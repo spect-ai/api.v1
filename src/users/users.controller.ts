@@ -13,8 +13,10 @@ import { UsersService } from './users.service';
 import { User } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { LocalAuthGuard } from 'src/auth/local-auth.gaurd';
+import { ApiTags } from '@nestjs/swagger';
 
 @Controller('users')
+@ApiTags('Users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 

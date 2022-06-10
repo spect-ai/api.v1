@@ -1,12 +1,11 @@
-import { prop } from '@typegoose/typegoose';
+import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsString } from 'class-validator';
 
-export class Cat {
+export class CreateCatDto {
   /**
    * The name of the cat
    */
   @IsString()
   @IsNotEmpty()
-  @prop({ required: true })
   name: string;
 }

@@ -1,20 +1,17 @@
 import { Injectable } from '@nestjs/common';
-import { InjectModel } from 'nestjs-typegoose';
-import { ReturnModelType } from '@typegoose/typegoose';
-import { Cat } from './dto/cat.dto';
+import { CreateCatDto } from './dto/create-cat.dto';
+import { CatsRepository } from './cats.repository';
+import { Cat } from './model/cat.model';
 
 @Injectable()
 export class CatsService {
-  constructor(
-    @InjectModel(Cat) private readonly catModel: ReturnModelType<typeof Cat>,
-  ) {}
+  constructor(private readonly catRepository: CatsRepository) {}
 
-  async create(createCatDto: Cat): Promise<Cat> {
-    const createdCat = new this.catModel(createCatDto);
-    return await createdCat.save();
+  async create(cat: CreateCatDto): Promise<Cat> {
+    return this.catRepository.create(cat);
   }
 
   async findAll(): Promise<Cat[] | null> {
-    return await this.catModel.find().exec();
+    return this.catRepository.findAll();
   }
 }

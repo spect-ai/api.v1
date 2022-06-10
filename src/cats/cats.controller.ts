@@ -1,10 +1,11 @@
 import { Controller, Get, Post, Body } from '@nestjs/common';
 import { CatsService } from './cats.service';
 import { ApiTags } from '@nestjs/swagger';
-import { Cat } from './dto/cat.dto';
+import { CreateCatDto } from './dto/create-cat.dto';
+import { Cat } from './model/cat.model';
 
 @Controller('cats')
-@ApiTags('cats')
+@ApiTags('Cats')
 export class CatsController {
   constructor(private readonly catsService: CatsService) {}
 
@@ -20,7 +21,7 @@ export class CatsController {
    * Create a cat
    */
   @Post()
-  async create(@Body() cat: Cat): Promise<Cat> {
+  async create(@Body() cat: CreateCatDto): Promise<Cat> {
     return await this.catsService.create(cat);
   }
 }
