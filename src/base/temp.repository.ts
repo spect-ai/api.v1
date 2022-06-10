@@ -1,6 +1,6 @@
 import { FilterQuery, Model, UpdateQuery } from 'mongoose';
 
-export abstract class EntityRepository<T, C> {
+export abstract class BaseRepository<T, C> {
   constructor(protected readonly entityModel: Model<T>) {}
 
   async findOne(

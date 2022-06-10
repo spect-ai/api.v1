@@ -10,26 +10,27 @@ import {
   Request,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { User } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
 import { LocalAuthGuard } from 'src/auth/local-auth.gaurd';
 import { ApiTags } from '@nestjs/swagger';
+import { ConnectUserDto } from './dto/connect-user.dto';
 
 @Controller('users')
 @ApiTags('Users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  @Post()
-  create(@Body() createUserDto: User) {
-    return this.usersService.create(createUserDto);
+  @Post('/connect')
+  connect(@Body() body: ConnectUserDto) {
+    return this.usersService.connect(body);
   }
 
   @UseGuards(LocalAuthGuard)
   @Get()
-  findAll(@Request() req) {
-    console.log(req.user);
-    return this.usersService.findAll();
+  findAll(@Request() req, @Body() body) {
+    // console.log(req.user);
+    console.log({ body });
+    return req.user;
+    // return this.usersService.findAll();
   }
 
   // @Get(':id')

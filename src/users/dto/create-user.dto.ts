@@ -1,13 +1,11 @@
-import { prop } from '@typegoose/typegoose';
 import { IsNotEmpty, IsString } from 'class-validator';
 
-export class User {
+export class CreateUserDto {
   /**
    * The name of the user
    */
   @IsString()
   @IsNotEmpty()
-  @prop({ required: true })
   name: string;
 
   /**
@@ -15,6 +13,5 @@ export class User {
    */
   @IsString()
   @IsNotEmpty()
-  @prop({ required: true })
   address: string;
 }

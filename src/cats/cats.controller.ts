@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param } from '@nestjs/common';
 import { CatsService } from './cats.service';
 import { ApiTags } from '@nestjs/swagger';
 import { CreateCatDto } from './dto/create-cat.dto';
@@ -15,6 +15,14 @@ export class CatsController {
   @Get()
   async getCats(): Promise<Cat[] | null> {
     return await this.catsService.findAll();
+  }
+
+  /**
+   * Get a cat by id
+   */
+  @Get('/:id')
+  async getCatById(@Param() params): Promise<Cat | null> {
+    return await this.catsService.findOne(params.id);
   }
 
   /**

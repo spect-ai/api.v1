@@ -1,7 +1,9 @@
-import { ApiProperty } from '@nestjs/swagger';
 import { prop } from '@typegoose/typegoose';
+import { BaseModel } from 'src/base/base.model';
+import { useMongoosePlugin } from 'src/base/decorators/use-mongoose-plugins.decorator';
 
-export class Cat {
+@useMongoosePlugin()
+export class Cat extends BaseModel {
   /**
    * The name of the cat
    */

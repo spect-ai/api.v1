@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { CreateCatDto } from './dto/create-cat.dto';
 import { CatsRepository } from './cats.repository';
 import { Cat } from './model/cat.model';
-
 @Injectable()
 export class CatsService {
   constructor(private readonly catRepository: CatsRepository) {}
@@ -13,5 +12,9 @@ export class CatsService {
 
   async findAll(): Promise<Cat[] | null> {
     return this.catRepository.findAll();
+  }
+
+  async findOne(id: string): Promise<Cat | null> {
+    return this.catRepository.findById(id);
   }
 }
