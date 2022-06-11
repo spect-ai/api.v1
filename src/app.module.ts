@@ -2,12 +2,10 @@ import { Module } from '@nestjs/common';
 import { TypegooseModule } from 'nestjs-typegoose';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { CatsModule } from './cats/cats.module';
-import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
-import { CirclesController } from './circles/circles.controller';
-import { CirclesService } from './circles/circles.service';
 import { CirclesModule } from './circles/circles.module';
+import { UsersModule } from './users/users.module';
+import { EthAddressModule } from './_eth-address/_eth-address.module';
 
 @Module({
   imports: [
@@ -15,6 +13,7 @@ import { CirclesModule } from './circles/circles.module';
     CirclesModule,
     UsersModule,
     AuthModule,
+    EthAddressModule,
   ],
   controllers: [AppController],
   providers: [AppService],
