@@ -31,7 +31,7 @@ export class UsersService {
         return user;
       } else {
         const count = await this.ethAddressRepository.count().exec();
-        const username = `fren ${count + 1}`;
+        const username = `fren${count + 1}`;
         const user = await this.usersRepository.create({
           ethAddress: address,
           username: username,

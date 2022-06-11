@@ -1,6 +1,6 @@
 import { IsNotEmpty, IsString } from 'class-validator';
 
-export class CreateCircleDto {
+export class CreateCircleResponseDto {
   /**
    * The name of the circle
    */

@@ -1,31 +1,36 @@
 import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { CirclesService } from './circles.service';
-import { Circle } from './dto/circle.dto';
-import { ApiTags } from '@nestjs/swagger';
-import { CreateCircleDto } from './dto/create-circle.dto';
+import { ApiTags, ApiParam, ApiBody } from '@nestjs/swagger';
+import { CreateCircleRequestDto } from './dto/create-circle-request.dto';
+import { CreateCircleResponseDto } from './dto/create-circle-response.dto';
+import { DetailedCircleResponseDto } from './dto/detailed-circle-response.dto';
 
 @Controller('circles')
 @ApiTags('circles')
 export class CirclesController {
   constructor(private readonly circlesService: CirclesService) {}
 
-  // @Get()
-  // findAll(): Promise<Circle[]> {
-  //   return 'This action returns all circles';
-  // }
+  @Get('/allParents')
+  async findAllParentCircles(): Promise<DetailedCircleResponseDto[]> {
+    return await this.circlesService.getParentCircles();
+  }
 
-  // @Get('/:objectId')
-  // findOneByEntityId(@Param('id') id): Promise<Circle> {
-  //   return 'This action returns all circles';
-  // }
+  @Get('/:id')
+  @ApiParam({
+    name: 'id',
+    required: true,
+    description: 'Object Id of the circle',
+    schema: { type: 'string' },
+  })
+  async findByObjectId(@Param('id') id): Promise<DetailedCircleResponseDto> {
+    return await this.circlesService.getDetailedCircle(id);
+  }
 
-  // @Get('/:entityId')
-  // findOneByObjectId(@Param('entityId') entityId): Promise<Circle> {
-  //   return 'This action returns all circles';
-  // }
-
-  @Post()
-  async create(@Body() circle: CreateCircleDto): Promise<Circle> {
+  @Post('/create')
+  @ApiBody({ type: CreateCircleRequestDto })
+  async create(
+    @Body() circle: CreateCircleRequestDto,
+  ): Promise<CreateCircleResponseDto> {
     console.log(circle);
     return await this.circlesService.create(circle);
   }

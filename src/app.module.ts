@@ -6,6 +6,7 @@ import { AuthModule } from './auth/auth.module';
 import { CirclesModule } from './circles/circles.module';
 import { UsersModule } from './users/users.module';
 import { EthAddressModule } from './_eth-address/_eth-address.module';
+import { SlugModule } from './slug/slug.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { EthAddressModule } from './_eth-address/_eth-address.module';
     UsersModule,
     AuthModule,
     EthAddressModule,
+    SlugModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -1,9 +1,9 @@
 import { prop } from '@typegoose/typegoose';
-import { BaseModel } from 'src/base/base.model';
+import { ProfileModel } from 'src/profile/model/profile.model';
 import { useMongoosePlugin } from 'src/base/decorators/use-mongoose-plugins.decorator';
 
 @useMongoosePlugin()
-export class User extends BaseModel {
+export class User extends ProfileModel {
   /**
    * username
    */
@@ -21,18 +21,6 @@ export class User extends BaseModel {
    */
   @prop()
   accounts: string[];
-
-  /**
-   * Email
-   */
-  @prop()
-  email: string;
-
-  /**
-   * Profile picture stored in IPFS as URL
-   */
-  @prop()
-  avatar: string;
 
   /**
    * Discord Integration user id
