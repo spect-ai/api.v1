@@ -11,7 +11,7 @@ export class User {
   name: string;
 
   /**
-   * The email of the user
+   * The ethereum address of the user
    */
   @IsString()
   @IsNotEmpty()

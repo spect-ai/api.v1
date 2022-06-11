@@ -5,11 +5,14 @@ import { AppService } from './app.service';
 import { CatsModule } from './cats/cats.module';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
+import { CirclesController } from './circles/circles.controller';
+import { CirclesService } from './circles/circles.service';
+import { CirclesModule } from './circles/circles.module';
 
 @Module({
   imports: [
     TypegooseModule.forRoot('mongodb://localhost:27017/nest'),
-    CatsModule,
+    CirclesModule,
     UsersModule,
     AuthModule,
   ],

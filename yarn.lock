@@ -795,7 +795,7 @@
 
 "@typegoose/typegoose@^9.9.0":
   version "9.9.0"
-  resolved "https://registry.npmjs.org/@typegoose/typegoose/-/typegoose-9.9.0.tgz"
+  resolved "https://registry.yarnpkg.com/@typegoose/typegoose/-/typegoose-9.9.0.tgz#ea6e9bcc0d7f55055513f1daeba9bd0c8cdd4e3c"
   integrity sha512-n29N5Lp5gIV+mSx//LoJxIsOIMpwX5ptx/+KkzPblRf6CD2DZ9gGMqTd3iIbN+8Re/7Vmkj9dkw/URenxlb2yA==
   dependencies:
     lodash "^4.17.20"
