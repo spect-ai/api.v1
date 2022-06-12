@@ -1,4 +1,16 @@
-import { IsArray, IsNotEmpty, IsObject, IsString } from 'class-validator';
+import {
+  ArrayUnique,
+  IsArray,
+  IsNotEmpty,
+  IsObject,
+  IsOptional,
+  ValidateNested,
+  IsString,
+} from 'class-validator';
+import { Type } from 'class-transformer';
+import { Circle } from '../model/circle.model';
+import { ObjectId } from 'mongoose';
+import { prop, Ref } from '@typegoose/typegoose';
 
 export class DetailedCircleResponseDto {
   /**
@@ -21,26 +33,22 @@ export class DetailedCircleResponseDto {
   avatar?: string;
 
   /**
-   * The parents of the circle, aka, the circles that this circle is a part of
+   * The children of the circle, aka, the circles that this circle contains
    */
-  @IsArray()
-  parents?: string[];
+  @IsOptional()
+  @ValidateNested()
+  parents?: Ref<Circle>[];
 
   /**
    * The children of the circle, aka, the circles that this circle contains
    */
-  @IsArray()
-  children?: string[];
+  @IsOptional()
+  @ValidateNested()
+  children?: Ref<Circle>[];
 
   /**
    * The projects in the circle
    */
   @IsArray()
   projects?: string[];
-
-  /**
-   * The details of the circle
-   */
-  @IsObject()
-  circleDetails?: any;
 }

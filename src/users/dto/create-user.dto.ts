@@ -13,5 +13,5 @@ export class CreateUserDto {
    */
   @IsString()
   @IsNotEmpty()
-  address: string;
+  ethAddress: string;
 }

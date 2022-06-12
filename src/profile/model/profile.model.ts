@@ -5,12 +5,6 @@ import { useMongoosePlugin } from 'src/base/decorators/use-mongoose-plugins.deco
 @useMongoosePlugin()
 export abstract class ProfileModel extends BaseModel {
   /**
-   * The name of the profile
-   */
-  @prop({ required: true })
-  name: string;
-
-  /**
    * The description of the profile
    */
   @prop()
@@ -21,12 +15,6 @@ export abstract class ProfileModel extends BaseModel {
    */
   @prop()
   avatar: string;
-
-  /**
-   * The slug of the profile, aka, the url of the profile
-   */
-  @prop({ required: true })
-  slug: string;
 
   /**
    * The website associated with the profile

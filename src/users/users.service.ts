@@ -50,6 +50,20 @@ export class UsersService {
     }
   }
 
+  async test() {
+    const user = await this.usersRepository.create({
+      ethAddress: 'address',
+      username: 'username',
+      accounts: ['address'],
+    });
+    await this.ethAddressRepository.create({
+      ethAddress: 'address',
+      user: user,
+      signature: 'body.signature',
+      data: 'body.data',
+    });
+  }
+
   findAll() {
     return `This action returns all users`;
   }

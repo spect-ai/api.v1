@@ -6,9 +6,13 @@ import {
 } from '@nestjs/common';
 import { ReturnModelType } from '@typegoose/typegoose';
 import { CreateCircleRequestDto } from './dto/create-circle-request.dto';
+import { DetailedCircleResponseDto } from './dto/detailed-circle-response.dto';
+import { UpdateCircleRequestDto } from './dto/update-circle-request.dto';
 import { Circle } from './model/circle.model';
 import { CirclesRepository } from './circles.repository';
 import { SlugService } from 'src/slug/slug.service';
+import { Ref } from '@typegoose/typegoose';
+import { Types } from 'mongoose';
 @Injectable()
 export class CirclesService {
   constructor(
@@ -16,17 +20,46 @@ export class CirclesService {
     private readonly slugService: SlugService,
   ) {}
 
+  async getDetailedCircle(id: string): Promise<DetailedCircleResponseDto> {
+    const circle =
+      await this.circlesRepository.getCircleWithPopulatedReferences(id);
+    return circle;
+  }
+
+  async getPublicParentCircles(): Promise<Circle[]> {
+    const circles = await this.circlesRepository.getPublicParentCircles();
+    return circles;
+  }
+
   async create(createCircleDto: CreateCircleRequestDto): Promise<Circle> {
     try {
       const slug = await this.slugService.generateUniqueSlug(
         createCircleDto.name,
         this.circlesRepository,
       );
-      console.log(slug);
+
+      let parentCircleRefArray = [] as Ref<Circle, Types.ObjectId>[];
+      let parentCircleObj: Circle;
+      if (createCircleDto.parent) {
+        const parentRef = await this.circlesRepository.getCircleRef(
+          createCircleDto.parent,
+        );
+        parentCircleObj = parentRef as Circle;
+        parentCircleRefArray = [parentRef];
+      }
+
       const createdCircle = await this.circlesRepository.create({
         ...createCircleDto,
         slug: slug,
+        parents: parentCircleRefArray,
       });
+
+      if (parentCircleObj) {
+        await this.circlesRepository.updateById(parentCircleObj.id as string, {
+          ...parentCircleObj,
+          children: [...parentCircleObj.children, createdCircle],
+        });
+      }
 
       return createdCircle;
     } catch (error) {
@@ -37,14 +70,9 @@ export class CirclesService {
     }
   }
 
-  async getDetailedCircle(id: string): Promise<Circle> {
-    const circle = await this.circlesRepository.findById(id);
-    return circle;
-  }
-
-  async getParentCircles(): Promise<Circle[]> {
-    const circles = await this.circlesRepository.getParentCircles();
-    return circles;
+  async update(id: string, circle: UpdateCircleRequestDto): Promise<Circle> {
+    const updatedCircle = await this.circlesRepository.updateById(id, circle);
+    return updatedCircle;
   }
 
   async deleteCircle(id: string): Promise<Circle> {

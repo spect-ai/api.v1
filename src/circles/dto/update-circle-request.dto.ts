@@ -4,22 +4,22 @@ import {
   IsNotEmpty,
   IsOptional,
   IsString,
-  IsUrl,
 } from 'class-validator';
-import { Circle } from '../model/circle.model';
 
-export class CreateCircleRequestDto {
+export class UpdateCircleRequestDto {
   /**
    * The name of the circle
    */
   @IsString()
   @IsNotEmpty()
-  name: string;
+  @IsOptional()
+  name?: string;
 
   /**
    * The description of the circle
    */
   @IsString()
+  @IsOptional()
   @IsOptional()
   description?: string;
 
@@ -42,7 +42,6 @@ export class CreateCircleRequestDto {
    */
   @IsString()
   @IsOptional()
-  @IsUrl()
   website?: string;
 
   /**
@@ -50,7 +49,6 @@ export class CreateCircleRequestDto {
    */
   @IsString()
   @IsOptional()
-  @IsUrl()
   twitter?: string;
 
   /**
@@ -58,7 +56,6 @@ export class CreateCircleRequestDto {
    */
   @IsString()
   @IsOptional()
-  @IsUrl()
   github?: string;
 
   /**
@@ -67,11 +64,4 @@ export class CreateCircleRequestDto {
   @IsString()
   @IsOptional()
   email?: string;
-
-  /**
-   * The email associated with the circle
-   */
-  @IsString()
-  @IsOptional()
-  parent?: string;
 }

@@ -1,18 +1,19 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
 import { CirclesService } from './circles.service';
 import { ApiTags, ApiParam, ApiBody } from '@nestjs/swagger';
 import { CreateCircleRequestDto } from './dto/create-circle-request.dto';
 import { CreateCircleResponseDto } from './dto/create-circle-response.dto';
 import { DetailedCircleResponseDto } from './dto/detailed-circle-response.dto';
+import { UpdateCircleRequestDto } from './dto/update-circle-request.dto';
 
 @Controller('circles')
 @ApiTags('circles')
 export class CirclesController {
   constructor(private readonly circlesService: CirclesService) {}
 
-  @Get('/allParents')
+  @Get('/allPublicParents')
   async findAllParentCircles(): Promise<DetailedCircleResponseDto[]> {
-    return await this.circlesService.getParentCircles();
+    return await this.circlesService.getPublicParentCircles();
   }
 
   @Get('/:id')
@@ -31,7 +32,21 @@ export class CirclesController {
   async create(
     @Body() circle: CreateCircleRequestDto,
   ): Promise<CreateCircleResponseDto> {
-    console.log(circle);
     return await this.circlesService.create(circle);
+  }
+
+  @Patch('/:id')
+  @ApiParam({
+    name: 'id',
+    required: true,
+    description: 'Object Id of the circle',
+    schema: { type: 'string' },
+  })
+  @ApiBody({ type: UpdateCircleRequestDto })
+  async update(
+    @Param('id') id,
+    @Body() circle: UpdateCircleRequestDto,
+  ): Promise<UpdateCircleRequestDto> {
+    return await this.circlesService.update(id, circle);
   }
 }
