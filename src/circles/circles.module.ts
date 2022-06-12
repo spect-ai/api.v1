@@ -4,7 +4,7 @@ import { CirclesController } from './circles.controller';
 import { CirclesService } from './circles.service';
 import { Circle } from './model/circle.model';
 import { CirclesRepository } from './circles.repository';
-import { SlugService } from 'src/slug/slug.service';
+import { SlugService } from 'src/common/slug.service';
 
 @Module({
   imports: [TypegooseModule.forFeature([Circle])],

@@ -7,6 +7,9 @@ import { CirclesModule } from './circles/circles.module';
 import { UsersModule } from './users/users.module';
 import { EthAddressModule } from './_eth-address/_eth-address.module';
 import { SlugModule } from './slug/slug.module';
+import { ProjectService } from './project/project.service';
+import { ProjectController } from './project/project.controller';
+import { ProjectModule } from './project/project.module';
 
 @Module({
   imports: [
@@ -16,8 +19,9 @@ import { SlugModule } from './slug/slug.module';
     AuthModule,
     EthAddressModule,
     SlugModule,
+    ProjectModule,
   ],
-  controllers: [AppController],
-  providers: [AppService],
+  controllers: [AppController, ProjectController],
+  providers: [AppService, ProjectService],
 })
 export class AppModule {}

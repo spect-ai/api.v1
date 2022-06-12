@@ -10,7 +10,7 @@ import { DetailedCircleResponseDto } from './dto/detailed-circle-response.dto';
 import { UpdateCircleRequestDto } from './dto/update-circle-request.dto';
 import { Circle } from './model/circle.model';
 import { CirclesRepository } from './circles.repository';
-import { SlugService } from 'src/slug/slug.service';
+import { SlugService } from 'src/common/slug.service';
 import { Ref } from '@typegoose/typegoose';
 import { Types } from 'mongoose';
 @Injectable()

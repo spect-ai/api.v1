@@ -1,5 +1,5 @@
 import { prop } from '@typegoose/typegoose';
-import { ProfileModel } from 'src/profile/model/profile.model';
+import { ProfileModel } from 'src/common/models/profile.model';
 import { useMongoosePlugin } from 'src/base/decorators/use-mongoose-plugins.decorator';
 
 @useMongoosePlugin()

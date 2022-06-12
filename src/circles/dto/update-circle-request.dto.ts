@@ -66,14 +66,14 @@ export class UpdateCircleRequestDto {
   email?: string;
 
   /**
-   * The email associated with the circle
+   * The members of the circle
    */
   @IsArray()
   @IsOptional()
   members?: string[];
 
   /**
-   * The email associated with the circle
+   * Circle is archived if true
    */
   @IsBoolean()
   @IsOptional()

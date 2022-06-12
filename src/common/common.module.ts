@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { SlugService } from './slug.service';
 
 @Module({
-  providers: [SlugService]
+  controllers: [],
+  providers: [SlugService],
 })
-export class SlugModule {}
+export class CommonModule {}

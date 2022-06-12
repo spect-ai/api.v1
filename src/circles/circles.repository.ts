@@ -6,8 +6,8 @@ import { Ref } from '@typegoose/typegoose';
 import { Types } from 'mongoose';
 @Injectable()
 export class CirclesRepository extends BaseRepository<Circle> {
-  constructor(@InjectModel(Circle) ethAdressModel) {
-    super(ethAdressModel);
+  constructor(@InjectModel(Circle) circleModel) {
+    super(circleModel);
   }
 
   async getCircleWithPopulatedReferences(id: string): Promise<Circle> {
