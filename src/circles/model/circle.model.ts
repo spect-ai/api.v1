@@ -17,6 +17,18 @@ export class Circle extends ProfileModel {
   slug: string;
 
   /**
+   * A list of roles that the circle has
+   */
+  @prop({ default: [] })
+  roles: string[];
+
+  /**
+   * Members mapped to their respective roles
+   */
+  @prop({ default: {} })
+  memberRoles: object;
+
+  /**
    * Circle is public or private
    */
   @prop({ default: false })
@@ -45,4 +57,10 @@ export class Circle extends ProfileModel {
    */
   @prop({ type: () => [String], default: [] })
   members: string[];
+
+  /**
+   * Circle is archived
+   */
+  @prop({ default: false })
+  archived: boolean;
 }

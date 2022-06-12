@@ -20,7 +20,6 @@ export class UpdateCircleRequestDto {
    */
   @IsString()
   @IsOptional()
-  @IsOptional()
   description?: string;
 
   /**
@@ -35,6 +34,7 @@ export class UpdateCircleRequestDto {
    */
   @IsBoolean()
   @IsOptional()
+  @IsNotEmpty()
   private?: boolean;
 
   /**
@@ -64,4 +64,18 @@ export class UpdateCircleRequestDto {
   @IsString()
   @IsOptional()
   email?: string;
+
+  /**
+   * The email associated with the circle
+   */
+  @IsArray()
+  @IsOptional()
+  members?: string[];
+
+  /**
+   * The email associated with the circle
+   */
+  @IsBoolean()
+  @IsOptional()
+  archived?: boolean;
 }

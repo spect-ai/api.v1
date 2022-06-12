@@ -27,7 +27,7 @@ export class CirclesController {
     return await this.circlesService.getDetailedCircle(id);
   }
 
-  @Post('/create')
+  @Post('/')
   @ApiBody({ type: CreateCircleRequestDto })
   async create(
     @Body() circle: CreateCircleRequestDto,
@@ -48,5 +48,16 @@ export class CirclesController {
     @Body() circle: UpdateCircleRequestDto,
   ): Promise<UpdateCircleRequestDto> {
     return await this.circlesService.update(id, circle);
+  }
+
+  @Post('/:id/delete')
+  @ApiParam({
+    name: 'id',
+    required: true,
+    description: 'Object Id of the circle',
+    schema: { type: 'string' },
+  })
+  async delete(@Param('id') id): Promise<DetailedCircleResponseDto> {
+    return await this.circlesService.delete(id);
   }
 }

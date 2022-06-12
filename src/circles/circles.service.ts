@@ -70,17 +70,40 @@ export class CirclesService {
     }
   }
 
-  async update(id: string, circle: UpdateCircleRequestDto): Promise<Circle> {
-    const updatedCircle = await this.circlesRepository.updateById(id, circle);
-    return updatedCircle;
+  async update(
+    id: string,
+    updateCircleDto: UpdateCircleRequestDto,
+  ): Promise<Circle> {
+    try {
+      const updatedCircle = await this.circlesRepository.updateById(
+        id,
+        updateCircleDto,
+      );
+      return updatedCircle;
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Failed circle update',
+        error.message,
+      );
+    }
   }
 
-  async deleteCircle(id: string): Promise<Circle> {
+  // async join(
+  //   id: string,
+  //   updateCircleDto: UpdateCircleRequestDto,
+  // ): Promise<Circle> {
+  //   const updatedCircle = await this.circlesRepository.updateById(
+  //     id,
+  //     updateCircleDto,
+  //   );
+  //   return updatedCircle;
+  // }
+
+  async delete(id: string): Promise<Circle> {
     const circle = await this.circlesRepository.findById(id);
     if (!circle) {
       throw new HttpException('Circle not found', HttpStatus.NOT_FOUND);
     }
-    await this.circlesRepository.deleteById(id);
-    return circle;
+    return await this.circlesRepository.deleteById(id);
   }
 }
