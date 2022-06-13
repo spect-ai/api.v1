@@ -5,10 +5,13 @@ import { SlugService } from 'src/common/slug.service';
 import { Project } from './model/project.model';
 import { ProjectController } from './project.controller';
 import { ProjectService } from './project.service';
+import { ProjectsRepository } from './project.repository';
+import { CirclesModule } from 'src/circles/circles.module';
 
 @Module({
-  imports: [TypegooseModule.forFeature([Project])],
+  imports: [TypegooseModule.forFeature([Project]), CirclesModule],
   controllers: [ProjectController],
-  providers: [ProjectService, CirclesService, SlugService],
+  providers: [ProjectService, ProjectsRepository, SlugService],
+  exports: [ProjectService, ProjectsRepository, ProjectModule],
 })
 export class ProjectModule {}

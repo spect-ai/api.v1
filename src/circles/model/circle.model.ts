@@ -1,6 +1,7 @@
 import { prop, Ref } from '@typegoose/typegoose';
 import { ProfileModel } from 'src/common/models/profile.model';
 import { useMongoosePlugin } from 'src/base/decorators/use-mongoose-plugins.decorator';
+import { PaymentModel } from 'src/common/models/payment.model';
 
 @useMongoosePlugin()
 export class Circle extends ProfileModel {
@@ -57,6 +58,23 @@ export class Circle extends ProfileModel {
    */
   @prop({ type: () => [String], default: [] })
   members: string[];
+
+  /**
+   * Default payment method of the circle
+   */
+  @prop({
+    default: {
+      chain: {
+        chainId: '137',
+        name: 'polygon',
+      },
+      token: {
+        address: '0x0',
+        symbol: 'MATIC',
+      },
+    },
+  })
+  defaultPayment: PaymentModel;
 
   /**
    * Circle is archived

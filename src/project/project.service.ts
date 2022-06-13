@@ -46,7 +46,7 @@ export class ProjectService {
         parentCircleRefArray = [parentRef];
       }
 
-      const createdCircle = await this.projectRepository.create({
+      const createdProject = await this.projectRepository.create({
         ...createProjectDto,
         slug: slug,
         parents: parentCircleRefArray,
@@ -55,11 +55,11 @@ export class ProjectService {
       if (parentCircleObj) {
         await this.circlesRepository.updateById(parentCircleObj.id as string, {
           ...parentCircleObj,
-          projects: [...parentCircleObj.children, createdCircle],
+          projects: [...parentCircleObj.children, createdProject],
         });
       }
 
-      return createdCircle;
+      return createdProject;
     } catch (error) {
       throw new InternalServerErrorException(
         'Failed circle creation',

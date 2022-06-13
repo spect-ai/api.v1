@@ -1,11 +1,14 @@
 import {
   IsArray,
   IsBoolean,
+  IsEmail,
   IsNotEmpty,
+  IsObject,
   IsOptional,
   IsString,
   IsUrl,
 } from 'class-validator';
+import { PaymentModel } from 'src/common/models/payment.model';
 import { Circle } from '../model/circle.model';
 
 export class CreateCircleRequestDto {
@@ -64,12 +67,19 @@ export class CreateCircleRequestDto {
   /**
    * The email associated with the circle
    */
-  @IsString()
   @IsOptional()
+  @IsEmail()
   email?: string;
 
   /**
-   * The email associated with the circle
+   * The default payment settings of with the circle
+   */
+  @IsOptional()
+  @IsObject()
+  defaultPayment?: PaymentModel;
+
+  /**
+   * The parent of the circle
    */
   @IsString()
   @IsOptional()

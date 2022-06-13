@@ -2,12 +2,12 @@ import {
   IsArray,
   IsBoolean,
   IsNotEmpty,
-  IsObject,
+  ValidateNested,
   IsOptional,
   IsString,
   IsUrl,
 } from 'class-validator';
-import { Project } from '../model/project.model';
+import { ColumnDetailsModel } from '../model/columnDetails.model';
 
 export class CreateProjectRequestDto {
   /**
@@ -35,11 +35,13 @@ export class CreateProjectRequestDto {
    * The order of the columns in the project
    */
   @IsArray()
+  @IsOptional()
   columnOrder?: string[];
 
   /**
    * The details of the columns in the project
    */
-  @IsObject()
-  columnDetails?: object;
+  @ValidateNested()
+  @IsOptional()
+  columnDetails?: ColumnDetailsModel;
 }

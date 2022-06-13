@@ -2,6 +2,7 @@ import { prop, Ref } from '@typegoose/typegoose';
 import { useMongoosePlugin } from 'src/base/decorators/use-mongoose-plugins.decorator';
 import { Circle } from 'src/circles/model/circle.model';
 import { BaseModel } from 'src/base/base.model';
+import { ColumnDetailsModel } from './columnDetails.model';
 
 @useMongoosePlugin()
 export class Project extends BaseModel {
@@ -39,7 +40,7 @@ export class Project extends BaseModel {
    * Column  of the project
    */
   @prop({})
-  columnDetails: object;
+  columnDetails: ColumnDetailsModel;
 
   /**
    * Project is archived

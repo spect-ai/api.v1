@@ -10,5 +10,6 @@ import { SlugService } from 'src/common/slug.service';
   imports: [TypegooseModule.forFeature([Circle])],
   controllers: [CirclesController],
   providers: [CirclesService, CirclesRepository, SlugService],
+  exports: [CirclesService, CirclesRepository, CirclesModule],
 })
 export class CirclesModule {}

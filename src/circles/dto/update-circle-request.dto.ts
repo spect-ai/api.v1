@@ -1,6 +1,7 @@
 import {
   IsArray,
   IsBoolean,
+  IsEmail,
   IsNotEmpty,
   IsOptional,
   IsString,
@@ -61,8 +62,8 @@ export class UpdateCircleRequestDto {
   /**
    * The email associated with the circle
    */
-  @IsString()
   @IsOptional()
+  @IsEmail()
   email?: string;
 
   /**
