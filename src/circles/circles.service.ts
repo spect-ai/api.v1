@@ -31,7 +31,9 @@ export class CirclesService {
     return circles;
   }
 
-  async create(createCircleDto: CreateCircleRequestDto): Promise<Circle> {
+  async create(
+    createCircleDto: CreateCircleRequestDto,
+  ): Promise<DetailedCircleResponseDto> {
     try {
       const slug = await this.slugService.generateUniqueSlug(
         createCircleDto.name,

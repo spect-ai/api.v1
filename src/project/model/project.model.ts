@@ -3,6 +3,7 @@ import { useMongoosePlugin } from 'src/base/decorators/use-mongoose-plugins.deco
 import { Circle } from 'src/circles/model/circle.model';
 import { BaseModel } from 'src/base/base.model';
 import { ColumnDetailsModel } from './columnDetails.model';
+import { TemplateModel } from 'src/templates/models/template.model';
 
 @useMongoosePlugin()
 export class Project extends BaseModel {
@@ -47,4 +48,10 @@ export class Project extends BaseModel {
    */
   @prop({ default: false })
   archived: boolean;
+
+  /**
+   * The templates available in the project
+   */
+  @prop({ default: [] })
+  templates: TemplateModel[];
 }

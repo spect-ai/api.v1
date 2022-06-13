@@ -4,7 +4,7 @@ import { useMongoosePlugin } from 'src/base/decorators/use-mongoose-plugins.deco
 @useMongoosePlugin()
 export abstract class TokenModel {
   /**
-   * The address of the token
+   * The address of the token, it is set to '0x0' if its a currency
    */
   @prop()
   address?: string;

@@ -5,20 +5,26 @@ import { TokenModel } from './token.model';
 
 export abstract class PaymentModel {
   /**
-   * The description of the profile
+   * The network used for payment
    */
   @prop()
   chain?: ChainModel;
 
   /**
-   * The description of the profile
+   * The token used for payment
    */
   @prop()
   token?: TokenModel;
 
   /**
-   * The website associated with the profile
+   * The value of the payment
    */
   @prop({ default: 0 })
   value?: number;
+
+  /**
+   * The transaction hash of payment
+   */
+  @prop()
+  transactionHash?: string;
 }

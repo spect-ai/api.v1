@@ -2,6 +2,12 @@ import { IsArray, IsNotEmpty, IsNumber, IsString } from 'class-validator';
 
 export class ColumnDetailsDto {
   /**
+   * The id of the column
+   */
+  @IsString()
+  @IsNotEmpty()
+  columnId: string;
+  /**
    * The name of the column
    */
   @IsString()

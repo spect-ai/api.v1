@@ -2,6 +2,11 @@ import { prop, Ref } from '@typegoose/typegoose';
 import { ProfileModel } from 'src/common/models/profile.model';
 import { useMongoosePlugin } from 'src/base/decorators/use-mongoose-plugins.decorator';
 import { PaymentModel } from 'src/common/models/payment.model';
+import { ActivityModel } from 'src/common/models/activity.model';
+import { Project } from 'src/project/model/project.model';
+import { User } from 'src/users/model/users.model';
+import { TemplateModel } from 'src/templates/models/template.model';
+import { ChainModel } from 'src/common/models/chain.model';
 
 @useMongoosePlugin()
 export class Circle extends ProfileModel {
@@ -50,14 +55,14 @@ export class Circle extends ProfileModel {
   /**
    * Projects in the circle
    */
-  @prop({ type: () => [String], default: [] })
-  projects: string[];
+  @prop({ ref: () => Project, default: [] })
+  projects: Ref<Project>[];
 
   /**
    * Members in the circle
    */
-  @prop({ type: () => [String], default: [] })
-  members: string[];
+  @prop({ ref: () => User, default: [] })
+  members: Ref<User>[];
 
   /**
    * Default payment method of the circle
@@ -81,4 +86,22 @@ export class Circle extends ProfileModel {
    */
   @prop({ default: false })
   archived: boolean;
+
+  /**
+   * Activity that took place in the circle
+   */
+  @prop({ default: [] })
+  activity: ActivityModel[];
+
+  /**
+   * The templates available in the circle
+   */
+  @prop({ default: [] })
+  templates: TemplateModel[];
+
+  /**
+   * The tokens whitelisted in the circle, these will be available in the circle on top of the globally available tokens
+   */
+  @prop({ default: {} })
+  whitelistedTokens: ChainModel;
 }

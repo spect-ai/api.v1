@@ -1,16 +1,14 @@
+import { Ref } from '@typegoose/typegoose';
 import {
-  ArrayUnique,
-  IsArray,
+  IsBoolean,
   IsNotEmpty,
   IsObject,
-  IsOptional,
-  ValidateNested,
   IsString,
+  ValidateNested,
 } from 'class-validator';
-import { Type } from 'class-transformer';
+import { Project } from 'src/project/model/project.model';
+import { User } from 'src/users/model/users.model';
 import { Circle } from '../model/circle.model';
-import { ObjectId } from 'mongoose';
-import { prop, Ref } from '@typegoose/typegoose';
 
 export class DetailedCircleResponseDto {
   /**
@@ -35,20 +33,42 @@ export class DetailedCircleResponseDto {
   /**
    * The children of the circle, aka, the circles that this circle contains
    */
-  @IsOptional()
   @ValidateNested()
   parents?: Ref<Circle>[];
 
   /**
    * The children of the circle, aka, the circles that this circle contains
    */
-  @IsOptional()
   @ValidateNested()
   children?: Ref<Circle>[];
 
   /**
    * The projects in the circle
    */
-  @IsArray()
-  projects?: string[];
+  @ValidateNested()
+  projects?: Ref<Project>[];
+
+  /**
+   * The members in the circle
+   */
+  @ValidateNested()
+  members?: Ref<User>[];
+
+  /**
+   * The default payment used in the circle
+   */
+  @IsObject()
+  defaultPayment?: object;
+
+  /**
+   * The circle is archived or not
+   */
+  @IsBoolean()
+  archived?: boolean;
+
+  /**
+   * The activity history in the circle
+   */
+  @IsObject()
+  activity?: object;
 }

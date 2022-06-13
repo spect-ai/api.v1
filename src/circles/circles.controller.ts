@@ -1,9 +1,18 @@
-import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Patch,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
 import { CirclesService } from './circles.service';
 import { ApiTags, ApiParam, ApiBody } from '@nestjs/swagger';
 import { CreateCircleRequestDto } from './dto/create-circle-request.dto';
 import { DetailedCircleResponseDto } from './dto/detailed-circle-response.dto';
 import { UpdateCircleRequestDto } from './dto/update-circle-request.dto';
+import { LocalAuthGuard } from 'src/auth/local-auth.gaurd';
 
 @Controller('circles')
 @ApiTags('circles')
@@ -45,7 +54,7 @@ export class CirclesController {
   async update(
     @Param('id') id,
     @Body() circle: UpdateCircleRequestDto,
-  ): Promise<UpdateCircleRequestDto> {
+  ): Promise<DetailedCircleResponseDto> {
     return await this.circlesService.update(id, circle);
   }
 
