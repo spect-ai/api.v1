@@ -40,7 +40,6 @@ export class UsersService {
         await this.ethAddressRepository.create({
           ethAddress: address,
           user: user,
-          signature: body.signature,
           data: body.data,
         });
         return user;

@@ -25,12 +25,9 @@ export class UsersController {
   }
 
   @UseGuards(LocalAuthGuard)
-  @Get()
-  findAll(@Request() req, @Body() body) {
-    // console.log(req.user);
-    console.log({ body });
+  @Get('/me')
+  findMe(@Request() req) {
     return req.user;
-    // return this.usersService.findAll();
   }
 
   // @Get(':id')

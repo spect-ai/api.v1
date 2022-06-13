@@ -8,12 +8,12 @@ export class ConnectUserDto {
   @IsNotEmpty()
   token: string;
 
-  /**
-   * The encrypted signature of the user
-   */
-  @IsString()
-  @IsNotEmpty()
-  signature: string;
+  // /**
+  //  * The encrypted signature of the user
+  //  */
+  // @IsString()
+  // @IsNotEmpty()
+  // signature: string;
 
   /**
    * Some custom data
