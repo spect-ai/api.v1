@@ -7,6 +7,7 @@ import { Project } from 'src/project/model/project.model';
 import { User } from 'src/users/model/users.model';
 import { TemplateModel } from 'src/templates/models/template.model';
 import { ChainModel } from 'src/common/models/chain.model';
+import { ObjectId } from 'mongoose';
 
 @useMongoosePlugin()
 export class Circle extends ProfileModel {
@@ -44,25 +45,25 @@ export class Circle extends ProfileModel {
    * Parent Ids of the circle
    */
   @prop({ ref: () => Circle, default: [] })
-  parents: Ref<Circle>[];
+  parents: ObjectId[];
 
   /**
    * Child Ids of the circle
    */
   @prop({ ref: () => Circle, default: [] })
-  children: Ref<Circle>[];
+  children: ObjectId[];
 
   /**
    * Projects in the circle
    */
   @prop({ ref: () => Project, default: [] })
-  projects: Ref<Project>[];
+  projects: ObjectId[];
 
   /**
    * Members in the circle
    */
   @prop({ ref: () => User, default: [] })
-  members: Ref<User>[];
+  members: ObjectId[];
 
   /**
    * Default payment method of the circle

@@ -5,11 +5,12 @@ import { CirclesService } from './circles.service';
 import { Circle } from './model/circle.model';
 import { CirclesRepository } from './circles.repository';
 import { SlugService } from 'src/common/slug.service';
+import { UserProvider } from 'src/users/user.provider';
 
 @Module({
   imports: [TypegooseModule.forFeature([Circle])],
   controllers: [CirclesController],
-  providers: [CirclesService, CirclesRepository, SlugService],
+  providers: [CirclesService, CirclesRepository, SlugService, UserProvider],
   exports: [CirclesService, CirclesRepository, CirclesModule],
 })
 export class CirclesModule {}

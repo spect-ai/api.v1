@@ -5,6 +5,7 @@ import {
   Param,
   Patch,
   Post,
+  Request,
   UseGuards,
 } from '@nestjs/common';
 import { CirclesService } from './circles.service';
@@ -25,18 +26,12 @@ export class CirclesController {
   }
 
   @Get('/:id')
-  @ApiParam({
-    name: 'id',
-    required: true,
-    description: 'Object Id of the circle',
-    schema: { type: 'string' },
-  })
   async findByObjectId(@Param('id') id): Promise<DetailedCircleResponseDto> {
     return await this.circlesService.getDetailedCircle(id);
   }
 
   @Post('/')
-  @ApiBody({ type: CreateCircleRequestDto })
+  @UseGuards(LocalAuthGuard)
   async create(
     @Body() circle: CreateCircleRequestDto,
   ): Promise<DetailedCircleResponseDto> {
@@ -44,13 +39,6 @@ export class CirclesController {
   }
 
   @Patch('/:id')
-  @ApiParam({
-    name: 'id',
-    required: true,
-    description: 'Object Id of the circle',
-    schema: { type: 'string' },
-  })
-  @ApiBody({ type: UpdateCircleRequestDto })
   async update(
     @Param('id') id,
     @Body() circle: UpdateCircleRequestDto,
@@ -59,12 +47,6 @@ export class CirclesController {
   }
 
   @Post('/:id/delete')
-  @ApiParam({
-    name: 'id',
-    required: true,
-    description: 'Object Id of the circle',
-    schema: { type: 'string' },
-  })
   async delete(@Param('id') id): Promise<DetailedCircleResponseDto> {
     return await this.circlesService.delete(id);
   }

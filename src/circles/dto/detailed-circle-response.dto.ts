@@ -6,6 +6,7 @@ import {
   IsString,
   ValidateNested,
 } from 'class-validator';
+import { ObjectId } from 'mongoose';
 import { Project } from 'src/project/model/project.model';
 import { User } from 'src/users/model/users.model';
 import { Circle } from '../model/circle.model';
@@ -34,25 +35,25 @@ export class DetailedCircleResponseDto {
    * The children of the circle, aka, the circles that this circle contains
    */
   @ValidateNested()
-  parents?: Ref<Circle>[];
+  parents?: ObjectId[];
 
   /**
    * The children of the circle, aka, the circles that this circle contains
    */
   @ValidateNested()
-  children?: Ref<Circle>[];
+  children?: ObjectId[];
 
   /**
    * The projects in the circle
    */
   @ValidateNested()
-  projects?: Ref<Project>[];
+  projects?: ObjectId[];
 
   /**
    * The members in the circle
    */
   @ValidateNested()
-  members?: Ref<User>[];
+  members?: ObjectId[];
 
   /**
    * The default payment used in the circle

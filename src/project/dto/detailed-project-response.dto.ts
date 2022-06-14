@@ -26,7 +26,7 @@ export class DetailedProjectResponseDto {
    */
   @IsOptional()
   @ValidateNested()
-  parents?: Ref<Circle>[];
+  parents?: ObjectId[];
 
   /**
    * The order of the columns in the project

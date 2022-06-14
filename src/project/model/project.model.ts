@@ -4,6 +4,7 @@ import { Circle } from 'src/circles/model/circle.model';
 import { BaseModel } from 'src/base/base.model';
 import { ColumnDetailsModel } from './columnDetails.model';
 import { TemplateModel } from 'src/templates/models/template.model';
+import { ObjectId } from 'mongoose';
 
 @useMongoosePlugin()
 export class Project extends BaseModel {
@@ -29,7 +30,7 @@ export class Project extends BaseModel {
    * Parent Ids of the project
    */
   @prop({ ref: () => Circle, default: [] })
-  parents: Ref<Circle>[];
+  parents: ObjectId[];
 
   /**
    * Column order of the project

@@ -36,26 +36,24 @@ export class ProjectService {
         this.projectRepository,
       );
 
-      let parentCircleRefArray = [] as Ref<Circle, Types.ObjectId>[];
-      let parentCircleObj: Circle;
+      let parentCircle: Circle;
       if (createProjectDto.circleId) {
-        const parentRef = await this.circlesRepository.getCircleRef(
-          createProjectDto.circleId,
-        );
-        parentCircleObj = parentRef as Circle;
-        parentCircleRefArray = [parentRef];
+        parentCircle =
+          await this.circlesRepository.getCircleWithUnpopulatedReferences(
+            createProjectDto.circleId,
+          );
       }
 
       const createdProject = await this.projectRepository.create({
         ...createProjectDto,
         slug: slug,
-        parents: parentCircleRefArray,
+        parents: [parentCircle._id],
       });
 
-      if (parentCircleObj) {
-        await this.circlesRepository.updateById(parentCircleObj.id as string, {
-          ...parentCircleObj,
-          projects: [...parentCircleObj.children, createdProject],
+      if (parentCircle?.id) {
+        await this.circlesRepository.updateById(parentCircle.id as string, {
+          ...createProjectDto,
+          projects: [...parentCircle.projects, createdProject],
         });
       }
 

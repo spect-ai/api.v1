@@ -14,16 +14,12 @@ export class CirclesRepository extends BaseRepository<Circle> {
     return await this.findById(id)
       .populate('parents')
       .populate('children')
-      .populate('members');
+      .populate('members')
+      .exec();
   }
 
   async getCircleWithUnpopulatedReferences(id: string): Promise<Circle> {
     return await this.findById(id);
-  }
-
-  async getCircleRef(id: string): Promise<Ref<Circle, Types.ObjectId>> {
-    const circle = await this.findById(id);
-    return circle;
   }
 
   async getPublicParentCircles(): Promise<Circle[]> {
