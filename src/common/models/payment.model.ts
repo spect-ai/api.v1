@@ -1,20 +1,19 @@
 import { prop } from '@typegoose/typegoose';
-import { useMongoosePlugin } from 'src/base/decorators/use-mongoose-plugins.decorator';
-import { ChainModel } from './chain.model';
-import { TokenModel } from './token.model';
+import { Chain } from './chain.model';
+import { Token } from './token.model';
 
 export abstract class PaymentModel {
   /**
    * The network used for payment
    */
   @prop()
-  chain?: ChainModel;
+  chain?: Chain;
 
   /**
    * The token used for payment
    */
   @prop()
-  token?: TokenModel;
+  token?: Token;
 
   /**
    * The value of the payment

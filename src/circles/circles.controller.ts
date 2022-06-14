@@ -14,6 +14,7 @@ import { CreateCircleRequestDto } from './dto/create-circle-request.dto';
 import { DetailedCircleResponseDto } from './dto/detailed-circle-response.dto';
 import { UpdateCircleRequestDto } from './dto/update-circle-request.dto';
 import { LocalAuthGuard } from 'src/auth/local-auth.gaurd';
+// import { RolesGuard } from 'src/auth/role-auth.guard';
 
 @Controller('circles')
 @ApiTags('circles')
@@ -25,13 +26,17 @@ export class CirclesController {
     return await this.circlesService.getPublicParentCircles();
   }
 
+  @Get('/:slug')
+  async findBySlug(@Param('slug') slug): Promise<DetailedCircleResponseDto> {
+    return await this.circlesService.getDetailedCircleBySlug(slug);
+  }
+
   @Get('/:id')
   async findByObjectId(@Param('id') id): Promise<DetailedCircleResponseDto> {
     return await this.circlesService.getDetailedCircle(id);
   }
 
   @Post('/')
-  @UseGuards(LocalAuthGuard)
   async create(
     @Body() circle: CreateCircleRequestDto,
   ): Promise<DetailedCircleResponseDto> {

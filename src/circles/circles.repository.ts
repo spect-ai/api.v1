@@ -17,6 +17,13 @@ export class CirclesRepository extends BaseRepository<Circle> {
       .populate('members')
       .exec();
   }
+  async getCircleWithPopulatedReferencesBySlug(slug: string): Promise<Circle> {
+    return await this.findOne({ slug: slug })
+      .populate('parents')
+      .populate('children')
+      .populate('members')
+      .exec();
+  }
 
   async getCircleWithUnpopulatedReferences(id: string): Promise<Circle> {
     return await this.findById(id);

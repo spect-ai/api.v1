@@ -7,9 +7,6 @@ import {
   ValidateNested,
 } from 'class-validator';
 import { ObjectId } from 'mongoose';
-import { Project } from 'src/project/model/project.model';
-import { User } from 'src/users/model/users.model';
-import { Circle } from '../model/circle.model';
 
 export class DetailedCircleResponseDto {
   /**
@@ -54,6 +51,18 @@ export class DetailedCircleResponseDto {
    */
   @ValidateNested()
   members?: ObjectId[];
+
+  /**
+   * The members in the circle
+   */
+  @IsObject()
+  roles?: object;
+
+  /**
+   * The members in the circle
+   */
+  @IsObject()
+  memberRoles?: object;
 
   /**
    * The default payment used in the circle

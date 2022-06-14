@@ -1,10 +1,8 @@
-import { prop } from '@typegoose/typegoose';
-import { TokenModel } from './token.model';
+import { Token } from './token.model';
 
-export class DetailedTokenModel extends TokenModel {
+export type DetailedToken = {
   /**
    * The chainId of the chain
    */
-  @prop()
   name?: string;
-}
+};

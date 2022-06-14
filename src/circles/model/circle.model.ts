@@ -6,8 +6,9 @@ import { ActivityModel } from 'src/common/models/activity.model';
 import { Project } from 'src/project/model/project.model';
 import { User } from 'src/users/model/users.model';
 import { TemplateModel } from 'src/templates/models/template.model';
-import { ChainModel } from 'src/common/models/chain.model';
+import { Chain } from 'src/common/models/chain.model';
 import { ObjectId } from 'mongoose';
+import { MemberRoles, Roles } from 'src/common/types/role.type';
 
 @useMongoosePlugin()
 export class Circle extends ProfileModel {
@@ -22,18 +23,6 @@ export class Circle extends ProfileModel {
    */
   @prop({ required: true })
   slug: string;
-
-  /**
-   * A list of roles that the circle has
-   */
-  @prop({ default: [] })
-  roles: string[];
-
-  /**
-   * Members mapped to their respective roles
-   */
-  @prop({ default: {} })
-  memberRoles: object;
 
   /**
    * Circle is public or private
@@ -66,6 +55,75 @@ export class Circle extends ProfileModel {
   members: ObjectId[];
 
   /**
+   * A list of roles that the circle has
+   */
+  @prop({
+    default: {
+      admin: {
+        name: 'admin',
+        description: 'Admin role',
+        selfAssignable: false,
+        permissions: {
+          createNewCircle: true,
+          manageCircleSettings: true,
+          createNewProject: true,
+          manageProjectSettings: true,
+          createNewRetro: true,
+          endRetroManually: true,
+          managePaymentOptions: true,
+          makePayment: true,
+          inviteMembers: true,
+          manageRoles: true,
+          manageMembers: true,
+        },
+      },
+      contributor: {
+        name: 'contributor',
+        description: 'Contributor role',
+        selfAssignable: false,
+        permissions: {
+          createNewCircle: false,
+          manageCircleSettings: false,
+          createNewProject: true,
+          manageProjectSettings: true,
+          createNewRetro: true,
+          endRetroManually: false,
+          managePaymentOptions: false,
+          makePayment: true,
+          inviteMembers: true,
+          manageRoles: false,
+          manageMembers: false,
+        },
+      },
+      member: {
+        name: 'member',
+        description: 'Member role',
+        selfAssignable: false,
+        permissions: {
+          createNewCircle: false,
+          manageCircleSettings: false,
+          createNewProject: false,
+          manageProjectSettings: false,
+          createNewRetro: false,
+          endRetroManually: false,
+          managePaymentOptions: false,
+          makePayment: false,
+          inviteMembers: false,
+          manageRoles: false,
+          manageMembers: false,
+        },
+      },
+    },
+  })
+  roles: Roles;
+
+  /**
+   * Members mapped to their respective roles
+   */
+  @prop({ default: {} })
+  memberRoles: MemberRoles;
+
+  /**
    * Default payment method of the circle
    */
   @prop({
@@ -86,7 +144,7 @@ export class Circle extends ProfileModel {
    * Circle is archived
    */
   @prop({ default: false })
-  archived: boolean;
+  archived: true;
 
   /**
    * Activity that took place in the circle
@@ -104,5 +162,5 @@ export class Circle extends ProfileModel {
    * The tokens whitelisted in the circle, these will be available in the circle on top of the globally available tokens
    */
   @prop({ default: {} })
-  whitelistedTokens: ChainModel;
+  whitelistedTokens: Chain;
 }

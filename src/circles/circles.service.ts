@@ -1,29 +1,20 @@
 import {
-  Injectable,
   HttpException,
   HttpStatus,
+  Injectable,
   InternalServerErrorException,
-  Inject,
-  Scope,
 } from '@nestjs/common';
-import { ReturnModelType } from '@typegoose/typegoose';
+import { SlugService } from 'src/common/slug.service';
+import { UserProvider } from 'src/users/user.provider';
+import { CirclesRepository } from './circles.repository';
 import { CreateCircleRequestDto } from './dto/create-circle-request.dto';
 import { DetailedCircleResponseDto } from './dto/detailed-circle-response.dto';
 import { UpdateCircleRequestDto } from './dto/update-circle-request.dto';
 import { Circle } from './model/circle.model';
-import { CirclesRepository } from './circles.repository';
-import { SlugService } from 'src/common/slug.service';
-import { Ref } from '@typegoose/typegoose';
-import { Types } from 'mongoose';
-import { REQUEST } from '@nestjs/core';
-import { Request } from 'express';
-import { User } from 'src/users/model/users.model';
-import { UserProvider } from 'src/users/user.provider';
 
 @Injectable()
 export class CirclesService {
   constructor(
-    //@Inject(REQUEST) private request: Request,
     private readonly userProvider: UserProvider,
     private readonly circlesRepository: CirclesRepository,
     private readonly slugService: SlugService,
@@ -32,6 +23,14 @@ export class CirclesService {
   async getDetailedCircle(id: string): Promise<DetailedCircleResponseDto> {
     const circle =
       await this.circlesRepository.getCircleWithPopulatedReferences(id);
+    return circle;
+  }
+
+  async getDetailedCircleBySlug(
+    slug: string,
+  ): Promise<DetailedCircleResponseDto> {
+    const circle =
+      await this.circlesRepository.getCircleWithPopulatedReferencesBySlug(slug);
     return circle;
   }
 
@@ -44,7 +43,6 @@ export class CirclesService {
     createCircleDto: CreateCircleRequestDto,
   ): Promise<DetailedCircleResponseDto> {
     try {
-      console.log(this.userProvider.userRef);
       const slug = await this.slugService.generateUniqueSlug(
         createCircleDto.name,
         this.circlesRepository,
@@ -58,12 +56,15 @@ export class CirclesService {
           );
       }
       let createdCircle: Circle;
+      const memberRoles = {};
+      memberRoles[this.userProvider.user.id] = ['admin'];
       if (parentCircle) {
         createdCircle = await this.circlesRepository.create({
           ...createCircleDto,
           slug: slug,
           parents: [parentCircle._id],
           members: [this.userProvider.user._id],
+          memberRoles: memberRoles,
         });
         await this.circlesRepository.updateById(parentCircle.id as string, {
           ...parentCircle,
@@ -74,6 +75,7 @@ export class CirclesService {
           ...createCircleDto,
           slug: slug,
           members: [this.userProvider.user._id],
+          memberRoles: memberRoles,
         });
       }
 

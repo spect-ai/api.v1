@@ -1,15 +1,13 @@
 import { prop } from '@typegoose/typegoose';
 
-export abstract class ChainModel {
+export type Chain = {
   /**
    * The chainId of the chain
    */
-  @prop()
   chainId?: string;
 
   /**
    * The name of the chain
    */
-  @prop()
   name?: string;
-}
+};
