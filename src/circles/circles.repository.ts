@@ -15,6 +15,7 @@ export class CirclesRepository extends BaseRepository<Circle> {
       .populate('parents')
       .populate('children')
       .populate('members')
+      .populate('projects')
       .exec();
   }
   async getCircleWithPopulatedReferencesBySlug(slug: string): Promise<Circle> {
@@ -22,6 +23,7 @@ export class CirclesRepository extends BaseRepository<Circle> {
       .populate('parents')
       .populate('children')
       .populate('members')
+      .populate('projects')
       .exec();
   }
 

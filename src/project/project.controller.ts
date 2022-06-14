@@ -10,18 +10,16 @@ export class ProjectController {
   constructor(private readonly projectService: ProjectService) {}
 
   @Get('/:id')
-  @ApiParam({
-    name: 'id',
-    required: true,
-    description: 'Object Id of the project',
-    schema: { type: 'string' },
-  })
   async findByObjectId(@Param('id') id): Promise<DetailedProjectResponseDto> {
     return await this.projectService.getDetailedProject(id);
   }
 
+  @Get('/slug/:slug')
+  async findBySlug(@Param('slug') slug): Promise<DetailedProjectResponseDto> {
+    return await this.projectService.getDetailedProjectBySlug(slug);
+  }
+
   @Post('/')
-  @ApiBody({ type: CreateProjectRequestDto })
   async create(
     @Body() project: CreateProjectRequestDto,
   ): Promise<DetailedProjectResponseDto> {
@@ -29,13 +27,6 @@ export class ProjectController {
   }
 
   @Patch('/:id')
-  @ApiParam({
-    name: 'id',
-    required: true,
-    description: 'Object Id of the project',
-    schema: { type: 'string' },
-  })
-  @ApiBody({ type: UpdateProjectRequestDto })
   async update(
     @Param('id') id,
     @Body() project: UpdateProjectRequestDto,
@@ -44,12 +35,6 @@ export class ProjectController {
   }
 
   @Post('/:id/delete')
-  @ApiParam({
-    name: 'id',
-    required: true,
-    description: 'Object Id of the project',
-    schema: { type: 'string' },
-  })
   async delete(@Param('id') id): Promise<DetailedProjectResponseDto> {
     return await this.projectService.delete(id);
   }

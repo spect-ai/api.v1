@@ -26,7 +26,7 @@ export class CirclesController {
     return await this.circlesService.getPublicParentCircles();
   }
 
-  @Get('/:slug')
+  @Get('/slug/:slug')
   async findBySlug(@Param('slug') slug): Promise<DetailedCircleResponseDto> {
     return await this.circlesService.getDetailedCircleBySlug(slug);
   }

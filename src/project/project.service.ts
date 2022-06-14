@@ -29,6 +29,16 @@ export class ProjectService {
     return project;
   }
 
+  async getDetailedProjectBySlug(
+    slug: string,
+  ): Promise<DetailedProjectResponseDto> {
+    const project =
+      await this.projectRepository.getProjectWithPopulatedReferencesBySlug(
+        slug,
+      );
+    return project;
+  }
+
   async create(createProjectDto: CreateProjectRequestDto): Promise<Project> {
     try {
       const slug = await this.slugService.generateUniqueSlug(
