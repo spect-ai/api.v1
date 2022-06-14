@@ -1,4 +1,40 @@
-import { Controller } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
+import { CardsService } from './cards.service';
+import { CreateCardRequestDto } from './dto/create-card-request.dto';
+import { DetailedCardResponseDto } from './dto/detailed-card-response-dto';
+import { UpdateCardRequestDto } from './dto/update-card-request.dto';
 
 @Controller('cards')
-export class CardsController {}
+export class CardsController {
+  constructor(private readonly cardsService: CardsService) {}
+
+  @Get('/slug/:slug')
+  async findBySlug(@Param('slug') slug): Promise<DetailedCardResponseDto> {
+    return await this.cardsService.getDetailedCard(slug);
+  }
+
+  @Get('/:id')
+  async findByObjectId(@Param('id') id): Promise<DetailedCardResponseDto> {
+    return await this.cardsService.getDetailedCardBySlug(id);
+  }
+
+  @Post('/')
+  async create(
+    @Body() card: CreateCardRequestDto,
+  ): Promise<DetailedCardResponseDto> {
+    return await this.cardsService.create(card);
+  }
+
+  @Patch('/:id')
+  async update(
+    @Param('id') id,
+    @Body() circle: UpdateCardRequestDto,
+  ): Promise<DetailedCardResponseDto> {
+    return await this.cardsService.update(id, circle);
+  }
+
+  @Post('/:id/delete')
+  async delete(@Param('id') id): Promise<DetailedCardResponseDto> {
+    return await this.cardsService.delete(id);
+  }
+}

@@ -2,8 +2,8 @@ import { plugin, prop, Ref } from '@typegoose/typegoose';
 import { useMongoosePlugin } from 'src/base/decorators/use-mongoose-plugins.decorator';
 import { BaseModel } from 'src/base/base.model';
 import { Project } from 'src/project/model/project.model';
-import { PaymentModel } from 'src/common/models/payment.model';
-import { Date } from 'mongoose';
+import { Payment } from 'src/common/models/payment.model';
+import { Date, ObjectId } from 'mongoose';
 import { ActivityModel } from 'src/common/models/activity.model';
 import { StatusModel } from '../../common/models/status.model';
 import { SubmissionModel } from './submission.model';
@@ -33,32 +33,32 @@ export class Card extends BaseModel {
   /**
    * The id of the creator of the card
    */
-  @prop()
-  creator: Ref<User>;
+  @prop({ ref: () => User })
+  creator: ObjectId;
 
   /**
    * The ids of all the reviewers of the card
    */
-  @prop({ default: [] })
-  reviewer: Ref<User>[];
+  @prop({ ref: () => User, default: [] })
+  reviewer: ObjectId[];
 
   /**
    * The ids of all the assignees of the card
    */
-  @prop({ default: [] })
-  assignee: Ref<User>[];
+  @prop({ ref: () => User, default: [] })
+  assignee: ObjectId[];
 
   /**
    * The project that the card belongs to
    */
-  @prop({ ref: () => Project, default: [] })
-  project: Ref<Project>;
+  @prop({ ref: () => Project, required: true })
+  project: ObjectId;
 
   /**
    * The reward associated with the card
    */
   @prop({ required: true })
-  reward: PaymentModel;
+  reward: Payment;
 
   /**
    * The type of the card, i.e., task, bounty, etc.

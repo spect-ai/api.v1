@@ -20,6 +20,7 @@ import { CardsController } from './cards/cards.controller';
 import { CardsService } from './cards/cards.service';
 import { CardsModule } from './cards/cards.module';
 import { HookModule } from './hooks/hook.module';
+import { UserProvider } from './users/user.provider';
 
 @Module({
   imports: [
@@ -44,6 +45,7 @@ import { HookModule } from './hooks/hook.module';
     RetroService,
     RegistryService,
     CardsService,
+    UserProvider,
   ],
 })
 export class AppModule {}

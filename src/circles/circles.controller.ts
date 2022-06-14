@@ -17,7 +17,6 @@ import { LocalAuthGuard } from 'src/auth/local-auth.gaurd';
 // import { RolesGuard } from 'src/auth/role-auth.guard';
 
 @Controller('circles')
-@ApiTags('circles')
 export class CirclesController {
   constructor(private readonly circlesService: CirclesService) {}
 

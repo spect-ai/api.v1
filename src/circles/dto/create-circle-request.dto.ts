@@ -8,7 +8,7 @@ import {
   IsString,
   IsUrl,
 } from 'class-validator';
-import { PaymentModel } from 'src/common/models/payment.model';
+import { Payment } from 'src/common/models/payment.model';
 import { Circle } from '../model/circle.model';
 
 export class CreateCircleRequestDto {
@@ -76,7 +76,7 @@ export class CreateCircleRequestDto {
    */
   @IsOptional()
   @IsObject()
-  defaultPayment?: PaymentModel;
+  defaultPayment?: Payment;
 
   /**
    * The parent of the circle

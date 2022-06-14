@@ -1,7 +1,7 @@
 import { prop, Ref } from '@typegoose/typegoose';
 import { ProfileModel } from 'src/common/models/profile.model';
 import { useMongoosePlugin } from 'src/base/decorators/use-mongoose-plugins.decorator';
-import { PaymentModel } from 'src/common/models/payment.model';
+import { Payment } from 'src/common/models/payment.model';
 import { ActivityModel } from 'src/common/models/activity.model';
 import { Project } from 'src/project/model/project.model';
 import { User } from 'src/users/model/users.model';
@@ -138,7 +138,7 @@ export class Circle extends ProfileModel {
       },
     },
   })
-  defaultPayment: PaymentModel;
+  defaultPayment: Payment;
 
   /**
    * Circle is archived

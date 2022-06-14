@@ -2,7 +2,7 @@ import { plugin, prop, Ref } from '@typegoose/typegoose';
 import { useMongoosePlugin } from 'src/base/decorators/use-mongoose-plugins.decorator';
 import { BaseModel } from 'src/base/base.model';
 import { Project } from 'src/project/model/project.model';
-import { PaymentModel } from 'src/common/models/payment.model';
+import { Payment } from 'src/common/models/payment.model';
 import { Date } from 'mongoose';
 import { ActivityModel } from 'src/common/models/activity.model';
 import { User } from 'src/users/model/users.model';
@@ -77,7 +77,7 @@ export class Retro extends BaseModel {
    * The reward budget of the retro period
    */
   @prop({ required: true })
-  reward: PaymentModel;
+  reward: Payment;
 
   /**
    * The voting stats of different users
