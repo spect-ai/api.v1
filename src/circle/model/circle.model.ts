@@ -9,6 +9,7 @@ import { TemplateModel } from 'src/template/models/template.model';
 import { Chain } from 'src/common/models/chain.model';
 import { ObjectId } from 'mongoose';
 import { MemberRoles, Roles } from 'src/common/types/role.type';
+import { Invite } from 'src/common/types/invite.type';
 
 @useMongoosePlugin()
 export class Circle extends ProfileModel {
@@ -163,4 +164,10 @@ export class Circle extends ProfileModel {
    */
   @prop({ default: {} })
   whitelistedTokens: Chain;
+
+  /**
+   * Invitations to the circle
+   */
+  @prop({ default: [] })
+  invites: Invite[];
 }

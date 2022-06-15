@@ -5,12 +5,16 @@ import {
   InternalServerErrorException,
 } from '@nestjs/common';
 import { SlugService } from 'src/common/slug.service';
+import { Invite } from 'src/common/types/invite.type';
 import { UserProvider } from 'src/users/user.provider';
 import { CirclesRepository } from './circles.repository';
 import { CreateCircleRequestDto } from './dto/create-circle-request.dto';
 import { DetailedCircleResponseDto } from './dto/detailed-circle-response.dto';
+import { JoinCircleRequestDto } from './dto/join-circle.dto';
 import { UpdateCircleRequestDto } from './dto/update-circle-request.dto';
 import { Circle } from './model/circle.model';
+import { DiscordService } from 'src/common/discord.service';
+import { GithubService } from 'src/common/github.service';
 
 @Injectable()
 export class CirclesService {
@@ -18,6 +22,8 @@ export class CirclesService {
     private readonly userProvider: UserProvider,
     private readonly circlesRepository: CirclesRepository,
     private readonly slugService: SlugService,
+    private readonly discordService: DiscordService,
+    private readonly githubService: GithubService,
   ) {}
 
   async getDetailedCircle(id: string): Promise<DetailedCircleResponseDto> {
@@ -57,13 +63,14 @@ export class CirclesService {
       }
       let createdCircle: Circle;
       const memberRoles = {};
-      memberRoles[this.userProvider.user.id] = ['admin'];
+      console.log(this.userProvider.user);
+      //memberRoles[this.userProvider.user.id] = ['admin'];
       if (parentCircle) {
         createdCircle = await this.circlesRepository.create({
           ...createCircleDto,
           slug: slug,
           parents: [parentCircle._id],
-          members: [this.userProvider.user._id],
+          //members: [this.userProvider.user._id],
           memberRoles: memberRoles,
         });
         await this.circlesRepository.updateById(parentCircle.id as string, {
@@ -74,7 +81,7 @@ export class CirclesService {
         createdCircle = await this.circlesRepository.create({
           ...createCircleDto,
           slug: slug,
-          members: [this.userProvider.user._id],
+          //members: [this.userProvider.user._id],
           memberRoles: memberRoles,
         });
       }
@@ -91,7 +98,7 @@ export class CirclesService {
   async update(
     id: string,
     updateCircleDto: UpdateCircleRequestDto,
-  ): Promise<Circle> {
+  ): Promise<DetailedCircleResponseDto> {
     try {
       const updatedCircle = await this.circlesRepository.updateById(
         id,
@@ -106,16 +113,69 @@ export class CirclesService {
     }
   }
 
-  // async join(
-  //   id: string,
-  //   updateCircleDto: UpdateCircleRequestDto,
-  // ): Promise<Circle> {
-  //   const updatedCircle = await this.circlesRepository.updateById(
-  //     id,
-  //     updateCircleDto,
-  //   );
-  //   return updatedCircle;
-  // }
+  async invite(
+    id: string,
+    newInvite: Invite,
+  ): Promise<DetailedCircleResponseDto> {
+    try {
+      const circle =
+        await this.circlesRepository.getCircleWithUnpopulatedReferences(id);
+      const invites = circle.invites;
+      const updatedCircle = await this.circlesRepository.updateById(id, {
+        invites: [...invites, newInvite],
+      });
+      return updatedCircle;
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Failed circle update',
+        error.message,
+      );
+    }
+  }
+
+  async join(
+    id: string,
+    joinCircleDto: JoinCircleRequestDto,
+  ): Promise<DetailedCircleResponseDto> {
+    try {
+      const circle =
+        await this.circlesRepository.getCircleWithUnpopulatedReferences(id);
+      if (joinCircleDto.joinUsing === 'discord') {
+        const role = await this.discordService.getSpectRoleFromDiscordId(
+          this.userProvider.user.discordId,
+        );
+        if (!role) {
+          throw new HttpException(
+            'Role required to join circle not found',
+            HttpStatus.NOT_FOUND,
+          );
+        }
+        const updatedCircle = await this.circlesRepository.updateById(id, {
+          // members: [...circle.members, this.userProvider.user._id],
+          // memberRoles: {...circle.memberRoles, [this.userProvider.user.id]: role},
+        });
+        return updatedCircle;
+      } else if (joinCircleDto.joinUsing === 'invitation') {
+        const invite = circle.invites.find(
+          (invite) => invite.id === joinCircleDto.invitationId,
+        );
+        if (!invite) {
+          throw new HttpException('Invitation not found', HttpStatus.NOT_FOUND);
+        } else {
+          const updatedCircle = await this.circlesRepository.updateById(id, {
+            // members: [...circle.members, this.userProvider.user._id],
+            // memberRoles: {...circle.memberRoles, [this.userProvider.user.id]: invite.role},
+          });
+          return updatedCircle;
+        }
+      }
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Failed joining circle',
+        error.message,
+      );
+    }
+  }
 
   async delete(id: string): Promise<Circle> {
     const circle = await this.circlesRepository.findById(id);
