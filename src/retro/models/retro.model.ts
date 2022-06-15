@@ -1,7 +1,6 @@
 import { plugin, prop, Ref } from '@typegoose/typegoose';
 import { useMongoosePlugin } from 'src/base/decorators/use-mongoose-plugins.decorator';
 import { BaseModel } from 'src/base/base.model';
-import { Project } from 'src/project/model/project.model';
 import { Payment } from 'src/common/models/payment.model';
 import { Date } from 'mongoose';
 import { ActivityModel } from 'src/common/models/activity.model';
@@ -65,7 +64,7 @@ export class Retro extends BaseModel {
    * The duration of the retro period
    */
   @prop()
-  duration: Date;
+  duration: number;
 
   /**
    * The end time of the retro period
