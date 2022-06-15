@@ -105,9 +105,9 @@ export abstract class BaseRepository<TModel extends BaseModel> {
       .setOptions(BaseRepository.getQueryOptions(options));
   }
 
-  async create(item: Partial<TModel>): Promise<DocumentType<TModel> | null> {
+  create(item: Partial<TModel>): Promise<DocumentType<TModel> | null> {
     try {
-      return await this.model.create(item);
+      return this.model.create(item);
     } catch (e) {
       BaseRepository.throwMongoError(e);
     }

@@ -1,23 +1,44 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { HttpException, Injectable } from '@nestjs/common';
+import { generateNonce, SiweMessage } from 'siwe';
 import { UsersService } from 'src/users/users.service';
 import { EthAddressService } from 'src/_eth-address/_eth-address.service';
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const Web3Token = require('web3-token');
-
+import { ConnectUserDto } from './dto/connect-user.dto';
 @Injectable()
 export class AuthService {
-  constructor(private ethAddressService: EthAddressService) {}
+  constructor(
+    private ethAddressService: EthAddressService,
+    private userService: UsersService,
+  ) {}
 
-  async ValidateUser(token: string): Promise<any> {
-    try {
-      const { address } = await Web3Token.verify(token);
-      const ethAddress = await this.ethAddressService.findByAddress(address);
-      if (!ethAddress) {
-        throw new UnauthorizedException();
-      }
-      return ethAddress.user;
-    } catch {
-      throw new UnauthorizedException();
+  async getNonce(req): Promise<string> {
+    req.session.nonce = generateNonce();
+    await req.session.save();
+    return req.session.nonce;
+  }
+
+  async connect(
+    { message, signature }: ConnectUserDto,
+    req: any,
+  ): Promise<any> {
+    const siweMessage = new SiweMessage(message);
+    const fields = await siweMessage.validate(signature);
+    console.log(fields.nonce);
+    console.log(req.session.nonce);
+    if (fields.nonce !== req.session.nonce)
+      throw new HttpException({ message: 'Invalid nonce.' }, 422);
+
+    req.session.siwe = fields;
+    await req.session.save();
+
+    const _ethAddress = await this.ethAddressService.findByAddress(
+      req.session.siwe.address.toLowerCase(),
+    );
+    if (!_ethAddress) {
+      const user = await this.userService.create(
+        req.session.siwe.address.toLowerCase(),
+      );
+      return user;
     }
+    return _ethAddress.user;
   }
 }
