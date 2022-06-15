@@ -13,8 +13,6 @@ import { ApiTags, ApiParam, ApiBody } from '@nestjs/swagger';
 import { CreateCircleRequestDto } from './dto/create-circle-request.dto';
 import { DetailedCircleResponseDto } from './dto/detailed-circle-response.dto';
 import { UpdateCircleRequestDto } from './dto/update-circle-request.dto';
-import { LocalAuthGuard } from 'src/auth/local-auth.gaurd';
-// import { RolesGuard } from 'src/auth/role-auth.guard';
 
 @Controller('circle')
 export class CirclesController {

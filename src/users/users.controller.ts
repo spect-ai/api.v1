@@ -1,30 +1,14 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
-  UseGuards,
-  Request,
-} from '@nestjs/common';
+import { Controller, Get, UseGuards, Request } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { LocalAuthGuard } from 'src/auth/local-auth.gaurd';
 import { ApiTags } from '@nestjs/swagger';
-import { ConnectUserDto } from './dto/connect-user.dto';
+import { SessionAuthGuard } from 'src/auth/iron-session.guard';
 
 @Controller('users')
 @ApiTags('Users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  @Post('/connect')
-  connect(@Body() body: ConnectUserDto) {
-    return this.usersService.connect(body);
-  }
-
-  @UseGuards(LocalAuthGuard)
+  @UseGuards(SessionAuthGuard)
   @Get('/me')
   findMe(@Request() req) {
     return req.user;

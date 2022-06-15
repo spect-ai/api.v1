@@ -5,6 +5,7 @@ import { User } from './model/users.model';
 import { TypegooseModule } from 'nestjs-typegoose';
 import { UsersRepository } from './users.repository';
 import { EthAddressModule } from 'src/_eth-address/_eth-address.module';
+import { AuthModule } from 'src/auth/auth.module';
 
 @Module({
   imports: [TypegooseModule.forFeature([User]), EthAddressModule],

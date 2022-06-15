@@ -1,4 +1,5 @@
 import { prop } from '@typegoose/typegoose';
+import { ObjectId } from 'mongoose';
 import { BaseModel } from 'src/base/base.model';
 import { useMongoosePlugin } from 'src/base/decorators/use-mongoose-plugins.decorator';
 import { User } from 'src/users/model/users.model';
@@ -26,6 +27,6 @@ export class _EthAddress extends BaseModel {
   /**
    * Linked User
    */
-  @prop()
-  user: User;
+  @prop({ ref: () => User, default: [] })
+  user: ObjectId;
 }
