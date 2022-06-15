@@ -19,8 +19,8 @@ import { RegistryModule } from './registry/registry.module';
 import { CardsController } from './card/cards.controller';
 import { CardsService } from './card/cards.service';
 import { CardsModule } from './card/cards.module';
-import { HookModule } from './hooks/hook.module';
 import { UserProvider } from './users/user.provider';
+import { IntegrationsModule } from './integrations/integrations.module';
 
 @Module({
   imports: [
@@ -30,12 +30,12 @@ import { UserProvider } from './users/user.provider';
     AuthModule,
     EthAddressModule,
     CommonModule,
-    HookModule,
     ProjectModule,
     TemplatesModule,
     RetroModule,
     RegistryModule,
     CardsModule,
+    IntegrationsModule,
   ],
   controllers: [AppController, ProjectController, CardsController],
   providers: [

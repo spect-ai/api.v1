@@ -50,6 +50,12 @@ export class CreateCardRequestDto {
   project: ObjectId;
 
   /**
+   * The circle Id that the card belongs to
+   */
+  @IsString()
+  circleId: string;
+
+  /**
    * The description of the circle
    */
   @IsObject()

@@ -15,6 +15,7 @@ import { UpdateCircleRequestDto } from './dto/update-circle-request.dto';
 import { Circle } from './model/circle.model';
 import { DiscordService } from 'src/common/discord.service';
 import { GithubService } from 'src/common/github.service';
+import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
 export class CirclesService {
@@ -53,6 +54,7 @@ export class CirclesService {
         createCircleDto.name,
         this.circlesRepository,
       );
+      const commitId = uuidv4();
 
       let parentCircle: Circle;
       if (createCircleDto.parent) {

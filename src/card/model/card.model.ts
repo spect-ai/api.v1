@@ -63,7 +63,7 @@ export class Card extends BaseModel {
   /**
    * The type of the card, i.e., task, bounty, etc.
    */
-  @prop({ required: true })
+  @prop({ default: 'Task' })
   type: string;
 
   /**
@@ -100,7 +100,7 @@ export class Card extends BaseModel {
    * The activity associated with the card
    */
   @prop({ default: [] })
-  activity: ActivityModel;
+  activity: ActivityModel[];
 
   /**
    * The status of the card

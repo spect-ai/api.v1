@@ -4,6 +4,9 @@ import {
   Injectable,
   InternalServerErrorException,
 } from '@nestjs/common';
+import { CirclesRepository } from 'src/circle/circles.repository';
+import { ActivityBuilder } from 'src/common/activity.builder';
+import { ProjectService } from 'src/project/project.service';
 import { UserProvider } from 'src/users/user.provider';
 import { CardsRepository } from './cards.repository';
 import { CreateCardRequestDto } from './dto/create-card-request.dto';
@@ -16,12 +19,39 @@ export class CardsService {
   constructor(
     private readonly userProvider: UserProvider,
     private readonly cardsRepository: CardsRepository,
+    private readonly activityBuilder: ActivityBuilder,
+    private readonly projectService: ProjectService,
+    private readonly circleRepository: CirclesRepository,
   ) {}
 
   async create(
     createCardDto: CreateCardRequestDto,
   ): Promise<DetailedCardResponseDto> {
-    return await this.cardsRepository.create(createCardDto);
+    try {
+      const activity = this.activityBuilder.getActivity(
+        this.userProvider,
+        createCardDto,
+        null,
+      );
+      const defaultPayment = await this.circleRepository.getDefaultPayment(
+        createCardDto.circleId,
+      );
+      const cardNum = await this.cardsRepository.count({
+        project: createCardDto.project,
+      });
+
+      return await this.cardsRepository.create({
+        ...createCardDto,
+        activity: activity,
+        reward: defaultPayment,
+        slug: cardNum.toString(),
+      });
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Failed card creation',
+        error.message,
+      );
+    }
   }
 
   async getDetailedCard(id: string): Promise<DetailedCardResponseDto> {
@@ -54,8 +84,8 @@ export class CardsService {
   }
 
   async delete(id: string): Promise<Card> {
-    const circle = await this.cardsRepository.findById(id);
-    if (!circle) {
+    const card = await this.cardsRepository.findById(id);
+    if (!card) {
       throw new HttpException('Card not found', HttpStatus.NOT_FOUND);
     }
     return await this.cardsRepository.deleteById(id);

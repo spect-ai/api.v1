@@ -3,7 +3,7 @@ import { InjectModel } from 'nestjs-typegoose';
 import { BaseRepository } from 'src/base/base.repository';
 import { Circle } from './model/circle.model';
 import { Ref } from '@typegoose/typegoose';
-import { Types } from 'mongoose';
+import { ObjectId, Types } from 'mongoose';
 @Injectable()
 export class CirclesRepository extends BaseRepository<Circle> {
   constructor(@InjectModel(Circle) circleModel) {
@@ -43,5 +43,10 @@ export class CirclesRepository extends BaseRepository<Circle> {
       parents: { $exists: true, $eq: [] },
       // members: { $is: [] }, TODO: implement
     });
+  }
+
+  async getDefaultPayment(id: string) {
+    const circle = await this.findById(id);
+    return circle.defaultPayment;
   }
 }
