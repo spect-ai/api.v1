@@ -5,7 +5,7 @@ import { DetailedProjectResponseDto } from './dto/detailed-project-response.dto'
 import { UpdateProjectRequestDto } from './dto/update-project-request.dto';
 import { ProjectService } from './project.service';
 
-@Controller('project')
+@Controller('projects')
 export class ProjectController {
   constructor(private readonly projectService: ProjectService) {}
 

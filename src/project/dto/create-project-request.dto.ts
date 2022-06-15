@@ -29,7 +29,7 @@ export class CreateProjectRequestDto {
    */
   @IsString()
   @IsNotEmpty()
-  circleId?: string;
+  circleId: string;
 
   /**
    * The order of the columns in the project
