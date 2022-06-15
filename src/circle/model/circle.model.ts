@@ -5,7 +5,7 @@ import { Payment } from 'src/common/models/payment.model';
 import { ActivityModel } from 'src/common/models/activity.model';
 import { Project } from 'src/project/model/project.model';
 import { User } from 'src/users/model/users.model';
-import { TemplateModel } from 'src/templates/models/template.model';
+import { TemplateModel } from 'src/template/models/template.model';
 import { Chain } from 'src/common/models/chain.model';
 import { ObjectId } from 'mongoose';
 import { MemberRoles, Roles } from 'src/common/types/role.type';

@@ -4,7 +4,7 @@ import { CreateCardRequestDto } from './dto/create-card-request.dto';
 import { DetailedCardResponseDto } from './dto/detailed-card-response-dto';
 import { UpdateCardRequestDto } from './dto/update-card-request.dto';
 
-@Controller('cards')
+@Controller('card')
 export class CardsController {
   constructor(private readonly cardsService: CardsService) {}
 

@@ -1,6 +1,6 @@
 import { prop, Ref } from '@typegoose/typegoose';
 import { BaseModel } from 'src/base/base.model';
-import { Card } from 'src/cards/model/card.model';
+import { Card } from 'src/card/model/card.model';
 import { Project } from 'src/project/model/project.model';
 import { Retro } from 'src/retro/models/retro.model';
 import { User } from 'src/users/model/users.model';

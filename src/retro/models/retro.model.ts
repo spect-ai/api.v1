@@ -6,7 +6,7 @@ import { Date } from 'mongoose';
 import { ActivityModel } from 'src/common/models/activity.model';
 import { User } from 'src/users/model/users.model';
 import { StatusModel } from 'src/common/models/status.model';
-import { Circle } from 'src/circles/model/circle.model';
+import { Circle } from 'src/circle/model/circle.model';
 import { FeedbackModel } from 'src/common/models/feedback.model';
 import { StatsModel } from './stats.model';
 

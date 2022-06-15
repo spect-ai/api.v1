@@ -8,7 +8,7 @@ import { ActivityModel } from 'src/common/models/activity.model';
 import { StatusModel } from '../../common/models/status.model';
 import { SubmissionModel } from './submission.model';
 import { User } from 'src/users/model/users.model';
-import { TemplateModel } from 'src/templates/models/template.model';
+import { TemplateModel } from 'src/template/models/template.model';
 
 @useMongoosePlugin()
 export class Card extends BaseModel {

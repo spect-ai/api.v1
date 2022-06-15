@@ -1,9 +1,9 @@
 import { prop, Ref } from '@typegoose/typegoose';
 import { useMongoosePlugin } from 'src/base/decorators/use-mongoose-plugins.decorator';
-import { Circle } from 'src/circles/model/circle.model';
+import { Circle } from 'src/circle/model/circle.model';
 import { BaseModel } from 'src/base/base.model';
 import { ColumnDetailsModel } from './columnDetails.model';
-import { TemplateModel } from 'src/templates/models/template.model';
+import { TemplateModel } from 'src/template/models/template.model';
 import { ObjectId } from 'mongoose';
 
 @useMongoosePlugin()

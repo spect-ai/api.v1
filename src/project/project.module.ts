@@ -1,12 +1,12 @@
 import { Module } from '@nestjs/common';
 import { TypegooseModule } from 'nestjs-typegoose';
-import { CirclesService } from 'src/circles/circles.service';
+import { CirclesService } from 'src/circle/circles.service';
 import { SlugService } from 'src/common/slug.service';
 import { Project } from './model/project.model';
 import { ProjectController } from './project.controller';
 import { ProjectService } from './project.service';
 import { ProjectsRepository } from './project.repository';
-import { CirclesModule } from 'src/circles/circles.module';
+import { CirclesModule } from 'src/circle/circles.module';
 
 @Module({
   imports: [TypegooseModule.forFeature([Project]), CirclesModule],

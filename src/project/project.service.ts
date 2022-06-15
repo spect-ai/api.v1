@@ -6,8 +6,8 @@ import {
 } from '@nestjs/common';
 import { Ref } from '@typegoose/typegoose';
 import { Types } from 'mongoose';
-import { CirclesRepository } from 'src/circles/circles.repository';
-import { Circle } from 'src/circles/model/circle.model';
+import { CirclesRepository } from 'src/circle/circles.repository';
+import { Circle } from 'src/circle/model/circle.model';
 import { SlugService } from 'src/common/slug.service';
 import { CreateProjectRequestDto } from './dto/create-project-request.dto';
 import { DetailedProjectResponseDto } from './dto/detailed-project-response.dto';
