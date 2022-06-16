@@ -4,8 +4,6 @@ import {
   Injectable,
   InternalServerErrorException,
 } from '@nestjs/common';
-import { Ref } from '@typegoose/typegoose';
-import { Types } from 'mongoose';
 import { CirclesRepository } from 'src/circle/circles.repository';
 import { Circle } from 'src/circle/model/circle.model';
 import { SlugService } from 'src/common/slug.service';

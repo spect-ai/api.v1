@@ -9,6 +9,7 @@ import { StatusModel } from '../../common/models/status.model';
 import { SubmissionModel } from './submission.model';
 import { User } from 'src/users/model/users.model';
 import { TemplateModel } from 'src/template/models/template.model';
+import { Circle } from 'src/circle/model/circle.model';
 
 @useMongoosePlugin()
 export class Card extends BaseModel {
@@ -53,6 +54,12 @@ export class Card extends BaseModel {
    */
   @prop({ ref: () => Project, required: true })
   project: ObjectId;
+
+  /**
+   * The project that the card belongs to
+   */
+  @prop({ ref: () => Circle, required: true })
+  circle: ObjectId;
 
   /**
    * The reward associated with the card

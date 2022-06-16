@@ -3,7 +3,7 @@ import { InjectModel } from 'nestjs-typegoose';
 import { BaseRepository } from 'src/base/base.repository';
 import { Card } from './model/card.model';
 import { Ref } from '@typegoose/typegoose';
-import { Types } from 'mongoose';
+import { ObjectId, Types } from 'mongoose';
 @Injectable()
 export class CardsRepository extends BaseRepository<Card> {
   constructor(@InjectModel(Card) circleModel) {
@@ -13,8 +13,11 @@ export class CardsRepository extends BaseRepository<Card> {
   async getCardWithPopulatedReferences(id: string): Promise<Card> {
     return await this.findById(id).exec();
   }
-  async getCardWithPopulatedReferencesBySlug(slug: string): Promise<Card> {
-    return await this.findOne({ slug: slug }).exec();
+  async getCardWithPopulatedReferencesBySlug(
+    project: ObjectId,
+    slug: string,
+  ): Promise<Card> {
+    return await this.findOne({ project: project, slug: slug }).exec();
   }
 
   async getCardWithUnpopulatedReferences(id: string): Promise<Card> {

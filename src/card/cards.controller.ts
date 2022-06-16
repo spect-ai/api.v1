@@ -8,14 +8,17 @@ import { UpdateCardRequestDto } from './dto/update-card-request.dto';
 export class CardsController {
   constructor(private readonly cardsService: CardsService) {}
 
-  @Get('/slug/:slug')
-  async findBySlug(@Param('slug') slug): Promise<DetailedCardResponseDto> {
-    return await this.cardsService.getDetailedCard(slug);
+  @Get('/byProjectAndSlug/:project/:slug')
+  async findBySlug(
+    @Param('project') project,
+    @Param('slug') slug,
+  ): Promise<DetailedCardResponseDto> {
+    return await this.cardsService.getDetailedCardBySlug(project, slug);
   }
 
   @Get('/:id')
   async findByObjectId(@Param('id') id): Promise<DetailedCardResponseDto> {
-    return await this.cardsService.getDetailedCardBySlug(id);
+    return await this.cardsService.getDetailedCard(id);
   }
 
   @Post('/')

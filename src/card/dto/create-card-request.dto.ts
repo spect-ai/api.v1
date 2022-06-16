@@ -53,7 +53,7 @@ export class CreateCardRequestDto {
    * The circle Id that the card belongs to
    */
   @IsString()
-  circleId: string;
+  circle: ObjectId;
 
   /**
    * The description of the circle

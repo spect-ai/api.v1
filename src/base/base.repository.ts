@@ -4,6 +4,7 @@ import type { MongoError } from 'mongodb';
 import {
   FilterQuery,
   HydratedDocument,
+  ObjectId,
   QueryOptions as MongooseQueryOptions,
   QueryWithHelpers,
   Types,
@@ -102,6 +103,12 @@ export abstract class BaseRepository<TModel extends BaseModel> {
   findById(id: string, options?: QueryOptions): QueryItem<TModel> {
     return this.model
       .findById(this.toObjectId(id))
+      .setOptions(BaseRepository.getQueryOptions(options));
+  }
+
+  findByObjectId(id: ObjectId, options?: QueryOptions): QueryItem<TModel> {
+    return this.model
+      .findById(id)
       .setOptions(BaseRepository.getQueryOptions(options));
   }
 

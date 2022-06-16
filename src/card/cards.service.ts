@@ -4,6 +4,7 @@ import {
   Injectable,
   InternalServerErrorException,
 } from '@nestjs/common';
+import { ObjectId } from 'mongoose';
 import { CirclesRepository } from 'src/circle/circles.repository';
 import { ActivityBuilder } from 'src/common/activity.builder';
 import { ProjectService } from 'src/project/project.service';
@@ -34,7 +35,7 @@ export class CardsService {
         null,
       );
       const defaultPayment = await this.circleRepository.getDefaultPayment(
-        createCardDto.circleId,
+        createCardDto.circle,
       );
       const cardNum = await this.cardsRepository.count({
         project: createCardDto.project,
@@ -59,9 +60,15 @@ export class CardsService {
     return card;
   }
 
-  async getDetailedCardBySlug(slug: string): Promise<DetailedCardResponseDto> {
+  async getDetailedCardBySlug(
+    project: ObjectId,
+    slug: string,
+  ): Promise<DetailedCardResponseDto> {
     const card =
-      await this.cardsRepository.getCardWithPopulatedReferencesBySlug(slug);
+      await this.cardsRepository.getCardWithPopulatedReferencesBySlug(
+        project,
+        slug,
+      );
     return card;
   }
 

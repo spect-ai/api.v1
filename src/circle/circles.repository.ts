@@ -45,8 +45,8 @@ export class CirclesRepository extends BaseRepository<Circle> {
     });
   }
 
-  async getDefaultPayment(id: string) {
-    const circle = await this.findById(id);
+  async getDefaultPayment(id: ObjectId) {
+    const circle = await this.findByObjectId(id);
     return circle.defaultPayment;
   }
 }
