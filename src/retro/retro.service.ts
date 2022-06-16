@@ -4,11 +4,16 @@ import {
   Injectable,
   InternalServerErrorException,
 } from '@nestjs/common';
+import { CirclesRepository } from 'src/circle/circles.repository';
 import { UserProvider } from 'src/users/user.provider';
-import { CreateRetroRequestDto } from './dto/create-retro-request.dto';
+import {
+  CreateRetroRequestDto,
+  MemberStats,
+} from './dto/create-retro-request.dto';
 import { DetailedRetroResponseDto } from './dto/detailed-retro-response.dto';
 import { UpdateRetroRequestDto } from './dto/update-retro-request.dto';
 import { Retro } from './models/retro.model';
+import { Stats } from './models/stats.model';
 import { RetroRepository } from './retro.repository';
 
 @Injectable()
@@ -16,12 +21,52 @@ export class RetroService {
   constructor(
     private readonly userProvider: UserProvider,
     private readonly retroRepository: RetroRepository,
+    private readonly circleRepository: CirclesRepository,
   ) {}
+
+  initStats(memberStats: MemberStats[]): Stats {
+    const stats = {} as Stats;
+    const votesGiven = {};
+    for (const memberStat of memberStats) {
+      votesGiven[memberStat.member?.toString()] = 0;
+    }
+    for (const memberStat of memberStats) {
+      stats[memberStat.member.toString()] = {
+        owner: memberStat.member,
+        votesGiven: votesGiven,
+        votesRemaining: memberStat.allocation,
+        votesAllocated: memberStat.allocation,
+        canGive: memberStat.canGive,
+        canReceive: memberStat.canReceive,
+      };
+    }
+    return stats;
+  }
 
   async create(
     createRetroDto: CreateRetroRequestDto,
   ): Promise<DetailedRetroResponseDto> {
-    return await this.retroRepository.create(createRetroDto);
+    try {
+      if (!createRetroDto.reward) {
+        createRetroDto.reward = await this.circleRepository.getDefaultPayment(
+          createRetroDto.circle,
+        );
+      }
+      const stats = this.initStats(createRetroDto.memberStats);
+      const retroNum = await this.retroRepository.count({
+        circle: createRetroDto.circle,
+      });
+      return await this.retroRepository.create({
+        ...createRetroDto,
+        slug: retroNum.toString(),
+        stats: stats,
+      });
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Failed retro creation',
+        error.message,
+      );
+    }
   }
 
   async getDetailedRetro(id: string): Promise<DetailedRetroResponseDto> {

@@ -1,4 +1,5 @@
 import {
+  IsArray,
   IsDate,
   IsNotEmpty,
   IsNumber,
@@ -8,6 +9,13 @@ import {
 } from 'class-validator';
 import { Date, ObjectId } from 'mongoose';
 import { Payment } from 'src/common/models/payment.model';
+
+export type MemberStats = {
+  member: ObjectId;
+  canGive: boolean;
+  canReceive: boolean;
+  allocation: number;
+};
 
 export class CreateRetroRequestDto {
   /**
@@ -28,7 +36,7 @@ export class CreateRetroRequestDto {
    * The circle that the retro belongs to
    */
   @IsString()
-  circleId: ObjectId;
+  circle: ObjectId;
 
   /**
    * The strategy used in the retro period, ie, Quadratic or Normal Voting
@@ -50,10 +58,18 @@ export class CreateRetroRequestDto {
   @IsNumber()
   @IsOptional()
   duration?: number;
+
   /**
    * The reward budget of the retro period
    */
   @IsObject()
   @IsOptional()
   reward?: Payment;
+
+  /**
+   * The reward budget of the retro period
+   */
+  @IsArray()
+  @IsOptional()
+  memberStats?: MemberStats[];
 }

@@ -81,7 +81,7 @@ export class ProjectService {
 
       if (parentCircle?.id) {
         await this.circlesRepository.updateById(parentCircle.id as string, {
-          ...createProjectDto,
+          ...parentCircle,
           projects: [...parentCircle.projects, createdProject],
         });
       }

@@ -2,13 +2,13 @@ import { plugin, prop, Ref } from '@typegoose/typegoose';
 import { useMongoosePlugin } from 'src/base/decorators/use-mongoose-plugins.decorator';
 import { BaseModel } from 'src/base/base.model';
 import { Payment } from 'src/common/models/payment.model';
-import { Date } from 'mongoose';
+import { Date, ObjectId } from 'mongoose';
 import { ActivityModel } from 'src/common/models/activity.model';
 import { User } from 'src/users/model/users.model';
 import { StatusModel } from 'src/common/models/status.model';
 import { Circle } from 'src/circle/model/circle.model';
 import { FeedbackModel } from 'src/common/models/feedback.model';
-import { StatsModel } from './stats.model';
+import { Stats, StatsModel } from './stats.model';
 
 @useMongoosePlugin()
 export class Retro extends BaseModel {
@@ -33,25 +33,25 @@ export class Retro extends BaseModel {
   /**
    * The circle that the retro belongs to
    */
-  @prop({ required: true })
-  parent: Ref<Circle>;
+  @prop({ ref: () => Circle, required: true })
+  circle: ObjectId;
 
   /**
    * The creator of the retro period
    */
-  @prop({ required: true })
-  creator: Ref<User>;
+  @prop({ ref: () => User })
+  creator: ObjectId;
 
   /**
    * The status of the retro period
    */
-  @prop({ required: true })
+  @prop()
   status: StatusModel;
 
   /**
    * The strategy used in the retro period, ie, Quadratic or Normal Voting
    */
-  @prop({ required: true })
+  @prop({ default: 'Normal Voting' })
   strategy: string;
 
   /**
@@ -82,17 +82,17 @@ export class Retro extends BaseModel {
    * The voting stats of different users
    */
   @prop({ required: true })
-  stats: StatsModel;
+  stats: Stats;
 
   /**
    * The feedbacks exchanged during the retro period
    */
   @prop({ default: [] })
-  feedbacks: FeedbackModel;
+  feedbacks: FeedbackModel[];
 
   /**
    * The activity history of the retro period
    */
   @prop({ default: [] })
-  activity: ActivityModel;
+  activity: ActivityModel[];
 }

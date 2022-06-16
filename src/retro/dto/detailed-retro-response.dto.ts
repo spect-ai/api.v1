@@ -10,7 +10,7 @@ import { Date } from 'mongoose';
 import { ActivityModel } from 'src/common/models/activity.model';
 import { FeedbackModel } from 'src/common/models/feedback.model';
 import { Payment } from 'src/common/models/payment.model';
-import { StatsModel } from '../models/stats.model';
+import { Stats, StatsModel } from '../models/stats.model';
 
 export class DetailedRetroResponseDto {
   /**
@@ -67,19 +67,19 @@ export class DetailedRetroResponseDto {
    */
   @IsObject()
   @IsOptional()
-  stats: StatsModel;
+  stats: Stats;
 
   /**
    * The feedbacks exchanged during the retro period
    */
   @IsObject()
   @IsOptional()
-  feedbacks: FeedbackModel;
+  feedbacks: FeedbackModel[];
 
   /**
    * The activity history of the retro period
    */
   @IsObject()
   @IsOptional()
-  activity: ActivityModel;
+  activity: ActivityModel[];
 }
