@@ -54,8 +54,8 @@ export class CirclesService {
         createCircleDto.name,
         this.circlesRepository,
       );
-      const commitId = uuidv4();
 
+      console.log(this.userProvider);
       let parentCircle: Circle;
       if (createCircleDto.parent) {
         parentCircle =

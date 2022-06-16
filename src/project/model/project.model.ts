@@ -4,6 +4,7 @@ import { Circle } from 'src/circle/model/circle.model';
 import { BaseModel } from 'src/base/base.model';
 import { ColumnDetailsModel } from './columnDetails.model';
 import { ObjectId } from 'mongoose';
+import { ColumnDetailsDto } from '../dto/column-details.dto';
 
 @useMongoosePlugin()
 export class Project extends BaseModel {
@@ -41,7 +42,7 @@ export class Project extends BaseModel {
    * Column  of the project
    */
   @prop({})
-  columnDetails: ColumnDetailsModel;
+  columnDetails: ColumnDetailsDto;
 
   /**
    * Project is archived

@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { TypegooseModule } from 'nestjs-typegoose';
 import { CirclesModule } from 'src/circle/circles.module';
 import { ProjectModule } from 'src/project/project.module';
@@ -11,7 +11,7 @@ import { TemplatesService } from './templates.service';
 @Module({
   imports: [
     TypegooseModule.forFeature([Template]),
-    ProjectModule,
+    forwardRef(() => ProjectModule),
     CirclesModule,
   ],
   controllers: [TemplatesController],

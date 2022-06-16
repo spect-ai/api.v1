@@ -8,8 +8,8 @@ import {
   Request,
   UseGuards,
 } from '@nestjs/common';
+import { SessionAuthGuard } from 'src/auth/iron-session.guard';
 import { CirclesService } from './circles.service';
-import { ApiTags, ApiParam, ApiBody } from '@nestjs/swagger';
 import { CreateCircleRequestDto } from './dto/create-circle-request.dto';
 import { DetailedCircleResponseDto } from './dto/detailed-circle-response.dto';
 import { UpdateCircleRequestDto } from './dto/update-circle-request.dto';

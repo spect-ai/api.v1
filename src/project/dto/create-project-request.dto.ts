@@ -8,6 +8,7 @@ import {
   IsUrl,
 } from 'class-validator';
 import { ColumnDetailsModel } from '../model/columnDetails.model';
+import { ColumnDetailsDto } from './column-details.dto';
 
 export class CreateProjectRequestDto {
   /**
@@ -43,5 +44,12 @@ export class CreateProjectRequestDto {
    */
   @ValidateNested()
   @IsOptional()
-  columnDetails?: ColumnDetailsModel;
+  columnDetails?: ColumnDetailsDto;
+
+  /**
+   * The template of the project
+   */
+  @IsString()
+  @IsOptional()
+  fromTemplateId?: string;
 }

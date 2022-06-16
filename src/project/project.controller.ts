@@ -1,11 +1,10 @@
 import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
-import { ApiBody, ApiParam } from '@nestjs/swagger';
 import { CreateProjectRequestDto } from './dto/create-project-request.dto';
 import { DetailedProjectResponseDto } from './dto/detailed-project-response.dto';
 import { UpdateProjectRequestDto } from './dto/update-project-request.dto';
 import { ProjectService } from './project.service';
 
-@Controller('projects')
+@Controller('project')
 export class ProjectController {
   constructor(private readonly projectService: ProjectService) {}
 

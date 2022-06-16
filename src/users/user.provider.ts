@@ -10,9 +10,5 @@ export class UserProvider {
     return this.req.user;
   }
 
-  get userRef(): Ref<User, Types.ObjectId> {
-    return this.req.user;
-  }
-
   constructor(@Inject(REQUEST) private readonly req) {}
 }

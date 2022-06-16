@@ -7,9 +7,12 @@ import {
 import { CirclesRepository } from 'src/circle/circles.repository';
 import { Circle } from 'src/circle/model/circle.model';
 import { SlugService } from 'src/common/slug.service';
+import { TemplatesRepository } from 'src/template/tempates.repository';
+import { ColumnDetailsDto } from './dto/column-details.dto';
 import { CreateProjectRequestDto } from './dto/create-project-request.dto';
 import { DetailedProjectResponseDto } from './dto/detailed-project-response.dto';
 import { UpdateProjectRequestDto } from './dto/update-project-request.dto';
+import { ColumnDetailsModel } from './model/columnDetails.model';
 import { Project } from './model/project.model';
 import { ProjectsRepository } from './project.repository';
 
@@ -19,6 +22,7 @@ export class ProjectService {
     private readonly projectRepository: ProjectsRepository,
     private readonly circlesRepository: CirclesRepository,
     private readonly slugService: SlugService,
+    private readonly templateRepository: TemplatesRepository,
   ) {}
 
   async getDetailedProject(id: string): Promise<DetailedProjectResponseDto> {
@@ -50,6 +54,23 @@ export class ProjectService {
           await this.circlesRepository.getCircleWithUnpopulatedReferences(
             createProjectDto.circleId,
           );
+      }
+
+      if (createProjectDto.fromTemplateId) {
+        const template = await this.templateRepository.getTemplate(
+          createProjectDto.fromTemplateId,
+        );
+        const data: Project = template.data as Project;
+        if (
+          Object.keys(data).length > 0 &&
+          'columnOrder' in data &&
+          'columnDetails' in data
+        ) {
+          console.log(data);
+          createProjectDto.columnOrder = data.columnOrder;
+          createProjectDto.columnDetails =
+            data?.columnDetails as ColumnDetailsDto;
+        }
       }
 
       const createdProject = await this.projectRepository.create({

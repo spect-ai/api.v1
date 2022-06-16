@@ -1,6 +1,9 @@
 import { IsArray, IsNotEmpty, IsNumber, IsString } from 'class-validator';
 
-export class ColumnDetailsDto {
+export type ColumnDetailsDto = {
+  [key: string]: ColumnDetailDto;
+};
+export class ColumnDetailDto {
   /**
    * The id of the column
    */
