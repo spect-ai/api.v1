@@ -5,9 +5,7 @@ import {
   ValidateNested,
   IsOptional,
   IsString,
-  IsUrl,
 } from 'class-validator';
-import { ColumnDetailsModel } from '../model/columnDetails.model';
 import { ColumnDetailsDto } from './column-details.dto';
 
 export class CreateProjectRequestDto {
@@ -17,6 +15,13 @@ export class CreateProjectRequestDto {
   @IsString()
   @IsNotEmpty()
   name: string;
+
+  /**
+   * The description of the project
+   */
+  @IsString()
+  @IsOptional()
+  description?: string;
 
   /**
    * Project is private or public

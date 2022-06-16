@@ -15,6 +15,12 @@ export class Project extends BaseModel {
   name: string;
 
   /**
+   * The description
+   */
+  @prop({})
+  description: string;
+
+  /**
    * The slug of the profile, aka, the url of the profile
    */
   @prop({ required: true })
