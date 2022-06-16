@@ -5,7 +5,6 @@ import { Payment } from 'src/common/models/payment.model';
 import { ActivityModel } from 'src/common/models/activity.model';
 import { Project } from 'src/project/model/project.model';
 import { User } from 'src/users/model/users.model';
-import { TemplateModel } from 'src/template/models/template.model';
 import { Chain } from 'src/common/models/chain.model';
 import { ObjectId } from 'mongoose';
 import { MemberRoles, Roles } from 'src/common/types/role.type';
@@ -152,12 +151,6 @@ export class Circle extends ProfileModel {
    */
   @prop({ default: [] })
   activity: ActivityModel[];
-
-  /**
-   * The templates available in the circle
-   */
-  @prop({ default: [] })
-  templates: TemplateModel[];
 
   /**
    * The tokens whitelisted in the circle, these will be available in the circle on top of the globally available tokens

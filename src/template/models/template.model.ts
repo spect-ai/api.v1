@@ -1,11 +1,15 @@
 import { prop, Ref } from '@typegoose/typegoose';
+import { ObjectId } from 'mongoose';
 import { BaseModel } from 'src/base/base.model';
+import { useMongoosePlugin } from 'src/base/decorators/use-mongoose-plugins.decorator';
 import { Card } from 'src/card/model/card.model';
+import { Circle } from 'src/circle/model/circle.model';
 import { Project } from 'src/project/model/project.model';
 import { Retro } from 'src/retro/models/retro.model';
 import { User } from 'src/users/model/users.model';
 
-export abstract class TemplateModel extends BaseModel {
+@useMongoosePlugin()
+export class Template extends BaseModel {
   /**
    * The name of the temolate
    */
@@ -25,8 +29,26 @@ export abstract class TemplateModel extends BaseModel {
   data: Project | Card | Retro;
 
   /**
+   * The circle that the template belongs to
+   */
+  @prop({ ref: () => Circle })
+  circle?: ObjectId;
+
+  /**
    * The creator of the template
    */
-  @prop()
-  creator?: Ref<User>;
+  @prop({ ref: () => Project })
+  project?: ObjectId;
+
+  /**
+   * The creator of the template
+   */
+  @prop({ default: false })
+  global?: boolean;
+
+  /**
+   * The creator of the template
+   */
+  @prop({ ref: () => User })
+  creator?: ObjectId;
 }

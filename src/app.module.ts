@@ -21,6 +21,7 @@ import { CardsService } from './card/cards.service';
 import { CardsModule } from './card/cards.module';
 import { UserProvider } from './users/user.provider';
 import { IntegrationsModule } from './integrations/integrations.module';
+import { TemplatesController } from './template/templates.controller';
 
 @Module({
   imports: [
@@ -37,7 +38,12 @@ import { IntegrationsModule } from './integrations/integrations.module';
     CardsModule,
     IntegrationsModule,
   ],
-  controllers: [AppController, ProjectController, CardsController],
+  controllers: [
+    AppController,
+    ProjectController,
+    CardsController,
+    TemplatesController,
+  ],
   providers: [
     AppService,
     ProjectService,
