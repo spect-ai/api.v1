@@ -55,12 +55,11 @@ export class ProjectService {
             createProjectDto.circleId,
           );
       }
-
       if (createProjectDto.fromTemplateId) {
         const template = await this.templateRepository.getTemplate(
           createProjectDto.fromTemplateId,
         );
-        const data: Project = template.data as Project;
+        const data: Project = template.projectData as Project;
         if (
           Object.keys(data).length > 0 &&
           'columnOrder' in data &&

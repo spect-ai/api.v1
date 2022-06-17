@@ -25,7 +25,7 @@ export abstract class DetailedTemplateResponseDto {
    */
   @IsString()
   @IsNotEmpty()
-  data: ProjectTemplateData;
+  projectData: ProjectTemplateData;
 
   /**
    * The creator of the temolate

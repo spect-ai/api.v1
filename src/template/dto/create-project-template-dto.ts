@@ -13,28 +13,28 @@ export class ProjectTemplateData {
 
 export abstract class CreateTemplateDto {
   /**
-   * The name of the temolate
+   * The name of the template
    */
   @IsString()
   @IsNotEmpty()
-  name?: string;
+  name: string;
 
   /**
-   * The type of the temolate
+   * The type of the template
    */
   @IsString()
   @IsNotEmpty()
-  type: 'project';
+  type: 'project' | 'card';
 
   /**
    * The template data that will be populated when the template is used
    */
   @IsNotEmpty()
   @Type(() => ProjectTemplateData)
-  data: ProjectTemplateData;
+  projectData: ProjectTemplateData;
 
   /**
-   * The type of the temolate
+   * Circle id of the circle that the template will be created in
    */
   @IsString()
   @IsOptional()

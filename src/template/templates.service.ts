@@ -26,6 +26,7 @@ export class TemplatesService {
     createTemplateDto: CreateTemplateDto,
   ): Promise<DetailedTemplateResponseDto> {
     try {
+      console.log({ createTemplateDto });
       return await this.templatesRepository.create({
         ...createTemplateDto,
         creator: this.requestProvider.user._id,

@@ -23,7 +23,7 @@ export class TemplatesRepository extends BaseRepository<Template> {
     return await this.findAll({
       $or: [
         { type: type, global: true },
-        { type: type, circle: circle, project: project },
+        { type: type, circle: circle /*project: project*/ }, // project is not in schema, error thrown
       ],
     });
   }
