@@ -1,10 +1,10 @@
-import { prop, Ref } from '@typegoose/typegoose';
+import { prop } from '@typegoose/typegoose';
 import { useMongoosePlugin } from 'src/base/decorators/use-mongoose-plugins.decorator';
 import { Circle } from 'src/circle/model/circle.model';
 import { BaseModel } from 'src/base/base.model';
-import { ColumnDetailsModel } from './columnDetails.model';
 import { ObjectId } from 'mongoose';
 import { ColumnDetailsDto } from '../dto/column-details.dto';
+import { Card } from 'src/card/model/card.model';
 
 @useMongoosePlugin()
 export class Project extends BaseModel {
@@ -45,10 +45,18 @@ export class Project extends BaseModel {
   columnOrder: string[];
 
   /**
-   * Column  of the project
+   * Column details of the project
    */
   @prop({})
   columnDetails: ColumnDetailsDto;
+
+  /**
+   * Cards of the project
+   *
+   * !! Important, need to store as MAP to support dynamic key to reference
+   */
+  @prop({ ref: () => Card })
+  cards: Map<string, ObjectId>;
 
   /**
    * Project is archived

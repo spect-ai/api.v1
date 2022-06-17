@@ -1,5 +1,4 @@
 import {
-  ArrayUnique,
   IsArray,
   IsNotEmpty,
   IsObject,
@@ -7,11 +6,7 @@ import {
   ValidateNested,
   IsString,
 } from 'class-validator';
-import { Type } from 'class-transformer';
-import { Project } from '../model/project.model';
 import { ObjectId } from 'mongoose';
-import { prop, Ref } from '@typegoose/typegoose';
-import { Circle } from 'src/circle/model/circle.model';
 
 export class DetailedProjectResponseDto {
   /**

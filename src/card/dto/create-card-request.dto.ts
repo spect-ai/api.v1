@@ -1,50 +1,46 @@
 import {
   IsArray,
-  IsBoolean,
   IsDate,
-  IsEmail,
   IsNotEmpty,
   IsNumber,
   IsObject,
   IsOptional,
   IsString,
-  IsUrl,
 } from 'class-validator';
 import { ObjectId, Date } from 'mongoose';
 import { Payment } from 'src/common/models/payment.model';
-import { Card } from '../model/card.model';
 
 export class CreateCardRequestDto {
   /**
-   * The name of the circle
+   * The title of the card
    */
   @IsString()
   @IsNotEmpty()
   title: string;
 
   /**
-   * The description of the circle
+   * The description of the card
    */
   @IsString()
   @IsOptional()
   description?: string;
 
   /**
-   * The description of the circle
+   * The reviewer of the card
    */
   @IsArray()
   @IsOptional()
   reviewer?: ObjectId[];
 
   /**
-   * The description of the circle
+   * The assignee of the card
    */
   @IsArray()
   @IsOptional()
   assignee?: ObjectId[];
 
   /**
-   * The description of the circle
+   * The car's project
    */
   @IsString()
   project: ObjectId;
@@ -56,43 +52,42 @@ export class CreateCardRequestDto {
   circle: ObjectId;
 
   /**
-   * The description of the circle
+   * Card reward
    */
   @IsObject()
   @IsOptional()
   reward?: Payment;
 
   /**
-   * The description of the circle
+   * Card type
    */
   @IsString()
-  @IsOptional()
-  type?: string;
+  type: string;
 
   /**
-   * The description of the circle
+   * Card Deadline
    */
   @IsDate()
   @IsOptional()
   deadline?: Date;
 
   /**
-   * The description of the circle
+   * Card Labels
    */
   @IsArray()
   @IsOptional()
   labels?: string[];
 
   /**
-   * The description of the circle
+   * Card priority
    */
   @IsNumber()
   @IsOptional()
   priority?: number;
 
   /**
-   * The description of the circle
+   * The card's column id
    */
   @IsString()
-  columnId?: string;
+  columnId: string;
 }

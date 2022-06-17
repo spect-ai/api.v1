@@ -4,6 +4,7 @@ import {
   Injectable,
   InternalServerErrorException,
 } from '@nestjs/common';
+import { ObjectId } from 'mongoose';
 import { CirclesRepository } from 'src/circle/circles.repository';
 import { Circle } from 'src/circle/model/circle.model';
 import { SlugService } from 'src/common/slug.service';
@@ -96,9 +97,9 @@ export class ProjectService {
   async update(
     id: string,
     updateProjectDto: UpdateProjectRequestDto,
-  ): Promise<Circle> {
+  ): Promise<Project> {
     try {
-      const updatedProject = await this.circlesRepository.updateById(
+      const updatedProject = await this.projectRepository.updateById(
         id,
         updateProjectDto,
       );
@@ -112,10 +113,38 @@ export class ProjectService {
   }
 
   async delete(id: string): Promise<Project> {
-    const circle = await this.projectRepository.findById(id);
-    if (!circle) {
-      throw new HttpException('Circle not found', HttpStatus.NOT_FOUND);
+    const project = await this.projectRepository.findById(id);
+    if (!project) {
+      throw new HttpException('Project not found', HttpStatus.NOT_FOUND);
     }
     return await this.projectRepository.deleteById(id);
+  }
+
+  async addCardToProject(
+    projectId: ObjectId,
+    columnId: string,
+    cardSlug: string,
+    cardId: ObjectId,
+  ): Promise<Project> {
+    const project = await this.projectRepository.findById(projectId.toString());
+    if (!project) {
+      throw new HttpException('Project not found', HttpStatus.NOT_FOUND);
+    }
+    return await this.projectRepository
+      .updateById(projectId.toString(), {
+        ...project,
+        cards: {
+          ...project.cards,
+          [cardSlug]: cardId,
+        },
+        columnDetails: {
+          ...project.columnDetails,
+          [columnId]: {
+            ...project.columnDetails[columnId],
+            cards: [...project.columnDetails[columnId].cards, cardSlug],
+          },
+        },
+      })
+      .populate('cards.$*');
   }
 }

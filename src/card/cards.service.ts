@@ -7,6 +7,7 @@ import {
 import { ObjectId } from 'mongoose';
 import { CirclesRepository } from 'src/circle/circles.repository';
 import { ActivityBuilder } from 'src/common/activity.builder';
+import { DetailedProjectResponseDto } from 'src/project/dto/detailed-project-response.dto';
 import { ProjectService } from 'src/project/project.service';
 import { RequestProvider } from 'src/users/user.provider';
 import { CardsRepository } from './cards.repository';
@@ -21,13 +22,13 @@ export class CardsService {
     private readonly requestProvider: RequestProvider,
     private readonly cardsRepository: CardsRepository,
     private readonly activityBuilder: ActivityBuilder,
-    private readonly projectService: ProjectService,
     private readonly circleRepository: CirclesRepository,
+    private readonly projectService: ProjectService,
   ) {}
 
   async create(
     createCardDto: CreateCardRequestDto,
-  ): Promise<DetailedCardResponseDto> {
+  ): Promise<DetailedProjectResponseDto> {
     try {
       const activity = this.activityBuilder.getActivity(
         this.requestProvider,
@@ -41,13 +42,21 @@ export class CardsService {
         project: createCardDto.project,
       });
 
-      return await this.cardsRepository.create({
+      const card = await this.cardsRepository.create({
         ...createCardDto,
         activity: activity,
         reward: defaultPayment,
         slug: cardNum.toString(),
         creator: this.requestProvider.user._id,
       });
+
+      const project = await this.projectService.addCardToProject(
+        createCardDto.project,
+        createCardDto.columnId,
+        card.slug,
+        card._id,
+      );
+      return project;
     } catch (error) {
       throw new InternalServerErrorException(
         'Failed card creation',

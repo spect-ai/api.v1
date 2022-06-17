@@ -15,7 +15,13 @@ export class ProjectController {
 
   @Get('/slug/:slug')
   async findBySlug(@Param('slug') slug): Promise<DetailedProjectResponseDto> {
-    return await this.projectService.getDetailedProjectBySlug(slug);
+    // temp fix to convert map to object
+    let proj: any = await this.projectService.getDetailedProjectBySlug(slug);
+    proj = {
+      ...proj,
+      cards: Object.fromEntries(proj.cards),
+    };
+    return proj;
   }
 
   @Post('/')

@@ -5,9 +5,11 @@ import {
   Param,
   Patch,
   Post,
+  Res,
   UseGuards,
 } from '@nestjs/common';
 import { SessionAuthGuard } from 'src/auth/iron-session.guard';
+import { DetailedProjectResponseDto } from 'src/project/dto/detailed-project-response.dto';
 import { CardsService } from './cards.service';
 import { CreateCardRequestDto } from './dto/create-card-request.dto';
 import { DetailedCardResponseDto } from './dto/detailed-card-response-dto';
@@ -32,10 +34,14 @@ export class CardsController {
 
   @Post('/')
   @UseGuards(SessionAuthGuard)
-  async create(
-    @Body() card: CreateCardRequestDto,
-  ): Promise<DetailedCardResponseDto> {
-    return await this.cardsService.create(card);
+  async create(@Body() card: CreateCardRequestDto) {
+    // temp fix to convert map to object
+    let proj: any = await this.cardsService.create(card);
+    proj = {
+      ...proj,
+      cards: Object.fromEntries(proj.cards),
+    };
+    return proj;
   }
 
   @Patch('/:id')

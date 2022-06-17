@@ -16,6 +16,9 @@ export class ProjectsRepository extends BaseRepository<Project> {
   async getProjectWithPopulatedReferencesBySlug(
     slug: string,
   ): Promise<Project> {
-    return await this.findOne({ slug: slug }).populate('parents');
+    return await this.findOne({ slug: slug }).populate('parents').populate(
+      'cards.$*',
+      'id title labels assignee reviewer reward priority', // set all fields required
+    );
   }
 }
