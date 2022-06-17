@@ -5,7 +5,7 @@ import { Types } from 'mongoose';
 import { User } from 'src/users/model/users.model';
 
 @Injectable({ scope: Scope.REQUEST })
-export class UserProvider {
+export class RequestProvider {
   get user(): User {
     return this.req.user;
   }

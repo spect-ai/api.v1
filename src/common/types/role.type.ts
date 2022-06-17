@@ -25,14 +25,11 @@ export type RoleProvider = {
 };
 
 export type Role = {
-  id: number;
   name?: string;
 
   description?: string;
 
   selfAssignable: string;
-
-  provider?: RoleProvider[];
 
   permissions: CirclePermission | ProjectPermission;
 };
@@ -42,5 +39,5 @@ export type Roles = {
 };
 
 export type MemberRoles = {
-  [key: string]: number; // MemberId -> RoleId
+  [key: string]: string[]; // MemberId -> role names
 };

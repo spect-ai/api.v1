@@ -1,6 +1,6 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { ObjectId } from 'mongoose';
-import { UserProvider } from 'src/users/user.provider';
+import { RequestProvider } from 'src/users/user.provider';
 import { CreateTemplateDto } from './dto/create-template-dto';
 import { DetailedTemplateResponseDto } from './dto/detailed-template-response.dto';
 import { TemplatesRepository } from './tempates.repository';
@@ -11,7 +11,7 @@ const mongoose = require('mongoose');
 export class TemplatesService {
   constructor(
     private readonly templatesRepository: TemplatesRepository,
-    private readonly userProvider: UserProvider,
+    private readonly requestProvider: RequestProvider,
   ) {}
 
   async getTemplates(
@@ -26,7 +26,7 @@ export class TemplatesService {
     createTemplateDto: CreateTemplateDto,
   ): Promise<DetailedTemplateResponseDto> {
     try {
-      console.log(this.userProvider);
+      console.log(this.requestProvider);
       const creator = mongoose.Types.ObjectId('62a5573add607ec0949f0445');
       return await this.templatesRepository.create({
         ...createTemplateDto,

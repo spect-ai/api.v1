@@ -19,9 +19,10 @@ import { RegistryModule } from './registry/registry.module';
 import { CardsController } from './card/cards.controller';
 import { CardsService } from './card/cards.service';
 import { CardsModule } from './card/cards.module';
-import { UserProvider } from './users/user.provider';
+import { RequestProvider } from './users/user.provider';
 import { IntegrationsModule } from './integrations/integrations.module';
 import { TemplatesController } from './template/templates.controller';
+import { RolesService } from './roles/roles.service';
 
 @Module({
   imports: [
@@ -51,7 +52,8 @@ import { TemplatesController } from './template/templates.controller';
     RetroService,
     RegistryService,
     CardsService,
-    UserProvider,
+    RequestProvider,
+    RolesService,
   ],
 })
 export class AppModule {}

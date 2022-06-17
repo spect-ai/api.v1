@@ -8,7 +8,7 @@ import { ObjectId } from 'mongoose';
 import { CirclesRepository } from 'src/circle/circles.repository';
 import { ActivityBuilder } from 'src/common/activity.builder';
 import { ProjectService } from 'src/project/project.service';
-import { UserProvider } from 'src/users/user.provider';
+import { RequestProvider } from 'src/users/user.provider';
 import { CardsRepository } from './cards.repository';
 import { CreateCardRequestDto } from './dto/create-card-request.dto';
 import { DetailedCardResponseDto } from './dto/detailed-card-response-dto';
@@ -18,7 +18,7 @@ import { Card } from './model/card.model';
 @Injectable()
 export class CardsService {
   constructor(
-    private readonly userProvider: UserProvider,
+    private readonly requestProvider: RequestProvider,
     private readonly cardsRepository: CardsRepository,
     private readonly activityBuilder: ActivityBuilder,
     private readonly projectService: ProjectService,
@@ -30,7 +30,7 @@ export class CardsService {
   ): Promise<DetailedCardResponseDto> {
     try {
       const activity = this.activityBuilder.getActivity(
-        this.userProvider,
+        this.requestProvider,
         createCardDto,
         null,
       );

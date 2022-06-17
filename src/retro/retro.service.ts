@@ -5,7 +5,7 @@ import {
   InternalServerErrorException,
 } from '@nestjs/common';
 import { CirclesRepository } from 'src/circle/circles.repository';
-import { UserProvider } from 'src/users/user.provider';
+import { RequestProvider } from 'src/users/user.provider';
 import {
   CreateRetroRequestDto,
   MemberStats,
@@ -19,7 +19,7 @@ import { RetroRepository } from './retro.repository';
 @Injectable()
 export class RetroService {
   constructor(
-    private readonly userProvider: UserProvider,
+    private readonly requestProvider: RequestProvider,
     private readonly retroRepository: RetroRepository,
     private readonly circleRepository: CirclesRepository,
   ) {}

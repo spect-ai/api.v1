@@ -10,6 +10,10 @@ export class CirclesRepository extends BaseRepository<Circle> {
     super(circleModel);
   }
 
+  async getCircle(id: string): Promise<Circle> {
+    return await this.findById(id).exec();
+  }
+
   async getCircleWithPopulatedReferences(id: string): Promise<Circle> {
     return await this.findById(id)
       .populate('parents')
@@ -18,6 +22,7 @@ export class CirclesRepository extends BaseRepository<Circle> {
       .populate('projects')
       .exec();
   }
+
   async getCircleWithPopulatedReferencesBySlug(slug: string): Promise<Circle> {
     return await this.findOne({ slug: slug })
       .populate('parents')
@@ -25,6 +30,13 @@ export class CirclesRepository extends BaseRepository<Circle> {
       .populate('members')
       .populate('projects')
       .exec();
+  }
+
+  async getParentCirclesByUser(user: ObjectId): Promise<Circle[]> {
+    return await this.findAll({
+      members: { $in: [user] },
+      parents: { $exists: true, $eq: [] },
+    });
   }
 
   async getCircleWithUnpopulatedReferences(id: string): Promise<Circle> {

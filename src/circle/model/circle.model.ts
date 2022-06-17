@@ -57,64 +57,7 @@ export class Circle extends ProfileModel {
   /**
    * A list of roles that the circle has
    */
-  @prop({
-    default: {
-      admin: {
-        name: 'admin',
-        description: 'Admin role',
-        selfAssignable: false,
-        permissions: {
-          createNewCircle: true,
-          manageCircleSettings: true,
-          createNewProject: true,
-          manageProjectSettings: true,
-          createNewRetro: true,
-          endRetroManually: true,
-          managePaymentOptions: true,
-          makePayment: true,
-          inviteMembers: true,
-          manageRoles: true,
-          manageMembers: true,
-        },
-      },
-      contributor: {
-        name: 'contributor',
-        description: 'Contributor role',
-        selfAssignable: false,
-        permissions: {
-          createNewCircle: false,
-          manageCircleSettings: false,
-          createNewProject: true,
-          manageProjectSettings: true,
-          createNewRetro: true,
-          endRetroManually: false,
-          managePaymentOptions: false,
-          makePayment: true,
-          inviteMembers: true,
-          manageRoles: false,
-          manageMembers: false,
-        },
-      },
-      member: {
-        name: 'member',
-        description: 'Member role',
-        selfAssignable: false,
-        permissions: {
-          createNewCircle: false,
-          manageCircleSettings: false,
-          createNewProject: false,
-          manageProjectSettings: false,
-          createNewRetro: false,
-          endRetroManually: false,
-          managePaymentOptions: false,
-          makePayment: false,
-          inviteMembers: false,
-          manageRoles: false,
-          manageMembers: false,
-        },
-      },
-    },
-  })
+  @prop({ required: true })
   roles: Roles;
 
   /**
@@ -163,4 +106,16 @@ export class Circle extends ProfileModel {
    */
   @prop({ default: [] })
   invites: Invite[];
+
+  /**
+   * Discord server id of the circle
+   */
+  @prop()
+  discordGuildId: string;
+
+  /**
+   * A list of roles that the circle has
+   */
+  @prop()
+  discordToCircleRoles: object;
 }

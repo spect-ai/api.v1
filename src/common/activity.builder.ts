@@ -8,7 +8,7 @@ import { Card } from 'src/card/model/card.model';
 import { Circle } from 'src/circle/model/circle.model';
 import { CreateCardRequestDto } from 'src/card/dto/create-card-request.dto';
 import { UpdateCardRequestDto } from 'src/card/dto/update-card-request.dto';
-import { UserProvider } from 'src/users/user.provider';
+import { RequestProvider } from 'src/users/user.provider';
 import { ObjectId } from 'mongoose';
 
 export type ActivityParams = {
@@ -26,11 +26,11 @@ export class ActivityBuilder {
   }
 
   getActivity(
-    userProvider: UserProvider,
+    requestProvider: RequestProvider,
     req: CreateCardRequestDto,
     oldObj?: Card,
   ): ActivityModel[] {
-    this.actorId = userProvider.user?._id;
+    this.actorId = requestProvider.user?._id;
     let activity = [] as ActivityModel[];
     activity = this.buildNewCardActivity(activity, req);
 

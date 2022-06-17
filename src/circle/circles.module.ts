@@ -5,10 +5,11 @@ import { CirclesService } from './circles.service';
 import { Circle } from './model/circle.model';
 import { CirclesRepository } from './circles.repository';
 import { SlugService } from 'src/common/slug.service';
-import { UserProvider } from 'src/users/user.provider';
+import { RequestProvider } from 'src/users/user.provider';
 import { DiscordService } from 'src/common/discord.service';
 import { GithubService } from 'src/common/github.service';
 import { EthAddressModule } from 'src/_eth-address/_eth-address.module';
+import { RolesService } from 'src/roles/roles.service';
 
 @Module({
   imports: [TypegooseModule.forFeature([Circle]), EthAddressModule],
@@ -17,9 +18,10 @@ import { EthAddressModule } from 'src/_eth-address/_eth-address.module';
     CirclesService,
     CirclesRepository,
     SlugService,
-    UserProvider,
+    RequestProvider,
     DiscordService,
     GithubService,
+    RolesService,
   ],
   exports: [CirclesService, CirclesRepository, CirclesModule],
 })

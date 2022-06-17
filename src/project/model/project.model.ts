@@ -55,4 +55,10 @@ export class Project extends BaseModel {
    */
   @prop({ default: false })
   archived: boolean;
+
+  /**
+   * Channel in which discussion threads about cards in the circle will be posted
+   */
+  @prop()
+  discordDiscussionChannel: string;
 }

@@ -9,8 +9,4 @@ export class DiscordService {
   async getDiscordRole(discordId: string): Promise<string> {
     return 'discord-role';
   }
-
-  async getSpectRoleFromDiscordId(discordId: string): Promise<string> {
-    return 'spect-role';
-  }
 }
