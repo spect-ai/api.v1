@@ -23,6 +23,7 @@ import { RequestProvider } from './users/user.provider';
 import { IntegrationsModule } from './integrations/integrations.module';
 import { TemplatesController } from './template/templates.controller';
 import { RolesService } from './roles/roles.service';
+import { RegistryController } from './registry/registry.controller';
 
 @Module({
   imports: [
@@ -38,12 +39,14 @@ import { RolesService } from './roles/roles.service';
     RegistryModule,
     CardsModule,
     IntegrationsModule,
+    RegistryModule,
   ],
   controllers: [
     AppController,
     ProjectController,
     CardsController,
     TemplatesController,
+    RegistryController,
   ],
   providers: [
     AppService,
@@ -54,6 +57,7 @@ import { RolesService } from './roles/roles.service';
     CardsService,
     RequestProvider,
     RolesService,
+    RegistryService,
   ],
 })
 export class AppModule {}
