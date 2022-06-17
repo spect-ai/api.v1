@@ -66,7 +66,6 @@ export class ProjectService {
           'columnOrder' in data &&
           'columnDetails' in data
         ) {
-          console.log(data);
           createProjectDto.columnOrder = data.columnOrder;
           createProjectDto.columnDetails =
             data?.columnDetails as ColumnDetailsDto;

@@ -1,5 +1,6 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
-import { CreateTemplateDto } from './dto/create-template-dto';
+import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
+import { SessionAuthGuard } from 'src/auth/iron-session.guard';
+import { CreateTemplateDto } from './dto/create-project-template-dto';
 import { DetailedTemplateResponseDto } from './dto/detailed-template-response.dto';
 import { TemplatesService } from './templates.service';
 
@@ -15,6 +16,7 @@ export class TemplatesController {
   }
 
   @Post('/')
+  @UseGuards(SessionAuthGuard)
   async create(
     @Body() template: CreateTemplateDto,
   ): Promise<DetailedTemplateResponseDto> {

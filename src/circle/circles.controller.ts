@@ -8,7 +8,7 @@ import {
   Request,
   UseGuards,
 } from '@nestjs/common';
-import { SessionAuthGuard } from 'src/auth/iron-session.guard';
+import { CircleRoleGuard, SessionAuthGuard } from 'src/auth/iron-session.guard';
 import { CirclesService } from './circles.service';
 import { CirclesRepository } from './circles.repository';
 import { CreateCircleRequestDto } from './dto/create-circle-request.dto';

@@ -7,6 +7,8 @@ import { ProjectModule } from 'src/project/project.module';
 import { ProjectService } from 'src/project/project.service';
 import { TemplatesModule } from 'src/template/templates.module';
 import { RequestProvider } from 'src/users/user.provider';
+import { EthAddressModule } from 'src/_eth-address/_eth-address.module';
+import { EthAddressService } from 'src/_eth-address/_eth-address.service';
 import { CardsController } from './cards.controller';
 import { CardsRepository } from './cards.repository';
 import { CardsService } from './cards.service';
@@ -18,6 +20,7 @@ import { Card } from './model/card.model';
     ProjectModule,
     CirclesModule,
     TemplatesModule,
+    EthAddressModule,
   ],
   controllers: [CardsController],
   providers: [

@@ -1,4 +1,10 @@
-import { IsArray, IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import {
+  IsArray,
+  IsNotEmpty,
+  IsNumber,
+  IsObject,
+  IsString,
+} from 'class-validator';
 
 export type ColumnDetailsDto = {
   [key: string]: ColumnDetailDto;
@@ -27,12 +33,16 @@ export class ColumnDetailDto {
   /**
    * The default card type in the column, ie, task or bounty
    */
-  @IsNumber()
-  defaultCardType?: number;
+  @IsString()
+  defaultCardType?: 'Task' | 'Bounty';
 
   /**
-   * The access to take various actions in the column
+   * The circle level role access to take various actions in the column
    */
-  @IsArray()
-  access: string[];
+  @IsObject()
+  access: Actions;
 }
+
+export type Actions = {
+  canCreateCard: string; // action pointing to a circle level role
+};

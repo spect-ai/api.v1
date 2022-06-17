@@ -46,6 +46,7 @@ export class CardsService {
         activity: activity,
         reward: defaultPayment,
         slug: cardNum.toString(),
+        creator: this.requestProvider.user._id,
       });
     } catch (error) {
       throw new InternalServerErrorException(

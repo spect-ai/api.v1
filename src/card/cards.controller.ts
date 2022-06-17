@@ -1,4 +1,13 @@
-import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Patch,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
+import { SessionAuthGuard } from 'src/auth/iron-session.guard';
 import { CardsService } from './cards.service';
 import { CreateCardRequestDto } from './dto/create-card-request.dto';
 import { DetailedCardResponseDto } from './dto/detailed-card-response-dto';
@@ -22,6 +31,7 @@ export class CardsController {
   }
 
   @Post('/')
+  @UseGuards(SessionAuthGuard)
   async create(
     @Body() card: CreateCardRequestDto,
   ): Promise<DetailedCardResponseDto> {
