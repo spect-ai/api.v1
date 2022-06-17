@@ -19,6 +19,12 @@ export class User extends ProfileModel {
   ethAddress: string;
 
   /**
+   * Avatar
+   */
+  @prop()
+  avatar: string;
+
+  /**
    * List of accounts connected to this user
    */
   @prop()

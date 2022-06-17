@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsNotEmpty, IsString, IsOptional } from 'class-validator';
 
 export class CreateUserDto {
   /**
@@ -6,7 +6,7 @@ export class CreateUserDto {
    */
   @IsString()
   @IsNotEmpty()
-  name: string;
+  username: string;
 
   /**
    * The ethereum address of the user
@@ -14,4 +14,11 @@ export class CreateUserDto {
   @IsString()
   @IsNotEmpty()
   ethAddress: string;
+
+  /**
+   * The avatar of the user
+   */
+  @IsString()
+  @IsOptional()
+  avatar: string;
 }
