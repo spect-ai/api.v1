@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsBoolean, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 export class AddNewNetworkDto {
   /**
@@ -23,11 +23,18 @@ export class AddNewNetworkDto {
   distributorAddress: string;
 
   /**
-   * Native currency of the network
+   * Native currency symbol of the network
    */
   @IsString()
   @IsNotEmpty()
   nativeCurrency: string;
+
+  /**
+   * Native currency name of the network
+   */
+  @IsString()
+  @IsOptional()
+  nativeCurrencyName: string;
 
   /**
    * Block explorer
@@ -49,4 +56,11 @@ export class AddNewNetworkDto {
   @IsString()
   @IsNotEmpty()
   pictureUrl: string;
+
+  /**
+   * Is it a mainnet network?
+   */
+  @IsBoolean()
+  @IsOptional()
+  mainnet?: boolean;
 }

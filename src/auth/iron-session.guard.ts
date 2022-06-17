@@ -28,6 +28,7 @@ export class SessionAuthGuard implements CanActivate {
         );
       }
       request.user = user;
+
       return true;
     }
     return false;

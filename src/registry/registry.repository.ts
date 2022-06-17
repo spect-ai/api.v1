@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from 'nestjs-typegoose';
 import { BaseRepository } from 'src/base/base.repository';
-import { RegistryModel } from './model/registry.model';
+import { Registry } from './model/registry.model';
 
 @Injectable()
-export class RegistryRepository extends BaseRepository<RegistryModel> {
-  constructor(@InjectModel(RegistryModel) registryModel) {
-    super(registryModel);
+export class RegistryRepository extends BaseRepository<Registry> {
+  constructor(@InjectModel(Registry) Registry) {
+    super(Registry);
   }
 }

@@ -9,6 +9,11 @@ import { Chain } from 'src/common/models/chain.model';
 import { ObjectId } from 'mongoose';
 import { MemberRoles, Roles } from 'src/common/types/role.type';
 import { Invite } from 'src/common/types/invite.type';
+import { Registry, TokenInfo } from 'src/registry/model/registry.model';
+
+export type TokenWhitelist = {
+  [chainId: string]: TokenInfo;
+};
 
 @useMongoosePlugin()
 export class Circle extends ProfileModel {
@@ -99,7 +104,7 @@ export class Circle extends ProfileModel {
    * The tokens whitelisted in the circle, these will be available in the circle on top of the globally available tokens
    */
   @prop({ default: {} })
-  whitelistedTokens: Chain;
+  tokenWhitelist: TokenWhitelist;
 
   /**
    * Invitations to the circle
