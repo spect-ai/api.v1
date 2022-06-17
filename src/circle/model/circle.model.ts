@@ -8,11 +8,17 @@ import { User } from 'src/users/model/users.model';
 import { Chain } from 'src/common/models/chain.model';
 import { ObjectId } from 'mongoose';
 import { MemberRoles, Roles } from 'src/common/types/role.type';
-import { Invite } from 'src/common/types/invite.type';
 import { Registry, TokenInfo } from 'src/registry/model/registry.model';
 
 export type TokenWhitelist = {
   [chainId: string]: TokenInfo;
+};
+
+export type Invite = {
+  id: string;
+  role: string;
+  uses: number;
+  expires: Date;
 };
 
 @useMongoosePlugin()

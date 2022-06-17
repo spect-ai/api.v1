@@ -5,7 +5,7 @@ import {
   InternalServerErrorException,
 } from '@nestjs/common';
 import { SlugService } from 'src/common/slug.service';
-import { Invite } from 'src/common/types/invite.type';
+import { InviteDto } from './dto/invite.dto';
 import { RequestProvider } from 'src/users/user.provider';
 import { CirclesRepository } from './circles.repository';
 import { CreateCircleRequestDto } from './dto/create-circle-request.dto';
@@ -16,6 +16,8 @@ import { Circle } from './model/circle.model';
 import { DiscordService } from 'src/common/discord.service';
 import { GithubService } from 'src/common/github.service';
 import { RolesService } from 'src/roles/roles.service';
+import { v4 as uuidv4 } from 'uuid';
+import moment from 'moment';
 
 @Injectable()
 export class CirclesService {
@@ -102,14 +104,21 @@ export class CirclesService {
 
   async invite(
     id: string,
-    newInvite: Invite,
+    newInvite: InviteDto,
   ): Promise<DetailedCircleResponseDto> {
     try {
       const circle =
         await this.circlesRepository.getCircleWithUnpopulatedReferences(id);
       const invites = circle.invites;
       const updatedCircle = await this.circlesRepository.updateById(id, {
-        invites: [...invites, newInvite],
+        invites: [
+          ...invites,
+          {
+            ...newInvite,
+            id: uuidv4(),
+            expires: new Date(newInvite.expires),
+          },
+        ],
       });
       return updatedCircle;
     } catch (error) {
@@ -150,12 +159,24 @@ export class CirclesService {
         const invite = circle.invites.find(
           (invite) => invite.id === joinCircleDto.invitationId,
         );
+
         if (!invite) {
           throw new HttpException('Invitation not found', HttpStatus.NOT_FOUND);
+        } else if (
+          invite.uses <= 0 &&
+          moment(new Date()).isAfter(invite.expires)
+        ) {
+          throw new HttpException(
+            'Invalid invitation - expired or used up already',
+            HttpStatus.NOT_FOUND,
+          );
         } else {
           const updatedCircle = await this.circlesRepository.updateById(id, {
-            // members: [...circle.members, this.RequestProvider.user._id],
-            // memberRoles: {...circle.memberRoles, [this.RequestProvider.user.id]: invite.role},
+            members: [...circle.members, this.requestProvider.user._id],
+            memberRoles: {
+              ...circle.memberRoles,
+              [this.requestProvider.user.id]: invite.role,
+            },
           });
           return updatedCircle;
         }

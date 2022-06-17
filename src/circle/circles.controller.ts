@@ -15,6 +15,8 @@ import { CreateCircleRequestDto } from './dto/create-circle-request.dto';
 import { DetailedCircleResponseDto } from './dto/detailed-circle-response.dto';
 import { UpdateCircleRequestDto } from './dto/update-circle-request.dto';
 import { RequestProvider } from 'src/users/user.provider';
+import { InviteDto } from './dto/invite.dto';
+import { JoinCircleRequestDto } from './dto/join-circle.dto';
 
 @Controller('circle')
 export class CirclesController {
@@ -64,6 +66,22 @@ export class CirclesController {
     @Body() circle: UpdateCircleRequestDto,
   ): Promise<DetailedCircleResponseDto> {
     return await this.circlesService.update(id, circle);
+  }
+
+  @Patch('/invite/:id')
+  async invite(
+    @Param('id') id,
+    @Body() invitation: InviteDto,
+  ): Promise<DetailedCircleResponseDto> {
+    return await this.circlesService.invite(id, invitation);
+  }
+
+  @Patch('/join/:id')
+  async join(
+    @Param('id') id,
+    @Body() joinDto: JoinCircleRequestDto,
+  ): Promise<DetailedCircleResponseDto> {
+    return await this.circlesService.join(id, joinDto);
   }
 
   @Post('/:id/delete')
