@@ -4,9 +4,8 @@ import { RequestProvider } from 'src/users/user.provider';
 import { CreateTemplateDto } from './dto/create-project-template-dto';
 import { DetailedTemplateResponseDto } from './dto/detailed-template-response.dto';
 import { TemplatesRepository } from './tempates.repository';
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const mongoose = require('mongoose');
-
+import { v4 as uuidv4 } from 'uuid';
+import { MinimalColumnDetails } from './models/template.model';
 @Injectable()
 export class TemplatesService {
   constructor(
@@ -26,10 +25,24 @@ export class TemplatesService {
     createTemplateDto: CreateTemplateDto,
   ): Promise<DetailedTemplateResponseDto> {
     try {
-      console.log({ createTemplateDto });
+      const columnOrder = createTemplateDto.projectData.columns;
+      const columnDetails = {} as MinimalColumnDetails;
+      for (const columnName of columnOrder) {
+        const columnId = uuidv4();
+        columnDetails[columnId] = {
+          columnId,
+          name: columnName,
+          cards: [] as ObjectId[],
+          defaultCardType: 'Task',
+        };
+      }
       return await this.templatesRepository.create({
         ...createTemplateDto,
         creator: this.requestProvider.user._id,
+        projectData: {
+          columnDetails,
+          columnOrder,
+        },
       });
     } catch (error) {
       throw new InternalServerErrorException(

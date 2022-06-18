@@ -1,14 +1,20 @@
 import { Type } from 'class-transformer';
-import { IsBoolean, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import {
+  IsArray,
+  IsBoolean,
+  IsNotEmpty,
+  IsObject,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 import { ObjectId } from 'mongoose';
 import { ColumnDetailsDto } from 'src/project/dto/column-details.dto';
+import { Automation, ValidActionId } from 'src/project/model/automation.type';
 
-export class ProjectTemplateData {
+export class CreateProjectDataDto {
+  @IsArray()
   @IsNotEmpty()
-  columnOrder: string[];
-
-  @IsNotEmpty()
-  columnDetails: ColumnDetailsDto;
+  columns: string[];
 }
 
 export abstract class CreateTemplateDto {
@@ -30,8 +36,8 @@ export abstract class CreateTemplateDto {
    * The template data that will be populated when the template is used
    */
   @IsNotEmpty()
-  @Type(() => ProjectTemplateData)
-  projectData: ProjectTemplateData;
+  @Type(() => CreateProjectDataDto)
+  projectData: CreateProjectDataDto;
 
   /**
    * Circle id of the circle that the template will be created in

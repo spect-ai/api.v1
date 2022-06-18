@@ -4,8 +4,35 @@ import { BaseModel } from 'src/base/base.model';
 import { useMongoosePlugin } from 'src/base/decorators/use-mongoose-plugins.decorator';
 import { Circle } from 'src/circle/model/circle.model';
 import { User } from 'src/users/model/users.model';
-import { ProjectTemplateData } from '../dto/create-project-template-dto';
 
+export type MinimalColumnDetail = {
+  columnId: string;
+  name: string;
+  cards: ObjectId[];
+  defaultCardType: string;
+};
+
+export type MinimalColumnDetails = {
+  [columnId: string]: MinimalColumnDetail;
+};
+
+export type ProjectTemplateData = {
+  /**
+   * The columns must be ordered in the desired order
+   */
+  columnOrder: string[];
+
+  /**
+   * The column details
+   */
+  columnDetails: MinimalColumnDetails;
+
+  // /**
+  //  * The automations that come out of the box with the template
+  //  */
+  // @IsOptional()
+  // automations: Map<ValidActionId, Automation>;
+};
 @useMongoosePlugin()
 export class Template extends BaseModel {
   /**
@@ -36,7 +63,7 @@ export class Template extends BaseModel {
   circle?: ObjectId;
 
   /**
-   * The creator of the template
+   * Is the template globally available?
    */
   @prop({ default: false })
   global?: boolean;

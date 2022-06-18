@@ -5,6 +5,7 @@ import {
   IsObject,
   IsString,
 } from 'class-validator';
+import { ObjectId } from 'mongoose';
 
 export type ColumnDetailsDto = {
   [key: string]: ColumnDetailDto;
@@ -24,11 +25,11 @@ export class ColumnDetailDto {
   name: string;
 
   /**
-   * The name of the project
+   * The card Ids in the column
    */
   @IsString()
   @IsNotEmpty()
-  cards: string[];
+  cards: ObjectId[];
 
   /**
    * The default card type in the column, ie, task or bounty

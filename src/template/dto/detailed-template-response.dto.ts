@@ -3,7 +3,7 @@ import { ObjectId } from 'mongoose';
 import { Card } from 'src/card/model/card.model';
 import { Project } from 'src/project/model/project.model';
 import { Retro } from 'src/retro/models/retro.model';
-import { ProjectTemplateData } from './create-project-template-dto';
+import { ProjectTemplateData } from '../models/template.model';
 
 export abstract class DetailedTemplateResponseDto {
   /**

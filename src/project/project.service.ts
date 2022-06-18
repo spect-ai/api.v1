@@ -60,7 +60,7 @@ export class ProjectService {
         const template = await this.templateRepository.getTemplate(
           createProjectDto.fromTemplateId,
         );
-        const data: Project = template.projectData as Project;
+        const data = template.projectData;
         if (
           Object.keys(data).length > 0 &&
           'columnOrder' in data &&

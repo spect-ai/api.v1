@@ -7,7 +7,7 @@ export class StatusModel {
    * Created
    */
   @prop({ default: true })
-  created: boolean;
+  active: boolean;
 
   /**
    * In review
@@ -20,12 +20,6 @@ export class StatusModel {
    */
   @prop({ default: false })
   inRevision: boolean;
-
-  /**
-   * Closed
-   */
-  @prop({ default: false })
-  closed: boolean;
 
   /**
    * Paid

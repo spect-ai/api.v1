@@ -5,6 +5,7 @@ import { BaseModel } from 'src/base/base.model';
 import { ObjectId } from 'mongoose';
 import { ColumnDetailsDto } from '../dto/column-details.dto';
 import { Card } from 'src/card/model/card.model';
+import { Automation, ValidActionId } from './automation.type';
 
 @useMongoosePlugin()
 export class Project extends BaseModel {
@@ -69,4 +70,10 @@ export class Project extends BaseModel {
    */
   @prop()
   discordDiscussionChannel: string;
+
+  /**
+   * The automations associated with the project, the trigger is the key and the value is the automation
+   */
+  @prop()
+  automations?: Map<ValidActionId, Automation>;
 }
