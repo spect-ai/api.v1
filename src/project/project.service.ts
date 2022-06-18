@@ -5,6 +5,7 @@ import {
   InternalServerErrorException,
 } from '@nestjs/common';
 import { ObjectId } from 'mongoose';
+import { CardsRepository } from 'src/card/cards.repository';
 import { CirclesRepository } from 'src/circle/circles.repository';
 import { Circle } from 'src/circle/model/circle.model';
 import { SlugService } from 'src/common/slug.service';
@@ -12,6 +13,7 @@ import { TemplatesRepository } from 'src/template/tempates.repository';
 import { ColumnDetailsDto } from './dto/column-details.dto';
 import { CreateProjectRequestDto } from './dto/create-project-request.dto';
 import { DetailedProjectResponseDto } from './dto/detailed-project-response.dto';
+import { UpdateColumnRequestDto } from './dto/update-column.dto';
 import { UpdateProjectRequestDto } from './dto/update-project-request.dto';
 import { ColumnDetailsModel } from './model/columnDetails.model';
 import { Project } from './model/project.model';
@@ -24,6 +26,7 @@ export class ProjectService {
     private readonly circlesRepository: CirclesRepository,
     private readonly slugService: SlugService,
     private readonly templateRepository: TemplatesRepository,
+    private readonly cardRepository: CardsRepository,
   ) {}
 
   async getDetailedProject(id: string): Promise<DetailedProjectResponseDto> {
@@ -107,6 +110,79 @@ export class ProjectService {
     } catch (error) {
       throw new InternalServerErrorException(
         'Failed project update',
+        error.message,
+      );
+    }
+  }
+
+  async deleteColumn(id: string, columnId: string): Promise<Project> {
+    try {
+      const project = await this.projectRepository.findById(id);
+      if (!project) {
+        throw new HttpException('Project not found', HttpStatus.NOT_FOUND);
+      }
+
+      const columnOrder = project.columnOrder;
+      const columnDetails = project.columnDetails;
+      const columnIndex = project.columnOrder.indexOf(columnId, 0);
+      if (columnIndex > -1) {
+        columnOrder.splice(columnIndex, 1);
+      }
+      let cards = [] as ObjectId[];
+      console.log(project);
+      if (columnId in columnDetails) {
+        cards = project.columnDetails[columnId].cards;
+        delete columnDetails[columnId];
+      }
+
+      await this.cardRepository.updateByFilter(
+        {
+          _id: {
+            $in: cards,
+          },
+        },
+        {
+          archived: true,
+          active: false,
+        },
+      );
+
+      return await this.projectRepository.updateById(id, {
+        columnOrder,
+        columnDetails,
+      });
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Failed column deletion',
+        error.message,
+      );
+    }
+  }
+
+  async updateColumnDetails(
+    id: string,
+    columnId: string,
+    updateColumnDto: UpdateColumnRequestDto,
+  ): Promise<Project> {
+    try {
+      const project = await this.projectRepository.findById(id);
+      if (!project) {
+        throw new HttpException('Project not found', HttpStatus.NOT_FOUND);
+      }
+      if (!project.columnDetails[columnId]) {
+        throw new HttpException('Column not found', HttpStatus.NOT_FOUND);
+      }
+      const columnDetails = project.columnDetails;
+      columnDetails[columnId] = {
+        ...columnDetails[columnId],
+        ...updateColumnDto,
+      };
+      return await this.projectRepository.updateById(id, {
+        columnDetails,
+      });
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Failed column renaming',
         error.message,
       );
     }

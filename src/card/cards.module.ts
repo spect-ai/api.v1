@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { TypegooseModule } from 'nestjs-typegoose';
 import { CirclesModule } from 'src/circle/circles.module';
 import { ActivityBuilder } from 'src/common/activity.builder';
@@ -17,7 +17,7 @@ import { Card } from './model/card.model';
 @Module({
   imports: [
     TypegooseModule.forFeature([Card]),
-    ProjectModule,
+    forwardRef(() => ProjectModule),
     CirclesModule,
     TemplatesModule,
     EthAddressModule,

@@ -7,12 +7,14 @@ import { ProjectService } from './project.service';
 import { ProjectsRepository } from './project.repository';
 import { CirclesModule } from 'src/circle/circles.module';
 import { TemplatesModule } from 'src/template/templates.module';
+import { CardsModule } from 'src/card/cards.module';
 
 @Module({
   imports: [
     TypegooseModule.forFeature([Project]),
     CirclesModule,
     forwardRef(() => TemplatesModule),
+    forwardRef(() => CardsModule),
   ],
   controllers: [ProjectController],
   providers: [ProjectService, ProjectsRepository, SlugService],
