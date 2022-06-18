@@ -49,7 +49,6 @@ export class CardsService {
         slug: cardNum.toString(),
         creator: this.requestProvider.user._id,
       });
-
       const project = await this.projectService.addCardToProject(
         createCardDto.project,
         createCardDto.columnId,

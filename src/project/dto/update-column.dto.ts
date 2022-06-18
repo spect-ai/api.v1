@@ -1,12 +1,4 @@
-import {
-  IsArray,
-  IsBoolean,
-  IsNotEmpty,
-  ValidateNested,
-  IsOptional,
-  IsString,
-} from 'class-validator';
-import { ColumnDetailsDto } from './column-details.dto';
+import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 export class UpdateColumnRequestDto {
   /**

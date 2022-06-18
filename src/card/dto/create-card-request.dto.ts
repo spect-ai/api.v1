@@ -62,6 +62,7 @@ export class CreateCardRequestDto {
    * Card type
    */
   @IsString()
+  @IsOptional()
   type: string;
 
   /**

@@ -1,6 +1,7 @@
 import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
 import { CreateProjectRequestDto } from './dto/create-project-request.dto';
 import { DetailedProjectResponseDto } from './dto/detailed-project-response.dto';
+import { ReorderCardReqestDto } from './dto/reorder-card-request.dto';
 import { UpdateColumnRequestDto } from './dto/update-column.dto';
 import { UpdateProjectRequestDto } from './dto/update-project-request.dto';
 import { ProjectService } from './project.service';
@@ -38,6 +39,19 @@ export class ProjectController {
     @Body() project: UpdateProjectRequestDto,
   ): Promise<DetailedProjectResponseDto> {
     return await this.projectService.update(id, project);
+  }
+
+  @Patch('/:id/reorderCard/:cardId')
+  async reorderCard(
+    @Param('id') id,
+    @Param('cardId') cardId,
+    @Body() reorderCardRequestDto: ReorderCardReqestDto,
+  ): Promise<DetailedProjectResponseDto> {
+    return await this.projectService.reorderCard(
+      id,
+      cardId,
+      reorderCardRequestDto,
+    );
   }
 
   @Post('/:id/column/:columnId/delete')

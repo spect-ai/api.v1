@@ -13,11 +13,13 @@ import { TemplatesRepository } from 'src/template/tempates.repository';
 import { ColumnDetailsDto } from './dto/column-details.dto';
 import { CreateProjectRequestDto } from './dto/create-project-request.dto';
 import { DetailedProjectResponseDto } from './dto/detailed-project-response.dto';
+import { ReorderCardReqestDto } from './dto/reorder-card-request.dto';
 import { UpdateColumnRequestDto } from './dto/update-column.dto';
 import { UpdateProjectRequestDto } from './dto/update-project-request.dto';
 import { ColumnDetailsModel } from './model/columnDetails.model';
 import { Project } from './model/project.model';
 import { ProjectsRepository } from './project.repository';
+import { CardLoc } from './types/card-loc.type';
 
 @Injectable()
 export class ProjectService {
@@ -202,10 +204,18 @@ export class ProjectService {
     cardSlug: string,
     cardId: ObjectId,
   ): Promise<Project> {
-    const project = await this.projectRepository.findById(projectId.toString());
+    const project = await this.projectRepository.findByObjectId(projectId);
     if (!project) {
       throw new HttpException('Project not found', HttpStatus.NOT_FOUND);
     }
+
+    if (
+      !project.columnDetails[columnId] ||
+      !project.columnOrder.includes(columnId)
+    ) {
+      throw new HttpException('Column not found', HttpStatus.NOT_FOUND);
+    }
+
     return await this.projectRepository
       .updateById(projectId.toString(), {
         ...project,
@@ -222,5 +232,74 @@ export class ProjectService {
         },
       })
       .populate('cards.$*');
+  }
+
+  findCardLocationInProject(project: Project, cardId: ObjectId): CardLoc {
+    const cardLoc: CardLoc = {} as CardLoc;
+    for (const columnId in project.columnDetails) {
+      const column = project.columnDetails[columnId];
+      const cardIndex = column.cards.indexOf(cardId);
+      if (cardIndex > -1) {
+        cardLoc.columnId = columnId;
+        cardLoc.cardIndex = cardIndex;
+        break;
+      }
+    }
+    return cardLoc;
+  }
+
+  async reorderCard(
+    projectId: ObjectId,
+    cardId: ObjectId,
+    reorderCardDto: ReorderCardReqestDto,
+    updateColumnIdInCard = false,
+  ): Promise<Project> {
+    const project = await this.projectRepository.findByObjectId(projectId);
+    if (!project) {
+      throw new HttpException('Project not found', HttpStatus.NOT_FOUND);
+    }
+    const sourceCardLoc = this.findCardLocationInProject(project, cardId);
+    if (!sourceCardLoc.columnId) {
+      throw new HttpException('Card not found', HttpStatus.NOT_FOUND);
+    }
+    const columnDetails = project.columnDetails;
+    if (
+      reorderCardDto.destinationCardIndex < 0 ||
+      reorderCardDto.destinationCardIndex -
+        columnDetails[reorderCardDto.destinationColumnId].cards.length >
+        0
+    ) {
+      throw new HttpException(
+        'Invalid destination card index',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    columnDetails[sourceCardLoc.columnId] = {
+      ...columnDetails[sourceCardLoc.columnId],
+      cards: columnDetails[sourceCardLoc.columnId].cards.splice(
+        sourceCardLoc.cardIndex,
+        1,
+      ),
+    };
+
+    columnDetails[reorderCardDto.destinationColumnId] = {
+      ...columnDetails[reorderCardDto.destinationColumnId],
+      cards: columnDetails[reorderCardDto.destinationColumnId].cards.splice(
+        reorderCardDto.destinationCardIndex,
+        0,
+        cardId,
+      ),
+    };
+
+    if (updateColumnIdInCard) {
+      await this.cardRepository.updateById(cardId.toString(), {
+        columnId: reorderCardDto.destinationColumnId,
+      });
+    }
+
+    return await this.projectRepository.updateById(projectId.toString(), {
+      columnDetails,
+    });
   }
 }
