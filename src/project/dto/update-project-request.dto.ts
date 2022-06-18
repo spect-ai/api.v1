@@ -15,14 +15,15 @@ export class UpdateProjectRequestDto {
    */
   @IsString()
   @IsNotEmpty()
+  @IsOptional()
   name: string;
 
   /**
-   * The name of the project
+   * The description of the project
    */
   @IsString()
-  @IsNotEmpty()
-  slug: string;
+  @IsOptional()
+  description?: string;
 
   /**
    * Project is private or public
@@ -32,23 +33,11 @@ export class UpdateProjectRequestDto {
   private?: boolean;
 
   /**
-   * Parents of the project
-   */
-  @IsBoolean()
-  @IsOptional()
-  parents?: boolean;
-
-  /**
-   * The order of the columns in the project
+   * Array containing column order
    */
   @IsArray()
+  @IsOptional()
   columnOrder?: string[];
-
-  /**
-   * The details of the columns in the project
-   */
-  @IsObject()
-  columnDetails?: object;
 
   /**
    * Project is archived if true
@@ -56,4 +45,11 @@ export class UpdateProjectRequestDto {
   @IsBoolean()
   @IsOptional()
   archived?: boolean;
+
+  /**
+   * Channel in which discussion threads about cards in the circle will be posted
+   */
+  @IsString()
+  @IsOptional()
+  discordDiscussionChannel: string;
 }

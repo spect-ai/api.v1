@@ -25,9 +25,8 @@ export class TemplatesService {
     createTemplateDto: CreateTemplateDto,
   ): Promise<DetailedTemplateResponseDto> {
     try {
-      const columnOrder = createTemplateDto.projectData.columns;
       const columnDetails = {} as MinimalColumnDetails;
-      for (const columnName of columnOrder) {
+      for (const columnName of createTemplateDto.projectData.columns) {
         const columnId = uuidv4();
         columnDetails[columnId] = {
           columnId,
@@ -36,6 +35,8 @@ export class TemplatesService {
           defaultCardType: 'Task',
         };
       }
+      const columnOrder = Object.keys(columnDetails);
+
       return await this.templatesRepository.create({
         ...createTemplateDto,
         creator: this.requestProvider.user._id,

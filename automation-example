@@ -1,0 +1,29 @@
+{
+  "automations": {
+    "statusChange": {
+      "active": [
+        {
+          "from": true,
+          "to": false,
+          "moveColumn": {
+            "to": "def"
+          }
+        }
+      ]
+    },
+    "columnChange": [
+      {
+        "from": "abc",
+        "to": "def",
+        "changeStatus": {
+          "active": {
+            "to": false
+          },
+          "paid": {
+            "to": true
+          }
+        }
+      }
+    ]
+  }
+}
