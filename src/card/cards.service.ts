@@ -8,6 +8,7 @@ import { ObjectId } from 'mongoose';
 import { CirclesRepository } from 'src/circle/circles.repository';
 import { ActivityBuilder } from 'src/common/activity.builder';
 import { DetailedProjectResponseDto } from 'src/project/dto/detailed-project-response.dto';
+import { ReorderCardReqestDto } from 'src/project/dto/reorder-card-request.dto';
 import { ProjectService } from 'src/project/project.service';
 import { RequestProvider } from 'src/users/user.provider';
 import { CardsRepository } from './cards.repository';
@@ -86,11 +87,23 @@ export class CardsService {
     updateCardDto: UpdateCardRequestDto,
   ): Promise<DetailedCardResponseDto> {
     try {
-      const updatedCircle = await this.cardsRepository.updateById(
+      const updatedCard = await this.cardsRepository.updateById(
         id,
         updateCardDto,
       );
-      return updatedCircle;
+      if (updatedCard.columnId) {
+        const projectId = await updatedCard.project;
+        await this.projectService.reorderCard(
+          projectId,
+          updatedCard._id,
+          {
+            destinationColumnId: updatedCard.columnId,
+            destinationCardIndex: 'end',
+          } as ReorderCardReqestDto,
+          false,
+        );
+      }
+      return updatedCard;
     } catch (error) {
       throw new InternalServerErrorException(
         'Failed card update',

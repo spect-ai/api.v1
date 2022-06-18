@@ -258,14 +258,32 @@ export class ProjectService {
     if (!project) {
       throw new HttpException('Project not found', HttpStatus.NOT_FOUND);
     }
+
+    // Find where the card is in the project now
     const sourceCardLoc = this.findCardLocationInProject(project, cardId);
     if (!sourceCardLoc.columnId) {
       throw new HttpException('Card not found', HttpStatus.NOT_FOUND);
     }
+
+    // Get the destination card index based on the input
+    let destinationCardIndex: number;
+    if (reorderCardDto.destinationCardIndex === 'end') {
+      destinationCardIndex =
+        project.columnDetails[sourceCardLoc.columnId].cards.length;
+    } else destinationCardIndex = reorderCardDto.destinationCardIndex;
+
+    // if destination card is in the same column, reduce the index by 1 only if the destination index is greater than the source index
+    if (sourceCardLoc.columnId === reorderCardDto.destinationColumnId) {
+      if (sourceCardLoc.cardIndex < destinationCardIndex) {
+        destinationCardIndex--;
+      }
+    }
+
+    // In case destination card index is not valid, throw error
     const columnDetails = project.columnDetails;
     if (
-      reorderCardDto.destinationCardIndex < 0 ||
-      reorderCardDto.destinationCardIndex -
+      destinationCardIndex < 0 ||
+      destinationCardIndex -
         columnDetails[reorderCardDto.destinationColumnId].cards.length >
         0
     ) {
@@ -275,6 +293,7 @@ export class ProjectService {
       );
     }
 
+    // Remove the card from the source column and index
     columnDetails[sourceCardLoc.columnId] = {
       ...columnDetails[sourceCardLoc.columnId],
       cards: columnDetails[sourceCardLoc.columnId].cards.splice(
@@ -283,15 +302,17 @@ export class ProjectService {
       ),
     };
 
+    // Add the card from the source column and index
     columnDetails[reorderCardDto.destinationColumnId] = {
       ...columnDetails[reorderCardDto.destinationColumnId],
       cards: columnDetails[reorderCardDto.destinationColumnId].cards.splice(
-        reorderCardDto.destinationCardIndex,
+        destinationCardIndex,
         0,
         cardId,
       ),
     };
 
+    // Update the column id in the card if flag is set to true, flag will mostly be false if this function is called from the card service
     if (updateColumnIdInCard) {
       await this.cardRepository.updateById(cardId.toString(), {
         columnId: reorderCardDto.destinationColumnId,

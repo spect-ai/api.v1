@@ -5,7 +5,7 @@ import { Project } from 'src/project/model/project.model';
 import { Payment } from 'src/common/models/payment.model';
 import { Date, ObjectId } from 'mongoose';
 import { ActivityModel } from 'src/common/models/activity.model';
-import { StatusModel } from '../../common/models/status.model';
+import { CardStatus } from '../../common/types/status.type';
 import { SubmissionModel } from './submission.model';
 import { User } from 'src/users/model/users.model';
 import { Circle } from 'src/circle/model/circle.model';
@@ -111,8 +111,16 @@ export class Card extends BaseModel {
   /**
    * The status of the card
    */
-  @prop()
-  status: StatusModel;
+  @prop({
+    default: {
+      active: true,
+      paid: false,
+      archived: false,
+      inReview: false,
+      inRevision: false,
+    },
+  })
+  status: CardStatus;
 
   /**
    * The submissions and revision instructions associated with the card

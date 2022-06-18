@@ -5,7 +5,7 @@ import { Payment } from 'src/common/models/payment.model';
 import { Date, ObjectId } from 'mongoose';
 import { ActivityModel } from 'src/common/models/activity.model';
 import { User } from 'src/users/model/users.model';
-import { StatusModel } from 'src/common/models/status.model';
+import { RetroStatus } from '../../common/types/status.type';
 import { Circle } from 'src/circle/model/circle.model';
 import { FeedbackModel } from 'src/common/models/feedback.model';
 import { Stats, StatsModel } from './stats.model';
@@ -45,8 +45,14 @@ export class Retro extends BaseModel {
   /**
    * The status of the retro period
    */
-  @prop()
-  status: StatusModel;
+  @prop({
+    default: {
+      active: true,
+      paid: false,
+      archived: false,
+    },
+  })
+  status: RetroStatus;
 
   /**
    * The strategy used in the retro period, ie, Quadratic or Normal Voting

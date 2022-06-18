@@ -40,7 +40,7 @@ export class CreateCardRequestDto {
   assignee?: ObjectId[];
 
   /**
-   * The car's project
+   * The card's project
    */
   @IsString()
   project: ObjectId;

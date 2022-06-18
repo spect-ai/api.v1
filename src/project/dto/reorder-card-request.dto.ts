@@ -13,5 +13,5 @@ export class ReorderCardReqestDto {
    */
   @IsNumber()
   @IsNotEmpty()
-  destinationCardIndex: number;
+  destinationCardIndex: number | 'end';
 }
