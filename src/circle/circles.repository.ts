@@ -27,7 +27,7 @@ export class CirclesRepository extends BaseRepository<Circle> {
     return await this.findOne({ slug: slug })
       .populate('parents')
       .populate('children')
-      .populate('members')
+      // .populate('members') getting member details separately no need to populate
       .populate('projects')
       .exec();
   }
