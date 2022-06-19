@@ -17,8 +17,8 @@ export class TemplatesRepository extends BaseRepository<Template> {
 
   async getTemplates(
     type: string,
-    circle?: ObjectId,
-    project?: ObjectId,
+    circle?: string,
+    project?: string,
   ): Promise<Template[]> {
     return await this.findAll({
       $or: [

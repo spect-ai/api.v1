@@ -42,17 +42,17 @@ export class CardsService {
         project: createCardDto.project,
       });
 
+      console.log(createCardDto.deadline);
+      console.log(new Date(createCardDto.deadline));
       const card = await this.cardsRepository.create({
         ...createCardDto,
-        // can't send date as DATE need to send as string, conversion to date here giving some type error
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        deadline: new Date(createCardDto.deadline),
+        deadline: createCardDto.deadline,
         activity: activity,
         reward: defaultPayment,
         slug: cardNum.toString(),
         creator: this.requestProvider.user._id,
       });
+      console.log(card);
       const project = await this.projectService.addCardToProject(
         createCardDto.project,
         createCardDto.columnId,

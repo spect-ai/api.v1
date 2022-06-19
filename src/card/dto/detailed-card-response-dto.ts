@@ -68,7 +68,7 @@ export class DetailedCardResponseDto {
    */
   @IsDate()
   @IsOptional()
-  deadline?: Date;
+  deadline?: string;
 
   /**
    * The description of the circle

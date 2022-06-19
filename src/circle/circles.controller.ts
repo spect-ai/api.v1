@@ -18,6 +18,7 @@ import { RequestProvider } from 'src/users/user.provider';
 import { InviteDto } from './dto/invite.dto';
 import { JoinCircleRequestDto } from './dto/join-circle.dto';
 import { GetMemberDetailsOfCircleDto } from './dto/get-member-details.dto';
+import { ApiParam } from '@nestjs/swagger';
 
 @Controller('circle')
 export class CirclesController {
@@ -40,27 +41,25 @@ export class CirclesController {
     );
   }
 
-  @Post('/myPermissions')
+  @Get('/:circleIds/member/myPermissions')
   @UseGuards(SessionAuthGuard)
-  async getMyRoles(
-    @Body() getMemberDetailsDto: GetMemberDetailsOfCircleDto,
-  ): Promise<any> {
+  @ApiParam({ name: 'circleIds', type: 'array' })
+  async getMyRoles(@Param('circleIds') circleIds): Promise<any> {
+    circleIds = circleIds.split(',');
     return await this.circlesService.getCollatedUserPermissions(
-      getMemberDetailsDto,
+      circleIds,
       this.requestProvider.user,
     );
   }
 
-  @Post('/getMemberDetailsOfCircles')
-  async getMemberDetailsOfCircles(
-    @Body() getMemberDetailsDto: GetMemberDetailsOfCircleDto,
-  ): Promise<any> {
-    if (getMemberDetailsDto.circleIds.length === 0) {
+  @Get('/:circleIds/member/details')
+  @ApiParam({ name: 'circleIds', type: 'array' })
+  async getMemberDetailsOfCircles(@Param('circleIds') circleIds): Promise<any> {
+    circleIds = circleIds.split(',');
+    if (circleIds.length === 0) {
       throw new HttpException('No circles provided', 400);
     }
-    return await this.circlesService.getMemberDetailsOfCircles(
-      getMemberDetailsDto,
-    );
+    return await this.circlesService.getMemberDetailsOfCircles(circleIds);
   }
 
   @Get('/slug/:slug')

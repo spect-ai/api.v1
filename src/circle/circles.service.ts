@@ -36,12 +36,12 @@ export class CirclesService {
   ) {}
 
   async getCollatedUserPermissions(
-    getMemberDetailsDto: GetMemberDetailsOfCircleDto,
+    circleIds: string[],
     user: User,
   ): Promise<any> {
     const circles = await this.circlesRepository.findAll(
       {
-        _id: { $in: getMemberDetailsDto.circleIds },
+        _id: { $in: circleIds },
       },
       {
         projection: {
@@ -53,9 +53,11 @@ export class CirclesService {
 
     const userPermissions = [];
     for (const circle of circles) {
-      const roles = circle.memberRoles[user.id];
-      for (const role of roles) {
-        userPermissions.push(circle.roles[role].permissions);
+      const memberRoles = circle.memberRoles[user.id];
+      if (memberRoles) {
+        for (const memberRole of memberRoles) {
+          userPermissions.push(circle.roles[memberRole].permissions);
+        }
       }
     }
     return this.datastructureManipulationService.collateifyBooleanFields(
@@ -63,13 +65,11 @@ export class CirclesService {
     );
   }
 
-  async getMemberDetailsOfCircles(
-    getMemberDetailsDto: GetMemberDetailsOfCircleDto,
-  ): Promise<any> {
+  async getMemberDetailsOfCircles(circleIds: string[]): Promise<any> {
     const circles = await this.circlesRepository
       .findAll(
         {
-          _id: { $in: getMemberDetailsDto.circleIds },
+          _id: { $in: circleIds },
         },
         {
           projection: {
@@ -83,7 +83,14 @@ export class CirclesService {
       'members',
     );
     res = this.datastructureManipulationService.distinctify(res, 'id');
-    return this.datastructureManipulationService.objectify(res, 'id');
+    const memberDetails = this.datastructureManipulationService.objectify(
+      res,
+      'id',
+    );
+    return {
+      memberDetails,
+      members: Object.keys(memberDetails),
+    };
   }
 
   async getCircleWithSlug(slug: string): Promise<DetailedCircleResponseDto> {

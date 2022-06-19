@@ -11,7 +11,7 @@ export class TemplatesController {
 
   @Get('/allProjectTemplates/:circle')
   async getProjectTemplates(
-    @Param('circle') circle: ObjectId,
+    @Param('circle') circle: string,
   ): Promise<DetailedTemplateResponseDto[]> {
     if (!circle) {
       return;

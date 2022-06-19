@@ -15,8 +15,8 @@ export class TemplatesService {
 
   async getTemplates(
     type: string,
-    circle: ObjectId,
-    project: ObjectId,
+    circle: string,
+    project: string,
   ): Promise<DetailedTemplateResponseDto[]> {
     return await this.templatesRepository.getTemplates(type, circle, project);
   }

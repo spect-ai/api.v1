@@ -4,6 +4,7 @@ import { BaseModel } from 'src/base/base.model';
 import { Project } from 'src/project/model/project.model';
 import { Payment } from 'src/common/models/payment.model';
 import { Date, ObjectId } from 'mongoose';
+import mongoose from 'mongoose';
 import { ActivityModel } from 'src/common/models/activity.model';
 import { CardStatus } from '../../common/types/status.type';
 import { SubmissionModel } from './submission.model';
@@ -75,9 +76,8 @@ export class Card extends BaseModel {
   /**
    * The deadline the card is due to be completed by
    */
-  @prop()
-  deadline: Date;
-
+  @prop({ default: null })
+  deadline?: string;
   /**
    * The labels associated with the card
    */
