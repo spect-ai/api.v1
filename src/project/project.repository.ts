@@ -10,15 +10,32 @@ export class ProjectsRepository extends BaseRepository<Project> {
   }
 
   async getProjectWithPopulatedReferences(id: string): Promise<Project> {
-    return await this.findById(id).populate('parents');
+    return await this.findById(id).populate('parents').populate('cards', {
+      title: 1,
+      labels: 1,
+      assignee: 1,
+      reviewer: 1,
+      reward: 1,
+      priority: 1,
+      deadline: 1,
+      slug: 1,
+    });
   }
 
   async getProjectWithPopulatedReferencesBySlug(
     slug: string,
   ): Promise<Project> {
-    return await this.findOne({ slug: slug }).populate('parents').populate(
-      'cards.$*',
-      'id title labels assignee reviewer reward priority', // set all fields required
-    );
+    return await this.findOne({ slug: slug })
+      .populate('parents')
+      .populate('cards', {
+        title: 1,
+        labels: 1,
+        assignee: 1,
+        reviewer: 1,
+        reward: 1,
+        priority: 1,
+        deadline: 1,
+        slug: 1,
+      });
   }
 }

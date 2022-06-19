@@ -2,6 +2,7 @@ import { forwardRef, Module } from '@nestjs/common';
 import { TypegooseModule } from 'nestjs-typegoose';
 import { CirclesModule } from 'src/circle/circles.module';
 import { ActivityBuilder } from 'src/common/activity.builder';
+import { DataStructureManipulationService } from 'src/common/dataStructureManipulation.service';
 import { SlugService } from 'src/common/slug.service';
 import { ProjectModule } from 'src/project/project.module';
 import { ProjectService } from 'src/project/project.service';
@@ -30,6 +31,7 @@ import { Card } from './model/card.model';
     RequestProvider,
     ActivityBuilder,
     ProjectService,
+    DataStructureManipulationService,
   ],
   exports: [CardsService, CardsRepository, CardsModule],
 })

@@ -8,6 +8,7 @@ export class DataStructureManipulationService {
     for (const obj of arrOfObjects) {
       res[obj[key]] = obj;
     }
+
     return res;
   }
 

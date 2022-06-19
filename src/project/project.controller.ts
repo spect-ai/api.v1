@@ -4,6 +4,7 @@ import { DetailedProjectResponseDto } from './dto/detailed-project-response.dto'
 import { ReorderCardReqestDto } from './dto/reorder-card-request.dto';
 import { UpdateColumnRequestDto } from './dto/update-column.dto';
 import { UpdateProjectRequestDto } from './dto/update-project-request.dto';
+import { Project } from './model/project.model';
 import { ProjectService } from './project.service';
 
 @Controller('project')
@@ -18,18 +19,11 @@ export class ProjectController {
   @Get('/slug/:slug')
   async findBySlug(@Param('slug') slug): Promise<DetailedProjectResponseDto> {
     // temp fix to convert map to object
-    let proj: any = await this.projectService.getDetailedProjectBySlug(slug);
-    proj = {
-      ...proj,
-      cards: Object.fromEntries(proj.cards),
-    };
-    return proj;
+    return await this.projectService.getDetailedProjectBySlug(slug);
   }
 
   @Post('/')
-  async create(
-    @Body() project: CreateProjectRequestDto,
-  ): Promise<DetailedProjectResponseDto> {
+  async create(@Body() project: CreateProjectRequestDto): Promise<Project> {
     return await this.projectService.create(project);
   }
 
@@ -76,7 +70,7 @@ export class ProjectController {
   }
 
   @Post('/:id/delete')
-  async delete(@Param('id') id): Promise<DetailedProjectResponseDto> {
+  async delete(@Param('id') id): Promise<Project> {
     return await this.projectService.delete(id);
   }
 }

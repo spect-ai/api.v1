@@ -8,6 +8,7 @@ import { ProjectsRepository } from './project.repository';
 import { CirclesModule } from 'src/circle/circles.module';
 import { TemplatesModule } from 'src/template/templates.module';
 import { CardsModule } from 'src/card/cards.module';
+import { DataStructureManipulationService } from 'src/common/dataStructureManipulation.service';
 
 @Module({
   imports: [
@@ -17,7 +18,12 @@ import { CardsModule } from 'src/card/cards.module';
     forwardRef(() => CardsModule),
   ],
   controllers: [ProjectController],
-  providers: [ProjectService, ProjectsRepository, SlugService],
+  providers: [
+    ProjectService,
+    ProjectsRepository,
+    SlugService,
+    DataStructureManipulationService,
+  ],
   exports: [ProjectService, ProjectsRepository, ProjectModule],
 })
 export class ProjectModule {}

@@ -8,6 +8,7 @@ import { ObjectId } from 'mongoose';
 import { CardsRepository } from 'src/card/cards.repository';
 import { CirclesRepository } from 'src/circle/circles.repository';
 import { Circle } from 'src/circle/model/circle.model';
+import { DataStructureManipulationService } from 'src/common/dataStructureManipulation.service';
 import { SlugService } from 'src/common/slug.service';
 import { TemplatesRepository } from 'src/template/tempates.repository';
 import { ColumnDetailsDto } from './dto/column-details.dto';
@@ -29,12 +30,25 @@ export class ProjectService {
     private readonly slugService: SlugService,
     private readonly templateRepository: TemplatesRepository,
     private readonly cardRepository: CardsRepository,
+    private readonly datastructureManipulationService: DataStructureManipulationService,
   ) {}
+
+  projectPopulatedWithCardDetails(
+    project: Project,
+  ): DetailedProjectResponseDto {
+    return {
+      ...project,
+      cards: this.datastructureManipulationService.objectify(
+        project.cards,
+        'id',
+      ),
+    };
+  }
 
   async getDetailedProject(id: string): Promise<DetailedProjectResponseDto> {
     const project =
       await this.projectRepository.getProjectWithPopulatedReferences(id);
-    return project;
+    return this.projectPopulatedWithCardDetails(project);
   }
 
   async getDetailedProjectBySlug(
@@ -44,8 +58,7 @@ export class ProjectService {
       await this.projectRepository.getProjectWithPopulatedReferencesBySlug(
         slug,
       );
-    console.log(project);
-    return project;
+    return this.projectPopulatedWithCardDetails(project);
   }
 
   async create(createProjectDto: CreateProjectRequestDto): Promise<Project> {
@@ -91,7 +104,6 @@ export class ProjectService {
           projects: [...parentCircle.projects, createdProject],
         });
       }
-
       return createdProject;
     } catch (error) {
       throw new InternalServerErrorException(
@@ -104,13 +116,13 @@ export class ProjectService {
   async update(
     id: string,
     updateProjectDto: UpdateProjectRequestDto,
-  ): Promise<Project> {
+  ): Promise<DetailedProjectResponseDto> {
     try {
       const updatedProject = await this.projectRepository.updateById(
         id,
         updateProjectDto,
       );
-      return updatedProject;
+      return this.projectPopulatedWithCardDetails(updatedProject);
     } catch (error) {
       throw new InternalServerErrorException(
         'Failed project update',
@@ -119,7 +131,10 @@ export class ProjectService {
     }
   }
 
-  async deleteColumn(id: string, columnId: string): Promise<Project> {
+  async deleteColumn(
+    id: string,
+    columnId: string,
+  ): Promise<DetailedProjectResponseDto> {
     try {
       const project = await this.projectRepository.findById(id);
       if (!project) {
@@ -133,7 +148,6 @@ export class ProjectService {
         columnOrder.splice(columnIndex, 1);
       }
       let cards = [] as ObjectId[];
-      console.log(project);
       if (columnId in columnDetails) {
         cards = project.columnDetails[columnId].cards;
         delete columnDetails[columnId];
@@ -151,10 +165,12 @@ export class ProjectService {
         },
       );
 
-      return await this.projectRepository.updateById(id, {
+      const udpatedProject = await this.projectRepository.updateById(id, {
         columnOrder,
         columnDetails,
       });
+
+      return this.projectPopulatedWithCardDetails(udpatedProject);
     } catch (error) {
       throw new InternalServerErrorException(
         'Failed column deletion',
@@ -167,7 +183,7 @@ export class ProjectService {
     id: string,
     columnId: string,
     updateColumnDto: UpdateColumnRequestDto,
-  ): Promise<Project> {
+  ): Promise<DetailedProjectResponseDto> {
     try {
       const project = await this.projectRepository.findById(id);
       if (!project) {
@@ -181,9 +197,10 @@ export class ProjectService {
         ...columnDetails[columnId],
         ...updateColumnDto,
       };
-      return await this.projectRepository.updateById(id, {
+      const updatedProject = await this.projectRepository.updateById(id, {
         columnDetails,
       });
+      return this.projectPopulatedWithCardDetails(updatedProject);
     } catch (error) {
       throw new InternalServerErrorException(
         'Failed column renaming',
@@ -205,7 +222,7 @@ export class ProjectService {
     columnId: string,
     cardSlug: string,
     cardId: ObjectId,
-  ): Promise<Project> {
+  ): Promise<DetailedProjectResponseDto> {
     const project = await this.projectRepository.findByObjectId(projectId);
     if (!project) {
       throw new HttpException('Project not found', HttpStatus.NOT_FOUND);
@@ -218,22 +235,30 @@ export class ProjectService {
       throw new HttpException('Column not found', HttpStatus.NOT_FOUND);
     }
 
-    return await this.projectRepository
+    const updatedProject = await this.projectRepository
       .updateById(projectId.toString(), {
         ...project,
-        cards: {
-          ...project.cards,
-          [cardSlug]: cardId,
-        },
+        cards: [...project.cards, cardId],
         columnDetails: {
           ...project.columnDetails,
           [columnId]: {
             ...project.columnDetails[columnId],
-            cards: [...project.columnDetails[columnId].cards, cardSlug],
+            cards: [...project.columnDetails[columnId].cards, cardId],
           },
         },
       })
-      .populate('cards.$*');
+      .populate('cards', {
+        title: 1,
+        labels: 1,
+        assignee: 1,
+        reviewer: 1,
+        reward: 1,
+        priority: 1,
+        deadline: 1,
+        slug: 1,
+      });
+
+    return this.projectPopulatedWithCardDetails(updatedProject);
   }
 
   findCardLocationInProject(project: Project, cardId: ObjectId): CardLoc {
@@ -255,7 +280,7 @@ export class ProjectService {
     cardId: ObjectId,
     reorderCardDto: ReorderCardReqestDto,
     updateColumnIdInCard = false,
-  ): Promise<Project> {
+  ): Promise<DetailedProjectResponseDto> {
     const project = await this.projectRepository.findByObjectId(projectId);
     if (!project) {
       throw new HttpException('Project not found', HttpStatus.NOT_FOUND);
@@ -321,8 +346,12 @@ export class ProjectService {
       });
     }
 
-    return await this.projectRepository.updateById(projectId.toString(), {
-      columnDetails,
-    });
+    const updatedProject = await this.projectRepository.updateById(
+      projectId.toString(),
+      {
+        columnDetails,
+      },
+    );
+    return this.projectPopulatedWithCardDetails(updatedProject);
   }
 }
