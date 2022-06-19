@@ -69,22 +69,34 @@ export class CardsService {
   }
 
   async getDetailedCard(id: string): Promise<DetailedCardResponseDto> {
-    const card = await this.cardsRepository.getCardWithPopulatedReferences(id);
-    return card;
+    try {
+      const card = await this.cardsRepository.getCardWithPopulatedReferences(
+        id,
+      );
+      return card;
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Failed card retrieval',
+        error.message,
+      );
+    }
   }
 
   async getDetailedCardBySlug(
     project: string,
     slug: string,
   ): Promise<DetailedCardResponseDto> {
-    const projectId = await this.projectService.getProjectIdFromSlug(project);
-    console.log({ projectId });
-    const card =
-      await this.cardsRepository.getCardWithPopulatedReferencesBySlug(
-        projectId._id,
+    try {
+      return await this.cardsRepository.getCardWithPopulatedReferencesBySlug(
+        project,
         slug,
       );
-    return card;
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Failed card retrieval',
+        error.message,
+      );
+    }
   }
 
   async update(
@@ -99,7 +111,7 @@ export class CardsService {
       if (updatedCard.columnId) {
         const projectId = await updatedCard.project;
         await this.projectService.reorderCard(
-          projectId,
+          projectId.toString(),
           updatedCard._id,
           {
             destinationColumnId: updatedCard.columnId,

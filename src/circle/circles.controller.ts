@@ -4,8 +4,10 @@ import {
   Get,
   HttpException,
   Param,
+  ParseArrayPipe,
   Patch,
   Post,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import { SessionAuthGuard } from 'src/auth/iron-session.guard';
@@ -18,7 +20,8 @@ import { RequestProvider } from 'src/users/user.provider';
 import { InviteDto } from './dto/invite.dto';
 import { JoinCircleRequestDto } from './dto/join-circle.dto';
 import { GetMemberDetailsOfCircleDto } from './dto/get-member-details.dto';
-import { ApiParam } from '@nestjs/swagger';
+import { ApiParam, ApiQuery } from '@nestjs/swagger';
+import { ObjectIdDto } from 'src/common/validators/object-id.dto';
 
 @Controller('circle')
 export class CirclesController {
@@ -41,21 +44,24 @@ export class CirclesController {
     );
   }
 
-  @Get('/:circleIds/member/myPermissions')
+  @Get('/:circleIds/myPermissions')
   @UseGuards(SessionAuthGuard)
-  @ApiParam({ name: 'circleIds', type: 'array' })
-  async getMyRoles(@Param('circleIds') circleIds): Promise<any> {
-    circleIds = circleIds.split(',');
+  @ApiQuery({ name: 'circleIds', type: 'array' })
+  async getMyRoles(@Query('circleIds') circleIds: string[]): Promise<any> {
+    if (circleIds.length === 0) {
+      throw new HttpException('No circles provided', 400);
+    }
     return await this.circlesService.getCollatedUserPermissions(
       circleIds,
       this.requestProvider.user,
     );
   }
 
-  @Get('/:circleIds/member/details')
-  @ApiParam({ name: 'circleIds', type: 'array' })
-  async getMemberDetailsOfCircles(@Param('circleIds') circleIds): Promise<any> {
-    circleIds = circleIds.split(',');
+  @Get('/:circleIds/memberDetails')
+  @ApiQuery({ name: 'circleIds', type: 'array' })
+  async getMemberDetailsOfCircles(
+    @Query('circleIds') circleIds: string[],
+  ): Promise<any> {
     if (circleIds.length === 0) {
       throw new HttpException('No circles provided', 400);
     }
@@ -68,8 +74,12 @@ export class CirclesController {
   }
 
   @Get('/:id')
-  async findByObjectId(@Param('id') id): Promise<DetailedCircleResponseDto> {
-    return await this.circlesRepository.getCircleWithPopulatedReferences(id);
+  async findByObjectId(
+    @Param() param: ObjectIdDto,
+  ): Promise<DetailedCircleResponseDto> {
+    return await this.circlesRepository.getCircleWithPopulatedReferences(
+      param.id,
+    );
   }
 
   @Post('/')
@@ -82,30 +92,32 @@ export class CirclesController {
 
   @Patch('/:id')
   async update(
-    @Param('id') id,
+    @Param() param: ObjectIdDto,
     @Body() circle: UpdateCircleRequestDto,
   ): Promise<DetailedCircleResponseDto> {
-    return await this.circlesService.update(id, circle);
+    return await this.circlesService.update(param.id, circle);
   }
 
   @Patch('/invite/:id')
   async invite(
-    @Param('id') id,
+    @Param() param: ObjectIdDto,
     @Body() invitation: InviteDto,
   ): Promise<DetailedCircleResponseDto> {
-    return await this.circlesService.invite(id, invitation);
+    return await this.circlesService.invite(param.id, invitation);
   }
 
   @Patch('/join/:id')
   async join(
-    @Param('id') id,
+    @Param() param: ObjectIdDto,
     @Body() joinDto: JoinCircleRequestDto,
   ): Promise<DetailedCircleResponseDto> {
-    return await this.circlesService.join(id, joinDto);
+    return await this.circlesService.join(param.id, joinDto);
   }
 
   @Post('/:id/delete')
-  async delete(@Param('id') id): Promise<DetailedCircleResponseDto> {
-    return await this.circlesService.delete(id);
+  async delete(
+    @Param() param: ObjectIdDto,
+  ): Promise<DetailedCircleResponseDto> {
+    return await this.circlesService.delete(param.id);
   }
 }

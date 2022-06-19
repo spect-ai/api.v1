@@ -286,12 +286,12 @@ export class ProjectService {
   }
 
   async reorderCard(
-    projectId: ObjectId,
+    projectId: string,
     cardId: ObjectId,
     reorderCardDto: ReorderCardReqestDto,
     updateColumnIdInCard = false,
   ): Promise<DetailedProjectResponseDto> {
-    const project = await this.projectRepository.findByObjectId(projectId);
+    const project = await this.projectRepository.findById(projectId);
     if (!project) {
       throw new HttpException('Project not found', HttpStatus.NOT_FOUND);
     }

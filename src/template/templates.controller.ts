@@ -3,6 +3,7 @@ import { ObjectId } from 'mongoose';
 import { SessionAuthGuard } from 'src/auth/iron-session.guard';
 import { CreateTemplateDto } from './dto/create-project-template-dto';
 import { DetailedTemplateResponseDto } from './dto/detailed-template-response.dto';
+import { GetProjectTemplatesDto } from './dto/get-project-templates.dto';
 import { TemplatesService } from './templates.service';
 
 @Controller('template')
@@ -11,12 +12,13 @@ export class TemplatesController {
 
   @Get('/allProjectTemplates/:circle')
   async getProjectTemplates(
-    @Param('circle') circle: string,
+    @Param() param: GetProjectTemplatesDto,
   ): Promise<DetailedTemplateResponseDto[]> {
-    if (!circle) {
-      return;
-    }
-    return await this.templatesService.getTemplates('project', circle, null);
+    return await this.templatesService.getTemplates(
+      'project',
+      param.circle,
+      null,
+    );
   }
 
   @Post('/')

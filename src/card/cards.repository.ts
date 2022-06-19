@@ -14,7 +14,7 @@ export class CardsRepository extends BaseRepository<Card> {
     return await this.findById(id).exec();
   }
   async getCardWithPopulatedReferencesBySlug(
-    project: ObjectId,
+    project: string,
     slug: string,
   ): Promise<Card> {
     return await this.findOne({ project: project, slug: slug }).exec();

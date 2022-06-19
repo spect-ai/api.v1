@@ -1,4 +1,5 @@
 import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
+import { ObjectIdDto } from 'src/common/validators/object-id.dto';
 import { CreateProjectRequestDto } from './dto/create-project-request.dto';
 import { DetailedProjectResponseDto } from './dto/detailed-project-response.dto';
 import { ReorderCardReqestDto } from './dto/reorder-card-request.dto';
@@ -12,8 +13,10 @@ export class ProjectController {
   constructor(private readonly projectService: ProjectService) {}
 
   @Get('/:id')
-  async findByObjectId(@Param('id') id): Promise<DetailedProjectResponseDto> {
-    return await this.projectService.getDetailedProject(id);
+  async findByObjectId(
+    @Param() param: ObjectIdDto,
+  ): Promise<DetailedProjectResponseDto> {
+    return await this.projectService.getDetailedProject(param.id);
   }
 
   @Get('/slug/:slug')
@@ -28,20 +31,20 @@ export class ProjectController {
 
   @Patch('/:id')
   async update(
-    @Param('id') id,
+    @Param() param: ObjectIdDto,
     @Body() project: UpdateProjectRequestDto,
   ): Promise<DetailedProjectResponseDto> {
-    return await this.projectService.update(id, project);
+    return await this.projectService.update(param.id, project);
   }
 
   @Patch('/:id/reorderCard/:cardId')
   async reorderCard(
-    @Param('id') id,
+    @Param() param: ObjectIdDto,
     @Param('cardId') cardId,
     @Body() reorderCardRequestDto: ReorderCardReqestDto,
   ): Promise<DetailedProjectResponseDto> {
     return await this.projectService.reorderCard(
-      id,
+      param.id,
       cardId,
       reorderCardRequestDto,
     );
@@ -49,27 +52,27 @@ export class ProjectController {
 
   @Post('/:id/column/:columnId/delete')
   async deleteColumn(
-    @Param('id') id,
+    @Param() param: ObjectIdDto,
     @Param('columnId') columnId,
   ): Promise<DetailedProjectResponseDto> {
-    return await this.projectService.deleteColumn(id, columnId);
+    return await this.projectService.deleteColumn(param.id, columnId);
   }
 
   @Patch('/:id/column/:columnId/')
   async updateColumnDetails(
-    @Param('id') id,
+    @Param() param: ObjectIdDto,
     @Param('columnId') columnId,
     @Body() updateColumnDetails: UpdateColumnRequestDto,
   ): Promise<DetailedProjectResponseDto> {
     return await this.projectService.updateColumnDetails(
-      id,
+      param.id,
       columnId,
       updateColumnDetails,
     );
   }
 
   @Post('/:id/delete')
-  async delete(@Param('id') id): Promise<Project> {
-    return await this.projectService.delete(id);
+  async delete(@Param() param: ObjectIdDto): Promise<Project> {
+    return await this.projectService.delete(param.id);
   }
 }
