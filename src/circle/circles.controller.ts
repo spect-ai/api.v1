@@ -2,13 +2,13 @@ import {
   Body,
   Controller,
   Get,
+  HttpException,
   Param,
   Patch,
   Post,
-  Request,
   UseGuards,
 } from '@nestjs/common';
-import { CircleRoleGuard, SessionAuthGuard } from 'src/auth/iron-session.guard';
+import { SessionAuthGuard } from 'src/auth/iron-session.guard';
 import { CirclesService } from './circles.service';
 import { CirclesRepository } from './circles.repository';
 import { CreateCircleRequestDto } from './dto/create-circle-request.dto';
@@ -17,9 +17,7 @@ import { UpdateCircleRequestDto } from './dto/update-circle-request.dto';
 import { RequestProvider } from 'src/users/user.provider';
 import { InviteDto } from './dto/invite.dto';
 import { JoinCircleRequestDto } from './dto/join-circle.dto';
-import { ObjectId } from 'mongoose';
 import { GetMemberDetailsOfCircleDto } from './dto/get-member-details.dto';
-import { ApiParam } from '@nestjs/swagger';
 
 @Controller('circle')
 export class CirclesController {
@@ -42,7 +40,7 @@ export class CirclesController {
     );
   }
 
-  @Get('/myPermissions')
+  @Post('/myPermissions')
   @UseGuards(SessionAuthGuard)
   async getMyRoles(
     @Body() getMemberDetailsDto: GetMemberDetailsOfCircleDto,
@@ -53,10 +51,13 @@ export class CirclesController {
     );
   }
 
-  @Get('/getMemberDetailsOfCircles')
+  @Post('/getMemberDetailsOfCircles')
   async getMemberDetailsOfCircles(
     @Body() getMemberDetailsDto: GetMemberDetailsOfCircleDto,
   ): Promise<any> {
+    if (getMemberDetailsDto.circleIds.length === 0) {
+      throw new HttpException('No circles provided', 400);
+    }
     return await this.circlesService.getMemberDetailsOfCircles(
       getMemberDetailsDto,
     );

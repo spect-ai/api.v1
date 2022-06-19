@@ -38,4 +38,10 @@ export class ProjectsRepository extends BaseRepository<Project> {
         slug: 1,
       });
   }
+
+  async getProjectIdFromSlug(slug: string): Promise<Project> {
+    return await this.findOne({ slug: slug })
+      .setOptions({ projection: { _id: 1 } })
+      .exec();
+  }
 }

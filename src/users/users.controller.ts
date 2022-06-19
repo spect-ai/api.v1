@@ -12,7 +12,7 @@ import { ApiTags } from '@nestjs/swagger';
 import { SessionAuthGuard } from 'src/auth/iron-session.guard';
 import { UpdateUserDto } from './dto/update-user.dto';
 
-@Controller('users')
+@Controller('user')
 @ApiTags('Users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
@@ -25,8 +25,8 @@ export class UsersController {
 
   @UseGuards(SessionAuthGuard)
   @Patch('/me')
-  update(@Body() updateUserDto: UpdateUserDto) {
-    return this.usersService.update(updateUserDto);
+  update(@Body() updateUserDto: UpdateUserDto, @Request() req) {
+    return this.usersService.update(updateUserDto, req.user);
   }
 
   @Get(':id')

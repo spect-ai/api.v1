@@ -1,4 +1,5 @@
 import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
+import { ObjectId } from 'mongoose';
 import { SessionAuthGuard } from 'src/auth/iron-session.guard';
 import { CreateTemplateDto } from './dto/create-project-template-dto';
 import { DetailedTemplateResponseDto } from './dto/detailed-template-response.dto';
@@ -10,8 +11,11 @@ export class TemplatesController {
 
   @Get('/allProjectTemplates/:circle')
   async getProjectTemplates(
-    @Param('circle') circle,
+    @Param('circle') circle: ObjectId,
   ): Promise<DetailedTemplateResponseDto[]> {
+    if (!circle) {
+      return;
+    }
     return await this.templatesService.getTemplates('project', circle, null);
   }
 

@@ -4,7 +4,6 @@ import {
   Injectable,
   InternalServerErrorException,
 } from '@nestjs/common';
-import { ObjectId } from 'mongoose';
 import { CirclesRepository } from 'src/circle/circles.repository';
 import { ActivityBuilder } from 'src/common/activity.builder';
 import { DetailedProjectResponseDto } from 'src/project/dto/detailed-project-response.dto';
@@ -45,6 +44,10 @@ export class CardsService {
 
       const card = await this.cardsRepository.create({
         ...createCardDto,
+        // can't send date as DATE need to send as string, conversion to date here giving some type error
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        deadline: new Date(createCardDto.deadline),
         activity: activity,
         reward: defaultPayment,
         slug: cardNum.toString(),
@@ -71,12 +74,14 @@ export class CardsService {
   }
 
   async getDetailedCardBySlug(
-    project: ObjectId,
+    project: string,
     slug: string,
   ): Promise<DetailedCardResponseDto> {
+    const projectId = await this.projectService.getProjectIdFromSlug(project);
+    console.log({ projectId });
     const card =
       await this.cardsRepository.getCardWithPopulatedReferencesBySlug(
-        project,
+        projectId._id,
         slug,
       );
     return card;

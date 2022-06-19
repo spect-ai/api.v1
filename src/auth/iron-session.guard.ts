@@ -49,8 +49,6 @@ export class CircleRoleGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
-    console.log(request);
-    console.log(request.route);
 
     if (request.session.siwe?.address) {
       const user = (

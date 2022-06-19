@@ -62,6 +62,11 @@ export class ProjectService {
     return this.projectPopulatedWithCardDetails(project);
   }
 
+  async getProjectIdFromSlug(slug: string): Promise<Project> {
+    const project = await this.projectRepository.getProjectIdFromSlug(slug);
+    return project;
+  }
+
   async create(createProjectDto: CreateProjectRequestDto): Promise<Project> {
     try {
       const slug = await this.slugService.generateUniqueSlug(
@@ -257,7 +262,8 @@ export class ProjectService {
         priority: 1,
         deadline: 1,
         slug: 1,
-      });
+      })
+      .populate('parents'); // need to recheck this, might not need to populate parents
 
     return this.projectPopulatedWithCardDetails(updatedProject);
   }

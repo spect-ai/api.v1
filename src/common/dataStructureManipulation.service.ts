@@ -15,12 +15,8 @@ export class DataStructureManipulationService {
   arrayify(arrOfObjects: any[], key: string) {
     let res = [];
     for (const obj of arrOfObjects) {
-      console.log(`obj[key]`);
-
-      console.log(obj[key]);
       res = [...res, ...obj[key]];
     }
-    console.log(res);
     return res;
   }
 

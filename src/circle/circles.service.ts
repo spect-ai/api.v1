@@ -58,7 +58,6 @@ export class CirclesService {
         userPermissions.push(circle.roles[role].permissions);
       }
     }
-    console.log(userPermissions);
     return this.datastructureManipulationService.collateifyBooleanFields(
       userPermissions,
     );

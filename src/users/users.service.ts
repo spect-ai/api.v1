@@ -29,9 +29,9 @@ export class UsersService {
     return user;
   }
 
-  async update(updateUserDto: UpdateUserDto): Promise<User> {
+  async update(updateUserDto: UpdateUserDto, user: User): Promise<User> {
     try {
-      if (updateUserDto.username) {
+      if (updateUserDto.username && user.username !== updateUserDto.username) {
         const usernameTaken = await this.usersRepository.exists({
           username: updateUserDto.username,
         });
