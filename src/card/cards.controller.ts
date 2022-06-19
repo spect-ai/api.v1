@@ -37,10 +37,14 @@ export class CardsController {
   async create(@Body() card: CreateCardRequestDto) {
     // temp fix to convert map to object
     let proj: any = await this.cardsService.create(card);
+    console.log(`proj.cards before`);
+    console.log(proj.cards);
     proj = {
       ...proj,
       cards: Object.fromEntries(proj.cards),
     };
+    console.log(`proj.cards adter`);
+    console.log(proj.cards);
     return proj;
   }
 

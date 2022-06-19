@@ -44,6 +44,7 @@ export class ProjectService {
       await this.projectRepository.getProjectWithPopulatedReferencesBySlug(
         slug,
       );
+    console.log(project);
     return project;
   }
 
@@ -61,11 +62,13 @@ export class ProjectService {
             createProjectDto.circleId,
           );
       }
+
       if (createProjectDto.fromTemplateId) {
         const template = await this.templateRepository.getTemplate(
           createProjectDto.fromTemplateId,
         );
         const data = template.projectData;
+
         if (
           Object.keys(data).length > 0 &&
           'columnOrder' in data &&
@@ -82,7 +85,6 @@ export class ProjectService {
         slug: slug,
         parents: [parentCircle._id],
       });
-
       if (parentCircle?.id) {
         await this.circlesRepository.updateById(parentCircle.id as string, {
           ...parentCircle,

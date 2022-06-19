@@ -81,4 +81,10 @@ export class DetailedCircleResponseDto {
    */
   @IsObject()
   activity?: object;
+
+  /**
+   * The members mapped to their respective info
+   */
+  @IsObject()
+  memberDetails?: object;
 }

@@ -56,7 +56,7 @@ export class Project extends BaseModel {
    *
    * !! Important, need to store as MAP to support dynamic key to reference
    */
-  @prop({ ref: () => Card })
+  @prop({ ref: () => Card, default: [] })
   cards: Map<string, ObjectId>;
 
   /**

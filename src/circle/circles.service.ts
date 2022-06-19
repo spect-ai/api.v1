@@ -18,6 +18,10 @@ import { GithubService } from 'src/common/github.service';
 import { RolesService } from 'src/roles/roles.service';
 import { v4 as uuidv4 } from 'uuid';
 import moment from 'moment';
+import { DataStructureManipulationService } from 'src/common/dataStructureManipulation.service';
+import { ObjectId } from 'mongoose';
+import { GetMemberDetailsOfCircleDto } from './dto/get-member-details.dto';
+import { User } from 'src/users/model/users.model';
 
 @Injectable()
 export class CirclesService {
@@ -28,7 +32,76 @@ export class CirclesService {
     private readonly discordService: DiscordService,
     private readonly githubService: GithubService,
     private readonly roleService: RolesService,
+    private readonly datastructureManipulationService: DataStructureManipulationService,
   ) {}
+
+  async getCollatedUserPermissions(
+    getMemberDetailsDto: GetMemberDetailsOfCircleDto,
+    user: User,
+  ): Promise<any> {
+    const circles = await this.circlesRepository.findAll(
+      {
+        _id: { $in: getMemberDetailsDto.circleIds },
+      },
+      {
+        projection: {
+          roles: 1,
+          memberRoles: 1,
+        },
+      },
+    );
+
+    const userPermissions = [];
+    for (const circle of circles) {
+      const roles = circle.memberRoles[user.id];
+      for (const role of roles) {
+        userPermissions.push(circle.roles[role].permissions);
+      }
+    }
+    console.log(userPermissions);
+    return this.datastructureManipulationService.collateifyBooleanFields(
+      userPermissions,
+    );
+  }
+
+  async getMemberDetailsOfCircles(
+    getMemberDetailsDto: GetMemberDetailsOfCircleDto,
+  ): Promise<any> {
+    const circles = await this.circlesRepository
+      .findAll(
+        {
+          _id: { $in: getMemberDetailsDto.circleIds },
+        },
+        {
+          projection: {
+            members: 1,
+          },
+        },
+      )
+      .populate('members');
+    let res = this.datastructureManipulationService.arrayify(
+      circles,
+      'members',
+    );
+    res = this.datastructureManipulationService.distinctify(res, 'id');
+    return this.datastructureManipulationService.objectify(res, 'id');
+  }
+
+  async getCircleWithSlug(slug: string): Promise<DetailedCircleResponseDto> {
+    const circle =
+      await this.circlesRepository.getCircleWithPopulatedReferencesBySlug(slug);
+    if (!circle) {
+      throw new HttpException('Circle not found', HttpStatus.NOT_FOUND);
+    }
+    const res = {
+      ...circle,
+      memberDetails: this.datastructureManipulationService.objectify(
+        circle.members,
+        'id',
+      ),
+    };
+    return res;
+  }
 
   async create(
     createCircleDto: CreateCircleRequestDto,
@@ -48,7 +121,6 @@ export class CirclesService {
       }
       let createdCircle: Circle;
       const memberRoles = {};
-      console.log(this.requestProvider.user);
       memberRoles[this.requestProvider.user.id] = [
         this.roleService.getDefaultUserRoleOnCircleCreation(),
       ];

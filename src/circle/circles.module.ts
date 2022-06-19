@@ -10,6 +10,7 @@ import { DiscordService } from 'src/common/discord.service';
 import { GithubService } from 'src/common/github.service';
 import { EthAddressModule } from 'src/_eth-address/_eth-address.module';
 import { RolesService } from 'src/roles/roles.service';
+import { DataStructureManipulationService } from 'src/common/dataStructureManipulation.service';
 
 @Module({
   imports: [TypegooseModule.forFeature([Circle]), EthAddressModule],
@@ -22,6 +23,7 @@ import { RolesService } from 'src/roles/roles.service';
     DiscordService,
     GithubService,
     RolesService,
+    DataStructureManipulationService,
   ],
   exports: [CirclesService, CirclesRepository, CirclesModule],
 })

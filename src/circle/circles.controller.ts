@@ -17,6 +17,9 @@ import { UpdateCircleRequestDto } from './dto/update-circle-request.dto';
 import { RequestProvider } from 'src/users/user.provider';
 import { InviteDto } from './dto/invite.dto';
 import { JoinCircleRequestDto } from './dto/join-circle.dto';
+import { ObjectId } from 'mongoose';
+import { GetMemberDetailsOfCircleDto } from './dto/get-member-details.dto';
+import { ApiParam } from '@nestjs/swagger';
 
 @Controller('circle')
 export class CirclesController {
@@ -34,17 +37,34 @@ export class CirclesController {
   @Get('/myOrganizations')
   @UseGuards(SessionAuthGuard)
   async findMyOrganizations(): Promise<DetailedCircleResponseDto[]> {
-    console.log(`sdsdsd`);
     return await this.circlesRepository.getParentCirclesByUser(
       this.requestProvider.user._id,
     );
   }
 
+  @Get('/myPermissions')
+  @UseGuards(SessionAuthGuard)
+  async getMyRoles(
+    @Body() getMemberDetailsDto: GetMemberDetailsOfCircleDto,
+  ): Promise<any> {
+    return await this.circlesService.getCollatedUserPermissions(
+      getMemberDetailsDto,
+      this.requestProvider.user,
+    );
+  }
+
+  @Get('/getMemberDetailsOfCircles')
+  async getMemberDetailsOfCircles(
+    @Body() getMemberDetailsDto: GetMemberDetailsOfCircleDto,
+  ): Promise<any> {
+    return await this.circlesService.getMemberDetailsOfCircles(
+      getMemberDetailsDto,
+    );
+  }
+
   @Get('/slug/:slug')
   async findBySlug(@Param('slug') slug): Promise<DetailedCircleResponseDto> {
-    return await this.circlesRepository.getCircleWithPopulatedReferencesBySlug(
-      slug,
-    );
+    return await this.circlesService.getCircleWithSlug(slug);
   }
 
   @Get('/:id')
