@@ -18,10 +18,12 @@ export class ProjectController {
   async findBySlug(@Param('slug') slug): Promise<DetailedProjectResponseDto> {
     // temp fix to convert map to object
     let proj: any = await this.projectService.getDetailedProjectBySlug(slug);
-    proj = {
-      ...proj,
-      cards: Object.fromEntries(proj.cards),
-    };
+    if (proj?.cards) {
+      proj = {
+        ...proj,
+        cards: Object.fromEntries(proj.cards),
+      };
+    }
     return proj;
   }
 

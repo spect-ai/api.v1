@@ -18,7 +18,7 @@ export class ProjectsRepository extends BaseRepository<Project> {
   ): Promise<Project> {
     return await this.findOne({ slug: slug }).populate('parents').populate(
       'cards.$*',
-      'id title labels assignee reviewer reward priority', // set all fields required
+      // 'id title labels assignee reviewer reward priority slug creator', // set all fields required
     );
   }
 }

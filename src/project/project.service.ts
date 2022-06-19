@@ -221,6 +221,7 @@ export class ProjectService {
           },
         },
       })
-      .populate('cards.$*');
+      .populate('cards.$*')
+      .populate('parents');
   }
 }
