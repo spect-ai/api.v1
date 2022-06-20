@@ -124,10 +124,19 @@ export class ProjectService {
     updateProjectDto: UpdateProjectRequestDto,
   ): Promise<DetailedProjectResponseDto> {
     try {
-      const updatedProject = await this.projectRepository.updateById(
-        id,
-        updateProjectDto,
-      );
+      const updatedProject = await this.projectRepository
+        .updateById(id, updateProjectDto)
+        .populate('parents')
+        .populate('cards', {
+          title: 1,
+          labels: 1,
+          assignee: 1,
+          reviewer: 1,
+          reward: 1,
+          priority: 1,
+          deadline: 1,
+          slug: 1,
+        });
       return this.projectPopulatedWithCardDetails(updatedProject);
     } catch (error) {
       throw new InternalServerErrorException(

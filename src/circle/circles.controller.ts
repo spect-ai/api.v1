@@ -106,6 +106,7 @@ export class CirclesController {
     return await this.circlesService.invite(param.id, invitation);
   }
 
+  @UseGuards(SessionAuthGuard)
   @Patch('/join/:id')
   @ApiParam({ name: 'id', type: 'string' })
   async join(
@@ -115,6 +116,7 @@ export class CirclesController {
     return await this.circlesService.join(param.id, joinDto);
   }
 
+  @UseGuards(SessionAuthGuard)
   @Post('/:id/delete')
   async delete(
     @Param() param: ObjectIdDto,

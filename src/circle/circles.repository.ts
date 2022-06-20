@@ -33,10 +33,15 @@ export class CirclesRepository extends BaseRepository<Circle> {
   }
 
   async getParentCirclesByUser(user: ObjectId): Promise<Circle[]> {
-    return await this.findAll({
-      members: { $in: [user] },
-      parents: { $exists: true, $eq: [] },
-    });
+    try {
+      return await this.findAll({
+        members: { $in: [user] },
+        parents: { $exists: true, $eq: [] },
+      });
+    } catch (error) {
+      console.log(error);
+      return [] as Circle[];
+    }
   }
 
   async getCircleWithUnpopulatedReferences(id: string): Promise<Circle> {
