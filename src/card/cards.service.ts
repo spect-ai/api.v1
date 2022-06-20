@@ -3,6 +3,7 @@ import {
   HttpStatus,
   Injectable,
   InternalServerErrorException,
+  NotFoundException,
 } from '@nestjs/common';
 import { CirclesRepository } from 'src/circle/circles.repository';
 import { ActivityBuilder } from 'src/common/activity.builder';
@@ -22,7 +23,9 @@ import {
   CreateWorkThreadRequestDto,
   UpdateWorkUnitRequestDto,
 } from './dto/work-request.dto';
-import { UpdateWithAggregationPipeline } from 'mongoose';
+import { Activity } from 'src/common/types/activity.type';
+import { AddCommentDto, UpdateCommentDto } from './dto/comment-body.dto';
+
 @Injectable()
 export class CardsService {
   constructor(
@@ -42,6 +45,21 @@ export class CardsService {
   validateCardThreadExists(card: Card, threadId: string) {
     if (!card.workThreads[threadId]) {
       throw new HttpException('Work thread not found', HttpStatus.NOT_FOUND);
+    }
+  }
+
+  validateComment(card: Card, commentIndex: number) {
+    if (commentIndex === -1) {
+      throw new HttpException('Comment not found', HttpStatus.NOT_FOUND);
+    }
+    if (card.activity[commentIndex].actorId !== '62acba3f5a96420af18972a2') {
+      throw new HttpException(
+        'You are not authorized to update this comment',
+        HttpStatus.UNAUTHORIZED,
+      );
+    }
+    if (!card.activity[commentIndex].comment) {
+      throw new HttpException('Not a comment', HttpStatus.NOT_FOUND);
     }
   }
 
@@ -160,8 +178,7 @@ export class CardsService {
       const workUnitId = uuidv4();
       const workUnit = {};
       workUnit[workUnitId] = {
-        user: '62acba3f5a96420af18972a2',
-        //user: this.requestProvider.user._id,
+        user: this.requestProvider.user._id,
         content: createWorkThread.content,
         workUnitId,
         createdAt: new Date(),
@@ -239,8 +256,7 @@ export class CardsService {
       const workUnits = {
         ...card.workThreads[threadId].workUnits,
         [workUnitId]: {
-          user: '62acba3f5a96420af18972a2',
-          //user: this.requestProvider.user._id,
+          user: this.requestProvider.user._id,
           content: createWorkUnit.content,
           workUnitId,
           createdAt: new Date(),
@@ -304,6 +320,90 @@ export class CardsService {
     } catch (error) {
       throw new InternalServerErrorException(
         'Failed updating work unit',
+        error.message,
+      );
+    }
+  }
+
+  async addComment(
+    id: string,
+    addCommentDto: AddCommentDto,
+  ): Promise<DetailedCardResponseDto> {
+    try {
+      const card = await this.cardsRepository.findById(id);
+      this.validateCardExists(card);
+
+      const commitId = uuidv4();
+      card.activity = [
+        ...card.activity,
+        {
+          commitId,
+          actorId: this.requestProvider.user.id,
+          content: addCommentDto.comment,
+          timestamp: new Date(),
+          comment: true,
+        } as Activity,
+      ];
+
+      return await this.cardsRepository.updateById(id, {
+        activity: card.activity,
+      });
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Failed adding comment',
+        error.message,
+      );
+    }
+  }
+
+  async updateComment(
+    id: string,
+    commitId: string,
+    updateCommentDto: UpdateCommentDto,
+  ): Promise<DetailedCardResponseDto> {
+    try {
+      const card = await this.cardsRepository.findById(id);
+      this.validateCardExists(card);
+
+      const commentIndex = card.activity.findIndex((activity) => {
+        return activity.commitId === commitId;
+      });
+      this.validateComment(card, commentIndex);
+
+      card.activity[commentIndex].content = updateCommentDto.comment;
+
+      return await this.cardsRepository.updateById(id, {
+        activity: card.activity,
+      });
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Failed updating comment',
+        error.message,
+      );
+    }
+  }
+
+  async deleteComment(
+    id: string,
+    commitId: string,
+  ): Promise<DetailedCardResponseDto> {
+    try {
+      const card = await this.cardsRepository.findById(id);
+      this.validateCardExists(card);
+
+      const commentIndex = card.activity.findIndex((activity) => {
+        return activity.commitId === commitId;
+      });
+      this.validateComment(card, commentIndex);
+
+      card.activity.splice(commentIndex, 1);
+
+      return await this.cardsRepository.updateById(id, {
+        activity: card.activity,
+      });
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Failed adding comment',
         error.message,
       );
     }

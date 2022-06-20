@@ -5,7 +5,7 @@ import { Project } from 'src/project/model/project.model';
 import { Payment } from 'src/common/models/payment.model';
 import { Date, ObjectId } from 'mongoose';
 import mongoose from 'mongoose';
-import { ActivityModel } from 'src/common/models/activity.model';
+import { Activity } from 'src/common/types/activity.type';
 import { CardStatus } from '../../common/types/status.type';
 import { WorkThread, WorkThreads } from './workHistory.model';
 import { User } from 'src/users/model/users.model';
@@ -106,7 +106,7 @@ export class Card extends BaseModel {
    * The activity associated with the card
    */
   @prop({ default: [] })
-  activity: ActivityModel[];
+  activity: Activity[];
 
   /**
    * The status of the card

@@ -28,6 +28,7 @@ import {
   UpdateWorkThreadRequestDto,
   CreateWorkUnitRequestDto,
 } from './dto/work-request.dto';
+import { AddCommentDto, UpdateCommentDto } from './dto/comment-body.dto';
 
 @Controller('card')
 export class CardsController {
@@ -117,6 +118,36 @@ export class CardsController {
       updateWorkUnit,
     );
   }
+
+  @Patch('/:id/addComment')
+  async addComment(
+    @Param() params: ObjectIdDto,
+    @Body() addCommentDto: AddCommentDto,
+  ): Promise<DetailedCardResponseDto> {
+    return await this.cardsService.addComment(params.id, addCommentDto);
+  }
+
+  @Patch('/:id/updateComment')
+  async udpateComment(
+    @Param() params: ObjectIdDto,
+    @Query('commitId') commitId: string,
+    @Body() updateCommentDto: UpdateCommentDto,
+  ): Promise<DetailedCardResponseDto> {
+    return await this.cardsService.updateComment(
+      params.id,
+      commitId,
+      updateCommentDto,
+    );
+  }
+
+  @Patch('/:id/deleteComment')
+  async deleteComment(
+    @Param() params: ObjectIdDto,
+    @Query('commitId') commitId: string,
+  ): Promise<DetailedCardResponseDto> {
+    return await this.cardsService.deleteComment(params.id, commitId);
+  }
+
   @Post('/:id/delete')
   async delete(@Param() params: ObjectIdDto): Promise<DetailedCardResponseDto> {
     return await this.cardsService.delete(params.id);

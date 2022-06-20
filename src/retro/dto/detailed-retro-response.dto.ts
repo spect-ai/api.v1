@@ -7,7 +7,7 @@ import {
   IsString,
 } from 'class-validator';
 import { Date } from 'mongoose';
-import { ActivityModel } from 'src/common/models/activity.model';
+import { Activity } from 'src/common/types/activity.type';
 import { FeedbackModel } from 'src/common/models/feedback.model';
 import { Payment } from 'src/common/models/payment.model';
 import { Stats, StatsModel } from '../models/stats.model';
@@ -81,5 +81,5 @@ export class DetailedRetroResponseDto {
    */
   @IsObject()
   @IsOptional()
-  activity: ActivityModel[];
+  activity: Activity[];
 }

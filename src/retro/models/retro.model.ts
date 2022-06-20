@@ -3,7 +3,7 @@ import { useMongoosePlugin } from 'src/base/decorators/use-mongoose-plugins.deco
 import { BaseModel } from 'src/base/base.model';
 import { Payment } from 'src/common/models/payment.model';
 import { Date, ObjectId } from 'mongoose';
-import { ActivityModel } from 'src/common/models/activity.model';
+import { Activity } from 'src/common/types/activity.type';
 import { User } from 'src/users/model/users.model';
 import { RetroStatus } from '../../common/types/status.type';
 import { Circle } from 'src/circle/model/circle.model';
@@ -100,5 +100,5 @@ export class Retro extends BaseModel {
    * The activity history of the retro period
    */
   @prop({ default: [] })
-  activity: ActivityModel[];
+  activity: Activity[];
 }

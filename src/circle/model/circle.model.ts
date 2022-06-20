@@ -2,7 +2,7 @@ import { prop, Ref } from '@typegoose/typegoose';
 import { ProfileModel } from 'src/common/models/profile.model';
 import { useMongoosePlugin } from 'src/base/decorators/use-mongoose-plugins.decorator';
 import { Payment } from 'src/common/models/payment.model';
-import { ActivityModel } from 'src/common/models/activity.model';
+import { Activity } from 'src/common/types/activity.type';
 import { Project } from 'src/project/model/project.model';
 import { User } from 'src/users/model/users.model';
 import { Chain } from 'src/common/models/chain.model';
@@ -104,7 +104,7 @@ export class Circle extends ProfileModel {
    * Activity that took place in the circle
    */
   @prop({ default: [] })
-  activity: ActivityModel[];
+  activity: Activity[];
 
   /**
    * The tokens whitelisted in the circle, these will be available in the circle on top of the globally available tokens

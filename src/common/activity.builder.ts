@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import * as urlSlug from 'url-slug';
 import { BaseRepository } from 'src/base/base.repository';
 import { BaseModel } from 'src/base/base.model';
-import { ActivityModel } from './models/activity.model';
+import { Activity } from './types/activity.type';
 import { v4 as uuidv4 } from 'uuid';
 import { Card } from 'src/card/model/card.model';
 import { Circle } from 'src/circle/model/circle.model';
@@ -20,7 +20,7 @@ export type ActivityParams = {
 @Injectable()
 export class ActivityBuilder {
   commitId: string;
-  actorId: ObjectId;
+  actorId: string;
   constructor() {
     this.commitId = uuidv4();
   }
@@ -29,32 +29,35 @@ export class ActivityBuilder {
     requestProvider: RequestProvider,
     req: CreateCardRequestDto,
     oldObj?: Card,
-  ): ActivityModel[] {
-    this.actorId = requestProvider.user?._id;
-    let activity = [] as ActivityModel[];
+  ): Activity[] {
+    this.actorId = requestProvider.user?.id;
+    let activity = [] as Activity[];
     activity = this.buildNewCardActivity(activity, req);
 
     return activity;
   }
 
   buildNewCardActivity(
-    activity: ActivityModel[],
+    activity: Activity[],
     req: CreateCardRequestDto,
-  ): ActivityModel[] {
-    const newCardActivity = {} as ActivityModel;
+  ): Activity[] {
+    const newCardActivity = {} as Activity;
 
-    newCardActivity.description = `created card ${req.title}`;
+    newCardActivity.content = `created card ${req.title}`;
     newCardActivity.timestamp = new Date();
+    newCardActivity.actorId = this.actorId;
+    newCardActivity.commitId = this.commitId;
+    newCardActivity.comment = false;
 
     activity.push(newCardActivity);
     return activity;
   }
 
   buildUpdatedLabelsActivity(
-    activity: ActivityModel,
+    activity: Activity,
     req: CreateCardRequestDto,
-  ): ActivityModel {
-    activity.description = `${
+  ): Activity {
+    activity.content = `${
       this.actorId
     } added labels ${'asas'} and removed labels ${'asas'}`;
 
@@ -62,9 +65,9 @@ export class ActivityBuilder {
   }
 
   // buildUpdatedDeadlineActivity(
-  //   activity: ActivityModel,
+  //   activity: Activity,
   //   req: CreateCardRequestDto,
-  // ): ActivityModel {
+  // ): Activity {
   //   activity.description = `${
   //     this.actorId
   //   } added labels ${'asas'} and removed labels ${'asas'}`;
@@ -73,9 +76,9 @@ export class ActivityBuilder {
   // }
 
   // buildUpdatedRewardActivity(
-  //   activity: ActivityModel,
+  //   activity: Activity,
   //   req: CreateCardRequestDto,
-  // ): ActivityModel {
+  // ): Activity {
   //   activity.description = `${
   //     this.actorId
   //   } added labels ${'asas'} and removed labels ${'asas'}`;
