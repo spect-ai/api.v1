@@ -188,17 +188,18 @@ export class CirclesService {
       const circle =
         await this.circlesRepository.getCircleWithUnpopulatedReferences(id);
       const invites = circle.invites;
+      const inviteId = uuidv4();
       const updatedCircle = await this.circlesRepository.updateById(id, {
         invites: [
           ...invites,
           {
             ...newInvite,
-            id: uuidv4(),
+            id: inviteId,
             expires: new Date(newInvite.expires),
           },
         ],
       });
-      return updatedCircle;
+      return inviteId;
     } catch (error) {
       throw new InternalServerErrorException(
         'Failed circle update',
