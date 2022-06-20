@@ -49,9 +49,9 @@ export class CardsController {
   @Patch('/:id')
   async update(
     @Param() params: ObjectIdDto,
-    @Body() circle: UpdateCardRequestDto,
+    @Body() card: UpdateCardRequestDto,
   ): Promise<DetailedCardResponseDto> {
-    return await this.cardsService.update(params.id, circle);
+    return await this.cardsService.update(params.id, card);
   }
 
   @Post('/:id/delete')

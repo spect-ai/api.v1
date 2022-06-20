@@ -153,7 +153,7 @@ export class ProjectService {
       if (columnIndex > -1) {
         columnOrder.splice(columnIndex, 1);
       }
-      let cards = [] as ObjectId[];
+      let cards = [] as string[];
       if (columnId in columnDetails) {
         cards = project.columnDetails[columnId].cards;
         delete columnDetails[columnId];
@@ -226,7 +226,6 @@ export class ProjectService {
   async addCardToProject(
     projectId: ObjectId,
     columnId: string,
-    cardSlug: string,
     cardId: ObjectId,
   ): Promise<DetailedProjectResponseDto> {
     const project = await this.projectRepository.findByObjectId(projectId);
@@ -249,7 +248,10 @@ export class ProjectService {
           ...project.columnDetails,
           [columnId]: {
             ...project.columnDetails[columnId],
-            cards: [...project.columnDetails[columnId].cards, cardId],
+            cards: [
+              ...project.columnDetails[columnId].cards,
+              cardId.toString(),
+            ],
           },
         },
       })
@@ -268,14 +270,12 @@ export class ProjectService {
     return this.projectPopulatedWithCardDetails(updatedProject);
   }
 
-  findCardLocationInProject(project: Project, cardId: ObjectId): CardLoc {
+  findCardLocationInProject(project: Project, cardId: string): CardLoc {
     const cardLoc: CardLoc = {} as CardLoc;
 
     for (const columnId in project.columnDetails) {
       const column = project.columnDetails[columnId];
-      const cards = column.cards.map((card) => card.toString());
-
-      const cardIndex = cards.indexOf(cardId.toString());
+      const cardIndex = column.cards.indexOf(cardId);
       if (cardIndex > -1) {
         cardLoc.columnId = columnId;
         cardLoc.cardIndex = cardIndex;
@@ -287,8 +287,8 @@ export class ProjectService {
 
   async reorderCard(
     projectId: string,
-    cardId: ObjectId,
-    reorderCardDto: ReorderCardReqestDto,
+    cardId: string,
+    destinationCardLoc: ReorderCardReqestDto,
     updateColumnIdInCard = false,
   ): Promise<DetailedProjectResponseDto> {
     const project = await this.projectRepository.findById(projectId);
@@ -297,7 +297,6 @@ export class ProjectService {
     }
 
     // Find where the card is in the project now
-
     const sourceCardLoc = this.findCardLocationInProject(project, cardId);
     if (!sourceCardLoc.columnId) {
       throw new HttpException('Card not found', HttpStatus.NOT_FOUND);
@@ -305,13 +304,14 @@ export class ProjectService {
 
     // Get the destination card index based on the input
     let destinationCardIndex: number;
-    if (reorderCardDto.destinationCardIndex === 'end') {
+    if (destinationCardLoc.destinationCardIndex === 'end') {
       destinationCardIndex =
-        project.columnDetails[sourceCardLoc.columnId].cards.length;
-    } else destinationCardIndex = reorderCardDto.destinationCardIndex;
+        project.columnDetails[destinationCardLoc.destinationColumnId].cards
+          .length;
+    } else destinationCardIndex = destinationCardLoc.destinationCardIndex;
 
     // if destination card is in the same column, reduce the index by 1 only if the destination index is greater than the source index
-    if (sourceCardLoc.columnId === reorderCardDto.destinationColumnId) {
+    if (sourceCardLoc.columnId === destinationCardLoc.destinationColumnId) {
       if (sourceCardLoc.cardIndex < destinationCardIndex) {
         destinationCardIndex--;
       }
@@ -322,7 +322,7 @@ export class ProjectService {
     if (
       destinationCardIndex < 0 ||
       destinationCardIndex -
-        columnDetails[reorderCardDto.destinationColumnId].cards.length >
+        columnDetails[destinationCardLoc.destinationColumnId].cards.length >
         0
     ) {
       throw new HttpException(
@@ -330,32 +330,33 @@ export class ProjectService {
         HttpStatus.BAD_REQUEST,
       );
     }
+
+    // Update the card location in the project
     columnDetails[sourceCardLoc.columnId].cards.splice(
       sourceCardLoc.cardIndex,
       1,
     );
 
-    columnDetails[reorderCardDto.destinationColumnId].cards.splice(
+    columnDetails[destinationCardLoc.destinationColumnId].cards.splice(
       destinationCardIndex,
       0,
       cardId,
     );
-    // Remove the card from the source column and index
+
     columnDetails[sourceCardLoc.columnId] = {
       ...columnDetails[sourceCardLoc.columnId],
       cards: columnDetails[sourceCardLoc.columnId].cards,
     };
 
-    // Add the card from the source column and index
-    columnDetails[reorderCardDto.destinationColumnId] = {
-      ...columnDetails[reorderCardDto.destinationColumnId],
-      cards: columnDetails[reorderCardDto.destinationColumnId].cards,
+    columnDetails[destinationCardLoc.destinationColumnId] = {
+      ...columnDetails[destinationCardLoc.destinationColumnId],
+      cards: columnDetails[destinationCardLoc.destinationColumnId].cards,
     };
 
     // Update the column id in the card if flag is set to true, flag will mostly be false if this function is called from the card service
     if (updateColumnIdInCard) {
       await this.cardRepository.updateById(cardId.toString(), {
-        columnId: reorderCardDto.destinationColumnId,
+        columnId: destinationCardLoc.destinationColumnId,
       });
     }
 

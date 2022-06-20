@@ -31,7 +31,7 @@ export class TemplatesService {
         columnDetails[columnId] = {
           columnId,
           name: columnName,
-          cards: [] as ObjectId[],
+          cards: [] as string[],
           defaultCardType: 'Task',
         };
       }

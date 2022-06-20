@@ -56,7 +56,6 @@ export class CardsService {
       const project = await this.projectService.addCardToProject(
         createCardDto.project,
         createCardDto.columnId,
-        card.slug,
         card._id,
       );
       return project;
@@ -104,22 +103,24 @@ export class CardsService {
     updateCardDto: UpdateCardRequestDto,
   ): Promise<DetailedCardResponseDto> {
     try {
+      if (updateCardDto.columnId) {
+        const card = await this.cardsRepository.findById(id);
+        if (card.columnId !== updateCardDto.columnId) {
+          await this.projectService.reorderCard(
+            card.project.toString(),
+            id,
+            {
+              destinationColumnId: updateCardDto.columnId,
+              destinationCardIndex: 'end',
+            } as ReorderCardReqestDto,
+            false,
+          );
+        }
+      }
       const updatedCard = await this.cardsRepository.updateById(
         id,
         updateCardDto,
       );
-      if (updatedCard.columnId) {
-        const projectId = await updatedCard.project;
-        await this.projectService.reorderCard(
-          projectId.toString(),
-          updatedCard._id,
-          {
-            destinationColumnId: updatedCard.columnId,
-            destinationCardIndex: 'end',
-          } as ReorderCardReqestDto,
-          false,
-        );
-      }
       return updatedCard;
     } catch (error) {
       throw new InternalServerErrorException(

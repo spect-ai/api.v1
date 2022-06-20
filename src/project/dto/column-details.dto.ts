@@ -29,7 +29,7 @@ export class ColumnDetailDto {
    */
   @IsString()
   @IsNotEmpty()
-  cards: ObjectId[];
+  cards: string[];
 
   /**
    * The default card type in the column, ie, task or bounty

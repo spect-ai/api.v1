@@ -8,7 +8,7 @@ import { User } from 'src/users/model/users.model';
 export type MinimalColumnDetail = {
   columnId: string;
   name: string;
-  cards: ObjectId[];
+  cards: string[];
   defaultCardType: string;
 };
 

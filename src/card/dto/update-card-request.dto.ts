@@ -1,3 +1,4 @@
+import { OmitType, PartialType } from '@nestjs/swagger';
 import {
   IsArray,
   IsDate,
@@ -10,76 +11,21 @@ import {
 import { Date, ObjectId } from 'mongoose';
 import { Payment } from 'src/common/models/payment.model';
 import { CardStatus } from 'src/common/types/status.type';
+import { CreateCardRequestDto } from './create-card-request.dto';
 
-export class UpdateCardRequestDto {
+export class UpdateCardRequestDto extends OmitType(CreateCardRequestDto, [
+  'title',
+  'project',
+  'circle',
+  'columnId',
+] as const) {
   /**
    * The title of the card
    */
   @IsString()
+  @IsOptional()
   @IsNotEmpty()
   title: string;
-
-  /**
-   * The description of the card
-   */
-  @IsString()
-  @IsOptional()
-  description?: string;
-
-  /**
-   *  The reviewer of the card
-   */
-  @IsArray()
-  @IsOptional()
-  reviewer?: ObjectId[];
-
-  /**
-   * The assignee of the card
-   */
-  @IsArray()
-  @IsOptional()
-  assignee?: ObjectId[];
-
-  /**
-   * The card's project
-   */
-  @IsString()
-  project: ObjectId;
-
-  /**
-   * Card reward
-   */
-  @IsObject()
-  @IsOptional()
-  reward?: Payment;
-
-  /**
-   * Card type
-   */
-  @IsString()
-  @IsOptional()
-  type?: string;
-
-  /**
-   * Card Deadline
-   */
-  @IsDate()
-  @IsOptional()
-  deadline?: Date;
-
-  /**
-   * Card Labels
-   */
-  @IsArray()
-  @IsOptional()
-  labels?: string[];
-
-  /**
-   * The priority of the card
-   */
-  @IsNumber()
-  @IsOptional()
-  priority?: number;
 
   /**
    * The column Id of the card
@@ -89,9 +35,9 @@ export class UpdateCardRequestDto {
   columnId?: string;
 
   /**
-   * The description of the circle
+   * The statis of the card (active, inreview etc) - TODO: Add custom validation
    */
-  @IsString()
+  @IsObject()
   @IsOptional()
   status?: CardStatus;
 }
