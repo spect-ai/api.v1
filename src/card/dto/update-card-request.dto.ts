@@ -1,15 +1,5 @@
-import { OmitType, PartialType } from '@nestjs/swagger';
-import {
-  IsArray,
-  IsDate,
-  IsNotEmpty,
-  IsNumber,
-  IsObject,
-  IsOptional,
-  IsString,
-} from 'class-validator';
-import { Date, ObjectId } from 'mongoose';
-import { Payment } from 'src/common/models/payment.model';
+import { OmitType } from '@nestjs/swagger';
+import { IsNotEmpty, IsObject, IsOptional, IsString } from 'class-validator';
 import { CardStatus } from 'src/common/types/status.type';
 import { CreateCardRequestDto } from './create-card-request.dto';
 

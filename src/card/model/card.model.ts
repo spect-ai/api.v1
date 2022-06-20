@@ -7,7 +7,7 @@ import { Date, ObjectId } from 'mongoose';
 import mongoose from 'mongoose';
 import { ActivityModel } from 'src/common/models/activity.model';
 import { CardStatus } from '../../common/types/status.type';
-import { SubmissionModel } from './submission.model';
+import { WorkThread, WorkThreads } from './workHistory.model';
 import { User } from 'src/users/model/users.model';
 import { Circle } from 'src/circle/model/circle.model';
 
@@ -123,8 +123,15 @@ export class Card extends BaseModel {
   status: CardStatus;
 
   /**
-   * The submissions and revision instructions associated with the card
+   * The history of work done on the card, supports multiple parallel work histories so
+   * multiple people can work on the same card (relevant for contests, cooperatives etc)
+   */
+  @prop({ default: {} })
+  workThreads: WorkThreads;
+
+  /**
+   * The order of the work threads
    */
   @prop({ default: [] })
-  submission: SubmissionModel[];
+  workThreadOrder: string[];
 }

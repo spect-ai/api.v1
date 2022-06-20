@@ -3,7 +3,6 @@ import { InjectModel } from 'nestjs-typegoose';
 import { BaseRepository } from 'src/base/base.repository';
 import { Card } from './model/card.model';
 import { Ref } from '@typegoose/typegoose';
-import { ObjectId, Types } from 'mongoose';
 @Injectable()
 export class CardsRepository extends BaseRepository<Card> {
   constructor(@InjectModel(Card) circleModel) {

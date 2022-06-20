@@ -5,6 +5,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   Res,
   UseGuards,
 } from '@nestjs/common';
@@ -16,6 +17,17 @@ import { CreateCardRequestDto } from './dto/create-card-request.dto';
 import { DetailedCardResponseDto } from './dto/detailed-card-response-dto';
 import { GetByProjectAndSlugDto } from './dto/get-by-project-and-slug.dto';
 import { UpdateCardRequestDto } from './dto/update-card-request.dto';
+import {
+  UpdateWorkThreadParamDto,
+  CreateWorkUnitParamDto,
+  UpdateWorkUnitParamDto,
+} from './dto/param.dto';
+import {
+  UpdateWorkUnitRequestDto,
+  CreateWorkThreadRequestDto,
+  UpdateWorkThreadRequestDto,
+  CreateWorkUnitRequestDto,
+} from './dto/work-request.dto';
 
 @Controller('card')
 export class CardsController {
@@ -54,6 +66,57 @@ export class CardsController {
     return await this.cardsService.update(params.id, card);
   }
 
+  @Patch('/:id/createWorkThread')
+  async createWorkThread(
+    @Param() params: ObjectIdDto,
+    @Body() createWorkThread: CreateWorkThreadRequestDto,
+  ): Promise<DetailedCardResponseDto> {
+    return await this.cardsService.createWorkThread(
+      params.id,
+      createWorkThread,
+    );
+  }
+
+  @Patch('/:id/updateWorkThread')
+  async updateWorkThread(
+    @Param() params: ObjectIdDto,
+    @Query('threadId') threadId: string,
+    @Body() updateWorkThread: UpdateWorkThreadRequestDto,
+  ): Promise<DetailedCardResponseDto> {
+    return await this.cardsService.updateWorkThread(
+      params.id,
+      threadId,
+      updateWorkThread,
+    );
+  }
+
+  @Patch('/:id/createWorkUnit')
+  async createWorkUnit(
+    @Param() params: ObjectIdDto,
+    @Query('threadId') threadId: string,
+    @Body() createWorkUnit: CreateWorkUnitRequestDto,
+  ): Promise<DetailedCardResponseDto> {
+    return await this.cardsService.createWorkUnit(
+      params.id,
+      threadId,
+      createWorkUnit,
+    );
+  }
+
+  @Patch('/:id/updateWorkUnit')
+  async updateWorkUnit(
+    @Param() params: ObjectIdDto,
+    @Query('threadId') threadId: string,
+    @Query('workUnitId') workUnitId: string,
+    @Body() updateWorkUnit: UpdateWorkUnitRequestDto,
+  ): Promise<DetailedCardResponseDto> {
+    return await this.cardsService.udpateWorkUnit(
+      params.id,
+      threadId,
+      workUnitId,
+      updateWorkUnit,
+    );
+  }
   @Post('/:id/delete')
   async delete(@Param() params: ObjectIdDto): Promise<DetailedCardResponseDto> {
     return await this.cardsService.delete(params.id);
