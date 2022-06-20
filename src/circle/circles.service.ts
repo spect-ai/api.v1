@@ -215,6 +215,12 @@ export class CirclesService {
     try {
       const circle =
         await this.circlesRepository.getCircleWithUnpopulatedReferences(id);
+      if (circle.members.includes(this.requestProvider.user._id)) {
+        throw new HttpException(
+          'You are already a member of this circle',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      }
       if (joinCircleDto.joinUsing === 'discord') {
         const role = await this.roleService.getSpectRoleFromDiscord(
           this.requestProvider.user,
@@ -235,30 +241,32 @@ export class CirclesService {
         });
         return updatedCircle;
       } else if (joinCircleDto.joinUsing === 'invitation') {
-        const invite = circle.invites.find(
+        const inviteIndex = circle.invites.findIndex(
           (invite) => invite.id === joinCircleDto.invitationId,
         );
-
-        if (!invite) {
+        if (inviteIndex === -1) {
           throw new HttpException('Invitation not found', HttpStatus.NOT_FOUND);
-        } else if (
-          invite.uses <= 0 &&
-          moment(new Date()).isAfter(invite.expires)
-        ) {
+        }
+
+        const invite = circle.invites[inviteIndex];
+        if (invite.uses <= 0 && moment(new Date()).isAfter(invite.expires)) {
           throw new HttpException(
             'Invalid invitation - expired or used up already',
             HttpStatus.NOT_FOUND,
           );
-        } else {
-          const updatedCircle = await this.circlesRepository.updateById(id, {
-            members: [...circle.members, this.requestProvider.user._id],
-            memberRoles: {
-              ...circle.memberRoles,
-              [this.requestProvider.user.id]: invite.role,
-            },
-          });
-          return updatedCircle;
         }
+
+        circle.invites.splice(inviteIndex, 1);
+        invite.uses--;
+        const updatedCircle = await this.circlesRepository.updateById(id, {
+          members: [...circle.members, this.requestProvider.user._id],
+          memberRoles: {
+            ...circle.memberRoles,
+            [this.requestProvider.user.id]: [invite.role],
+          },
+          invites: [...circle.invites, invite],
+        });
+        return updatedCircle;
       }
     } catch (error) {
       throw new InternalServerErrorException(

@@ -107,6 +107,7 @@ export class CirclesController {
   }
 
   @Patch('/join/:id')
+  @ApiParam({ name: 'id', type: 'string' })
   async join(
     @Param() param: ObjectIdDto,
     @Body() joinDto: JoinCircleRequestDto,

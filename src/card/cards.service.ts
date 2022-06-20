@@ -52,7 +52,7 @@ export class CardsService {
     if (commentIndex === -1) {
       throw new HttpException('Comment not found', HttpStatus.NOT_FOUND);
     }
-    if (card.activity[commentIndex].actorId !== '62acba3f5a96420af18972a2') {
+    if (card.activity[commentIndex].actorId !== this.requestProvider.user.id) {
       throw new HttpException(
         'You are not authorized to update this comment',
         HttpStatus.UNAUTHORIZED,
