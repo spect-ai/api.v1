@@ -119,6 +119,7 @@ export class CardsController {
     );
   }
 
+  @UseGuards(SessionAuthGuard)
   @Patch('/:id/addComment')
   async addComment(
     @Param() params: ObjectIdDto,
