@@ -136,6 +136,8 @@ export class ProjectService {
           priority: 1,
           deadline: 1,
           slug: 1,
+          type: 1,
+          project: 1,
         });
       return this.projectPopulatedWithCardDetails(updatedProject);
     } catch (error) {
@@ -273,6 +275,8 @@ export class ProjectService {
         priority: 1,
         deadline: 1,
         slug: 1,
+        type: 1,
+        project: 1,
       })
       .populate('parents'); // need to recheck this, might not need to populate parents
 
@@ -383,6 +387,7 @@ export class ProjectService {
         deadline: 1,
         slug: 1,
         type: 1,
+        project: 1,
       });
     return this.projectPopulatedWithCardDetails(updatedProject);
   }
