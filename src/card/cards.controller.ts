@@ -129,6 +129,7 @@ export class CardsController {
     return await this.cardsService.addComment(params.id, addCommentDto);
   }
 
+  @UseGuards(SessionAuthGuard)
   @Patch('/:id/updateComment')
   async udpateComment(
     @Param() params: ObjectIdDto,
