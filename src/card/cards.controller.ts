@@ -50,9 +50,10 @@ export class CardsController {
 
   @Post('/')
   @UseGuards(SessionAuthGuard)
-  async create(
-    @Body() card: CreateCardRequestDto,
-  ): Promise<DetailedProjectResponseDto> {
+  async create(@Body() card: CreateCardRequestDto): Promise<{
+    card: DetailedCardResponseDto;
+    project: DetailedProjectResponseDto;
+  }> {
     return await this.cardsService.create(card);
   }
 
@@ -121,6 +122,7 @@ export class CardsController {
     );
   }
 
+  @UseGuards(SessionAuthGuard)
   @Patch('/:id/addComment')
   @ApiParam({ name: 'id', type: 'string' })
   @UseGuards(SessionAuthGuard)

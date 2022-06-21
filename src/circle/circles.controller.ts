@@ -47,10 +47,7 @@ export class CirclesController {
     } catch (e) {
       // TODO: Distinguish between DocumentNotFound error and other errors correctly, silent errors are not good
       console.log(e);
-      throw new InternalServerErrorException(
-        'Failed to load user organization',
-        e.message,
-      );
+      return [] as DetailedCircleResponseDto[];
     }
   }
 
@@ -128,6 +125,7 @@ export class CirclesController {
     return await this.circlesService.joinUsingInvitation(param.id, joinDto);
   }
 
+  @UseGuards(SessionAuthGuard)
   @Post('/:id/delete')
   @UseGuards(SessionAuthGuard)
   async delete(

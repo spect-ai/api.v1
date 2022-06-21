@@ -68,9 +68,10 @@ export class CardsService {
     return card;
   }
 
-  async create(
-    createCardDto: CreateCardRequestDto,
-  ): Promise<DetailedProjectResponseDto> {
+  async create(createCardDto: CreateCardRequestDto): Promise<{
+    card: DetailedCardResponseDto;
+    project: DetailedProjectResponseDto;
+  }> {
     try {
       const activity = this.activityBuilder.getActivity(
         this.requestProvider,
@@ -96,7 +97,10 @@ export class CardsService {
         createCardDto.columnId,
         card._id,
       );
-      return project;
+      return {
+        project: project,
+        card: card,
+      };
     } catch (error) {
       throw new InternalServerErrorException(
         'Failed card creation',

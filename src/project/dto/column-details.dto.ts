@@ -1,11 +1,4 @@
-import {
-  IsArray,
-  IsNotEmpty,
-  IsNumber,
-  IsObject,
-  IsString,
-} from 'class-validator';
-import { ObjectId } from 'mongoose';
+import { IsNotEmpty, IsObject, IsString } from 'class-validator';
 
 export type ColumnDetailsDto = {
   [key: string]: ColumnDetailDto;
