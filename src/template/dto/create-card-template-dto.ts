@@ -8,6 +8,7 @@ import {
   IsDate,
   IsArray,
   IsNumber,
+  IsDateString,
 } from 'class-validator';
 import { ObjectId } from 'mongoose';
 import { Payment } from 'src/common/models/payment.model';
@@ -39,9 +40,9 @@ export class CardTemplateData {
   /**
    * The description of the circle
    */
-  @IsDate()
+  @IsDateString()
   @IsOptional()
-  deadline?: Date;
+  deadline?: string;
 
   /**
    * The description of the circle

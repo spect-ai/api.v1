@@ -2,6 +2,7 @@ import {
   IsArray,
   IsBoolean,
   IsDate,
+  IsDateString,
   IsEmail,
   IsNotEmpty,
   IsNumber,
@@ -66,7 +67,7 @@ export class DetailedCardResponseDto {
   /**
    * The description of the circle
    */
-  @IsDate()
+  @IsDateString()
   @IsOptional()
   deadline?: string;
 
