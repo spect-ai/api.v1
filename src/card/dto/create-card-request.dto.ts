@@ -1,6 +1,6 @@
 import {
   IsArray,
-  IsDate,
+  IsDateString,
   IsNotEmpty,
   IsNumber,
   IsObject,
@@ -68,7 +68,7 @@ export class CreateCardRequestDto {
   /**
    * Card Deadline
    */
-  @IsString()
+  @IsDateString()
   @IsOptional()
   deadline?: string;
 

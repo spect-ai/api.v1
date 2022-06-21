@@ -295,9 +295,9 @@ export class ProjectService {
     if (!project) {
       throw new HttpException('Project not found', HttpStatus.NOT_FOUND);
     }
-
     // Find where the card is in the project now
     const sourceCardLoc = this.findCardLocationInProject(project, cardId);
+
     if (!sourceCardLoc.columnId) {
       throw new HttpException('Card not found', HttpStatus.NOT_FOUND);
     }
@@ -373,6 +373,7 @@ export class ProjectService {
         priority: 1,
         deadline: 1,
         slug: 1,
+        type: 1,
       });
     return this.projectPopulatedWithCardDetails(updatedProject);
   }

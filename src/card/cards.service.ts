@@ -63,6 +63,11 @@ export class CardsService {
     }
   }
 
+  reverseActivity(card: Card) {
+    card.activity = card.activity.reverse();
+    return card;
+  }
+
   async create(
     createCardDto: CreateCardRequestDto,
   ): Promise<DetailedProjectResponseDto> {
@@ -79,17 +84,13 @@ export class CardsService {
         project: createCardDto.project,
       });
 
-      console.log(createCardDto.deadline);
-      console.log(new Date(createCardDto.deadline));
       const card = await this.cardsRepository.create({
         ...createCardDto,
-        deadline: createCardDto.deadline,
         activity: activity,
         reward: defaultPayment,
         slug: cardNum.toString(),
         creator: this.requestProvider.user._id,
       });
-      console.log(card);
       const project = await this.projectService.addCardToProject(
         createCardDto.project,
         createCardDto.columnId,
@@ -142,6 +143,7 @@ export class CardsService {
     try {
       if (updateCardDto.columnId) {
         const card = await this.cardsRepository.findById(id);
+
         if (card.columnId !== updateCardDto.columnId) {
           await this.projectService.reorderCard(
             card.project.toString(),
@@ -154,11 +156,12 @@ export class CardsService {
           );
         }
       }
+
       const updatedCard = await this.cardsRepository.updateById(
         id,
         updateCardDto,
       );
-      return updatedCard;
+      return this.reverseActivity(updatedCard);
     } catch (error) {
       throw new InternalServerErrorException(
         'Failed card update',
@@ -345,9 +348,10 @@ export class CardsService {
         } as Activity,
       ];
 
-      return await this.cardsRepository.updateById(id, {
+      const updatedCard = await this.cardsRepository.updateById(id, {
         activity: card.activity,
       });
+      return this.reverseActivity(updatedCard);
     } catch (error) {
       throw new InternalServerErrorException(
         'Failed adding comment',
@@ -372,9 +376,10 @@ export class CardsService {
 
       card.activity[commentIndex].content = updateCommentDto.comment;
 
-      return await this.cardsRepository.updateById(id, {
+      const updatedCard = await this.cardsRepository.updateById(id, {
         activity: card.activity,
       });
+      return this.reverseActivity(updatedCard);
     } catch (error) {
       throw new InternalServerErrorException(
         'Failed updating comment',
@@ -398,9 +403,10 @@ export class CardsService {
 
       card.activity.splice(commentIndex, 1);
 
-      return await this.cardsRepository.updateById(id, {
+      const updatedCard = await this.cardsRepository.updateById(id, {
         activity: card.activity,
       });
+      return this.reverseActivity(updatedCard);
     } catch (error) {
       throw new InternalServerErrorException(
         'Failed adding comment',

@@ -22,6 +22,7 @@ export class UpdateCardRequestDto extends OmitType(CreateCardRequestDto, [
    */
   @IsString()
   @IsOptional()
+  @IsNotEmpty()
   columnId?: string;
 
   /**
@@ -29,5 +30,6 @@ export class UpdateCardRequestDto extends OmitType(CreateCardRequestDto, [
    */
   @IsObject()
   @IsOptional()
+  @IsNotEmpty()
   status?: CardStatus;
 }

@@ -10,7 +10,7 @@ import { RequestProvider } from 'src/users/user.provider';
 import { CirclesRepository } from './circles.repository';
 import { CreateCircleRequestDto } from './dto/create-circle-request.dto';
 import { DetailedCircleResponseDto } from './dto/detailed-circle-response.dto';
-import { JoinCircleRequestDto } from './dto/join-circle.dto';
+import { JoinCircleUsingInvitationRequestDto } from './dto/join-circle.dto';
 import { UpdateCircleRequestDto } from './dto/update-circle-request.dto';
 import { Circle } from './model/circle.model';
 import { DiscordService } from 'src/common/discord.service';
@@ -34,6 +34,16 @@ export class CirclesService {
     private readonly roleService: RolesService,
     private readonly datastructureManipulationService: DataStructureManipulationService,
   ) {}
+
+  validateNewMember(circle: Circle, newMember: string) {
+    const members = circle.members.map((m) => m.toString());
+    if (members.includes(newMember)) {
+      throw new HttpException(
+        'You are already a member of this circle',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
 
   async getCollatedUserPermissions(
     circleIds: string[],
@@ -208,66 +218,72 @@ export class CirclesService {
     }
   }
 
-  async join(
+  async joinUsingInvitation(
     id: string,
-    joinCircleDto: JoinCircleRequestDto,
+    joinCircleDto: JoinCircleUsingInvitationRequestDto,
   ): Promise<DetailedCircleResponseDto> {
     try {
       const circle =
         await this.circlesRepository.getCircleWithUnpopulatedReferences(id);
-      if (circle.members.includes(this.requestProvider.user._id)) {
+      this.validateNewMember(circle, this.requestProvider.user.id);
+
+      const inviteIndex = circle.invites.findIndex(
+        (invite) => invite.id === joinCircleDto.invitationId,
+      );
+      if (inviteIndex === -1) {
+        throw new HttpException('Invitation not found', HttpStatus.NOT_FOUND);
+      }
+
+      const invite = circle.invites[inviteIndex];
+      if (invite.uses <= 0 && moment(new Date()).isAfter(invite.expires)) {
         throw new HttpException(
-          'You are already a member of this circle',
-          HttpStatus.INTERNAL_SERVER_ERROR,
+          'Invalid invitation - expired or used up already',
+          HttpStatus.NOT_FOUND,
         );
       }
-      if (joinCircleDto.joinUsing === 'discord') {
-        const role = await this.roleService.getSpectRoleFromDiscord(
-          this.requestProvider.user,
-          circle,
-        );
-        if (!role) {
-          throw new HttpException(
-            'Role required to join circle not found',
-            HttpStatus.NOT_FOUND,
-          );
-        }
-        const updatedCircle = await this.circlesRepository.updateById(id, {
-          members: [...circle.members, this.requestProvider.user._id],
-          memberRoles: {
-            ...circle.memberRoles,
-            [this.requestProvider.user.id]: role,
-          },
-        });
-        return updatedCircle;
-      } else if (joinCircleDto.joinUsing === 'invitation') {
-        const inviteIndex = circle.invites.findIndex(
-          (invite) => invite.id === joinCircleDto.invitationId,
-        );
-        if (inviteIndex === -1) {
-          throw new HttpException('Invitation not found', HttpStatus.NOT_FOUND);
-        }
 
-        const invite = circle.invites[inviteIndex];
-        if (invite.uses <= 0 && moment(new Date()).isAfter(invite.expires)) {
-          throw new HttpException(
-            'Invalid invitation - expired or used up already',
-            HttpStatus.NOT_FOUND,
-          );
-        }
+      circle.invites.splice(inviteIndex, 1);
+      invite.uses--;
+      const updatedCircle = await this.circlesRepository.updateById(id, {
+        members: [...circle.members, this.requestProvider.user._id],
+        memberRoles: {
+          ...circle.memberRoles,
+          [this.requestProvider.user.id]: [invite.role],
+        },
+        invites: [...circle.invites, invite],
+      });
+      return updatedCircle;
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Failed joining circle',
+        error.message,
+      );
+    }
+  }
 
-        circle.invites.splice(inviteIndex, 1);
-        invite.uses--;
-        const updatedCircle = await this.circlesRepository.updateById(id, {
-          members: [...circle.members, this.requestProvider.user._id],
-          memberRoles: {
-            ...circle.memberRoles,
-            [this.requestProvider.user.id]: [invite.role],
-          },
-          invites: [...circle.invites, invite],
-        });
-        return updatedCircle;
+  async joinUsingDiscord(id: string): Promise<DetailedCircleResponseDto> {
+    try {
+      const circle =
+        await this.circlesRepository.getCircleWithUnpopulatedReferences(id);
+      this.validateNewMember(circle, this.requestProvider.user.id);
+      const role = await this.roleService.getSpectRoleFromDiscord(
+        this.requestProvider.user,
+        circle,
+      );
+      if (!role) {
+        throw new HttpException(
+          'Role required to join circle not found',
+          HttpStatus.NOT_FOUND,
+        );
       }
+      const updatedCircle = await this.circlesRepository.updateById(id, {
+        members: [...circle.members, this.requestProvider.user._id],
+        memberRoles: {
+          ...circle.memberRoles,
+          [this.requestProvider.user.id]: role,
+        },
+      });
+      return updatedCircle;
     } catch (error) {
       throw new InternalServerErrorException(
         'Failed joining circle',

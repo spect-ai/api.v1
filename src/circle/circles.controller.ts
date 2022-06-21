@@ -3,6 +3,7 @@ import {
   Controller,
   Get,
   HttpException,
+  InternalServerErrorException,
   Param,
   ParseArrayPipe,
   Patch,
@@ -18,10 +19,10 @@ import { DetailedCircleResponseDto } from './dto/detailed-circle-response.dto';
 import { UpdateCircleRequestDto } from './dto/update-circle-request.dto';
 import { RequestProvider } from 'src/users/user.provider';
 import { InviteDto } from './dto/invite.dto';
-import { JoinCircleRequestDto } from './dto/join-circle.dto';
+import { JoinCircleUsingInvitationRequestDto } from './dto/join-circle.dto';
 import { GetMemberDetailsOfCircleDto } from './dto/get-member-details.dto';
 import { ApiParam, ApiQuery } from '@nestjs/swagger';
-import { ObjectIdDto } from 'src/common/validators/object-id.dto';
+import { ObjectIdDto } from 'src/common/dtos/object-id.dto';
 
 @Controller('circle')
 export class CirclesController {
@@ -39,9 +40,18 @@ export class CirclesController {
   @Get('/myOrganizations')
   @UseGuards(SessionAuthGuard)
   async findMyOrganizations(): Promise<DetailedCircleResponseDto[]> {
-    return await this.circlesRepository.getParentCirclesByUser(
-      this.requestProvider.user._id,
-    );
+    try {
+      return await this.circlesRepository.getParentCirclesByUser(
+        `62a54d4ecb7a9f9d6d22a9f9`,
+      );
+    } catch (e) {
+      // TODO: Distinguish between DocumentNotFound error and other errors correctly, silent errors are not good
+      console.log(e);
+      throw new InternalServerErrorException(
+        'Failed to load user organization',
+        e.message,
+      );
+    }
   }
 
   @Get('/:circleIds/myPermissions')
@@ -91,6 +101,7 @@ export class CirclesController {
   }
 
   @Patch('/:id')
+  @UseGuards(SessionAuthGuard)
   async update(
     @Param() param: ObjectIdDto,
     @Body() circle: UpdateCircleRequestDto,
@@ -99,6 +110,7 @@ export class CirclesController {
   }
 
   @Patch('/invite/:id')
+  @UseGuards(SessionAuthGuard)
   async invite(
     @Param() param: ObjectIdDto,
     @Body() invitation: InviteDto,
@@ -106,16 +118,18 @@ export class CirclesController {
     return await this.circlesService.invite(param.id, invitation);
   }
 
-  @Patch('/join/:id')
+  @Patch('/joinUsingInvitation/:id')
   @ApiParam({ name: 'id', type: 'string' })
+  @UseGuards(SessionAuthGuard)
   async join(
     @Param() param: ObjectIdDto,
-    @Body() joinDto: JoinCircleRequestDto,
+    @Body() joinDto: JoinCircleUsingInvitationRequestDto,
   ): Promise<DetailedCircleResponseDto> {
-    return await this.circlesService.join(param.id, joinDto);
+    return await this.circlesService.joinUsingInvitation(param.id, joinDto);
   }
 
   @Post('/:id/delete')
+  @UseGuards(SessionAuthGuard)
   async delete(
     @Param() param: ObjectIdDto,
   ): Promise<DetailedCircleResponseDto> {

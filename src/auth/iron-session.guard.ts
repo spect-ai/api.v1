@@ -36,16 +36,8 @@ export class SessionAuthGuard implements CanActivate {
 }
 
 @Injectable()
-export class CircleRoleGuard implements CanActivate {
-  constructor(
-    private readonly ethAddressService: EthAddressService,
-    private readonly circleService: CirclesService,
-    private readonly roleService: RolesService,
-  ) {}
-
-  private async getActionsFromRoute(route: string) {
-    return ['createNewCircle'];
-  }
+export class FreePassGuard implements CanActivate {
+  constructor(private readonly ethAddressService: EthAddressService) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
@@ -56,17 +48,8 @@ export class CircleRoleGuard implements CanActivate {
           request.session.siwe?.address.toLowerCase(),
         )
       )?.user;
-      if (!user) {
-        request.session.destroy();
-        throw new HttpException(
-          { message: 'Invalid session./ User not found' },
-          422,
-        );
-      }
-
       request.user = user;
-      return true;
     }
-    return false;
+    return true;
   }
 }

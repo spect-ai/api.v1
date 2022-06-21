@@ -10,7 +10,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { SessionAuthGuard } from 'src/auth/iron-session.guard';
-import { ObjectIdDto } from 'src/common/validators/object-id.dto';
+import { ObjectIdDto } from 'src/common/dtos/object-id.dto';
 import { DetailedProjectResponseDto } from 'src/project/dto/detailed-project-response.dto';
 import { CardsService } from './cards.service';
 import { CreateCardRequestDto } from './dto/create-card-request.dto';
@@ -18,19 +18,16 @@ import { DetailedCardResponseDto } from './dto/detailed-card-response-dto';
 import { GetByProjectAndSlugDto } from './dto/get-by-project-and-slug.dto';
 import { UpdateCardRequestDto } from './dto/update-card-request.dto';
 import {
-  UpdateWorkThreadParamDto,
-  CreateWorkUnitParamDto,
-  UpdateWorkUnitParamDto,
-} from './dto/param.dto';
-import {
   UpdateWorkUnitRequestDto,
   CreateWorkThreadRequestDto,
   UpdateWorkThreadRequestDto,
   CreateWorkUnitRequestDto,
 } from './dto/work-request.dto';
 import { AddCommentDto, UpdateCommentDto } from './dto/comment-body.dto';
+import { ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
 
 @Controller('card')
+@ApiTags('card')
 export class CardsController {
   constructor(private readonly cardsService: CardsService) {}
 
@@ -60,6 +57,7 @@ export class CardsController {
   }
 
   @Patch('/:id')
+  @UseGuards(SessionAuthGuard)
   async update(
     @Param() params: ObjectIdDto,
     @Body() card: UpdateCardRequestDto,
@@ -68,6 +66,7 @@ export class CardsController {
   }
 
   @Patch('/:id/createWorkThread')
+  @UseGuards(SessionAuthGuard)
   async createWorkThread(
     @Param() params: ObjectIdDto,
     @Body() createWorkThread: CreateWorkThreadRequestDto,
@@ -79,6 +78,7 @@ export class CardsController {
   }
 
   @Patch('/:id/updateWorkThread')
+  @UseGuards(SessionAuthGuard)
   async updateWorkThread(
     @Param() params: ObjectIdDto,
     @Query('threadId') threadId: string,
@@ -92,6 +92,7 @@ export class CardsController {
   }
 
   @Patch('/:id/createWorkUnit')
+  @UseGuards(SessionAuthGuard)
   async createWorkUnit(
     @Param() params: ObjectIdDto,
     @Query('threadId') threadId: string,
@@ -105,6 +106,7 @@ export class CardsController {
   }
 
   @Patch('/:id/updateWorkUnit')
+  @UseGuards(SessionAuthGuard)
   async updateWorkUnit(
     @Param() params: ObjectIdDto,
     @Query('threadId') threadId: string,
@@ -120,6 +122,8 @@ export class CardsController {
   }
 
   @Patch('/:id/addComment')
+  @ApiParam({ name: 'id', type: 'string' })
+  @UseGuards(SessionAuthGuard)
   async addComment(
     @Param() params: ObjectIdDto,
     @Body() addCommentDto: AddCommentDto,
@@ -128,6 +132,9 @@ export class CardsController {
   }
 
   @Patch('/:id/updateComment')
+  @ApiParam({ name: 'id', type: 'string' })
+  @ApiQuery({ name: 'commitId', type: 'string' })
+  @UseGuards(SessionAuthGuard)
   async udpateComment(
     @Param() params: ObjectIdDto,
     @Query('commitId') commitId: string,
@@ -141,6 +148,7 @@ export class CardsController {
   }
 
   @Patch('/:id/deleteComment')
+  @UseGuards(SessionAuthGuard)
   async deleteComment(
     @Param() params: ObjectIdDto,
     @Query('commitId') commitId: string,

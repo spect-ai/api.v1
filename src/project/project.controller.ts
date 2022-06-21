@@ -1,5 +1,14 @@
-import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
-import { ObjectIdDto } from 'src/common/validators/object-id.dto';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Patch,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
+import { SessionAuthGuard } from 'src/auth/iron-session.guard';
+import { ObjectIdDto } from 'src/common/dtos/object-id.dto';
 import { CreateProjectRequestDto } from './dto/create-project-request.dto';
 import { DetailedProjectResponseDto } from './dto/detailed-project-response.dto';
 import { ReorderCardReqestDto } from './dto/reorder-card-request.dto';
@@ -25,11 +34,13 @@ export class ProjectController {
   }
 
   @Post('/')
+  @UseGuards(SessionAuthGuard)
   async create(@Body() project: CreateProjectRequestDto): Promise<Project> {
     return await this.projectService.create(project);
   }
 
   @Patch('/:id')
+  @UseGuards(SessionAuthGuard)
   async update(
     @Param() param: ObjectIdDto,
     @Body() project: UpdateProjectRequestDto,
@@ -38,6 +49,7 @@ export class ProjectController {
   }
 
   @Patch('/:id/reorderCard/:cardId')
+  @UseGuards(SessionAuthGuard)
   async reorderCard(
     @Param() param: ObjectIdDto,
     @Param('cardId') cardId,
@@ -51,6 +63,7 @@ export class ProjectController {
   }
 
   @Post('/:id/column/:columnId/delete')
+  @UseGuards(SessionAuthGuard)
   async deleteColumn(
     @Param() param: ObjectIdDto,
     @Param('columnId') columnId,
@@ -59,6 +72,7 @@ export class ProjectController {
   }
 
   @Patch('/:id/column/:columnId/')
+  @UseGuards(SessionAuthGuard)
   async updateColumnDetails(
     @Param() param: ObjectIdDto,
     @Param('columnId') columnId,
@@ -72,6 +86,7 @@ export class ProjectController {
   }
 
   @Post('/:id/delete')
+  @UseGuards(SessionAuthGuard)
   async delete(@Param() param: ObjectIdDto): Promise<Project> {
     return await this.projectService.delete(param.id);
   }

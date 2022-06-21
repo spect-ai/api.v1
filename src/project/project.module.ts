@@ -9,6 +9,7 @@ import { CirclesModule } from 'src/circle/circles.module';
 import { TemplatesModule } from 'src/template/templates.module';
 import { CardsModule } from 'src/card/cards.module';
 import { DataStructureManipulationService } from 'src/common/dataStructureManipulation.service';
+import { EthAddressModule } from 'src/_eth-address/_eth-address.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { DataStructureManipulationService } from 'src/common/dataStructureManipu
     CirclesModule,
     forwardRef(() => TemplatesModule),
     forwardRef(() => CardsModule),
+    EthAddressModule,
   ],
   controllers: [ProjectController],
   providers: [
