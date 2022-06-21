@@ -70,6 +70,7 @@ export class CardsController {
     return await this.cardsService.create(card);
   }
 
+  @UseGuards(SessionAuthGuard)
   @Patch('/:id')
   @UseGuards(SessionAuthGuard)
   async update(
@@ -79,6 +80,7 @@ export class CardsController {
     return await this.cardsService.update(params.id, card);
   }
 
+  @UseGuards(SessionAuthGuard)
   @Patch('/:id/createWorkThread')
   @UseGuards(SessionAuthGuard)
   async createWorkThread(
@@ -91,6 +93,7 @@ export class CardsController {
     );
   }
 
+  @UseGuards(SessionAuthGuard)
   @Patch('/:id/updateWorkThread')
   @UseGuards(SessionAuthGuard)
   async updateWorkThread(
@@ -105,6 +108,7 @@ export class CardsController {
     );
   }
 
+  @UseGuards(SessionAuthGuard)
   @Patch('/:id/createWorkUnit')
   @UseGuards(SessionAuthGuard)
   async createWorkUnit(
@@ -119,6 +123,7 @@ export class CardsController {
     );
   }
 
+  @UseGuards(SessionAuthGuard)
   @Patch('/:id/updateWorkUnit')
   @UseGuards(SessionAuthGuard)
   async updateWorkUnit(
@@ -146,6 +151,7 @@ export class CardsController {
     return await this.cardsService.addComment(params.id, addCommentDto);
   }
 
+  @UseGuards(SessionAuthGuard)
   @Patch('/:id/updateComment')
   @ApiParam({ name: 'id', type: 'string' })
   @ApiQuery({ name: 'commitId', type: 'string' })
@@ -162,6 +168,7 @@ export class CardsController {
     );
   }
 
+  @UseGuards(SessionAuthGuard)
   @Patch('/:id/deleteComment')
   @UseGuards(SessionAuthGuard)
   async deleteComment(
@@ -171,6 +178,7 @@ export class CardsController {
     return await this.cardsService.deleteComment(params.id, commitId);
   }
 
+  @UseGuards(SessionAuthGuard)
   @Post('/:id/delete')
   async delete(@Param() params: ObjectIdDto): Promise<DetailedCardResponseDto> {
     return await this.cardsService.delete(params.id);
