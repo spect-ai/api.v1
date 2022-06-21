@@ -27,7 +27,6 @@ export class AuthService {
 
     req.session.siwe = fields;
     await req.session.save();
-
     const _ethAddress = await this.ethAddressService.findByAddress(
       req.session.siwe.address.toLowerCase(),
     );
