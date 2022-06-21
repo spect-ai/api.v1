@@ -42,7 +42,7 @@ export class CirclesController {
   async findMyOrganizations(): Promise<DetailedCircleResponseDto[]> {
     try {
       return await this.circlesRepository.getParentCirclesByUser(
-        `62a54d4ecb7a9f9d6d22a9f9`,
+        this.requestProvider.user.id,
       );
     } catch (e) {
       // TODO: Distinguish between DocumentNotFound error and other errors correctly, silent errors are not good
