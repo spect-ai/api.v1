@@ -10,6 +10,7 @@ import { TemplatesModule } from 'src/template/templates.module';
 import { RequestProvider } from 'src/users/user.provider';
 import { EthAddressModule } from 'src/_eth-address/_eth-address.module';
 import { EthAddressService } from 'src/_eth-address/_eth-address.service';
+import { ActionService } from './actions.service';
 import { CardsController } from './cards.controller';
 import { CardsRepository } from './cards.repository';
 import { CardsService } from './cards.service';
@@ -32,6 +33,7 @@ import { Card } from './model/card.model';
     ActivityBuilder,
     ProjectService,
     DataStructureManipulationService,
+    ActionService,
   ],
   exports: [CardsService, CardsRepository, CardsModule],
 })

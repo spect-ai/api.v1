@@ -34,20 +34,20 @@ export class Card extends BaseModel {
   /**
    * The id of the creator of the card
    */
-  @prop({ ref: () => User })
-  creator: ObjectId;
+  @prop()
+  creator: string;
 
   /**
    * The ids of all the reviewers of the card
    */
-  @prop({ ref: () => User, default: [] })
-  reviewer: ObjectId[];
+  @prop({ default: [] })
+  reviewer: string[];
 
   /**
    * The ids of all the assignees of the card
    */
-  @prop({ ref: () => User, default: [] })
-  assignee: ObjectId[];
+  @prop({ default: [] })
+  assignee: string[];
 
   /**
    * The project that the card belongs to

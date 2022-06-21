@@ -90,7 +90,7 @@ export class CardsService {
         activity: activity,
         reward: defaultPayment,
         slug: cardNum.toString(),
-        creator: this.requestProvider.user._id,
+        creator: this.requestProvider.user.id,
       });
       const project = await this.projectService.addCardToProject(
         createCardDto.project,

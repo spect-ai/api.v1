@@ -22,6 +22,7 @@ import { DataStructureManipulationService } from 'src/common/dataStructureManipu
 import { ObjectId } from 'mongoose';
 import { GetMemberDetailsOfCircleDto } from './dto/get-member-details.dto';
 import { User } from 'src/users/model/users.model';
+import { CirclePermission } from 'src/common/types/role.type';
 
 @Injectable()
 export class CirclesService {
@@ -48,7 +49,7 @@ export class CirclesService {
   async getCollatedUserPermissions(
     circleIds: string[],
     user: User,
-  ): Promise<any> {
+  ): Promise<CirclePermission> {
     const circles = await this.circlesRepository.findAll(
       {
         _id: { $in: circleIds },
@@ -70,9 +71,12 @@ export class CirclesService {
         }
       }
     }
-    return this.datastructureManipulationService.collateifyBooleanFields(
-      userPermissions,
-    );
+
+    const circlePermissions: CirclePermission =
+      this.datastructureManipulationService.collateifyBooleanFields(
+        userPermissions,
+      ) as CirclePermission;
+    return circlePermissions;
   }
 
   async getMemberDetailsOfCircles(circleIds: string[]): Promise<any> {

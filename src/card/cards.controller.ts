@@ -25,11 +25,16 @@ import {
 } from './dto/work-request.dto';
 import { AddCommentDto, UpdateCommentDto } from './dto/comment-body.dto';
 import { ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { ActionService } from './actions.service';
+import { ValidCardActionResponseDto } from './dto/card-access-response.dto';
 
 @Controller('card')
 @ApiTags('card')
 export class CardsController {
-  constructor(private readonly cardsService: CardsService) {}
+  constructor(
+    private readonly cardsService: CardsService,
+    private readonly actionService: ActionService,
+  ) {}
 
   @Get('/byProjectAndSlug/:project/:slug')
   async findBySlug(
@@ -46,6 +51,14 @@ export class CardsController {
     @Param() params: ObjectIdDto,
   ): Promise<DetailedCardResponseDto> {
     return await this.cardsService.getDetailedCard(params.id);
+  }
+
+  @Get('/:id/myValidActions')
+  @UseGuards(SessionAuthGuard)
+  async getValidActions(
+    @Param() params: ObjectIdDto,
+  ): Promise<ValidCardActionResponseDto> {
+    return await this.actionService.getValidActions(params.id);
   }
 
   @Post('/')

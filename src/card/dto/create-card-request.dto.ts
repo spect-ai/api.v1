@@ -30,14 +30,14 @@ export class CreateCardRequestDto {
    */
   @IsArray()
   @IsOptional()
-  reviewer?: ObjectId[];
+  reviewer?: string[];
 
   /**
    * The assignee of the card
    */
   @IsArray()
   @IsOptional()
-  assignee?: ObjectId[];
+  assignee?: string[];
 
   /**
    * The card's project

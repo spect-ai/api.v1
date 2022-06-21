@@ -10,10 +10,7 @@ export type CirclePermission = {
   inviteMembers: boolean;
   manageRoles: boolean;
   manageMembers: boolean;
-};
-
-export type ProjectPermission = {
-  manageProjectSettings: boolean;
+  manageCardProperties: boolean;
   createNewCard: boolean;
   manageRewards: boolean;
   reviewWork: boolean;
@@ -31,7 +28,7 @@ export type Role = {
 
   selfAssignable: string;
 
-  permissions: CirclePermission | ProjectPermission;
+  permissions: CirclePermission;
 };
 
 export type Roles = {

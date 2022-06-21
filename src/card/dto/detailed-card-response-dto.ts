@@ -34,14 +34,14 @@ export class DetailedCardResponseDto {
    */
   @IsArray()
   @IsOptional()
-  reviewer?: ObjectId[];
+  reviewer?: string[];
 
   /**
    * The description of the circle
    */
   @IsArray()
   @IsOptional()
-  assignee?: ObjectId[];
+  assignee?: string[];
 
   /**
    * The description of the circle
