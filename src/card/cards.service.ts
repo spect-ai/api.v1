@@ -95,7 +95,7 @@ export class CardsService {
       );
       return {
         project: project,
-        card: await card.populate('project'),
+        card: card,
       };
     } catch (error) {
       throw new InternalServerErrorException(
@@ -164,11 +164,11 @@ export class CardsService {
         }
       }
 
-      const updatedCard = await this.cardsRepository.updateById(
-        id,
-        updateCardDto,
-      );
-      return this.reverseActivity(await updatedCard.populate('project'));
+      const updatedCard = await this.cardsRepository
+        .updateById(id, updateCardDto)
+        .populate('project')
+        .populate('circle');
+      return this.reverseActivity(updatedCard);
     } catch (error) {
       throw new InternalServerErrorException(
         'Failed card update',
@@ -212,10 +212,13 @@ export class CardsService {
       };
       const workThreadOrder = [...card.workThreadOrder, threadId];
 
-      const updatedCard = await this.cardsRepository.updateById(id, {
-        workThreads,
-        workThreadOrder,
-      });
+      const updatedCard = await this.cardsRepository
+        .updateById(id, {
+          workThreads,
+          workThreadOrder,
+        })
+        .populate('project')
+        .populate('circle');
       return updatedCard;
     } catch (error) {
       throw new InternalServerErrorException(
@@ -241,9 +244,12 @@ export class CardsService {
         updatedAt: new Date(),
       };
 
-      const updatedCard = await this.cardsRepository.updateById(id, {
-        workThreads: card.workThreads,
-      });
+      const updatedCard = await this.cardsRepository
+        .updateById(id, {
+          workThreads: card.workThreads,
+        })
+        .populate('project')
+        .populate('circle');
 
       return updatedCard;
     } catch (error) {
@@ -288,9 +294,12 @@ export class CardsService {
         updatedAt: new Date(),
       };
 
-      const updatedCard = await this.cardsRepository.updateById(id, {
-        workThreads: card.workThreads,
-      });
+      const updatedCard = await this.cardsRepository
+        .updateById(id, {
+          workThreads: card.workThreads,
+        })
+        .populate('project')
+        .populate('circle');
 
       return updatedCard;
     } catch (error) {
@@ -325,9 +334,12 @@ export class CardsService {
         updatedAt: new Date(),
       };
 
-      const updatedCard = await this.cardsRepository.updateById(id, {
-        workThreads: card.workThreads,
-      });
+      const updatedCard = await this.cardsRepository
+        .updateById(id, {
+          workThreads: card.workThreads,
+        })
+        .populate('project')
+        .populate('circle');
 
       return updatedCard;
     } catch (error) {
@@ -358,9 +370,12 @@ export class CardsService {
         } as Activity,
       ];
 
-      const updatedCard = await this.cardsRepository.updateById(id, {
-        activity: card.activity,
-      });
+      const updatedCard = await this.cardsRepository
+        .updateById(id, {
+          activity: card.activity,
+        })
+        .populate('project')
+        .populate('circle');
       return this.reverseActivity(updatedCard);
     } catch (error) {
       throw new InternalServerErrorException(
@@ -386,9 +401,12 @@ export class CardsService {
 
       card.activity[commentIndex].content = updateCommentDto.comment;
 
-      const updatedCard = await this.cardsRepository.updateById(id, {
-        activity: card.activity,
-      });
+      const updatedCard = await this.cardsRepository
+        .updateById(id, {
+          activity: card.activity,
+        })
+        .populate('project')
+        .populate('circle');
       return this.reverseActivity(updatedCard);
     } catch (error) {
       throw new InternalServerErrorException(
@@ -413,9 +431,12 @@ export class CardsService {
 
       card.activity.splice(commentIndex, 1);
 
-      const updatedCard = await this.cardsRepository.updateById(id, {
-        activity: card.activity,
-      });
+      const updatedCard = await this.cardsRepository
+        .updateById(id, {
+          activity: card.activity,
+        })
+        .populate('project')
+        .populate('circle');
       return this.reverseActivity(updatedCard);
     } catch (error) {
       throw new InternalServerErrorException(
