@@ -6,7 +6,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { CirclesRepository } from 'src/circle/circles.repository';
-import { ActivityBuilder } from 'src/common/activity.builder';
+import { ActivityBuilder } from 'src/card/activity.builder';
 import { DetailedProjectResponseDto } from 'src/project/dto/detailed-project-response.dto';
 import { ReorderCardReqestDto } from 'src/project/dto/reorder-card-request.dto';
 import { ProjectService } from 'src/project/project.service';
@@ -73,11 +73,7 @@ export class CardsService {
     project: DetailedProjectResponseDto;
   }> {
     try {
-      const activity = this.activityBuilder.getActivity(
-        this.requestProvider,
-        createCardDto,
-        null,
-      );
+      const activity = this.activityBuilder.buildNewCardActivity(createCardDto);
       const defaultPayment = await this.circleRepository.getDefaultPayment(
         createCardDto.circle,
       );
@@ -87,7 +83,7 @@ export class CardsService {
 
       const card = await this.cardsRepository.create({
         ...createCardDto,
-        activity: activity,
+        activity: [activity],
         reward: defaultPayment,
         slug: cardNum.toString(),
         creator: this.requestProvider.user.id,
@@ -99,7 +95,7 @@ export class CardsService {
       );
       return {
         project: project,
-        card: card,
+        card: await card.populate('project'),
       };
     } catch (error) {
       throw new InternalServerErrorException(
@@ -148,6 +144,13 @@ export class CardsService {
       if (updateCardDto.columnId) {
         const card = await this.cardsRepository.findById(id);
 
+        const activities = this.activityBuilder.buildUpdatedCardActivity(
+          updateCardDto,
+          card,
+        );
+
+        console.log(activities);
+
         if (card.columnId !== updateCardDto.columnId) {
           await this.projectService.reorderCard(
             card.project.toString(),
@@ -165,7 +168,7 @@ export class CardsService {
         id,
         updateCardDto,
       );
-      return this.reverseActivity(updatedCard);
+      return this.reverseActivity(await updatedCard.populate('project'));
     } catch (error) {
       throw new InternalServerErrorException(
         'Failed card update',

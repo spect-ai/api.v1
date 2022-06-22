@@ -25,6 +25,7 @@ import { TemplatesController } from './template/templates.controller';
 import { RolesService } from './roles/roles.service';
 import { RegistryController } from './registry/registry.controller';
 import { ActionService } from './card/actions.service';
+import { ActivityBuilder } from './card/activity.builder';
 
 @Module({
   imports: [
@@ -60,6 +61,7 @@ import { ActionService } from './card/actions.service';
     RolesService,
     RegistryService,
     ActionService,
+    ActivityBuilder,
   ],
 })
 export class AppModule {}

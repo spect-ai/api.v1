@@ -2967,6 +2967,11 @@ external-editor@^3.0.3:
     iconv-lite "^0.4.24"
     tmp "^0.0.33"
 
+fast-array-diff@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/fast-array-diff/-/fast-array-diff-1.0.1.tgz#463bacfeddaa3f5d56b79f6847fe322f15581c92"
+  integrity sha512-pU83E/Y7+c/hRrDlmIiPYHy0Ugt+QypqzHKZI5qFOWMJAspWdmOyIeN/1FbdnGPlROp6FeGLLfhMO075DBqb4A==
+
 fast-deep-equal@^3.1.1, fast-deep-equal@^3.1.3:
   version "3.1.3"
   resolved "https://registry.npmjs.org/fast-deep-equal/-/fast-deep-equal-3.1.3.tgz"

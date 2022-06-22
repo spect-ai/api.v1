@@ -1,7 +1,7 @@
 import { forwardRef, Module } from '@nestjs/common';
 import { TypegooseModule } from 'nestjs-typegoose';
 import { CirclesModule } from 'src/circle/circles.module';
-import { ActivityBuilder } from 'src/common/activity.builder';
+import { ActivityBuilder } from 'src/card/activity.builder';
 import { DataStructureManipulationService } from 'src/common/dataStructureManipulation.service';
 import { SlugService } from 'src/common/slug.service';
 import { ProjectModule } from 'src/project/project.module';
@@ -23,6 +23,7 @@ import { Card } from './model/card.model';
     CirclesModule,
     TemplatesModule,
     EthAddressModule,
+    RequestProvider,
   ],
   controllers: [CardsController],
   providers: [
@@ -30,10 +31,10 @@ import { Card } from './model/card.model';
     CardsRepository,
     SlugService,
     RequestProvider,
-    ActivityBuilder,
     ProjectService,
     DataStructureManipulationService,
     ActionService,
+    ActivityBuilder,
   ],
   exports: [CardsService, CardsRepository, CardsModule],
 })
