@@ -124,10 +124,12 @@ export class CardsService {
     slug: string,
   ): Promise<DetailedCardResponseDto> {
     try {
-      return await this.cardsRepository.getCardWithPopulatedReferencesBySlug(
-        project,
-        slug,
-      );
+      const updatedCard =
+        await this.cardsRepository.getCardWithPopulatedReferencesBySlug(
+          project,
+          slug,
+        );
+      return this.reverseActivity(updatedCard);
     } catch (error) {
       throw new InternalServerErrorException(
         'Failed card retrieval',

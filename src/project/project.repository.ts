@@ -36,6 +36,7 @@ export class ProjectsRepository extends BaseRepository<Project> {
         priority: 1,
         deadline: 1,
         slug: 1,
+        creator: 1,
       });
   }
 

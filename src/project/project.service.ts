@@ -21,7 +21,7 @@ import { ColumnDetailsModel } from './model/columnDetails.model';
 import { Project } from './model/project.model';
 import { ProjectsRepository } from './project.repository';
 import { CardLoc } from './types/card-loc.type';
-import mongoose from 'mongoose';
+import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
 export class ProjectService {
@@ -138,11 +138,61 @@ export class ProjectService {
           slug: 1,
           type: 1,
           project: 1,
+          creator: 1,
         });
       return this.projectPopulatedWithCardDetails(updatedProject);
     } catch (error) {
       throw new InternalServerErrorException(
         'Failed project update',
+        error.message,
+      );
+    }
+  }
+
+  async addColumn(projectId: string): Promise<DetailedProjectResponseDto> {
+    try {
+      const project = await this.projectRepository.findById(projectId);
+      if (!project) {
+        throw new HttpException('Project not found', HttpStatus.NOT_FOUND);
+      }
+      const columnOrder = project.columnOrder;
+      const columnDetails = project.columnDetails;
+      const newColumnId = uuidv4();
+      const newColumn = {
+        columnId: newColumnId,
+        name: 'New Column',
+        cards: [],
+        defaultCardType: 'Task',
+      };
+      const newColumnDetails = {
+        ...columnDetails,
+        [newColumnId]: newColumn,
+      };
+      const newColumnOrder = [...columnOrder, newColumnId];
+
+      const udpatedProject = await this.projectRepository
+        .updateById(projectId, {
+          columnOrder: newColumnOrder,
+          columnDetails: newColumnDetails,
+        })
+        .populate('cards', {
+          title: 1,
+          labels: 1,
+          assignee: 1,
+          reviewer: 1,
+          reward: 1,
+          priority: 1,
+          deadline: 1,
+          slug: 1,
+          type: 1,
+          project: 1,
+          creator: 1,
+        });
+
+      return this.projectPopulatedWithCardDetails(udpatedProject);
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Failed column deletion',
         error.message,
       );
     }
@@ -182,10 +232,24 @@ export class ProjectService {
         },
       );
 
-      const udpatedProject = await this.projectRepository.updateById(id, {
-        columnOrder,
-        columnDetails,
-      });
+      const udpatedProject = await this.projectRepository
+        .updateById(id, {
+          columnOrder,
+          columnDetails,
+        })
+        .populate('cards', {
+          title: 1,
+          labels: 1,
+          assignee: 1,
+          reviewer: 1,
+          reward: 1,
+          priority: 1,
+          deadline: 1,
+          slug: 1,
+          type: 1,
+          project: 1,
+          creator: 1,
+        });
 
       return this.projectPopulatedWithCardDetails(udpatedProject);
     } catch (error) {
@@ -214,9 +278,23 @@ export class ProjectService {
         ...columnDetails[columnId],
         ...updateColumnDto,
       };
-      const updatedProject = await this.projectRepository.updateById(id, {
-        columnDetails,
-      });
+      const updatedProject = await this.projectRepository
+        .updateById(id, {
+          columnDetails,
+        })
+        .populate('cards', {
+          title: 1,
+          labels: 1,
+          assignee: 1,
+          reviewer: 1,
+          reward: 1,
+          priority: 1,
+          deadline: 1,
+          slug: 1,
+          type: 1,
+          project: 1,
+          creator: 1,
+        });
       return this.projectPopulatedWithCardDetails(updatedProject);
     } catch (error) {
       throw new InternalServerErrorException(
@@ -277,6 +355,7 @@ export class ProjectService {
         slug: 1,
         type: 1,
         project: 1,
+        creator: 1,
       })
       .populate('parents'); // need to recheck this, might not need to populate parents
 
@@ -310,7 +389,6 @@ export class ProjectService {
     }
     // Find where the card is in the project now
     const sourceCardLoc = this.findCardLocationInProject(project, cardId);
-
     if (!sourceCardLoc.columnId) {
       throw new HttpException('Card not found', HttpStatus.NOT_FOUND);
     }
@@ -324,11 +402,14 @@ export class ProjectService {
     } else destinationCardIndex = destinationCardLoc.destinationCardIndex;
 
     // if destination card is in the same column, reduce the index by 1 only if the destination index is greater than the source index
-    if (sourceCardLoc.columnId === destinationCardLoc.destinationColumnId) {
-      if (sourceCardLoc.cardIndex < destinationCardIndex) {
-        destinationCardIndex--;
-      }
-    }
+
+    // what is this for??? it works well without this, this causes inconsistent ordering of cards
+
+    // if (sourceCardLoc.columnId === destinationCardLoc.destinationColumnId) {
+    //   if (sourceCardLoc.cardIndex < destinationCardIndex) {
+    //     destinationCardIndex--;
+    //   }
+    // }
 
     // In case destination card index is not valid, throw error
     const columnDetails = project.columnDetails;
@@ -388,6 +469,7 @@ export class ProjectService {
         slug: 1,
         type: 1,
         project: 1,
+        creator: 1,
       });
     return this.projectPopulatedWithCardDetails(updatedProject);
   }

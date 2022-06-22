@@ -62,6 +62,14 @@ export class ProjectController {
     );
   }
 
+  @Post('/:id/column/add')
+  @UseGuards(SessionAuthGuard)
+  async addColumn(
+    @Param() param: ObjectIdDto,
+  ): Promise<DetailedProjectResponseDto> {
+    return await this.projectService.addColumn(param.id);
+  }
+
   @Post('/:id/column/:columnId/delete')
   @UseGuards(SessionAuthGuard)
   async deleteColumn(

@@ -14,16 +14,14 @@ export class UsersService {
     private readonly requestProvider: RequestProvider,
   ) {}
 
-  async create(createUserDto: CreateUserDto) {
+  async create(ethAddress: string) {
     const numUsers = await this.usersRepository.count();
     const user = await this.usersRepository.create({
-      ...createUserDto,
-      username: createUserDto.username
-        ? createUserDto.username
-        : `fren${numUsers}`,
+      username: `fren${numUsers}`,
+      ethAddress: ethAddress,
     });
     await this.ethAddressRepository.create({
-      ethAddress: createUserDto.ethAddress,
+      ethAddress: ethAddress,
       user: user._id,
     });
     return user;
