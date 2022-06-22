@@ -6,6 +6,7 @@ export class CreateUserDto {
    */
   @IsString()
   @IsNotEmpty()
+  @IsOptional()
   username: string;
 
   /**

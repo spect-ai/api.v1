@@ -27,14 +27,16 @@ export class AuthService {
 
     req.session.siwe = fields;
     await req.session.save();
-
+    console.log(req.session.siwe.address);
     const _ethAddress = await this.ethAddressService.findByAddress(
       req.session.siwe.address.toLowerCase(),
     );
     if (!_ethAddress) {
-      const user = await this.userService.create(
-        req.session.siwe.address.toLowerCase(),
-      );
+      const user = await this.userService.create({
+        ethAddress: req.session.siwe.address.toLowerCase(),
+        username: '',
+        avatar: '',
+      });
       return user;
     }
     return _ethAddress.user;

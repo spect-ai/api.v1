@@ -1,6 +1,7 @@
 import { ObjectId } from 'mongoose';
 
 export type WorkUnit = {
+  unitId: string;
   /**
    * The persone thats adding he subission or revision
    */
@@ -27,6 +28,7 @@ export type WorkThread = {
   /**
    * The thread of the work units being done on the card
    */
+  name: string;
   workUnits: WorkUnits;
   workUnitOrder: string[];
   status: 'accepted' | 'inReview' | 'inRevision' | 'draft';

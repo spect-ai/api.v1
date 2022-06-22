@@ -4,6 +4,12 @@ import { CreateCardRequestDto } from './create-card-request.dto';
 
 export class CreateWorkThreadRequestDto {
   /**
+   * Submission name
+   */
+  @IsString()
+  @IsNotEmpty()
+  name: string;
+  /**
    * Submission content
    */
   @IsString()
@@ -19,6 +25,13 @@ export class CreateWorkThreadRequestDto {
 }
 
 export class UpdateWorkThreadRequestDto {
+  /**
+   * Submission name
+   */
+  @IsString()
+  @IsNotEmpty()
+  @IsOptional()
+  name: string;
   /**
    * Is the submission a revision instruction or a submission
    */

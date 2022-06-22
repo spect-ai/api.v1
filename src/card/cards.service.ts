@@ -197,6 +197,8 @@ export class CardsService {
       const workThreads = {
         ...card.workThreads,
         [threadId]: {
+          threadId,
+          name: createWorkThread.name,
           workUnitOrder: [workUnitId],
           workUnits: workUnit,
           active: true,
@@ -263,6 +265,7 @@ export class CardsService {
       const workUnits = {
         ...card.workThreads[threadId].workUnits,
         [workUnitId]: {
+          unitId: workUnitId,
           user: this.requestProvider.user._id,
           content: createWorkUnit.content,
           workUnitId,
