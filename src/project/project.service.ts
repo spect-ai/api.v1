@@ -124,22 +124,12 @@ export class ProjectService {
     updateProjectDto: UpdateProjectRequestDto,
   ): Promise<DetailedProjectResponseDto> {
     try {
-      const updatedProject = await this.projectRepository
-        .updateById(id, updateProjectDto)
-        .populate('parents')
-        .populate('cards', {
-          title: 1,
-          labels: 1,
-          assignee: 1,
-          reviewer: 1,
-          reward: 1,
-          priority: 1,
-          deadline: 1,
-          slug: 1,
-          type: 1,
-          project: 1,
-          creator: 1,
-        });
+      const updatedProject =
+        await this.projectRepository.updateProjectAndReturnWithPopulatedReferences(
+          id,
+          updateProjectDto,
+        );
+
       return this.projectPopulatedWithCardDetails(updatedProject);
     } catch (error) {
       throw new InternalServerErrorException(
@@ -170,24 +160,14 @@ export class ProjectService {
       };
       const newColumnOrder = [...columnOrder, newColumnId];
 
-      const udpatedProject = await this.projectRepository
-        .updateById(projectId, {
-          columnOrder: newColumnOrder,
-          columnDetails: newColumnDetails,
-        })
-        .populate('cards', {
-          title: 1,
-          labels: 1,
-          assignee: 1,
-          reviewer: 1,
-          reward: 1,
-          priority: 1,
-          deadline: 1,
-          slug: 1,
-          type: 1,
-          project: 1,
-          creator: 1,
-        });
+      const udpatedProject =
+        await this.projectRepository.updateProjectAndReturnWithPopulatedReferences(
+          projectId,
+          {
+            columnOrder: newColumnOrder,
+            columnDetails: newColumnDetails,
+          },
+        );
 
       return this.projectPopulatedWithCardDetails(udpatedProject);
     } catch (error) {
@@ -232,24 +212,14 @@ export class ProjectService {
         },
       );
 
-      const udpatedProject = await this.projectRepository
-        .updateById(id, {
-          columnOrder,
-          columnDetails,
-        })
-        .populate('cards', {
-          title: 1,
-          labels: 1,
-          assignee: 1,
-          reviewer: 1,
-          reward: 1,
-          priority: 1,
-          deadline: 1,
-          slug: 1,
-          type: 1,
-          project: 1,
-          creator: 1,
-        });
+      const udpatedProject =
+        await this.projectRepository.updateProjectAndReturnWithPopulatedReferences(
+          id,
+          {
+            columnOrder,
+            columnDetails,
+          },
+        );
 
       return this.projectPopulatedWithCardDetails(udpatedProject);
     } catch (error) {
@@ -278,23 +248,13 @@ export class ProjectService {
         ...columnDetails[columnId],
         ...updateColumnDto,
       };
-      const updatedProject = await this.projectRepository
-        .updateById(id, {
-          columnDetails,
-        })
-        .populate('cards', {
-          title: 1,
-          labels: 1,
-          assignee: 1,
-          reviewer: 1,
-          reward: 1,
-          priority: 1,
-          deadline: 1,
-          slug: 1,
-          type: 1,
-          project: 1,
-          creator: 1,
-        });
+      const updatedProject =
+        await this.projectRepository.updateProjectAndReturnWithPopulatedReferences(
+          id,
+          {
+            columnDetails,
+          },
+        );
       return this.projectPopulatedWithCardDetails(updatedProject);
     } catch (error) {
       throw new InternalServerErrorException(
@@ -329,36 +289,24 @@ export class ProjectService {
       throw new HttpException('Column not found', HttpStatus.NOT_FOUND);
     }
 
-    const updatedProject = await this.projectRepository
-      .updateById(projectId.toString(), {
-        ...project,
-        cards: [...project.cards, cardId],
-        columnDetails: {
-          ...project.columnDetails,
-          [columnId]: {
-            ...project.columnDetails[columnId],
-            cards: [
-              ...project.columnDetails[columnId].cards,
-              cardId.toString(),
-            ],
+    const updatedProject =
+      await this.projectRepository.updateProjectAndReturnWithPopulatedReferences(
+        projectId.toString(),
+        {
+          ...project,
+          cards: [...project.cards, cardId],
+          columnDetails: {
+            ...project.columnDetails,
+            [columnId]: {
+              ...project.columnDetails[columnId],
+              cards: [
+                ...project.columnDetails[columnId].cards,
+                cardId.toString(),
+              ],
+            },
           },
         },
-      })
-      .populate('cards', {
-        title: 1,
-        labels: 1,
-        assignee: 1,
-        reviewer: 1,
-        reward: 1,
-        priority: 1,
-        deadline: 1,
-        slug: 1,
-        type: 1,
-        project: 1,
-        creator: 1,
-      })
-      .populate('parents'); // need to recheck this, might not need to populate parents
-
+      );
     return this.projectPopulatedWithCardDetails(updatedProject);
   }
 
@@ -454,23 +402,13 @@ export class ProjectService {
       });
     }
 
-    const updatedProject = await this.projectRepository
-      .updateById(projectId.toString(), {
-        columnDetails,
-      })
-      .populate('cards', {
-        title: 1,
-        labels: 1,
-        assignee: 1,
-        reviewer: 1,
-        reward: 1,
-        priority: 1,
-        deadline: 1,
-        slug: 1,
-        type: 1,
-        project: 1,
-        creator: 1,
-      });
+    const updatedProject =
+      await this.projectRepository.updateProjectAndReturnWithPopulatedReferences(
+        projectId.toString(),
+        {
+          columnDetails,
+        },
+      );
     return this.projectPopulatedWithCardDetails(updatedProject);
   }
 }

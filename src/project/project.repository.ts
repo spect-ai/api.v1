@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from 'nestjs-typegoose';
 import { BaseRepository } from 'src/base/base.repository';
+import { DetailedProjectResponseDto } from './dto/detailed-project-response.dto';
+import { UpdateProjectRequestDto } from './dto/update-project-request.dto';
 import { Project } from './model/project.model';
 
 @Injectable()
@@ -44,5 +46,26 @@ export class ProjectsRepository extends BaseRepository<Project> {
     return await this.findOne({ slug: slug })
       .setOptions({ projection: { _id: 1 } })
       .exec();
+  }
+
+  async updateProjectAndReturnWithPopulatedReferences(
+    id: string,
+    update: any,
+  ): Promise<Project> {
+    return await this.updateById(id, update)
+      .populate('parents')
+      .populate('cards', {
+        title: 1,
+        labels: 1,
+        assignee: 1,
+        reviewer: 1,
+        reward: 1,
+        priority: 1,
+        deadline: 1,
+        slug: 1,
+        type: 1,
+        project: 1,
+        creator: 1,
+      });
   }
 }

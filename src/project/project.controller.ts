@@ -62,7 +62,7 @@ export class ProjectController {
     );
   }
 
-  @Post('/:id/column/add')
+  @Patch('/:id/column/add')
   @UseGuards(SessionAuthGuard)
   async addColumn(
     @Param() param: ObjectIdDto,
@@ -70,7 +70,7 @@ export class ProjectController {
     return await this.projectService.addColumn(param.id);
   }
 
-  @Post('/:id/column/:columnId/delete')
+  @Patch('/:id/column/:columnId/delete')
   @UseGuards(SessionAuthGuard)
   async deleteColumn(
     @Param() param: ObjectIdDto,
