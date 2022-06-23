@@ -5,7 +5,7 @@ import { Payment } from 'src/common/models/payment.model';
 import { Date, ObjectId } from 'mongoose';
 import { Activity } from 'src/common/types/activity.type';
 import { User } from 'src/users/model/users.model';
-import { RetroStatus } from '../../common/types/status.type';
+import { Status } from '../../common/types/status.type';
 import { Circle } from 'src/circle/model/circle.model';
 import { FeedbackModel } from 'src/common/models/feedback.model';
 import { Stats, StatsModel } from './stats.model';
@@ -52,7 +52,7 @@ export class Retro extends BaseModel {
       archived: false,
     },
   })
-  status: RetroStatus;
+  status: Status;
 
   /**
    * The strategy used in the retro period, ie, Quadratic or Normal Voting

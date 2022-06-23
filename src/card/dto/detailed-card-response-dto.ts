@@ -13,81 +13,88 @@ import {
 } from 'class-validator';
 import { ObjectId, Date } from 'mongoose';
 import { Payment } from 'src/common/models/payment.model';
+import { Status } from 'src/common/types/status.type';
 import { Card } from '../model/card.model';
 
 export class DetailedCardResponseDto {
   /**
-   * The name of the circle
+   * The title of the card
    */
   @IsString()
   @IsNotEmpty()
   title: string;
 
   /**
-   * The description of the circle
+   * The description of the card
    */
   @IsString()
   @IsOptional()
   description?: string;
 
   /**
-   * The description of the circle
+   * The reviewers of the card
    */
   @IsArray()
   @IsOptional()
   reviewer?: string[];
 
   /**
-   * The description of the circle
+   * The assignees of the card
    */
   @IsArray()
   @IsOptional()
   assignee?: string[];
 
   /**
-   * The description of the circle
+   * The project of the card
    */
   @IsString()
   project: ObjectId;
 
   /**
-   * The description of the circle
+   * The reward of the card
    */
   @IsObject()
   @IsOptional()
   reward?: Payment;
 
   /**
-   * The description of the circle
+   * The type of the card
    */
   @IsString()
   @IsOptional()
   type?: string;
 
   /**
-   * The description of the circle
+   * The deadline of the card
    */
   @IsDateString()
   @IsOptional()
   deadline?: string;
 
   /**
-   * The description of the circle
+   * The labels of the card
    */
   @IsArray()
   @IsOptional()
   labels?: string[];
 
   /**
-   * The description of the circle
+   * The priority of the card
    */
   @IsNumber()
   @IsOptional()
   priority?: number;
 
   /**
-   * The description of the circle
+   * The columnId of the card
    */
   @IsString()
   columnId?: string;
+
+  /**
+   * The status of the card
+   */
+  @IsObject()
+  status: Status;
 }

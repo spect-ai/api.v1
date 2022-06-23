@@ -27,6 +27,7 @@ import { Activity } from 'src/common/types/activity.type';
 import { AddCommentDto, UpdateCommentDto } from './dto/comment-body.dto';
 import { DataStructureManipulationService } from 'src/common/dataStructureManipulation.service';
 import { AggregatedFlattenedPaymentInfo } from './dto/payment-info-response.dto';
+import { UpdatePaymentInfoDto } from './dto/update-payment-info.dto';
 
 @Injectable()
 export class CardsService {
@@ -543,6 +544,24 @@ export class CardsService {
 
     console.log(aggregatedPaymentInfo);
     return aggregatedPaymentInfo;
+  }
+
+  async archive(id: string): Promise<Card> {
+    return await this.cardsRepository.updateById(id, {
+      'status.archived': true,
+      'status.active': false,
+    });
+  }
+
+  async updatePaymentInfoAndClose(
+    id: string,
+    updatePaymentInfo: UpdatePaymentInfoDto,
+  ): Promise<Card> {
+    return await this.cardsRepository.updateById(id, {
+      'reward.transactionHash': updatePaymentInfo.transactionHash,
+      'status.active': false,
+      'status.paid': true,
+    });
   }
 
   async delete(id: string): Promise<Card> {

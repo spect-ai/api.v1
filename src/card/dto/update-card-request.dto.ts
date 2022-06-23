@@ -1,6 +1,6 @@
 import { OmitType } from '@nestjs/swagger';
 import { IsNotEmpty, IsObject, IsOptional, IsString } from 'class-validator';
-import { CardStatus } from 'src/common/types/status.type';
+import { Status } from 'src/common/types/status.type';
 import { CreateCardRequestDto } from './create-card-request.dto';
 
 export class UpdateCardRequestDto extends OmitType(CreateCardRequestDto, [
@@ -31,5 +31,5 @@ export class UpdateCardRequestDto extends OmitType(CreateCardRequestDto, [
   @IsObject()
   @IsOptional()
   @IsNotEmpty()
-  status?: CardStatus;
+  status?: Status;
 }

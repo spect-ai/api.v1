@@ -28,6 +28,7 @@ import { ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { ActionService } from './actions.service';
 import { ValidCardActionResponseDto } from './dto/card-access-response.dto';
 import { AggregatedFlattenedPaymentInfo } from './dto/payment-info-response.dto';
+import { UpdatePaymentInfoDto } from './dto/update-payment-info.dto';
 
 @Controller('card')
 @ApiTags('card')
@@ -180,6 +181,26 @@ export class CardsController {
     @Query('commitId') commitId: string,
   ): Promise<DetailedCardResponseDto> {
     return await this.cardsService.deleteComment(params.id, commitId);
+  }
+
+  @UseGuards(SessionAuthGuard)
+  @Patch('/:id/archive')
+  async archive(
+    @Param() params: ObjectIdDto,
+  ): Promise<DetailedCardResponseDto> {
+    return await this.cardsService.archive(params.id);
+  }
+
+  @UseGuards(SessionAuthGuard)
+  @Patch('/:id/updatePaymentInfoAndClose')
+  async updatePaymentInfoAndClose(
+    @Param() params: ObjectIdDto,
+    @Body() updatePaymentInfoDto: UpdatePaymentInfoDto,
+  ): Promise<DetailedCardResponseDto> {
+    return await this.cardsService.updatePaymentInfoAndClose(
+      params.id,
+      updatePaymentInfoDto,
+    );
   }
 
   @UseGuards(SessionAuthGuard)

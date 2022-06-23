@@ -1,4 +1,4 @@
-export class Status {
+export type Status = {
   /**
    * Active
    */
@@ -13,18 +13,4 @@ export class Status {
    * Archived
    */
   archived: boolean;
-}
-
-export class CardStatus extends Status {
-  /**
-   * In review
-   */
-  inReview: boolean;
-
-  /**
-   * In revision
-   */
-  inRevision: boolean;
-}
-
-export class RetroStatus extends Status {}
+};

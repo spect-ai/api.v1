@@ -207,8 +207,8 @@ export class ProjectService {
           },
         },
         {
-          archived: true,
-          active: false,
+          'status.archived': true,
+          'status.active': false,
         },
       );
 

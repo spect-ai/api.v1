@@ -6,7 +6,7 @@ import { Payment } from 'src/common/models/payment.model';
 import { Date, ObjectId } from 'mongoose';
 import mongoose from 'mongoose';
 import { Activity } from 'src/common/types/activity.type';
-import { CardStatus } from '../../common/types/status.type';
+import { Status } from '../../common/types/status.type';
 import { WorkThread, WorkThreads } from './workHistory.model';
 import { User } from 'src/users/model/users.model';
 import { Circle } from 'src/circle/model/circle.model';
@@ -114,13 +114,11 @@ export class Card extends BaseModel {
   @prop({
     default: {
       active: true,
-      paid: false,
       archived: false,
-      inReview: false,
-      inRevision: false,
+      paid: false,
     },
   })
-  status: CardStatus;
+  status: Status;
 
   /**
    * The history of work done on the card, supports multiple parallel work histories so
