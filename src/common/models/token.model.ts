@@ -5,10 +5,10 @@ export type Token = {
   /**
    * The address of the token, it is set to '0x0' if its a currency
    */
-  address?: string;
+  address: string;
 
   /**
    * The symbol of the token
    */
-  symbol?: string;
+  symbol: string;
 };

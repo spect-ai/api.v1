@@ -49,4 +49,13 @@ export class DataStructureManipulationService {
     }
     return res;
   }
+
+  setOrAggregateObjectKey(obj: object, key: string, value: number) {
+    if (key in obj) {
+      obj[key] += value;
+    } else {
+      obj[key] = value;
+    }
+    return obj;
+  }
 }

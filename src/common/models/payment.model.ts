@@ -6,12 +6,12 @@ export type Payment = {
   /**
    * The network used for payment
    */
-  chain?: Chain;
+  chain: Chain;
 
   /**
    * The token used for payment
    */
-  token?: Token;
+  token: Token;
 
   /**
    * The value of the payment

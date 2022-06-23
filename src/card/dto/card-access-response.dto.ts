@@ -1,6 +1,4 @@
-import { PartialType } from '@nestjs/swagger';
-import { IsBoolean, IsNotEmpty, IsObject, IsString } from 'class-validator';
-import { IsObjectId } from 'class-validator-mongo-object-id';
+import { IsObject } from 'class-validator';
 
 export type ActionValidOrNotWithReason = {
   /**

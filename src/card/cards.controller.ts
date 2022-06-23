@@ -27,6 +27,7 @@ import { AddCommentDto, UpdateCommentDto } from './dto/comment-body.dto';
 import { ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { ActionService } from './actions.service';
 import { ValidCardActionResponseDto } from './dto/card-access-response.dto';
+import { AggregatedFlattenedPaymentInfo } from './dto/payment-info-response.dto';
 
 @Controller('card')
 @ApiTags('card')
@@ -44,6 +45,17 @@ export class CardsController {
       params.project,
       params.slug,
     );
+  }
+
+  @Get('/aggregatedPaymentInfo')
+  @ApiQuery({ name: 'cardIds', type: 'array' })
+  @ApiQuery({ name: 'chainId', type: 'string' })
+  async getAggregatedPaymentInfo(
+    @Query('cardIds') cardIds: string[],
+    @Query('chainId') chainId: string,
+  ): Promise<AggregatedFlattenedPaymentInfo> {
+    console.log(cardIds);
+    return await this.cardsService.aggregatePaymentInfo(cardIds, chainId);
   }
 
   @Get('/:id')
@@ -70,7 +82,6 @@ export class CardsController {
     return await this.cardsService.create(card);
   }
 
-  @UseGuards(SessionAuthGuard)
   @Patch('/:id')
   @UseGuards(SessionAuthGuard)
   async update(
@@ -80,7 +91,6 @@ export class CardsController {
     return await this.cardsService.update(params.id, card);
   }
 
-  @UseGuards(SessionAuthGuard)
   @Patch('/:id/createWorkThread')
   @UseGuards(SessionAuthGuard)
   async createWorkThread(
@@ -93,7 +103,6 @@ export class CardsController {
     );
   }
 
-  @UseGuards(SessionAuthGuard)
   @Patch('/:id/updateWorkThread')
   @UseGuards(SessionAuthGuard)
   async updateWorkThread(
@@ -108,7 +117,6 @@ export class CardsController {
     );
   }
 
-  @UseGuards(SessionAuthGuard)
   @Patch('/:id/createWorkUnit')
   @UseGuards(SessionAuthGuard)
   async createWorkUnit(
@@ -123,7 +131,6 @@ export class CardsController {
     );
   }
 
-  @UseGuards(SessionAuthGuard)
   @Patch('/:id/updateWorkUnit')
   @UseGuards(SessionAuthGuard)
   async updateWorkUnit(
@@ -140,7 +147,6 @@ export class CardsController {
     );
   }
 
-  @UseGuards(SessionAuthGuard)
   @Patch('/:id/addComment')
   @ApiParam({ name: 'id', type: 'string' })
   @UseGuards(SessionAuthGuard)
@@ -151,7 +157,6 @@ export class CardsController {
     return await this.cardsService.addComment(params.id, addCommentDto);
   }
 
-  @UseGuards(SessionAuthGuard)
   @Patch('/:id/updateComment')
   @ApiParam({ name: 'id', type: 'string' })
   @ApiQuery({ name: 'commitId', type: 'string' })
@@ -168,7 +173,6 @@ export class CardsController {
     );
   }
 
-  @UseGuards(SessionAuthGuard)
   @Patch('/:id/deleteComment')
   @UseGuards(SessionAuthGuard)
   async deleteComment(

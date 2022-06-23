@@ -349,16 +349,6 @@ export class ProjectService {
           .length;
     } else destinationCardIndex = destinationCardLoc.destinationCardIndex;
 
-    // if destination card is in the same column, reduce the index by 1 only if the destination index is greater than the source index
-
-    // what is this for??? it works well without this, this causes inconsistent ordering of cards
-
-    // if (sourceCardLoc.columnId === destinationCardLoc.destinationColumnId) {
-    //   if (sourceCardLoc.cardIndex < destinationCardIndex) {
-    //     destinationCardIndex--;
-    //   }
-    // }
-
     // In case destination card index is not valid, throw error
     const columnDetails = project.columnDetails;
     if (
