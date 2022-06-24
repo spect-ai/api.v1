@@ -16,7 +16,10 @@ export class CardsRepository extends BaseRepository<Card> {
     project: string,
     slug: string,
   ): Promise<Card> {
-    return await this.findOne({ project: project, slug: slug }).exec();
+    return await this.findOne({
+      project: project,
+      slug: slug,
+    }).exec();
   }
 
   async getCardWithUnpopulatedReferences(id: string): Promise<Card> {

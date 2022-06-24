@@ -15,7 +15,10 @@ import { DetailedProjectResponseDto } from 'src/project/dto/detailed-project-res
 import { CardsService } from './cards.service';
 import { CreateCardRequestDto } from './dto/create-card-request.dto';
 import { DetailedCardResponseDto } from './dto/detailed-card-response-dto';
-import { GetByProjectAndSlugDto } from './dto/get-by-project-and-slug.dto';
+import {
+  GetByProjectAndSlugDto,
+  GetByProjectSlugAndCardSlugDto,
+} from './dto/get-card-params.dto';
 import { UpdateCardRequestDto } from './dto/update-card-request.dto';
 import {
   UpdateWorkUnitRequestDto,
@@ -38,11 +41,21 @@ export class CardsController {
     private readonly actionService: ActionService,
   ) {}
 
+  @Get('/byProjectSlugAndCardSlug/:projectSlug/:cardSlug')
+  async findByProjectSlugAndCardSlug(
+    @Param() params: GetByProjectSlugAndCardSlugDto,
+  ): Promise<DetailedCardResponseDto> {
+    return await this.cardsService.getDetailedCardByProjectSlugAndCardSlug(
+      params.projectSlug,
+      params.cardSlug,
+    );
+  }
+
   @Get('/byProjectAndSlug/:project/:slug')
-  async findBySlug(
+  async findByProjectIdAndCardSlug(
     @Param() params: GetByProjectAndSlugDto,
   ): Promise<DetailedCardResponseDto> {
-    return await this.cardsService.getDetailedCardBySlug(
+    return await this.cardsService.getDetailedCardByProjectIdAndCardSlug(
       params.project,
       params.slug,
     );

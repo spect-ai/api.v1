@@ -123,18 +123,39 @@ export class CardsService {
     }
   }
 
-  async getDetailedCardBySlug(
+  async getDetailedCardByProjectSlugAndCardSlug(
+    projectSlug: string,
+    cardSlug: string,
+  ): Promise<DetailedCardResponseDto> {
+    try {
+      const project = await this.projectService.getProjectIdFromSlug(
+        projectSlug,
+      );
+      return await this.getDetailedCardByProjectIdAndCardSlug(
+        project.id,
+        cardSlug,
+      );
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Failed card retrieval',
+        error.message,
+      );
+    }
+  }
+
+  async getDetailedCardByProjectIdAndCardSlug(
     project: string,
     slug: string,
   ): Promise<DetailedCardResponseDto> {
     try {
-      const updatedCard =
+      const card =
         await this.cardsRepository.getCardWithPopulatedReferencesBySlug(
           project,
           slug,
         );
-      return this.reverseActivity(updatedCard);
+      return this.reverseActivity(card);
     } catch (error) {
+      console.log(error);
       throw new InternalServerErrorException(
         'Failed card retrieval',
         error.message,

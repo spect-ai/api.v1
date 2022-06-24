@@ -18,3 +18,19 @@ export class GetByProjectAndSlugDto {
   @IsNotEmpty()
   slug: string;
 }
+
+export class GetByProjectSlugAndCardSlugDto {
+  /**
+   * Project Slug
+   */
+  @IsString()
+  @IsNotEmpty()
+  projectSlug: string;
+
+  /**
+   * Card Slug
+   */
+  @IsString()
+  @IsNotEmpty()
+  cardSlug: string;
+}
