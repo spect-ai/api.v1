@@ -7,9 +7,10 @@ import { Date, ObjectId } from 'mongoose';
 import mongoose from 'mongoose';
 import { Activity } from 'src/common/types/activity.type';
 import { Status } from '../../common/types/status.type';
-import { WorkThread, WorkThreads } from './workHistory.model';
+import { WorkThread, WorkThreads } from './workHistory.type';
 import { User } from 'src/users/model/users.model';
 import { Circle } from 'src/circle/model/circle.model';
+import { ApplicationDetails } from './application.type';
 
 @useMongoosePlugin()
 export class Card extends BaseModel {
@@ -132,4 +133,16 @@ export class Card extends BaseModel {
    */
   @prop({ default: [] })
   workThreadOrder: string[];
+
+  /**
+   * The applications submitted to a bounty
+   */
+  @prop({ default: [] })
+  application: ApplicationDetails;
+
+  /**
+   * The order in which applications are saved
+   */
+  @prop({ default: [] })
+  applicationOrder: string[];
 }

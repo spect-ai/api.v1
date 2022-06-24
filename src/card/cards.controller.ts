@@ -32,6 +32,15 @@ import { ActionService } from './actions.service';
 import { ValidCardActionResponseDto } from './dto/card-access-response.dto';
 import { AggregatedFlattenedPaymentInfo } from './dto/payment-info-response.dto';
 import { UpdatePaymentInfoDto } from './dto/update-payment-info.dto';
+import { BountyService } from './bounty.service';
+import {
+  CreateApplicationDto,
+  UpdateApplicationDto,
+} from './dto/application.dto';
+import {
+  PickApplicationsParamDto,
+  UpdateApplicationParamDto,
+} from './dto/param.dto';
 
 @Controller('card')
 @ApiTags('card')
@@ -39,6 +48,7 @@ export class CardsController {
   constructor(
     private readonly cardsService: CardsService,
     private readonly actionService: ActionService,
+    private readonly bountyService: BountyService,
   ) {}
 
   @Get('/byProjectSlugAndCardSlug/:projectSlug/:cardSlug')
@@ -222,6 +232,54 @@ export class CardsController {
       params.id,
       updatePaymentInfoDto,
     );
+  }
+
+  @UseGuards(SessionAuthGuard)
+  @Patch('/:id/createApplication')
+  async createApplication(
+    @Param() params: ObjectIdDto,
+    @Body() createApplicationDto: CreateApplicationDto,
+  ): Promise<DetailedCardResponseDto> {
+    return await this.bountyService.createApplication(
+      params.id,
+      createApplicationDto,
+    );
+  }
+
+  @UseGuards(SessionAuthGuard)
+  @Patch('/:id/updateApplication')
+  async updateApplication(
+    @Param() params: ObjectIdDto,
+    @Query() updateApplicationQueryParam: UpdateApplicationParamDto,
+    @Body() updateApplicationDto: UpdateApplicationDto,
+  ): Promise<DetailedCardResponseDto> {
+    return await this.bountyService.updateApplication(
+      params.id,
+      updateApplicationQueryParam.applicationId,
+      updateApplicationDto,
+    );
+  }
+
+  @UseGuards(SessionAuthGuard)
+  @Patch('/:id/deleteApplication')
+  async deleteApplication(
+    @Param() params: ObjectIdDto,
+    @Query() updateApplicationQueryParam: UpdateApplicationParamDto,
+  ): Promise<DetailedCardResponseDto> {
+    return await this.bountyService.deleteApplication(
+      params.id,
+      updateApplicationQueryParam.applicationId,
+    );
+  }
+
+  @Patch('/:id/pickApplications')
+  @ApiQuery({ name: 'applicationIds', type: 'array' })
+  @ApiParam({ name: 'id' })
+  async pickApplications(
+    @Param() params: ObjectIdDto,
+    @Query('applicationIds') applicationIds: string[],
+  ): Promise<DetailedCardResponseDto> {
+    return await this.bountyService.pickApplications(params.id, applicationIds);
   }
 
   @UseGuards(SessionAuthGuard)

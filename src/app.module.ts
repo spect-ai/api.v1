@@ -26,6 +26,7 @@ import { RolesService } from './roles/roles.service';
 import { RegistryController } from './registry/registry.controller';
 import { ActionService } from './card/actions.service';
 import { ActivityBuilder } from './card/activity.builder';
+import { BountyService } from './card/bounty.service';
 
 @Module({
   imports: [
@@ -62,6 +63,7 @@ import { ActivityBuilder } from './card/activity.builder';
     RegistryService,
     ActionService,
     ActivityBuilder,
+    BountyService,
   ],
 })
 export class AppModule {}

@@ -246,7 +246,7 @@ export class CardsService {
         })
         .populate('project')
         .populate('circle');
-      return updatedCard;
+      return this.reverseActivity(updatedCard);
     } catch (error) {
       throw new InternalServerErrorException(
         'Failed creating work thread',
@@ -278,7 +278,7 @@ export class CardsService {
         .populate('project')
         .populate('circle');
 
-      return updatedCard;
+      return this.reverseActivity(updatedCard);
     } catch (error) {
       throw new InternalServerErrorException(
         'Failed updating work thread',
@@ -328,7 +328,7 @@ export class CardsService {
         .populate('project')
         .populate('circle');
 
-      return updatedCard;
+      return this.reverseActivity(updatedCard);
     } catch (error) {
       throw new InternalServerErrorException(
         'Failed creating work unit',
@@ -368,7 +368,7 @@ export class CardsService {
         .populate('project')
         .populate('circle');
 
-      return updatedCard;
+      return this.reverseActivity(updatedCard);
     } catch (error) {
       throw new InternalServerErrorException(
         'Failed updating work unit',

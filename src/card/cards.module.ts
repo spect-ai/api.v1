@@ -15,6 +15,7 @@ import { CardsController } from './cards.controller';
 import { CardsRepository } from './cards.repository';
 import { CardsService } from './cards.service';
 import { Card } from './model/card.model';
+import { BountyService } from './bounty.service';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { Card } from './model/card.model';
     DataStructureManipulationService,
     ActionService,
     ActivityBuilder,
+    BountyService,
   ],
   exports: [CardsService, CardsRepository, CardsModule],
 })

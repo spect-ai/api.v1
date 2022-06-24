@@ -1,5 +1,5 @@
 import { PartialType } from '@nestjs/swagger';
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsArray, IsNotEmpty, IsString } from 'class-validator';
 import { IsObjectId } from 'class-validator-mongo-object-id';
 
 export class UpdateWorkThreadParamDto {
@@ -33,4 +33,22 @@ export class UpdateWorkUnitParamDto extends PartialType(
   @IsString()
   @IsNotEmpty()
   workUnitId: string;
+}
+
+export class UpdateApplicationParamDto {
+  /**
+   * Card Object Id
+   */
+  @IsString()
+  @IsNotEmpty()
+  applicationId: string;
+}
+
+export class PickApplicationsParamDto {
+  /**
+   * Card Object Id
+   */
+  @IsArray()
+  @IsNotEmpty()
+  applicationIds: string[];
 }
