@@ -74,6 +74,13 @@ export class UpdateCircleRequestDto {
   members?: string[];
 
   /**
+   * The roles of members of the circle
+   */
+  @IsArray()
+  @IsOptional()
+  memberRoles?: string[];
+
+  /**
    * Circle is archived if true
    */
   @IsBoolean()

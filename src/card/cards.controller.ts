@@ -192,6 +192,14 @@ export class CardsController {
   }
 
   @UseGuards(SessionAuthGuard)
+  @Patch('/:id/revertArchive')
+  async revertArchive(
+    @Param() params: ObjectIdDto,
+  ): Promise<DetailedCardResponseDto> {
+    return await this.cardsService.revertArchive(params.id);
+  }
+
+  @UseGuards(SessionAuthGuard)
   @Patch('/:id/updatePaymentInfoAndClose')
   async updatePaymentInfoAndClose(
     @Param() params: ObjectIdDto,

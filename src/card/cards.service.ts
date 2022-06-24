@@ -546,13 +546,6 @@ export class CardsService {
     return aggregatedPaymentInfo;
   }
 
-  async archive(id: string): Promise<Card> {
-    return await this.cardsRepository.updateById(id, {
-      'status.archived': true,
-      'status.active': false,
-    });
-  }
-
   async updatePaymentInfoAndClose(
     id: string,
     updatePaymentInfo: UpdatePaymentInfoDto,
@@ -561,6 +554,39 @@ export class CardsService {
       'reward.transactionHash': updatePaymentInfo.transactionHash,
       'status.active': false,
       'status.paid': true,
+    });
+  }
+
+  async archive(id: string): Promise<Card> {
+    const card = await this.cardsRepository.findById(id);
+    this.validateCardExists(card);
+    const updatedProject = await this.projectService.removeCardFromProject(
+      card.project.toString(),
+      id,
+    );
+    return await this.cardsRepository.updateById(id, {
+      'status.archived': true,
+      'status.active': false,
+    });
+  }
+
+  async revertArchive(id: string): Promise<Card> {
+    const card = await this.cardsRepository.findById(id);
+    this.validateCardExists(card);
+
+    if (!card.status.archived)
+      throw new HttpException(
+        'Card is not in archived state',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    const updatedProject = await this.projectService.addCardToProject(
+      card.project,
+      card.columnId,
+      card._id,
+    );
+    return await this.cardsRepository.updateById(id, {
+      'status.archived': false,
+      'status.active': true,
     });
   }
 

@@ -276,6 +276,7 @@ export class ProjectService {
     projectId: ObjectId,
     columnId: string,
     cardId: ObjectId,
+    addInFirstColumnIfColumnDoesntExist = true,
   ): Promise<DetailedProjectResponseDto> {
     const project = await this.projectRepository.findByObjectId(projectId);
     if (!project) {
@@ -286,7 +287,15 @@ export class ProjectService {
       !project.columnDetails[columnId] ||
       !project.columnOrder.includes(columnId)
     ) {
-      throw new HttpException('Column not found', HttpStatus.NOT_FOUND);
+      if (addInFirstColumnIfColumnDoesntExist) {
+        if (project.columnOrder.length === 0) {
+          throw new HttpException(
+            'Project doesnt have a column',
+            HttpStatus.NOT_FOUND,
+          );
+        }
+        columnId = project.columnOrder[0];
+      } else throw new HttpException('Column not found', HttpStatus.NOT_FOUND);
     }
 
     const updatedProject =
@@ -397,6 +406,42 @@ export class ProjectService {
         projectId.toString(),
         {
           columnDetails,
+        },
+      );
+    return this.projectPopulatedWithCardDetails(updatedProject);
+  }
+
+  async removeCardFromProject(
+    projectId: string,
+    cardId: string,
+  ): Promise<DetailedProjectResponseDto> {
+    const project = await this.projectRepository.findById(projectId);
+    if (!project) {
+      throw new HttpException('Project not found', HttpStatus.NOT_FOUND);
+    }
+    // Find where the card is in the project now
+    const sourceCardLoc = this.findCardLocationInProject(project, cardId);
+
+    // Remove Card from column
+    const columnDetails = project.columnDetails;
+    columnDetails[sourceCardLoc.columnId].cards.splice(
+      sourceCardLoc.cardIndex,
+      1,
+    );
+
+    // Remove card from project
+    const cards = project.cards.map((card) => card.toString());
+    const cardIndex = cards.indexOf(cardId);
+    project.cards.splice(cardIndex, 1);
+
+    // Update project
+    const updatedProject =
+      await this.projectRepository.updateProjectAndReturnWithPopulatedReferences(
+        projectId.toString(),
+        {
+          ...project,
+          cards: project.cards,
+          columnDetails: columnDetails,
         },
       );
     return this.projectPopulatedWithCardDetails(updatedProject);
