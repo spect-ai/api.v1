@@ -23,6 +23,8 @@ import { JoinCircleUsingInvitationRequestDto } from './dto/join-circle.dto';
 import { GetMemberDetailsOfCircleDto } from './dto/get-member-details.dto';
 import { ApiParam, ApiQuery } from '@nestjs/swagger';
 import { ObjectIdDto } from 'src/common/dtos/object-id.dto';
+import { UpdateMemberRolesDto } from './dto/update-member-role.dto';
+import { MemberDto } from './dto/params.dto';
 
 @Controller('circle')
 export class CirclesController {
@@ -123,6 +125,20 @@ export class CirclesController {
     @Body() joinDto: JoinCircleUsingInvitationRequestDto,
   ): Promise<DetailedCircleResponseDto> {
     return await this.circlesService.joinUsingInvitation(param.id, joinDto);
+  }
+
+  @Patch('/:id/updateMemberRoles')
+  @UseGuards(SessionAuthGuard)
+  async updateMemberRoles(
+    @Param() param: ObjectIdDto,
+    @Query() memberDto: MemberDto,
+    @Body() updateMemberRolesDto: UpdateMemberRolesDto,
+  ): Promise<DetailedCircleResponseDto> {
+    return await this.circlesService.updateMemberRoles(
+      param.id,
+      memberDto.member,
+      updateMemberRolesDto,
+    );
   }
 
   @UseGuards(SessionAuthGuard)

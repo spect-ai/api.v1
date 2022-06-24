@@ -23,6 +23,7 @@ import { ObjectId } from 'mongoose';
 import { GetMemberDetailsOfCircleDto } from './dto/get-member-details.dto';
 import { User } from 'src/users/model/users.model';
 import { CirclePermission } from 'src/common/types/role.type';
+import { UpdateMemberRolesDto } from './dto/update-member-role.dto';
 
 @Injectable()
 export class CirclesService {
@@ -41,6 +42,28 @@ export class CirclesService {
     if (members.includes(newMember)) {
       throw new HttpException(
         'You are already a member of this circle',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  validateExistingMember(circle: Circle, member: string) {
+    const members = circle.members.map((m) => m.toString());
+    if (!members.includes(member)) {
+      throw new HttpException(
+        'Member doesnt exist in the circle',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  validateRolesExistInCircle(circle: Circle, roles: string[]) {
+    const rolesAreSubset = roles.every((role) =>
+      Object.keys(circle.roles).includes(role),
+    );
+    if (!rolesAreSubset) {
+      throw new HttpException(
+        'Roles are not a subset of existing roles in the circle',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
@@ -291,6 +314,32 @@ export class CirclesService {
     } catch (error) {
       throw new InternalServerErrorException(
         'Failed joining circle',
+        error.message,
+      );
+    }
+  }
+
+  async updateMemberRoles(
+    id: string,
+    member: string,
+    updateMemberRolesDto: UpdateMemberRolesDto,
+  ): Promise<DetailedCircleResponseDto> {
+    try {
+      const circle =
+        await this.circlesRepository.getCircleWithUnpopulatedReferences(id);
+      this.validateExistingMember(circle, member);
+      this.validateRolesExistInCircle(circle, updateMemberRolesDto.roles);
+
+      const updatedCircle = await this.circlesRepository.updateById(id, {
+        memberRoles: {
+          ...circle.memberRoles,
+          [member]: updateMemberRolesDto.roles,
+        },
+      });
+      return updatedCircle;
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Failed updating member roles',
         error.message,
       );
     }
