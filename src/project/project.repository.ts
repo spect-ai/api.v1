@@ -21,6 +21,9 @@ export class ProjectsRepository extends BaseRepository<Project> {
       priority: 1,
       deadline: 1,
       slug: 1,
+      type: 1,
+      project: 1,
+      creator: 1,
     });
   }
 
@@ -38,6 +41,8 @@ export class ProjectsRepository extends BaseRepository<Project> {
         priority: 1,
         deadline: 1,
         slug: 1,
+        type: 1,
+        project: 1,
         creator: 1,
       });
   }
