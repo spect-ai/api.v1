@@ -78,9 +78,10 @@ export class CardsService {
   }> {
     try {
       const activity = this.activityBuilder.buildNewCardActivity(createCardDto);
-      const defaultPayment = await this.circleRepository.getDefaultPayment(
-        createCardDto.circle,
-      );
+      // const defaultPayment = await this.circleRepository.getDefaultPayment(
+      //   createCardDto.circle,
+      // );
+      // bug, we can send reward in create card, default payment value = 0
       const cardNum = await this.cardsRepository.count({
         project: createCardDto.project,
       });
@@ -88,7 +89,6 @@ export class CardsService {
       const card = await this.cardsRepository.create({
         ...createCardDto,
         activity: [activity],
-        reward: defaultPayment,
         slug: cardNum.toString(),
         creator: this.requestProvider.user.id,
       });
