@@ -9,6 +9,7 @@ import {
   QueryWithHelpers,
   Types,
   UpdateQuery,
+  UpdateWriteOpResult,
 } from 'mongoose';
 import { BaseModel } from './base.model';
 
@@ -22,6 +23,11 @@ export type EnforceDocumentType<TModel extends BaseModel> = HydratedDocument<
   DocumentType<TModel>,
   Record<string, unknown>,
   Record<string, unknown>
+>;
+
+export type UpdateQueryList<TModel extends BaseModel> = QueryWithHelpers<
+  UpdateWriteOpResult,
+  EnforceDocumentType<TModel>
 >;
 
 export type QueryList<TModel extends BaseModel> = QueryWithHelpers<
@@ -173,6 +179,20 @@ export abstract class BaseRepository<TModel extends BaseModel> {
         Object.assign({ new: true }, updateOptions),
       )
       .setOptions(BaseRepository.getQueryOptions(options));
+  }
+
+  updateMany(
+    filter: FilterQuery<DocumentType<TModel>> = {},
+    updateQuery: UpdateQuery<DocumentType<TModel>>,
+    updateOptions: MongooseQueryOptions & { multi?: boolean } = {},
+    options?: QueryOptions,
+  ): UpdateQueryList<TModel> {
+    const b = this.model
+      .updateMany(filter, updateQuery, updateOptions)
+      .setOptions(options)
+      .orFail();
+
+    return b;
   }
 
   count(

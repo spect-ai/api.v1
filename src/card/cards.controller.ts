@@ -82,6 +82,16 @@ export class CardsController {
     return await this.cardsService.aggregatePaymentInfo(cardIds, chainId);
   }
 
+  @UseGuards(SessionAuthGuard)
+  @Patch('/updatePaymentInfoAndClose')
+  async updatePaymentInfoAndClose(
+    @Body() updatePaymentInfoDto: UpdatePaymentInfoDto,
+  ): Promise<DetailedCardResponseDto> {
+    return await this.cardsService.updatePaymentInfoAndClose(
+      updatePaymentInfoDto,
+    );
+  }
+
   @Get('/:id')
   async findByObjectId(
     @Param() params: ObjectIdDto,
@@ -220,18 +230,6 @@ export class CardsController {
     @Param() params: ObjectIdDto,
   ): Promise<DetailedCardResponseDto> {
     return await this.cardsService.revertArchive(params.id);
-  }
-
-  @UseGuards(SessionAuthGuard)
-  @Patch('/:id/updatePaymentInfoAndClose')
-  async updatePaymentInfoAndClose(
-    @Param() params: ObjectIdDto,
-    @Body() updatePaymentInfoDto: UpdatePaymentInfoDto,
-  ): Promise<DetailedCardResponseDto> {
-    return await this.cardsService.updatePaymentInfoAndClose(
-      params.id,
-      updatePaymentInfoDto,
-    );
   }
 
   @UseGuards(SessionAuthGuard)

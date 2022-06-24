@@ -563,19 +563,54 @@ export class CardsService {
       }
     }
 
-    console.log(aggregatedPaymentInfo);
     return aggregatedPaymentInfo;
   }
 
   async updatePaymentInfoAndClose(
-    id: string,
     updatePaymentInfo: UpdatePaymentInfoDto,
-  ): Promise<Card> {
-    return await this.cardsRepository.updateById(id, {
-      'reward.transactionHash': updatePaymentInfo.transactionHash,
-      'status.active': false,
-      'status.paid': true,
-    });
+  ): Promise<any> {
+    try {
+      if (updatePaymentInfo.cardIds.length === 0) {
+        throw new HttpException(
+          'Card ids cannot be empty',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      }
+
+      /** Taking the first card to get the project */
+      const card = await this.cardsRepository.getCardWithUnpopulatedReferences(
+        updatePaymentInfo.cardIds[0],
+      );
+      const projectId = card.project;
+      /** Mongo only returns an acknowledgment on update and not the updated records itself */
+      const updateAcknowledgment = await this.cardsRepository.updateMany(
+        {
+          _id: { $in: updatePaymentInfo.cardIds },
+        },
+        {
+          $set: {
+            'reward.transactionHash': updatePaymentInfo.transactionHash,
+            'status.active': false,
+            'status.paid': true,
+          },
+        },
+        {
+          multi: true,
+        },
+      );
+      if (!updateAcknowledgment.acknowledged) {
+        throw new HttpException(
+          'Something went wrong while updating payment info',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      }
+      return await this.projectService.getDetailedProject(projectId.toString());
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Failed updating payment info',
+        error.message,
+      );
+    }
   }
 
   async archive(id: string): Promise<Card> {

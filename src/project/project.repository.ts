@@ -5,6 +5,21 @@ import { DetailedProjectResponseDto } from './dto/detailed-project-response.dto'
 import { UpdateProjectRequestDto } from './dto/update-project-request.dto';
 import { Project } from './model/project.model';
 
+const populatedCardFields = {
+  title: 1,
+  labels: 1,
+  assignee: 1,
+  reviewer: 1,
+  reward: 1,
+  priority: 1,
+  deadline: 1,
+  slug: 1,
+  type: 1,
+  project: 1,
+  creator: 1,
+  status: 1,
+};
+
 @Injectable()
 export class ProjectsRepository extends BaseRepository<Project> {
   constructor(@InjectModel(Project) projectModel) {
@@ -12,19 +27,9 @@ export class ProjectsRepository extends BaseRepository<Project> {
   }
 
   async getProjectWithPopulatedReferences(id: string): Promise<Project> {
-    return await this.findById(id).populate('parents').populate('cards', {
-      title: 1,
-      labels: 1,
-      assignee: 1,
-      reviewer: 1,
-      reward: 1,
-      priority: 1,
-      deadline: 1,
-      slug: 1,
-      type: 1,
-      project: 1,
-      creator: 1,
-    });
+    return await this.findById(id)
+      .populate('parents')
+      .populate('cards', populatedCardFields);
   }
 
   async getProjectWithPopulatedReferencesBySlug(
@@ -32,19 +37,7 @@ export class ProjectsRepository extends BaseRepository<Project> {
   ): Promise<Project> {
     return await this.findOne({ slug: slug })
       .populate('parents')
-      .populate('cards', {
-        title: 1,
-        labels: 1,
-        assignee: 1,
-        reviewer: 1,
-        reward: 1,
-        priority: 1,
-        deadline: 1,
-        slug: 1,
-        type: 1,
-        project: 1,
-        creator: 1,
-      });
+      .populate('cards', populatedCardFields);
   }
 
   async getProjectIdFromSlug(slug: string): Promise<Project> {
@@ -59,18 +52,6 @@ export class ProjectsRepository extends BaseRepository<Project> {
   ): Promise<Project> {
     return await this.updateById(id, update)
       .populate('parents')
-      .populate('cards', {
-        title: 1,
-        labels: 1,
-        assignee: 1,
-        reviewer: 1,
-        reward: 1,
-        priority: 1,
-        deadline: 1,
-        slug: 1,
-        type: 1,
-        project: 1,
-        creator: 1,
-      });
+      .populate('cards', populatedCardFields);
   }
 }
