@@ -2,7 +2,6 @@ import { OmitType } from '@nestjs/swagger';
 import {
   IsArray,
   IsBoolean,
-  IsEmail,
   IsNotEmpty,
   IsOptional,
   IsString,

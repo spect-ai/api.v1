@@ -309,8 +309,8 @@ export class ProjectService {
             [columnId]: {
               ...project.columnDetails[columnId],
               cards: [
-                ...project.columnDetails[columnId].cards,
                 cardId.toString(),
+                ...project.columnDetails[columnId].cards,
               ],
             },
           },

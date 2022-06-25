@@ -6,7 +6,6 @@ import {
   Patch,
   Post,
   Query,
-  Res,
   UseGuards,
 } from '@nestjs/common';
 import { SessionAuthGuard } from 'src/auth/iron-session.guard';
@@ -37,10 +36,7 @@ import {
   CreateApplicationDto,
   UpdateApplicationDto,
 } from './dto/application.dto';
-import {
-  PickApplicationsParamDto,
-  UpdateApplicationParamDto,
-} from './dto/param.dto';
+import { UpdateApplicationParamDto } from './dto/param.dto';
 
 @Controller('card')
 @ApiTags('card')
@@ -86,7 +82,7 @@ export class CardsController {
   @Patch('/updatePaymentInfoAndClose')
   async updatePaymentInfoAndClose(
     @Body() updatePaymentInfoDto: UpdatePaymentInfoDto,
-  ): Promise<DetailedCardResponseDto> {
+  ): Promise<DetailedProjectResponseDto> {
     return await this.cardsService.updatePaymentInfoAndClose(
       updatePaymentInfoDto,
     );
