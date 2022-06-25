@@ -204,10 +204,14 @@ export class CirclesService {
     updateCircleDto: UpdateCircleRequestDto,
   ): Promise<DetailedCircleResponseDto> {
     try {
-      const updatedCircle = await this.circlesRepository.updateById(
-        id,
-        updateCircleDto,
-      );
+      const updatedCircle = await this.circlesRepository
+        .updateById(id, updateCircleDto)
+        .populate('parents')
+        .populate('children')
+        .populate('members')
+        .populate('projects')
+        .exec();
+
       return updatedCircle;
     } catch (error) {
       throw new InternalServerErrorException(
