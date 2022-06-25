@@ -79,7 +79,7 @@ export class BountyService {
         .populate('project')
         .populate('circle');
 
-      return this.cardsService.reverseActivity(updatedCard);
+      return await this.cardsService.enrichActivity(updatedCard);
     } catch (error) {
       throw new InternalServerErrorException(
         'Failed creating application',
@@ -97,7 +97,6 @@ export class BountyService {
       const card = await this.cardsRepository.findById(id);
       this.cardsService.validateCardExists(card);
       this.validateApplicationExists(card, applicationId);
-      console.log(applicationId);
       card.application[applicationId] = {
         ...card.application[applicationId],
         ...updateApplicationDto,
@@ -111,7 +110,7 @@ export class BountyService {
         .populate('project')
         .populate('circle');
 
-      return this.cardsService.reverseActivity(updatedCard);
+      return await this.cardsService.enrichActivity(updatedCard);
     } catch (error) {
       throw new InternalServerErrorException(
         'Failed updating application',
@@ -142,7 +141,7 @@ export class BountyService {
         .populate('project')
         .populate('circle');
 
-      return this.cardsService.reverseActivity(updatedCard);
+      return await this.cardsService.enrichActivity(updatedCard);
     } catch (error) {
       throw new InternalServerErrorException(
         'Failed while deleting application',
@@ -170,7 +169,7 @@ export class BountyService {
         .populate('project')
         .populate('circle');
 
-      return this.cardsService.reverseActivity(updatedCard);
+      return await this.cardsService.enrichActivity(updatedCard);
     } catch (error) {
       throw new InternalServerErrorException(
         'Failed while picking applications',

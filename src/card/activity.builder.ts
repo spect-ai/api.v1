@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { diff } from 'fast-array-diff';
+import { diff as arrayDiff } from 'fast-array-diff';
+import { diff as objectDiff } from 'deep-object-diff';
 import { CreateCardRequestDto } from 'src/card/dto/create-card-request.dto';
 import { UpdateCardRequestDto } from 'src/card/dto/update-card-request.dto';
 import {
@@ -14,6 +15,18 @@ import { RequestProvider } from 'src/users/user.provider';
 import { v4 as uuidv4 } from 'uuid';
 import { Activity } from '../common/types/activity.type';
 
+const fieldUpdateToActiityIdMap = {
+  deadline: 'updateDeadline',
+  reviewer: 'updateReviewer',
+  assignee: 'updateAssignee',
+  reward: 'updateReward',
+  labels: 'updateLabels',
+  priority: 'updatePriority',
+  type: 'updateCardType',
+  columnId: 'updateColumn',
+  status: 'updateStatus',
+};
+
 @Injectable()
 export class ActivityBuilder {
   commitId: string;
@@ -21,31 +34,14 @@ export class ActivityBuilder {
     this.commitId = uuidv4();
   }
 
-  resolveArrayTypeActivityContent(
-    added: any[],
-    removed: any[],
-    fieldName: string,
-  ) {
-    let res = '';
-    if (added.length > 1) res += `added ${fieldName}`;
-    else if (added.length > 0) res += `added ${fieldName}s`;
-    res += `${added.join(', ')}`;
-
-    if (added.length > 0 && removed.length > 0) res += ` and removed `;
-    else if (added.length === 0 && removed.length === 1)
-      res += `removed ${fieldName}`;
-    else if (added.length === 0 && removed.length >= 1)
-      res += `removed ${fieldName}s`;
-
-    res += `${removed.join(', ')}`;
-
-    return res;
-  }
-
   buildNewCardActivity(req: CreateCardRequestDto): Activity {
     const newCardActivity = {} as Activity;
 
-    newCardActivity.content = `created card ${req.title}`;
+    newCardActivity.activityId = `createCard`;
+    newCardActivity.changeLog = {
+      prev: {},
+      next: req,
+    };
     newCardActivity.timestamp = new Date();
     newCardActivity.actorId = this.requestProvider.user.id;
     newCardActivity.commitId = this.commitId;
@@ -54,106 +50,73 @@ export class ActivityBuilder {
     return newCardActivity;
   }
 
-  buildUpdatedCardActivity(req: UpdateCardRequestDto, card: Card): Activity[] {
+  buildUpdatedCardActivity(
+    req: UpdateCardRequestDto,
+    card: Card,
+    project: Project,
+  ): Activity[] {
     const timestamp = new Date();
-    const contentArray = [];
-    if (req.reviewer)
-      contentArray.push(this.buildUpdatedReviewerActivityContent(req, card));
-
     const newActivities = [];
-    for (const content of contentArray) {
-      if (content)
+    for (const [field, value] of Object.entries(req)) {
+      if (
+        fieldUpdateToActiityIdMap.hasOwnProperty(field) &&
+        this.valueIsDifferent(req, card, field)
+      ) {
+        let changeLog;
+        if (field === 'columnId') {
+          changeLog = this.buildColumnUpdateChange(req, card, field, project);
+        } else changeLog = this.buildUpdateChangeLog(req, card, field);
+        console.log(changeLog);
         newActivities.push({
-          content,
+          activityId: fieldUpdateToActiityIdMap[field],
+          changeLog: changeLog,
           timestamp,
           actorId: this.requestProvider.user.id,
           commitId: this.commitId,
           comment: false,
         });
+      }
     }
 
     return newActivities;
   }
 
-  buildUpdatedReviewerActivityContent(req: UpdateCardRequestDto, card: Card) {
-    const difference = diff(req.reviewer, card.reviewer);
-    if (difference.added?.length > 0 || difference.removed?.length > 0) {
-      return this.resolveArrayTypeActivityContent(
-        difference.added,
-        difference.removed,
-        'reviewer',
-      );
-    }
+  buildUpdateChangeLog(req: UpdateCardRequestDto, card: Card, field: string) {
+    return {
+      prev: {
+        [field]: card[field],
+      },
+      next: {
+        [field]: req[field],
+      },
+    };
   }
 
-  buildUpdatedAssigneeActivityContent(req: UpdateCardRequestDto, card: Card) {
-    const difference = diff(req.assignee, card.assignee);
-
-    return this.resolveArrayTypeActivityContent(
-      difference.added,
-      difference.removed,
-      'assignee',
-    );
-  }
-
-  buildUpdatedDeadlineActivityContent(req: UpdateCardRequestDto, card: Card) {
-    if (card.deadline !== req.deadline) {
-      if (!req.deadline) {
-        return 'removed deadline';
-      }
-      return `updated deadline to ${req.deadline}`;
-    }
-  }
-
-  buildUpdatedLabelsActivityContent(req: UpdateCardRequestDto, card: Card) {
-    const difference = diff(req.assignee, card.assignee);
-
-    return this.resolveArrayTypeActivityContent(
-      difference.added,
-      difference.removed,
-      'label',
-    );
-  }
-
-  buildUpdatedRewardActivity(req: UpdateCardRequestDto, card: Card) {
-    if (req.reward.value !== card.reward.value) {
-      return `updated value to ${req.reward.value} ${req.reward.token.symbol} on ${req.reward.chain.name}`;
-    }
-  }
-
-  buildUpdatedCardTypeActivity(req: UpdateCardRequestDto, card: Card) {
-    if (req.type !== card.type) {
-      return `updated card type to ${req.type}`;
-    }
-  }
-
-  buildUpdatedColumnActivity(
+  buildColumnUpdateChange(
     req: UpdateCardRequestDto,
     card: Card,
+    field: string,
     project: Project,
   ) {
-    if (req.columnId !== card.columnId) {
-      return `updated column to ${project.columnDetails[req.columnId].name}`;
-    }
+    return {
+      prev: {
+        [field]: project.columnDetails[card[field]].name,
+      },
+      next: {
+        [field]: project.columnDetails[req[field]].name,
+      },
+    };
   }
 
-  buildUpdatedStatusActivity(req: UpdateCardRequestDto, card: Card) {
-    return ``;
-  }
-
-  buildCreatedWorkThreadActivity(req: CreateWorkThreadRequestDto, card: Card) {
-    return `created a work thread ${req.name}`;
-  }
-
-  buildUpdatedWorkThreadActivity(req: UpdateWorkThreadRequestDto, card: Card) {
-    return `updated work thread to`;
-  }
-
-  buildCreatedWorkUnitActivity(req: CreateWorkUnitRequestDto, card: Card) {
-    return `created a work unit`;
-  }
-
-  buildUpdatedWorkUnitActivity(req: UpdateWorkUnitRequestDto, card: Card) {
-    return `updated work unit`;
+  valueIsDifferent(req: UpdateCardRequestDto, card: Card, field: string) {
+    if (['deadline', 'priority', 'type', 'columnId'].includes(field)) {
+      return card[field] !== req[field];
+    } else if (['assignee', 'reviewer', 'labels'].includes(field)) {
+      const difference = arrayDiff(card[field], req[field]);
+      return difference.added?.length !== 0 || difference.removed?.length !== 0;
+    } else if (['status', 'reward'].includes(field)) {
+      const difference = objectDiff(card[field], req[field]);
+      return Object.keys(difference)?.length > 0;
+    } else return false;
   }
 }

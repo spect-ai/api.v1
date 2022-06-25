@@ -8,6 +8,7 @@ export class UpdateCardRequestDto extends OmitType(CreateCardRequestDto, [
   'project',
   'circle',
   'columnId',
+  'type',
 ] as const) {
   /**
    * The title of the card
@@ -15,7 +16,15 @@ export class UpdateCardRequestDto extends OmitType(CreateCardRequestDto, [
   @IsString()
   @IsOptional()
   @IsNotEmpty()
-  title: string;
+  title?: string;
+
+  /**
+   * The title of the card
+   */
+  @IsString()
+  @IsOptional()
+  @IsNotEmpty()
+  type?: string;
 
   /**
    * The column Id of the card

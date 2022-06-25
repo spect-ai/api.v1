@@ -28,6 +28,8 @@ import { AddCommentDto, UpdateCommentDto } from './dto/comment-body.dto';
 import { DataStructureManipulationService } from 'src/common/dataStructureManipulation.service';
 import { AggregatedFlattenedPaymentInfo } from './dto/payment-info-response.dto';
 import { UpdatePaymentInfoDto } from './dto/update-payment-info.dto';
+import { ActivityResolver } from './activity.resolver';
+import { Project } from 'src/project/model/project.model';
 
 @Injectable()
 export class CardsService {
@@ -35,6 +37,7 @@ export class CardsService {
     private readonly requestProvider: RequestProvider,
     private readonly cardsRepository: CardsRepository,
     private readonly activityBuilder: ActivityBuilder,
+    private readonly activityResolver: ActivityResolver,
     private readonly circleRepository: CirclesRepository,
     private readonly projectService: ProjectService,
     private readonly datastructureManipulationService: DataStructureManipulationService,
@@ -67,7 +70,8 @@ export class CardsService {
     }
   }
 
-  reverseActivity(card: Card) {
+  async enrichActivity(card: Card) {
+    card = await this.activityResolver.resolveActivities(card);
     card.activity = card.activity.reverse();
     return card;
   }
@@ -153,7 +157,7 @@ export class CardsService {
           project,
           slug,
         );
-      return this.reverseActivity(card);
+      return await this.enrichActivity(card);
     } catch (error) {
       console.log(error);
       throw new InternalServerErrorException(
@@ -168,19 +172,12 @@ export class CardsService {
     updateCardDto: UpdateCardRequestDto,
   ): Promise<DetailedCardResponseDto> {
     try {
+      const card = await this.cardsRepository.findById(id).populate('project');
+      const project = card.project as unknown as Project;
       if (updateCardDto.columnId) {
-        const card = await this.cardsRepository.findById(id);
-
-        const activities = this.activityBuilder.buildUpdatedCardActivity(
-          updateCardDto,
-          card,
-        );
-
-        console.log(activities);
-
         if (card.columnId !== updateCardDto.columnId) {
           await this.projectService.reorderCard(
-            card.project.toString(),
+            project._id.toString(),
             id,
             {
               destinationColumnId: updateCardDto.columnId,
@@ -190,12 +187,20 @@ export class CardsService {
           );
         }
       }
+      const activities = this.activityBuilder.buildUpdatedCardActivity(
+        updateCardDto,
+        card,
+        project,
+      );
 
       const updatedCard = await this.cardsRepository
-        .updateById(id, updateCardDto)
+        .updateById(id, {
+          ...updateCardDto,
+          activity: card.activity.concat(activities),
+        })
         .populate('project')
         .populate('circle');
-      return this.reverseActivity(updatedCard);
+      return await this.enrichActivity(updatedCard);
     } catch (error) {
       throw new InternalServerErrorException(
         'Failed card update',
@@ -246,7 +251,7 @@ export class CardsService {
         })
         .populate('project')
         .populate('circle');
-      return this.reverseActivity(updatedCard);
+      return this.enrichActivity(updatedCard);
     } catch (error) {
       throw new InternalServerErrorException(
         'Failed creating work thread',
@@ -278,7 +283,7 @@ export class CardsService {
         .populate('project')
         .populate('circle');
 
-      return this.reverseActivity(updatedCard);
+      return await this.enrichActivity(updatedCard);
     } catch (error) {
       throw new InternalServerErrorException(
         'Failed updating work thread',
@@ -328,7 +333,7 @@ export class CardsService {
         .populate('project')
         .populate('circle');
 
-      return this.reverseActivity(updatedCard);
+      return await this.enrichActivity(updatedCard);
     } catch (error) {
       throw new InternalServerErrorException(
         'Failed creating work unit',
@@ -368,7 +373,7 @@ export class CardsService {
         .populate('project')
         .populate('circle');
 
-      return this.reverseActivity(updatedCard);
+      return await this.enrichActivity(updatedCard);
     } catch (error) {
       throw new InternalServerErrorException(
         'Failed updating work unit',
@@ -403,7 +408,7 @@ export class CardsService {
         })
         .populate('project')
         .populate('circle');
-      return this.reverseActivity(updatedCard);
+      return await this.enrichActivity(updatedCard);
     } catch (error) {
       throw new InternalServerErrorException(
         'Failed adding comment',
@@ -434,7 +439,7 @@ export class CardsService {
         })
         .populate('project')
         .populate('circle');
-      return this.reverseActivity(updatedCard);
+      return await this.enrichActivity(updatedCard);
     } catch (error) {
       throw new InternalServerErrorException(
         'Failed updating comment',
@@ -464,7 +469,7 @@ export class CardsService {
         })
         .populate('project')
         .populate('circle');
-      return this.reverseActivity(updatedCard);
+      return await this.enrichActivity(updatedCard);
     } catch (error) {
       throw new InternalServerErrorException(
         'Failed adding comment',
@@ -549,7 +554,6 @@ export class CardsService {
     /*
      * Flatten the reward tokens, users and values into equal length arrays
      */
-    console.log(paymentInfo);
     for (const [tokenAddress, userIdToValue] of Object.entries(paymentInfo)) {
       if (tokenAddress === '0x0') {
         aggregatedPaymentInfo.currency.userIds = Object.keys(userIdToValue);
@@ -578,10 +582,22 @@ export class CardsService {
       }
 
       /** Taking the first card to get the project */
-      const card = await this.cardsRepository.getCardWithUnpopulatedReferences(
+      const card = await this.cardsRepository.getCardWithPopulatedReferences(
         updatePaymentInfo.cardIds[0],
       );
-      const projectId = card.project;
+      const project = card.project as unknown as Project;
+      const activities = this.activityBuilder.buildUpdatedCardActivity(
+        {
+          status: {
+            active: false,
+            paid: true,
+            archived: false,
+          },
+        },
+        card,
+        project,
+      );
+
       /** Mongo only returns an acknowledgment on update and not the updated records itself */
       const updateAcknowledgment = await this.cardsRepository.updateMany(
         {
@@ -592,6 +608,9 @@ export class CardsService {
             'reward.transactionHash': updatePaymentInfo.transactionHash,
             'status.active': false,
             'status.paid': true,
+          },
+          $push: {
+            activity: activities[0],
           },
         },
         {
@@ -604,7 +623,9 @@ export class CardsService {
           HttpStatus.INTERNAL_SERVER_ERROR,
         );
       }
-      return await this.projectService.getDetailedProject(projectId.toString());
+      return await this.projectService.getDetailedProject(
+        project._id.toString(),
+      );
     } catch (error) {
       throw new InternalServerErrorException(
         'Failed updating payment info',

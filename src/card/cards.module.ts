@@ -16,6 +16,8 @@ import { CardsRepository } from './cards.repository';
 import { CardsService } from './cards.service';
 import { Card } from './model/card.model';
 import { BountyService } from './bounty.service';
+import { ActivityResolver } from './activity.resolver';
+import { UsersModule } from 'src/users/users.module';
 
 @Module({
   imports: [
@@ -25,6 +27,7 @@ import { BountyService } from './bounty.service';
     TemplatesModule,
     EthAddressModule,
     RequestProvider,
+    UsersModule,
   ],
   controllers: [CardsController],
   providers: [
@@ -36,6 +39,7 @@ import { BountyService } from './bounty.service';
     DataStructureManipulationService,
     ActionService,
     ActivityBuilder,
+    ActivityResolver,
     BountyService,
   ],
   exports: [CardsService, CardsRepository, CardsModule],

@@ -53,6 +53,13 @@ export class UsersService {
     return await this.usersRepository.findById(userId);
   }
 
+  async getPublicProfileOfMultipleUsers(userIds: string[]): Promise<User[]> {
+    // Filter what fields get returned as private data is added to user table
+    return await this.usersRepository.findAll({
+      _id: { $in: userIds },
+    });
+  }
+
   async getUserPublicProfileByUsername(username: string): Promise<User> {
     // Filter what fields get returned as private data is added to user table
     return await this.usersRepository.findOne({ username });

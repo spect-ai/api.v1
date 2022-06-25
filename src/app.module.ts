@@ -27,6 +27,7 @@ import { RegistryController } from './registry/registry.controller';
 import { ActionService } from './card/actions.service';
 import { ActivityBuilder } from './card/activity.builder';
 import { BountyService } from './card/bounty.service';
+import { ActivityResolver } from './card/activity.resolver';
 
 @Module({
   imports: [
@@ -63,6 +64,7 @@ import { BountyService } from './card/bounty.service';
     RegistryService,
     ActionService,
     ActivityBuilder,
+    ActivityResolver,
     BountyService,
   ],
 })
