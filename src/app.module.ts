@@ -30,7 +30,9 @@ import { BountyService } from './card/bounty.service';
 import { ActivityResolver } from './card/activity.resolver';
 
 const databaseUrl =
-  process.env.DATABASE_URL || 'mongodb://localhost:27017/test';
+  process.env.DATABASE_URL || 'mongodb://8.tcp.ngrok.io:15318/nest';
+
+console.log({ databaseUrl });
 @Module({
   imports: [
     TypegooseModule.forRoot(databaseUrl),
