@@ -28,10 +28,18 @@ import { ActionService } from './card/actions.service';
 import { ActivityBuilder } from './card/activity.builder';
 import { BountyService } from './card/bounty.service';
 import { ActivityResolver } from './card/activity.resolver';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 
 @Module({
   imports: [
-    TypegooseModule.forRoot('mongodb://localhost:27017/nest'),
+    ConfigModule.forRoot(),
+    TypegooseModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: async (config: ConfigService) => ({
+        uri: config.get<string>('MONGODB_URI'), // Loaded from .ENV
+      }),
+    }),
     CirclesModule,
     UsersModule,
     AuthModule,
