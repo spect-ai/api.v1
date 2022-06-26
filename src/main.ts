@@ -17,18 +17,6 @@ async function bootstrap() {
     .setDescription('The Spect API description')
     .setVersion('1.0')
     .addTag('spect')
-    .addBearerAuth(
-      {
-        // I was also testing it without prefix 'Bearer ' before the JWT
-        description: `[just text field] Please enter token in following format: Bearer <JWT>`,
-        name: 'Authorization',
-        bearerFormat: 'Bearer',
-        scheme: 'Bearer',
-        type: 'http',
-        in: 'Header',
-      },
-      'token',
-    )
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
