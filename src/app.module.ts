@@ -32,9 +32,6 @@ import { ActivityResolver } from './card/activity.resolver';
 const databaseUrl =
   process.env.DATABASE_URL || 'mongodb://0.tcp.ngrok.io:10569/nest';
 
-console.log({ databaseUrl });
-
-console.log({ databaseUrl });
 @Module({
   imports: [
     TypegooseModule.forRoot(databaseUrl),
