@@ -29,9 +29,11 @@ import { ActivityBuilder } from './card/activity.builder';
 import { BountyService } from './card/bounty.service';
 import { ActivityResolver } from './card/activity.resolver';
 
+const databaseUrl =
+  process.env.DATABASE_URL || 'mongodb://localhost:27017/test';
 @Module({
   imports: [
-    TypegooseModule.forRoot('mongodb://localhost:27017/nest'),
+    TypegooseModule.forRoot(databaseUrl),
     CirclesModule,
     UsersModule,
     AuthModule,
