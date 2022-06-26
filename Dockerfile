@@ -10,12 +10,6 @@ RUN yarn --only=development
 
 COPY . .
 
-RUN yarn build
-
-RUN yarn --only=production
-
-COPY . .
-
-EXPOSE 8080
+EXPOSE 3000
 
 CMD ["node", "src/main"]
