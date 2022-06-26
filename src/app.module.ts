@@ -29,9 +29,9 @@ import { ActivityBuilder } from './card/activity.builder';
 import { BountyService } from './card/bounty.service';
 import { ActivityResolver } from './card/activity.resolver';
 
-const databaseUrl =
-  process.env.DATABASE_URL || 'mongodb://0.tcp.ngrok.io:10569/nest';
+const databaseUrl = process.env.DATABASE_URL;
 
+console.log({ databaseUrl });
 @Module({
   imports: [
     TypegooseModule.forRoot(databaseUrl),
