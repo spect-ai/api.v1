@@ -22,8 +22,11 @@ export class AuthService {
   ): Promise<any> {
     const siweMessage = new SiweMessage(message);
     const fields = await siweMessage.validate(signature);
-    if (fields.nonce !== req.session.nonce)
+    if (fields.nonce !== req.session.nonce) {
+      console.log('field nonce', fields.nonce);
+      console.log('session nonce', req.session.nonce);
       throw new HttpException({ message: 'Invalid nonce.' }, 422);
+    }
 
     req.session.siwe = fields;
     await req.session.save();
