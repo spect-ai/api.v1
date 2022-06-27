@@ -79,13 +79,10 @@ export class CardsService {
   async create(createCardDto: CreateCardRequestDto): Promise<{
     card: DetailedCardResponseDto;
     project: DetailedProjectResponseDto;
+    parentCard?: DetailedCardResponseDto;
   }> {
     try {
       const activity = this.activityBuilder.buildNewCardActivity(createCardDto);
-      // const defaultPayment = await this.circleRepository.getDefaultPayment(
-      //   createCardDto.circle,
-      // );
-      // bug, we can send reward in create card, default payment value = 0
       const cardNum = await this.cardsRepository.count({
         project: createCardDto.project,
       });
@@ -96,6 +93,24 @@ export class CardsService {
         slug: cardNum.toString(),
         creator: this.requestProvider.user.id,
       });
+
+      let updatedParentCard: Card;
+      if (card.parent) {
+        const parentCard =
+          await this.cardsRepository.getCardWithPopulatedReferences(
+            card.parent.toString(),
+          );
+        this.validateCardExists(parentCard);
+        updatedParentCard =
+          await this.cardsRepository.updateCardAndReturnWithPopulatedReferences(
+            parentCard.id,
+            {
+              ...parentCard,
+              children: [...parentCard.children, card._id],
+            },
+          );
+      }
+
       const project = await this.projectService.addCardToProject(
         createCardDto.project,
         createCardDto.columnId,
@@ -104,6 +119,7 @@ export class CardsService {
       return {
         project: project,
         card: card,
+        parentCard: updatedParentCard,
       };
     } catch (error) {
       throw new InternalServerErrorException(
@@ -193,13 +209,14 @@ export class CardsService {
         project,
       );
 
-      const updatedCard = await this.cardsRepository
-        .updateById(id, {
-          ...updateCardDto,
-          activity: card.activity.concat(activities),
-        })
-        .populate('project')
-        .populate('circle');
+      const updatedCard =
+        await this.cardsRepository.updateCardAndReturnWithPopulatedReferences(
+          id,
+          {
+            ...updateCardDto,
+            activity: card.activity.concat(activities),
+          },
+        );
       return await this.enrichActivity(updatedCard);
     } catch (error) {
       throw new InternalServerErrorException(
@@ -244,13 +261,14 @@ export class CardsService {
       };
       const workThreadOrder = [...card.workThreadOrder, threadId];
 
-      const updatedCard = await this.cardsRepository
-        .updateById(id, {
-          workThreads,
-          workThreadOrder,
-        })
-        .populate('project')
-        .populate('circle');
+      const updatedCard =
+        await this.cardsRepository.updateCardAndReturnWithPopulatedReferences(
+          id,
+          {
+            workThreads,
+            workThreadOrder,
+          },
+        );
       return this.enrichActivity(updatedCard);
     } catch (error) {
       throw new InternalServerErrorException(
@@ -276,12 +294,13 @@ export class CardsService {
         updatedAt: new Date(),
       };
 
-      const updatedCard = await this.cardsRepository
-        .updateById(id, {
-          workThreads: card.workThreads,
-        })
-        .populate('project')
-        .populate('circle');
+      const updatedCard =
+        await this.cardsRepository.updateCardAndReturnWithPopulatedReferences(
+          id,
+          {
+            workThreads: card.workThreads,
+          },
+        );
 
       return await this.enrichActivity(updatedCard);
     } catch (error) {
@@ -326,12 +345,13 @@ export class CardsService {
         updatedAt: new Date(),
       };
 
-      const updatedCard = await this.cardsRepository
-        .updateById(id, {
-          workThreads: card.workThreads,
-        })
-        .populate('project')
-        .populate('circle');
+      const updatedCard =
+        await this.cardsRepository.updateCardAndReturnWithPopulatedReferences(
+          id,
+          {
+            workThreads: card.workThreads,
+          },
+        );
 
       return await this.enrichActivity(updatedCard);
     } catch (error) {
@@ -366,12 +386,13 @@ export class CardsService {
         updatedAt: new Date(),
       };
 
-      const updatedCard = await this.cardsRepository
-        .updateById(id, {
-          workThreads: card.workThreads,
-        })
-        .populate('project')
-        .populate('circle');
+      const updatedCard =
+        await this.cardsRepository.updateCardAndReturnWithPopulatedReferences(
+          id,
+          {
+            workThreads: card.workThreads,
+          },
+        );
 
       return await this.enrichActivity(updatedCard);
     } catch (error) {
@@ -402,12 +423,13 @@ export class CardsService {
         } as Activity,
       ];
 
-      const updatedCard = await this.cardsRepository
-        .updateById(id, {
-          activity: card.activity,
-        })
-        .populate('project')
-        .populate('circle');
+      const updatedCard =
+        await this.cardsRepository.updateCardAndReturnWithPopulatedReferences(
+          id,
+          {
+            activity: card.activity,
+          },
+        );
       return await this.enrichActivity(updatedCard);
     } catch (error) {
       throw new InternalServerErrorException(
@@ -433,12 +455,13 @@ export class CardsService {
 
       card.activity[commentIndex].content = updateCommentDto.comment;
 
-      const updatedCard = await this.cardsRepository
-        .updateById(id, {
-          activity: card.activity,
-        })
-        .populate('project')
-        .populate('circle');
+      const updatedCard =
+        await this.cardsRepository.updateCardAndReturnWithPopulatedReferences(
+          id,
+          {
+            activity: card.activity,
+          },
+        );
       return await this.enrichActivity(updatedCard);
     } catch (error) {
       throw new InternalServerErrorException(
@@ -463,12 +486,13 @@ export class CardsService {
 
       card.activity.splice(commentIndex, 1);
 
-      const updatedCard = await this.cardsRepository
-        .updateById(id, {
-          activity: card.activity,
-        })
-        .populate('project')
-        .populate('circle');
+      const updatedCard =
+        await this.cardsRepository.updateCardAndReturnWithPopulatedReferences(
+          id,
+          {
+            activity: card.activity,
+          },
+        );
       return await this.enrichActivity(updatedCard);
     } catch (error) {
       throw new InternalServerErrorException(
@@ -641,10 +665,13 @@ export class CardsService {
       card.project.toString(),
       id,
     );
-    return await this.cardsRepository.updateById(id, {
-      'status.archived': true,
-      'status.active': false,
-    });
+    return await this.cardsRepository.updateCardAndReturnWithPopulatedReferences(
+      id,
+      {
+        'status.archived': true,
+        'status.active': false,
+      },
+    );
   }
 
   async revertArchive(id: string): Promise<Card> {
@@ -661,10 +688,13 @@ export class CardsService {
       card.columnId,
       card._id,
     );
-    return await this.cardsRepository.updateById(id, {
-      'status.archived': false,
-      'status.active': true,
-    });
+    return await this.cardsRepository.updateCardAndReturnWithPopulatedReferences(
+      id,
+      {
+        'status.archived': false,
+        'status.active': true,
+      },
+    );
   }
 
   async delete(id: string): Promise<Card> {

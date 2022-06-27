@@ -145,4 +145,16 @@ export class Card extends BaseModel {
    */
   @prop({ default: [] })
   applicationOrder: string[];
+
+  /**
+   * The child cards associated with the card
+   */
+  @prop({ ref: () => Card, default: [] })
+  children: string[];
+
+  /**
+   * The parent card associated with the card
+   */
+  @prop({ ref: () => Card })
+  parent?: ObjectId;
 }
