@@ -32,6 +32,13 @@ export class DetailedCardResponseDto {
   description?: string;
 
   /**
+   * The title of the card
+   */
+  @IsString()
+  @IsNotEmpty()
+  slug: string;
+
+  /**
    * The reviewers of the card
    */
   @IsArray()

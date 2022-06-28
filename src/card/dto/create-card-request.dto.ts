@@ -99,4 +99,11 @@ export class CreateCardRequestDto {
   @IsObjectId()
   @IsOptional()
   parent?: ObjectId;
+
+  /**
+   * The card's children
+   */
+  @IsArray()
+  @IsOptional()
+  children?: string[];
 }

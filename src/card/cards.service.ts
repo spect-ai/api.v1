@@ -87,18 +87,19 @@ export class CardsService {
         project: createCardDto.project,
       });
 
-      const card = await this.cardsRepository.create({
+      const createdCard = await this.cardsRepository.create({
         ...createCardDto,
         activity: [activity],
         slug: cardNum.toString(),
         creator: this.requestProvider.user.id,
       });
 
+      /** If card has a parent, add the card as a child in the parent card */
       let updatedParentCard: Card;
-      if (card.parent) {
+      if (createdCard.parent) {
         const parentCard =
           await this.cardsRepository.getCardWithPopulatedReferences(
-            card.parent.toString(),
+            createdCard.parent.toString(),
           );
         this.validateCardExists(parentCard);
         updatedParentCard =
@@ -106,15 +107,40 @@ export class CardsService {
             parentCard.id,
             {
               ...parentCard,
-              children: [...parentCard.children, card._id],
+              children: [...parentCard.children, createdCard._id],
             },
           );
       }
+      let card = createdCard as DetailedCardResponseDto;
 
+      /** If card has children add the card as a parent in all its child cards */
+      if (createdCard.children?.length > 0) {
+        /** Mongo only returns an acknowledgment on update and not the updated records itself */
+        const updateAcknowledgment = await this.cardsRepository.updateMany(
+          {
+            _id: { $in: createdCard.children },
+          },
+          {
+            $set: {
+              parent: createdCard._id,
+            },
+          },
+          {
+            multi: true,
+          },
+        );
+
+        card = await this.getDetailedCardByProjectIdAndCardSlug(
+          card.project.toString(),
+          card.slug,
+        );
+      }
+
+      /** Add the card to the prokject column */
       const project = await this.projectService.addCardToProject(
         createCardDto.project,
         createCardDto.columnId,
-        card._id,
+        createdCard._id,
       );
       return {
         project: project,
