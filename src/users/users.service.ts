@@ -1,4 +1,5 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { ObjectId } from 'mongoose';
 import { EthAddressRepository } from 'src/_eth-address/_eth_address.repository';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -55,6 +56,7 @@ export class UsersService {
 
   async getPublicProfileOfMultipleUsers(userIds: string[]): Promise<User[]> {
     // Filter what fields get returned as private data is added to user table
+    if (userIds.length === 0) return [];
     return await this.usersRepository.findAll({
       _id: { $in: userIds },
     });

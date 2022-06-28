@@ -114,9 +114,21 @@ export class ActivityBuilder {
     } else if (['assignee', 'reviewer', 'labels'].includes(field)) {
       const difference = arrayDiff(card[field], req[field]);
       return difference.added?.length !== 0 || difference.removed?.length !== 0;
-    } else if (['status', 'reward'].includes(field)) {
+    } else if (['status'].includes(field)) {
       const difference = objectDiff(card[field], req[field]);
       return Object.keys(difference)?.length > 0;
+    } else if (['reward'].includes(field)) {
+      const difference = objectDiff(card[field], req[field]);
+
+      console.log(`dissss`);
+      console.log(difference);
+      console.log('lalal');
+      return (
+        Object.keys(difference).includes('value') ||
+        ((Object.keys(difference).includes('chain') ||
+          Object.keys(difference).includes('token')) &&
+          card[field].value > 0)
+      );
     } else return false;
   }
 }
