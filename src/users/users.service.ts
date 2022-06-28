@@ -36,7 +36,6 @@ export class UsersService {
         });
         if (usernameTaken) throw new Error('Username taken');
       }
-
       return await this.usersRepository.updateById(
         this.requestProvider.user.id,
         updateUserDto,
