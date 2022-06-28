@@ -197,7 +197,7 @@ export class CardsService {
             id,
             {
               destinationColumnId: updateCardDto.columnId,
-              destinationCardIndex: 'end',
+              destinationCardIndex: 0,
             } as ReorderCardReqestDto,
             false,
           );
