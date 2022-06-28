@@ -150,16 +150,17 @@ export class BountyService {
     }
   }
 
-  async pickApplications(id: string, applicationIds: string[]) {
+  async pickApplications(id: string, applicationId: string) {
     try {
       const card = await this.cardsRepository.findById(id);
       this.cardsService.validateCardExists(card);
       const assignees = [];
-      for (const applicationId of applicationIds) {
-        this.validateApplicationExists(card, applicationId);
-        assignees.push(card.application[applicationId].user);
-        card.application[applicationId].status = 'picked';
-      }
+      // passing single applicationId was not working, it was looping through a single string instead of an array
+      // for (const applicationId of applicationIds) {
+      this.validateApplicationExists(card, applicationId);
+      assignees.push(card.application[applicationId].user);
+      card.application[applicationId].status = 'picked';
+      // }
 
       const updatedCard = await this.cardsRepository
         .updateById(id, {

@@ -273,7 +273,7 @@ export class CardsController {
   @ApiParam({ name: 'id' })
   async pickApplications(
     @Param() params: ObjectIdDto,
-    @Query('applicationIds') applicationIds: string[],
+    @Query('applicationIds') applicationIds: string,
   ): Promise<DetailedCardResponseDto> {
     return await this.bountyService.pickApplications(params.id, applicationIds);
   }
