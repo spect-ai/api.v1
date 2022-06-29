@@ -14,6 +14,7 @@ import {
 import { ObjectId, Date } from 'mongoose';
 import { Payment } from 'src/common/models/payment.model';
 import { Status } from 'src/common/types/status.type';
+import { ApplicationDetails, ApplicationUnit } from '../model/application.type';
 import { Card } from '../model/card.model';
 
 export class DetailedCardResponseDto {
@@ -104,4 +105,10 @@ export class DetailedCardResponseDto {
    */
   @IsObject()
   status?: Status;
+
+  /**
+   * The application of the caller
+   */
+  @IsObject()
+  myApplication?: ApplicationUnit;
 }

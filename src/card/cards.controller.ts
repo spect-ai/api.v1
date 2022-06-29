@@ -31,7 +31,7 @@ import { ActionService } from './actions.service';
 import { ValidCardActionResponseDto } from './dto/card-access-response.dto';
 import { AggregatedFlattenedPaymentInfo } from './dto/payment-info-response.dto';
 import { UpdatePaymentInfoDto } from './dto/update-payment-info.dto';
-import { BountyService } from './bounty.service';
+import { ApplicationService } from './application.service';
 import {
   CreateApplicationDto,
   PickApplicationDto,
@@ -45,7 +45,7 @@ export class CardsController {
   constructor(
     private readonly cardsService: CardsService,
     private readonly actionService: ActionService,
-    private readonly bountyService: BountyService,
+    private readonly applicationService: ApplicationService,
   ) {}
 
   @Get('/byProjectSlugAndCardSlug/:projectSlug/:cardSlug')
@@ -238,7 +238,7 @@ export class CardsController {
     @Param() params: ObjectIdDto,
     @Body() createApplicationDto: CreateApplicationDto,
   ): Promise<DetailedCardResponseDto> {
-    return await this.bountyService.createApplication(
+    return await this.applicationService.createApplication(
       params.id,
       createApplicationDto,
     );
@@ -253,7 +253,7 @@ export class CardsController {
     @Query() updateApplicationQueryParam: UpdateApplicationParamDto,
     @Body() updateApplicationDto: UpdateApplicationDto,
   ): Promise<DetailedCardResponseDto> {
-    return await this.bountyService.updateApplication(
+    return await this.applicationService.updateApplication(
       params.id,
       updateApplicationQueryParam.applicationId,
       updateApplicationDto,
@@ -266,7 +266,7 @@ export class CardsController {
     @Param() params: ObjectIdDto,
     @Query() updateApplicationQueryParam: UpdateApplicationParamDto,
   ): Promise<DetailedCardResponseDto> {
-    return await this.bountyService.deleteApplication(
+    return await this.applicationService.deleteApplication(
       params.id,
       updateApplicationQueryParam.applicationId,
     );
@@ -279,7 +279,7 @@ export class CardsController {
     @Body() applications: PickApplicationDto,
   ): Promise<DetailedCardResponseDto> {
     console.log(applications);
-    return await this.bountyService.pickApplications(
+    return await this.applicationService.pickApplications(
       params.id,
       applications.applicationIds,
     );

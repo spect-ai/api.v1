@@ -1,6 +1,8 @@
 import {
+  forwardRef,
   HttpException,
   HttpStatus,
+  Inject,
   Injectable,
   InternalServerErrorException,
 } from '@nestjs/common';
@@ -20,7 +22,7 @@ import { Card } from './model/card.model';
 import { DetailedCardResponseDto } from './dto/detailed-card-response-dto';
 
 @Injectable()
-export class BountyService {
+export class ApplicationService {
   constructor(
     private readonly requestProvider: RequestProvider,
     private readonly cardsRepository: CardsRepository,
@@ -48,10 +50,11 @@ export class BountyService {
   }
 
   validateUserHasntSubmittedApplicaiton(card: Card) {
+    if (!card.application) return;
     for (const [applicationId, application] of Object.entries(
       card.application,
     )) {
-      if (application.user.toString() === this.requestProvider.user.id) {
+      if (application.user?.toString() === this.requestProvider.user.id) {
         throw new HttpException(
           'User has already submitted application',
           HttpStatus.INTERNAL_SERVER_ERROR,
@@ -70,7 +73,7 @@ export class BountyService {
       this.validateUserHasntSubmittedApplicaiton(card);
 
       const applicationId = uuidv4();
-
+      console.log(this.requestProvider.user);
       const applicationOrder = [...card.applicationOrder, applicationId];
       const application = {
         ...card.application,
@@ -92,8 +95,9 @@ export class BountyService {
           },
         );
 
-      return await this.cardsService.enrichActivity(updatedCard);
+      return await this.cardsService.enrichResponse(updatedCard);
     } catch (error) {
+      console.log(error);
       throw new InternalServerErrorException(
         'Failed creating application',
         error.message,
@@ -125,7 +129,7 @@ export class BountyService {
           },
         );
 
-      return await this.cardsService.enrichActivity(updatedCard);
+      return await this.cardsService.enrichResponse(updatedCard);
     } catch (error) {
       throw new InternalServerErrorException(
         'Failed updating application',
@@ -157,7 +161,7 @@ export class BountyService {
           },
         );
 
-      return await this.cardsService.enrichActivity(updatedCard);
+      return await this.cardsService.enrichResponse(updatedCard);
     } catch (error) {
       throw new InternalServerErrorException(
         'Failed while deleting application',
@@ -186,7 +190,7 @@ export class BountyService {
           },
         );
 
-      return await this.cardsService.enrichActivity(updatedCard);
+      return await this.cardsService.enrichResponse(updatedCard);
     } catch (error) {
       throw new InternalServerErrorException(
         'Failed while picking applications',

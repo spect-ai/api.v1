@@ -15,7 +15,7 @@ import { CardsController } from './cards.controller';
 import { CardsRepository } from './cards.repository';
 import { CardsService } from './cards.service';
 import { Card } from './model/card.model';
-import { BountyService } from './bounty.service';
+import { ApplicationService } from './application.service';
 import { ActivityResolver } from './activity.resolver';
 import { UsersModule } from 'src/users/users.module';
 
@@ -40,7 +40,7 @@ import { UsersModule } from 'src/users/users.module';
     ActionService,
     ActivityBuilder,
     ActivityResolver,
-    BountyService,
+    ApplicationService,
   ],
   exports: [CardsService, CardsRepository, CardsModule],
 })

@@ -26,7 +26,7 @@ import { RolesService } from './roles/roles.service';
 import { RegistryController } from './registry/registry.controller';
 import { ActionService } from './card/actions.service';
 import { ActivityBuilder } from './card/activity.builder';
-import { BountyService } from './card/bounty.service';
+import { ApplicationService } from './card/application.service';
 import { ActivityResolver } from './card/activity.resolver';
 
 const databaseUrl =
@@ -69,7 +69,7 @@ console.log({ databaseUrl });
     ActionService,
     ActivityBuilder,
     ActivityResolver,
-    BountyService,
+    ApplicationService,
   ],
 })
 export class AppModule {}
