@@ -41,7 +41,13 @@ export class ProjectsRepository extends BaseRepository<Project> {
   ): Promise<Project> {
     return await this.findOne({ slug: slug })
       .populate('parents')
-      .populate('cards', populatedCardFields);
+      .populate('cards', populatedCardFields, {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        parent: {
+          $exists: false,
+        },
+      });
   }
 
   async getProjectIdFromSlug(slug: string): Promise<Project> {
