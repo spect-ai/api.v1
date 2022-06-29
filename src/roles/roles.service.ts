@@ -63,6 +63,25 @@ export class RolesService {
           manageMembers: false,
         },
       },
+      /** TODO: We need to reserve this keyword and not let users set this as role */
+      visitor: {
+        name: 'visitor',
+        description: 'Visitor role',
+        selfAssignable: false,
+        permissions: {
+          createNewCircle: false,
+          manageCircleSettings: false,
+          createNewProject: false,
+          manageProjectSettings: false,
+          createNewRetro: false,
+          endRetroManually: false,
+          managePaymentOptions: false,
+          makePayment: false,
+          inviteMembers: false,
+          manageRoles: false,
+          manageMembers: false,
+        },
+      },
     };
   }
 

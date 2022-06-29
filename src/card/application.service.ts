@@ -20,6 +20,8 @@ import {
 import { v4 as uuidv4 } from 'uuid';
 import { Card } from './model/card.model';
 import { DetailedCardResponseDto } from './dto/detailed-card-response-dto';
+import { CirclesService } from 'src/circle/circles.service';
+import { ProjectsRepository } from 'src/project/project.repository';
 
 @Injectable()
 export class ApplicationService {
@@ -27,6 +29,9 @@ export class ApplicationService {
     private readonly requestProvider: RequestProvider,
     private readonly cardsRepository: CardsRepository,
     private readonly cardsService: CardsService,
+    private readonly circleService: CirclesService,
+    private readonly projectRepository: ProjectsRepository,
+    private readonly circleRepository: CirclesRepository,
     private readonly activityBuilder: ActivityBuilder,
     private readonly datastructureManipulationService: DataStructureManipulationService,
   ) {}
@@ -72,8 +77,28 @@ export class ApplicationService {
       this.cardsService.validateCardExists(card);
       this.validateUserHasntSubmittedApplicaiton(card);
 
+      const project =
+        await this.projectRepository.getProjectWithUnpPopulatedReferences(
+          card.project,
+        );
+      const memberDetailsRes =
+        await this.circleService.getMemberDetailsOfCircles(project.parents);
+
+      if (!memberDetailsRes.members?.includes(this.requestProvider.user.id)) {
+        const updatedCircles = await this.circleRepository.updateById(
+          card.circle,
+          {
+            $push: {
+              members: this.requestProvider.user.id,
+            },
+            $set: {
+              [`memberRoles.${this.requestProvider.user.id}`]: 'visitor',
+            },
+          },
+        );
+      }
+
       const applicationId = uuidv4();
-      console.log(this.requestProvider.user);
       const applicationOrder = [...card.applicationOrder, applicationId];
       const application = {
         ...card.application,

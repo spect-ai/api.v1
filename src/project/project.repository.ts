@@ -26,6 +26,10 @@ export class ProjectsRepository extends BaseRepository<Project> {
     super(projectModel);
   }
 
+  async getProjectWithUnpPopulatedReferences(id: string): Promise<Project> {
+    return await this.findById(id);
+  }
+
   async getProjectWithPopulatedReferences(id: string): Promise<Project> {
     return await this.findById(id)
       .populate('parents')
