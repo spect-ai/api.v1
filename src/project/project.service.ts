@@ -273,12 +273,12 @@ export class ProjectService {
   }
 
   async addCardToProject(
-    projectId: ObjectId,
+    projectId: string,
     columnId: string,
     cardId: ObjectId,
     addInFirstColumnIfColumnDoesntExist = true,
   ): Promise<DetailedProjectResponseDto> {
-    const project = await this.projectRepository.findByObjectId(projectId);
+    const project = await this.projectRepository.findById(projectId);
     if (!project) {
       throw new HttpException('Project not found', HttpStatus.NOT_FOUND);
     }

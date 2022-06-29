@@ -30,7 +30,7 @@ export class Card extends BaseModel {
    * The description of the card
    */
   @prop()
-  description: string;
+  description?: string;
 
   /**
    * The id of the creator of the card
@@ -42,25 +42,25 @@ export class Card extends BaseModel {
    * The ids of all the reviewers of the card
    */
   @prop({ default: [] })
-  reviewer: string[];
+  reviewer?: string[];
 
   /**
    * The ids of all the assignees of the card
    */
   @prop({ default: [] })
-  assignee: string[];
+  assignee?: string[];
 
   /**
    * The project that the card belongs to
    */
   @prop({ ref: () => Project, required: true })
-  project: ObjectId;
+  project: string;
 
   /**
    * The project that the card belongs to
    */
   @prop({ ref: () => Circle, required: true })
-  circle: ObjectId;
+  circle: string;
 
   /**
    * The reward associated with the card
@@ -72,7 +72,7 @@ export class Card extends BaseModel {
    * The type of the card, i.e., task, bounty, etc.
    */
   @prop({ default: 'Task' })
-  type: string;
+  type?: string;
 
   /**
    * The deadline the card is due to be completed by
@@ -83,19 +83,19 @@ export class Card extends BaseModel {
    * The labels associated with the card
    */
   @prop({ default: [] })
-  labels: string[];
+  labels?: string[];
 
   /**
    * The priority of the card
    */
   @prop()
-  priority: number;
+  priority?: number;
 
   /**
    * The votes given to the card
    */
   @prop()
-  votes: number;
+  votes?: number;
 
   /**
    * The column that the card belongs to
@@ -107,7 +107,7 @@ export class Card extends BaseModel {
    * The activity associated with the card
    */
   @prop({ default: [] })
-  activity: Activity[];
+  activity?: Activity[];
 
   /**
    * The status of the card
@@ -119,42 +119,42 @@ export class Card extends BaseModel {
       paid: false,
     },
   })
-  status: Status;
+  status?: Status;
 
   /**
    * The history of work done on the card, supports multiple parallel work histories so
    * multiple people can work on the same card (relevant for contests, cooperatives etc)
    */
   @prop({ default: {} })
-  workThreads: WorkThreads;
+  workThreads?: WorkThreads;
 
   /**
    * The order of the work threads
    */
   @prop({ default: [] })
-  workThreadOrder: string[];
+  workThreadOrder?: string[];
 
   /**
    * The applications submitted to a bounty
    */
-  @prop({ default: [] })
-  application: ApplicationDetails;
+  @prop({ default: {} })
+  application?: ApplicationDetails;
 
   /**
    * The order in which applications are saved
    */
   @prop({ default: [] })
-  applicationOrder: string[];
+  applicationOrder?: string[];
 
   /**
    * The child cards associated with the card
    */
   @prop({ ref: () => Card, default: [] })
-  children: string[];
+  children?: string[];
 
   /**
    * The parent card associated with the card
    */
   @prop({ ref: () => Card })
-  parent?: ObjectId;
+  parent?: string;
 }

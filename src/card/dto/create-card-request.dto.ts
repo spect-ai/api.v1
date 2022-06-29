@@ -43,14 +43,14 @@ export class CreateCardRequestDto {
   /**
    * The card's project
    */
-  @IsString()
-  project: ObjectId;
+  @IsObjectId()
+  project: string;
 
   /**
    * The circle Id that the card belongs to
    */
-  @IsString()
-  circle: ObjectId;
+  @IsObjectId()
+  circle: string;
 
   /**
    * Card reward
@@ -98,12 +98,12 @@ export class CreateCardRequestDto {
    */
   @IsObjectId()
   @IsOptional()
-  parent?: ObjectId;
+  parent?: string;
 
   /**
    * The card's children
    */
   @IsArray()
   @IsOptional()
-  children?: string[];
+  childCards?: CreateCardRequestDto[];
 }

@@ -17,6 +17,8 @@ const populatedCardFields = {
   project: 1,
   creator: 1,
   status: 1,
+  parent: 1,
+  children: 1,
 };
 @Injectable()
 export class CardsRepository extends BaseRepository<Card> {

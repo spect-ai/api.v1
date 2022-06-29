@@ -4,6 +4,7 @@ import type { MongoError } from 'mongodb';
 import {
   FilterQuery,
   HydratedDocument,
+  InsertManyResult,
   ObjectId,
   QueryOptions as MongooseQueryOptions,
   QueryWithHelpers,
@@ -24,6 +25,8 @@ export type EnforceDocumentType<TModel extends BaseModel> = HydratedDocument<
   Record<string, unknown>,
   Record<string, unknown>
 >;
+
+// export type InsertQueryList<TModel extends BaseModel> = InsertManyResult;
 
 export type UpdateQueryList<TModel extends BaseModel> = QueryWithHelpers<
   UpdateWriteOpResult,
@@ -125,6 +128,15 @@ export abstract class BaseRepository<TModel extends BaseModel> {
       BaseRepository.throwMongoError(e);
     }
     return null;
+  }
+
+  insertMany(
+    items: Partial<TModel[]>,
+    options?: QueryOptions,
+  ): Promise<HydratedDocument<DocumentType<TModel>>[]> {
+    const b = this.model.insertMany(items, options);
+
+    return b;
   }
 
   deleteOne(

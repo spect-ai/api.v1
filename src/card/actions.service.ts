@@ -168,7 +168,7 @@ export class ActionService {
     const card = await this.cardsRepository.getCardWithPopulatedReferences(id);
     this.cardService.validateCardExists(card);
 
-    const circle = await this.circleRepository.findByObjectId(card.circle);
+    const circle = await this.circleRepository.findById(card.circle);
     const circlePermissions =
       await this.circleService.getCollatedUserPermissions(
         [card.circle.toString()],

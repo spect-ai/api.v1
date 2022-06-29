@@ -56,7 +56,7 @@ export class DetailedCardResponseDto {
    * The project of the card
    */
   @IsString()
-  project: ObjectId;
+  project: string;
 
   /**
    * The reward of the card
@@ -103,5 +103,5 @@ export class DetailedCardResponseDto {
    * The status of the card
    */
   @IsObject()
-  status: Status;
+  status?: Status;
 }
