@@ -34,6 +34,7 @@ import { UpdatePaymentInfoDto } from './dto/update-payment-info.dto';
 import { BountyService } from './bounty.service';
 import {
   CreateApplicationDto,
+  PickApplicationDto,
   UpdateApplicationDto,
 } from './dto/application.dto';
 import { UpdateApplicationParamDto } from './dto/param.dto';
@@ -232,6 +233,7 @@ export class CardsController {
 
   @UseGuards(SessionAuthGuard)
   @Patch('/:id/createApplication')
+  @ApiParam({ name: 'id' })
   async createApplication(
     @Param() params: ObjectIdDto,
     @Body() createApplicationDto: CreateApplicationDto,
@@ -244,6 +246,8 @@ export class CardsController {
 
   @UseGuards(SessionAuthGuard)
   @Patch('/:id/updateApplication')
+  @ApiQuery({ name: 'applicationId', type: 'string' })
+  @ApiParam({ name: 'id' })
   async updateApplication(
     @Param() params: ObjectIdDto,
     @Query() updateApplicationQueryParam: UpdateApplicationParamDto,
@@ -269,13 +273,16 @@ export class CardsController {
   }
 
   @Patch('/:id/pickApplications')
-  @ApiQuery({ name: 'applicationIds', type: 'array' })
   @ApiParam({ name: 'id' })
   async pickApplications(
     @Param() params: ObjectIdDto,
-    @Query('applicationIds') applicationIds: string,
+    @Body() applications: PickApplicationDto,
   ): Promise<DetailedCardResponseDto> {
-    return await this.bountyService.pickApplications(params.id, applicationIds);
+    console.log(applications);
+    return await this.bountyService.pickApplications(
+      params.id,
+      applications.applicationIds,
+    );
   }
 
   @UseGuards(SessionAuthGuard)

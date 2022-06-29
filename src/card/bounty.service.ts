@@ -35,6 +35,18 @@ export class BountyService {
     }
   }
 
+  validateCallerIsOwner(card: Card, applicationId: string) {
+    if (
+      card.application[applicationId].user.toString() !==
+      this.requestProvider.user.id
+    ) {
+      throw new HttpException(
+        'Caller didnt submit this application',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
   validateUserHasntSubmittedApplicaiton(card: Card) {
     for (const [applicationId, application] of Object.entries(
       card.application,
@@ -63,21 +75,22 @@ export class BountyService {
       const application = {
         ...card.application,
         [applicationId]: {
+          ...createApplicationDto,
           applicationId: applicationId,
-          user: this.requestProvider.user._id,
-          content: createApplicationDto.content,
+          user: this.requestProvider.user.id,
           createdAt: new Date(),
           updatedAt: new Date(),
           status: 'active',
         },
       };
-      const updatedCard = await this.cardsRepository
-        .updateById(id, {
-          application,
-          applicationOrder,
-        })
-        .populate('project')
-        .populate('circle');
+      const updatedCard =
+        await this.cardsRepository.updateCardAndReturnWithPopulatedReferences(
+          id,
+          {
+            application,
+            applicationOrder,
+          },
+        );
 
       return await this.cardsService.enrichActivity(updatedCard);
     } catch (error) {
@@ -97,18 +110,20 @@ export class BountyService {
       const card = await this.cardsRepository.findById(id);
       this.cardsService.validateCardExists(card);
       this.validateApplicationExists(card, applicationId);
+      this.validateCallerIsOwner(card, applicationId);
       card.application[applicationId] = {
         ...card.application[applicationId],
         ...updateApplicationDto,
         updatedAt: new Date(),
       };
 
-      const updatedCard = await this.cardsRepository
-        .updateById(id, {
-          application: card.application,
-        })
-        .populate('project')
-        .populate('circle');
+      const updatedCard =
+        await this.cardsRepository.updateCardAndReturnWithPopulatedReferences(
+          id,
+          {
+            application: card.application,
+          },
+        );
 
       return await this.cardsService.enrichActivity(updatedCard);
     } catch (error) {
@@ -133,13 +148,14 @@ export class BountyService {
       applicationOrder.splice(applicationIndex, 1);
       delete card.application[applicationId];
 
-      const updatedCard = await this.cardsRepository
-        .updateById(id, {
-          application: card.application,
-          applicationOrder,
-        })
-        .populate('project')
-        .populate('circle');
+      const updatedCard =
+        await this.cardsRepository.updateCardAndReturnWithPopulatedReferences(
+          id,
+          {
+            application: card.application,
+            applicationOrder,
+          },
+        );
 
       return await this.cardsService.enrichActivity(updatedCard);
     } catch (error) {
@@ -150,25 +166,25 @@ export class BountyService {
     }
   }
 
-  async pickApplications(id: string, applicationId: string) {
+  async pickApplications(id: string, applicationIds: string[]) {
     try {
       const card = await this.cardsRepository.findById(id);
       this.cardsService.validateCardExists(card);
       const assignees = [];
-      // passing single applicationId was not working, it was looping through a single string instead of an array
-      // for (const applicationId of applicationIds) {
-      this.validateApplicationExists(card, applicationId);
-      assignees.push(card.application[applicationId].user);
-      card.application[applicationId].status = 'picked';
-      // }
+      for (const applicationId of applicationIds) {
+        this.validateApplicationExists(card, applicationId);
+        assignees.push(card.application[applicationId].user);
+        card.application[applicationId].status = 'picked';
+      }
 
-      const updatedCard = await this.cardsRepository
-        .updateById(id, {
-          application: card.application,
-          assignee: assignees,
-        })
-        .populate('project')
-        .populate('circle');
+      const updatedCard =
+        await this.cardsRepository.updateCardAndReturnWithPopulatedReferences(
+          id,
+          {
+            application: card.application,
+            assignee: assignees,
+          },
+        );
 
       return await this.cardsService.enrichActivity(updatedCard);
     } catch (error) {
