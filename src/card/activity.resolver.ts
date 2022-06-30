@@ -30,6 +30,12 @@ const activityIdToFieldNameMap = {
   updateStatus: 'status',
 };
 
+const applicationActivityToActionMap = {
+  createApplication: 'created',
+  updateApplication: 'updated',
+  deleteApplication: 'deleted',
+};
+
 const priorityMap = {
   1: 'Low',
   2: 'Medium',
@@ -84,6 +90,19 @@ export class ActivityResolver {
           activityIdToFieldNameMap[activity.activityId],
           priorityMap,
         );
+      } else if (
+        [
+          'createApplication',
+          'updateApplication',
+          'deleteApplication',
+        ].includes(activity.activityId)
+      ) {
+        activity.content = this.resolveApplications(
+          activity,
+          applicationActivityToActionMap[activity.activityId],
+        );
+      } else if (['pickApplication'].includes(activity.activityId)) {
+        activity.content = await this.resolvePickedApplication(activity);
       }
     }
 
@@ -275,6 +294,35 @@ export class ActivityResolver {
     } catch (error) {
       console.log(error);
       return `updated ${fieldName}`;
+    }
+  }
+
+  private async resolvePickedApplication(activity: Activity) {
+    try {
+      const assignees = await this.userService.getPublicProfileOfMultipleUsers(
+        activity.changeLog?.next.assignee,
+      );
+      const usernames = [];
+      for (const assignee of assignees) usernames.push(assignee.username);
+      if (assignees.length > 0)
+        return `assigned bounty to applicants ${usernames.join(', ')}`;
+      else return `removed assignees`;
+    } catch (error) {
+      console.log(error);
+      return `updated applications`;
+    }
+  }
+
+  private resolveApplications(activity: Activity, action: string) {
+    try {
+      if (action === 'deleted') {
+        return `${action} application ${activity.changeLog?.prev.application?.title}`;
+      } else {
+        return `${action} application ${activity.changeLog?.next.application?.title}`;
+      }
+    } catch (error) {
+      console.log(error);
+      return `updated applications`;
     }
   }
 }

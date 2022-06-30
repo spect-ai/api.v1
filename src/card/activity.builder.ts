@@ -14,6 +14,10 @@ import { Project } from 'src/project/model/project.model';
 import { RequestProvider } from 'src/users/user.provider';
 import { v4 as uuidv4 } from 'uuid';
 import { Activity } from '../common/types/activity.type';
+import {
+  CreateApplicationDto,
+  UpdateApplicationDto,
+} from './dto/application.dto';
 
 const fieldUpdateToActiityIdMap = {
   deadline: 'updateDeadline',
@@ -81,7 +85,11 @@ export class ActivityBuilder {
     return newActivities;
   }
 
-  buildUpdateChangeLog(req: UpdateCardRequestDto, card: Card, field: string) {
+  private buildUpdateChangeLog(
+    req: UpdateCardRequestDto,
+    card: Card,
+    field: string,
+  ) {
     return {
       prev: {
         [field]: card[field],
@@ -92,7 +100,7 @@ export class ActivityBuilder {
     };
   }
 
-  buildColumnUpdateChange(
+  private buildColumnUpdateChange(
     req: UpdateCardRequestDto,
     card: Card,
     field: string,
@@ -120,9 +128,6 @@ export class ActivityBuilder {
     } else if (['reward'].includes(field)) {
       const difference = objectDiff(card[field], req[field]);
 
-      console.log(`dissss`);
-      console.log(difference);
-      console.log('lalal');
       return (
         Object.keys(difference).includes('value') ||
         ((Object.keys(difference).includes('chain') ||
@@ -130,5 +135,102 @@ export class ActivityBuilder {
           card[field].value > 0)
       );
     } else return false;
+  }
+
+  buildApplicationActivity(
+    card: Card,
+    type: 'create' | 'update' | 'delete',
+    req?: CreateApplicationDto | UpdateApplicationDto,
+    applicationId?: string,
+  ): Activity {
+    const newCardActivity = {} as Activity;
+
+    if (type === 'create') {
+      newCardActivity.activityId = `createApplication`;
+      newCardActivity.changeLog = {
+        prev: {},
+        next: {
+          application: req,
+        },
+      };
+    } else if (type === 'delete') {
+      newCardActivity.activityId = `deleteApplication`;
+      newCardActivity.changeLog = {
+        prev: { application: card.application[applicationId] },
+        next: {},
+      };
+    } else if (type === 'update') {
+      /** Find the difference to see if activity needs to be saved */
+      const isDifferent = {};
+      const existingApplication = card.application[applicationId];
+      isDifferent['content'] =
+        req.content && existingApplication.content !== req.content;
+      isDifferent['title'] =
+        req.title && existingApplication.title !== req.title;
+      console.log(isDifferent);
+      /** If there is no difference return */
+      if (!Object.values(isDifferent).includes(true)) return;
+
+      newCardActivity.activityId = `updateApplication`;
+      newCardActivity.changeLog = {
+        prev: { application: {} },
+        next: { application: {} },
+      };
+
+      /** Store the difference in title or content in the application.
+       * Only store content if there is a change to reduce storage usage
+       * */
+      newCardActivity.changeLog.prev.application = {
+        ...newCardActivity.changeLog.prev.application,
+        title: existingApplication.title,
+      };
+      newCardActivity.changeLog.next.application = {
+        ...newCardActivity.changeLog.next.application,
+        title: req.title,
+      };
+
+      if (isDifferent['content']) {
+        newCardActivity.changeLog.prev.application = {
+          ...newCardActivity.changeLog.prev.application,
+          content: existingApplication.content,
+        };
+        newCardActivity.changeLog.next.application = {
+          ...newCardActivity.changeLog.next.application,
+          content: req.content,
+        };
+      }
+    }
+
+    newCardActivity.timestamp = new Date();
+    newCardActivity.actorId = this.requestProvider.user.id;
+    newCardActivity.commitId = this.commitId;
+    newCardActivity.comment = false;
+
+    return newCardActivity;
+  }
+
+  buildPickApplicationUpdate(card: Card, applicants: string[]) {
+    const newCardActivity = {} as Activity;
+    const difference = arrayDiff(card.assignee, applicants);
+    if (difference.added.length === 0 && difference.removed.length === 0)
+      return;
+
+    newCardActivity.activityId = `pickApplication`;
+
+    newCardActivity.changeLog = {
+      prev: {
+        assignee: card.assignee,
+      },
+      next: {
+        assignee: applicants,
+      },
+    };
+
+    newCardActivity.timestamp = new Date();
+    newCardActivity.actorId = this.requestProvider.user.id;
+    newCardActivity.commitId = this.commitId;
+    newCardActivity.comment = false;
+
+    return newCardActivity;
   }
 }

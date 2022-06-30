@@ -111,12 +111,18 @@ export class ApplicationService {
           status: 'active',
         },
       };
+      const activity = this.activityBuilder.buildApplicationActivity(
+        card,
+        'create',
+        createApplicationDto,
+      );
       const updatedCard =
         await this.cardsRepository.updateCardAndReturnWithPopulatedReferences(
           id,
           {
             application,
             applicationOrder,
+            activity: [...card.activity, activity],
           },
         );
 
@@ -140,6 +146,13 @@ export class ApplicationService {
       this.cardsService.validateCardExists(card);
       this.validateApplicationExists(card, applicationId);
       this.validateCallerIsOwner(card, applicationId);
+
+      const activity = this.activityBuilder.buildApplicationActivity(
+        card,
+        'update',
+        updateApplicationDto,
+        applicationId,
+      );
       card.application[applicationId] = {
         ...card.application[applicationId],
         ...updateApplicationDto,
@@ -151,6 +164,7 @@ export class ApplicationService {
           id,
           {
             application: card.application,
+            activity: activity ? [...card.activity, activity] : card.activity,
           },
         );
 
@@ -172,6 +186,12 @@ export class ApplicationService {
       this.cardsService.validateCardExists(card);
       this.validateApplicationExists(card, applicationId);
 
+      const activity = this.activityBuilder.buildApplicationActivity(
+        card,
+        'delete',
+        null,
+        applicationId,
+      );
       const applicationOrder = card.applicationOrder;
       const applicationIndex = applicationOrder.indexOf(applicationId);
       applicationOrder.splice(applicationIndex, 1);
@@ -183,6 +203,7 @@ export class ApplicationService {
           {
             application: card.application,
             applicationOrder,
+            activity: [...card.activity, activity],
           },
         );
 
@@ -199,19 +220,23 @@ export class ApplicationService {
     try {
       const card = await this.cardsRepository.findById(id);
       this.cardsService.validateCardExists(card);
-      const assignees = [];
+      const applicants = [];
       for (const applicationId of applicationIds) {
         this.validateApplicationExists(card, applicationId);
-        assignees.push(card.application[applicationId].user);
+        applicants.push(card.application[applicationId].user);
         card.application[applicationId].status = 'picked';
       }
-
+      const activity = this.activityBuilder.buildPickApplicationUpdate(
+        card,
+        applicants,
+      );
       const updatedCard =
         await this.cardsRepository.updateCardAndReturnWithPopulatedReferences(
           id,
           {
             application: card.application,
-            assignee: assignees,
+            assignee: applicants,
+            activity: activity ? [...card.activity, activity] : card.activity,
           },
         );
 

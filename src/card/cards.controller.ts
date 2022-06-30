@@ -272,6 +272,7 @@ export class CardsController {
     );
   }
 
+  @UseGuards(SessionAuthGuard)
   @Patch('/:id/pickApplications')
   @ApiParam({ name: 'id' })
   async pickApplications(

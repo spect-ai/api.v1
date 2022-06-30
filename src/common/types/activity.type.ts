@@ -1,5 +1,11 @@
+import { ApplicationUnit } from 'src/card/model/application.type';
 import { Payment } from '../models/payment.model';
 import { Status } from './status.type';
+
+export type MinimalApplicationUnit = {
+  title?: string;
+  content?: string;
+};
 
 export type ChangeField = {
   title?: string;
@@ -12,6 +18,7 @@ export type ChangeField = {
   priority?: number;
   type?: string;
   status?: Status;
+  application?: MinimalApplicationUnit;
 };
 
 export type ChangeLog = {
@@ -39,7 +46,8 @@ export type Activity = {
     | 'updateWorkUnit'
     | 'createApplication'
     | 'updateApplication'
-    | 'deleteApplication';
+    | 'deleteApplication'
+    | 'pickApplication';
 
   /**
    * The commit id of the update of the activity, it is used to group updates that took place at the same time
