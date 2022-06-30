@@ -15,9 +15,10 @@ import { CardsController } from './cards.controller';
 import { CardsRepository } from './cards.repository';
 import { CardsService } from './cards.service';
 import { Card } from './model/card.model';
-import { ApplicationService } from './application.service';
+import { ApplicationService } from './application.cards.service';
 import { ActivityResolver } from './activity.resolver';
 import { UsersModule } from 'src/users/users.module';
+import { WorkService } from './work.cards.service';
 
 @Module({
   imports: [
@@ -41,6 +42,7 @@ import { UsersModule } from 'src/users/users.module';
     ActivityBuilder,
     ActivityResolver,
     ApplicationService,
+    WorkService,
   ],
   exports: [CardsService, CardsRepository, CardsModule],
 })

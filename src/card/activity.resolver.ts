@@ -43,6 +43,7 @@ const priorityMap = {
   4: 'Urgent',
 };
 
+/** TODO: This class will get out of hand, switch activity to strategy pattern */
 @Injectable()
 export class ActivityResolver {
   constructor(private readonly userService: UsersService) {}

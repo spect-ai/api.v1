@@ -233,4 +233,6 @@ export class ActivityBuilder {
 
     return newCardActivity;
   }
+
+  // buildNewWorkThreadActivity(card: Card);
 }

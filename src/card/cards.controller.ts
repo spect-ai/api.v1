@@ -8,10 +8,10 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
+import { ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { SessionAuthGuard } from 'src/auth/iron-session.guard';
 import { ObjectIdDto } from 'src/common/dtos/object-id.dto';
 import { DetailedProjectResponseDto } from 'src/project/dto/detailed-project-response.dto';
-import { CardsService } from './cards.service';
 import { CreateCardRequestDto } from './dto/create-card-request.dto';
 import { DetailedCardResponseDto } from './dto/detailed-card-response-dto';
 import {
@@ -26,18 +26,19 @@ import {
   CreateWorkUnitRequestDto,
 } from './dto/work-request.dto';
 import { AddCommentDto, UpdateCommentDto } from './dto/comment-body.dto';
-import { ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
-import { ActionService } from './actions.service';
 import { ValidCardActionResponseDto } from './dto/card-access-response.dto';
 import { AggregatedFlattenedPaymentInfo } from './dto/payment-info-response.dto';
 import { UpdatePaymentInfoDto } from './dto/update-payment-info.dto';
-import { ApplicationService } from './application.service';
 import {
   CreateApplicationDto,
   PickApplicationDto,
   UpdateApplicationDto,
 } from './dto/application.dto';
 import { UpdateApplicationParamDto } from './dto/param.dto';
+import { CardsService } from './cards.service';
+import { ApplicationService } from './application.cards.service';
+import { ActionService } from './actions.service';
+import { WorkService } from './work.cards.service';
 
 @Controller('card')
 @ApiTags('card')
@@ -46,6 +47,7 @@ export class CardsController {
     private readonly cardsService: CardsService,
     private readonly actionService: ActionService,
     private readonly applicationService: ApplicationService,
+    private readonly workService: WorkService,
   ) {}
 
   @Get('/byProjectSlugAndCardSlug/:projectSlug/:cardSlug')
@@ -130,10 +132,7 @@ export class CardsController {
     @Param() params: ObjectIdDto,
     @Body() createWorkThread: CreateWorkThreadRequestDto,
   ): Promise<DetailedCardResponseDto> {
-    return await this.cardsService.createWorkThread(
-      params.id,
-      createWorkThread,
-    );
+    return await this.workService.createWorkThread(params.id, createWorkThread);
   }
 
   @Patch('/:id/updateWorkThread')
@@ -143,7 +142,7 @@ export class CardsController {
     @Query('threadId') threadId: string,
     @Body() updateWorkThread: UpdateWorkThreadRequestDto,
   ): Promise<DetailedCardResponseDto> {
-    return await this.cardsService.updateWorkThread(
+    return await this.workService.updateWorkThread(
       params.id,
       threadId,
       updateWorkThread,
@@ -157,7 +156,7 @@ export class CardsController {
     @Query('threadId') threadId: string,
     @Body() createWorkUnit: CreateWorkUnitRequestDto,
   ): Promise<DetailedCardResponseDto> {
-    return await this.cardsService.createWorkUnit(
+    return await this.workService.createWorkUnit(
       params.id,
       threadId,
       createWorkUnit,
@@ -172,7 +171,7 @@ export class CardsController {
     @Query('workUnitId') workUnitId: string,
     @Body() updateWorkUnit: UpdateWorkUnitRequestDto,
   ): Promise<DetailedCardResponseDto> {
-    return await this.cardsService.udpateWorkUnit(
+    return await this.workService.udpateWorkUnit(
       params.id,
       threadId,
       workUnitId,
