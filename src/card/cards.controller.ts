@@ -171,7 +171,7 @@ export class CardsController {
     @Query('workUnitId') workUnitId: string,
     @Body() updateWorkUnit: UpdateWorkUnitRequestDto,
   ): Promise<DetailedCardResponseDto> {
-    return await this.workService.udpateWorkUnit(
+    return await this.workService.updateWorkUnit(
       params.id,
       threadId,
       workUnitId,

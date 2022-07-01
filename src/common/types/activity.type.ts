@@ -7,6 +7,13 @@ export type MinimalApplicationUnit = {
   content?: string;
 };
 
+export type MinimalWorkActivity = {
+  threadName?: string;
+  threadStatus?: 'inReview' | 'draft' | 'accepted' | 'inRevision';
+  content?: string;
+  type?: string;
+};
+
 export type ChangeField = {
   title?: string;
   reviewer?: string[];
@@ -19,6 +26,7 @@ export type ChangeField = {
   type?: string;
   status?: Status;
   application?: MinimalApplicationUnit;
+  work?: MinimalWorkActivity;
 };
 
 export type ChangeLog = {

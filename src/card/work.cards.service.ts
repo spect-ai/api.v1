@@ -10,6 +10,7 @@ import {
   UpdateWorkUnitRequestDto,
 } from './dto/work-request.dto';
 import { v4 as uuidv4 } from 'uuid';
+import { ActivityBuilder } from './activity.builder';
 
 @Injectable()
 export class WorkService {
@@ -17,6 +18,7 @@ export class WorkService {
     private readonly requestProvider: RequestProvider,
     private readonly cardsRepository: CardsRepository,
     private readonly cardsService: CardsService,
+    private readonly activityBuilder: ActivityBuilder,
   ) {}
 
   async createWorkThread(
@@ -54,12 +56,19 @@ export class WorkService {
       };
       const workThreadOrder = [...card.workThreadOrder, threadId];
 
+      const activity = this.activityBuilder.buildCreateWorkActivity(
+        'createWorkUnit',
+        createWorkThread.name,
+        createWorkThread.content,
+        'submission',
+      );
       const updatedCard =
         await this.cardsRepository.updateCardAndReturnWithPopulatedReferences(
           id,
           {
             workThreads,
             workThreadOrder,
+            activity: activity ? [...card.activity, activity] : activity,
           },
         );
       return this.cardsService.enrichResponse(updatedCard);
@@ -87,11 +96,18 @@ export class WorkService {
         updatedAt: new Date(),
       };
 
+      const activity = this.activityBuilder.buildUpdateWorkThreadActivity(
+        card,
+        threadId,
+        updateWorkThread,
+      );
+
       const updatedCard =
         await this.cardsRepository.updateCardAndReturnWithPopulatedReferences(
           id,
           {
             workThreads: card.workThreads,
+            activity: activity ? [...card.activity, activity] : activity,
           },
         );
 
@@ -138,11 +154,19 @@ export class WorkService {
         updatedAt: new Date(),
       };
 
+      const activity = this.activityBuilder.buildCreateWorkActivity(
+        'createWorkUnit',
+        card.workThreads[threadId].name,
+        createWorkUnit.content,
+        createWorkUnit.type,
+      );
+
       const updatedCard =
         await this.cardsRepository.updateCardAndReturnWithPopulatedReferences(
           id,
           {
             workThreads: card.workThreads,
+            activity: activity ? [...card.activity, activity] : activity,
           },
         );
 
@@ -155,7 +179,7 @@ export class WorkService {
     }
   }
 
-  async udpateWorkUnit(
+  async updateWorkUnit(
     id: string,
     threadId: string,
     workUnitId: string,
@@ -179,11 +203,19 @@ export class WorkService {
         updatedAt: new Date(),
       };
 
+      const activity = this.activityBuilder.buildUpdateWorkUnitActivity(
+        card,
+        threadId,
+        workUnitId,
+        updateWorkUnit,
+      );
+
       const updatedCard =
         await this.cardsRepository.updateCardAndReturnWithPopulatedReferences(
           id,
           {
             workThreads: card.workThreads,
+            activity: activity ? [...card.activity, activity] : activity,
           },
         );
 

@@ -36,6 +36,11 @@ const applicationActivityToActionMap = {
   deleteApplication: 'deleted',
 };
 
+const submissionTypeToTypeNameMap = {
+  submission: 'submission',
+  revision: 'revision instruction',
+};
+
 const priorityMap = {
   1: 'Low',
   2: 'Medium',
@@ -104,6 +109,12 @@ export class ActivityResolver {
         );
       } else if (['pickApplication'].includes(activity.activityId)) {
         activity.content = await this.resolvePickedApplication(activity);
+      } else if (
+        ['createWorkUnit', 'createWorkThread'].includes(activity.activityId)
+      ) {
+        activity.content = this.resolveCreatedWork(activity);
+      } else if (['updateWorkUnit'].includes(activity.activityId)) {
+        activity.content = this.resolveUpdatedWork(activity);
       }
     }
 
@@ -324,6 +335,28 @@ export class ActivityResolver {
     } catch (error) {
       console.log(error);
       return `updated applications`;
+    }
+  }
+
+  private resolveCreatedWork(activity: Activity) {
+    try {
+      return `created a new ${
+        submissionTypeToTypeNameMap[activity.changeLog?.next.work?.type]
+      } in thread ${activity.changeLog?.next.work?.threadName}`;
+    } catch (error) {
+      console.log(error);
+      return `updated submssions`;
+    }
+  }
+
+  private resolveUpdatedWork(activity: Activity) {
+    try {
+      return `updated ${
+        submissionTypeToTypeNameMap[activity.changeLog?.next.work?.type]
+      } in thread ${activity.changeLog?.next.work?.threadName}`;
+    } catch (error) {
+      console.log(error);
+      return `updated submssions`;
     }
   }
 }

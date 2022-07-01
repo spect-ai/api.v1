@@ -17,7 +17,7 @@ export class CreateWorkThreadRequestDto {
   content: string;
 
   /**
-   * Is the submission a revision instruction or a submission
+   * submission thread status
    */
   @IsString()
   @IsNotEmpty()
@@ -33,7 +33,7 @@ export class UpdateWorkThreadRequestDto {
   @IsOptional()
   name: string;
   /**
-   * Is the submission a revision instruction or a submission
+   * submission thread status
    */
   @IsString()
   @IsNotEmpty()
@@ -41,7 +41,7 @@ export class UpdateWorkThreadRequestDto {
   status: 'accepted' | 'inRevision' | 'inReview' | 'draft';
 
   /**
-   * Ask for a revision
+   * set submission to active or expired
    */
   @IsBoolean()
   @IsOptional()
@@ -50,7 +50,7 @@ export class UpdateWorkThreadRequestDto {
 
 export class CreateWorkUnitRequestDto {
   /**
-   * Confirm submission and ask for review
+   * Is the submission a revision instruction or a submission
    */
   @IsString()
   @IsNotEmpty()
@@ -64,7 +64,7 @@ export class CreateWorkUnitRequestDto {
   content: string;
 
   /**
-   * Is the submission a revision instruction or a submission
+   * Submission thread status
    */
   @IsString()
   @IsNotEmpty()

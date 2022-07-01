@@ -234,5 +234,130 @@ export class ActivityBuilder {
     return newCardActivity;
   }
 
-  // buildNewWorkThreadActivity(card: Card);
+  buildNewWorkThreadActivity(req: CreateWorkThreadRequestDto) {
+    const newCardActivity = {} as Activity;
+    newCardActivity.activityId = `createWorkThread`;
+
+    if (req.status !== 'inReview') return;
+
+    newCardActivity.changeLog = {
+      prev: {},
+      next: {
+        work: req,
+      },
+    };
+
+    newCardActivity.timestamp = new Date();
+    newCardActivity.actorId = this.requestProvider.user.id;
+    newCardActivity.commitId = this.commitId;
+    newCardActivity.comment = false;
+
+    return newCardActivity;
+  }
+
+  isValidWorkUpdateActivity(
+    card: Card,
+    threadId: string,
+    threadName: string,
+    threadStatus?: string,
+    workUnitId?: string,
+    content?: string,
+  ) {
+    return true;
+  }
+
+  buildCreateWorkActivity(
+    activityId: 'createWorkThread' | 'createWorkUnit',
+    threadName: string,
+    content?: string,
+    type?: string,
+    threadStatus?: 'inReview' | 'draft' | 'accepted' | 'inRevision',
+  ) {
+    const newCardActivity = {} as Activity;
+    newCardActivity.activityId = activityId;
+
+    newCardActivity.changeLog = {
+      prev: {},
+      next: {
+        work: {
+          threadName,
+          content,
+          type,
+          threadStatus,
+        },
+      },
+    };
+
+    newCardActivity.timestamp = new Date();
+    newCardActivity.actorId = this.requestProvider.user.id;
+    newCardActivity.commitId = this.commitId;
+    newCardActivity.comment = false;
+
+    return newCardActivity;
+  }
+
+  buildUpdateWorkThreadActivity(
+    card: Card,
+    threadId: string,
+    req: UpdateWorkThreadRequestDto,
+  ) {
+    const newCardActivity = {} as Activity;
+    newCardActivity.activityId = 'updateWorkThread';
+
+    newCardActivity.changeLog = {
+      prev: {},
+      next: {
+        work: {
+          threadName: req.name,
+          threadStatus: req.status,
+        },
+      },
+    };
+
+    newCardActivity.timestamp = new Date();
+    newCardActivity.actorId = this.requestProvider.user.id;
+    newCardActivity.commitId = this.commitId;
+    newCardActivity.comment = false;
+
+    return newCardActivity;
+  }
+
+  buildUpdateWorkUnitActivity(
+    card: Card,
+    threadId: string,
+    workUnitId: string,
+    req: UpdateWorkUnitRequestDto,
+  ) {
+    const newCardActivity = {} as Activity;
+    newCardActivity.activityId = 'updateWorkUnit';
+
+    // const isValidWorkActivity = this.isValidWorkUpdateActivity(card, threadId);
+    newCardActivity.changeLog = {
+      prev: {
+        work: {
+          threadName: card.workThreads[threadId].name,
+          content: card.workThreads[threadId].workUnits[workUnitId].content,
+          type: card.workThreads[threadId].workUnits[workUnitId].type,
+          threadStatus: card.workThreads[threadId].status,
+        },
+      },
+      next: {
+        work: {
+          threadName: card.workThreads[threadId].name,
+          content: req.content,
+          type: req.type,
+          threadStatus: req.status
+            ? req.status
+            : card.workThreads[threadId].status,
+        },
+      },
+    };
+
+    newCardActivity.timestamp = new Date();
+    newCardActivity.actorId = this.requestProvider.user.id;
+    newCardActivity.commitId = this.commitId;
+    newCardActivity.comment = false;
+
+    return newCardActivity;
+  }
 }
