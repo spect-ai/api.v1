@@ -2,10 +2,12 @@ import { InternalServerErrorException } from '@nestjs/common';
 import type { DocumentType, ReturnModelType } from '@typegoose/typegoose';
 import type { MongoError } from 'mongodb';
 import {
+  Aggregate,
   FilterQuery,
   HydratedDocument,
   InsertManyResult,
   ObjectId,
+  PipelineStage,
   QueryOptions as MongooseQueryOptions,
   QueryWithHelpers,
   Types,
@@ -233,5 +235,16 @@ export abstract class BaseRepository<TModel extends BaseModel> {
       BaseRepository.throwMongoError(e);
     }
     return false;
+  }
+
+  aggregate(
+    pipeline: PipelineStage[],
+    options?: QueryOptions,
+  ): Promise<Aggregate<Array<any>>> {
+    try {
+      return this.aggregate(pipeline, options);
+    } catch (e) {
+      BaseRepository.throwMongoError(e);
+    }
   }
 }

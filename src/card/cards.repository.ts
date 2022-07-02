@@ -56,4 +56,17 @@ export class CardsRepository extends BaseRepository<Card> {
       .populate('children', populatedCardFields)
       .populate('parent', populatedCardFields);
   }
+
+  async getCardWithAllChildren(project: string, slug: string) {
+    const children = await this.findOne({
+      project: project,
+      slug: slug,
+    }).populate({
+      path: 'children',
+      populate: {
+        path: 'children',
+      },
+    });
+    return children;
+  }
 }

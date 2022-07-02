@@ -33,7 +33,13 @@ export class ProjectsRepository extends BaseRepository<Project> {
   async getProjectWithPopulatedReferences(id: string): Promise<Project> {
     return await this.findById(id)
       .populate('parents')
-      .populate('cards', populatedCardFields);
+      .populate('cards', populatedCardFields, {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        parent: {
+          $exists: false,
+        },
+      });
   }
 
   async getProjectWithPopulatedReferencesBySlug(
@@ -62,6 +68,12 @@ export class ProjectsRepository extends BaseRepository<Project> {
   ): Promise<Project> {
     return await this.updateById(id, update)
       .populate('parents')
-      .populate('cards', populatedCardFields);
+      .populate('cards', populatedCardFields, {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        parent: {
+          $exists: false,
+        },
+      });
   }
 }

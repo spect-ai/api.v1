@@ -50,6 +50,21 @@ export class CardsController {
     private readonly workService: WorkService,
   ) {}
 
+  @Get('/getAllChildren')
+  async getAllChildren(@Body() card): Promise<string[]> {
+    console.log(card.children);
+    const allChildren = [];
+    return await this.cardsService.getAllChildren(card, allChildren);
+  }
+
+  @Get('/getChildren/:projectSlug/:cardSlug')
+  async getChildren(@Param() params: GetByProjectSlugAndCardSlugDto) {
+    return await this.cardsService.getChildren(
+      params.projectSlug,
+      params.cardSlug,
+    );
+  }
+
   @Get('/byProjectSlugAndCardSlug/:projectSlug/:cardSlug')
   async findByProjectSlugAndCardSlug(
     @Param() params: GetByProjectSlugAndCardSlugDto,

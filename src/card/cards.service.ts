@@ -624,6 +624,7 @@ export class CardsService {
       card.project.toString(),
       id,
     );
+
     return await this.cardsRepository.updateCardAndReturnWithPopulatedReferences(
       id,
       {
@@ -631,6 +632,18 @@ export class CardsService {
         'status.active': false,
       },
     );
+  }
+
+  getAllChildren(root, allChildren: string[]): string[] {
+    for (const child of root.children) {
+      allChildren.push(child.id);
+      allChildren = this.getAllChildren(child, allChildren);
+    }
+    return allChildren;
+  }
+
+  async getChildren(project: string, slug: string) {
+    return await this.cardsRepository.getCardWithAllChildren(project, slug);
   }
 
   async revertArchive(id: string): Promise<Card> {
