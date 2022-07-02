@@ -24,7 +24,7 @@ export class Project extends BaseModel {
   /**
    * The slug of the profile, aka, the url of the profile
    */
-  @prop({ required: true })
+  @prop({ required: true, unique: true })
   slug: string;
 
   /**

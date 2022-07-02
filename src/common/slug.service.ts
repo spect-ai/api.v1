@@ -13,7 +13,11 @@ export class SlugService {
       separator: '-',
       transformer: urlSlug.LOWERCASE_TRANSFORMER,
     });
-    const existingSlugCount = await repository.count({ slug }).exec();
+    const existingSlugCount = await repository
+      .count({
+        $or: [{ slug: slug }, { slug: new RegExp(slug + '-[0-9]+$') }],
+      })
+      .exec();
     if (existingSlugCount > 0) {
       return `${slug}-${existingSlugCount}`;
     }

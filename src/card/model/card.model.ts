@@ -1,4 +1,4 @@
-import { plugin, prop, Ref } from '@typegoose/typegoose';
+import { plugin, pre, prop, Ref } from '@typegoose/typegoose';
 import { useMongoosePlugin } from 'src/base/decorators/use-mongoose-plugins.decorator';
 import { BaseModel } from 'src/base/base.model';
 import { Project } from 'src/project/model/project.model';
@@ -23,7 +23,7 @@ export class Card extends BaseModel {
   /**
    * The slug associated with the card
    */
-  @prop({ required: true })
+  @prop({ required: true, unique: true })
   slug: string;
 
   /**
