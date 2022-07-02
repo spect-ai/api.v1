@@ -8,7 +8,6 @@ import {
   IsString,
 } from 'class-validator';
 import { IsObjectId } from 'class-validator-mongo-object-id';
-import { ObjectId, Date } from 'mongoose';
 import { Payment } from 'src/common/models/payment.model';
 
 export class CreateCardRequestDto {

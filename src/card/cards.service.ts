@@ -162,7 +162,6 @@ export class CardsService {
             },
           );
       }
-
       /** If card has children add the child cards first and then update the parent card to reference the children */
       if (createCardDto.childCards?.length > 0) {
         /** Adding the child cards */
