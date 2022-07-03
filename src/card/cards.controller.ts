@@ -218,9 +218,7 @@ export class CardsController {
 
   @UseGuards(SessionAuthGuard)
   @Patch('/:id/archive')
-  async archive(
-    @Param() params: ObjectIdDto,
-  ): Promise<DetailedCardResponseDto> {
+  async archive(@Param() params: ObjectIdDto): Promise<string[]> {
     return await this.cardsService.archive(params.id);
   }
 

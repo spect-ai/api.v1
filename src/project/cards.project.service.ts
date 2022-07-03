@@ -172,28 +172,36 @@ export class CardsProjectService {
     return this.projectPopulatedWithCardDetails(updatedProject);
   }
 
-  async removeCardFromProject(
+  async removeMultipleCardsFromProject(
     projectId: string,
-    cardId: string,
+    cardIds: string[],
   ): Promise<DetailedProjectResponseDto> {
     const project = await this.projectRepository.findById(projectId);
     if (!project) {
       throw new HttpException('Project not found', HttpStatus.NOT_FOUND);
     }
-    // Find where the card is in the project now
-    const sourceCardLoc = this.findCardLocationInProject(project, cardId);
-
     // Remove Card from column
     const columnDetails = project.columnDetails;
-    columnDetails[sourceCardLoc.columnId].cards.splice(
-      sourceCardLoc.cardIndex,
-      1,
-    );
+    for (const cardId of cardIds) {
+      console.log(cardId);
+
+      const sourceCardLoc = this.findCardLocationInProject(project, cardId);
+      console.log(sourceCardLoc);
+      columnDetails[sourceCardLoc.columnId].cards.splice(
+        sourceCardLoc.cardIndex,
+        1,
+      );
+    }
 
     // Remove card from project
     const cards = project.cards.map((card) => card.toString());
-    const cardIndex = cards.indexOf(cardId);
-    project.cards.splice(cardIndex, 1);
+
+    for (const cardId of cardIds) {
+      const cardIndex = cards.indexOf(cardId);
+      cards.splice(cardIndex, 1);
+    }
+
+    project.cards = cards;
 
     // Update project
     const updatedProject =

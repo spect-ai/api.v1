@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from 'nestjs-typegoose';
 import { BaseRepository } from 'src/base/base.repository';
-import { Card } from './model/card.model';
+import { Card, ExtendedCard } from './model/card.model';
 import { Ref } from '@typegoose/typegoose';
 
 const populatedCardFields = {
@@ -57,20 +57,11 @@ export class CardsRepository extends BaseRepository<Card> {
       .populate('parent', populatedCardFields);
   }
 
-  async getCardWithAllChildren(project: string, slug: string) {
+  async getCardWithAllChildren(id: string): Promise<ExtendedCard> {
     const cards = await this.aggregate([
       {
         $match: {
-          project: project,
-          slug: slug,
-        },
-      },
-      {
-        $project: {
-          _id: 1,
-          children: 1,
-          title: 1,
-          slug: 1,
+          _id: this.toObjectId(id),
         },
       },
       {
@@ -83,6 +74,7 @@ export class CardsRepository extends BaseRepository<Card> {
         },
       },
     ]);
-    return cards;
+    console.log(cards);
+    return cards[0];
   }
 }

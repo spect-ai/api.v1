@@ -453,25 +453,44 @@ export class CardsService {
     }
   }
 
-  async archive(id: string): Promise<Card> {
-    const card = await this.cardsRepository.findById(id);
+  async archive(id: string): Promise<string[]> {
+    const card = await this.cardsRepository.getCardWithAllChildren(id);
     this.validationService.validateCardExists(card);
-    const childCards = await this.cardsRepository.getCardWithAllChildren(
-      card.project,
-      id,
-    );
-    const updatedProject = await this.cardsProjectService.removeCardFromProject(
-      card.project.toString(),
-      id,
-    );
 
-    return await this.cardsRepository.updateCardAndReturnWithPopulatedReferences(
+    console.log(card.flattenedChildren);
+    const cardIds = [
+      ...card.flattenedChildren.map((c) => c._id.toString()),
       id,
+    ] as string[];
+
+    const updatedProject =
+      await this.cardsProjectService.removeMultipleCardsFromProject(
+        card.project.toString(),
+        cardIds,
+      );
+
+    /** Mongo only returns an acknowledgment on update and not the updated records itself */
+    const updateAcknowledgment = await this.cardsRepository.updateMany(
       {
-        'status.archived': true,
-        'status.active': false,
+        _id: { $in: cardIds },
+      },
+      {
+        $set: {
+          'status.archived': true,
+          'status.active': false,
+        },
+      },
+      {
+        multi: true,
       },
     );
+    if (!updateAcknowledgment.acknowledged) {
+      throw new HttpException(
+        'Something went wrong while updating payment info',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+    return cardIds;
   }
 
   async revertArchive(id: string): Promise<Card> {

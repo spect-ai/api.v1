@@ -158,3 +158,7 @@ export class Card extends BaseModel {
   @prop({ ref: () => Card })
   parent?: string;
 }
+
+export class ExtendedCard extends Card {
+  flattenedChildren?: Card[];
+}
