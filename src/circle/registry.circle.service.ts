@@ -74,7 +74,6 @@ export class CircleRegistryService {
     const network = await this.registryRepository.findOne({
       chainId: addTokenDto.chainId,
     });
-    console.log(network);
     if (!network)
       throw new HttpException('Invalid network', HttpStatus.NOT_FOUND);
 

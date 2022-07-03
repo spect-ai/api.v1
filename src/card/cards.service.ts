@@ -98,6 +98,7 @@ export class CardsService {
     card: Card;
     project: DetailedProjectResponseDto;
   }> {
+    if (!createCardDto.type) createCardDto.type = 'Task';
     const activity = this.activityBuilder.buildNewCardActivity(createCardDto);
 
     if (!slug) {
@@ -276,6 +277,7 @@ export class CardsService {
           );
         }
       }
+      console.log(updateCardDto);
       const activities = this.activityBuilder.buildUpdatedCardActivity(
         updateCardDto,
         card,
