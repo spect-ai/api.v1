@@ -9,7 +9,3 @@ workflows:
             branches:
               only:
                 - main
-general:
-  branches:
-    only:
-      - main
