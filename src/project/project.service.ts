@@ -4,24 +4,20 @@ import {
   Injectable,
   InternalServerErrorException,
 } from '@nestjs/common';
-import { ObjectId } from 'mongoose';
 import { CardsRepository } from 'src/card/cards.repository';
 import { CirclesRepository } from 'src/circle/circles.repository';
 import { Circle } from 'src/circle/model/circle.model';
-import { DataStructureManipulationService } from 'src/common/dataStructureManipulation.service';
 import { SlugService } from 'src/common/slug.service';
 import { TemplatesRepository } from 'src/template/tempates.repository';
+import { v4 as uuidv4 } from 'uuid';
+import { CardsProjectService } from './cards.project.service';
 import { ColumnDetailsDto } from './dto/column-details.dto';
 import { CreateProjectRequestDto } from './dto/create-project-request.dto';
 import { DetailedProjectResponseDto } from './dto/detailed-project-response.dto';
-import { ReorderCardReqestDto } from './dto/reorder-card-request.dto';
 import { UpdateColumnRequestDto } from './dto/update-column.dto';
 import { UpdateProjectRequestDto } from './dto/update-project-request.dto';
-import { ColumnDetailsModel } from './model/columnDetails.model';
 import { Project } from './model/project.model';
 import { ProjectsRepository } from './project.repository';
-import { CardLoc } from './types/card-loc.type';
-import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
 export class ProjectService {
@@ -31,25 +27,13 @@ export class ProjectService {
     private readonly slugService: SlugService,
     private readonly templateRepository: TemplatesRepository,
     private readonly cardRepository: CardsRepository,
-    private readonly datastructureManipulationService: DataStructureManipulationService,
+    private readonly cardsProjectService: CardsProjectService,
   ) {}
-
-  projectPopulatedWithCardDetails(
-    project: Project,
-  ): DetailedProjectResponseDto {
-    return {
-      ...project,
-      cards: this.datastructureManipulationService.objectify(
-        project.cards,
-        'id',
-      ),
-    };
-  }
 
   async getDetailedProject(id: string): Promise<DetailedProjectResponseDto> {
     const project =
       await this.projectRepository.getProjectWithPopulatedReferences(id);
-    return this.projectPopulatedWithCardDetails(project);
+    return this.cardsProjectService.projectPopulatedWithCardDetails(project);
   }
 
   async getDetailedProjectBySlug(
@@ -59,7 +43,7 @@ export class ProjectService {
       await this.projectRepository.getProjectWithPopulatedReferencesBySlug(
         slug,
       );
-    return this.projectPopulatedWithCardDetails(project);
+    return this.cardsProjectService.projectPopulatedWithCardDetails(project);
   }
 
   async getProjectIdFromSlug(slug: string): Promise<Project> {
@@ -130,7 +114,9 @@ export class ProjectService {
           updateProjectDto,
         );
 
-      return this.projectPopulatedWithCardDetails(updatedProject);
+      return this.cardsProjectService.projectPopulatedWithCardDetails(
+        updatedProject,
+      );
     } catch (error) {
       throw new InternalServerErrorException(
         'Failed project update',
@@ -169,7 +155,9 @@ export class ProjectService {
           },
         );
 
-      return this.projectPopulatedWithCardDetails(udpatedProject);
+      return this.cardsProjectService.projectPopulatedWithCardDetails(
+        udpatedProject,
+      );
     } catch (error) {
       throw new InternalServerErrorException(
         'Failed column deletion',
@@ -221,7 +209,9 @@ export class ProjectService {
           },
         );
 
-      return this.projectPopulatedWithCardDetails(udpatedProject);
+      return this.cardsProjectService.projectPopulatedWithCardDetails(
+        udpatedProject,
+      );
     } catch (error) {
       throw new InternalServerErrorException(
         'Failed column deletion',
@@ -255,7 +245,9 @@ export class ProjectService {
             columnDetails,
           },
         );
-      return this.projectPopulatedWithCardDetails(updatedProject);
+      return this.cardsProjectService.projectPopulatedWithCardDetails(
+        updatedProject,
+      );
     } catch (error) {
       throw new InternalServerErrorException(
         'Failed column renaming',
@@ -270,180 +262,5 @@ export class ProjectService {
       throw new HttpException('Project not found', HttpStatus.NOT_FOUND);
     }
     return await this.projectRepository.deleteById(id);
-  }
-
-  async addCardToProject(
-    projectId: string,
-    columnId: string,
-    cardId: string,
-    addInFirstColumnIfColumnDoesntExist = true,
-  ): Promise<DetailedProjectResponseDto> {
-    const project = await this.projectRepository.findById(projectId);
-    if (!project) {
-      throw new HttpException('Project not found', HttpStatus.NOT_FOUND);
-    }
-
-    if (
-      !project.columnDetails[columnId] ||
-      !project.columnOrder.includes(columnId)
-    ) {
-      if (addInFirstColumnIfColumnDoesntExist) {
-        if (project.columnOrder.length === 0) {
-          throw new HttpException(
-            'Project doesnt have a column',
-            HttpStatus.NOT_FOUND,
-          );
-        }
-        columnId = project.columnOrder[0];
-      } else throw new HttpException('Column not found', HttpStatus.NOT_FOUND);
-    }
-
-    const updatedProject =
-      await this.projectRepository.updateProjectAndReturnWithPopulatedReferences(
-        projectId.toString(),
-        {
-          ...project,
-          cards: [...project.cards, cardId],
-          columnDetails: {
-            ...project.columnDetails,
-            [columnId]: {
-              ...project.columnDetails[columnId],
-              cards: [
-                cardId.toString(),
-                ...project.columnDetails[columnId].cards,
-              ],
-            },
-          },
-        },
-      );
-    return this.projectPopulatedWithCardDetails(updatedProject);
-  }
-
-  findCardLocationInProject(project: Project, cardId: string): CardLoc {
-    const cardLoc: CardLoc = {} as CardLoc;
-
-    for (const columnId in project.columnDetails) {
-      const column = project.columnDetails[columnId];
-      const cardIndex = column.cards.indexOf(cardId);
-      if (cardIndex > -1) {
-        cardLoc.columnId = columnId;
-        cardLoc.cardIndex = cardIndex;
-        break;
-      }
-    }
-    return cardLoc;
-  }
-
-  async reorderCard(
-    projectId: string,
-    cardId: string,
-    destinationCardLoc: ReorderCardReqestDto,
-    updateColumnIdInCard = false,
-  ): Promise<DetailedProjectResponseDto> {
-    const project = await this.projectRepository.findById(projectId);
-    if (!project) {
-      throw new HttpException('Project not found', HttpStatus.NOT_FOUND);
-    }
-    // Find where the card is in the project now
-    const sourceCardLoc = this.findCardLocationInProject(project, cardId);
-    if (!sourceCardLoc.columnId) {
-      throw new HttpException('Card not found', HttpStatus.NOT_FOUND);
-    }
-
-    // Get the destination card index based on the input
-    let destinationCardIndex: number;
-    if (destinationCardLoc.destinationCardIndex === 'end') {
-      destinationCardIndex =
-        project.columnDetails[destinationCardLoc.destinationColumnId].cards
-          .length;
-    } else destinationCardIndex = destinationCardLoc.destinationCardIndex;
-
-    // In case destination card index is not valid, throw error
-    const columnDetails = project.columnDetails;
-    if (
-      destinationCardIndex < 0 ||
-      destinationCardIndex -
-        columnDetails[destinationCardLoc.destinationColumnId].cards.length >
-        0
-    ) {
-      throw new HttpException(
-        'Invalid destination card index',
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-
-    // Update the card location in the project
-    columnDetails[sourceCardLoc.columnId].cards.splice(
-      sourceCardLoc.cardIndex,
-      1,
-    );
-
-    columnDetails[destinationCardLoc.destinationColumnId].cards.splice(
-      destinationCardIndex,
-      0,
-      cardId,
-    );
-
-    columnDetails[sourceCardLoc.columnId] = {
-      ...columnDetails[sourceCardLoc.columnId],
-      cards: columnDetails[sourceCardLoc.columnId].cards,
-    };
-
-    columnDetails[destinationCardLoc.destinationColumnId] = {
-      ...columnDetails[destinationCardLoc.destinationColumnId],
-      cards: columnDetails[destinationCardLoc.destinationColumnId].cards,
-    };
-
-    // Update the column id in the card if flag is set to true, flag will mostly be false if this function is called from the card service
-    if (updateColumnIdInCard) {
-      await this.cardRepository.updateById(cardId.toString(), {
-        columnId: destinationCardLoc.destinationColumnId,
-      });
-    }
-
-    const updatedProject =
-      await this.projectRepository.updateProjectAndReturnWithPopulatedReferences(
-        projectId.toString(),
-        {
-          columnDetails,
-        },
-      );
-    return this.projectPopulatedWithCardDetails(updatedProject);
-  }
-
-  async removeCardFromProject(
-    projectId: string,
-    cardId: string,
-  ): Promise<DetailedProjectResponseDto> {
-    const project = await this.projectRepository.findById(projectId);
-    if (!project) {
-      throw new HttpException('Project not found', HttpStatus.NOT_FOUND);
-    }
-    // Find where the card is in the project now
-    const sourceCardLoc = this.findCardLocationInProject(project, cardId);
-
-    // Remove Card from column
-    const columnDetails = project.columnDetails;
-    columnDetails[sourceCardLoc.columnId].cards.splice(
-      sourceCardLoc.cardIndex,
-      1,
-    );
-
-    // Remove card from project
-    const cards = project.cards.map((card) => card.toString());
-    const cardIndex = cards.indexOf(cardId);
-    project.cards.splice(cardIndex, 1);
-
-    // Update project
-    const updatedProject =
-      await this.projectRepository.updateProjectAndReturnWithPopulatedReferences(
-        projectId.toString(),
-        {
-          ...project,
-          cards: project.cards,
-          columnDetails: columnDetails,
-        },
-      );
-    return this.projectPopulatedWithCardDetails(updatedProject);
   }
 }

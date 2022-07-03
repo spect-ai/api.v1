@@ -86,27 +86,3 @@ export class CardsRepository extends BaseRepository<Card> {
     return cards;
   }
 }
-
-/*[
-  {
-    '$match': {
-      'project': '62bd1a0fec866e51679c9862', 
-      'slug': '40'
-    }
-  }, {
-    '$project': {
-      '_id': 1, 
-      'children': 1, 
-      'title': 1, 
-      'slug': 1
-    }
-  }, {
-    '$graphLookup': {
-      'from': 'cards', 
-      'startWith': '$children', 
-      'connectFromField': 'children', 
-      'connectToField': '_id', 
-      'as': 'relatioship'
-    }
-  }
-]*/

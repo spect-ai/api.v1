@@ -32,6 +32,7 @@ import { WorkService } from './card/work.cards.service';
 import { CardValidationService } from './card/validation.cards.service';
 import { ResponseBuilder } from './card/response.builder';
 import { CommentService } from './card/comments.cards.service';
+import { CardsProjectService } from './project/cards.project.service';
 
 const databaseUrl =
   process.env.DATABASE_URL || 'mongodb://localhost:27017/nest';
@@ -63,6 +64,7 @@ console.log({ databaseUrl });
   providers: [
     AppService,
     ProjectService,
+    CardsProjectService,
     TemplatesService,
     RetroService,
     RegistryService,

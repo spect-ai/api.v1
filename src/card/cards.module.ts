@@ -22,6 +22,7 @@ import { WorkService } from './work.cards.service';
 import { CardValidationService } from './validation.cards.service';
 import { ResponseBuilder } from './response.builder';
 import { CommentService } from './comments.cards.service';
+import { CardsProjectService } from 'src/project/cards.project.service';
 
 @Module({
   imports: [
@@ -40,6 +41,7 @@ import { CommentService } from './comments.cards.service';
     SlugService,
     RequestProvider,
     ProjectService,
+    CardsProjectService,
     DataStructureManipulationService,
     ActionService,
     ActivityBuilder,

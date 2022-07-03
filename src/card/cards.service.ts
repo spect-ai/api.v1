@@ -7,6 +7,7 @@ import {
 import { ActivityBuilder } from 'src/card/activity.builder';
 import { CirclesRepository } from 'src/circle/circles.repository';
 import { DataStructureManipulationService } from 'src/common/dataStructureManipulation.service';
+import { CardsProjectService } from 'src/project/cards.project.service';
 import { DetailedProjectResponseDto } from 'src/project/dto/detailed-project-response.dto';
 import { ReorderCardReqestDto } from 'src/project/dto/reorder-card-request.dto';
 import { Project } from 'src/project/model/project.model';
@@ -30,6 +31,7 @@ export class CardsService {
     private readonly activityBuilder: ActivityBuilder,
     private readonly circleRepository: CirclesRepository,
     private readonly projectService: ProjectService,
+    private readonly cardsProjectService: CardsProjectService,
     private readonly datastructureManipulationService: DataStructureManipulationService,
     private readonly validationService: CardValidationService,
     private readonly responseBuilder: ResponseBuilder,
@@ -59,7 +61,7 @@ export class CardsService {
     })) as Card;
 
     /** Add the card to the project column */
-    const project = await this.projectService.addCardToProject(
+    const project = await this.cardsProjectService.addCardToProject(
       createCardDto.project,
       createCardDto.columnId,
       createdCard.id,
@@ -263,7 +265,7 @@ export class CardsService {
       const project = card.project as unknown as Project;
       if (updateCardDto.columnId) {
         if (card.columnId !== updateCardDto.columnId) {
-          await this.projectService.reorderCard(
+          await this.cardsProjectService.reorderCard(
             project.id,
             id,
             {
@@ -458,7 +460,7 @@ export class CardsService {
       card.project,
       id,
     );
-    const updatedProject = await this.projectService.removeCardFromProject(
+    const updatedProject = await this.cardsProjectService.removeCardFromProject(
       card.project.toString(),
       id,
     );
@@ -481,7 +483,7 @@ export class CardsService {
         'Card is not in archived state',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
-    const updatedProject = await this.projectService.addCardToProject(
+    const updatedProject = await this.cardsProjectService.addCardToProject(
       card.project,
       card.columnId,
       card.id,
@@ -493,12 +495,5 @@ export class CardsService {
         'status.active': true,
       },
     );
-  }
-
-  async delete(id: string): Promise<Card> {
-    const card = await this.cardsRepository.findById(id);
-    this.validationService.validateCardExists(card);
-
-    return await this.cardsRepository.deleteById(id);
   }
 }

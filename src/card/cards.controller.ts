@@ -286,10 +286,4 @@ export class CardsController {
       applications.applicationIds,
     );
   }
-
-  @UseGuards(SessionAuthGuard)
-  @Post('/:id/delete')
-  async delete(@Param() params: ObjectIdDto): Promise<DetailedCardResponseDto> {
-    return await this.cardsService.delete(params.id);
-  }
 }
