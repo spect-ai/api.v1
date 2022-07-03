@@ -12,7 +12,7 @@ import { CreateCircleRequestDto } from './dto/create-circle-request.dto';
 import { DetailedCircleResponseDto } from './dto/detailed-circle-response.dto';
 import { JoinCircleUsingInvitationRequestDto } from './dto/join-circle.dto';
 import { UpdateCircleRequestDto } from './dto/update-circle-request.dto';
-import { Circle } from './model/circle.model';
+import { Circle, LocalRegistry } from './model/circle.model';
 import { DiscordService } from 'src/common/discord.service';
 import { GithubService } from 'src/common/github.service';
 import { RolesService } from 'src/roles/roles.service';
@@ -24,6 +24,7 @@ import { GetMemberDetailsOfCircleDto } from './dto/get-member-details.dto';
 import { User } from 'src/users/model/users.model';
 import { CirclePermission } from 'src/common/types/role.type';
 import { UpdateMemberRolesDto } from './dto/update-member-role.dto';
+import { RegistryService } from 'src/registry/registry.service';
 
 @Injectable()
 export class CirclesService {
@@ -35,6 +36,7 @@ export class CirclesService {
     private readonly githubService: GithubService,
     private readonly roleService: RolesService,
     private readonly datastructureManipulationService: DataStructureManipulationService,
+    private readonly registryService: RegistryService,
   ) {}
 
   validateNewMember(circle: Circle, newMember: string) {

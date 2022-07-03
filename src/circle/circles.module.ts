@@ -11,9 +11,15 @@ import { GithubService } from 'src/common/github.service';
 import { EthAddressModule } from 'src/_eth-address/_eth-address.module';
 import { RolesService } from 'src/roles/roles.service';
 import { DataStructureManipulationService } from 'src/common/dataStructureManipulation.service';
+import { CircleRegistryService } from './registry.circle.service';
+import { RegistryModule } from 'src/registry/registry.module';
 
 @Module({
-  imports: [TypegooseModule.forFeature([Circle]), EthAddressModule],
+  imports: [
+    TypegooseModule.forFeature([Circle]),
+    EthAddressModule,
+    RegistryModule,
+  ],
   controllers: [CirclesController],
   providers: [
     CirclesService,
@@ -24,6 +30,7 @@ import { DataStructureManipulationService } from 'src/common/dataStructureManipu
     GithubService,
     RolesService,
     DataStructureManipulationService,
+    CircleRegistryService,
   ],
   exports: [CirclesService, CirclesRepository, CirclesModule],
 })

@@ -8,6 +8,10 @@ export type TokenInfo = {
   name: string;
 };
 
+export type TokenDetails = {
+  [tokenAddress: string]: TokenInfo;
+};
+
 @useMongoosePlugin()
 export class Registry extends BaseModel {
   @prop({ required: true })
@@ -35,5 +39,5 @@ export class Registry extends BaseModel {
   provider: string;
 
   @prop({ required: true })
-  tokenDetails: { [tokenAddress: string]: TokenInfo };
+  tokenDetails: TokenDetails;
 }
