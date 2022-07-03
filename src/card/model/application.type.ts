@@ -3,10 +3,14 @@ import { ObjectId } from 'mongoose';
 export type ApplicationUnit = {
   applicationId: string;
   /**
-   * The persone thats adding the application
+   * The person thats adding the application
    */
   user: string;
 
+  /**
+   * The application title
+   */
+  title: string;
   /**
    * The application content
    */

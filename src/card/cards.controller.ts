@@ -8,10 +8,10 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
+import { ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { SessionAuthGuard } from 'src/auth/iron-session.guard';
 import { ObjectIdDto } from 'src/common/dtos/object-id.dto';
 import { DetailedProjectResponseDto } from 'src/project/dto/detailed-project-response.dto';
-import { CardsService } from './cards.service';
 import { CreateCardRequestDto } from './dto/create-card-request.dto';
 import { DetailedCardResponseDto } from './dto/detailed-card-response-dto';
 import {
@@ -26,17 +26,21 @@ import {
   CreateWorkUnitRequestDto,
 } from './dto/work-request.dto';
 import { AddCommentDto, UpdateCommentDto } from './dto/comment-body.dto';
-import { ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
-import { ActionService } from './actions.service';
 import { ValidCardActionResponseDto } from './dto/card-access-response.dto';
 import { AggregatedFlattenedPaymentInfo } from './dto/payment-info-response.dto';
 import { UpdatePaymentInfoDto } from './dto/update-payment-info.dto';
-import { BountyService } from './bounty.service';
 import {
   CreateApplicationDto,
+  PickApplicationDto,
   UpdateApplicationDto,
 } from './dto/application.dto';
 import { UpdateApplicationParamDto } from './dto/param.dto';
+import { CardsService } from './cards.service';
+import { ApplicationService } from './application.cards.service';
+import { ActionService } from './actions.service';
+import { WorkService } from './work.cards.service';
+import { CommentService } from './comments.cards.service';
+import { CardsPaymentService } from './payment.cards.service';
 
 @Controller('card')
 @ApiTags('card')
@@ -44,7 +48,10 @@ export class CardsController {
   constructor(
     private readonly cardsService: CardsService,
     private readonly actionService: ActionService,
-    private readonly bountyService: BountyService,
+    private readonly applicationService: ApplicationService,
+    private readonly workService: WorkService,
+    private readonly commentService: CommentService,
+    private readonly paymentService: CardsPaymentService,
   ) {}
 
   @Get('/byProjectSlugAndCardSlug/:projectSlug/:cardSlug')
@@ -75,7 +82,7 @@ export class CardsController {
     @Query('chainId') chainId: string,
   ): Promise<AggregatedFlattenedPaymentInfo> {
     console.log(cardIds);
-    return await this.cardsService.aggregatePaymentInfo(cardIds, chainId);
+    return await this.paymentService.aggregatePaymentInfo(cardIds, chainId);
   }
 
   @UseGuards(SessionAuthGuard)
@@ -83,7 +90,7 @@ export class CardsController {
   async updatePaymentInfoAndClose(
     @Body() updatePaymentInfoDto: UpdatePaymentInfoDto,
   ): Promise<DetailedProjectResponseDto> {
-    return await this.cardsService.updatePaymentInfoAndClose(
+    return await this.paymentService.updatePaymentInfoAndClose(
       updatePaymentInfoDto,
     );
   }
@@ -96,6 +103,7 @@ export class CardsController {
   }
 
   @Get('/:id/myValidActions')
+  @ApiParam({ name: 'id', type: 'string' })
   @UseGuards(SessionAuthGuard)
   async getValidActions(
     @Param() params: ObjectIdDto,
@@ -114,6 +122,7 @@ export class CardsController {
 
   @Patch('/:id')
   @UseGuards(SessionAuthGuard)
+  @ApiParam({ name: 'id', type: 'string' })
   async update(
     @Param() params: ObjectIdDto,
     @Body() card: UpdateCardRequestDto,
@@ -127,10 +136,7 @@ export class CardsController {
     @Param() params: ObjectIdDto,
     @Body() createWorkThread: CreateWorkThreadRequestDto,
   ): Promise<DetailedCardResponseDto> {
-    return await this.cardsService.createWorkThread(
-      params.id,
-      createWorkThread,
-    );
+    return await this.workService.createWorkThread(params.id, createWorkThread);
   }
 
   @Patch('/:id/updateWorkThread')
@@ -140,7 +146,7 @@ export class CardsController {
     @Query('threadId') threadId: string,
     @Body() updateWorkThread: UpdateWorkThreadRequestDto,
   ): Promise<DetailedCardResponseDto> {
-    return await this.cardsService.updateWorkThread(
+    return await this.workService.updateWorkThread(
       params.id,
       threadId,
       updateWorkThread,
@@ -154,7 +160,7 @@ export class CardsController {
     @Query('threadId') threadId: string,
     @Body() createWorkUnit: CreateWorkUnitRequestDto,
   ): Promise<DetailedCardResponseDto> {
-    return await this.cardsService.createWorkUnit(
+    return await this.workService.createWorkUnit(
       params.id,
       threadId,
       createWorkUnit,
@@ -169,7 +175,7 @@ export class CardsController {
     @Query('workUnitId') workUnitId: string,
     @Body() updateWorkUnit: UpdateWorkUnitRequestDto,
   ): Promise<DetailedCardResponseDto> {
-    return await this.cardsService.udpateWorkUnit(
+    return await this.workService.updateWorkUnit(
       params.id,
       threadId,
       workUnitId,
@@ -184,7 +190,7 @@ export class CardsController {
     @Param() params: ObjectIdDto,
     @Body() addCommentDto: AddCommentDto,
   ): Promise<DetailedCardResponseDto> {
-    return await this.cardsService.addComment(params.id, addCommentDto);
+    return await this.commentService.addComment(params.id, addCommentDto);
   }
 
   @Patch('/:id/updateComment')
@@ -196,7 +202,7 @@ export class CardsController {
     @Query('commitId') commitId: string,
     @Body() updateCommentDto: UpdateCommentDto,
   ): Promise<DetailedCardResponseDto> {
-    return await this.cardsService.updateComment(
+    return await this.commentService.updateComment(
       params.id,
       commitId,
       updateCommentDto,
@@ -209,14 +215,12 @@ export class CardsController {
     @Param() params: ObjectIdDto,
     @Query('commitId') commitId: string,
   ): Promise<DetailedCardResponseDto> {
-    return await this.cardsService.deleteComment(params.id, commitId);
+    return await this.commentService.deleteComment(params.id, commitId);
   }
 
   @UseGuards(SessionAuthGuard)
   @Patch('/:id/archive')
-  async archive(
-    @Param() params: ObjectIdDto,
-  ): Promise<DetailedCardResponseDto> {
+  async archive(@Param() params: ObjectIdDto): Promise<string[]> {
     return await this.cardsService.archive(params.id);
   }
 
@@ -230,11 +234,12 @@ export class CardsController {
 
   @UseGuards(SessionAuthGuard)
   @Patch('/:id/createApplication')
+  @ApiParam({ name: 'id' })
   async createApplication(
     @Param() params: ObjectIdDto,
     @Body() createApplicationDto: CreateApplicationDto,
   ): Promise<DetailedCardResponseDto> {
-    return await this.bountyService.createApplication(
+    return await this.applicationService.createApplication(
       params.id,
       createApplicationDto,
     );
@@ -242,12 +247,14 @@ export class CardsController {
 
   @UseGuards(SessionAuthGuard)
   @Patch('/:id/updateApplication')
+  @ApiQuery({ name: 'applicationId', type: 'string' })
+  @ApiParam({ name: 'id' })
   async updateApplication(
     @Param() params: ObjectIdDto,
     @Query() updateApplicationQueryParam: UpdateApplicationParamDto,
     @Body() updateApplicationDto: UpdateApplicationDto,
   ): Promise<DetailedCardResponseDto> {
-    return await this.bountyService.updateApplication(
+    return await this.applicationService.updateApplication(
       params.id,
       updateApplicationQueryParam.applicationId,
       updateApplicationDto,
@@ -260,25 +267,23 @@ export class CardsController {
     @Param() params: ObjectIdDto,
     @Query() updateApplicationQueryParam: UpdateApplicationParamDto,
   ): Promise<DetailedCardResponseDto> {
-    return await this.bountyService.deleteApplication(
+    return await this.applicationService.deleteApplication(
       params.id,
       updateApplicationQueryParam.applicationId,
     );
   }
 
+  @UseGuards(SessionAuthGuard)
   @Patch('/:id/pickApplications')
-  @ApiQuery({ name: 'applicationIds', type: 'array' })
   @ApiParam({ name: 'id' })
   async pickApplications(
     @Param() params: ObjectIdDto,
-    @Query('applicationIds') applicationIds: string[],
+    @Body() applications: PickApplicationDto,
   ): Promise<DetailedCardResponseDto> {
-    return await this.bountyService.pickApplications(params.id, applicationIds);
-  }
-
-  @UseGuards(SessionAuthGuard)
-  @Post('/:id/delete')
-  async delete(@Param() params: ObjectIdDto): Promise<DetailedCardResponseDto> {
-    return await this.cardsService.delete(params.id);
+    console.log(applications);
+    return await this.applicationService.pickApplications(
+      params.id,
+      applications.applicationIds,
+    );
   }
 }

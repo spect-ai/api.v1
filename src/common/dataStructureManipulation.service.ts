@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import * as urlSlug from 'url-slug';
 
 @Injectable()
 export class DataStructureManipulationService {

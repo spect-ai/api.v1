@@ -36,7 +36,12 @@ export class CirclesController {
 
   @Get('/allPublicParents')
   async findAllParentCircles(): Promise<DetailedCircleResponseDto[]> {
-    return await this.circlesRepository.getPublicParentCircles();
+    try {
+      return await this.circlesRepository.getPublicParentCircles();
+    } catch (error) {
+      console.log(error);
+      return [];
+    }
   }
 
   @Get('/myOrganizations')

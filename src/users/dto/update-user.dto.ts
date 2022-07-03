@@ -16,4 +16,11 @@ export class UpdateUserDto extends PartialType(User) {
   @IsString()
   @IsOptional()
   avatar?: string;
+
+  /**
+   * Discord Id associated with the profile
+   */
+  @IsString()
+  @IsOptional()
+  discordId?: string;
 }

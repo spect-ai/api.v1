@@ -10,6 +10,7 @@ import { TemplatesModule } from 'src/template/templates.module';
 import { CardsModule } from 'src/card/cards.module';
 import { DataStructureManipulationService } from 'src/common/dataStructureManipulation.service';
 import { EthAddressModule } from 'src/_eth-address/_eth-address.module';
+import { CardsProjectService } from './cards.project.service';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { EthAddressModule } from 'src/_eth-address/_eth-address.module';
     ProjectsRepository,
     SlugService,
     DataStructureManipulationService,
+    CardsProjectService,
   ],
   exports: [ProjectService, ProjectsRepository, ProjectModule],
 })

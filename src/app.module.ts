@@ -26,8 +26,14 @@ import { RolesService } from './roles/roles.service';
 import { RegistryController } from './registry/registry.controller';
 import { ActionService } from './card/actions.service';
 import { ActivityBuilder } from './card/activity.builder';
-import { BountyService } from './card/bounty.service';
+import { ApplicationService } from './card/application.cards.service';
 import { ActivityResolver } from './card/activity.resolver';
+import { WorkService } from './card/work.cards.service';
+import { CardValidationService } from './card/validation.cards.service';
+import { ResponseBuilder } from './card/response.builder';
+import { CommentService } from './card/comments.cards.service';
+import { CardsProjectService } from './project/cards.project.service';
+import { CardsPaymentService } from './card/payment.cards.service';
 
 const databaseUrl =
   process.env.DATABASE_URL || 'mongodb://localhost:27017/nest';
@@ -59,6 +65,7 @@ console.log({ databaseUrl });
   providers: [
     AppService,
     ProjectService,
+    CardsProjectService,
     TemplatesService,
     RetroService,
     RegistryService,
@@ -69,7 +76,12 @@ console.log({ databaseUrl });
     ActionService,
     ActivityBuilder,
     ActivityResolver,
-    BountyService,
+    ApplicationService,
+    WorkService,
+    CardValidationService,
+    ResponseBuilder,
+    CommentService,
+    CardsPaymentService,
   ],
 })
 export class AppModule {}

@@ -2,9 +2,13 @@ import { InternalServerErrorException } from '@nestjs/common';
 import type { DocumentType, ReturnModelType } from '@typegoose/typegoose';
 import type { MongoError } from 'mongodb';
 import {
+  Aggregate,
+  AggregateOptions,
   FilterQuery,
   HydratedDocument,
+  InsertManyResult,
   ObjectId,
+  PipelineStage,
   QueryOptions as MongooseQueryOptions,
   QueryWithHelpers,
   Types,
@@ -24,6 +28,8 @@ export type EnforceDocumentType<TModel extends BaseModel> = HydratedDocument<
   Record<string, unknown>,
   Record<string, unknown>
 >;
+
+// export type InsertQueryList<TModel extends BaseModel> = InsertManyResult;
 
 export type UpdateQueryList<TModel extends BaseModel> = QueryWithHelpers<
   UpdateWriteOpResult,
@@ -127,6 +133,15 @@ export abstract class BaseRepository<TModel extends BaseModel> {
     return null;
   }
 
+  insertMany(
+    items: Partial<TModel[]>,
+    options?: QueryOptions,
+  ): Promise<HydratedDocument<DocumentType<TModel>>[]> {
+    const b = this.model.insertMany(items, options);
+
+    return b;
+  }
+
   deleteOne(
     filterQuery: FilterQuery<TModel>,
     options?: QueryOptions,
@@ -221,5 +236,16 @@ export abstract class BaseRepository<TModel extends BaseModel> {
       BaseRepository.throwMongoError(e);
     }
     return false;
+  }
+
+  aggregate(
+    pipeline: PipelineStage[],
+    options?: AggregateOptions,
+  ): Aggregate<Array<any>> {
+    try {
+      return this.model.aggregate(pipeline, options);
+    } catch (e) {
+      BaseRepository.throwMongoError(e);
+    }
   }
 }

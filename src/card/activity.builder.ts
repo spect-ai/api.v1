@@ -14,6 +14,10 @@ import { Project } from 'src/project/model/project.model';
 import { RequestProvider } from 'src/users/user.provider';
 import { v4 as uuidv4 } from 'uuid';
 import { Activity } from '../common/types/activity.type';
+import {
+  CreateApplicationDto,
+  UpdateApplicationDto,
+} from './dto/application.dto';
 
 const fieldUpdateToActiityIdMap = {
   deadline: 'updateDeadline',
@@ -81,7 +85,11 @@ export class ActivityBuilder {
     return newActivities;
   }
 
-  buildUpdateChangeLog(req: UpdateCardRequestDto, card: Card, field: string) {
+  private buildUpdateChangeLog(
+    req: UpdateCardRequestDto,
+    card: Card,
+    field: string,
+  ) {
     return {
       prev: {
         [field]: card[field],
@@ -92,7 +100,7 @@ export class ActivityBuilder {
     };
   }
 
-  buildColumnUpdateChange(
+  private buildColumnUpdateChange(
     req: UpdateCardRequestDto,
     card: Card,
     field: string,
@@ -114,9 +122,242 @@ export class ActivityBuilder {
     } else if (['assignee', 'reviewer', 'labels'].includes(field)) {
       const difference = arrayDiff(card[field], req[field]);
       return difference.added?.length !== 0 || difference.removed?.length !== 0;
-    } else if (['status', 'reward'].includes(field)) {
+    } else if (['status'].includes(field)) {
       const difference = objectDiff(card[field], req[field]);
       return Object.keys(difference)?.length > 0;
+    } else if (['reward'].includes(field)) {
+      const difference = objectDiff(card[field], req[field]);
+
+      return (
+        Object.keys(difference).includes('value') ||
+        ((Object.keys(difference).includes('chain') ||
+          Object.keys(difference).includes('token')) &&
+          card[field].value > 0)
+      );
     } else return false;
+  }
+
+  buildApplicationActivity(
+    card: Card,
+    type: 'create' | 'update' | 'delete',
+    req?: CreateApplicationDto | UpdateApplicationDto,
+    applicationId?: string,
+  ): Activity {
+    const newCardActivity = {} as Activity;
+
+    if (type === 'create') {
+      newCardActivity.activityId = `createApplication`;
+      newCardActivity.changeLog = {
+        prev: {},
+        next: {
+          application: req,
+        },
+      };
+    } else if (type === 'delete') {
+      newCardActivity.activityId = `deleteApplication`;
+      newCardActivity.changeLog = {
+        prev: { application: card.application[applicationId] },
+        next: {},
+      };
+    } else if (type === 'update') {
+      /** Find the difference to see if activity needs to be saved */
+      const isDifferent = {};
+      const existingApplication = card.application[applicationId];
+      isDifferent['content'] =
+        req.content && existingApplication.content !== req.content;
+      isDifferent['title'] =
+        req.title && existingApplication.title !== req.title;
+      console.log(isDifferent);
+      /** If there is no difference return */
+      if (!Object.values(isDifferent).includes(true)) return;
+
+      newCardActivity.activityId = `updateApplication`;
+      newCardActivity.changeLog = {
+        prev: { application: {} },
+        next: { application: {} },
+      };
+
+      /** Store the difference in title or content in the application.
+       * Only store content if there is a change to reduce storage usage
+       * */
+      newCardActivity.changeLog.prev.application = {
+        ...newCardActivity.changeLog.prev.application,
+        title: existingApplication.title,
+      };
+      newCardActivity.changeLog.next.application = {
+        ...newCardActivity.changeLog.next.application,
+        title: req.title,
+      };
+
+      if (isDifferent['content']) {
+        newCardActivity.changeLog.prev.application = {
+          ...newCardActivity.changeLog.prev.application,
+          content: existingApplication.content,
+        };
+        newCardActivity.changeLog.next.application = {
+          ...newCardActivity.changeLog.next.application,
+          content: req.content,
+        };
+      }
+    }
+
+    newCardActivity.timestamp = new Date();
+    newCardActivity.actorId = this.requestProvider.user.id;
+    newCardActivity.commitId = this.commitId;
+    newCardActivity.comment = false;
+
+    return newCardActivity;
+  }
+
+  buildPickApplicationUpdate(card: Card, applicants: string[]) {
+    const newCardActivity = {} as Activity;
+    const difference = arrayDiff(card.assignee, applicants);
+    if (difference.added.length === 0 && difference.removed.length === 0)
+      return;
+
+    newCardActivity.activityId = `pickApplication`;
+
+    newCardActivity.changeLog = {
+      prev: {
+        assignee: card.assignee,
+      },
+      next: {
+        assignee: applicants,
+      },
+    };
+
+    newCardActivity.timestamp = new Date();
+    newCardActivity.actorId = this.requestProvider.user.id;
+    newCardActivity.commitId = this.commitId;
+    newCardActivity.comment = false;
+
+    return newCardActivity;
+  }
+
+  buildNewWorkThreadActivity(req: CreateWorkThreadRequestDto) {
+    const newCardActivity = {} as Activity;
+    newCardActivity.activityId = `createWorkThread`;
+
+    if (req.status !== 'inReview') return;
+
+    newCardActivity.changeLog = {
+      prev: {},
+      next: {
+        work: req,
+      },
+    };
+
+    newCardActivity.timestamp = new Date();
+    newCardActivity.actorId = this.requestProvider.user.id;
+    newCardActivity.commitId = this.commitId;
+    newCardActivity.comment = false;
+
+    return newCardActivity;
+  }
+
+  isValidWorkUpdateActivity(
+    card: Card,
+    threadId: string,
+    threadName: string,
+    threadStatus?: string,
+    workUnitId?: string,
+    content?: string,
+  ) {
+    return true;
+  }
+
+  buildCreateWorkActivity(
+    activityId: 'createWorkThread' | 'createWorkUnit',
+    threadName: string,
+    content?: string,
+    type?: string,
+    threadStatus?: 'inReview' | 'draft' | 'accepted' | 'inRevision',
+  ) {
+    const newCardActivity = {} as Activity;
+    newCardActivity.activityId = activityId;
+
+    newCardActivity.changeLog = {
+      prev: {},
+      next: {
+        work: {
+          threadName,
+          content,
+          type,
+          threadStatus,
+        },
+      },
+    };
+
+    newCardActivity.timestamp = new Date();
+    newCardActivity.actorId = this.requestProvider.user.id;
+    newCardActivity.commitId = this.commitId;
+    newCardActivity.comment = false;
+
+    return newCardActivity;
+  }
+
+  buildUpdateWorkThreadActivity(
+    card: Card,
+    threadId: string,
+    req: UpdateWorkThreadRequestDto,
+  ) {
+    const newCardActivity = {} as Activity;
+    newCardActivity.activityId = 'updateWorkThread';
+
+    newCardActivity.changeLog = {
+      prev: {},
+      next: {
+        work: {
+          threadName: req.name,
+          threadStatus: req.status,
+        },
+      },
+    };
+
+    newCardActivity.timestamp = new Date();
+    newCardActivity.actorId = this.requestProvider.user.id;
+    newCardActivity.commitId = this.commitId;
+    newCardActivity.comment = false;
+
+    return newCardActivity;
+  }
+
+  buildUpdateWorkUnitActivity(
+    card: Card,
+    threadId: string,
+    workUnitId: string,
+    req: UpdateWorkUnitRequestDto,
+  ) {
+    const newCardActivity = {} as Activity;
+    newCardActivity.activityId = 'updateWorkUnit';
+
+    // const isValidWorkActivity = this.isValidWorkUpdateActivity(card, threadId);
+    newCardActivity.changeLog = {
+      prev: {
+        work: {
+          threadName: card.workThreads[threadId].name,
+          content: card.workThreads[threadId].workUnits[workUnitId].content,
+          type: card.workThreads[threadId].workUnits[workUnitId].type,
+          threadStatus: card.workThreads[threadId].status,
+        },
+      },
+      next: {
+        work: {
+          threadName: card.workThreads[threadId].name,
+          content: req.content,
+          type: req.type,
+          threadStatus: req.status
+            ? req.status
+            : card.workThreads[threadId].status,
+        },
+      },
+    };
+
+    newCardActivity.timestamp = new Date();
+    newCardActivity.actorId = this.requestProvider.user.id;
+    newCardActivity.commitId = this.commitId;
+    newCardActivity.comment = false;
+
+    return newCardActivity;
   }
 }

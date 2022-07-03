@@ -32,7 +32,7 @@ export class Circle extends ProfileModel {
   /**
    * The slug of the profile, aka, the url of the profile
    */
-  @prop({ required: true })
+  @prop({ required: true, unique: true })
   slug: string;
 
   /**

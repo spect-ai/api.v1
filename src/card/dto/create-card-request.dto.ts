@@ -7,7 +7,7 @@ import {
   IsOptional,
   IsString,
 } from 'class-validator';
-import { ObjectId, Date } from 'mongoose';
+import { IsObjectId } from 'class-validator-mongo-object-id';
 import { Payment } from 'src/common/models/payment.model';
 
 export class CreateCardRequestDto {
@@ -42,14 +42,14 @@ export class CreateCardRequestDto {
   /**
    * The card's project
    */
-  @IsString()
-  project: ObjectId;
+  @IsObjectId()
+  project: string;
 
   /**
    * The circle Id that the card belongs to
    */
-  @IsString()
-  circle: ObjectId;
+  @IsObjectId()
+  circle: string;
 
   /**
    * Card reward
@@ -91,4 +91,18 @@ export class CreateCardRequestDto {
    */
   @IsString()
   columnId: string;
+
+  /**
+   * The card's parents
+   */
+  @IsObjectId()
+  @IsOptional()
+  parent?: string;
+
+  /**
+   * The card's children
+   */
+  @IsArray()
+  @IsOptional()
+  childCards?: CreateCardRequestDto[];
 }

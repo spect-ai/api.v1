@@ -102,7 +102,9 @@ export class CirclesService {
     return circlePermissions;
   }
 
-  async getMemberDetailsOfCircles(circleIds: string[]): Promise<any> {
+  async getMemberDetailsOfCircles(
+    circleIds: string[] | ObjectId[],
+  ): Promise<any> {
     const circles = await this.circlesRepository
       .findAll(
         {

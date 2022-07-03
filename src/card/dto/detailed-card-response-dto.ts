@@ -14,6 +14,7 @@ import {
 import { ObjectId, Date } from 'mongoose';
 import { Payment } from 'src/common/models/payment.model';
 import { Status } from 'src/common/types/status.type';
+import { ApplicationDetails, ApplicationUnit } from '../model/application.type';
 import { Card } from '../model/card.model';
 
 export class DetailedCardResponseDto {
@@ -30,6 +31,13 @@ export class DetailedCardResponseDto {
   @IsString()
   @IsOptional()
   description?: string;
+
+  /**
+   * The title of the card
+   */
+  @IsString()
+  @IsNotEmpty()
+  slug: string;
 
   /**
    * The reviewers of the card
@@ -49,7 +57,7 @@ export class DetailedCardResponseDto {
    * The project of the card
    */
   @IsString()
-  project: ObjectId;
+  project: string;
 
   /**
    * The reward of the card
@@ -96,5 +104,11 @@ export class DetailedCardResponseDto {
    * The status of the card
    */
   @IsObject()
-  status: Status;
+  status?: Status;
+
+  /**
+   * The application of the caller
+   */
+  @IsObject()
+  myApplication?: ApplicationUnit;
 }

@@ -9,6 +9,7 @@ import {
 } from '@nestjs/common';
 import { SessionAuthGuard } from 'src/auth/iron-session.guard';
 import { ObjectIdDto } from 'src/common/dtos/object-id.dto';
+import { CardsProjectService } from './cards.project.service';
 import { CreateProjectRequestDto } from './dto/create-project-request.dto';
 import { DetailedProjectResponseDto } from './dto/detailed-project-response.dto';
 import { ReorderCardReqestDto } from './dto/reorder-card-request.dto';
@@ -19,7 +20,10 @@ import { ProjectService } from './project.service';
 
 @Controller('project')
 export class ProjectController {
-  constructor(private readonly projectService: ProjectService) {}
+  constructor(
+    private readonly projectService: ProjectService,
+    private readonly cardsProjectService: CardsProjectService,
+  ) {}
 
   @Get('/:id')
   async findByObjectId(
@@ -55,7 +59,7 @@ export class ProjectController {
     @Param('cardId') cardId,
     @Body() reorderCardRequestDto: ReorderCardReqestDto,
   ): Promise<DetailedProjectResponseDto> {
-    return await this.projectService.reorderCard(
+    return await this.cardsProjectService.reorderCard(
       param.id,
       cardId,
       reorderCardRequestDto,

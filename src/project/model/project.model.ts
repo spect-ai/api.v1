@@ -24,7 +24,7 @@ export class Project extends BaseModel {
   /**
    * The slug of the profile, aka, the url of the profile
    */
-  @prop({ required: true })
+  @prop({ required: true, unique: true })
   slug: string;
 
   /**
@@ -37,7 +37,7 @@ export class Project extends BaseModel {
    * Parent Ids of the project
    */
   @prop({ ref: () => Circle, default: [] })
-  parents: ObjectId[];
+  parents: string[];
 
   /**
    * Column order of the project
@@ -57,7 +57,7 @@ export class Project extends BaseModel {
    * !! Important, need to store as MAP to support dynamic key to reference
    */
   @prop({ ref: () => Card, default: [] })
-  cards: ObjectId[];
+  cards: string[];
 
   /**
    * Project is archived

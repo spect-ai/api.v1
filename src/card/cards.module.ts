@@ -15,9 +15,15 @@ import { CardsController } from './cards.controller';
 import { CardsRepository } from './cards.repository';
 import { CardsService } from './cards.service';
 import { Card } from './model/card.model';
-import { BountyService } from './bounty.service';
+import { ApplicationService } from './application.cards.service';
 import { ActivityResolver } from './activity.resolver';
 import { UsersModule } from 'src/users/users.module';
+import { WorkService } from './work.cards.service';
+import { CardValidationService } from './validation.cards.service';
+import { ResponseBuilder } from './response.builder';
+import { CommentService } from './comments.cards.service';
+import { CardsProjectService } from 'src/project/cards.project.service';
+import { CardsPaymentService } from './payment.cards.service';
 
 @Module({
   imports: [
@@ -36,11 +42,17 @@ import { UsersModule } from 'src/users/users.module';
     SlugService,
     RequestProvider,
     ProjectService,
+    CardsProjectService,
     DataStructureManipulationService,
     ActionService,
     ActivityBuilder,
     ActivityResolver,
-    BountyService,
+    ApplicationService,
+    WorkService,
+    CardValidationService,
+    ResponseBuilder,
+    CommentService,
+    CardsPaymentService,
   ],
   exports: [CardsService, CardsRepository, CardsModule],
 })
