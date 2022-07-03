@@ -3,6 +3,7 @@ import { InjectModel } from 'nestjs-typegoose';
 import { BaseRepository } from 'src/base/base.repository';
 import { Card, ExtendedCard } from './model/card.model';
 import { Ref } from '@typegoose/typegoose';
+import { UpdateWriteOpResult } from 'mongoose';
 
 const populatedCardFields = {
   title: 1,
@@ -76,5 +77,20 @@ export class CardsRepository extends BaseRepository<Card> {
     ]);
     console.log(cards);
     return cards[0];
+  }
+
+  async updateManyByIds(
+    ids: string[],
+    update: any,
+  ): Promise<UpdateWriteOpResult> {
+    return await this.updateMany(
+      {
+        _id: { $in: ids },
+      },
+      update,
+      {
+        multi: true,
+      },
+    );
   }
 }

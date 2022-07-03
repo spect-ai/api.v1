@@ -40,6 +40,7 @@ import { ApplicationService } from './application.cards.service';
 import { ActionService } from './actions.service';
 import { WorkService } from './work.cards.service';
 import { CommentService } from './comments.cards.service';
+import { CardsPaymentService } from './payment.cards.service';
 
 @Controller('card')
 @ApiTags('card')
@@ -50,6 +51,7 @@ export class CardsController {
     private readonly applicationService: ApplicationService,
     private readonly workService: WorkService,
     private readonly commentService: CommentService,
+    private readonly paymentService: CardsPaymentService,
   ) {}
 
   @Get('/byProjectSlugAndCardSlug/:projectSlug/:cardSlug')
@@ -80,7 +82,7 @@ export class CardsController {
     @Query('chainId') chainId: string,
   ): Promise<AggregatedFlattenedPaymentInfo> {
     console.log(cardIds);
-    return await this.cardsService.aggregatePaymentInfo(cardIds, chainId);
+    return await this.paymentService.aggregatePaymentInfo(cardIds, chainId);
   }
 
   @UseGuards(SessionAuthGuard)
@@ -88,7 +90,7 @@ export class CardsController {
   async updatePaymentInfoAndClose(
     @Body() updatePaymentInfoDto: UpdatePaymentInfoDto,
   ): Promise<DetailedProjectResponseDto> {
-    return await this.cardsService.updatePaymentInfoAndClose(
+    return await this.paymentService.updatePaymentInfoAndClose(
       updatePaymentInfoDto,
     );
   }

@@ -23,6 +23,7 @@ import { CardValidationService } from './validation.cards.service';
 import { ResponseBuilder } from './response.builder';
 import { CommentService } from './comments.cards.service';
 import { CardsProjectService } from 'src/project/cards.project.service';
+import { CardsPaymentService } from './payment.cards.service';
 
 @Module({
   imports: [
@@ -51,6 +52,7 @@ import { CardsProjectService } from 'src/project/cards.project.service';
     CardValidationService,
     ResponseBuilder,
     CommentService,
+    CardsPaymentService,
   ],
   exports: [CardsService, CardsRepository, CardsModule],
 })
