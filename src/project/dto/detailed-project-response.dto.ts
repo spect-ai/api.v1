@@ -57,7 +57,7 @@ export class DetailedProjectResponseDto {
    */
   @IsOptional()
   @ValidateNested()
-  parents?: ObjectId[];
+  parents?: string[];
 
   /**
    * The order of the columns in the project

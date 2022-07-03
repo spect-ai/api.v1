@@ -39,6 +39,7 @@ import { CardsService } from './cards.service';
 import { ApplicationService } from './application.cards.service';
 import { ActionService } from './actions.service';
 import { WorkService } from './work.cards.service';
+import { CommentService } from './comments.cards.service';
 
 @Controller('card')
 @ApiTags('card')
@@ -48,22 +49,8 @@ export class CardsController {
     private readonly actionService: ActionService,
     private readonly applicationService: ApplicationService,
     private readonly workService: WorkService,
+    private readonly commentService: CommentService,
   ) {}
-
-  @Get('/getAllChildren')
-  async getAllChildren(@Body() card): Promise<string[]> {
-    console.log(card.children);
-    const allChildren = [];
-    return await this.cardsService.getAllChildren(card, allChildren);
-  }
-
-  @Get('/getChildren/:projectSlug/:cardSlug')
-  async getChildren(@Param() params: GetByProjectSlugAndCardSlugDto) {
-    return await this.cardsService.getChildren(
-      params.projectSlug,
-      params.cardSlug,
-    );
-  }
 
   @Get('/byProjectSlugAndCardSlug/:projectSlug/:cardSlug')
   async findByProjectSlugAndCardSlug(
@@ -201,7 +188,7 @@ export class CardsController {
     @Param() params: ObjectIdDto,
     @Body() addCommentDto: AddCommentDto,
   ): Promise<DetailedCardResponseDto> {
-    return await this.cardsService.addComment(params.id, addCommentDto);
+    return await this.commentService.addComment(params.id, addCommentDto);
   }
 
   @Patch('/:id/updateComment')
@@ -213,7 +200,7 @@ export class CardsController {
     @Query('commitId') commitId: string,
     @Body() updateCommentDto: UpdateCommentDto,
   ): Promise<DetailedCardResponseDto> {
-    return await this.cardsService.updateComment(
+    return await this.commentService.updateComment(
       params.id,
       commitId,
       updateCommentDto,
@@ -226,7 +213,7 @@ export class CardsController {
     @Param() params: ObjectIdDto,
     @Query('commitId') commitId: string,
   ): Promise<DetailedCardResponseDto> {
-    return await this.cardsService.deleteComment(params.id, commitId);
+    return await this.commentService.deleteComment(params.id, commitId);
   }
 
   @UseGuards(SessionAuthGuard)

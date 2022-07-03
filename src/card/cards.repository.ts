@@ -22,8 +22,8 @@ const populatedCardFields = {
 };
 @Injectable()
 export class CardsRepository extends BaseRepository<Card> {
-  constructor(@InjectModel(Card) circleModel) {
-    super(circleModel);
+  constructor(@InjectModel(Card) cardModel) {
+    super(cardModel);
   }
 
   async getCardWithPopulatedReferences(id: string): Promise<Card> {
@@ -58,15 +58,55 @@ export class CardsRepository extends BaseRepository<Card> {
   }
 
   async getCardWithAllChildren(project: string, slug: string) {
-    const children = await this.findOne({
-      project: project,
-      slug: slug,
-    }).populate({
-      path: 'children',
-      populate: {
-        path: 'children',
+    const cards = await this.aggregate([
+      {
+        $match: {
+          project: project,
+          slug: slug,
+        },
       },
-    });
-    return children;
+      {
+        $project: {
+          _id: 1,
+          children: 1,
+          title: 1,
+          slug: 1,
+        },
+      },
+      {
+        $graphLookup: {
+          from: 'cards',
+          startWith: '$children',
+          connectFromField: 'children',
+          connectToField: '_id',
+          as: 'flattenedChildren',
+        },
+      },
+    ]);
+    return cards;
   }
 }
+
+/*[
+  {
+    '$match': {
+      'project': '62bd1a0fec866e51679c9862', 
+      'slug': '40'
+    }
+  }, {
+    '$project': {
+      '_id': 1, 
+      'children': 1, 
+      'title': 1, 
+      'slug': 1
+    }
+  }, {
+    '$graphLookup': {
+      'from': 'cards', 
+      'startWith': '$children', 
+      'connectFromField': 'children', 
+      'connectToField': '_id', 
+      'as': 'relatioship'
+    }
+  }
+]*/

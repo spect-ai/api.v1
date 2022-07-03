@@ -1,5 +1,4 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
-import { ObjectId } from 'mongoose';
 import { CirclesRepository } from 'src/circle/circles.repository';
 import { CirclesService } from 'src/circle/circles.service';
 import { Circle } from 'src/circle/model/circle.model';
@@ -9,6 +8,7 @@ import { CardsRepository } from './cards.repository';
 import { CardsService } from './cards.service';
 import { ValidCardActionResponseDto } from './dto/card-access-response.dto';
 import { Card } from './model/card.model';
+import { CardValidationService } from './validation.cards.service';
 
 @Injectable()
 export class ActionService {
@@ -18,6 +18,7 @@ export class ActionService {
     private readonly cardsRepository: CardsRepository,
     private readonly circleRepository: CirclesRepository,
     private readonly circleService: CirclesService,
+    private readonly validationService: CardValidationService,
   ) {}
 
   canUpdateGeneralInfo(card: Card, circlePermissions: CirclePermission) {
@@ -166,7 +167,7 @@ export class ActionService {
 
   async getValidActions(id: string): Promise<ValidCardActionResponseDto> {
     const card = await this.cardsRepository.getCardWithPopulatedReferences(id);
-    this.cardService.validateCardExists(card);
+    this.validationService.validateCardExists(card);
 
     const circle = await this.circleRepository.findById(card.circle);
     const circlePermissions =

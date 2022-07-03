@@ -102,7 +102,7 @@ export class ProjectService {
       const createdProject = await this.projectRepository.create({
         ...createProjectDto,
         slug: slug,
-        parents: [parentCircle._id],
+        parents: [parentCircle.id],
       });
       if (parentCircle?.id) {
         await this.circlesRepository.updateById(parentCircle.id as string, {
@@ -275,7 +275,7 @@ export class ProjectService {
   async addCardToProject(
     projectId: string,
     columnId: string,
-    cardId: ObjectId,
+    cardId: string,
     addInFirstColumnIfColumnDoesntExist = true,
   ): Promise<DetailedProjectResponseDto> {
     const project = await this.projectRepository.findById(projectId);

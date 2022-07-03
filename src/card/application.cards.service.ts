@@ -1,15 +1,9 @@
-import {
-  forwardRef,
-  HttpException,
-  HttpStatus,
-  Inject,
-  Injectable,
-  InternalServerErrorException,
-} from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { CirclesRepository } from 'src/circle/circles.repository';
-import { DataStructureManipulationService } from 'src/common/dataStructureManipulation.service';
-import { ProjectService } from 'src/project/project.service';
+import { CirclesService } from 'src/circle/circles.service';
+import { ProjectsRepository } from 'src/project/project.repository';
 import { RequestProvider } from 'src/users/user.provider';
+import { v4 as uuidv4 } from 'uuid';
 import { ActivityBuilder } from './activity.builder';
 import { CardsRepository } from './cards.repository';
 import { CardsService } from './cards.service';
@@ -17,11 +11,9 @@ import {
   CreateApplicationDto,
   UpdateApplicationDto,
 } from './dto/application.dto';
-import { v4 as uuidv4 } from 'uuid';
-import { Card } from './model/card.model';
 import { DetailedCardResponseDto } from './dto/detailed-card-response-dto';
-import { CirclesService } from 'src/circle/circles.service';
-import { ProjectsRepository } from 'src/project/project.repository';
+import { ResponseBuilder } from './response.builder';
+import { CardValidationService } from './validation.cards.service';
 
 @Injectable()
 export class ApplicationService {
@@ -33,40 +25,9 @@ export class ApplicationService {
     private readonly projectRepository: ProjectsRepository,
     private readonly circleRepository: CirclesRepository,
     private readonly activityBuilder: ActivityBuilder,
-    private readonly datastructureManipulationService: DataStructureManipulationService,
+    private readonly validationService: CardValidationService,
+    private readonly responseBuilder: ResponseBuilder,
   ) {}
-
-  validateApplicationExists(card: Card, applicationId: string) {
-    if (!card.application[applicationId]) {
-      throw new HttpException('Application not found', HttpStatus.NOT_FOUND);
-    }
-  }
-
-  validateCallerIsOwner(card: Card, applicationId: string) {
-    if (
-      card.application[applicationId].user.toString() !==
-      this.requestProvider.user.id
-    ) {
-      throw new HttpException(
-        'Caller didnt submit this application',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
-    }
-  }
-
-  validateUserHasntSubmittedApplicaiton(card: Card) {
-    if (!card.application) return;
-    for (const [applicationId, application] of Object.entries(
-      card.application,
-    )) {
-      if (application.user?.toString() === this.requestProvider.user.id) {
-        throw new HttpException(
-          'User has already submitted application',
-          HttpStatus.INTERNAL_SERVER_ERROR,
-        );
-      }
-    }
-  }
 
   async createApplication(
     id: string,
@@ -74,8 +35,8 @@ export class ApplicationService {
   ): Promise<DetailedCardResponseDto> {
     try {
       const card = await this.cardsRepository.findById(id);
-      this.cardsService.validateCardExists(card);
-      this.validateUserHasntSubmittedApplicaiton(card);
+      this.validationService.validateCardExists(card);
+      this.validationService.validateUserHasntSubmittedApplicaiton(card);
 
       const project =
         await this.projectRepository.getProjectWithUnpPopulatedReferences(
@@ -126,7 +87,7 @@ export class ApplicationService {
           },
         );
 
-      return await this.cardsService.enrichResponse(updatedCard);
+      return await this.responseBuilder.enrichResponse(updatedCard);
     } catch (error) {
       console.log(error);
       throw new InternalServerErrorException(
@@ -143,9 +104,9 @@ export class ApplicationService {
   ): Promise<DetailedCardResponseDto> {
     try {
       const card = await this.cardsRepository.findById(id);
-      this.cardsService.validateCardExists(card);
-      this.validateApplicationExists(card, applicationId);
-      this.validateCallerIsOwner(card, applicationId);
+      this.validationService.validateCardExists(card);
+      this.validationService.validateApplicationExists(card, applicationId);
+      this.validationService.validateCallerIsOwner(card, applicationId);
 
       const activity = this.activityBuilder.buildApplicationActivity(
         card,
@@ -168,7 +129,7 @@ export class ApplicationService {
           },
         );
 
-      return await this.cardsService.enrichResponse(updatedCard);
+      return await this.responseBuilder.enrichResponse(updatedCard);
     } catch (error) {
       throw new InternalServerErrorException(
         'Failed updating application',
@@ -183,8 +144,8 @@ export class ApplicationService {
   ): Promise<DetailedCardResponseDto> {
     try {
       const card = await this.cardsRepository.findById(id);
-      this.cardsService.validateCardExists(card);
-      this.validateApplicationExists(card, applicationId);
+      this.validationService.validateCardExists(card);
+      this.validationService.validateApplicationExists(card, applicationId);
 
       const activity = this.activityBuilder.buildApplicationActivity(
         card,
@@ -207,7 +168,7 @@ export class ApplicationService {
           },
         );
 
-      return await this.cardsService.enrichResponse(updatedCard);
+      return await this.responseBuilder.enrichResponse(updatedCard);
     } catch (error) {
       throw new InternalServerErrorException(
         'Failed while deleting application',
@@ -219,10 +180,10 @@ export class ApplicationService {
   async pickApplications(id: string, applicationIds: string[]) {
     try {
       const card = await this.cardsRepository.findById(id);
-      this.cardsService.validateCardExists(card);
+      this.validationService.validateCardExists(card);
       const applicants = [];
       for (const applicationId of applicationIds) {
-        this.validateApplicationExists(card, applicationId);
+        this.validationService.validateApplicationExists(card, applicationId);
         applicants.push(card.application[applicationId].user);
         card.application[applicationId].status = 'picked';
       }
@@ -240,7 +201,7 @@ export class ApplicationService {
           },
         );
 
-      return await this.cardsService.enrichResponse(updatedCard);
+      return await this.responseBuilder.enrichResponse(updatedCard);
     } catch (error) {
       throw new InternalServerErrorException(
         'Failed while picking applications',

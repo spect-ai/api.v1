@@ -29,6 +29,9 @@ import { ActivityBuilder } from './card/activity.builder';
 import { ApplicationService } from './card/application.cards.service';
 import { ActivityResolver } from './card/activity.resolver';
 import { WorkService } from './card/work.cards.service';
+import { CardValidationService } from './card/validation.cards.service';
+import { ResponseBuilder } from './card/response.builder';
+import { CommentService } from './card/comments.cards.service';
 
 const databaseUrl =
   process.env.DATABASE_URL || 'mongodb://localhost:27017/nest';
@@ -72,6 +75,9 @@ console.log({ databaseUrl });
     ActivityResolver,
     ApplicationService,
     WorkService,
+    CardValidationService,
+    ResponseBuilder,
+    CommentService,
   ],
 })
 export class AppModule {}

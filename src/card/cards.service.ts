@@ -7,22 +7,20 @@ import {
 import { ActivityBuilder } from 'src/card/activity.builder';
 import { CirclesRepository } from 'src/circle/circles.repository';
 import { DataStructureManipulationService } from 'src/common/dataStructureManipulation.service';
-import { Activity } from 'src/common/types/activity.type';
 import { DetailedProjectResponseDto } from 'src/project/dto/detailed-project-response.dto';
 import { ReorderCardReqestDto } from 'src/project/dto/reorder-card-request.dto';
 import { Project } from 'src/project/model/project.model';
 import { ProjectService } from 'src/project/project.service';
 import { RequestProvider } from 'src/users/user.provider';
-import { v4 as uuidv4 } from 'uuid';
-import { ActivityResolver } from './activity.resolver';
 import { CardsRepository } from './cards.repository';
-import { AddCommentDto, UpdateCommentDto } from './dto/comment-body.dto';
 import { CreateCardRequestDto } from './dto/create-card-request.dto';
 import { DetailedCardResponseDto } from './dto/detailed-card-response-dto';
 import { AggregatedFlattenedPaymentInfo } from './dto/payment-info-response.dto';
 import { UpdateCardRequestDto } from './dto/update-card-request.dto';
 import { UpdatePaymentInfoDto } from './dto/update-payment-info.dto';
 import { Card } from './model/card.model';
+import { ResponseBuilder } from './response.builder';
+import { CardValidationService } from './validation.cards.service';
 
 @Injectable()
 export class CardsService {
@@ -30,74 +28,12 @@ export class CardsService {
     private readonly requestProvider: RequestProvider,
     private readonly cardsRepository: CardsRepository,
     private readonly activityBuilder: ActivityBuilder,
-    private readonly activityResolver: ActivityResolver,
     private readonly circleRepository: CirclesRepository,
     private readonly projectService: ProjectService,
     private readonly datastructureManipulationService: DataStructureManipulationService,
+    private readonly validationService: CardValidationService,
+    private readonly responseBuilder: ResponseBuilder,
   ) {}
-
-  validateCardExists(card: Card) {
-    if (!card) {
-      throw new HttpException('Card not found', HttpStatus.NOT_FOUND);
-    }
-  }
-
-  validateCardThreadExists(card: Card, threadId: string) {
-    if (!card.workThreads[threadId]) {
-      throw new HttpException('Work thread not found', HttpStatus.NOT_FOUND);
-    }
-  }
-
-  validateComment(card: Card, commentIndex: number) {
-    if (commentIndex === -1) {
-      throw new HttpException('Comment not found', HttpStatus.NOT_FOUND);
-    }
-    if (card.activity[commentIndex].actorId !== this.requestProvider.user.id) {
-      throw new HttpException(
-        'You are not authorized to update this comment',
-        HttpStatus.UNAUTHORIZED,
-      );
-    }
-    if (!card.activity[commentIndex].comment) {
-      throw new HttpException('Not a comment', HttpStatus.NOT_FOUND);
-    }
-  }
-
-  resolveApplicationView(card: Card): DetailedCardResponseDto {
-    /** Do nothing if card is not bounty, otherwise add the applicant's application
-     *
-     * TODO: Check if caller is steward, if not, filter out the rest of the applications
-     */
-    if (card.type !== 'Bounty') return card;
-    else if (!this.requestProvider.user) return card;
-    else {
-      for (const [applicationId, application] of Object.entries(
-        card.application,
-      )) {
-        if (application.user.toString() === this.requestProvider.user.id) {
-          return {
-            ...card,
-            myApplication: application,
-          };
-        }
-      }
-    }
-    return card;
-  }
-
-  async enrichResponse(card: Card) {
-    /** This function should contain everything added to the response for the frontend, to prevent
-     * multiple functions needing to be updated seperately for a new item
-     */
-    card = await this.enrichActivity(card);
-    return this.resolveApplicationView(card);
-  }
-
-  async enrichActivity(card: Card) {
-    card = await this.activityResolver.resolveActivities(card);
-    card.activity = card.activity.reverse();
-    return card;
-  }
 
   private async createOneCard(
     createCardDto: CreateCardRequestDto,
@@ -126,7 +62,7 @@ export class CardsService {
     const project = await this.projectService.addCardToProject(
       createCardDto.project,
       createCardDto.columnId,
-      createdCard._id,
+      createdCard.id,
     );
 
     return {
@@ -153,12 +89,12 @@ export class CardsService {
           await this.cardsRepository.getCardWithUnpopulatedReferences(
             createdCard.parent,
           );
-        this.validateCardExists(parentCard);
+        this.validationService.validateCardExists(parentCard);
         updatedParentCard =
           await this.cardsRepository.updateCardAndReturnWithPopulatedReferences(
             parentCard.id,
             {
-              children: [...parentCard.children, createdCard._id],
+              children: [...parentCard.children, createdCard.id],
             },
           );
       }
@@ -308,7 +244,7 @@ export class CardsService {
           project,
           slug,
         );
-      return await this.enrichResponse(card);
+      return await this.responseBuilder.enrichResponse(card);
     } catch (error) {
       console.log(error);
       throw new InternalServerErrorException(
@@ -328,7 +264,7 @@ export class CardsService {
       if (updateCardDto.columnId) {
         if (card.columnId !== updateCardDto.columnId) {
           await this.projectService.reorderCard(
-            project._id.toString(),
+            project.id,
             id,
             {
               destinationColumnId: updateCardDto.columnId,
@@ -352,109 +288,10 @@ export class CardsService {
             activity: card.activity.concat(activities),
           },
         );
-      return await this.enrichResponse(updatedCard);
+      return await this.responseBuilder.enrichResponse(updatedCard);
     } catch (error) {
       throw new InternalServerErrorException(
         'Failed card update',
-        error.message,
-      );
-    }
-  }
-
-  async addComment(
-    id: string,
-    addCommentDto: AddCommentDto,
-  ): Promise<DetailedCardResponseDto> {
-    try {
-      const card = await this.cardsRepository.findById(id);
-      this.validateCardExists(card);
-
-      const commitId = uuidv4();
-      card.activity = [
-        ...card.activity,
-        {
-          commitId,
-          actorId: this.requestProvider.user.id,
-          content: addCommentDto.comment,
-          timestamp: new Date(),
-          comment: true,
-        } as Activity,
-      ];
-
-      const updatedCard =
-        await this.cardsRepository.updateCardAndReturnWithPopulatedReferences(
-          id,
-          {
-            activity: card.activity,
-          },
-        );
-      return await this.enrichResponse(updatedCard);
-    } catch (error) {
-      throw new InternalServerErrorException(
-        'Failed adding comment',
-        error.message,
-      );
-    }
-  }
-
-  async updateComment(
-    id: string,
-    commitId: string,
-    updateCommentDto: UpdateCommentDto,
-  ): Promise<DetailedCardResponseDto> {
-    try {
-      const card = await this.cardsRepository.findById(id);
-      this.validateCardExists(card);
-
-      const commentIndex = card.activity.findIndex((activity) => {
-        return activity.commitId === commitId;
-      });
-      this.validateComment(card, commentIndex);
-
-      card.activity[commentIndex].content = updateCommentDto.comment;
-
-      const updatedCard =
-        await this.cardsRepository.updateCardAndReturnWithPopulatedReferences(
-          id,
-          {
-            activity: card.activity,
-          },
-        );
-      return await this.enrichResponse(updatedCard);
-    } catch (error) {
-      throw new InternalServerErrorException(
-        'Failed updating comment',
-        error.message,
-      );
-    }
-  }
-
-  async deleteComment(
-    id: string,
-    commitId: string,
-  ): Promise<DetailedCardResponseDto> {
-    try {
-      const card = await this.cardsRepository.findById(id);
-      this.validateCardExists(card);
-
-      const commentIndex = card.activity.findIndex((activity) => {
-        return activity.commitId === commitId;
-      });
-      this.validateComment(card, commentIndex);
-
-      card.activity.splice(commentIndex, 1);
-
-      const updatedCard =
-        await this.cardsRepository.updateCardAndReturnWithPopulatedReferences(
-          id,
-          {
-            activity: card.activity,
-          },
-        );
-      return await this.enrichResponse(updatedCard);
-    } catch (error) {
-      throw new InternalServerErrorException(
-        'Failed adding comment',
         error.message,
       );
     }
@@ -605,9 +442,7 @@ export class CardsService {
           HttpStatus.INTERNAL_SERVER_ERROR,
         );
       }
-      return await this.projectService.getDetailedProject(
-        project._id.toString(),
-      );
+      return await this.projectService.getDetailedProject(project.id);
     } catch (error) {
       throw new InternalServerErrorException(
         'Failed updating payment info',
@@ -618,7 +453,11 @@ export class CardsService {
 
   async archive(id: string): Promise<Card> {
     const card = await this.cardsRepository.findById(id);
-    this.validateCardExists(card);
+    this.validationService.validateCardExists(card);
+    const childCards = await this.cardsRepository.getCardWithAllChildren(
+      card.project,
+      id,
+    );
     const updatedProject = await this.projectService.removeCardFromProject(
       card.project.toString(),
       id,
@@ -633,21 +472,9 @@ export class CardsService {
     );
   }
 
-  getAllChildren(root, allChildren: string[]): string[] {
-    for (const child of root.children) {
-      allChildren.push(child.id);
-      allChildren = this.getAllChildren(child, allChildren);
-    }
-    return allChildren;
-  }
-
-  async getChildren(project: string, slug: string) {
-    return await this.cardsRepository.getCardWithAllChildren(project, slug);
-  }
-
   async revertArchive(id: string): Promise<Card> {
     const card = await this.cardsRepository.findById(id);
-    this.validateCardExists(card);
+    this.validationService.validateCardExists(card);
 
     if (!card.status.archived)
       throw new HttpException(
@@ -657,7 +484,7 @@ export class CardsService {
     const updatedProject = await this.projectService.addCardToProject(
       card.project,
       card.columnId,
-      card._id,
+      card.id,
     );
     return await this.cardsRepository.updateCardAndReturnWithPopulatedReferences(
       id,
@@ -670,7 +497,7 @@ export class CardsService {
 
   async delete(id: string): Promise<Card> {
     const card = await this.cardsRepository.findById(id);
-    this.validateCardExists(card);
+    this.validationService.validateCardExists(card);
 
     return await this.cardsRepository.deleteById(id);
   }

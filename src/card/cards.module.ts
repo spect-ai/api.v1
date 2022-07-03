@@ -19,6 +19,9 @@ import { ApplicationService } from './application.cards.service';
 import { ActivityResolver } from './activity.resolver';
 import { UsersModule } from 'src/users/users.module';
 import { WorkService } from './work.cards.service';
+import { CardValidationService } from './validation.cards.service';
+import { ResponseBuilder } from './response.builder';
+import { CommentService } from './comments.cards.service';
 
 @Module({
   imports: [
@@ -43,6 +46,9 @@ import { WorkService } from './work.cards.service';
     ActivityResolver,
     ApplicationService,
     WorkService,
+    CardValidationService,
+    ResponseBuilder,
+    CommentService,
   ],
   exports: [CardsService, CardsRepository, CardsModule],
 })

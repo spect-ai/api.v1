@@ -37,7 +37,7 @@ export class Project extends BaseModel {
    * Parent Ids of the project
    */
   @prop({ ref: () => Circle, default: [] })
-  parents: ObjectId[];
+  parents: string[];
 
   /**
    * Column order of the project

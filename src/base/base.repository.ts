@@ -3,6 +3,7 @@ import type { DocumentType, ReturnModelType } from '@typegoose/typegoose';
 import type { MongoError } from 'mongodb';
 import {
   Aggregate,
+  AggregateOptions,
   FilterQuery,
   HydratedDocument,
   InsertManyResult,
@@ -239,10 +240,10 @@ export abstract class BaseRepository<TModel extends BaseModel> {
 
   aggregate(
     pipeline: PipelineStage[],
-    options?: QueryOptions,
-  ): Promise<Aggregate<Array<any>>> {
+    options?: AggregateOptions,
+  ): Aggregate<Array<any>> {
     try {
-      return this.aggregate(pipeline, options);
+      return this.model.aggregate(pipeline, options);
     } catch (e) {
       BaseRepository.throwMongoError(e);
     }
