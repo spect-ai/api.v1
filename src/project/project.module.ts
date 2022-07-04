@@ -11,6 +11,9 @@ import { CardsModule } from 'src/card/cards.module';
 import { DataStructureManipulationService } from 'src/common/dataStructureManipulation.service';
 import { EthAddressModule } from 'src/_eth-address/_eth-address.module';
 import { CardsProjectService } from './cards.project.service';
+import { ActionService } from 'src/card/actions.service';
+import { RequestProvider } from 'src/users/user.provider';
+import { CardValidationService } from 'src/card/validation.cards.service';
 
 @Module({
   imports: [
@@ -27,6 +30,9 @@ import { CardsProjectService } from './cards.project.service';
     SlugService,
     DataStructureManipulationService,
     CardsProjectService,
+    ActionService,
+    RequestProvider,
+    CardValidationService,
   ],
   exports: [ProjectService, ProjectsRepository, ProjectModule],
 })

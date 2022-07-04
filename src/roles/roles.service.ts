@@ -1,13 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { Circle } from 'src/circle/model/circle.model';
 import { DiscordService } from 'src/common/discord.service';
+import { CirclePermission, Roles } from 'src/common/types/role.type';
 import { User } from 'src/users/model/users.model';
 
 @Injectable()
 export class RolesService {
   constructor(private readonly discordService: DiscordService) {}
 
-  defaultCircleRoles() {
+  defaultCircleRoles(): Roles {
     return {
       steward: {
         name: 'steward',
@@ -25,7 +26,11 @@ export class RolesService {
           inviteMembers: true,
           manageRoles: true,
           manageMembers: true,
-        },
+          manageCardProperties: true,
+          createNewCard: true,
+          manageRewards: true,
+          reviewWork: true,
+        } as CirclePermission,
       },
       contributor: {
         name: 'contributor',
@@ -43,7 +48,11 @@ export class RolesService {
           inviteMembers: true,
           manageRoles: false,
           manageMembers: false,
-        },
+          manageCardProperties: true,
+          createNewCard: true,
+          manageRewards: false,
+          reviewWork: false,
+        } as CirclePermission,
       },
       member: {
         name: 'member',
@@ -61,7 +70,11 @@ export class RolesService {
           inviteMembers: false,
           manageRoles: false,
           manageMembers: false,
-        },
+          manageCardProperties: false,
+          createNewCard: false,
+          manageRewards: false,
+          reviewWork: false,
+        } as CirclePermission,
       },
       /** TODO: We need to reserve this keyword and not let users set this as role */
       visitor: {
@@ -80,9 +93,13 @@ export class RolesService {
           inviteMembers: false,
           manageRoles: false,
           manageMembers: false,
-        },
+          manageCardProperties: false,
+          createNewCard: false,
+          manageRewards: false,
+          reviewWork: false,
+        } as CirclePermission,
       },
-    };
+    } as Roles;
   }
 
   getDefaultUserRoleOnCircleCreation(): string {

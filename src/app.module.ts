@@ -34,6 +34,7 @@ import { ResponseBuilder } from './card/response.builder';
 import { CommentService } from './card/comments.cards.service';
 import { CardsProjectService } from './project/cards.project.service';
 import { CardsPaymentService } from './card/payment.cards.service';
+import { CircleRegistryService } from './circle/registry.circle.service';
 
 const databaseUrl =
   process.env.DATABASE_URL || 'mongodb://localhost:27017/nest';
@@ -82,6 +83,7 @@ console.log({ databaseUrl });
     ResponseBuilder,
     CommentService,
     CardsPaymentService,
+    CircleRegistryService,
   ],
 })
 export class AppModule {}

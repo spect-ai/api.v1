@@ -88,7 +88,7 @@ export class Card extends BaseModel {
   /**
    * The priority of the card
    */
-  @prop()
+  @prop({ default: 0 })
   priority?: number;
 
   /**

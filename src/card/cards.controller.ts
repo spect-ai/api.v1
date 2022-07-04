@@ -26,7 +26,10 @@ import {
   CreateWorkUnitRequestDto,
 } from './dto/work-request.dto';
 import { AddCommentDto, UpdateCommentDto } from './dto/comment-body.dto';
-import { ValidCardActionResponseDto } from './dto/card-access-response.dto';
+import {
+  MultipleValidCardActionResponseDto,
+  ValidCardActionResponseDto,
+} from './dto/card-access-response.dto';
 import { AggregatedFlattenedPaymentInfo } from './dto/payment-info-response.dto';
 import { UpdatePaymentInfoDto } from './dto/update-payment-info.dto';
 import {
@@ -92,6 +95,17 @@ export class CardsController {
   ): Promise<DetailedProjectResponseDto> {
     return await this.paymentService.updatePaymentInfoAndClose(
       updatePaymentInfoDto,
+    );
+  }
+
+  @Get('/myValidActions')
+  @ApiQuery({ name: 'cardIds', type: 'string' })
+  @UseGuards(SessionAuthGuard)
+  async getValidActionsForMultipleCards(
+    @Query('cardIds') cardIds: string,
+  ): Promise<MultipleValidCardActionResponseDto> {
+    return await this.actionService.getValidActionsForMultipleCards(
+      cardIds.split(',').map((c) => c.trim()),
     );
   }
 

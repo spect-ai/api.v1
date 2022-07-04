@@ -54,6 +54,6 @@ import { CardsPaymentService } from './payment.cards.service';
     CommentService,
     CardsPaymentService,
   ],
-  exports: [CardsService, CardsRepository, CardsModule],
+  exports: [CardsService, CardsRepository, CardsModule, ActionService],
 })
 export class CardsModule {}

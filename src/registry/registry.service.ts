@@ -2,9 +2,9 @@ import { Injectable } from '@nestjs/common';
 import { DataStructureManipulationService } from 'src/common/dataStructureManipulation.service';
 import { AddNewNetworkDto } from './dto/add-new-network.dto';
 import { AddNewTokenDto } from './dto/add-new-token.dto';
+import { RegistryResponseDto } from './dto/detailed-registry-response.dto';
 import { Registry, TokenInfo } from './model/registry.model';
 import { RegistryRepository } from './registry.repository';
-
 @Injectable()
 export class RegistryService {
   constructor(
@@ -12,12 +12,13 @@ export class RegistryService {
     private readonly dataStructureManipuationService: DataStructureManipulationService,
   ) {}
 
-  async getRegistry() {
+  async getRegistry(): Promise<RegistryResponseDto> {
     const networks = await this.registryRepository.findAll();
-    return await this.dataStructureManipuationService.objectify(
+    const res = this.dataStructureManipuationService.objectify(
       networks,
       'chainId',
-    );
+    ) as RegistryResponseDto;
+    return res;
   }
 
   async addNetwork(addNetworkDto: AddNewNetworkDto) {
