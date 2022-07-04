@@ -26,7 +26,10 @@ import {
   CreateWorkUnitRequestDto,
 } from './dto/work-request.dto';
 import { AddCommentDto, UpdateCommentDto } from './dto/comment-body.dto';
-import { ValidCardActionResponseDto } from './dto/card-access-response.dto';
+import {
+  MultipleValidCardActionResponseDto,
+  ValidCardActionResponseDto,
+} from './dto/card-access-response.dto';
 import { AggregatedFlattenedPaymentInfo } from './dto/payment-info-response.dto';
 import { UpdatePaymentInfoDto } from './dto/update-payment-info.dto';
 import {
@@ -95,6 +98,17 @@ export class CardsController {
     );
   }
 
+  @Get('/myValidActions')
+  @ApiQuery({ name: 'cardIds', type: 'string' })
+  @UseGuards(SessionAuthGuard)
+  async getValidActionsForMultipleCards(
+    @Query('cardIds') cardIds: string,
+  ): Promise<MultipleValidCardActionResponseDto> {
+    return await this.actionService.getValidActionsForMultipleCards(
+      cardIds.split(',').map((c) => c.trim()),
+    );
+  }
+
   @Get('/:id')
   async findByObjectId(
     @Param() params: ObjectIdDto,
@@ -104,7 +118,7 @@ export class CardsController {
 
   @Get('/:id/myValidActions')
   @ApiParam({ name: 'id', type: 'string' })
-  //@UseGuards(SessionAuthGuard)
+  @UseGuards(SessionAuthGuard)
   async getValidActions(
     @Param() params: ObjectIdDto,
   ): Promise<ValidCardActionResponseDto> {

@@ -95,3 +95,7 @@ export class ValidCardActionResponseDto {
   @IsObject()
   createDiscordThread: ActionValidOrNotWithReason;
 }
+
+export class MultipleValidCardActionResponseDto {
+  [id: string]: ValidCardActionResponseDto;
+}

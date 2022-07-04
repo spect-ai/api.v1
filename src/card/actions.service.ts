@@ -6,7 +6,10 @@ import { CirclePermission } from 'src/common/types/role.type';
 import { RequestProvider } from 'src/users/user.provider';
 import { CardsRepository } from './cards.repository';
 import { CardsService } from './cards.service';
-import { ValidCardActionResponseDto } from './dto/card-access-response.dto';
+import {
+  MultipleValidCardActionResponseDto,
+  ValidCardActionResponseDto,
+} from './dto/card-access-response.dto';
 import { Card } from './model/card.model';
 import { CardValidationService } from './validation.cards.service';
 
@@ -256,5 +259,18 @@ export class ActionService {
       duplicate: this.canDuplicate(card, circlePermissions),
       createDiscordThread: this.canCreateDiscordThread(card, circle),
     };
+  }
+
+  async getValidActionsForMultipleCards(
+    ids: string[],
+  ): Promise<MultipleValidCardActionResponseDto> {
+    const validActions = {} as MultipleValidCardActionResponseDto;
+
+    for (const id of ids) {
+      const validAction = await this.getValidActions(id);
+      validActions[id] = validAction;
+    }
+
+    return validActions;
   }
 }
