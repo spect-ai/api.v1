@@ -8,6 +8,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { SessionAuthGuard } from 'src/auth/iron-session.guard';
+import { MultipleValidCardActionResponseDto } from 'src/card/dto/card-access-response.dto';
 import { ObjectIdDto } from 'src/common/dtos/object-id.dto';
 import { CardsProjectService } from './cards.project.service';
 import { CreateProjectRequestDto } from './dto/create-project-request.dto';
@@ -50,6 +51,14 @@ export class ProjectController {
     @Body() project: UpdateProjectRequestDto,
   ): Promise<DetailedProjectResponseDto> {
     return await this.projectService.update(param.id, project);
+  }
+
+  @Get('/:id/validActions')
+  @UseGuards(SessionAuthGuard)
+  async getValidActions(
+    @Param() param: ObjectIdDto,
+  ): Promise<MultipleValidCardActionResponseDto> {
+    return await this.projectService.getValidActions(param.id);
   }
 
   @Patch('/:id/column/add')

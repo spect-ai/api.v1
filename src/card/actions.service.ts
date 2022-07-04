@@ -17,7 +17,6 @@ import { CardValidationService } from './validation.cards.service';
 export class ActionService {
   constructor(
     private readonly requestProvider: RequestProvider,
-    private readonly cardService: CardsService,
     private readonly cardsRepository: CardsRepository,
     private readonly circleRepository: CirclesRepository,
     private readonly circleService: CirclesService,

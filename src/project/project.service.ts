@@ -4,7 +4,9 @@ import {
   Injectable,
   InternalServerErrorException,
 } from '@nestjs/common';
+import { ActionService } from 'src/card/actions.service';
 import { CardsRepository } from 'src/card/cards.repository';
+import { MultipleValidCardActionResponseDto } from 'src/card/dto/card-access-response.dto';
 import { CirclesRepository } from 'src/circle/circles.repository';
 import { Circle } from 'src/circle/model/circle.model';
 import { SlugService } from 'src/common/slug.service';
@@ -27,6 +29,7 @@ export class ProjectService {
     private readonly slugService: SlugService,
     private readonly templateRepository: TemplatesRepository,
     private readonly cardRepository: CardsRepository,
+    private readonly actionService: ActionService,
     private readonly cardsProjectService: CardsProjectService,
   ) {}
 
@@ -49,6 +52,16 @@ export class ProjectService {
   async getProjectIdFromSlug(slug: string): Promise<Project> {
     const project = await this.projectRepository.getProjectIdFromSlug(slug);
     return project;
+  }
+
+  async getValidActions(
+    id: string,
+  ): Promise<MultipleValidCardActionResponseDto> {
+    const project =
+      await this.projectRepository.getProjectWithUnpPopulatedReferences(id);
+    return await this.actionService.getValidActionsForMultipleCards(
+      project.cards,
+    );
   }
 
   async create(createProjectDto: CreateProjectRequestDto): Promise<Project> {
