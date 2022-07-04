@@ -18,7 +18,6 @@ export class CirclesRepository extends BaseRepository<Circle> {
     return await this.findById(id)
       .populate('parents')
       .populate('children')
-      .populate('members')
       .populate('projects')
       .exec();
   }
@@ -27,7 +26,6 @@ export class CirclesRepository extends BaseRepository<Circle> {
     return await this.findOne({ slug: slug })
       .populate('parents')
       .populate('children')
-      .populate('members')
       .populate('projects')
       .exec();
   }

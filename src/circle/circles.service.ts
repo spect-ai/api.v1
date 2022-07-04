@@ -135,19 +135,9 @@ export class CirclesService {
   }
 
   async getCircleWithSlug(slug: string): Promise<DetailedCircleResponseDto> {
-    const circle =
-      await this.circlesRepository.getCircleWithPopulatedReferencesBySlug(slug);
-    if (!circle) {
-      throw new HttpException('Circle not found', HttpStatus.NOT_FOUND);
-    }
-    const res = {
-      ...circle,
-      memberDetails: this.datastructureManipulationService.objectify(
-        circle.members,
-        'id',
-      ),
-    };
-    return res;
+    return await this.circlesRepository.getCircleWithPopulatedReferencesBySlug(
+      slug,
+    );
   }
 
   async create(
@@ -212,7 +202,6 @@ export class CirclesService {
         .updateById(id, updateCircleDto)
         .populate('parents')
         .populate('children')
-        .populate('members')
         .populate('projects')
         .exec();
 
