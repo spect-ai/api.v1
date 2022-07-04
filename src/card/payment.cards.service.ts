@@ -14,6 +14,7 @@ import { RequestProvider } from 'src/users/user.provider';
 import { CardsRepository } from './cards.repository';
 import { AggregatedFlattenedPaymentInfo } from './dto/payment-info-response.dto';
 import { UpdatePaymentInfoDto } from './dto/update-payment-info.dto';
+import { Card } from './model/card.model';
 import { ResponseBuilder } from './response.builder';
 import { CardValidationService } from './validation.cards.service';
 
@@ -122,6 +123,28 @@ export class CardsPaymentService {
     return aggregatedPaymentInfo;
   }
 
+  buildUpdateQuery(card: Card, updatePaymentInfoDto: UpdatePaymentInfoDto) {
+    return this.cardsRepository.updateOneByIdQuery(card._id, {
+      $set: {
+        'reward.transactionHash': updatePaymentInfoDto.transactionHash,
+        'status.active': false,
+        'status.paid': true,
+      },
+      $push: {
+        activity: this.activityBuilder.buildUpdatedCardActivity(
+          {
+            status: {
+              active: false,
+              paid: true,
+              archived: false,
+            },
+          },
+          card,
+        ),
+      },
+    });
+  }
+
   async updatePaymentInfoAndClose(
     updatePaymentInfo: UpdatePaymentInfoDto,
   ): Promise<any> {
@@ -133,45 +156,34 @@ export class CardsPaymentService {
         );
       }
 
-      /** Taking the first card to get the project */
-      const card = await this.cardsRepository.getCardWithPopulatedReferences(
-        updatePaymentInfo.cardIds[0],
-      );
-      const project = card.project as unknown as Project;
-      const activities = this.activityBuilder.buildUpdatedCardActivity(
-        {
-          status: {
-            active: false,
-            paid: true,
-            archived: false,
-          },
-        },
-        card,
-        project,
-      );
+      /** Get all the cards with all their children */
+      const cards =
+        await this.cardsRepository.getCardWithAllChildrenForMultipleCards(
+          updatePaymentInfo.cardIds,
+        );
+      const projectId = cards[0].project;
 
-      /** Mongo only returns an acknowledgment on update and not the updated records itself */
-      const updateAcknowledgment = await this.cardsRepository.updateManyByIds(
-        updatePaymentInfo.cardIds,
-        {
-          $set: {
-            'reward.transactionHash': updatePaymentInfo.transactionHash,
-            'status.active': false,
-            'status.paid': true,
-          },
-          $push: {
-            activity: activities[0],
-          },
-        },
-      );
+      /** Flatten all parent cards and child cards */
+      const queries = [];
+      for (const card of cards) {
+        for (const child of card.flattenedChildren) {
+          queries.push(this.buildUpdateQuery(child, updatePaymentInfo));
+        }
+        queries.push(this.buildUpdateQuery(card, updatePaymentInfo));
+      }
 
-      if (!updateAcknowledgment.acknowledged) {
+      // /** Mongo only returns an acknowledgment on bulk write and not the updated records itself */
+      const acknowledgment = await this.cardsRepository.bulkWrite(queries);
+      console.log(acknowledgment);
+
+      if (acknowledgment.hasWriteErrors()) {
+        console.log(acknowledgment.getWriteErrors());
         throw new HttpException(
           'Something went wrong while updating payment info',
           HttpStatus.INTERNAL_SERVER_ERROR,
         );
       }
-      return await this.projectService.getDetailedProject(project.id);
+      return await this.projectService.getDetailedProject(projectId);
     } catch (error) {
       throw new InternalServerErrorException(
         'Failed updating payment info',

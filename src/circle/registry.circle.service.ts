@@ -88,7 +88,7 @@ export class CircleRegistryService {
           symbol: addTokenDto.symbol,
           name: addTokenDto.name,
           address: addTokenDto.address,
-        } as TokenInfo,
+        } as any,
       };
     } else {
       localRegistry[addTokenDto.chainId] = {
@@ -98,7 +98,7 @@ export class CircleRegistryService {
             symbol: addTokenDto.symbol,
             name: addTokenDto.name,
             address: addTokenDto.address,
-          } as TokenInfo,
+          } as any,
         },
       };
     }

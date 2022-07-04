@@ -1,12 +1,14 @@
 import { InternalServerErrorException } from '@nestjs/common';
 import type { DocumentType, ReturnModelType } from '@typegoose/typegoose';
 import type { MongoError } from 'mongodb';
+import mongodb from 'mongodb';
 import {
   Aggregate,
   AggregateOptions,
   FilterQuery,
   HydratedDocument,
   InsertManyResult,
+  MongooseBulkWriteOptions,
   ObjectId,
   PipelineStage,
   QueryOptions as MongooseQueryOptions,
@@ -247,5 +249,38 @@ export abstract class BaseRepository<TModel extends BaseModel> {
     } catch (e) {
       BaseRepository.throwMongoError(e);
     }
+  }
+
+  async bulkWrite(
+    writes: Array<mongodb.AnyBulkWriteOperation>,
+    options?: MongooseBulkWriteOptions,
+  ): Promise<mongodb.BulkWriteResult> {
+    try {
+      console.log(JSON.stringify(writes));
+      return await this.model.bulkWrite(writes, options);
+    } catch (e) {
+      BaseRepository.throwMongoError(e);
+    }
+  }
+
+  updateOneByIdQuery(id: ObjectId, update: any): mongodb.AnyBulkWriteOperation {
+    return {
+      updateOne: {
+        filter: { _id: id },
+        update: update,
+      },
+    };
+  }
+
+  updateManyByIdsQuery(
+    ids: string[],
+    update: any,
+  ): mongodb.AnyBulkWriteOperation {
+    return {
+      updateMany: {
+        filter: { _id: { $in: ids } },
+        update: update,
+      },
+    };
   }
 }

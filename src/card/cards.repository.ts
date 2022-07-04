@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from 'nestjs-typegoose';
 import { BaseRepository } from 'src/base/base.repository';
 import { Card, ExtendedCard } from './model/card.model';
-import { Ref } from '@typegoose/typegoose';
+import mongodb from 'mongodb';
 import { UpdateWriteOpResult } from 'mongoose';
 
 const populatedCardFields = {
@@ -75,8 +75,29 @@ export class CardsRepository extends BaseRepository<Card> {
         },
       },
     ]);
-    console.log(cards);
     return cards[0];
+  }
+
+  async getCardWithAllChildrenForMultipleCards(
+    cardIds: string[],
+  ): Promise<ExtendedCard[]> {
+    const cards = await this.aggregate([
+      {
+        $match: {
+          _id: { $in: cardIds.map((a) => this.toObjectId(a)) },
+        },
+      },
+      {
+        $graphLookup: {
+          from: 'cards',
+          startWith: '$children',
+          connectFromField: 'children',
+          connectToField: '_id',
+          as: 'flattenedChildren',
+        },
+      },
+    ]);
+    return cards;
   }
 
   async updateManyByIds(
