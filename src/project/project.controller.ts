@@ -52,20 +52,6 @@ export class ProjectController {
     return await this.projectService.update(param.id, project);
   }
 
-  @Patch('/:id/reorderCard/:cardId')
-  @UseGuards(SessionAuthGuard)
-  async reorderCard(
-    @Param() param: ObjectIdDto,
-    @Param('cardId') cardId,
-    @Body() reorderCardRequestDto: ReorderCardReqestDto,
-  ): Promise<DetailedProjectResponseDto> {
-    return await this.cardsProjectService.reorderCard(
-      param.id,
-      cardId,
-      reorderCardRequestDto,
-    );
-  }
-
   @Patch('/:id/column/add')
   @UseGuards(SessionAuthGuard)
   async addColumn(

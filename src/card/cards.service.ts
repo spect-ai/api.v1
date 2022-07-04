@@ -264,20 +264,21 @@ export class CardsService {
     try {
       const card = await this.cardsRepository.findById(id).populate('project');
       const project = card.project as unknown as Project;
-      if (updateCardDto.columnId) {
-        if (card.columnId !== updateCardDto.columnId) {
-          await this.cardsProjectService.reorderCard(
-            project.id,
-            id,
-            {
-              destinationColumnId: updateCardDto.columnId,
-              destinationCardIndex: 0,
-            } as ReorderCardReqestDto,
-            false,
-          );
-        }
+      if (updateCardDto.columnId || updateCardDto.cardIndex) {
+        await this.cardsProjectService.reorderCard(
+          project.id,
+          id,
+          {
+            destinationColumnId: updateCardDto.columnId
+              ? updateCardDto.columnId
+              : card.columnId,
+            destinationCardIndex: updateCardDto.cardIndex
+              ? updateCardDto.cardIndex
+              : 0,
+          } as ReorderCardReqestDto,
+          false,
+        );
       }
-      console.log(updateCardDto);
       const activities = this.activityBuilder.buildUpdatedCardActivity(
         updateCardDto,
         card,
