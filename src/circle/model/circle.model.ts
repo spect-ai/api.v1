@@ -78,7 +78,7 @@ export class Circle extends ProfileModel {
    * Members in the circle
    */
   @prop({ ref: () => User, default: [] })
-  members: ObjectId[];
+  members: string[];
 
   /**
    * A list of roles that the circle has

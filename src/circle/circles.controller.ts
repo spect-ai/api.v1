@@ -71,7 +71,7 @@ export class CirclesController {
     }
     return await this.circlesService.getCollatedUserPermissions(
       circleIds,
-      this.requestProvider.user,
+      this.requestProvider.user.id,
     );
   }
 

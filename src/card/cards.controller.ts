@@ -104,7 +104,7 @@ export class CardsController {
 
   @Get('/:id/myValidActions')
   @ApiParam({ name: 'id', type: 'string' })
-  @UseGuards(SessionAuthGuard)
+  //@UseGuards(SessionAuthGuard)
   async getValidActions(
     @Param() params: ObjectIdDto,
   ): Promise<ValidCardActionResponseDto> {

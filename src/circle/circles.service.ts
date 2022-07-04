@@ -73,7 +73,7 @@ export class CirclesService {
 
   async getCollatedUserPermissions(
     circleIds: string[],
-    user: User,
+    userId: string,
   ): Promise<CirclePermission> {
     const circles = await this.circlesRepository.findAll(
       {
@@ -89,7 +89,7 @@ export class CirclesService {
 
     const userPermissions = [];
     for (const circle of circles) {
-      const memberRoles = circle.memberRoles[user.id];
+      const memberRoles = circle.memberRoles[userId];
       if (memberRoles) {
         for (const memberRole of memberRoles) {
           userPermissions.push(circle.roles[memberRole].permissions);
@@ -176,7 +176,7 @@ export class CirclesService {
           ...createCircleDto,
           slug: slug,
           parents: [parentCircle._id],
-          members: [this.requestProvider.user._id],
+          members: [this.requestProvider.user.id],
           memberRoles: memberRoles,
           roles: this.roleService.defaultCircleRoles(),
         });
@@ -188,7 +188,7 @@ export class CirclesService {
         createdCircle = await this.circlesRepository.create({
           ...createCircleDto,
           slug: slug,
-          members: [this.requestProvider.user._id],
+          members: [this.requestProvider.user.id],
           memberRoles: memberRoles,
           roles: this.roleService.defaultCircleRoles(),
         });

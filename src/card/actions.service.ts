@@ -21,10 +21,23 @@ export class ActionService {
     private readonly validationService: CardValidationService,
   ) {}
 
-  canUpdateGeneralInfo(card: Card, circlePermissions: CirclePermission) {
+  canCreateCard(circlePermissions: CirclePermission) {
+    if (circlePermissions.createNewCard) return { valid: true };
+    else
+      return {
+        valid: false,
+        reason:
+          'Only circle members that have permission to create new cards can duplicate card',
+      };
+  }
+
+  canUpdateGeneralInfo(
+    card: Card,
+    circlePermissions: CirclePermission,
+    userId: string,
+  ) {
     if (
-      card.reviewer &&
-      card.reviewer.includes(this.requestProvider.user.id) &&
+      (card.reviewer && card.reviewer.includes(userId)) ||
       circlePermissions.manageCardProperties
     )
       return { valid: true };
@@ -32,38 +45,82 @@ export class ActionService {
       return {
         valid: false,
         reason:
-          'Only reviewer and circle members that have permission to manage cards can update this card info',
+          'Only reviewers and circle members that have permission to manage cards can update this card info',
       };
   }
 
-  canUpdateDeadline(card: Card, circle: Circle) {
-    return { valid: true };
-  }
-
-  canUpdateColumn(card: Card, circle: Circle) {
-    return { valid: true };
-  }
-
-  canUpdateAssignee(card: Card, circle: Circle) {
-    return { valid: true };
-  }
-
-  canAssignMyself(card: Card, circle: Circle) {
+  canUpdateDeadline(
+    card: Card,
+    circlePermissions: CirclePermission,
+    userId: string,
+  ) {
     if (
-      card.type === 'Task' &&
-      card.status.active &&
-      circle.members?.includes(this.requestProvider.user._id) // Possible that object id causes an issue in comparison
-    ) {
+      (card.reviewer && card.reviewer.includes(userId)) ||
+      (card.assignee && card.assignee.includes(userId)) ||
+      circlePermissions.manageCardProperties
+    )
       return { valid: true };
-    } else
+    else
       return {
         valid: false,
         reason:
-          'Only possible to assign yourself if its an active task and you are a member in the space',
+          'Only reviewers, assignees and circle members that have permission to manage cards can update deadline',
       };
   }
 
-  canApply(card: Card, circle: Circle) {
+  canUpdateColumn(
+    card: Card,
+    circlePermissions: CirclePermission,
+    userId: string,
+  ) {
+    if (
+      (card.reviewer && card.reviewer.includes(userId)) ||
+      (card.assignee && card.assignee.includes(userId)) ||
+      circlePermissions.manageCardProperties
+    )
+      return { valid: true };
+    else
+      return {
+        valid: false,
+        reason:
+          'Only reviewers, assignees and circle members that have permission to manage cards can update column',
+      };
+  }
+
+  canUpdateAssignee(
+    card: Card,
+    circlePermissions: CirclePermission,
+    userId: string,
+  ) {
+    if (card.type === 'Bounty') {
+      if (
+        (card.reviewer && card.reviewer.includes(userId)) ||
+        circlePermissions.manageCardProperties
+      )
+        return { valid: true };
+      else
+        return {
+          valid: false,
+          reason:
+            'Only reviewers and circle members that have permission to manage cards can update column',
+        };
+    } else if (card.type === 'Task') {
+      if (
+        (card.reviewer && card.reviewer.includes(userId)) ||
+        (card.assignee && card.assignee.includes(userId)) ||
+        circlePermissions.manageCardProperties
+      )
+        return { valid: true };
+      else
+        return {
+          valid: false,
+          reason:
+            'Only reviewers, assignees and circle members that have permission to manage cards can update column',
+        };
+    }
+  }
+
+  canApply(card: Card, circle: Circle, userId: string) {
     if (card.type === 'Bounty' && card.assignee?.length === 0)
       return { valid: true };
     else
@@ -73,21 +130,21 @@ export class ActionService {
       };
   }
 
-  canSubmit(card: Card, circle: Circle) {
-    if (card.assignee?.includes(this.requestProvider.user.id))
-      return { valid: true };
+  canSubmit(card: Card, circle: Circle, userId: string) {
+    if (card.assignee?.includes(userId)) return { valid: true };
     else
       return {
         valid: false,
-        reason: 'Can only submit work if assigned',
+        reason: 'Can only submit work if assigned to card',
       };
   }
 
-  canAddRevisionInstructions(card: Card, circlePermissions: CirclePermission) {
-    if (
-      card.reviewer?.includes(this.requestProvider.user.id) ||
-      circlePermissions.reviewWork
-    )
+  canAddRevisionInstructions(
+    card: Card,
+    circlePermissions: CirclePermission,
+    userId: string,
+  ) {
+    if (card.reviewer?.includes(userId) || circlePermissions.reviewWork)
       return { valid: true };
     else
       return {
@@ -97,11 +154,12 @@ export class ActionService {
       };
   }
 
-  canAddFeedback(card: Card, circlePermissions: CirclePermission) {
-    if (
-      card.reviewer?.includes(this.requestProvider.user.id) ||
-      circlePermissions.reviewWork
-    )
+  canAddFeedback(
+    card: Card,
+    circlePermissions: CirclePermission,
+    userId: string,
+  ) {
+    if (card.reviewer?.includes(userId) || circlePermissions.reviewWork)
       return { valid: true };
     else
       return {
@@ -111,10 +169,9 @@ export class ActionService {
       };
   }
 
-  canClose(card: Card, circlePermissions: CirclePermission) {
+  canClose(card: Card, circlePermissions: CirclePermission, userId: string) {
     if (
-      card.reviewer &&
-      card.reviewer.includes(this.requestProvider.user.id) &&
+      (card.reviewer && card.reviewer.includes(userId)) ||
       circlePermissions.manageCardProperties
     )
       return { valid: true };
@@ -136,10 +193,9 @@ export class ActionService {
       };
   }
 
-  canArchive(card: Card, circlePermissions: CirclePermission) {
+  canArchive(card: Card, circlePermissions: CirclePermission, userId: string) {
     if (
-      card.reviewer &&
-      card.reviewer.includes(this.requestProvider.user.id) &&
+      (card.reviewer && card.reviewer.includes(userId)) ||
       circlePermissions.manageCardProperties
     )
       return { valid: true };
@@ -147,7 +203,7 @@ export class ActionService {
       return {
         valid: false,
         reason:
-          'Only reviewer and circle members that have permission to manage cards can archive card',
+          'Only reviewers and circle members that have permission to manage cards can archive card',
       };
   }
 
@@ -166,6 +222,7 @@ export class ActionService {
   }
 
   async getValidActions(id: string): Promise<ValidCardActionResponseDto> {
+    const userId = this.requestProvider.user.id;
     const card = await this.cardsRepository.getCardWithPopulatedReferences(id);
     this.validationService.validateCardExists(card);
 
@@ -173,27 +230,31 @@ export class ActionService {
     const circlePermissions =
       await this.circleService.getCollatedUserPermissions(
         [card.circle.toString()],
-        this.requestProvider.user,
+        userId,
       );
-
     return {
-      updateGeneralCardInfo: this.canUpdateGeneralInfo(card, circlePermissions),
-      updateDeadline: this.canUpdateDeadline(card, circle),
-      updateColumn: this.canUpdateColumn(card, circle),
-      updateAssignee: this.canUpdateAssignee(card, circle),
-      beAssigned: this.canAssignMyself(card, circle),
-      applyToBounty: this.canApply(card, circle),
-      submit: this.canSubmit(card, circle),
+      canCreateCard: this.canCreateCard(circlePermissions),
+      updateGeneralCardInfo: this.canUpdateGeneralInfo(
+        card,
+        circlePermissions,
+        userId,
+      ),
+      updateDeadline: this.canUpdateDeadline(card, circlePermissions, userId),
+      updateColumn: this.canUpdateColumn(card, circlePermissions, userId),
+      updateAssignee: this.canUpdateAssignee(card, circlePermissions, userId),
+      applyToBounty: this.canApply(card, circle, userId),
+      submit: this.canSubmit(card, circle, userId),
       addRevisionInstruction: this.canAddRevisionInstructions(
         card,
         circlePermissions,
+        userId,
       ),
-      addFeedback: this.canAddFeedback(card, circlePermissions),
-      close: this.canClose(card, circlePermissions),
+      addFeedback: this.canAddFeedback(card, circlePermissions, userId),
+      close: this.canClose(card, circlePermissions, userId),
       pay: this.canPay(card, circlePermissions),
-      archive: this.canArchive(card, circlePermissions),
+      archive: this.canArchive(card, circlePermissions, userId),
       duplicate: this.canDuplicate(card, circlePermissions),
-      startThread: this.canCreateDiscordThread(card, circle),
+      createDiscordThread: this.canCreateDiscordThread(card, circle),
     };
   }
 }

@@ -84,13 +84,21 @@ export class CircleRegistryService {
     ) {
       localRegistry[addTokenDto.chainId].tokenDetails = {
         ...localRegistry[addTokenDto.chainId].tokenDetails,
-        [addTokenDto.address]: addTokenDto,
+        [addTokenDto.address]: {
+          symbol: addTokenDto.symbol,
+          name: addTokenDto.name,
+          address: addTokenDto.address,
+        } as TokenInfo,
       };
     } else {
       localRegistry[addTokenDto.chainId] = {
         ...network,
         tokenDetails: {
-          [addTokenDto.address]: addTokenDto,
+          [addTokenDto.address]: {
+            symbol: addTokenDto.symbol,
+            name: addTokenDto.name,
+            address: addTokenDto.address,
+          } as TokenInfo,
         },
       };
     }

@@ -50,7 +50,7 @@ export class DetailedCircleResponseDto {
    * The members in the circle
    */
   @ValidateNested()
-  members?: ObjectId[];
+  members?: string[];
 
   /**
    * The members in the circle
