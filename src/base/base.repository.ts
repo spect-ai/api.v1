@@ -256,14 +256,16 @@ export abstract class BaseRepository<TModel extends BaseModel> {
     options?: MongooseBulkWriteOptions,
   ): Promise<mongodb.BulkWriteResult> {
     try {
-      console.log(JSON.stringify(writes));
       return await this.model.bulkWrite(writes, options);
     } catch (e) {
       BaseRepository.throwMongoError(e);
     }
   }
 
-  updateOneByIdQuery(id: ObjectId, update: any): mongodb.AnyBulkWriteOperation {
+  updateOneByIdQuery(
+    id: ObjectId,
+    update: mongodb.UpdateFilter<TModel>,
+  ): mongodb.AnyBulkWriteOperation {
     return {
       updateOne: {
         filter: { _id: id },
@@ -274,7 +276,7 @@ export abstract class BaseRepository<TModel extends BaseModel> {
 
   updateManyByIdsQuery(
     ids: string[],
-    update: any,
+    update: mongodb.UpdateFilter<TModel>,
   ): mongodb.AnyBulkWriteOperation {
     return {
       updateMany: {
@@ -282,5 +284,22 @@ export abstract class BaseRepository<TModel extends BaseModel> {
         update: update,
       },
     };
+  }
+
+  addToUpdateOneQuery(
+    currUpdate: mongodb.UpdateFilter<TModel>,
+    newUpdate: mongodb.UpdateFilter<TModel>,
+  ): mongodb.UpdateFilter<TModel> {
+    for (const [key, val] of Object.entries(newUpdate)) {
+      if (currUpdate.hasOwnProperty(key)) {
+        currUpdate[key] = {
+          ...currUpdate[key],
+          ...val,
+        };
+      } else {
+        currUpdate[key] = val;
+      }
+    }
+    return currUpdate;
   }
 }

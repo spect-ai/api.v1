@@ -44,6 +44,7 @@ import { ActionService } from './actions.service';
 import { WorkService } from './work.cards.service';
 import { CommentService } from './comments.cards.service';
 import { CardsPaymentService } from './payment.cards.service';
+import { CardCommandHandler } from './command.handler';
 
 @Controller('card')
 @ApiTags('card')
@@ -55,6 +56,7 @@ export class CardsController {
     private readonly workService: WorkService,
     private readonly commentService: CommentService,
     private readonly paymentService: CardsPaymentService,
+    private readonly cardCommandHandler: CardCommandHandler,
   ) {}
 
   @Get('/byProjectSlugAndCardSlug/:projectSlug/:cardSlug')
@@ -135,6 +137,16 @@ export class CardsController {
   }
 
   @Patch('/:id')
+  @UseGuards(SessionAuthGuard)
+  @ApiParam({ name: 'id', type: 'string' })
+  async updateNew(
+    @Param() params: ObjectIdDto,
+    @Body() card: UpdateCardRequestDto,
+  ): Promise<DetailedCardResponseDto> {
+    return await this.cardCommandHandler.update(params.id, card);
+  }
+
+  @Patch('/:id/updateOld')
   @UseGuards(SessionAuthGuard)
   @ApiParam({ name: 'id', type: 'string' })
   async update(

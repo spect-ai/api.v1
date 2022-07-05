@@ -21,6 +21,22 @@ const populatedCardFields = {
   parent: 1,
   children: 1,
 };
+
+const populatedCardFieldsOnProject = {
+  title: 1,
+  labels: 1,
+  assignee: 1,
+  reviewer: 1,
+  reward: 1,
+  priority: 1,
+  deadline: 1,
+  slug: 1,
+  type: 1,
+  project: 1,
+  creator: 1,
+  status: 1,
+};
+
 @Injectable()
 export class CardsRepository extends BaseRepository<Card> {
   constructor(@InjectModel(Card) cardModel) {
@@ -28,7 +44,13 @@ export class CardsRepository extends BaseRepository<Card> {
   }
 
   async getCardWithPopulatedReferences(id: string): Promise<Card> {
-    return await this.findById(id).populate('project').exec();
+    return await this.findById(id)
+      .populate({
+        path: 'project',
+        populate: { path: 'cards', select: populatedCardFieldsOnProject },
+      })
+      .populate('children', populatedCardFields)
+      .populate('parent', populatedCardFields);
   }
 
   async getCardWithPopulatedReferencesBySlug(
@@ -39,7 +61,10 @@ export class CardsRepository extends BaseRepository<Card> {
       project: project,
       slug: slug,
     })
-      .populate('project')
+      .populate({
+        path: 'project',
+        populate: { path: 'cards', select: populatedCardFieldsOnProject },
+      })
       .populate('children', populatedCardFields)
       .populate('parent', populatedCardFields);
   }

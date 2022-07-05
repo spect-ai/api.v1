@@ -35,6 +35,9 @@ import { CommentService } from './card/comments.cards.service';
 import { CardsProjectService } from './project/cards.project.service';
 import { CardsPaymentService } from './card/payment.cards.service';
 import { CircleRegistryService } from './circle/registry.circle.service';
+import { AutomationService } from './automation/automation.service';
+import { AutomationModule } from './automation/automation.module';
+import { CardCommandHandler } from './card/command.handler';
 
 const databaseUrl =
   process.env.DATABASE_URL || 'mongodb://localhost:27017/nest';
@@ -55,6 +58,7 @@ console.log({ databaseUrl });
     CardsModule,
     IntegrationsModule,
     RegistryModule,
+    AutomationModule,
   ],
   controllers: [
     AppController,
@@ -84,6 +88,8 @@ console.log({ databaseUrl });
     CommentService,
     CardsPaymentService,
     CircleRegistryService,
+    AutomationService,
+    CardCommandHandler,
   ],
 })
 export class AppModule {}

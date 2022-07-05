@@ -24,6 +24,7 @@ import { ResponseBuilder } from './response.builder';
 import { CommentService } from './comments.cards.service';
 import { CardsProjectService } from 'src/project/cards.project.service';
 import { CardsPaymentService } from './payment.cards.service';
+import { CardCommandHandler } from './command.handler';
 
 @Module({
   imports: [
@@ -53,7 +54,14 @@ import { CardsPaymentService } from './payment.cards.service';
     ResponseBuilder,
     CommentService,
     CardsPaymentService,
+    CardCommandHandler,
   ],
-  exports: [CardsService, CardsRepository, CardsModule, ActionService],
+  exports: [
+    CardsService,
+    CardsRepository,
+    CardsModule,
+    ActionService,
+    CardCommandHandler,
+  ],
 })
 export class CardsModule {}

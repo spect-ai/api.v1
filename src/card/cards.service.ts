@@ -22,6 +22,7 @@ import { UpdatePaymentInfoDto } from './dto/update-payment-info.dto';
 import { Card } from './model/card.model';
 import { ResponseBuilder } from './response.builder';
 import { CardValidationService } from './validation.cards.service';
+import mongodb from 'mongodb';
 
 @Injectable()
 export class CardsService {
@@ -295,6 +296,33 @@ export class CardsService {
         );
       return await this.responseBuilder.enrichResponse(updatedCard);
     } catch (error) {
+      throw new InternalServerErrorException(
+        'Failed card update',
+        error.message,
+      );
+    }
+  }
+
+  updateNew(
+    card: Card,
+    project: Project,
+    updateCardDto: UpdateCardRequestDto,
+  ): mongodb.AnyBulkWriteOperation {
+    try {
+      const activities = this.activityBuilder.buildUpdatedCardActivity(
+        updateCardDto,
+        card,
+        project,
+      );
+      const updatedActivity = [...card.activity, ...activities];
+      return this.cardsRepository.updateOneByIdQuery(card._id, {
+        $set: {
+          ...updateCardDto,
+          activity: updatedActivity,
+        },
+      });
+    } catch (error) {
+      console.log(error);
       throw new InternalServerErrorException(
         'Failed card update',
         error.message,

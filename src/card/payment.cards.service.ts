@@ -124,6 +124,17 @@ export class CardsPaymentService {
   }
 
   buildUpdateQuery(card: Card, updatePaymentInfoDto: UpdatePaymentInfoDto) {
+    const activities = this.activityBuilder.buildUpdatedCardActivity(
+      {
+        status: {
+          active: false,
+          paid: true,
+          archived: false,
+        },
+      },
+      card,
+    );
+
     return this.cardsRepository.updateOneByIdQuery(card._id, {
       $set: {
         'reward.transactionHash': updatePaymentInfoDto.transactionHash,
@@ -131,16 +142,7 @@ export class CardsPaymentService {
         'status.paid': true,
       },
       $push: {
-        activity: this.activityBuilder.buildUpdatedCardActivity(
-          {
-            status: {
-              active: false,
-              paid: true,
-              archived: false,
-            },
-          },
-          card,
-        ),
+        activity: activities[0],
       },
     });
   }
@@ -174,7 +176,6 @@ export class CardsPaymentService {
 
       // /** Mongo only returns an acknowledgment on bulk write and not the updated records itself */
       const acknowledgment = await this.cardsRepository.bulkWrite(queries);
-      console.log(acknowledgment);
 
       if (acknowledgment.hasWriteErrors()) {
         console.log(acknowledgment.getWriteErrors());
