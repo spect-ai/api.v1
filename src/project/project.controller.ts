@@ -53,12 +53,12 @@ export class ProjectController {
     return await this.projectService.update(param.id, project);
   }
 
-  @Get('/:id/validActions')
+  @Get('/:slug/validActions')
   @UseGuards(SessionAuthGuard)
   async getValidActions(
-    @Param() param: ObjectIdDto,
+    @Param('slug') slug,
   ): Promise<MultipleValidCardActionResponseDto> {
-    return await this.projectService.getValidActions(param.id);
+    return await this.projectService.getValidActions(slug);
   }
 
   @Patch('/:id/column/add')

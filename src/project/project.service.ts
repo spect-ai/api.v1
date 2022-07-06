@@ -55,10 +55,13 @@ export class ProjectService {
   }
 
   async getValidActions(
-    id: string,
+    slug: string,
   ): Promise<MultipleValidCardActionResponseDto> {
     const project =
-      await this.projectRepository.getProjectWithUnpPopulatedReferences(id);
+      await this.projectRepository.getProjectWithUnpPopulatedReferencesBySlug(
+        slug,
+      );
+    console.log(project);
     return await this.actionService.getValidActionsForMultipleCards(
       project.cards,
     );

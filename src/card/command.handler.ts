@@ -61,28 +61,28 @@ export class CardCommandHandler {
         ...cardUpdate,
       };
 
-      const globalUpdateAfterAutomation =
-        this.automationService.handleAutomation(card, project, updateCardDto);
+      //   const globalUpdateAfterAutomation =
+      //     this.automationService.handleAutomation(card, project, updateCardDto);
 
-      console.log(`before collate globalUpdate`);
-      console.log(globalUpdate);
+      //   console.log(`before collate globalUpdate`);
+      //   console.log(globalUpdate);
 
-      console.log(`before collate globalUpdateAfterAutomation`);
-      console.log(globalUpdateAfterAutomation);
+      //   console.log(`before collate globalUpdateAfterAutomation`);
+      //   console.log(globalUpdateAfterAutomation);
 
-      globalUpdate.project =
-        this.datastructureManipulationService.collateifyObjectOfObjects(
-          globalUpdate.project,
-          globalUpdateAfterAutomation.project,
-        ) as MappedProject;
+      //   globalUpdate.project =
+      //     this.datastructureManipulationService.collateifyObjectOfObjects(
+      //       globalUpdate.project,
+      //       globalUpdateAfterAutomation.project,
+      //     ) as MappedProject;
 
-      globalUpdate.card =
-        this.datastructureManipulationService.collateifyObjectOfObjects(
-          globalUpdate.card,
-          globalUpdateAfterAutomation.card,
-        ) as MappedCard;
+      //   globalUpdate.card =
+      //     this.datastructureManipulationService.collateifyObjectOfObjects(
+      //       globalUpdate.card,
+      //       globalUpdateAfterAutomation.card,
+      //     ) as MappedCard;
 
-      console.log(`after collate`);
+      //   console.log(`after collate`);
 
       if (updateCardDto.columnId || updateCardDto.cardIndex) {
         const projectUpdate = this.cardsProjectService.reorderCardNew(
