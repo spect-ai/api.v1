@@ -23,6 +23,7 @@ import { Card } from './model/card.model';
 import { ResponseBuilder } from './response.builder';
 import { CardValidationService } from './validation.cards.service';
 import mongodb from 'mongodb';
+import { MappedCard } from './types/types';
 
 @Injectable()
 export class CardsService {
@@ -258,56 +259,11 @@ export class CardsService {
     }
   }
 
-  async update(
-    id: string,
-    updateCardDto: UpdateCardRequestDto,
-  ): Promise<DetailedCardResponseDto> {
-    try {
-      const card = await this.cardsRepository.findById(id).populate('project');
-      const project = card.project as unknown as Project;
-      if (updateCardDto.columnId || updateCardDto.cardIndex) {
-        await this.cardsProjectService.reorderCard(
-          project.id,
-          id,
-          {
-            destinationColumnId: updateCardDto.columnId
-              ? updateCardDto.columnId
-              : card.columnId,
-            destinationCardIndex: updateCardDto.cardIndex
-              ? updateCardDto.cardIndex
-              : 0,
-          } as ReorderCardReqestDto,
-          false,
-        );
-      }
-      const activities = this.activityBuilder.buildUpdatedCardActivity(
-        updateCardDto,
-        card,
-        project,
-      );
-
-      const updatedCard =
-        await this.cardsRepository.updateCardAndReturnWithPopulatedReferences(
-          id,
-          {
-            ...updateCardDto,
-            activity: card.activity.concat(activities),
-          },
-        );
-      return await this.responseBuilder.enrichResponse(updatedCard);
-    } catch (error) {
-      throw new InternalServerErrorException(
-        'Failed card update',
-        error.message,
-      );
-    }
-  }
-
   updateNew(
     card: Card,
     project: Project,
     updateCardDto: UpdateCardRequestDto,
-  ): mongodb.AnyBulkWriteOperation {
+  ): MappedCard {
     try {
       const activities = this.activityBuilder.buildUpdatedCardActivity(
         updateCardDto,
@@ -315,12 +271,18 @@ export class CardsService {
         project,
       );
       const updatedActivity = [...card.activity, ...activities];
-      return this.cardsRepository.updateOneByIdQuery(card._id, {
-        $set: {
+
+      return {
+        [card.id]: {
+          ...card,
           ...updateCardDto,
           activity: updatedActivity,
+          status: {
+            ...card.status,
+            ...updateCardDto.status,
+          },
         },
-      });
+      };
     } catch (error) {
       console.log(error);
       throw new InternalServerErrorException(

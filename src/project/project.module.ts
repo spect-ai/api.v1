@@ -14,6 +14,7 @@ import { CardsProjectService } from './cards.project.service';
 import { ActionService } from 'src/card/actions.service';
 import { RequestProvider } from 'src/users/user.provider';
 import { CardValidationService } from 'src/card/validation.cards.service';
+import { AutomationModule } from 'src/automation/automation.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { CardValidationService } from 'src/card/validation.cards.service';
     CirclesModule,
     forwardRef(() => TemplatesModule),
     forwardRef(() => CardsModule),
+    forwardRef(() => AutomationModule),
     EthAddressModule,
   ],
   controllers: [ProjectController],

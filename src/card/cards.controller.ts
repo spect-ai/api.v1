@@ -146,15 +146,15 @@ export class CardsController {
     return await this.cardCommandHandler.update(params.id, card);
   }
 
-  @Patch('/:id/updateOld')
-  @UseGuards(SessionAuthGuard)
-  @ApiParam({ name: 'id', type: 'string' })
-  async update(
-    @Param() params: ObjectIdDto,
-    @Body() card: UpdateCardRequestDto,
-  ): Promise<DetailedCardResponseDto> {
-    return await this.cardsService.update(params.id, card);
-  }
+  // @Patch('/:id/updateOld')
+  // @UseGuards(SessionAuthGuard)
+  // @ApiParam({ name: 'id', type: 'string' })
+  // async update(
+  //   @Param() params: ObjectIdDto,
+  //   @Body() card: UpdateCardRequestDto,
+  // ): Promise<DetailedCardResponseDto> {
+  //   return await this.cardsService.update(params.id, card);
+  // }
 
   @Patch('/:id/createWorkThread')
   @UseGuards(SessionAuthGuard)

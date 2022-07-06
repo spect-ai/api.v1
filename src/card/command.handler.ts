@@ -1,4 +1,5 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { AutomationService } from 'src/automation/automation.service';
 import { CirclesRepository } from 'src/circle/circles.repository';
 import { DataStructureManipulationService } from 'src/common/dataStructureManipulation.service';
 import { CardsProjectService } from 'src/project/cards.project.service';
@@ -14,6 +15,10 @@ import { DetailedCardResponseDto } from './dto/detailed-card-response-dto';
 import { UpdateCardRequestDto } from './dto/update-card-request.dto';
 import { ResponseBuilder } from './response.builder';
 import { CardValidationService } from './validation.cards.service';
+import mongodb from 'mongodb';
+import { GlobalDocumentUpdate } from 'src/common/types/update.type';
+import { MappedCard } from './types/types';
+import { MappedProject } from 'src/project/types/types';
 
 @Injectable()
 export class CardCommandHandler {
@@ -29,6 +34,7 @@ export class CardCommandHandler {
     private readonly responseBuilder: ResponseBuilder,
     private readonly cardsService: CardsService,
     private readonly projectRepository: ProjectsRepository,
+    private readonly automationService: AutomationService,
   ) {}
 
   async update(
@@ -36,26 +42,50 @@ export class CardCommandHandler {
     updateCardDto: UpdateCardRequestDto,
   ): Promise<DetailedCardResponseDto> {
     try {
-      const card = await this.cardsRepository.findById(id).populate('project');
+      const card = await this.cardsRepository.findById(id);
       this.validationService.validateCardExists(card);
-      const project = card.project as unknown as Project;
+      const project = await this.projectRepository.findById(card.project);
 
-      const cardUpdateQuery = this.cardsService.updateNew(
+      const globalUpdate = {
+        card: {},
+        project: {},
+      } as GlobalDocumentUpdate;
+
+      const cardUpdate = this.cardsService.updateNew(
         card,
         project,
         updateCardDto,
       );
+      globalUpdate.card = {
+        ...globalUpdate.card,
+        ...cardUpdate,
+      };
 
-      const cardUpdateAcknowledgement = await this.cardsRepository.bulkWrite([
-        cardUpdateQuery,
-      ]);
-      console.log(cardUpdateAcknowledgement);
-      if (cardUpdateAcknowledgement.hasWriteErrors()) {
-        throw new InternalServerErrorException('Card update failed');
-      }
+      const globalUpdateAfterAutomation =
+        this.automationService.handleAutomation(card, project, updateCardDto);
+
+      console.log(`before collate globalUpdate`);
+      console.log(globalUpdate);
+
+      console.log(`before collate globalUpdateAfterAutomation`);
+      console.log(globalUpdateAfterAutomation);
+
+      globalUpdate.project =
+        this.datastructureManipulationService.collateifyObjectOfObjects(
+          globalUpdate.project,
+          globalUpdateAfterAutomation.project,
+        ) as MappedProject;
+
+      globalUpdate.card =
+        this.datastructureManipulationService.collateifyObjectOfObjects(
+          globalUpdate.card,
+          globalUpdateAfterAutomation.card,
+        ) as MappedCard;
+
+      console.log(`after collate`);
 
       if (updateCardDto.columnId || updateCardDto.cardIndex) {
-        const projectUpdateQuery = this.cardsProjectService.reorderCardNew(
+        const projectUpdate = this.cardsProjectService.reorderCardNew(
           project,
           id,
           {
@@ -67,16 +97,23 @@ export class CardCommandHandler {
               : 0,
           } as ReorderCardReqestDto,
         );
-        console.log(projectUpdateQuery);
-        const projectUpdateAcknowledgement =
-          await this.projectRepository.bulkWrite([projectUpdateQuery]);
 
-        console.log(projectUpdateAcknowledgement);
-        if (projectUpdateAcknowledgement.hasWriteErrors()) {
-          throw new InternalServerErrorException(
-            'Project update during updating card failed',
-          );
-        }
+        globalUpdate.project =
+          this.datastructureManipulationService.collateifyObjectOfObjects(
+            globalUpdate.project,
+            projectUpdate,
+          ) as MappedProject;
+      }
+
+      console.log(globalUpdate);
+      const updatedCard = await this.cardsRepository.update(
+        globalUpdate.card[id],
+      );
+
+      if (globalUpdate.project.hasOwnProperty(project.id)) {
+        const updatedProject = await this.projectRepository.update(
+          globalUpdate.project[project.id],
+        );
       }
 
       const resultingCard =

@@ -49,6 +49,31 @@ export class DataStructureManipulationService {
     return res;
   }
 
+  collateifyTwoObjects(obj1: object, obj2: object) {
+    const res = {};
+    for (const [key, val] of Object.entries(obj1)) {
+      res[key] = val;
+    }
+    for (const [key, val] of Object.entries(obj2)) {
+      res[key] = val;
+    }
+    return res;
+  }
+
+  collateifyObjectOfObjects(obj1: object, obj2: object) {
+    for (const [key, val] of Object.entries(obj2)) {
+      if (obj1.hasOwnProperty(key)) {
+        obj1[key] = {
+          ...obj1[key],
+          ...val,
+        };
+      } else {
+        obj1[key] = val;
+      }
+    }
+    return obj1;
+  }
+
   setOrAggregateObjectKey(obj: object, key: string, value: number) {
     if (key in obj) {
       obj[key] += value;

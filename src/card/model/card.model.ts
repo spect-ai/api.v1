@@ -1,16 +1,13 @@
-import { plugin, pre, prop, Ref } from '@typegoose/typegoose';
-import { useMongoosePlugin } from 'src/base/decorators/use-mongoose-plugins.decorator';
+import { prop } from '@typegoose/typegoose';
 import { BaseModel } from 'src/base/base.model';
-import { Project } from 'src/project/model/project.model';
-import { Payment } from 'src/common/models/payment.model';
-import { Date, ObjectId } from 'mongoose';
-import mongoose from 'mongoose';
-import { Activity } from 'src/common/types/activity.type';
-import { Status } from '../../common/types/status.type';
-import { WorkThread, WorkThreads } from './workHistory.type';
-import { User } from 'src/users/model/users.model';
+import { useMongoosePlugin } from 'src/base/decorators/use-mongoose-plugins.decorator';
 import { Circle } from 'src/circle/model/circle.model';
-import { ApplicationDetails } from './application.type';
+import { Payment } from 'src/common/models/payment.model';
+import { Activity } from 'src/common/types/activity.type';
+import { Project } from 'src/project/model/project.model';
+import { Status } from '../../common/types/status.type';
+import { ApplicationDetails } from '../types/types';
+import { WorkThreads } from './workHistory.type';
 
 @useMongoosePlugin()
 export class Card extends BaseModel {

@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { CardsModule } from 'src/card/cards.module';
 import { DataStructureManipulationService } from 'src/common/dataStructureManipulation.service';
 import { CardsProjectService } from 'src/project/cards.project.service';
@@ -10,7 +10,12 @@ import { AutomationController } from './automation.controller';
 import { AutomationService } from './automation.service';
 
 @Module({
-  imports: [ProjectModule, EthAddressModule, RequestProvider, CardsModule],
+  imports: [
+    EthAddressModule,
+    RequestProvider,
+    forwardRef(() => CardsModule),
+    forwardRef(() => ProjectModule),
+  ],
   controllers: [AutomationController],
   providers: [
     EthAddressService,

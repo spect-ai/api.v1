@@ -25,6 +25,8 @@ import { CommentService } from './comments.cards.service';
 import { CardsProjectService } from 'src/project/cards.project.service';
 import { CardsPaymentService } from './payment.cards.service';
 import { CardCommandHandler } from './command.handler';
+import { AutomationModule } from 'src/automation/automation.module';
+import { AutomationService } from 'src/automation/automation.service';
 
 @Module({
   imports: [
@@ -35,6 +37,7 @@ import { CardCommandHandler } from './command.handler';
     EthAddressModule,
     RequestProvider,
     UsersModule,
+    forwardRef(() => AutomationModule),
   ],
   controllers: [CardsController],
   providers: [
@@ -55,6 +58,7 @@ import { CardCommandHandler } from './command.handler';
     CommentService,
     CardsPaymentService,
     CardCommandHandler,
+    AutomationService,
   ],
   exports: [
     CardsService,

@@ -7,6 +7,8 @@ import { CardsProjectService } from 'src/project/cards.project.service';
 import { Project } from 'src/project/model/project.model';
 import { ProjectsRepository } from 'src/project/project.repository';
 import { ProjectService } from 'src/project/project.service';
+import mongodb from 'mongodb';
+import { GlobalDocumentUpdate } from 'src/common/types/update.type';
 
 export type StatusTrigger = {
   [key: string]: ConditionWithAction[];
@@ -93,13 +95,15 @@ export class AutomationService {
     private readonly cardService: CardsService,
   ) {}
 
-  async executeAutomation(
+  handleAutomation(
     card: Card,
     project: Project,
     req: UpdateCardRequestDto,
-  ) {
-    let query = this.projectRepository.updateOneByIdQuery(project._id, {});
-    console.log(query);
+  ): GlobalDocumentUpdate {
+    let globalUpdate: GlobalDocumentUpdate = {
+      card: {},
+      project: {},
+    };
     for (const [field, value] of Object.entries(req)) {
       if (automationTree.hasOwnProperty(field)) {
         if (field === 'status') {
@@ -115,13 +119,13 @@ export class AutomationService {
                   conditionWithAction.actions,
                 )) {
                   if (action === 'changeColumn') {
-                    query = await this.executeColumnChange(
+                    globalUpdate = this.handleColumnChange(
                       card,
                       project,
                       {
                         to: (actionValue as ColumnChangeAction).to,
                       },
-                      query,
+                      globalUpdate,
                     );
                   }
                 }
@@ -139,10 +143,10 @@ export class AutomationService {
                 conditionWithAction.actions,
               )) {
                 if (action === 'changeStatus') {
-                  query = await this.executeStatusChange(
+                  globalUpdate = this.handleStatusChange(
                     card,
                     actionValue as StatusChangeAction,
-                    query,
+                    globalUpdate,
                   );
                 }
               }
@@ -152,47 +156,60 @@ export class AutomationService {
       }
     }
 
-    return query;
+    return globalUpdate;
   }
 
-  async executeColumnChange(
+  handleColumnChange(
     card: Card,
     project: Project,
     columnChange: ColumnChangeAction,
-    query: any,
-  ) {
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    query.updateOne.update = await this.cardProjectService.reorderCard(
-      project.id,
+    globalUpdate: GlobalDocumentUpdate,
+  ): GlobalDocumentUpdate {
+    const projectUpdate = this.cardProjectService.reorderCardNew(
+      project,
       card.id,
       {
         destinationColumnId: columnChange.to,
         destinationCardIndex: columnChange.index ? columnChange.index : 0,
       },
-      query.updateOne.update,
     );
 
-    console.log(query);
-    return query;
+    const cardUpdate = {
+      [card.id]: {
+        columnId: columnChange.to,
+      },
+    };
+
+    globalUpdate.project = {
+      ...globalUpdate.project,
+      ...projectUpdate,
+    };
+
+    globalUpdate.card = {
+      ...globalUpdate.card,
+      ...cardUpdate,
+    };
+
+    return globalUpdate;
   }
 
-  async executeStatusChange(
+  handleStatusChange(
     card: Card,
     statusChange: StatusChangeAction,
-    query: any,
-  ) {
-    query.updateOne.update = this.cardRepository.addToUpdateOneQuery(
-      query.updateOne.update,
-      {
+    globalUpdate: GlobalDocumentUpdate,
+  ): GlobalDocumentUpdate {
+    const cardUpdate = {
+      [card.id]: {
         status: {
           ...card.status,
           ...statusChange,
         },
       },
-    );
-
-    console.log(query);
-    return query;
+    };
+    globalUpdate.card = {
+      ...globalUpdate.card,
+      ...cardUpdate,
+    };
+    return globalUpdate;
   }
 }

@@ -8,7 +8,7 @@ import { DetailedProjectResponseDto } from './dto/detailed-project-response.dto'
 import { ReorderCardReqestDto } from './dto/reorder-card-request.dto';
 import { Project } from './model/project.model';
 import { ProjectsRepository } from './project.repository';
-import { CardLoc } from './types/card-loc.type';
+import { CardLoc, MappedProject } from './types/types';
 import mongodb from 'mongodb';
 
 @Injectable()
@@ -93,90 +93,11 @@ export class CardsProjectService {
     return cardLoc;
   }
 
-  async reorderCard(
-    projectId: string,
-    cardId: string,
-    destinationCardLoc: ReorderCardReqestDto,
-    updateOneQuery?: any,
-  ): Promise<DetailedProjectResponseDto | any> {
-    const project = await this.projectRepository.findById(projectId);
-    if (!project) {
-      throw new HttpException('Project not found', HttpStatus.NOT_FOUND);
-    }
-    // Find where the card is in the project now
-    const sourceCardLoc = this.findCardLocationInProject(project, cardId);
-    if (!sourceCardLoc.columnId) {
-      throw new HttpException('Card not found', HttpStatus.NOT_FOUND);
-    }
-
-    // Get the destination card index based on the input
-    let destinationCardIndex: number;
-    if (destinationCardLoc.destinationCardIndex === 'end') {
-      destinationCardIndex =
-        project.columnDetails[destinationCardLoc.destinationColumnId].cards
-          .length;
-    } else destinationCardIndex = destinationCardLoc.destinationCardIndex;
-
-    // In case destination card index is not valid, throw error
-    const columnDetails = project.columnDetails;
-    if (
-      destinationCardIndex < 0 ||
-      destinationCardIndex -
-        columnDetails[destinationCardLoc.destinationColumnId].cards.length >
-        0
-    ) {
-      throw new HttpException(
-        'Invalid destination card index',
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-
-    // Update the card location in the project
-    columnDetails[sourceCardLoc.columnId].cards.splice(
-      sourceCardLoc.cardIndex,
-      1,
-    );
-
-    columnDetails[destinationCardLoc.destinationColumnId].cards.splice(
-      destinationCardIndex,
-      0,
-      cardId,
-    );
-
-    columnDetails[sourceCardLoc.columnId] = {
-      ...columnDetails[sourceCardLoc.columnId],
-      cards: columnDetails[sourceCardLoc.columnId].cards,
-    };
-
-    columnDetails[destinationCardLoc.destinationColumnId] = {
-      ...columnDetails[destinationCardLoc.destinationColumnId],
-      cards: columnDetails[destinationCardLoc.destinationColumnId].cards,
-    };
-
-    if (!updateOneQuery) {
-      const updatedProject =
-        await this.projectRepository.updateProjectAndReturnWithPopulatedReferences(
-          projectId.toString(),
-          {
-            columnDetails,
-          },
-        );
-      return this.projectPopulatedWithCardDetails(updatedProject);
-    } else {
-      return this.projectRepository.addToUpdateOneQuery(updateOneQuery, {
-        $set: {
-          columnDetails,
-        },
-      });
-    }
-  }
-
   reorderCardNew(
     project: Project,
     cardId: string,
     destinationCardLoc: ReorderCardReqestDto,
-    updateOneQuery?: any,
-  ): mongodb.AnyBulkWriteOperation {
+  ): MappedProject {
     // Find where the card is in the project now
     const sourceCardLoc = this.findCardLocationInProject(project, cardId);
     if (!sourceCardLoc.columnId) {
@@ -225,11 +146,13 @@ export class CardsProjectService {
       ...columnDetails[destinationCardLoc.destinationColumnId],
       cards: columnDetails[destinationCardLoc.destinationColumnId].cards,
     };
-    return this.projectRepository.updateOneByIdQuery(project._id, {
-      $set: {
+
+    return {
+      [project.id]: {
+        ...project,
         columnDetails,
       },
-    });
+    };
   }
 
   async removeMultipleCardsFromProject(
