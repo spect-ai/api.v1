@@ -101,5 +101,8 @@ export class DetailedProjectResponseDto {
    */
   @IsString()
   @IsOptional()
-  discordDiscussionChannel: string;
+  discordDiscussionChannel: {
+    id: string;
+    name: string;
+  };
 }
