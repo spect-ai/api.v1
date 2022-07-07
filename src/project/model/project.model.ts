@@ -5,7 +5,6 @@ import { BaseModel } from 'src/base/base.model';
 import { ObjectId } from 'mongoose';
 import { ColumnDetailsDto } from '../dto/column-details.dto';
 import { Card } from 'src/card/model/card.model';
-import { Automation, ValidActionId } from './automation.type';
 import { MappedAutomation } from 'src/template/models/template.model';
 
 @useMongoosePlugin()

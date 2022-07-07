@@ -98,7 +98,6 @@ export class CardsProjectService {
     cardId: string,
     destinationCardLoc: ReorderCardReqestDto,
   ): MappedProject {
-    console.log(destinationCardLoc);
     // Find where the card is in the project now
     const sourceCardLoc = this.findCardLocationInProject(project, cardId);
     if (!sourceCardLoc.columnId) {

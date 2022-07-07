@@ -3,7 +3,7 @@ import mongoose, { ObjectId } from 'mongoose';
 import { BaseModel } from 'src/base/base.model';
 import { useMongoosePlugin } from 'src/base/decorators/use-mongoose-plugins.decorator';
 import { Circle } from 'src/circle/model/circle.model';
-import { Automation } from 'src/project/model/automation.type';
+import { Automation } from 'src/automation/types/types';
 import { User } from 'src/users/model/users.model';
 
 export type MinimalColumnDetail = {

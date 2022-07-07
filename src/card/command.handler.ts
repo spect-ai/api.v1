@@ -61,28 +61,30 @@ export class CardCommandHandler {
         ...cardUpdate,
       };
 
-      //   const globalUpdateAfterAutomation =
-      //     this.automationService.handleAutomation(card, project, updateCardDto);
+      console.log(`before handleAutomation`);
 
-      //   console.log(`before collate globalUpdate`);
-      //   console.log(globalUpdate);
+      const globalUpdateAfterAutomation =
+        this.automationService.handleAutomation(card, project, updateCardDto);
 
-      //   console.log(`before collate globalUpdateAfterAutomation`);
-      //   console.log(globalUpdateAfterAutomation);
+      console.log(`before collate globalUpdate`);
+      console.log(globalUpdate);
 
-      //   globalUpdate.project =
-      //     this.datastructureManipulationService.collateifyObjectOfObjects(
-      //       globalUpdate.project,
-      //       globalUpdateAfterAutomation.project,
-      //     ) as MappedProject;
+      console.log(`before collate globalUpdateAfterAutomation`);
+      console.log(globalUpdateAfterAutomation);
 
-      //   globalUpdate.card =
-      //     this.datastructureManipulationService.collateifyObjectOfObjects(
-      //       globalUpdate.card,
-      //       globalUpdateAfterAutomation.card,
-      //     ) as MappedCard;
+      globalUpdate.project =
+        this.datastructureManipulationService.collateifyObjectOfObjects(
+          globalUpdate.project,
+          globalUpdateAfterAutomation.project,
+        ) as MappedProject;
 
-      //   console.log(`after collate`);
+      globalUpdate.card =
+        this.datastructureManipulationService.collateifyObjectOfObjects(
+          globalUpdate.card,
+          globalUpdateAfterAutomation.card,
+        ) as MappedCard;
+
+      console.log(`after collate`);
 
       if (updateCardDto.columnId || updateCardDto.cardIndex) {
         const projectUpdate = this.cardsProjectService.reorderCardNew(
@@ -104,6 +106,8 @@ export class CardCommandHandler {
             projectUpdate,
           ) as MappedProject;
       }
+
+      console.log(`globalUpdate122`);
 
       console.log(globalUpdate);
       const updatedCard = await this.cardsRepository.update(

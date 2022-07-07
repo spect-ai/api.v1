@@ -3,13 +3,10 @@ import {
   IsArray,
   IsBoolean,
   IsNotEmpty,
-  IsObject,
   IsOptional,
   IsString,
 } from 'class-validator';
 import { ObjectId } from 'mongoose';
-import { ColumnDetailsDto } from 'src/project/dto/column-details.dto';
-import { Automation, ValidActionId } from 'src/project/model/automation.type';
 
 export class AutomationDto {
   @IsString()

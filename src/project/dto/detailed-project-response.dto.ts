@@ -1,15 +1,13 @@
 import {
   IsArray,
+  IsBoolean,
   IsNotEmpty,
   IsObject,
   IsOptional,
-  ValidateNested,
   IsString,
-  IsBoolean,
+  ValidateNested,
 } from 'class-validator';
-import { ObjectId } from 'mongoose';
 import { MappedAutomation } from 'src/template/models/template.model';
-import { Automation, ValidActionId } from '../model/automation.type';
 
 export type MinimalCard = {
   id: string;

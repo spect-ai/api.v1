@@ -8,90 +8,6 @@ import { ProjectsRepository } from 'src/project/project.repository';
 import { ProjectService } from 'src/project/project.service';
 import { GlobalDocumentUpdate } from 'src/common/types/update.type';
 
-export type StatusTrigger = {
-  [key: string]: ConditionWithAction[];
-};
-
-export type ColumnTrigger = {
-  [key: string]: ConditionWithAction[];
-};
-
-export type ConditionWithAction = {
-  from?: boolean | number | string;
-  to: boolean | number | string;
-  actions: Actions;
-};
-
-export type Actions = {
-  [key: string]: ColumnChangeAction | StatusChangeAction;
-};
-
-export type ColumnChangeAction = {
-  to: string;
-  index?: number;
-};
-
-export type StatusChangeAction = {
-  paid?: boolean;
-  archived?: boolean;
-  active?: boolean;
-};
-
-const automationOrder = [
-  'ac0445e5-a03a-448b-8d5a-6e65d5dba53a',
-  'ac0445e5-a03a-448b-8d5a-6e65d5dba53b',
-];
-
-const automations = {
-  'ac0445e5-a03a-448b-8d5a-6e65d5dba53a': {
-    name: 'some automation',
-    triggerProperty: 'status.active',
-    value: {
-      from: true,
-      to: false,
-    },
-    conditions: [
-      {
-        property: 'assignee',
-        value: {
-          has: 'some user',
-        },
-      },
-    ],
-    actions: [
-      {
-        property: 'columnId',
-        value: { to: 'd0dd9ef1-d24f-4d4c-bb37-1b22e618ab88' },
-      },
-    ],
-    id: 'ac0445e5-a03a-448b-8d5a-6e65d5dba53a',
-  },
-  'ac0445e5-a03a-448b-8d5a-6e65d5dba53b': {
-    name: 'some automation',
-    triggerProperty: 'columnId',
-    value: {
-      to: '32a831c8-50a5-41b8-b9a1-a5ffe7e03c5d',
-    },
-    conditions: [
-      {
-        property: 'assignee',
-        value: {
-          has: 'some user',
-        },
-      },
-    ],
-    actions: [
-      {
-        property: 'status.active',
-        value: {
-          to: true,
-        },
-      },
-    ],
-    id: 'ac0445e5-a03a-448b-8d5a-6e65d5dba53b',
-  },
-};
-
 @Injectable()
 export class AutomationService {
   constructor(
@@ -156,8 +72,6 @@ export class AutomationService {
     card: Card,
     project: Project,
   ): GlobalDocumentUpdate {
-    console.log(card.id);
-    console.log(value);
     const projectUpdate = this.cardProjectService.reorderCardNew(
       project,
       card.id,
@@ -220,14 +134,15 @@ export class AutomationService {
       card: {},
       project: {},
     };
-    for (const automationId of automationOrder) {
-      const automation = automations[automationId];
+    for (const automationId of project.automationOrder) {
+      const automation = project.automations[automationId];
       const triggerPropertyArray = automation.triggerProperty.split('.');
       const values = this.findCardAndReqValues(
         card,
         update,
         triggerPropertyArray,
       );
+      console.log(values);
       if (!values) continue;
       const currVal = values[0];
       const newVal = values[1];
