@@ -21,6 +21,10 @@ export class CreateProjectDataDto {
   @IsArray()
   @IsNotEmpty()
   columns: string[];
+
+  @IsArray()
+  @IsNotEmpty()
+  automations: string[];
 }
 
 export abstract class CreateTemplateDto {

@@ -21,12 +21,12 @@ export class AutomationController {
     @Param() params: ObjectIdDto,
     @Body() updateCardRequestDto: UpdateCardRequestDto,
   ) {
-    // const card = await this.cardsRepository.findById(params.id);
-    // const project = await this.projectRepository.findById(card.project);
-    // return await this.automationService.executeAutomation(
-    //   card,
-    //   project,
-    //   updateCardRequestDto,
-    // );
+    const card = await this.cardsRepository.findById(params.id);
+    const project = await this.projectRepository.findById(card.project);
+    return await this.automationService.handleAutomation(
+      card,
+      project,
+      updateCardRequestDto,
+    );
   }
 }

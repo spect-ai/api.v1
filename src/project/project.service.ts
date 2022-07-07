@@ -10,6 +10,7 @@ import { MultipleValidCardActionResponseDto } from 'src/card/dto/card-access-res
 import { CirclesRepository } from 'src/circle/circles.repository';
 import { Circle } from 'src/circle/model/circle.model';
 import { SlugService } from 'src/common/slug.service';
+import { MappedAutomation } from 'src/template/models/template.model';
 import { TemplatesRepository } from 'src/template/tempates.repository';
 import { v4 as uuidv4 } from 'uuid';
 import { CardsProjectService } from './cards.project.service';
@@ -87,15 +88,18 @@ export class ProjectService {
           createProjectDto.fromTemplateId,
         );
         const data = template.projectData;
-
         if (
           Object.keys(data).length > 0 &&
           'columnOrder' in data &&
-          'columnDetails' in data
+          'columnDetails' in data &&
+          'automations' in data &&
+          'automationOrder' in data
         ) {
           createProjectDto.columnOrder = data.columnOrder;
           createProjectDto.columnDetails =
             data?.columnDetails as ColumnDetailsDto;
+          createProjectDto.automations = data?.automations as MappedAutomation;
+          createProjectDto.automationOrder = data?.automationOrder;
         }
       }
 
@@ -113,7 +117,7 @@ export class ProjectService {
       return createdProject;
     } catch (error) {
       throw new InternalServerErrorException(
-        'Failed circle creation',
+        'Failed project creation',
         error.message,
       );
     }

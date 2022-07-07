@@ -3,6 +3,7 @@ import mongoose, { ObjectId } from 'mongoose';
 import { BaseModel } from 'src/base/base.model';
 import { useMongoosePlugin } from 'src/base/decorators/use-mongoose-plugins.decorator';
 import { Circle } from 'src/circle/model/circle.model';
+import { Automation } from 'src/project/model/automation.type';
 import { User } from 'src/users/model/users.model';
 
 export type MinimalColumnDetail = {
@@ -16,6 +17,10 @@ export type MinimalColumnDetails = {
   [columnId: string]: MinimalColumnDetail;
 };
 
+export type MappedAutomation = {
+  [id: string]: Automation;
+};
+
 export type ProjectTemplateData = {
   /**
    * The columns must be ordered in the desired order
@@ -27,11 +32,9 @@ export type ProjectTemplateData = {
    */
   columnDetails: MinimalColumnDetails;
 
-  // /**
-  //  * The automations that come out of the box with the template
-  //  */
-  // @IsOptional()
-  // automations: Map<ValidActionId, Automation>;
+  automations: MappedAutomation;
+
+  automationOrder: string[];
 };
 @useMongoosePlugin()
 export class Template extends BaseModel {

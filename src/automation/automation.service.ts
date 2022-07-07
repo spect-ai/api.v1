@@ -1,13 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { CardsRepository } from 'src/card/cards.repository';
 import { CardsService } from 'src/card/cards.service';
-import { UpdateCardRequestDto } from 'src/card/dto/update-card-request.dto';
 import { Card } from 'src/card/model/card.model';
 import { CardsProjectService } from 'src/project/cards.project.service';
 import { Project } from 'src/project/model/project.model';
 import { ProjectsRepository } from 'src/project/project.repository';
 import { ProjectService } from 'src/project/project.service';
-import mongodb from 'mongodb';
 import { GlobalDocumentUpdate } from 'src/common/types/update.type';
 
 export type StatusTrigger = {
@@ -39,50 +37,59 @@ export type StatusChangeAction = {
   active?: boolean;
 };
 
-const automationTree = {
-  status: {
-    paid: [
+const automationOrder = [
+  'ac0445e5-a03a-448b-8d5a-6e65d5dba53a',
+  'ac0445e5-a03a-448b-8d5a-6e65d5dba53b',
+];
+
+const automations = {
+  'ac0445e5-a03a-448b-8d5a-6e65d5dba53a': {
+    name: 'some automation',
+    triggerProperty: 'status.active',
+    value: {
+      from: true,
+      to: false,
+    },
+    conditions: [
       {
-        from: false,
-        to: true,
-        actions: {
-          changeColumn: {
-            to: 'd0dd9ef1-d24f-4d4c-bb37-1b22e618ab88',
-          } as ColumnChangeAction,
-        } as Actions,
-      } as ConditionWithAction,
+        property: 'assignee',
+        value: {
+          has: 'some user',
+        },
+      },
     ],
-    active: [
+    actions: [
       {
-        from: true,
-        to: false,
-        actions: {
-          changeColumn: {
-            to: '414c1da8-9fa5-41fd-a39a-c5692cff481b',
-          } as ColumnChangeAction,
-        } as Actions,
-      } as ConditionWithAction,
-      {
-        from: false,
-        to: true,
-        actions: {
-          changeColumn: {
-            to: '32a831c8-50a5-41b8-b9a1-a5ffe7e03c5d',
-          } as ColumnChangeAction,
-        } as Actions,
-      } as ConditionWithAction,
+        property: 'columnId',
+        value: { to: 'd0dd9ef1-d24f-4d4c-bb37-1b22e618ab88' },
+      },
     ],
-  } as StatusTrigger,
-  columnId: [
-    {
-      to: 'd0dd9ef1-d24f-4d4c-bb37-1b22e618ab88',
-      actions: {
-        changeStatus: {
-          paid: true,
-        } as StatusChangeAction,
-      } as Actions,
-    } as ConditionWithAction,
-  ],
+    id: 'ac0445e5-a03a-448b-8d5a-6e65d5dba53a',
+  },
+  'ac0445e5-a03a-448b-8d5a-6e65d5dba53b': {
+    name: 'some automation',
+    triggerProperty: 'columnId',
+    value: {
+      to: '32a831c8-50a5-41b8-b9a1-a5ffe7e03c5d',
+    },
+    conditions: [
+      {
+        property: 'assignee',
+        value: {
+          has: 'some user',
+        },
+      },
+    ],
+    actions: [
+      {
+        property: 'status.active',
+        value: {
+          to: true,
+        },
+      },
+    ],
+    id: 'ac0445e5-a03a-448b-8d5a-6e65d5dba53b',
+  },
 };
 
 @Injectable()
@@ -95,88 +102,74 @@ export class AutomationService {
     private readonly cardService: CardsService,
   ) {}
 
-  handleAutomation(
+  findCardAndReqValues(
     card: Card,
-    project: Project,
-    req: UpdateCardRequestDto,
-  ): GlobalDocumentUpdate {
-    let globalUpdate: GlobalDocumentUpdate = {
-      card: {},
-      project: {},
-    };
-    for (const [field, value] of Object.entries(req)) {
-      if (automationTree.hasOwnProperty(field)) {
-        if (field === 'status') {
-          for (const [statusType, conditionsWithActions] of Object.entries(
-            automationTree[field],
-          )) {
-            for (const conditionWithAction of conditionsWithActions) {
-              if (
-                conditionWithAction.from === card.status[statusType] &&
-                conditionWithAction.to === value[statusType]
-              ) {
-                for (const [action, actionValue] of Object.entries(
-                  conditionWithAction.actions,
-                )) {
-                  if (action === 'changeColumn') {
-                    globalUpdate = this.handleColumnChange(
-                      card,
-                      project,
-                      {
-                        to: (actionValue as ColumnChangeAction).to,
-                      },
-                      globalUpdate,
-                    );
-                  }
-                }
-              }
-            }
-          }
-        } else if (field === 'columnId') {
-          for (const conditionWithAction of automationTree[field]) {
-            if (
-              (!conditionWithAction.from ||
-                conditionWithAction.from === card.columnId) &&
-              conditionWithAction.to === value
-            ) {
-              for (const [action, actionValue] of Object.entries(
-                conditionWithAction.actions,
-              )) {
-                if (action === 'changeStatus') {
-                  globalUpdate = this.handleStatusChange(
-                    card,
-                    actionValue as StatusChangeAction,
-                    globalUpdate,
-                  );
-                }
-              }
-            }
-          }
-        }
+    update: Partial<Card>,
+    triggerPropertyArray: any[],
+  ) {
+    let currCardVal = card;
+    let currReqVal = update;
+    for (const triggerProperty of triggerPropertyArray) {
+      if (
+        !currCardVal.hasOwnProperty(triggerProperty) ||
+        !currReqVal.hasOwnProperty(triggerProperty)
+      ) {
+        return false;
       }
+      currCardVal = currCardVal[triggerProperty];
+      currReqVal = currReqVal[triggerProperty];
     }
-
-    return globalUpdate;
+    return [currCardVal, currReqVal];
   }
 
-  handleColumnChange(
+  satisfiesCondition(card: Card, condition: any): boolean {
+    return true;
+  }
+
+  satisfiesConditions(card: Card, conditions: any[]): boolean {
+    for (const condition of conditions) {
+      if (!this.satisfiesCondition(card, condition)) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  satisfiesValueUpdate(
+    currVal: any,
+    newVal: any,
+    automationValUpdate: any,
+  ): boolean {
+    for (const [key, value] of Object.entries(automationValUpdate)) {
+      if (key === 'from') {
+        if (currVal !== value) return false;
+      } else if (key === 'to') {
+        if (newVal !== value) return false;
+      }
+    }
+    return true;
+  }
+
+  takeColumnAction(
+    globalUpdate: GlobalDocumentUpdate,
+    value: any,
     card: Card,
     project: Project,
-    columnChange: ColumnChangeAction,
-    globalUpdate: GlobalDocumentUpdate,
   ): GlobalDocumentUpdate {
+    console.log(card.id);
+    console.log(value);
     const projectUpdate = this.cardProjectService.reorderCardNew(
       project,
       card.id,
       {
-        destinationColumnId: columnChange.to,
-        destinationCardIndex: columnChange.index ? columnChange.index : 0,
+        destinationColumnId: value.to,
+        destinationCardIndex: value.index ? value.index : 0,
       },
     );
 
     const cardUpdate = {
       [card.id]: {
-        columnId: columnChange.to,
+        columnId: value.to,
       },
     };
 
@@ -193,23 +186,84 @@ export class AutomationService {
     return globalUpdate;
   }
 
-  handleStatusChange(
-    card: Card,
-    statusChange: StatusChangeAction,
+  takeStatusAction(
     globalUpdate: GlobalDocumentUpdate,
+    card: Card,
+    properties: string[],
+    value: any,
   ): GlobalDocumentUpdate {
-    const cardUpdate = {
-      [card.id]: {
-        status: {
-          ...card.status,
-          ...statusChange,
-        },
-      },
+    for (const [key, val] of Object.entries(value)) {
+      if (key === 'to') {
+        const cardUpdate = {
+          [card.id]: {
+            status: {
+              ...card.status,
+              [properties[1]]: val,
+            },
+          },
+        };
+        globalUpdate.card = {
+          ...globalUpdate.card,
+          ...cardUpdate,
+        };
+      }
+    }
+    return globalUpdate;
+  }
+
+  handleAutomation(
+    card: Card,
+    project: Project,
+    update: Partial<Card>,
+  ): GlobalDocumentUpdate {
+    let globalUpdate: GlobalDocumentUpdate = {
+      card: {},
+      project: {},
     };
-    globalUpdate.card = {
-      ...globalUpdate.card,
-      ...cardUpdate,
-    };
+    for (const automationId of automationOrder) {
+      const automation = automations[automationId];
+      const triggerPropertyArray = automation.triggerProperty.split('.');
+      const values = this.findCardAndReqValues(
+        card,
+        update,
+        triggerPropertyArray,
+      );
+      if (!values) continue;
+      const currVal = values[0];
+      const newVal = values[1];
+      const satisfiesValueUpdate = this.satisfiesValueUpdate(
+        currVal,
+        newVal,
+        automation.value,
+      );
+      if (!satisfiesValueUpdate) continue;
+      const satisfiesConditions = this.satisfiesConditions(
+        card,
+        automation.conditions,
+      );
+      if (!satisfiesConditions) continue;
+
+      for (const action of automation.actions) {
+        const properties = action.property.split('.');
+        const value = action.value;
+        if (properties[0] === 'columnId') {
+          globalUpdate = this.takeColumnAction(
+            globalUpdate,
+            value,
+            card,
+            project,
+          );
+        } else if (properties[0] === 'status') {
+          globalUpdate = this.takeStatusAction(
+            globalUpdate,
+            card,
+            properties,
+            value,
+          );
+        }
+      }
+    }
+
     return globalUpdate;
   }
 }

@@ -6,87 +6,61 @@ import { DetailedTemplateResponseDto } from './dto/detailed-template-response.dt
 import { TemplatesRepository } from './tempates.repository';
 import { v4 as uuidv4 } from 'uuid';
 import { MinimalColumnDetails } from './models/template.model';
+import { DataStructureManipulationService } from 'src/common/dataStructureManipulation.service';
 
-export type StatusTrigger = {
-  [key: string]: ConditionWithAction[];
-};
-
-export type ColumnTrigger = {
-  [key: string]: ConditionWithAction[];
-};
-
-export type ConditionWithAction = {
-  from?: boolean | number | string;
-  to: boolean | number | string;
-  actions: Actions;
-};
-
-export type Actions = {
-  [key: string]: ColumnChangeAction | StatusChangeAction;
-};
-
-export type ColumnChangeAction = {
-  to: string;
-  index?: number;
-};
-
-export type StatusChangeAction = {
-  paid?: boolean;
-  archived?: boolean;
-  active?: boolean;
-};
-
-const automationTree = {
-  status: {
-    paid: [
-      {
-        from: false,
-        to: true,
-        actions: {
-          changeColumn: {
-            to: 'To Do',
-          } as ColumnChangeAction,
-        } as Actions,
-      } as ConditionWithAction,
-    ],
-    active: [
-      {
-        from: true,
-        to: false,
-        actions: {
-          changeColumn: {
-            to: 'Done',
-          } as ColumnChangeAction,
-        } as Actions,
-      } as ConditionWithAction,
-      {
-        from: false,
-        to: true,
-        actions: {
-          changeColumn: {
-            to: 'In Progress',
-          } as ColumnChangeAction,
-        } as Actions,
-      } as ConditionWithAction,
-    ],
-  } as StatusTrigger,
-  columnId: [
-    {
-      to: 'Done',
-      actions: {
-        changeStatus: {
-          active: false,
-        } as StatusChangeAction,
-      } as Actions,
-    } as ConditionWithAction,
-  ],
-};
+// const automations = [
+//   {
+//     name: 'some automation',
+//     triggerProperty: 'status.active',
+//     value: {
+//       from: false,
+//       to: true,
+//     },
+//     conditions: [
+//       {
+//         property: 'assignee',
+//         value: { has: 'some user' },
+//       },
+//     ],
+//     actions: [
+//       {
+//         property: 'column',
+//         value: {
+//           to: 'Done',
+//         },
+//       },
+//     ],
+//   },
+//   {
+//     name: 'some automation',
+//     triggerProperty: 'status.active',
+//     value: {
+//       from: false, // to, from, added, removed, cleared
+//       to: true,
+//     },
+//     conditions: [
+//       {
+//         property: 'assignee',
+//         value: { has: 'some user' }, // is, has, hasNot, isNot, isOneOf, isNotOneOf, isEmpty, isNotEmpty
+//       },
+//     ],
+//     actions: [
+//       {
+//         property: 'columnId',
+//         value: {
+//           to: 'Done', // to, add, removee, clear
+//         },
+//       },
+//     ],
+//   },
+// ];
 
 @Injectable()
 export class TemplatesService {
   constructor(
     private readonly templatesRepository: TemplatesRepository,
     private readonly requestProvider: RequestProvider,
+    private readonly datastructuresService: DataStructureManipulationService,
   ) {}
 
   async getTemplates(
@@ -115,12 +89,21 @@ export class TemplatesService {
       }
       const columnOrder = Object.keys(columnDetails);
 
+      const cleanAutomations = this.cleanAutomationData(
+        createTemplateDto.projectData.automations,
+        columnNameToIdMap,
+      );
+      const [automations, automationOrder] =
+        this.buildAutomationData(cleanAutomations);
+
       return await this.templatesRepository.create({
         ...createTemplateDto,
         creator: this.requestProvider.user._id,
         projectData: {
           columnDetails,
           columnOrder,
+          automations,
+          automationOrder,
         },
       });
     } catch (error) {
@@ -131,26 +114,63 @@ export class TemplatesService {
     }
   }
 
-  async buildAutomationTemplate(
-    createTemplateDto: CreateTemplateDto,
+  buildAutomationData(automations: any) {
+    const automationOrder = [] as string[];
+    for (const automation of automations) {
+      const automationId = uuidv4();
+      automation['id'] = automationId;
+      automationOrder.push(automationId);
+    }
+
+    automations = this.datastructuresService.objectify(automations, 'id');
+
+    return [automations, automationOrder];
+  }
+
+  cleanAutomationData(automations: any, columnNameToIdMap: object) {
+    const resAutomations = [] as any[];
+    for (let automation of automations) {
+      automation = this.cleanAutomationColumnData(
+        automation,
+        'triggerProperty',
+        columnNameToIdMap,
+      );
+
+      const autoConditions = [] as any[];
+      for (const condition of automation.conditions) {
+        autoConditions.push(
+          this.cleanAutomationColumnData(
+            condition,
+            'property',
+            columnNameToIdMap,
+          ),
+        );
+      }
+      automation.conditions = autoConditions;
+
+      const autoActions = [] as any[];
+      for (const action of automation.actions) {
+        autoActions.push(
+          this.cleanAutomationColumnData(action, 'property', columnNameToIdMap),
+        );
+      }
+      automation.actions = autoActions;
+      resAutomations.push(automation);
+    }
+    return resAutomations;
+  }
+
+  cleanAutomationColumnData(
+    obj: object,
+    key: string,
     columnNameToIdMap: object,
   ) {
-    for (const [trigger, automation] of Object.entries(automationTree)) {
-      if (trigger === 'status') {
-        for (const [condition, actions] of Object.entries(
-          automation as StatusTrigger,
-        )) {
-          for (const [action, actionData] of Object.entries(actions)) {
-            if (action === 'changeColumn') {
-              actionData.to = columnNameToIdMap[actionData.to as string];
-            }
-          }
-        }
-      } else if (trigger === 'columnId') {
-        for (const condition of automation as ConditionWithAction[]) {
-          condition.to = columnNameToIdMap[condition.to as string];
-        }
+    if (obj[key] === 'column') {
+      obj[key] = 'columnId';
+      for (const [key, val] of Object.entries(obj['value'])) {
+        obj['value'][key] = columnNameToIdMap[val as string];
       }
     }
+    return obj;
   }
 }

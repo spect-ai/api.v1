@@ -8,6 +8,7 @@ import {
   IsBoolean,
 } from 'class-validator';
 import { ObjectId } from 'mongoose';
+import { MappedAutomation } from 'src/template/models/template.model';
 import { Automation, ValidActionId } from '../model/automation.type';
 
 export type MinimalCard = {
@@ -72,6 +73,19 @@ export class DetailedProjectResponseDto {
   columnDetails?: object;
 
   /**
+   * The priority of the automations in the project
+   */
+  @IsArray()
+  automationOrder?: string[];
+
+  /**
+   * The automations associated with the project, the trigger is the key and the value is the automation
+   */
+  @IsObject()
+  @IsOptional()
+  automations?: MappedAutomation;
+
+  /**
    * Cards of the project
    */
   @IsObject()
@@ -90,11 +104,4 @@ export class DetailedProjectResponseDto {
   @IsString()
   @IsOptional()
   discordDiscussionChannel: string;
-
-  /**
-   * The automations associated with the project, the trigger is the key and the value is the automation
-   */
-  @IsObject()
-  @IsOptional()
-  automations?: Map<ValidActionId, Automation>;
 }
