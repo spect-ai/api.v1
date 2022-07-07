@@ -292,7 +292,7 @@ export class CardsService {
     }
   }
 
-  async archive(id: string): Promise<string[]> {
+  async archive(id: string): Promise<DetailedProjectResponseDto> {
     const card = await this.cardsRepository.getCardWithAllChildren(id);
     this.validationService.validateCardExists(card);
 
@@ -329,7 +329,7 @@ export class CardsService {
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
-    return cardIds;
+    return updatedProject;
   }
 
   async revertArchive(id: string): Promise<Card> {
