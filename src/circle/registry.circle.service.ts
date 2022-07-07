@@ -95,10 +95,10 @@ export class CircleRegistryService {
         ...network,
         tokenDetails: {
           [addTokenDto.address]: {
-            symbol: addTokenDto.symbol,
-            name: addTokenDto.name,
-            address: addTokenDto.address,
-          } as any,
+            symbol: addTokenDto.symbol as TokenInfo['symbol'],
+            name: addTokenDto.name as TokenInfo['name'],
+            address: addTokenDto.address as TokenInfo['address'],
+          } as TokenInfo,
         },
       };
     }

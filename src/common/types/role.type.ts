@@ -1,3 +1,9 @@
+export type CardType = 'Task' | 'Bounty';
+
+export type CardTypeToPermissionMap = {
+  [key in CardType]: boolean;
+};
+
 export type CirclePermission = {
   createNewCircle: boolean;
   manageCircleSettings: boolean;
@@ -10,10 +16,10 @@ export type CirclePermission = {
   inviteMembers: boolean;
   manageRoles: boolean;
   manageMembers: boolean;
-  manageCardProperties: boolean;
-  createNewCard: boolean;
-  manageRewards: boolean;
-  reviewWork: boolean;
+  manageRewards: CardTypeToPermissionMap;
+  manageCardProperties: CardTypeToPermissionMap;
+  createNewCard: CardTypeToPermissionMap;
+  reviewWork: CardTypeToPermissionMap;
 };
 
 export type RoleProvider = {

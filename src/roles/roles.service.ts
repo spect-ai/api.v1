@@ -26,10 +26,22 @@ export class RolesService {
           inviteMembers: true,
           manageRoles: true,
           manageMembers: true,
-          manageCardProperties: true,
-          createNewCard: true,
-          manageRewards: true,
-          reviewWork: true,
+          manageCardProperties: {
+            Task: true,
+            Bounty: true,
+          },
+          createNewCard: {
+            Task: true,
+            Bounty: true,
+          },
+          manageRewards: {
+            Task: true,
+            Bounty: true,
+          },
+          reviewWork: {
+            Task: true,
+            Bounty: true,
+          },
         } as CirclePermission,
       },
       contributor: {
@@ -48,10 +60,22 @@ export class RolesService {
           inviteMembers: true,
           manageRoles: false,
           manageMembers: false,
-          manageCardProperties: true,
-          createNewCard: true,
-          manageRewards: false,
-          reviewWork: false,
+          manageCardProperties: {
+            Task: true,
+            Bounty: false,
+          },
+          createNewCard: {
+            Task: true,
+            Bounty: false,
+          },
+          manageRewards: {
+            Task: true,
+            Bounty: false,
+          },
+          reviewWork: {
+            Task: true,
+            Bounty: false,
+          },
         } as CirclePermission,
       },
       member: {
@@ -70,10 +94,22 @@ export class RolesService {
           inviteMembers: false,
           manageRoles: false,
           manageMembers: false,
-          manageCardProperties: false,
-          createNewCard: false,
-          manageRewards: false,
-          reviewWork: false,
+          manageCardProperties: {
+            Task: false,
+            Bounty: false,
+          },
+          createNewCard: {
+            Task: false,
+            Bounty: false,
+          },
+          manageRewards: {
+            Task: false,
+            Bounty: false,
+          },
+          reviewWork: {
+            Task: false,
+            Bounty: false,
+          },
         } as CirclePermission,
       },
       /** TODO: We need to reserve this keyword and not let users set this as role */
@@ -93,10 +129,22 @@ export class RolesService {
           inviteMembers: false,
           manageRoles: false,
           manageMembers: false,
-          manageCardProperties: false,
-          createNewCard: false,
-          manageRewards: false,
-          reviewWork: false,
+          manageCardProperties: {
+            Task: false,
+            Bounty: false,
+          },
+          createNewCard: {
+            Task: false,
+            Bounty: false,
+          },
+          manageRewards: {
+            Task: false,
+            Bounty: false,
+          },
+          reviewWork: {
+            Task: false,
+            Bounty: false,
+          },
         } as CirclePermission,
       },
     } as Roles;

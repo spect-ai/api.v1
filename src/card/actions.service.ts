@@ -23,8 +23,11 @@ export class ActionService {
     private readonly validationService: CardValidationService,
   ) {}
 
-  canCreateCard(circlePermissions: CirclePermission) {
-    if (circlePermissions.createNewCard) return { valid: true };
+  canCreateCard(
+    circlePermissions: CirclePermission,
+    cardType: 'Task' | 'Bounty',
+  ) {
+    if (circlePermissions.createNewCard[cardType]) return { valid: true };
     else
       return {
         valid: false,
@@ -40,7 +43,7 @@ export class ActionService {
   ) {
     if (
       (card.reviewer && card.reviewer.includes(userId)) ||
-      circlePermissions.manageCardProperties
+      circlePermissions.manageCardProperties[card.type]
     )
       return { valid: true };
     else
@@ -56,10 +59,15 @@ export class ActionService {
     circlePermissions: CirclePermission,
     userId: string,
   ) {
+    if (!card.status.active)
+      return {
+        valid: false,
+        reason: 'Card has been closed already',
+      };
     if (
       (card.reviewer && card.reviewer.includes(userId)) ||
       (card.assignee && card.assignee.includes(userId)) ||
-      circlePermissions.manageCardProperties
+      circlePermissions.manageCardProperties[card.type]
     )
       return { valid: true };
     else
@@ -78,7 +86,7 @@ export class ActionService {
     if (
       (card.reviewer && card.reviewer.includes(userId)) ||
       (card.assignee && card.assignee.includes(userId)) ||
-      circlePermissions.manageCardProperties
+      circlePermissions.manageCardProperties[card.type]
     )
       return { valid: true };
     else
@@ -94,10 +102,15 @@ export class ActionService {
     circlePermissions: CirclePermission,
     userId: string,
   ) {
+    if (!card.status.active)
+      return {
+        valid: false,
+        reason: 'Card has been closed already',
+      };
     if (card.type === 'Bounty') {
       if (
         (card.reviewer && card.reviewer.includes(userId)) ||
-        circlePermissions.manageCardProperties
+        circlePermissions.manageCardProperties[card.type]
       )
         return { valid: true };
       else
@@ -110,7 +123,7 @@ export class ActionService {
       if (
         (card.reviewer && card.reviewer.includes(userId)) ||
         (card.assignee && card.assignee.includes(userId)) ||
-        circlePermissions.manageCardProperties
+        circlePermissions.manageCardProperties[card.type]
       )
         return { valid: true };
       else
@@ -146,7 +159,15 @@ export class ActionService {
     circlePermissions: CirclePermission,
     userId: string,
   ) {
-    if (card.reviewer?.includes(userId) || circlePermissions.reviewWork)
+    if (!card.status.active)
+      return {
+        valid: false,
+        reason: 'Card has been closed already',
+      };
+    if (
+      card.reviewer?.includes(userId) ||
+      circlePermissions.reviewWork[card.type]
+    )
       return { valid: true };
     else
       return {
@@ -173,8 +194,9 @@ export class ActionService {
 
   canClose(card: Card, circlePermissions: CirclePermission, userId: string) {
     if (
-      (card.reviewer && card.reviewer.includes(userId)) ||
-      circlePermissions.manageCardProperties
+      card.status.active &&
+      ((card.reviewer && card.reviewer.includes(userId)) ||
+        circlePermissions.manageCardProperties[card.type])
     )
       return { valid: true };
     else
@@ -186,19 +208,26 @@ export class ActionService {
   }
 
   canPay(card: Card, circlePermissions: CirclePermission) {
-    if (circlePermissions.makePayment) return { valid: true };
+    if (
+      circlePermissions.makePayment &&
+      card.assignee?.length > 0 &&
+      !card.status.paid &&
+      card.reward?.value &&
+      card.reward?.value > 0
+    )
+      return { valid: true };
     else
       return {
         valid: false,
         reason:
-          'Only circle members that have permission to pay rewards can pay',
+          'Only circle members that have permission to pay rewards can pay for cards that have an assignee and reward',
       };
   }
 
   canArchive(card: Card, circlePermissions: CirclePermission, userId: string) {
     if (
       (card.reviewer && card.reviewer.includes(userId)) ||
-      circlePermissions.manageCardProperties
+      circlePermissions.manageCardProperties[card.type]
     )
       return { valid: true };
     else
@@ -220,6 +249,11 @@ export class ActionService {
   }
 
   canCreateDiscordThread(card: Card, circle: Circle) {
+    if (!card.status.active)
+      return {
+        valid: false,
+        reason: 'Card has been closed already',
+      };
     return { valid: true };
   }
 
@@ -235,7 +269,7 @@ export class ActionService {
         userId,
       );
     return {
-      canCreateCard: this.canCreateCard(circlePermissions),
+      canCreateCard: this.canCreateCard(circlePermissions, card.type),
       updateGeneralCardInfo: this.canUpdateGeneralInfo(
         card,
         circlePermissions,

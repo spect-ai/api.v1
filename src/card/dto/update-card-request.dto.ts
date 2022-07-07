@@ -30,7 +30,7 @@ export class UpdateCardRequestDto extends OmitType(CreateCardRequestDto, [
   @IsString()
   @IsOptional()
   @IsNotEmpty()
-  type?: string;
+  type?: 'Task' | 'Bounty';
 
   /**
    * The column Id of the card

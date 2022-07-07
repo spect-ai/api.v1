@@ -69,7 +69,7 @@ export class Card extends BaseModel {
    * The type of the card, i.e., task, bounty, etc.
    */
   @prop({ default: 'Task' })
-  type?: string;
+  type: 'Task' | 'Bounty';
 
   /**
    * The deadline the card is due to be completed by
