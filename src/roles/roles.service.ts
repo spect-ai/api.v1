@@ -166,15 +166,17 @@ export class RolesService {
     return true;
   }
 
-  async getSpectRoleFromDiscord(user: User, circle: Circle): Promise<string> {
+  async getSpectRoleFromDiscord(user: User, circle: Circle): Promise<string[]> {
     const discordRole = await this.discordService.getDiscordRole(user.id);
     const discordToCircleRoles = circle.discordToCircleRoles;
     if (!discordToCircleRoles)
       throw new Error('Discord to circle role mapping not setup');
     if (!discordToCircleRoles.hasOwnProperty(discordRole))
       throw new Error('No spect role found for this discord role');
-    if (!Object.keys(circle.roles).includes(discordToCircleRoles[discordRole]))
-      throw new Error('Mapped role doesnt exist in circle anymore');
-    return discordToCircleRoles[discordRole];
+    const activeRoles = [];
+    for (const role of discordToCircleRoles[discordRole]) {
+      if (circle.roles[role]) activeRoles.push(role);
+    }
+    return activeRoles;
   }
 }

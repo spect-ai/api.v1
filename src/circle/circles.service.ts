@@ -342,6 +342,28 @@ export class CirclesService {
     }
   }
 
+  async removeMember(
+    id: string,
+    member: string,
+  ): Promise<DetailedCircleResponseDto> {
+    try {
+      const circle =
+        await this.circlesRepository.getCircleWithUnpopulatedReferences(id);
+      this.validateExistingMember(circle, member);
+      delete circle.memberRoles[member];
+      const updatedCircle = await this.circlesRepository.updateById(id, {
+        members: circle.members.filter((m) => m.toString() !== member),
+        memberRoles: circle.memberRoles,
+      });
+      return updatedCircle;
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Failed removing member',
+        error.message,
+      );
+    }
+  }
+
   async delete(id: string): Promise<Circle> {
     const circle = await this.circlesRepository.findById(id);
     if (!circle) {

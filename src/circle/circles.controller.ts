@@ -188,6 +188,15 @@ export class CirclesController {
     );
   }
 
+  @Patch('/:id/removeMember')
+  @UseGuards(SessionAuthGuard)
+  async removeMember(
+    @Param() param: ObjectIdDto,
+    @Query() memberDto: MemberDto,
+  ): Promise<DetailedCircleResponseDto> {
+    return await this.circlesService.removeMember(param.id, memberDto.member);
+  }
+
   @UseGuards(SessionAuthGuard)
   @Post('/:id/delete')
   @UseGuards(SessionAuthGuard)

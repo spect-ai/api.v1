@@ -33,6 +33,10 @@ export type Invite = {
   expires: Date;
 };
 
+export type DiscordToCircleRoles = {
+  [role: string]: string[];
+};
+
 // eslint-disable-next-line @typescript-eslint/ban-types
 export type EmptyObject = {};
 
@@ -149,7 +153,7 @@ export class Circle extends ProfileModel {
    * A list of roles that the circle has
    */
   @prop({ default: {} })
-  discordToCircleRoles: object;
+  discordToCircleRoles: DiscordToCircleRoles;
 
   /**
    * A list of repos that the circle uses
