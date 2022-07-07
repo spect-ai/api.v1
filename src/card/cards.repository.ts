@@ -3,7 +3,7 @@ import { InjectModel } from 'nestjs-typegoose';
 import { BaseRepository } from 'src/base/base.repository';
 import { Card, ExtendedCard } from './model/card.model';
 import mongodb from 'mongodb';
-import { UpdateWriteOpResult } from 'mongoose';
+import { UpdateQuery, UpdateWriteOpResult } from 'mongoose';
 
 const populatedCardFields = {
   title: 1,
@@ -75,7 +75,7 @@ export class CardsRepository extends BaseRepository<Card> {
 
   async updateCardAndReturnWithPopulatedReferences(
     id: string,
-    update: any,
+    update: UpdateQuery<Card>,
   ): Promise<Card> {
     return await this.updateById(id, update)
       .populate('project')
@@ -127,7 +127,7 @@ export class CardsRepository extends BaseRepository<Card> {
 
   async updateManyByIds(
     ids: string[],
-    update: any,
+    update: UpdateQuery<Card>,
   ): Promise<UpdateWriteOpResult> {
     return await this.updateMany(
       {

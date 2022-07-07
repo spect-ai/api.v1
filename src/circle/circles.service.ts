@@ -198,12 +198,11 @@ export class CirclesService {
     updateCircleDto: UpdateCircleRequestDto,
   ): Promise<DetailedCircleResponseDto> {
     try {
-      const updatedCircle = await this.circlesRepository
-        .updateById(id, updateCircleDto)
-        .populate('parents')
-        .populate('children')
-        .populate('projects')
-        .exec();
+      const updatedCircle =
+        await this.circlesRepository.updateCircleAndReturnWithPopulatedReferences(
+          id,
+          updateCircleDto,
+        );
 
       return updatedCircle;
     } catch (error) {
@@ -268,14 +267,18 @@ export class CirclesService {
 
       circle.invites.splice(inviteIndex, 1);
       invite.uses--;
-      const updatedCircle = await this.circlesRepository.updateById(id, {
-        members: [...circle.members, this.requestProvider.user._id],
-        memberRoles: {
-          ...circle.memberRoles,
-          [this.requestProvider.user.id]: invite.roles,
-        },
-        invites: [...circle.invites, invite],
-      });
+      const updatedCircle =
+        await this.circlesRepository.updateCircleAndReturnWithPopulatedReferences(
+          id,
+          {
+            members: [...circle.members, this.requestProvider.user._id],
+            memberRoles: {
+              ...circle.memberRoles,
+              [this.requestProvider.user.id]: invite.roles,
+            },
+            invites: [...circle.invites, invite],
+          },
+        );
       return updatedCircle;
     } catch (error) {
       console.log(error);
@@ -301,13 +304,17 @@ export class CirclesService {
           HttpStatus.NOT_FOUND,
         );
       }
-      const updatedCircle = await this.circlesRepository.updateById(id, {
-        members: [...circle.members, this.requestProvider.user._id],
-        memberRoles: {
-          ...circle.memberRoles,
-          [this.requestProvider.user.id]: role,
-        },
-      });
+      const updatedCircle =
+        await this.circlesRepository.updateCircleAndReturnWithPopulatedReferences(
+          id,
+          {
+            members: [...circle.members, this.requestProvider.user._id],
+            memberRoles: {
+              ...circle.memberRoles,
+              [this.requestProvider.user.id]: role,
+            },
+          },
+        );
       return updatedCircle;
     } catch (error) {
       throw new InternalServerErrorException(
@@ -328,12 +335,16 @@ export class CirclesService {
       this.validateExistingMember(circle, member);
       this.validateRolesExistInCircle(circle, updateMemberRolesDto.roles);
 
-      const updatedCircle = await this.circlesRepository.updateById(id, {
-        memberRoles: {
-          ...circle.memberRoles,
-          [member]: updateMemberRolesDto.roles,
-        },
-      });
+      const updatedCircle =
+        await this.circlesRepository.updateCircleAndReturnWithPopulatedReferences(
+          id,
+          {
+            memberRoles: {
+              ...circle.memberRoles,
+              [member]: updateMemberRolesDto.roles,
+            },
+          },
+        );
       return updatedCircle;
     } catch (error) {
       throw new InternalServerErrorException(
@@ -352,10 +363,14 @@ export class CirclesService {
         await this.circlesRepository.getCircleWithUnpopulatedReferences(id);
       this.validateExistingMember(circle, member);
       delete circle.memberRoles[member];
-      const updatedCircle = await this.circlesRepository.updateById(id, {
-        members: circle.members.filter((m) => m.toString() !== member),
-        memberRoles: circle.memberRoles,
-      });
+      const updatedCircle =
+        await this.circlesRepository.updateCircleAndReturnWithPopulatedReferences(
+          id,
+          {
+            members: circle.members.filter((m) => m.toString() !== member),
+            memberRoles: circle.memberRoles,
+          },
+        );
       return updatedCircle;
     } catch (error) {
       throw new InternalServerErrorException(

@@ -3,7 +3,7 @@ import { InjectModel } from 'nestjs-typegoose';
 import { BaseRepository } from 'src/base/base.repository';
 import { Circle } from './model/circle.model';
 import { Ref } from '@typegoose/typegoose';
-import { ObjectId, Types } from 'mongoose';
+import { ObjectId, Types, UpdateQuery } from 'mongoose';
 @Injectable()
 export class CirclesRepository extends BaseRepository<Circle> {
   constructor(@InjectModel(Circle) circleModel) {
@@ -28,6 +28,16 @@ export class CirclesRepository extends BaseRepository<Circle> {
       .populate('children')
       .populate('projects')
       .exec();
+  }
+
+  async updateCircleAndReturnWithPopulatedReferences(
+    id: string,
+    update: UpdateQuery<Circle>,
+  ) {
+    return await this.updateById(id, update)
+      .populate('parents')
+      .populate('children')
+      .populate('projects');
   }
 
   async getParentCirclesByUser(user: string): Promise<Circle[]> {

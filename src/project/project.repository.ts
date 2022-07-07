@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { UpdateQuery } from 'mongoose';
 import { InjectModel } from 'nestjs-typegoose';
 import { BaseRepository } from 'src/base/base.repository';
 import { DetailedProjectResponseDto } from './dto/detailed-project-response.dto';
@@ -69,7 +70,7 @@ export class ProjectsRepository extends BaseRepository<Project> {
 
   async updateProjectAndReturnWithPopulatedReferences(
     id: string,
-    update: any,
+    update: UpdateQuery<Project>,
   ): Promise<Project> {
     return await this.updateById(id, update)
       .populate('parents')
