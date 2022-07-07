@@ -272,12 +272,13 @@ export class CirclesService {
         members: [...circle.members, this.requestProvider.user._id],
         memberRoles: {
           ...circle.memberRoles,
-          [this.requestProvider.user.id]: [invite.role],
+          [this.requestProvider.user.id]: invite.roles,
         },
         invites: [...circle.invites, invite],
       });
       return updatedCircle;
     } catch (error) {
+      console.log(error);
       throw new InternalServerErrorException(
         'Failed joining circle',
         error.message,

@@ -28,7 +28,7 @@ export type BlacklistRegistry = {
 
 export type Invite = {
   id: string;
-  role: string;
+  roles: string[];
   uses: number;
   expires: Date;
 };
