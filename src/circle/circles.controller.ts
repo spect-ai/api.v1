@@ -146,7 +146,7 @@ export class CirclesController {
     return await this.circlesService.update(param.id, circle);
   }
 
-  @Patch('/invite/:id')
+  @Patch('/:id/invite')
   @UseGuards(SessionAuthGuard)
   async invite(
     @Param() param: ObjectIdDto,
@@ -155,14 +155,23 @@ export class CirclesController {
     return await this.circlesService.invite(param.id, invitation);
   }
 
-  @Patch('/joinUsingInvitation/:id')
+  @Patch('/:id/joinUsingInvitation')
   @ApiParam({ name: 'id', type: 'string' })
   @UseGuards(SessionAuthGuard)
-  async join(
+  async joinUsingInvitation(
     @Param() param: ObjectIdDto,
     @Body() joinDto: JoinCircleUsingInvitationRequestDto,
   ): Promise<DetailedCircleResponseDto> {
     return await this.circlesService.joinUsingInvitation(param.id, joinDto);
+  }
+
+  @Patch('/:id/joinUsingDiscord')
+  @ApiParam({ name: 'id', type: 'string' })
+  @UseGuards(SessionAuthGuard)
+  async joinUsingDiscord(
+    @Param() param: ObjectIdDto,
+  ): Promise<DetailedCircleResponseDto> {
+    return await this.circlesService.joinUsingDiscord(param.id);
   }
 
   @Patch('/:id/updateMemberRoles')

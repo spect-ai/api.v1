@@ -7,6 +7,6 @@ import { BaseModel } from 'src/base/base.model';
 @Injectable()
 export class DiscordService {
   async getDiscordRole(discordId: string): Promise<string> {
-    return 'discord-role';
+    return 'legend';
   }
 }
