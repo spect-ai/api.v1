@@ -13,7 +13,6 @@ import { ObjectIdDto } from 'src/common/dtos/object-id.dto';
 import { CardsProjectService } from './cards.project.service';
 import { CreateProjectRequestDto } from './dto/create-project-request.dto';
 import { DetailedProjectResponseDto } from './dto/detailed-project-response.dto';
-import { ReorderCardReqestDto } from './dto/reorder-card-request.dto';
 import { UpdateColumnRequestDto } from './dto/update-column.dto';
 import { UpdateProjectRequestDto } from './dto/update-project-request.dto';
 import { Project } from './model/project.model';

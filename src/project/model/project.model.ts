@@ -77,5 +77,8 @@ export class Project extends BaseModel {
    * Channel in which discussion threads about cards in the circle will be posted
    */
   @prop()
-  discordDiscussionChannel: string;
+  discordDiscussionChannel: {
+    id: string;
+    name: string;
+  };
 }

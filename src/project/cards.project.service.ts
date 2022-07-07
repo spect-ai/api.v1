@@ -1,15 +1,11 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CardsRepository } from 'src/card/cards.repository';
-import { CirclesRepository } from 'src/circle/circles.repository';
 import { DataStructureManipulationService } from 'src/common/dataStructureManipulation.service';
-import { SlugService } from 'src/common/slug.service';
-import { TemplatesRepository } from 'src/template/tempates.repository';
 import { DetailedProjectResponseDto } from './dto/detailed-project-response.dto';
 import { ReorderCardReqestDto } from './dto/reorder-card-request.dto';
 import { Project } from './model/project.model';
 import { ProjectsRepository } from './project.repository';
 import { CardLoc, MappedProject } from './types/types';
-import mongodb from 'mongodb';
 
 @Injectable()
 export class CardsProjectService {
