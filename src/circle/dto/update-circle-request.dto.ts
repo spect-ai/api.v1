@@ -3,6 +3,7 @@ import {
   IsArray,
   IsBoolean,
   IsNotEmpty,
+  IsObject,
   IsOptional,
   IsString,
 } from 'class-validator';
@@ -40,4 +41,25 @@ export class UpdateCircleRequestDto extends OmitType(CreateCircleRequestDto, [
   @IsBoolean()
   @IsOptional()
   archived?: boolean;
+
+  /**
+   * Discord server id of the circle
+   */
+  @IsString()
+  @IsOptional()
+  discordGuildId?: string;
+
+  /**
+   * A list of roles that the circle has
+   */
+  @IsObject()
+  @IsOptional()
+  discordToCircleRoles?: object;
+
+  /**
+   * A list of repos that the circle uses
+   */
+  @IsArray()
+  @IsOptional()
+  githubRepos?: string[];
 }

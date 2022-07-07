@@ -148,6 +148,12 @@ export class Circle extends ProfileModel {
   /**
    * A list of roles that the circle has
    */
-  @prop()
+  @prop({ default: {} })
   discordToCircleRoles: object;
+
+  /**
+   * A list of repos that the circle uses
+   */
+  @prop({ default: [] })
+  githubRepos: string[];
 }

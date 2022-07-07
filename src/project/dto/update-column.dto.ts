@@ -16,4 +16,10 @@ export class UpdateColumnRequestDto {
   @IsNotEmpty()
   @IsOptional()
   defaultCardType: 'Task' | 'Bounty';
+
+  /** Channel to which notifs are sent when cards are added to this column */
+  @IsString()
+  @IsNotEmpty()
+  @IsOptional()
+  notificationChannel?: string;
 }
