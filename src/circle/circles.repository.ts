@@ -52,6 +52,13 @@ export class CirclesRepository extends BaseRepository<Circle> {
     return await this.findById(id);
   }
 
+  async getCircleWithUnpopulatedReferencesBySlug(
+    slug: string,
+  ): Promise<Circle> {
+    console.log(slug);
+    return await this.findOne({ slug: slug }).exec();
+  }
+
   async getPublicParentCircles(): Promise<Circle[]> {
     return await this.findAll({
       parents: { $exists: true, $eq: [] },

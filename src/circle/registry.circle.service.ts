@@ -14,9 +14,11 @@ export class CircleRegistryService {
     private readonly registryService: RegistryService,
   ) {}
 
-  async getPaymentMethods(id: string) {
+  async getPaymentMethods(slug: string) {
     const circle =
-      await this.circlesRepository.getCircleWithUnpopulatedReferences(id);
+      await this.circlesRepository.getCircleWithUnpopulatedReferencesBySlug(
+        slug,
+      );
 
     if (!circle) {
       throw new HttpException('Circle not found', HttpStatus.NOT_FOUND);

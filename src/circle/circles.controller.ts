@@ -86,6 +86,11 @@ export class CirclesController {
     return await this.circlesService.getMemberDetailsOfCircles(circleIds);
   }
 
+  @Get('/slug/:slug/getRegistry')
+  async getRegistry(@Param('slug') slug) {
+    return await this.circleRegistryService.getPaymentMethods(slug);
+  }
+
   @Get('/slug/:slug')
   async findBySlug(@Param('slug') slug): Promise<DetailedCircleResponseDto> {
     return await this.circlesService.getCircleWithSlug(slug);
@@ -97,13 +102,6 @@ export class CirclesController {
   ): Promise<DetailedCircleResponseDto> {
     return await this.circlesRepository.getCircleWithPopulatedReferences(
       param.id,
-    );
-  }
-
-  @Get('/:id/getRegistry')
-  async getRegistry(@Param() param: ObjectIdDto) {
-    return await this.circleRegistryService.getPaymentMethods(
-      param.id.toString(),
     );
   }
 
