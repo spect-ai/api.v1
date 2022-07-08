@@ -37,7 +37,7 @@ import { CardsPaymentService } from './card/payment.cards.service';
 import { CircleRegistryService } from './circle/registry.circle.service';
 import { AutomationService } from './automation/automation.service';
 import { AutomationModule } from './automation/automation.module';
-import { CardCommandHandler } from './card/command.handler';
+import { CardCommandHandler } from './card/handlers/update.command.handler';
 
 const databaseUrl =
   process.env.DATABASE_URL || 'mongodb://localhost:27017/nest';

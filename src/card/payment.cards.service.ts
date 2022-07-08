@@ -16,6 +16,7 @@ import { AggregatedFlattenedPaymentInfo } from './dto/payment-info-response.dto'
 import { UpdatePaymentInfoDto } from './dto/update-payment-info.dto';
 import { Card } from './model/card.model';
 import { ResponseBuilder } from './response.builder';
+import { MappedCard } from './types/types';
 import { CardValidationService } from './validation.cards.service';
 
 @Injectable()
@@ -123,7 +124,10 @@ export class CardsPaymentService {
     return aggregatedPaymentInfo;
   }
 
-  buildUpdateQuery(card: Card, updatePaymentInfoDto: UpdatePaymentInfoDto) {
+  updatePaymentInfo(
+    card: Card,
+    updatePaymentInfoDto: UpdatePaymentInfoDto,
+  ): MappedCard {
     const activities = this.activityBuilder.buildUpdatedCardActivity(
       {
         status: {
@@ -135,61 +139,89 @@ export class CardsPaymentService {
       card,
     );
 
-    return this.cardsRepository.updateOneByIdQuery(card._id, {
-      $set: {
-        'reward.transactionHash': updatePaymentInfoDto.transactionHash,
-        'status.active': false,
-        'status.paid': true,
+    return {
+      [card.id]: {
+        activity: card.activity.concat(activities),
+        reward: {
+          ...card.reward,
+          transactionHash: updatePaymentInfoDto.transactionHash,
+        },
+        status: {
+          ...card.status,
+          paid: true,
+          active: false,
+        },
       },
-      $push: {
-        activity: activities[0],
-      },
-    });
+    };
   }
 
-  async updatePaymentInfoAndClose(
-    updatePaymentInfo: UpdatePaymentInfoDto,
-  ): Promise<any> {
-    try {
-      if (updatePaymentInfo.cardIds.length === 0) {
-        throw new HttpException(
-          'Card ids cannot be empty',
-          HttpStatus.INTERNAL_SERVER_ERROR,
-        );
-      }
+  // buildUpdateQuery(card: Card, updatePaymentInfoDto: UpdatePaymentInfoDto) {
+  //   const activities = this.activityBuilder.buildUpdatedCardActivity(
+  //     {
+  //       status: {
+  //         active: false,
+  //         paid: true,
+  //         archived: false,
+  //       },
+  //     },
+  //     card,
+  //   );
 
-      /** Get all the cards with all their children */
-      const cards =
-        await this.cardsRepository.getCardWithAllChildrenForMultipleCards(
-          updatePaymentInfo.cardIds,
-        );
-      const projectId = cards[0].project;
+  //   return this.cardsRepository.updateOneByIdQuery(card._id, {
+  //     $set: {
+  //       'reward.transactionHash': updatePaymentInfoDto.transactionHash,
+  //       'status.active': false,
+  //       'status.paid': true,
+  //     },
+  //     $push: {
+  //       activity: activities[0],
+  //     },
+  //   });
+  // }
 
-      /** Flatten all parent cards and child cards */
-      const queries = [];
-      for (const card of cards) {
-        for (const child of card.flattenedChildren) {
-          queries.push(this.buildUpdateQuery(child, updatePaymentInfo));
-        }
-        queries.push(this.buildUpdateQuery(card, updatePaymentInfo));
-      }
+  // async updatePaymentInfoAndClose(
+  //   updatePaymentInfo: UpdatePaymentInfoDto,
+  // ): Promise<any> {
+  //   try {
+  //     if (updatePaymentInfo.cardIds.length === 0) {
+  //       throw new HttpException(
+  //         'Card ids cannot be empty',
+  //         HttpStatus.INTERNAL_SERVER_ERROR,
+  //       );
+  //     }
 
-      // /** Mongo only returns an acknowledgment on bulk write and not the updated records itself */
-      const acknowledgment = await this.cardsRepository.bulkWrite(queries);
+  //     /** Get all the cards with all their children */
+  //     const cards =
+  //       await this.cardsRepository.getCardWithAllChildrenForMultipleCards(
+  //         updatePaymentInfo.cardIds,
+  //       );
+  //     const projectId = cards[0].project;
 
-      if (acknowledgment.hasWriteErrors()) {
-        console.log(acknowledgment.getWriteErrors());
-        throw new HttpException(
-          'Something went wrong while updating payment info',
-          HttpStatus.INTERNAL_SERVER_ERROR,
-        );
-      }
-      return await this.projectService.getDetailedProject(projectId);
-    } catch (error) {
-      throw new InternalServerErrorException(
-        'Failed updating payment info',
-        error.message,
-      );
-    }
-  }
+  //     /** Flatten all parent cards and child cards */
+  //     const queries = [];
+  //     for (const card of cards) {
+  //       for (const child of card.flattenedChildren) {
+  //         queries.push(this.buildUpdateQuery(child, updatePaymentInfo));
+  //       }
+  //       queries.push(this.buildUpdateQuery(card, updatePaymentInfo));
+  //     }
+
+  //     // /** Mongo only returns an acknowledgment on bulk write and not the updated records itself */
+  //     const acknowledgment = await this.cardsRepository.bulkWrite(queries);
+
+  //     if (acknowledgment.hasWriteErrors()) {
+  //       console.log(acknowledgment.getWriteErrors());
+  //       throw new HttpException(
+  //         'Something went wrong while updating payment info',
+  //         HttpStatus.INTERNAL_SERVER_ERROR,
+  //       );
+  //     }
+  //     return await this.projectService.getDetailedProject(projectId);
+  //   } catch (error) {
+  //     throw new InternalServerErrorException(
+  //       'Failed updating payment info',
+  //       error.message,
+  //     );
+  //   }
+  //}
 }

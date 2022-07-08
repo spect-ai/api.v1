@@ -72,7 +72,7 @@ export class AutomationService {
     card: Card,
     project: Project,
   ): GlobalDocumentUpdate {
-    const projectUpdate = this.cardProjectService.reorderCardNew(
+    const projectUpdate = this.cardProjectService.reorderCard(
       project,
       card.id,
       {
@@ -102,9 +102,9 @@ export class AutomationService {
 
   takeStatusAction(
     globalUpdate: GlobalDocumentUpdate,
-    card: Card,
     properties: string[],
     value: any,
+    card: Card,
   ): GlobalDocumentUpdate {
     for (const [key, val] of Object.entries(value)) {
       if (key === 'to') {
@@ -142,7 +142,6 @@ export class AutomationService {
         update,
         triggerPropertyArray,
       );
-      console.log(values);
       if (!values) continue;
       const currVal = values[0];
       const newVal = values[1];
@@ -157,7 +156,6 @@ export class AutomationService {
         automation.conditions,
       );
       if (!satisfiesConditions) continue;
-
       for (const action of automation.actions) {
         const properties = action.property.split('.');
         const value = action.value;
@@ -171,9 +169,9 @@ export class AutomationService {
         } else if (properties[0] === 'status') {
           globalUpdate = this.takeStatusAction(
             globalUpdate,
-            card,
             properties,
             value,
+            card,
           );
         }
       }

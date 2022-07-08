@@ -259,7 +259,7 @@ export class CardsService {
     }
   }
 
-  updateNew(
+  update(
     card: Card,
     project: Project,
     updateCardDto: UpdateCardRequestDto,
@@ -274,7 +274,6 @@ export class CardsService {
 
       return {
         [card.id]: {
-          ...card,
           ...updateCardDto,
           activity: updatedActivity,
           status: {

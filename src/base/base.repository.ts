@@ -263,12 +263,13 @@ export abstract class BaseRepository<TModel extends BaseModel> {
   }
 
   updateOneByIdQuery(
-    id: ObjectId,
+    id: string,
     update: mongodb.UpdateFilter<TModel>,
   ): mongodb.AnyBulkWriteOperation {
+    const _id = this.toObjectId(id);
     return {
       updateOne: {
-        filter: { _id: id },
+        filter: { _id },
         update: update,
       },
     };

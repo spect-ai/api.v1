@@ -1,9 +1,10 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from 'nestjs-typegoose';
 import { BaseRepository } from 'src/base/base.repository';
 import { Card, ExtendedCard } from './model/card.model';
-import mongodb from 'mongodb';
 import { UpdateQuery, UpdateWriteOpResult } from 'mongoose';
+import { MappedCard } from './types/types';
+import mongodb from 'mongodb';
 
 const populatedCardFields = {
   title: 1,
@@ -122,6 +123,14 @@ export class CardsRepository extends BaseRepository<Card> {
         },
       },
     ]);
+
+    /** Aggregate query doesnt add id so adding manually */
+    for (const card of cards) {
+      card.id = card._id.toString();
+      for (const child of card.flattenedChildren) {
+        child.id = child._id.toString();
+      }
+    }
     return cards;
   }
 
@@ -138,5 +147,31 @@ export class CardsRepository extends BaseRepository<Card> {
         multi: true,
       },
     );
+  }
+
+  async bundleUpdatesAndExecute(
+    updates: MappedCard,
+  ): Promise<mongodb.BulkWriteResult> {
+    const queries = [];
+    console.log(updates);
+
+    for (const [id, update] of Object.entries(updates)) {
+      queries.push(this.updateOneByIdQuery(id, update));
+    }
+    console.log(queries);
+
+    if (queries.length === 0) return;
+
+    const acknowledgment = await this.bulkWrite(queries);
+    console.log(acknowledgment);
+    if (acknowledgment.hasWriteErrors()) {
+      console.log(acknowledgment.getWriteErrors());
+      throw new HttpException(
+        'Something went wrong while updating payment info',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+
+    return acknowledgment;
   }
 }

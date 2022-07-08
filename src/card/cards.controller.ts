@@ -44,7 +44,7 @@ import { ActionService } from './actions.service';
 import { WorkService } from './work.cards.service';
 import { CommentService } from './comments.cards.service';
 import { CardsPaymentService } from './payment.cards.service';
-import { CardCommandHandler } from './command.handler';
+import { CardCommandHandler } from './handlers/update.command.handler';
 
 @Controller('card')
 @ApiTags('card')
@@ -95,7 +95,7 @@ export class CardsController {
   async updatePaymentInfoAndClose(
     @Body() updatePaymentInfoDto: UpdatePaymentInfoDto,
   ): Promise<DetailedProjectResponseDto> {
-    return await this.paymentService.updatePaymentInfoAndClose(
+    return await this.cardCommandHandler.updatePaymentInfoAndClose(
       updatePaymentInfoDto,
     );
   }
@@ -145,16 +145,6 @@ export class CardsController {
   ): Promise<DetailedCardResponseDto> {
     return await this.cardCommandHandler.update(params.id, card);
   }
-
-  // @Patch('/:id/updateOld')
-  // @UseGuards(SessionAuthGuard)
-  // @ApiParam({ name: 'id', type: 'string' })
-  // async update(
-  //   @Param() params: ObjectIdDto,
-  //   @Body() card: UpdateCardRequestDto,
-  // ): Promise<DetailedCardResponseDto> {
-  //   return await this.cardsService.update(params.id, card);
-  // }
 
   @Patch('/:id/createWorkThread')
   @UseGuards(SessionAuthGuard)

@@ -89,7 +89,7 @@ export class CardsProjectService {
     return cardLoc;
   }
 
-  reorderCardNew(
+  reorderCard(
     project: Project,
     cardId: string,
     destinationCardLoc: ReorderCardReqestDto,
@@ -97,8 +97,10 @@ export class CardsProjectService {
     // Find where the card is in the project now
     const sourceCardLoc = this.findCardLocationInProject(project, cardId);
     if (!sourceCardLoc.columnId) {
+      console.log(`Card ${cardId} not found in project`);
       throw new HttpException('Card not found', HttpStatus.NOT_FOUND);
     }
+
     // Get the destination card index based on the input
     let destinationCardIndex: number;
     if (destinationCardLoc.destinationCardIndex === 'end') {
@@ -120,7 +122,6 @@ export class CardsProjectService {
         HttpStatus.BAD_REQUEST,
       );
     }
-
     // Update the card location in the project
     columnDetails[sourceCardLoc.columnId].cards.splice(
       sourceCardLoc.cardIndex,
@@ -145,7 +146,6 @@ export class CardsProjectService {
 
     return {
       [project.id]: {
-        ...project,
         columnDetails,
       },
     };

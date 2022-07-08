@@ -1,10 +1,10 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import mongodb from 'mongodb';
 import { UpdateQuery } from 'mongoose';
 import { InjectModel } from 'nestjs-typegoose';
 import { BaseRepository } from 'src/base/base.repository';
-import { DetailedProjectResponseDto } from './dto/detailed-project-response.dto';
-import { UpdateProjectRequestDto } from './dto/update-project-request.dto';
 import { Project } from './model/project.model';
+import { MappedProject } from './types/types';
 
 const populatedCardFields = {
   title: 1,
@@ -81,5 +81,25 @@ export class ProjectsRepository extends BaseRepository<Project> {
           $exists: false,
         },
       });
+  }
+
+  async bundleUpdatesAndExecute(
+    updates: MappedProject,
+  ): Promise<mongodb.BulkWriteResult> {
+    const queries = [];
+    for (const [id, update] of Object.entries(updates)) {
+      queries.push(this.updateOneByIdQuery(id, update));
+    }
+    if (queries.length === 0) return;
+    const acknowledgment = await this.bulkWrite(queries);
+    if (acknowledgment.hasWriteErrors()) {
+      console.log(acknowledgment.getWriteErrors());
+      throw new HttpException(
+        'Something went wrong while updating payment info',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+
+    return acknowledgment;
   }
 }

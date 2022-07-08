@@ -24,7 +24,7 @@ import { ResponseBuilder } from './response.builder';
 import { CommentService } from './comments.cards.service';
 import { CardsProjectService } from 'src/project/cards.project.service';
 import { CardsPaymentService } from './payment.cards.service';
-import { CardCommandHandler } from './command.handler';
+import { CardCommandHandler } from './handlers/update.command.handler';
 import { AutomationModule } from 'src/automation/automation.module';
 import { AutomationService } from 'src/automation/automation.service';
 
