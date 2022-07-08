@@ -280,6 +280,18 @@ export class CardsService {
             ...card.status,
             ...updateCardDto.status,
           },
+          reward: {
+            ...card.reward,
+            ...updateCardDto.reward,
+            chain: {
+              ...card.reward.chain,
+              ...updateCardDto.reward.chain,
+            },
+            token: {
+              ...card.reward.token,
+              ...updateCardDto.reward.token,
+            },
+          },
         },
       };
     } catch (error) {

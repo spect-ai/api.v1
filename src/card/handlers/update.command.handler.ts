@@ -59,52 +59,33 @@ export class CardCommandHandler {
       } as GlobalDocumentUpdate;
 
       const cardUpdate = this.cardsService.update(card, project, updateCardDto);
-      globalUpdate.card = {
-        ...globalUpdate.card,
-        ...cardUpdate,
-      };
 
       const globalUpdateAfterAutomation =
         this.automationService.handleAutomation(card, project, updateCardDto);
 
-      console.log(`before collate globalUpdateAfterAutomation`);
-      console.log(globalUpdateAfterAutomation);
-
-      globalUpdate.project =
-        this.datastructureManipulationService.collateifyObjectOfObjects(
-          globalUpdate.project,
-          globalUpdateAfterAutomation.project,
-        ) as MappedProject;
-
-      globalUpdate.card =
-        this.datastructureManipulationService.collateifyObjectOfObjects(
-          globalUpdate.card,
-          globalUpdateAfterAutomation.card,
-        ) as MappedCard;
-
+      let projectUpdate = {};
       if (updateCardDto.columnId || updateCardDto.cardIndex) {
-        const projectUpdate = this.cardsProjectService.reorderCard(
-          project,
-          id,
-          {
-            destinationColumnId: updateCardDto.columnId
-              ? updateCardDto.columnId
-              : card.columnId,
-            destinationCardIndex: updateCardDto.cardIndex
-              ? updateCardDto.cardIndex
-              : 0,
-          } as ReorderCardReqestDto,
-        );
-
-        globalUpdate.project =
-          this.datastructureManipulationService.collateifyObjectOfObjects(
-            globalUpdate.project,
-            projectUpdate,
-          ) as MappedProject;
+        projectUpdate = this.cardsProjectService.reorderCard(project, id, {
+          destinationColumnId: updateCardDto.columnId
+            ? updateCardDto.columnId
+            : card.columnId,
+          destinationCardIndex: updateCardDto.cardIndex
+            ? updateCardDto.cardIndex
+            : 0,
+        } as ReorderCardReqestDto);
       }
 
-      console.log(`globalUpdate122`);
-      console.log(globalUpdate);
+      globalUpdate.project = this.datastructureManipulationService.mergeObjects(
+        globalUpdate.project[project.id],
+        globalUpdateAfterAutomation.project[project.id],
+        projectUpdate[project.id],
+      ) as MappedProject;
+
+      globalUpdate.card = this.datastructureManipulationService.mergeObjects(
+        globalUpdate.card[id],
+        globalUpdateAfterAutomation.card[id],
+        cardUpdate[id],
+      ) as MappedCard;
 
       const acknowledgment = await this.cardsRepository.bundleUpdatesAndExecute(
         globalUpdate.card,
