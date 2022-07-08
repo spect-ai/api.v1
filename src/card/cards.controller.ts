@@ -148,6 +148,17 @@ export class CardsController {
     return await this.cardCommandHandler.update(params.id, card);
   }
 
+  @Patch('/:id/createWorkThreadWithPR')
+  async createWorkThreadWithPR(
+    @Param() params: ObjectIdDto,
+    @Body() createWorkThread: CreateWorkThreadRequestDto,
+  ): Promise<DetailedCardResponseDto> {
+    return await this.workCommandHandler.handleCreateWorkThread(
+      params.id,
+      createWorkThread,
+    );
+  }
+
   @Patch('/:id/createWorkThread')
   @UseGuards(SessionAuthGuard)
   async createWorkThread(
