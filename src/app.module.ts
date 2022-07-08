@@ -30,7 +30,7 @@ import { ApplicationService } from './card/application.cards.service';
 import { ActivityResolver } from './card/activity.resolver';
 import { WorkService } from './card/work.cards.service';
 import { CardValidationService } from './card/validation.cards.service';
-import { ResponseBuilder } from './card/response.builder';
+import { CommonUtility, ResponseBuilder } from './card/response.builder';
 import { CommentService } from './card/comments.cards.service';
 import { CardsProjectService } from './project/cards.project.service';
 import { CardsPaymentService } from './card/payment.cards.service';
@@ -38,6 +38,7 @@ import { CircleRegistryService } from './circle/registry.circle.service';
 import { AutomationService } from './automation/automation.service';
 import { AutomationModule } from './automation/automation.module';
 import { CardCommandHandler } from './card/handlers/update.command.handler';
+import { WorkCommandHandler } from './card/handlers/work.command.handler';
 
 const databaseUrl =
   process.env.DATABASE_URL || 'mongodb://localhost:27017/nest';
@@ -90,6 +91,8 @@ console.log({ databaseUrl });
     CircleRegistryService,
     AutomationService,
     CardCommandHandler,
+    WorkCommandHandler,
+    CommonUtility,
   ],
 })
 export class AppModule {}

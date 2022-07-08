@@ -72,6 +72,28 @@ export class CreateWorkUnitRequestDto {
   status: 'accepted' | 'inRevision' | 'inReview' | 'draft';
 }
 
-export class UpdateWorkUnitRequestDto extends PartialType(
-  CreateWorkUnitRequestDto,
-) {}
+export class UpdateWorkUnitRequestDto {
+  /**
+   * Is the submission a revision instruction or a submission
+   */
+  @IsString()
+  @IsNotEmpty()
+  @IsOptional()
+  type: 'submission' | 'revision' | 'feedback';
+
+  /**
+   * Submission content
+   */
+  @IsString()
+  @IsNotEmpty()
+  @IsOptional()
+  content: string;
+
+  /**
+   * Submission thread status
+   */
+  @IsString()
+  @IsNotEmpty()
+  @IsOptional()
+  status: 'accepted' | 'inRevision' | 'inReview' | 'draft';
+}

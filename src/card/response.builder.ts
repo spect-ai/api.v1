@@ -1,8 +1,14 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { DataStructureManipulationService } from 'src/common/dataStructureManipulation.service';
+import { GlobalDocumentUpdate } from 'src/common/types/update.type';
+import { ProjectsRepository } from 'src/project/project.repository';
+import { MappedProject } from 'src/project/types/types';
 import { RequestProvider } from 'src/users/user.provider';
 import { ActivityResolver } from './activity.resolver';
+import { CardsRepository } from './cards.repository';
 import { DetailedCardResponseDto } from './dto/detailed-card-response-dto';
 import { Card } from './model/card.model';
+import { MappedCard } from './types/types';
 
 @Injectable()
 export class ResponseBuilder {
@@ -45,5 +51,51 @@ export class ResponseBuilder {
     card = await this.activityResolver.resolveActivities(card);
     card.activity = card.activity.reverse();
     return card;
+  }
+}
+
+@Injectable()
+export class CommonUtility {
+  constructor(
+    private readonly requestProvider: RequestProvider,
+    private readonly responseBuilder: ResponseBuilder,
+    private readonly cardsRepository: CardsRepository,
+    private readonly projectRepository: ProjectsRepository,
+    private readonly datastructureManipulationService: DataStructureManipulationService,
+  ) {}
+
+  async mergeExecuteAndReturn(
+    cardId: string,
+    projectId: string,
+    globalUpdate: GlobalDocumentUpdate,
+    globalUpdateAfterAutomation: GlobalDocumentUpdate,
+    cardUpdate: MappedCard,
+    projectUpdate?: MappedProject,
+  ) {
+    globalUpdate.project[projectId] =
+      this.datastructureManipulationService.mergeObjects(
+        globalUpdate.project[projectId],
+        globalUpdateAfterAutomation.project[projectId],
+      ) as MappedProject;
+
+    globalUpdate.card[cardId] =
+      this.datastructureManipulationService.mergeObjects(
+        globalUpdate.card[cardId],
+        globalUpdateAfterAutomation.card[cardId],
+        cardUpdate[cardId],
+      ) as MappedCard;
+
+    const acknowledgment = await this.cardsRepository.bundleUpdatesAndExecute(
+      globalUpdate.card,
+    );
+
+    const projectUpdateAcknowledgment =
+      await this.projectRepository.bundleUpdatesAndExecute(
+        globalUpdate.project,
+      );
+
+    const resultingCard =
+      await this.cardsRepository.getCardWithPopulatedReferences(cardId);
+    return this.responseBuilder.enrichResponse(resultingCard);
   }
 }

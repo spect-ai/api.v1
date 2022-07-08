@@ -13,6 +13,8 @@ import { v4 as uuidv4 } from 'uuid';
 import { ActivityBuilder } from './activity.builder';
 import { ResponseBuilder } from './response.builder';
 import { CardValidationService } from './validation.cards.service';
+import { Card } from './model/card.model';
+import { MappedCard } from './types/types';
 
 @Injectable()
 export class WorkService {
@@ -25,14 +27,11 @@ export class WorkService {
     private readonly responseBuilder: ResponseBuilder,
   ) {}
 
-  async createWorkThread(
-    id: string,
+  async createWorkThreadNew(
+    card: Card,
     createWorkThread: CreateWorkThreadRequestDto,
-  ): Promise<DetailedCardResponseDto> {
+  ): Promise<MappedCard> {
     try {
-      const card = await this.cardsRepository.findById(id);
-      this.validationService.validateCardExists(card);
-
       const workUnitId = uuidv4();
       const workUnit = {};
       workUnit[workUnitId] = {
@@ -66,16 +65,13 @@ export class WorkService {
         createWorkThread.content,
         'submission',
       );
-      const updatedCard =
-        await this.cardsRepository.updateCardAndReturnWithPopulatedReferences(
-          id,
-          {
-            workThreads,
-            workThreadOrder,
-            activity: activity ? [...card.activity, activity] : activity,
-          },
-        );
-      return this.responseBuilder.enrichResponse(updatedCard);
+      return {
+        [card.id]: {
+          workThreads,
+          workThreadOrder,
+          activity: activity ? [...card.activity, activity] : card.activity,
+        },
+      };
     } catch (error) {
       throw new InternalServerErrorException(
         'Failed creating work thread',
@@ -84,16 +80,12 @@ export class WorkService {
     }
   }
 
-  async updateWorkThread(
-    id: string,
+  async updateWorkThreadNew(
+    card: Card,
     threadId: string,
     updateWorkThread: UpdateWorkThreadRequestDto,
-  ): Promise<DetailedCardResponseDto> {
+  ): Promise<MappedCard> {
     try {
-      const card = await this.cardsRepository.findById(id);
-      this.validationService.validateCardExists(card);
-      this.validationService.validateCardThreadExists(card, threadId);
-
       card.workThreads[threadId] = {
         ...card.workThreads[threadId],
         ...updateWorkThread,
@@ -106,16 +98,12 @@ export class WorkService {
         updateWorkThread,
       );
 
-      const updatedCard =
-        await this.cardsRepository.updateCardAndReturnWithPopulatedReferences(
-          id,
-          {
-            workThreads: card.workThreads,
-            activity: activity ? [...card.activity, activity] : activity,
-          },
-        );
-
-      return await this.responseBuilder.enrichResponse(updatedCard);
+      return {
+        [card.id]: {
+          workThreads: card.workThreads,
+          activity: activity ? [...card.activity, activity] : card.activity,
+        },
+      };
     } catch (error) {
       throw new InternalServerErrorException(
         'Failed updating work thread',
@@ -124,16 +112,12 @@ export class WorkService {
     }
   }
 
-  async createWorkUnit(
-    id: string,
+  async createWorkUnitNew(
+    card: Card,
     threadId: string,
     createWorkUnit: CreateWorkUnitRequestDto,
-  ): Promise<DetailedCardResponseDto> {
+  ): Promise<MappedCard> {
     try {
-      const card = await this.cardsRepository.findById(id);
-      this.validationService.validateCardExists(card);
-      this.validationService.validateCardThreadExists(card, threadId);
-
       const workUnitId = uuidv4();
       const workUnits = {
         ...card.workThreads[threadId].workUnits,
@@ -165,16 +149,12 @@ export class WorkService {
         createWorkUnit.type,
       );
 
-      const updatedCard =
-        await this.cardsRepository.updateCardAndReturnWithPopulatedReferences(
-          id,
-          {
-            workThreads: card.workThreads,
-            activity: activity ? [...card.activity, activity] : activity,
-          },
-        );
-
-      return await this.responseBuilder.enrichResponse(updatedCard);
+      return {
+        [card.id]: {
+          workThreads: card.workThreads,
+          activity: activity ? [...card.activity, activity] : card.activity,
+        },
+      };
     } catch (error) {
       throw new InternalServerErrorException(
         'Failed creating work unit',
@@ -184,20 +164,20 @@ export class WorkService {
   }
 
   async updateWorkUnit(
-    id: string,
+    card: Card,
     threadId: string,
     workUnitId: string,
     updateWorkUnit: UpdateWorkUnitRequestDto,
-  ): Promise<DetailedCardResponseDto> {
+  ): Promise<MappedCard> {
     try {
-      const card = await this.cardsRepository.findById(id);
-      this.validationService.validateCardExists(card);
-      this.validationService.validateCardThreadExists(card, threadId);
-
       card.workThreads[threadId].workUnits[workUnitId] = {
         ...card.workThreads[threadId].workUnits[workUnitId],
-        content: updateWorkUnit.content,
-        type: updateWorkUnit.type,
+        content:
+          updateWorkUnit.content ||
+          card.workThreads[threadId].workUnits[workUnitId].content,
+        type:
+          updateWorkUnit.type ||
+          card.workThreads[threadId].workUnits[workUnitId].type,
         updatedAt: new Date(),
       };
 
@@ -213,17 +193,12 @@ export class WorkService {
         workUnitId,
         updateWorkUnit,
       );
-
-      const updatedCard =
-        await this.cardsRepository.updateCardAndReturnWithPopulatedReferences(
-          id,
-          {
-            workThreads: card.workThreads,
-            activity: activity ? [...card.activity, activity] : activity,
-          },
-        );
-
-      return await this.responseBuilder.enrichResponse(updatedCard);
+      return {
+        [card.id]: {
+          workThreads: card.workThreads,
+          activity: activity ? [...card.activity, activity] : card.activity,
+        },
+      };
     } catch (error) {
       throw new InternalServerErrorException(
         'Failed updating work unit',

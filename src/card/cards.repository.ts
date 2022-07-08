@@ -153,12 +153,10 @@ export class CardsRepository extends BaseRepository<Card> {
     updates: MappedCard,
   ): Promise<mongodb.BulkWriteResult> {
     const queries = [];
-    console.log(updates);
 
     for (const [id, update] of Object.entries(updates)) {
       queries.push(this.updateOneByIdQuery(id, update));
     }
-    console.log(queries);
 
     if (queries.length === 0) return;
 

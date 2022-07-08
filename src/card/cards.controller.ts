@@ -45,6 +45,7 @@ import { WorkService } from './work.cards.service';
 import { CommentService } from './comments.cards.service';
 import { CardsPaymentService } from './payment.cards.service';
 import { CardCommandHandler } from './handlers/update.command.handler';
+import { WorkCommandHandler } from './handlers/work.command.handler';
 
 @Controller('card')
 @ApiTags('card')
@@ -57,6 +58,7 @@ export class CardsController {
     private readonly commentService: CommentService,
     private readonly paymentService: CardsPaymentService,
     private readonly cardCommandHandler: CardCommandHandler,
+    private readonly workCommandHandler: WorkCommandHandler,
   ) {}
 
   @Get('/byProjectSlugAndCardSlug/:projectSlug/:cardSlug')
@@ -152,7 +154,10 @@ export class CardsController {
     @Param() params: ObjectIdDto,
     @Body() createWorkThread: CreateWorkThreadRequestDto,
   ): Promise<DetailedCardResponseDto> {
-    return await this.workService.createWorkThread(params.id, createWorkThread);
+    return await this.workCommandHandler.handleCreateWorkThread(
+      params.id,
+      createWorkThread,
+    );
   }
 
   @Patch('/:id/updateWorkThread')
@@ -162,7 +167,7 @@ export class CardsController {
     @Query('threadId') threadId: string,
     @Body() updateWorkThread: UpdateWorkThreadRequestDto,
   ): Promise<DetailedCardResponseDto> {
-    return await this.workService.updateWorkThread(
+    return await this.workCommandHandler.handleUpdateWorkThread(
       params.id,
       threadId,
       updateWorkThread,
@@ -176,7 +181,7 @@ export class CardsController {
     @Query('threadId') threadId: string,
     @Body() createWorkUnit: CreateWorkUnitRequestDto,
   ): Promise<DetailedCardResponseDto> {
-    return await this.workService.createWorkUnit(
+    return await this.workCommandHandler.handleCreateWorkUnit(
       params.id,
       threadId,
       createWorkUnit,
@@ -191,7 +196,7 @@ export class CardsController {
     @Query('workUnitId') workUnitId: string,
     @Body() updateWorkUnit: UpdateWorkUnitRequestDto,
   ): Promise<DetailedCardResponseDto> {
-    return await this.workService.updateWorkUnit(
+    return await this.workCommandHandler.handleUpdateWorkUnit(
       params.id,
       threadId,
       workUnitId,
