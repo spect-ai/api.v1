@@ -34,7 +34,9 @@ export class CircleRegistryService {
     if (!circle.localRegistry) circle.localRegistry = {};
     for (const [chainId, chain] of Object.entries(globalRegistry)) {
       if (!(chainId in circle.localRegistry))
-        circle.localRegistry[chainId] = { tokenDetails: {} };
+        circle.localRegistry[chainId] = {};
+
+      circle.localRegistry[chainId] = Object.assign(globalRegistry[chainId]);
 
       circle.localRegistry[chainId].tokenDetails = Object.assign(
         circle.localRegistry[chainId].tokenDetails || {},
@@ -98,7 +100,7 @@ export class CircleRegistryService {
             symbol: addTokenDto.symbol as TokenInfo['symbol'],
             name: addTokenDto.name as TokenInfo['name'],
             address: addTokenDto.address as TokenInfo['address'],
-          } as TokenInfo,
+          } as any,
         },
       };
     }
