@@ -198,6 +198,7 @@ export class CirclesService {
     updateCircleDto: UpdateCircleRequestDto,
   ): Promise<DetailedCircleResponseDto> {
     try {
+      console.log({ updateCircleDto });
       const updatedCircle =
         await this.circlesRepository.updateCircleAndReturnWithPopulatedReferences(
           id,

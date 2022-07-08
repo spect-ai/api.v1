@@ -7,6 +7,7 @@ import {
   IsOptional,
   IsString,
 } from 'class-validator';
+import { DiscordToCircleRoles } from '../model/circle.model';
 import { CreateCircleRequestDto } from './create-circle-request.dto';
 
 export class UpdateCircleRequestDto extends OmitType(CreateCircleRequestDto, [
@@ -54,7 +55,7 @@ export class UpdateCircleRequestDto extends OmitType(CreateCircleRequestDto, [
    */
   @IsObject()
   @IsOptional()
-  discordToCircleRoles?: object;
+  discordToCircleRoles?: DiscordToCircleRoles;
 
   /**
    * A list of repos that the circle uses
