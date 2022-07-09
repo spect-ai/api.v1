@@ -41,21 +41,6 @@ export class DataStructureManipulationService {
     return res;
   }
 
-  deepCollateify(obj1: object, obj2: object) {
-    for (const [key, val] of Object.entries(obj2)) {
-      if (obj1.hasOwnProperty(key)) {
-        if (typeof obj1[key] === 'object') {
-          obj1[key] = this.deepCollateify(obj1[key], val);
-        } else {
-          obj1[key] = val;
-        }
-      } else {
-        obj1[key] = val;
-      }
-    }
-    return obj1;
-  }
-
   collateifyBooleanFields(arrOfObjects: any[], operator = 'or') {
     const res = {};
     for (const obj of arrOfObjects) {

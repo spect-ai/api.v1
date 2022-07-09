@@ -98,9 +98,7 @@ export class CirclesService {
     }
 
     const circlePermissions: CirclePermission =
-      this.datastructureManipulationService.collateifyBooleanFields(
-        userPermissions,
-      ) as CirclePermission;
+      this.roleService.collatePermissions(userPermissions) as CirclePermission;
     return circlePermissions;
   }
 
@@ -111,6 +109,34 @@ export class CirclesService {
       .findAll(
         {
           _id: { $in: circleIds },
+        },
+        {
+          projection: {
+            members: 1,
+          },
+        },
+      )
+      .populate('members');
+    let res = this.datastructureManipulationService.arrayify(
+      circles,
+      'members',
+    );
+    res = this.datastructureManipulationService.distinctify(res, 'id');
+    const memberDetails = this.datastructureManipulationService.objectify(
+      res,
+      'id',
+    );
+    return {
+      memberDetails,
+      members: Object.keys(memberDetails),
+    };
+  }
+
+  async getMemberDetailsOfCirclesWithSlug(slugs: string[]): Promise<any> {
+    const circles = await this.circlesRepository
+      .findAll(
+        {
+          slug: { $in: slugs },
         },
         {
           projection: {

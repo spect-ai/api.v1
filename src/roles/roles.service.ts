@@ -201,4 +201,40 @@ export class RolesService {
     }
     return [...new Set(activeRoles)];
   }
+
+  collatePermissions(permissions: CirclePermission[]): CirclePermission {
+    const permissionsCollated = {} as CirclePermission;
+    for (const permission of permissions) {
+      for (const [key, value] of Object.entries(permission)) {
+        if (
+          [
+            'createNewCard',
+            'manageRewards',
+            'reviewWork',
+            'canClaim',
+            'manageCardProperties',
+          ].includes(key)
+        ) {
+          for (const [cardType, val] of Object.entries(value)) {
+            if (!permissionsCollated.hasOwnProperty(key)) {
+              permissionsCollated[key] = {};
+            }
+            if (!permissionsCollated[key][cardType]) {
+              permissionsCollated[key][cardType] = val;
+            } else {
+              permissionsCollated[key][cardType] =
+                val || permissionsCollated[key][cardType];
+            }
+          }
+        } else {
+          if (!permissionsCollated[key]) {
+            permissionsCollated[key] = value;
+          } else {
+            permissionsCollated[key] = permissionsCollated[key] || value;
+          }
+        }
+      }
+    }
+    return permissionsCollated;
+  }
 }

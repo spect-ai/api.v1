@@ -86,6 +86,19 @@ export class CirclesController {
     return await this.circlesService.getMemberDetailsOfCircles(circleIds);
   }
 
+  @Get('/:circleSlugs/memberDetailsWithSlug')
+  @ApiQuery({ name: 'circleSlugs', type: 'array' })
+  async getMemberDetailsOfCirclesWithSlug(
+    @Query('circleSlugs') circleSlugs: string[],
+  ): Promise<any> {
+    if (circleSlugs.length === 0) {
+      throw new HttpException('No circles provided', 400);
+    }
+    return await this.circlesService.getMemberDetailsOfCirclesWithSlug(
+      circleSlugs,
+    );
+  }
+
   @Get('/slug/:slug/getRegistry')
   async getRegistry(@Param('slug') slug) {
     return await this.circleRegistryService.getPaymentMethods(slug);
