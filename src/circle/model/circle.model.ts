@@ -34,7 +34,10 @@ export type Invite = {
 };
 
 export type DiscordToCircleRoles = {
-  [role: string]: string[];
+  [role: string]: {
+    circleRole: string[];
+    name: string;
+  };
 };
 
 // eslint-disable-next-line @typescript-eslint/ban-types
