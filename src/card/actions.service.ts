@@ -144,13 +144,35 @@ export class ActionService {
     }
   }
 
+  canClaim(card: Card, circlePermissions: CirclePermission, userId: string) {
+    if (
+      card.status.active &&
+      card.assignee?.length === 0 &&
+      circlePermissions.canClaim &&
+      circlePermissions.canClaim[card.type]
+    ) {
+      return { valid: true };
+    } else
+      return {
+        valid: false,
+        reason:
+          'Only users that have correct circle permissions can claim task if task doesnt have an assignee',
+      };
+  }
+
   canApply(card: Card, circle: Circle, userId: string) {
-    if (card.type === 'Bounty' && card.assignee?.length === 0)
+    if (
+      card.type === 'Bounty' &&
+      card.assignee?.length === 0 &&
+      card.status.active &&
+      !card.reviewer?.includes(userId)
+    )
       return { valid: true };
     else
       return {
         valid: false,
-        reason: 'Can only apply on bounties that are unassigned',
+        reason:
+          'Can only apply on bounties that are unassigned if not a reviewer',
       };
   }
 
@@ -287,7 +309,7 @@ export class ActionService {
         userId,
       );
     return {
-      canCreateCard: this.canCreateCard(circlePermissions, card.type),
+      createCard: this.canCreateCard(circlePermissions, card.type),
       updateGeneralCardInfo: this.canUpdateGeneralInfo(
         card,
         circlePermissions,
@@ -296,6 +318,7 @@ export class ActionService {
       updateDeadline: this.canUpdateDeadline(card, circlePermissions, userId),
       updateColumn: this.canUpdateColumn(card, circlePermissions, userId),
       updateAssignee: this.canUpdateAssignee(card, circlePermissions, userId),
+      claim: this.canClaim(card, circlePermissions, userId),
       applyToBounty: this.canApply(card, circle, userId),
       submit: this.canSubmit(card, circle, userId),
       addRevisionInstruction: this.canAddRevisionInstructions(

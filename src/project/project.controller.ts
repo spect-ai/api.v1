@@ -57,7 +57,7 @@ export class ProjectController {
   async getValidActions(
     @Param('slug') slug,
   ): Promise<MultipleValidCardActionResponseDto> {
-    return await this.projectService.getValidActions('aaaa-1');
+    return await this.projectService.getValidActions(slug);
   }
 
   @Patch('/:id/column/add')

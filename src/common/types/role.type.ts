@@ -20,6 +20,7 @@ export type CirclePermission = {
   manageCardProperties: CardTypeToPermissionMap;
   createNewCard: CardTypeToPermissionMap;
   reviewWork: CardTypeToPermissionMap;
+  canClaim: CardTypeToPermissionMap;
 };
 
 export type RoleProvider = {

@@ -42,6 +42,10 @@ export class RolesService {
             Task: true,
             Bounty: true,
           },
+          canClaim: {
+            Task: true,
+            Bounty: false,
+          },
         } as CirclePermission,
       },
       contributor: {
@@ -73,6 +77,10 @@ export class RolesService {
             Bounty: false,
           },
           reviewWork: {
+            Task: true,
+            Bounty: false,
+          },
+          canClaim: {
             Task: true,
             Bounty: false,
           },
@@ -110,6 +118,10 @@ export class RolesService {
             Task: false,
             Bounty: false,
           },
+          canClaim: {
+            Task: false,
+            Bounty: false,
+          },
         } as CirclePermission,
       },
       /** TODO: We need to reserve this keyword and not let users set this as role */
@@ -142,6 +154,10 @@ export class RolesService {
             Bounty: false,
           },
           reviewWork: {
+            Task: false,
+            Bounty: false,
+          },
+          canClaim: {
             Task: false,
             Bounty: false,
           },
