@@ -75,18 +75,21 @@ export class CardCommandHandler {
         } as ReorderCardReqestDto);
       }
 
-      globalUpdate.project = this.datastructureManipulationService.mergeObjects(
-        globalUpdate.project[project.id],
-        globalUpdateAfterAutomation.project[project.id],
-        projectUpdate[project.id],
-      ) as MappedProject;
+      globalUpdate.project[project.id] =
+        this.datastructureManipulationService.mergeObjects(
+          globalUpdate.project[project.id],
+          globalUpdateAfterAutomation.project[project.id],
+          projectUpdate[project.id],
+        ) as MappedProject;
 
-      globalUpdate.card = this.datastructureManipulationService.mergeObjects(
-        globalUpdate.card[id],
-        globalUpdateAfterAutomation.card[id],
-        cardUpdate[id],
-      ) as MappedCard;
+      globalUpdate.card[id] =
+        this.datastructureManipulationService.mergeObjects(
+          globalUpdate.card[id],
+          globalUpdateAfterAutomation.card[id],
+          cardUpdate[id],
+        ) as MappedCard;
 
+      console.log(globalUpdate);
       const acknowledgment = await this.cardsRepository.bundleUpdatesAndExecute(
         globalUpdate.card,
       );
