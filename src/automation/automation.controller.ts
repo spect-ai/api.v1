@@ -29,4 +29,14 @@ export class AutomationController {
       updateCardRequestDto,
     );
   }
+
+  @Get('/autoVal')
+  async autoVal(@Body() bod) {
+    return this.automationService.satisfiesCondition(
+      bod.tree,
+      bod.property,
+      bod.value,
+      bod.condition,
+    );
+  }
 }

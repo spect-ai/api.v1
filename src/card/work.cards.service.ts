@@ -14,7 +14,7 @@ import { ActivityBuilder } from './activity.builder';
 import { ResponseBuilder } from './response.builder';
 import { CardValidationService } from './validation.cards.service';
 import { Card } from './model/card.model';
-import { MappedCard } from './types/types';
+import { MappedCard, WorkThread, WorkThreads } from './types/types';
 
 @Injectable()
 export class WorkService {
@@ -27,7 +27,7 @@ export class WorkService {
     private readonly responseBuilder: ResponseBuilder,
   ) {}
 
-  async createWorkThreadNew(
+  async createWorkThread(
     card: Card,
     createWorkThread: CreateWorkThreadRequestDto,
   ): Promise<MappedCard> {
@@ -80,18 +80,22 @@ export class WorkService {
     }
   }
 
-  async updateWorkThreadNew(
+  async updateWorkThread(
     card: Card,
     threadId: string,
     updateWorkThread: UpdateWorkThreadRequestDto,
   ): Promise<MappedCard> {
     try {
-      card.workThreads[threadId] = {
-        ...card.workThreads[threadId],
-        ...updateWorkThread,
-        updatedAt: new Date(),
+      const workThreads = {
+        ...card.workThreads,
+        [threadId]: {
+          ...card.workThreads[threadId],
+          name: updateWorkThread.name || card.workThreads[threadId].name,
+          active: updateWorkThread.active || card.workThreads[threadId].active,
+          status: updateWorkThread.status || card.workThreads[threadId].status,
+          updatedAt: new Date(),
+        },
       };
-
       const activity = this.activityBuilder.buildUpdateWorkThreadActivity(
         card,
         threadId,
@@ -100,7 +104,7 @@ export class WorkService {
 
       return {
         [card.id]: {
-          workThreads: card.workThreads,
+          workThreads: workThreads,
           activity: activity ? [...card.activity, activity] : card.activity,
         },
       };
@@ -112,7 +116,7 @@ export class WorkService {
     }
   }
 
-  async createWorkUnitNew(
+  async createWorkUnit(
     card: Card,
     threadId: string,
     createWorkUnit: CreateWorkUnitRequestDto,
@@ -131,17 +135,19 @@ export class WorkService {
           type: createWorkUnit.type,
         },
       };
-      card.workThreads[threadId] = {
-        ...card.workThreads[threadId],
-        workUnitOrder: [
-          ...card.workThreads[threadId].workUnitOrder,
-          workUnitId,
-        ],
-        workUnits,
-        status: createWorkUnit.status || card.workThreads[threadId].status,
-        updatedAt: new Date(),
+      const workThreads = {
+        ...card.workThreads,
+        [threadId]: {
+          ...card.workThreads[threadId],
+          workUnitOrder: [
+            ...card.workThreads[threadId].workUnitOrder,
+            workUnitId,
+          ],
+          status: createWorkUnit.status || card.workThreads[threadId].status,
+          workUnits: workUnits,
+          updatedAt: new Date(),
+        },
       };
-
       const activity = this.activityBuilder.buildCreateWorkActivity(
         'createWorkUnit',
         card.workThreads[threadId].name,
@@ -151,7 +157,7 @@ export class WorkService {
 
       return {
         [card.id]: {
-          workThreads: card.workThreads,
+          workThreads: workThreads,
           activity: activity ? [...card.activity, activity] : card.activity,
         },
       };
@@ -181,10 +187,13 @@ export class WorkService {
         updatedAt: new Date(),
       };
 
-      card.workThreads[threadId] = {
-        ...card.workThreads[threadId],
-        status: updateWorkUnit.status || card.workThreads[threadId].status,
-        updatedAt: new Date(),
+      const workThreads = {
+        ...card.workThreads,
+        [threadId]: {
+          ...card.workThreads[threadId],
+          status: updateWorkUnit.status || card.workThreads[threadId].status,
+          updatedAt: new Date(),
+        },
       };
 
       const activity = this.activityBuilder.buildUpdateWorkUnitActivity(
@@ -195,7 +204,7 @@ export class WorkService {
       );
       return {
         [card.id]: {
-          workThreads: card.workThreads,
+          workThreads: workThreads,
           activity: activity ? [...card.activity, activity] : card.activity,
         },
       };

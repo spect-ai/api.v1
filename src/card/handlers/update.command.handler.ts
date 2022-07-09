@@ -61,7 +61,7 @@ export class CardCommandHandler {
       const cardUpdate = this.cardsService.update(card, project, updateCardDto);
 
       const globalUpdateAfterAutomation =
-        this.automationService.handleAutomation(card, project, updateCardDto);
+        this.automationService.handleAutomation(card, project, cardUpdate[id]);
 
       let projectUpdate = {};
       if (updateCardDto.columnId || updateCardDto.cardIndex) {
@@ -86,10 +86,8 @@ export class CardCommandHandler {
         this.datastructureManipulationService.mergeObjects(
           globalUpdate.card[id],
           globalUpdateAfterAutomation.card[id],
-          cardUpdate[id],
         ) as MappedCard;
 
-      console.log(globalUpdate);
       const acknowledgment = await this.cardsRepository.bundleUpdatesAndExecute(
         globalUpdate.card,
       );

@@ -11,8 +11,6 @@ export type ConditionValue = {
   is?: string;
   hasNot?: string;
   isNot?: string;
-  isOneOf?: string[];
-  isNotOneOf?: string[];
   isEmpty?: boolean;
   isNotEmpty?: boolean;
 };

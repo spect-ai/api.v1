@@ -272,6 +272,14 @@ export class CardsService {
       );
       const updatedActivity = [...card.activity, ...activities];
 
+      if (updateCardDto.columnId) {
+        if (!project.columnOrder.includes(updateCardDto.columnId))
+          throw new HttpException(
+            'Column Id must be in the project column order',
+            HttpStatus.NOT_FOUND,
+          );
+      }
+
       return {
         [card.id]: {
           ...updateCardDto,
@@ -306,8 +314,6 @@ export class CardsService {
   async archive(id: string): Promise<DetailedProjectResponseDto> {
     const card = await this.cardsRepository.getCardWithAllChildren(id);
     this.validationService.validateCardExists(card);
-
-    console.log(card.flattenedChildren);
     const cardIds = [
       ...card.flattenedChildren.map((c) => c._id.toString()),
       id,

@@ -55,7 +55,6 @@ export class CirclesRepository extends BaseRepository<Circle> {
   async getCircleWithUnpopulatedReferencesBySlug(
     slug: string,
   ): Promise<Circle> {
-    console.log(slug);
     return await this.findOne({ slug: slug }).exec();
   }
 
