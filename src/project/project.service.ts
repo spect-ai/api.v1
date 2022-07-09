@@ -62,7 +62,6 @@ export class ProjectService {
       await this.projectRepository.getProjectWithUnpPopulatedReferencesBySlug(
         slug,
       );
-    console.log(project);
     return await this.actionService.getValidActionsForMultipleCards(
       project.cards,
     );

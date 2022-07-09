@@ -27,7 +27,11 @@ export class ActionService {
     circlePermissions: CirclePermission,
     cardType: 'Task' | 'Bounty',
   ) {
-    if (circlePermissions.createNewCard[cardType]) return { valid: true };
+    if (
+      circlePermissions.createNewCard &&
+      circlePermissions.createNewCard[cardType]
+    )
+      return { valid: true };
     else
       return {
         valid: false,
@@ -43,7 +47,8 @@ export class ActionService {
   ) {
     if (
       (card.reviewer && card.reviewer.includes(userId)) ||
-      circlePermissions.manageCardProperties[card.type]
+      (circlePermissions.manageCardProperties &&
+        circlePermissions.manageCardProperties[card.type])
     )
       return { valid: true };
     else
@@ -67,7 +72,8 @@ export class ActionService {
     if (
       (card.reviewer && card.reviewer.includes(userId)) ||
       (card.assignee && card.assignee.includes(userId)) ||
-      circlePermissions.manageCardProperties[card.type]
+      (circlePermissions.manageCardProperties &&
+        circlePermissions.manageCardProperties[card.type])
     )
       return { valid: true };
     else
@@ -86,7 +92,8 @@ export class ActionService {
     if (
       (card.reviewer && card.reviewer.includes(userId)) ||
       (card.assignee && card.assignee.includes(userId)) ||
-      circlePermissions.manageCardProperties[card.type]
+      (circlePermissions.manageCardProperties &&
+        circlePermissions.manageCardProperties[card.type])
     )
       return { valid: true };
     else
@@ -110,7 +117,8 @@ export class ActionService {
     if (card.type === 'Bounty') {
       if (
         (card.reviewer && card.reviewer.includes(userId)) ||
-        circlePermissions.manageCardProperties[card.type]
+        (circlePermissions.manageCardProperties &&
+          circlePermissions.manageCardProperties[card.type])
       )
         return { valid: true };
       else
@@ -123,7 +131,8 @@ export class ActionService {
       if (
         (card.reviewer && card.reviewer.includes(userId)) ||
         (card.assignee && card.assignee.includes(userId)) ||
-        circlePermissions.manageCardProperties[card.type]
+        (circlePermissions.manageCardProperties &&
+          circlePermissions.manageCardProperties[card.type])
       )
         return { valid: true };
       else
@@ -166,7 +175,7 @@ export class ActionService {
       };
     if (
       card.reviewer?.includes(userId) ||
-      circlePermissions.reviewWork[card.type]
+      (circlePermissions.reviewWork && circlePermissions.reviewWork[card.type])
     )
       return { valid: true };
     else
@@ -182,7 +191,10 @@ export class ActionService {
     circlePermissions: CirclePermission,
     userId: string,
   ) {
-    if (card.reviewer?.includes(userId) || circlePermissions.reviewWork)
+    if (
+      card.reviewer?.includes(userId) ||
+      (circlePermissions.reviewWork && circlePermissions.reviewWork[card.type])
+    )
       return { valid: true };
     else
       return {
@@ -196,7 +208,8 @@ export class ActionService {
     if (
       card.status.active &&
       ((card.reviewer && card.reviewer.includes(userId)) ||
-        circlePermissions.manageCardProperties[card.type])
+        (circlePermissions.manageCardProperties &&
+          circlePermissions.manageCardProperties[card.type]))
     )
       return { valid: true };
     else
@@ -227,7 +240,8 @@ export class ActionService {
   canArchive(card: Card, circlePermissions: CirclePermission, userId: string) {
     if (
       (card.reviewer && card.reviewer.includes(userId)) ||
-      circlePermissions.manageCardProperties[card.type]
+      (circlePermissions.manageCardProperties &&
+        circlePermissions.manageCardProperties[card.type])
     )
       return { valid: true };
     else
@@ -239,7 +253,11 @@ export class ActionService {
   }
 
   canDuplicate(card: Card, circlePermissions: CirclePermission) {
-    if (circlePermissions.createNewCard) return { valid: true };
+    if (
+      circlePermissions.createNewCard &&
+      circlePermissions.createNewCard[card.type]
+    )
+      return { valid: true };
     else
       return {
         valid: false,
