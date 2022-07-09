@@ -26,10 +26,13 @@ export class AutomationService {
     condition: 'is' | 'has' | 'isNot' | 'hasNot' | 'isEmpty' | 'isNotEmpty',
   ) {
     if (condition === 'is') {
+      // console.log('is');
+      // console.log(valueToCheck, valueToCheckAgainst);
       return valueToCheck === valueToCheckAgainst;
     } else if (condition === 'has') {
       return valueToCheck.includes(valueToCheckAgainst);
     } else if (condition === 'isNot') {
+      console.log(valueToCheck, valueToCheckAgainst);
       return valueToCheck !== valueToCheckAgainst;
     } else if (condition === 'hasNot') {
       return !valueToCheck.includes(valueToCheckAgainst);
@@ -58,6 +61,11 @@ export class AutomationService {
     value: any,
     condition: 'is' | 'has' | 'isNot' | 'hasNot' | 'isEmpty' | 'isNotEmpty',
   ): boolean {
+    console.log('in satisfies condition');
+    console.log(cardTree);
+
+    console.log(triggerPropertyArray);
+    console.log(value);
     if (triggerPropertyArray.length === 0)
       return this.satisfied(cardTree, value, condition);
 
@@ -91,8 +99,7 @@ export class AutomationService {
       }
       return true;
     }
-
-    if (cardTree[triggerPropertyArray[0]]) {
+    if (cardTree.hasOwnProperty(triggerPropertyArray[0])) {
       return this.satisfiesCondition(
         cardTree[triggerPropertyArray[0]],
         triggerPropertyArray.slice(1),
@@ -110,53 +117,37 @@ export class AutomationService {
     properties: string[],
     values: any,
   ): boolean {
-    for (const [key, value] of Object.entries(values)) {
-      if (key === 'from') {
-        /** Value change is not satisfied if previous card doesnt contain the value or if
-         * the new card contains the value, ie, the value was never changed from the expected value
-         * to a different arbitrary value  */
-        if (
-          this.satisfiesCondition(prevCard, properties, value, 'isNot') ||
-          (!values.hasOwnProperty('to') &&
-            this.satisfiesCondition(newCard, properties, value, 'is'))
-        ) {
-          return false;
-        }
-      } else if (key === 'to') {
-        /** Value change is not satisfied if previous card already contains the value or if
-         * the new card doesnt contain the value, ie, the value was never changed to the expected value
-         * from a different arbitrary value  */
-        if (
-          (!values.hasOwnProperty('from') &&
-            this.satisfiesCondition(prevCard, properties, value, 'is')) ||
-          this.satisfiesCondition(newCard, properties, value, 'isNot')
-        ) {
-          return false;
-        }
-      } else if (key === 'added') {
-        if (
-          !this.satisfiesCondition(prevCard, properties, value, 'has') ||
-          !this.satisfiesCondition(newCard, properties, value, 'hasNot')
-        ) {
-          return false;
-        }
-      } else if (key === 'removed') {
-        if (
-          !this.satisfiesCondition(prevCard, properties, value, 'hasNot') ||
-          !this.satisfiesCondition(newCard, properties, value, 'has')
-        ) {
-          return false;
-        }
-      } else if (key === 'cleared') {
-        if (
-          !this.satisfiesCondition(prevCard, properties, value, 'isEmpty') ||
-          !this.satisfiesCondition(newCard, properties, value, 'isNotEmpty')
-        ) {
-          return false;
-        }
-      }
+    // console.log(prevCard.status, newCard.status);
+    if (values.hasOwnProperty('to') && values.hasOwnProperty('from')) {
+      // console.log('has to and from');
+      // console.log(values.from, values.to);
+      return (
+        this.satisfiesCondition(prevCard, properties, values.from, 'is') &&
+        this.satisfiesCondition(newCard, properties, values.to, 'is')
+      );
     }
-    return true;
+    if (values.hasOwnProperty('to')) {
+      // console.log('has toppppppppppppppppppppppppppppppppppppp');
+      // console.log(
+      //   this.satisfiesCondition(newCard, properties, values.to, 'is'),
+      // );
+      // console.log(
+      //   'has to nottttttttttttttttttttttttttttttttttttttttttttttttttt',
+      // );
+      // console.log(
+      //   !this.satisfiesCondition(prevCard, properties, values.to, 'is'),
+      // );
+      return (
+        this.satisfiesCondition(newCard, properties, values.to, 'is') &&
+        !this.satisfiesCondition(prevCard, properties, values.to, 'is')
+      );
+    }
+    if (values.hasOwnProperty('from')) {
+      return (
+        !this.satisfiesCondition(newCard, properties, values.from, 'is') &&
+        this.satisfiesCondition(prevCard, properties, values.from, 'is')
+      );
+    }
   }
 
   satisfiesConditions(card: Card, conditions: Condition[]): boolean {
@@ -176,6 +167,7 @@ export class AutomationService {
     }
     return true;
   }
+
   handleAutomation(
     card: Card,
     project: Project,
@@ -187,6 +179,8 @@ export class AutomationService {
     };
     for (const automationId of project.automationOrder) {
       const automation = project.automations[automationId];
+      // console.log('   ');
+      // console.log(automation.name);
       const triggerPropertyArray = automation.triggerProperty.split('.');
       if (
         !this.satisfiesValues(
@@ -197,6 +191,7 @@ export class AutomationService {
         )
       )
         continue;
+      // console.log('satisfies values');
       if (!this.satisfiesConditions(card, automation.conditions)) continue;
       for (const action of automation.actions) {
         const properties = action.property.split('.');
