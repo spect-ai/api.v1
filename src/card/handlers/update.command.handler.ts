@@ -86,6 +86,7 @@ export class CardCommandHandler {
         this.datastructureManipulationService.mergeObjects(
           globalUpdate.card[id],
           globalUpdateAfterAutomation.card[id],
+          cardUpdate[id],
         ) as MappedCard;
 
       const acknowledgment = await this.cardsRepository.bundleUpdatesAndExecute(
