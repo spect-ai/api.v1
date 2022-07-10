@@ -9,9 +9,14 @@ import {
   Patch,
   Post,
   Query,
+  SetMetadata,
   UseGuards,
 } from '@nestjs/common';
-import { SessionAuthGuard } from 'src/auth/iron-session.guard';
+import {
+  CircleAuthGuard,
+  CreateCircleAuthGuard,
+  SessionAuthGuard,
+} from 'src/auth/iron-session.guard';
 import { CirclesService } from './circles.service';
 import { CirclesRepository } from './circles.repository';
 import { CreateCircleRequestDto } from './dto/create-circle-request.dto';
@@ -118,6 +123,8 @@ export class CirclesController {
     );
   }
 
+  @SetMetadata('permission', ['managePaymentOptions'])
+  @UseGuards(CircleAuthGuard)
   @Patch('/:id/addToken')
   async addToken(
     @Param() param: ObjectIdDto,
@@ -129,6 +136,8 @@ export class CirclesController {
     );
   }
 
+  @SetMetadata('permission', ['managePaymentOptions'])
+  @UseGuards(CircleAuthGuard)
   @Patch('/:id/updateBlacklist')
   async updateBlacklist(
     @Param() param: ObjectIdDto,
@@ -140,16 +149,17 @@ export class CirclesController {
     );
   }
 
+  @UseGuards(CreateCircleAuthGuard)
   @Post('/')
-  @UseGuards(SessionAuthGuard)
   async create(
     @Body() circle: CreateCircleRequestDto,
   ): Promise<DetailedCircleResponseDto> {
     return await this.circlesService.create(circle);
   }
 
+  @SetMetadata('permissions', ['manageCircleSettings'])
+  @UseGuards(CircleAuthGuard)
   @Patch('/:id')
-  @UseGuards(SessionAuthGuard)
   async update(
     @Param() param: ObjectIdDto,
     @Body() circle: UpdateCircleRequestDto,
@@ -157,8 +167,9 @@ export class CirclesController {
     return await this.circlesService.update(param.id, circle);
   }
 
+  @SetMetadata('permissions', ['inviteMembers'])
+  @UseGuards(CircleAuthGuard)
   @Patch('/:id/invite')
-  @UseGuards(SessionAuthGuard)
   async invite(
     @Param() param: ObjectIdDto,
     @Body() invitation: InviteDto,
@@ -166,9 +177,9 @@ export class CirclesController {
     return await this.circlesService.invite(param.id, invitation);
   }
 
-  @Patch('/:id/joinUsingInvitation')
   @ApiParam({ name: 'id', type: 'string' })
   @UseGuards(SessionAuthGuard)
+  @Patch('/:id/joinUsingInvitation')
   async joinUsingInvitation(
     @Param() param: ObjectIdDto,
     @Body() joinDto: JoinCircleUsingInvitationRequestDto,
@@ -176,17 +187,18 @@ export class CirclesController {
     return await this.circlesService.joinUsingInvitation(param.id, joinDto);
   }
 
-  @Patch('/:id/joinUsingDiscord')
   @ApiParam({ name: 'id', type: 'string' })
   @UseGuards(SessionAuthGuard)
+  @Patch('/:id/joinUsingDiscord')
   async joinUsingDiscord(
     @Param() param: ObjectIdDto,
   ): Promise<DetailedCircleResponseDto> {
     return await this.circlesService.joinUsingDiscord(param.id);
   }
 
+  @SetMetadata('permissions', ['manageMembers'])
+  @UseGuards(CircleAuthGuard)
   @Patch('/:id/updateMemberRoles')
-  @UseGuards(SessionAuthGuard)
   async updateMemberRoles(
     @Param() param: ObjectIdDto,
     @Query() memberDto: MemberDto,
@@ -199,8 +211,9 @@ export class CirclesController {
     );
   }
 
+  @SetMetadata('permissions', ['manageMembers'])
+  @UseGuards(CircleAuthGuard)
   @Patch('/:id/removeMember')
-  @UseGuards(SessionAuthGuard)
   async removeMember(
     @Param() param: ObjectIdDto,
     @Query() memberDto: MemberDto,
@@ -208,12 +221,12 @@ export class CirclesController {
     return await this.circlesService.removeMember(param.id, memberDto.member);
   }
 
-  @UseGuards(SessionAuthGuard)
-  @Post('/:id/delete')
-  @UseGuards(SessionAuthGuard)
-  async delete(
-    @Param() param: ObjectIdDto,
-  ): Promise<DetailedCircleResponseDto> {
-    return await this.circlesService.delete(param.id);
-  }
+  // TODO: Delete everything withing the circle
+  // @SetMetadata('permissions', ['manageMembers'])
+  // @UseGuards(CircleAuthGuard)  @Post('/:id/delete')
+  // async delete(
+  //   @Param() param: ObjectIdDto,
+  // ): Promise<DetailedCircleResponseDto> {
+  //   return await this.circlesService.delete(param.id);
+  // }
 }
