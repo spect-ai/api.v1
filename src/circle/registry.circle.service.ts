@@ -104,7 +104,7 @@ export class CircleRegistryService {
             address: addTokenDto.address as TokenInfo['address'],
           } as TokenInfo,
         },
-      };
+      } as any;
     }
 
     const updatedRegistry = await this.circlesRepository.updateByFilter(
