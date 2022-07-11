@@ -84,4 +84,11 @@ export class CreateCircleRequestDto {
   @IsString()
   @IsOptional()
   parent?: string;
+
+  /**
+   * Gradient color of the circle
+   */
+  @IsString()
+  @IsOptional()
+  gradient?: string;
 }

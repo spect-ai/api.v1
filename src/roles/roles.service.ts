@@ -26,10 +26,26 @@ export class RolesService {
           inviteMembers: true,
           manageRoles: true,
           manageMembers: true,
-          manageCardProperties: true,
-          createNewCard: true,
-          manageRewards: true,
-          reviewWork: true,
+          manageCardProperties: {
+            Task: true,
+            Bounty: true,
+          },
+          createNewCard: {
+            Task: true,
+            Bounty: true,
+          },
+          manageRewards: {
+            Task: true,
+            Bounty: true,
+          },
+          reviewWork: {
+            Task: true,
+            Bounty: true,
+          },
+          canClaim: {
+            Task: true,
+            Bounty: false,
+          },
         } as CirclePermission,
       },
       contributor: {
@@ -48,10 +64,26 @@ export class RolesService {
           inviteMembers: true,
           manageRoles: false,
           manageMembers: false,
-          manageCardProperties: true,
-          createNewCard: true,
-          manageRewards: false,
-          reviewWork: false,
+          manageCardProperties: {
+            Task: true,
+            Bounty: false,
+          },
+          createNewCard: {
+            Task: true,
+            Bounty: false,
+          },
+          manageRewards: {
+            Task: true,
+            Bounty: false,
+          },
+          reviewWork: {
+            Task: true,
+            Bounty: false,
+          },
+          canClaim: {
+            Task: true,
+            Bounty: false,
+          },
         } as CirclePermission,
       },
       member: {
@@ -70,10 +102,26 @@ export class RolesService {
           inviteMembers: false,
           manageRoles: false,
           manageMembers: false,
-          manageCardProperties: false,
-          createNewCard: false,
-          manageRewards: false,
-          reviewWork: false,
+          manageCardProperties: {
+            Task: false,
+            Bounty: false,
+          },
+          createNewCard: {
+            Task: false,
+            Bounty: false,
+          },
+          manageRewards: {
+            Task: false,
+            Bounty: false,
+          },
+          reviewWork: {
+            Task: false,
+            Bounty: false,
+          },
+          canClaim: {
+            Task: false,
+            Bounty: false,
+          },
         } as CirclePermission,
       },
       /** TODO: We need to reserve this keyword and not let users set this as role */
@@ -93,10 +141,26 @@ export class RolesService {
           inviteMembers: false,
           manageRoles: false,
           manageMembers: false,
-          manageCardProperties: false,
-          createNewCard: false,
-          manageRewards: false,
-          reviewWork: false,
+          manageCardProperties: {
+            Task: false,
+            Bounty: false,
+          },
+          createNewCard: {
+            Task: false,
+            Bounty: false,
+          },
+          manageRewards: {
+            Task: false,
+            Bounty: false,
+          },
+          reviewWork: {
+            Task: false,
+            Bounty: false,
+          },
+          canClaim: {
+            Task: false,
+            Bounty: false,
+          },
         } as CirclePermission,
       },
     } as Roles;
@@ -118,9 +182,59 @@ export class RolesService {
     return true;
   }
 
-  async getSpectRoleFromDiscord(user: User, circle: Circle): Promise<string> {
-    const discordRole = await this.discordService.getDiscordRole(user.id);
+  async getSpectRoleFromDiscord(user: User, circle: Circle): Promise<string[]> {
+    const discordRole = await this.discordService.getDiscordRole(
+      user.discordId,
+      circle.discordGuildId,
+    );
     const discordToCircleRoles = circle.discordToCircleRoles;
-    return discordToCircleRoles[discordRole];
+    if (!discordToCircleRoles)
+      throw new Error('Discord to circle role mapping not setup');
+    const activeRoles = [];
+    for (const role of discordRole) {
+      if (discordToCircleRoles[role]) {
+        activeRoles.push(...discordToCircleRoles[role].circleRole);
+      }
+    }
+    if (activeRoles.length === 0) {
+      throw new Error('No roles found for user');
+    }
+    return [...new Set(activeRoles)];
+  }
+
+  collatePermissions(permissions: CirclePermission[]): CirclePermission {
+    const permissionsCollated = {} as CirclePermission;
+    for (const permission of permissions) {
+      for (const [key, value] of Object.entries(permission)) {
+        if (
+          [
+            'createNewCard',
+            'manageRewards',
+            'reviewWork',
+            'canClaim',
+            'manageCardProperties',
+          ].includes(key)
+        ) {
+          for (const [cardType, val] of Object.entries(value)) {
+            if (!permissionsCollated.hasOwnProperty(key)) {
+              permissionsCollated[key] = {};
+            }
+            if (!permissionsCollated[key][cardType]) {
+              permissionsCollated[key][cardType] = val;
+            } else {
+              permissionsCollated[key][cardType] =
+                val || permissionsCollated[key][cardType];
+            }
+          }
+        } else {
+          if (!permissionsCollated[key]) {
+            permissionsCollated[key] = value;
+          } else {
+            permissionsCollated[key] = permissionsCollated[key] || value;
+          }
+        }
+      }
+    }
+    return permissionsCollated;
   }
 }

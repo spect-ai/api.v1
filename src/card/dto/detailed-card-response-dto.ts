@@ -1,21 +1,15 @@
 import {
   IsArray,
-  IsBoolean,
-  IsDate,
   IsDateString,
-  IsEmail,
   IsNotEmpty,
   IsNumber,
   IsObject,
   IsOptional,
   IsString,
-  IsUrl,
 } from 'class-validator';
-import { ObjectId, Date } from 'mongoose';
 import { Payment } from 'src/common/models/payment.model';
 import { Status } from 'src/common/types/status.type';
-import { ApplicationDetails, ApplicationUnit } from '../model/application.type';
-import { Card } from '../model/card.model';
+import { ApplicationUnit } from '../types/types';
 
 export class DetailedCardResponseDto {
   /**

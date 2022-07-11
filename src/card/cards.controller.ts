@@ -44,6 +44,8 @@ import { ActionService } from './actions.service';
 import { WorkService } from './work.cards.service';
 import { CommentService } from './comments.cards.service';
 import { CardsPaymentService } from './payment.cards.service';
+import { CardCommandHandler } from './handlers/update.command.handler';
+import { WorkCommandHandler } from './handlers/work.command.handler';
 
 @Controller('card')
 @ApiTags('card')
@@ -55,6 +57,8 @@ export class CardsController {
     private readonly workService: WorkService,
     private readonly commentService: CommentService,
     private readonly paymentService: CardsPaymentService,
+    private readonly cardCommandHandler: CardCommandHandler,
+    private readonly workCommandHandler: WorkCommandHandler,
   ) {}
 
   @Get('/byProjectSlugAndCardSlug/:projectSlug/:cardSlug')
@@ -93,7 +97,7 @@ export class CardsController {
   async updatePaymentInfoAndClose(
     @Body() updatePaymentInfoDto: UpdatePaymentInfoDto,
   ): Promise<DetailedProjectResponseDto> {
-    return await this.paymentService.updatePaymentInfoAndClose(
+    return await this.cardCommandHandler.updatePaymentInfoAndClose(
       updatePaymentInfoDto,
     );
   }
@@ -137,11 +141,22 @@ export class CardsController {
   @Patch('/:id')
   @UseGuards(SessionAuthGuard)
   @ApiParam({ name: 'id', type: 'string' })
-  async update(
+  async updateNew(
     @Param() params: ObjectIdDto,
     @Body() card: UpdateCardRequestDto,
   ): Promise<DetailedCardResponseDto> {
-    return await this.cardsService.update(params.id, card);
+    return await this.cardCommandHandler.update(params.id, card);
+  }
+
+  @Patch('/:id/createWorkThreadWithPR')
+  async createWorkThreadWithPR(
+    @Param() params: ObjectIdDto,
+    @Body() createWorkThread: CreateWorkThreadRequestDto,
+  ): Promise<DetailedCardResponseDto> {
+    return await this.workCommandHandler.handleCreateWorkThread(
+      params.id,
+      createWorkThread,
+    );
   }
 
   @Patch('/:id/createWorkThread')
@@ -150,7 +165,10 @@ export class CardsController {
     @Param() params: ObjectIdDto,
     @Body() createWorkThread: CreateWorkThreadRequestDto,
   ): Promise<DetailedCardResponseDto> {
-    return await this.workService.createWorkThread(params.id, createWorkThread);
+    return await this.workCommandHandler.handleCreateWorkThread(
+      params.id,
+      createWorkThread,
+    );
   }
 
   @Patch('/:id/updateWorkThread')
@@ -160,7 +178,7 @@ export class CardsController {
     @Query('threadId') threadId: string,
     @Body() updateWorkThread: UpdateWorkThreadRequestDto,
   ): Promise<DetailedCardResponseDto> {
-    return await this.workService.updateWorkThread(
+    return await this.workCommandHandler.handleUpdateWorkThread(
       params.id,
       threadId,
       updateWorkThread,
@@ -174,7 +192,7 @@ export class CardsController {
     @Query('threadId') threadId: string,
     @Body() createWorkUnit: CreateWorkUnitRequestDto,
   ): Promise<DetailedCardResponseDto> {
-    return await this.workService.createWorkUnit(
+    return await this.workCommandHandler.handleCreateWorkUnit(
       params.id,
       threadId,
       createWorkUnit,
@@ -189,7 +207,7 @@ export class CardsController {
     @Query('workUnitId') workUnitId: string,
     @Body() updateWorkUnit: UpdateWorkUnitRequestDto,
   ): Promise<DetailedCardResponseDto> {
-    return await this.workService.updateWorkUnit(
+    return await this.workCommandHandler.handleUpdateWorkUnit(
       params.id,
       threadId,
       workUnitId,
@@ -234,7 +252,9 @@ export class CardsController {
 
   @UseGuards(SessionAuthGuard)
   @Patch('/:id/archive')
-  async archive(@Param() params: ObjectIdDto): Promise<string[]> {
+  async archive(
+    @Param() params: ObjectIdDto,
+  ): Promise<DetailedProjectResponseDto> {
     return await this.cardsService.archive(params.id);
   }
 

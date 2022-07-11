@@ -28,9 +28,16 @@ export type BlacklistRegistry = {
 
 export type Invite = {
   id: string;
-  role: string;
+  roles: string[];
   uses: number;
   expires: Date;
+};
+
+export type DiscordToCircleRoles = {
+  [role: string]: {
+    circleRole: string[];
+    name: string;
+  };
 };
 
 // eslint-disable-next-line @typescript-eslint/ban-types
@@ -148,6 +155,18 @@ export class Circle extends ProfileModel {
   /**
    * A list of roles that the circle has
    */
+  @prop({ default: {} })
+  discordToCircleRoles: DiscordToCircleRoles;
+
+  /**
+   * A list of repos that the circle uses
+   */
+  @prop({ default: [] })
+  githubRepos: string[];
+
+  /**
+   * Gradient color of the circle
+   */
   @prop()
-  discordToCircleRoles: object;
+  gradient: string;
 }

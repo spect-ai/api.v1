@@ -2,12 +2,14 @@ import { Injectable } from '@nestjs/common';
 import * as urlSlug from 'url-slug';
 import { BaseRepository } from 'src/base/base.repository';
 import { BaseModel } from 'src/base/base.model';
+import { Project } from 'src/project/model/project.model';
+import { Circle } from 'src/circle/model/circle.model';
 
 @Injectable()
 export class SlugService {
   async generateUniqueSlug(
     generateFrom: string,
-    repository: BaseRepository<any>,
+    repository: BaseRepository<Project | Circle>,
   ) {
     const slug = urlSlug.convert(generateFrom, {
       separator: '-',

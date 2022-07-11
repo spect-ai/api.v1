@@ -1,12 +1,14 @@
 import { InternalServerErrorException } from '@nestjs/common';
 import type { DocumentType, ReturnModelType } from '@typegoose/typegoose';
 import type { MongoError } from 'mongodb';
+import mongodb from 'mongodb';
 import {
   Aggregate,
   AggregateOptions,
   FilterQuery,
   HydratedDocument,
   InsertManyResult,
+  MongooseBulkWriteOptions,
   ObjectId,
   PipelineStage,
   QueryOptions as MongooseQueryOptions,
@@ -247,5 +249,58 @@ export abstract class BaseRepository<TModel extends BaseModel> {
     } catch (e) {
       BaseRepository.throwMongoError(e);
     }
+  }
+
+  async bulkWrite(
+    writes: Array<mongodb.AnyBulkWriteOperation>,
+    options?: MongooseBulkWriteOptions,
+  ): Promise<mongodb.BulkWriteResult> {
+    try {
+      return await this.model.bulkWrite(writes, options);
+    } catch (e) {
+      BaseRepository.throwMongoError(e);
+    }
+  }
+
+  updateOneByIdQuery(
+    id: string,
+    update: mongodb.UpdateFilter<TModel>,
+  ): mongodb.AnyBulkWriteOperation {
+    const _id = this.toObjectId(id);
+    return {
+      updateOne: {
+        filter: { _id },
+        update: update,
+      },
+    };
+  }
+
+  updateManyByIdsQuery(
+    ids: string[],
+    update: mongodb.UpdateFilter<TModel>,
+  ): mongodb.AnyBulkWriteOperation {
+    return {
+      updateMany: {
+        filter: { _id: { $in: ids } },
+        update: update,
+      },
+    };
+  }
+
+  addToUpdateOneQuery(
+    currUpdate: mongodb.UpdateFilter<TModel>,
+    newUpdate: mongodb.UpdateFilter<TModel>,
+  ): mongodb.UpdateFilter<TModel> {
+    for (const [key, val] of Object.entries(newUpdate)) {
+      if (currUpdate.hasOwnProperty(key)) {
+        currUpdate[key] = {
+          ...currUpdate[key],
+          ...val,
+        };
+      } else {
+        currUpdate[key] = val;
+      }
+    }
+    return currUpdate;
   }
 }
