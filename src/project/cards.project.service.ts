@@ -1,22 +1,16 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CardsRepository } from 'src/card/cards.repository';
-import { CirclesRepository } from 'src/circle/circles.repository';
 import { DataStructureManipulationService } from 'src/common/dataStructureManipulation.service';
-import { SlugService } from 'src/common/slug.service';
-import { TemplatesRepository } from 'src/template/tempates.repository';
 import { DetailedProjectResponseDto } from './dto/detailed-project-response.dto';
 import { ReorderCardReqestDto } from './dto/reorder-card-request.dto';
 import { Project } from './model/project.model';
 import { ProjectsRepository } from './project.repository';
-import { CardLoc } from './types/card-loc.type';
+import { CardLoc, MappedProject } from './types/types';
 
 @Injectable()
 export class CardsProjectService {
   constructor(
     private readonly projectRepository: ProjectsRepository,
-    private readonly circlesRepository: CirclesRepository,
-    private readonly slugService: SlugService,
-    private readonly templateRepository: TemplatesRepository,
     private readonly cardRepository: CardsRepository,
     private readonly datastructureManipulationService: DataStructureManipulationService,
   ) {}
@@ -95,19 +89,15 @@ export class CardsProjectService {
     return cardLoc;
   }
 
-  async reorderCard(
-    projectId: string,
+  reorderCard(
+    project: Project,
     cardId: string,
     destinationCardLoc: ReorderCardReqestDto,
-    updateColumnIdInCard = false,
-  ): Promise<DetailedProjectResponseDto> {
-    const project = await this.projectRepository.findById(projectId);
-    if (!project) {
-      throw new HttpException('Project not found', HttpStatus.NOT_FOUND);
-    }
+  ): MappedProject {
     // Find where the card is in the project now
     const sourceCardLoc = this.findCardLocationInProject(project, cardId);
     if (!sourceCardLoc.columnId) {
+      console.log(`Card ${cardId} not found in project`);
       throw new HttpException('Card not found', HttpStatus.NOT_FOUND);
     }
 
@@ -132,7 +122,6 @@ export class CardsProjectService {
         HttpStatus.BAD_REQUEST,
       );
     }
-
     // Update the card location in the project
     columnDetails[sourceCardLoc.columnId].cards.splice(
       sourceCardLoc.cardIndex,
@@ -155,21 +144,11 @@ export class CardsProjectService {
       cards: columnDetails[destinationCardLoc.destinationColumnId].cards,
     };
 
-    // Update the column id in the card if flag is set to true, flag will mostly be false if this function is called from the card service
-    if (updateColumnIdInCard) {
-      await this.cardRepository.updateById(cardId.toString(), {
-        columnId: destinationCardLoc.destinationColumnId,
-      });
-    }
-
-    const updatedProject =
-      await this.projectRepository.updateProjectAndReturnWithPopulatedReferences(
-        projectId.toString(),
-        {
-          columnDetails,
-        },
-      );
-    return this.projectPopulatedWithCardDetails(updatedProject);
+    return {
+      [project.id]: {
+        columnDetails,
+      },
+    };
   }
 
   async removeMultipleCardsFromProject(

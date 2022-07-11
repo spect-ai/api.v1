@@ -17,7 +17,7 @@ export class ValidCardActionResponseDto {
    * Can user create card?
    */
   @IsObject()
-  canCreateCard: ActionValidOrNotWithReason;
+  createCard: ActionValidOrNotWithReason;
   /**
    * Can user update general card info - title, desc, reward, labels, priority, reviewer?
    */
@@ -41,6 +41,12 @@ export class ValidCardActionResponseDto {
    */
   @IsObject()
   updateAssignee: ActionValidOrNotWithReason;
+
+  /**
+   * Can user claim the task / bounty?
+   */
+  @IsObject()
+  claim: ActionValidOrNotWithReason;
 
   /**
    * Can user apply to bounty?

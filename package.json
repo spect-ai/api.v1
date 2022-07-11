@@ -42,6 +42,7 @@
     "mongoose-autopopulate": "^0.16.1",
     "mongoose-lean-virtuals": "^0.9.1",
     "nestjs-typegoose": "^7.1.38",
+    "node-fetch": "2",
     "reflect-metadata": "^0.1.13",
     "rimraf": "^3.0.2",
     "rxjs": "^7.2.0",

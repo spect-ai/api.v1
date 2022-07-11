@@ -57,7 +57,7 @@ export class ActivityBuilder {
   buildUpdatedCardActivity(
     req: UpdateCardRequestDto,
     card: Card,
-    project: Project,
+    project?: Project,
   ): Activity[] {
     const timestamp = new Date();
     const newActivities = [];
@@ -70,7 +70,6 @@ export class ActivityBuilder {
         if (field === 'columnId') {
           changeLog = this.buildColumnUpdateChange(req, card, field, project);
         } else changeLog = this.buildUpdateChangeLog(req, card, field);
-        console.log(changeLog);
         newActivities.push({
           activityId: fieldUpdateToActiityIdMap[field],
           changeLog: changeLog,

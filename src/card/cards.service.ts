@@ -22,6 +22,8 @@ import { UpdatePaymentInfoDto } from './dto/update-payment-info.dto';
 import { Card } from './model/card.model';
 import { ResponseBuilder } from './response.builder';
 import { CardValidationService } from './validation.cards.service';
+import mongodb from 'mongodb';
+import { MappedCard } from './types/types';
 
 @Injectable()
 export class CardsService {
@@ -257,44 +259,51 @@ export class CardsService {
     }
   }
 
-  async update(
-    id: string,
+  update(
+    card: Card,
+    project: Project,
     updateCardDto: UpdateCardRequestDto,
-  ): Promise<DetailedCardResponseDto> {
+  ): MappedCard {
     try {
-      const card = await this.cardsRepository.findById(id).populate('project');
-      const project = card.project as unknown as Project;
-      if (updateCardDto.columnId || updateCardDto.cardIndex) {
-        await this.cardsProjectService.reorderCard(
-          project.id,
-          id,
-          {
-            destinationColumnId: updateCardDto.columnId
-              ? updateCardDto.columnId
-              : card.columnId,
-            destinationCardIndex: updateCardDto.cardIndex
-              ? updateCardDto.cardIndex
-              : 0,
-          } as ReorderCardReqestDto,
-          false,
-        );
-      }
       const activities = this.activityBuilder.buildUpdatedCardActivity(
         updateCardDto,
         card,
         project,
       );
+      const updatedActivity = [...card.activity, ...activities];
 
-      const updatedCard =
-        await this.cardsRepository.updateCardAndReturnWithPopulatedReferences(
-          id,
-          {
-            ...updateCardDto,
-            activity: card.activity.concat(activities),
+      if (updateCardDto.columnId) {
+        if (!project.columnOrder.includes(updateCardDto.columnId))
+          throw new HttpException(
+            'Column Id must be in the project column order',
+            HttpStatus.NOT_FOUND,
+          );
+      }
+
+      return {
+        [card.id]: {
+          ...updateCardDto,
+          activity: updatedActivity,
+          status: {
+            ...card.status,
+            ...updateCardDto.status,
           },
-        );
-      return await this.responseBuilder.enrichResponse(updatedCard);
+          reward: {
+            ...card.reward,
+            ...updateCardDto.reward,
+            chain: {
+              ...card.reward.chain,
+              ...updateCardDto.reward?.chain,
+            },
+            token: {
+              ...card.reward.token,
+              ...updateCardDto.reward?.token,
+            },
+          },
+        },
+      };
     } catch (error) {
+      console.log(error);
       throw new InternalServerErrorException(
         'Failed card update',
         error.message,
@@ -302,11 +311,9 @@ export class CardsService {
     }
   }
 
-  async archive(id: string): Promise<string[]> {
+  async archive(id: string): Promise<DetailedProjectResponseDto> {
     const card = await this.cardsRepository.getCardWithAllChildren(id);
     this.validationService.validateCardExists(card);
-
-    console.log(card.flattenedChildren);
     const cardIds = [
       ...card.flattenedChildren.map((c) => c._id.toString()),
       id,
@@ -339,7 +346,7 @@ export class CardsService {
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
-    return cardIds;
+    return updatedProject;
   }
 
   async revertArchive(id: string): Promise<Card> {

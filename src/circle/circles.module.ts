@@ -13,6 +13,7 @@ import { RolesService } from 'src/roles/roles.service';
 import { DataStructureManipulationService } from 'src/common/dataStructureManipulation.service';
 import { CircleRegistryService } from './registry.circle.service';
 import { RegistryModule } from 'src/registry/registry.module';
+import { CircleAuthGuard, SessionAuthGuard } from 'src/auth/iron-session.guard';
 
 @Module({
   imports: [
@@ -31,6 +32,8 @@ import { RegistryModule } from 'src/registry/registry.module';
     RolesService,
     DataStructureManipulationService,
     CircleRegistryService,
+    SessionAuthGuard,
+    CircleAuthGuard,
   ],
   exports: [CirclesService, CirclesRepository, CirclesModule],
 })

@@ -5,7 +5,7 @@ import { BaseModel } from 'src/base/base.model';
 import { ObjectId } from 'mongoose';
 import { ColumnDetailsDto } from '../dto/column-details.dto';
 import { Card } from 'src/card/model/card.model';
-import { Automation, ValidActionId } from './automation.type';
+import { MappedAutomation } from 'src/template/models/template.model';
 
 @useMongoosePlugin()
 export class Project extends BaseModel {
@@ -51,6 +51,14 @@ export class Project extends BaseModel {
   @prop({})
   columnDetails: ColumnDetailsDto;
 
+  /** Automation priority order */
+  @prop({ default: [] })
+  automationOrder: string[];
+
+  /** Automation rule */
+  @prop({ default: {} })
+  automations: MappedAutomation;
+
   /**
    * Cards of the project
    *
@@ -69,11 +77,8 @@ export class Project extends BaseModel {
    * Channel in which discussion threads about cards in the circle will be posted
    */
   @prop()
-  discordDiscussionChannel: string;
-
-  /**
-   * The automations associated with the project, the trigger is the key and the value is the automation
-   */
-  @prop()
-  automations?: Map<ValidActionId, Automation>;
+  discordDiscussionChannel: {
+    id: string;
+    name: string;
+  };
 }

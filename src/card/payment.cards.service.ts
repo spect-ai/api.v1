@@ -14,7 +14,9 @@ import { RequestProvider } from 'src/users/user.provider';
 import { CardsRepository } from './cards.repository';
 import { AggregatedFlattenedPaymentInfo } from './dto/payment-info-response.dto';
 import { UpdatePaymentInfoDto } from './dto/update-payment-info.dto';
+import { Card } from './model/card.model';
 import { ResponseBuilder } from './response.builder';
+import { MappedCard } from './types/types';
 import { CardValidationService } from './validation.cards.service';
 
 @Injectable()
@@ -122,61 +124,34 @@ export class CardsPaymentService {
     return aggregatedPaymentInfo;
   }
 
-  async updatePaymentInfoAndClose(
-    updatePaymentInfo: UpdatePaymentInfoDto,
-  ): Promise<any> {
-    try {
-      if (updatePaymentInfo.cardIds.length === 0) {
-        throw new HttpException(
-          'Card ids cannot be empty',
-          HttpStatus.INTERNAL_SERVER_ERROR,
-        );
-      }
-
-      /** Taking the first card to get the project */
-      const card = await this.cardsRepository.getCardWithPopulatedReferences(
-        updatePaymentInfo.cardIds[0],
-      );
-      const project = card.project as unknown as Project;
-      const activities = this.activityBuilder.buildUpdatedCardActivity(
-        {
-          status: {
-            active: false,
-            paid: true,
-            archived: false,
-          },
+  updatePaymentInfo(
+    card: Card,
+    updatePaymentInfoDto: UpdatePaymentInfoDto,
+  ): MappedCard {
+    const activities = this.activityBuilder.buildUpdatedCardActivity(
+      {
+        status: {
+          active: false,
+          paid: true,
+          archived: false,
         },
-        card,
-        project,
-      );
+      },
+      card,
+    );
 
-      /** Mongo only returns an acknowledgment on update and not the updated records itself */
-      const updateAcknowledgment = await this.cardsRepository.updateManyByIds(
-        updatePaymentInfo.cardIds,
-        {
-          $set: {
-            'reward.transactionHash': updatePaymentInfo.transactionHash,
-            'status.active': false,
-            'status.paid': true,
-          },
-          $push: {
-            activity: activities[0],
-          },
+    return {
+      [card.id]: {
+        activity: card.activity.concat(activities),
+        reward: {
+          ...card.reward,
+          transactionHash: updatePaymentInfoDto.transactionHash,
         },
-      );
-
-      if (!updateAcknowledgment.acknowledged) {
-        throw new HttpException(
-          'Something went wrong while updating payment info',
-          HttpStatus.INTERNAL_SERVER_ERROR,
-        );
-      }
-      return await this.projectService.getDetailedProject(project.id);
-    } catch (error) {
-      throw new InternalServerErrorException(
-        'Failed updating payment info',
-        error.message,
-      );
-    }
+        status: {
+          ...card.status,
+          paid: true,
+          active: false,
+        },
+      },
+    };
   }
 }

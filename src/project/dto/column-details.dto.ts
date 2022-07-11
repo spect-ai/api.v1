@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsObject, IsString } from 'class-validator';
+import { IsNotEmpty, IsObject, IsOptional, IsString } from 'class-validator';
 
 export type ColumnDetailsDto = {
   [key: string]: ColumnDetailDto;
@@ -35,6 +35,11 @@ export class ColumnDetailDto {
    */
   @IsObject()
   access: Actions;
+
+  /** Channel to which notifs are sent when cards are added to this column */
+  @IsString()
+  @IsOptional()
+  notificationChannel?: string;
 }
 
 export type Actions = {

@@ -63,7 +63,7 @@ export class CreateCardRequestDto {
    */
   @IsString()
   @IsOptional()
-  type: string;
+  type: 'Task' | 'Bounty';
 
   /**
    * Card Deadline
