@@ -11,6 +11,13 @@ import { CardsModule } from 'src/card/cards.module';
 import { DataStructureManipulationService } from 'src/common/dataStructureManipulation.service';
 import { EthAddressModule } from 'src/_eth-address/_eth-address.module';
 import { CardsProjectService } from './cards.project.service';
+import { ActionService } from 'src/card/actions.service';
+import { RequestProvider } from 'src/users/user.provider';
+import { CardValidationService } from 'src/card/validation.cards.service';
+import { AutomationModule } from 'src/automation/automation.module';
+import { CircleAuthGuard, SessionAuthGuard } from 'src/auth/iron-session.guard';
+import { RolesService } from 'src/roles/roles.service';
+import { DiscordService } from 'src/common/discord.service';
 
 @Module({
   imports: [
@@ -18,6 +25,7 @@ import { CardsProjectService } from './cards.project.service';
     CirclesModule,
     forwardRef(() => TemplatesModule),
     forwardRef(() => CardsModule),
+    forwardRef(() => AutomationModule),
     EthAddressModule,
   ],
   controllers: [ProjectController],
@@ -27,6 +35,13 @@ import { CardsProjectService } from './cards.project.service';
     SlugService,
     DataStructureManipulationService,
     CardsProjectService,
+    ActionService,
+    RequestProvider,
+    CardValidationService,
+    RolesService,
+    DiscordService,
+    CircleAuthGuard,
+    SessionAuthGuard,
   ],
   exports: [ProjectService, ProjectsRepository, ProjectModule],
 })

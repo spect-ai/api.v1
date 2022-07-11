@@ -1,4 +1,3 @@
-import { ApplicationUnit } from 'src/card/model/application.type';
 import { Payment } from '../models/payment.model';
 import { Status } from './status.type';
 

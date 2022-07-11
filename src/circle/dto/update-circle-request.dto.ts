@@ -3,9 +3,11 @@ import {
   IsArray,
   IsBoolean,
   IsNotEmpty,
+  IsObject,
   IsOptional,
   IsString,
 } from 'class-validator';
+import { DiscordToCircleRoles } from '../model/circle.model';
 import { CreateCircleRequestDto } from './create-circle-request.dto';
 
 export class UpdateCircleRequestDto extends OmitType(CreateCircleRequestDto, [
@@ -40,4 +42,32 @@ export class UpdateCircleRequestDto extends OmitType(CreateCircleRequestDto, [
   @IsBoolean()
   @IsOptional()
   archived?: boolean;
+
+  /**
+   * Discord server id of the circle
+   */
+  @IsString()
+  @IsOptional()
+  discordGuildId?: string;
+
+  /**
+   * A list of roles that the circle has
+   */
+  @IsObject()
+  @IsOptional()
+  discordToCircleRoles?: DiscordToCircleRoles;
+
+  /**
+   * A list of repos that the circle uses
+   */
+  @IsArray()
+  @IsOptional()
+  githubRepos?: string[];
+
+  /**
+   * Gradient color of the circle
+   */
+  @IsString()
+  @IsOptional()
+  gradient?: string;
 }

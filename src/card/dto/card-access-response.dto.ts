@@ -14,6 +14,11 @@ export type ActionValidOrNotWithReason = {
 
 export class ValidCardActionResponseDto {
   /**
+   * Can user create card?
+   */
+  @IsObject()
+  createCard: ActionValidOrNotWithReason;
+  /**
    * Can user update general card info - title, desc, reward, labels, priority, reviewer?
    */
   @IsObject()
@@ -38,10 +43,11 @@ export class ValidCardActionResponseDto {
   updateAssignee: ActionValidOrNotWithReason;
 
   /**
-   * Can user assign themselves?
+   * Can user claim the task / bounty?
    */
   @IsObject()
-  beAssigned: ActionValidOrNotWithReason;
+  claim: ActionValidOrNotWithReason;
+
   /**
    * Can user apply to bounty?
    */
@@ -93,5 +99,9 @@ export class ValidCardActionResponseDto {
    * Can user start a discussion thread on discord for task / bounty?
    */
   @IsObject()
-  startThread: ActionValidOrNotWithReason;
+  createDiscordThread: ActionValidOrNotWithReason;
+}
+
+export class MultipleValidCardActionResponseDto {
+  [id: string]: ValidCardActionResponseDto;
 }

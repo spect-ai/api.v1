@@ -5,7 +5,9 @@ import {
   ValidateNested,
   IsOptional,
   IsString,
+  IsObject,
 } from 'class-validator';
+import { MappedAutomation } from 'src/template/models/template.model';
 import { ColumnDetailsDto } from './column-details.dto';
 
 export class CreateProjectRequestDto {
@@ -50,6 +52,20 @@ export class CreateProjectRequestDto {
   @ValidateNested()
   @IsOptional()
   columnDetails?: ColumnDetailsDto;
+
+  /**
+   * The priority of the automations in the project
+   */
+  @IsArray()
+  @IsOptional()
+  automationOrder?: string[];
+
+  /**
+   * The automations associated with the project, the trigger is the key and the value is the automation
+   */
+  @IsObject()
+  @IsOptional()
+  automations?: MappedAutomation;
 
   /**
    * The template of the project

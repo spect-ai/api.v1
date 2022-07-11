@@ -12,7 +12,7 @@ import { CreateCircleRequestDto } from './dto/create-circle-request.dto';
 import { DetailedCircleResponseDto } from './dto/detailed-circle-response.dto';
 import { JoinCircleUsingInvitationRequestDto } from './dto/join-circle.dto';
 import { UpdateCircleRequestDto } from './dto/update-circle-request.dto';
-import { Circle } from './model/circle.model';
+import { Circle, LocalRegistry } from './model/circle.model';
 import { DiscordService } from 'src/common/discord.service';
 import { GithubService } from 'src/common/github.service';
 import { RolesService } from 'src/roles/roles.service';
@@ -24,6 +24,7 @@ import { GetMemberDetailsOfCircleDto } from './dto/get-member-details.dto';
 import { User } from 'src/users/model/users.model';
 import { CirclePermission } from 'src/common/types/role.type';
 import { UpdateMemberRolesDto } from './dto/update-member-role.dto';
+import { RegistryService } from 'src/registry/registry.service';
 
 @Injectable()
 export class CirclesService {
@@ -35,6 +36,7 @@ export class CirclesService {
     private readonly githubService: GithubService,
     private readonly roleService: RolesService,
     private readonly datastructureManipulationService: DataStructureManipulationService,
+    private readonly registryService: RegistryService,
   ) {}
 
   validateNewMember(circle: Circle, newMember: string) {
@@ -71,7 +73,7 @@ export class CirclesService {
 
   async getCollatedUserPermissions(
     circleIds: string[],
-    user: User,
+    userId: string,
   ): Promise<CirclePermission> {
     const circles = await this.circlesRepository.findAll(
       {
@@ -87,7 +89,7 @@ export class CirclesService {
 
     const userPermissions = [];
     for (const circle of circles) {
-      const memberRoles = circle.memberRoles[user.id];
+      const memberRoles = circle.memberRoles[userId];
       if (memberRoles) {
         for (const memberRole of memberRoles) {
           userPermissions.push(circle.roles[memberRole].permissions);
@@ -96,9 +98,7 @@ export class CirclesService {
     }
 
     const circlePermissions: CirclePermission =
-      this.datastructureManipulationService.collateifyBooleanFields(
-        userPermissions,
-      ) as CirclePermission;
+      this.roleService.collatePermissions(userPermissions) as CirclePermission;
     return circlePermissions;
   }
 
@@ -132,20 +132,38 @@ export class CirclesService {
     };
   }
 
-  async getCircleWithSlug(slug: string): Promise<DetailedCircleResponseDto> {
-    const circle =
-      await this.circlesRepository.getCircleWithPopulatedReferencesBySlug(slug);
-    if (!circle) {
-      throw new HttpException('Circle not found', HttpStatus.NOT_FOUND);
-    }
-    const res = {
-      ...circle,
-      memberDetails: this.datastructureManipulationService.objectify(
-        circle.members,
-        'id',
-      ),
+  async getMemberDetailsOfCirclesWithSlug(slugs: string[]): Promise<any> {
+    const circles = await this.circlesRepository
+      .findAll(
+        {
+          slug: { $in: slugs },
+        },
+        {
+          projection: {
+            members: 1,
+          },
+        },
+      )
+      .populate('members');
+    let res = this.datastructureManipulationService.arrayify(
+      circles,
+      'members',
+    );
+    res = this.datastructureManipulationService.distinctify(res, 'id');
+    const memberDetails = this.datastructureManipulationService.objectify(
+      res,
+      'id',
+    );
+    return {
+      memberDetails,
+      members: Object.keys(memberDetails),
     };
-    return res;
+  }
+
+  async getCircleWithSlug(slug: string): Promise<DetailedCircleResponseDto> {
+    return await this.circlesRepository.getCircleWithPopulatedReferencesBySlug(
+      slug,
+    );
   }
 
   async create(
@@ -174,7 +192,7 @@ export class CirclesService {
           ...createCircleDto,
           slug: slug,
           parents: [parentCircle._id],
-          members: [this.requestProvider.user._id],
+          members: [this.requestProvider.user.id],
           memberRoles: memberRoles,
           roles: this.roleService.defaultCircleRoles(),
         });
@@ -186,7 +204,7 @@ export class CirclesService {
         createdCircle = await this.circlesRepository.create({
           ...createCircleDto,
           slug: slug,
-          members: [this.requestProvider.user._id],
+          members: [this.requestProvider.user.id],
           memberRoles: memberRoles,
           roles: this.roleService.defaultCircleRoles(),
         });
@@ -206,13 +224,12 @@ export class CirclesService {
     updateCircleDto: UpdateCircleRequestDto,
   ): Promise<DetailedCircleResponseDto> {
     try {
-      const updatedCircle = await this.circlesRepository
-        .updateById(id, updateCircleDto)
-        .populate('parents')
-        .populate('children')
-        .populate('members')
-        .populate('projects')
-        .exec();
+      console.log({ updateCircleDto });
+      const updatedCircle =
+        await this.circlesRepository.updateCircleAndReturnWithPopulatedReferences(
+          id,
+          updateCircleDto,
+        );
 
       return updatedCircle;
     } catch (error) {
@@ -277,16 +294,21 @@ export class CirclesService {
 
       circle.invites.splice(inviteIndex, 1);
       invite.uses--;
-      const updatedCircle = await this.circlesRepository.updateById(id, {
-        members: [...circle.members, this.requestProvider.user._id],
-        memberRoles: {
-          ...circle.memberRoles,
-          [this.requestProvider.user.id]: [invite.role],
-        },
-        invites: [...circle.invites, invite],
-      });
+      const updatedCircle =
+        await this.circlesRepository.updateCircleAndReturnWithPopulatedReferences(
+          id,
+          {
+            members: [...circle.members, this.requestProvider.user._id],
+            memberRoles: {
+              ...circle.memberRoles,
+              [this.requestProvider.user.id]: invite.roles,
+            },
+            invites: [...circle.invites, invite],
+          },
+        );
       return updatedCircle;
     } catch (error) {
+      console.log(error);
       throw new InternalServerErrorException(
         'Failed joining circle',
         error.message,
@@ -309,13 +331,17 @@ export class CirclesService {
           HttpStatus.NOT_FOUND,
         );
       }
-      const updatedCircle = await this.circlesRepository.updateById(id, {
-        members: [...circle.members, this.requestProvider.user._id],
-        memberRoles: {
-          ...circle.memberRoles,
-          [this.requestProvider.user.id]: role,
-        },
-      });
+      const updatedCircle =
+        await this.circlesRepository.updateCircleAndReturnWithPopulatedReferences(
+          id,
+          {
+            members: [...circle.members, this.requestProvider.user._id],
+            memberRoles: {
+              ...circle.memberRoles,
+              [this.requestProvider.user.id]: role,
+            },
+          },
+        );
       return updatedCircle;
     } catch (error) {
       throw new InternalServerErrorException(
@@ -336,16 +362,46 @@ export class CirclesService {
       this.validateExistingMember(circle, member);
       this.validateRolesExistInCircle(circle, updateMemberRolesDto.roles);
 
-      const updatedCircle = await this.circlesRepository.updateById(id, {
-        memberRoles: {
-          ...circle.memberRoles,
-          [member]: updateMemberRolesDto.roles,
-        },
-      });
+      const updatedCircle =
+        await this.circlesRepository.updateCircleAndReturnWithPopulatedReferences(
+          id,
+          {
+            memberRoles: {
+              ...circle.memberRoles,
+              [member]: updateMemberRolesDto.roles,
+            },
+          },
+        );
       return updatedCircle;
     } catch (error) {
       throw new InternalServerErrorException(
         'Failed updating member roles',
+        error.message,
+      );
+    }
+  }
+
+  async removeMember(
+    id: string,
+    member: string,
+  ): Promise<DetailedCircleResponseDto> {
+    try {
+      const circle =
+        await this.circlesRepository.getCircleWithUnpopulatedReferences(id);
+      this.validateExistingMember(circle, member);
+      delete circle.memberRoles[member];
+      const updatedCircle =
+        await this.circlesRepository.updateCircleAndReturnWithPopulatedReferences(
+          id,
+          {
+            members: circle.members.filter((m) => m.toString() !== member),
+            memberRoles: circle.memberRoles,
+          },
+        );
+      return updatedCircle;
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Failed removing member',
         error.message,
       );
     }

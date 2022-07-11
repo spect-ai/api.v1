@@ -2,12 +2,9 @@ import {
   IsArray,
   IsBoolean,
   IsNotEmpty,
-  IsObject,
   IsOptional,
   IsString,
-  IsUrl,
 } from 'class-validator';
-import { Project } from '../model/project.model';
 
 export class UpdateProjectRequestDto {
   /**
@@ -49,7 +46,9 @@ export class UpdateProjectRequestDto {
   /**
    * Channel in which discussion threads about cards in the circle will be posted
    */
-  @IsString()
   @IsOptional()
-  discordDiscussionChannel: string;
+  discordDiscussionChannel: {
+    id: string;
+    name: string;
+  };
 }

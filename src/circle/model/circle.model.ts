@@ -10,16 +10,38 @@ import { ObjectId } from 'mongoose';
 import { MemberRoles, Roles } from 'src/common/types/role.type';
 import { Registry, TokenInfo } from 'src/registry/model/registry.model';
 
-export type TokenWhitelist = {
-  [chainId: string]: TokenInfo;
+export type TokenDetails = {
+  [tokenAddress: string]: TokenInfo;
+};
+
+export type LocalRegistry = {
+  [chainId: string]: TokenDetails;
+};
+
+export type TokenBlacklisted = {
+  [tokenAddress: string]: boolean;
+};
+
+export type BlacklistRegistry = {
+  [chainId: string]: TokenBlacklisted;
 };
 
 export type Invite = {
   id: string;
-  role: string;
+  roles: string[];
   uses: number;
   expires: Date;
 };
+
+export type DiscordToCircleRoles = {
+  [role: string]: {
+    circleRole: string[];
+    name: string;
+  };
+};
+
+// eslint-disable-next-line @typescript-eslint/ban-types
+export type EmptyObject = {};
 
 @useMongoosePlugin()
 export class Circle extends ProfileModel {
@@ -63,7 +85,7 @@ export class Circle extends ProfileModel {
    * Members in the circle
    */
   @prop({ ref: () => User, default: [] })
-  members: ObjectId[];
+  members: string[];
 
   /**
    * A list of roles that the circle has
@@ -109,8 +131,14 @@ export class Circle extends ProfileModel {
   /**
    * The tokens whitelisted in the circle, these will be available in the circle on top of the globally available tokens
    */
-  @prop({ default: {} })
-  tokenWhitelist: TokenWhitelist;
+  @prop()
+  localRegistry: LocalRegistry | EmptyObject;
+
+  /**
+   * The tokens whitelisted in the circle, these will be available in the circle on top of the globally available tokens
+   */
+  @prop()
+  blacklistRegistry: BlacklistRegistry | EmptyObject;
 
   /**
    * Invitations to the circle
@@ -127,6 +155,18 @@ export class Circle extends ProfileModel {
   /**
    * A list of roles that the circle has
    */
+  @prop({ default: {} })
+  discordToCircleRoles: DiscordToCircleRoles;
+
+  /**
+   * A list of repos that the circle uses
+   */
+  @prop({ default: [] })
+  githubRepos: string[];
+
+  /**
+   * Gradient color of the circle
+   */
   @prop()
-  discordToCircleRoles: object;
+  gradient: string;
 }

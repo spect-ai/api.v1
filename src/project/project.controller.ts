@@ -5,14 +5,20 @@ import {
   Param,
   Patch,
   Post,
+  SetMetadata,
   UseGuards,
 } from '@nestjs/common';
-import { SessionAuthGuard } from 'src/auth/iron-session.guard';
+import {
+  CircleAuthGuard,
+  CreateNewProjectAuthGuard,
+  ProjectAuthGuard,
+  SessionAuthGuard,
+} from 'src/auth/iron-session.guard';
+import { MultipleValidCardActionResponseDto } from 'src/card/dto/card-access-response.dto';
 import { ObjectIdDto } from 'src/common/dtos/object-id.dto';
 import { CardsProjectService } from './cards.project.service';
 import { CreateProjectRequestDto } from './dto/create-project-request.dto';
 import { DetailedProjectResponseDto } from './dto/detailed-project-response.dto';
-import { ReorderCardReqestDto } from './dto/reorder-card-request.dto';
 import { UpdateColumnRequestDto } from './dto/update-column.dto';
 import { UpdateProjectRequestDto } from './dto/update-project-request.dto';
 import { Project } from './model/project.model';
@@ -37,14 +43,16 @@ export class ProjectController {
     return await this.projectService.getDetailedProjectBySlug(slug);
   }
 
+  @SetMetadata('permissions', ['createNewProject'])
+  @UseGuards(CreateNewProjectAuthGuard)
   @Post('/')
-  @UseGuards(SessionAuthGuard)
   async create(@Body() project: CreateProjectRequestDto): Promise<Project> {
     return await this.projectService.create(project);
   }
 
+  @SetMetadata('permissions', ['manageProjectSettings'])
+  @UseGuards(ProjectAuthGuard)
   @Patch('/:id')
-  @UseGuards(SessionAuthGuard)
   async update(
     @Param() param: ObjectIdDto,
     @Body() project: UpdateProjectRequestDto,
@@ -52,30 +60,26 @@ export class ProjectController {
     return await this.projectService.update(param.id, project);
   }
 
-  @Patch('/:id/reorderCard/:cardId')
+  @Get('/:slug/validActions')
   @UseGuards(SessionAuthGuard)
-  async reorderCard(
-    @Param() param: ObjectIdDto,
-    @Param('cardId') cardId,
-    @Body() reorderCardRequestDto: ReorderCardReqestDto,
-  ): Promise<DetailedProjectResponseDto> {
-    return await this.cardsProjectService.reorderCard(
-      param.id,
-      cardId,
-      reorderCardRequestDto,
-    );
+  async getValidActions(
+    @Param('slug') slug,
+  ): Promise<MultipleValidCardActionResponseDto> {
+    return await this.projectService.getValidActions(slug);
   }
 
+  @SetMetadata('permissions', ['manageProjectSettings'])
+  @UseGuards(ProjectAuthGuard)
   @Patch('/:id/column/add')
-  @UseGuards(SessionAuthGuard)
   async addColumn(
     @Param() param: ObjectIdDto,
   ): Promise<DetailedProjectResponseDto> {
     return await this.projectService.addColumn(param.id);
   }
 
+  @SetMetadata('permissions', ['manageProjectSettings'])
+  @UseGuards(ProjectAuthGuard)
   @Patch('/:id/column/:columnId/delete')
-  @UseGuards(SessionAuthGuard)
   async deleteColumn(
     @Param() param: ObjectIdDto,
     @Param('columnId') columnId,
@@ -83,8 +87,9 @@ export class ProjectController {
     return await this.projectService.deleteColumn(param.id, columnId);
   }
 
+  @SetMetadata('permissions', ['manageProjectSettings'])
+  @UseGuards(ProjectAuthGuard)
   @Patch('/:id/column/:columnId/')
-  @UseGuards(SessionAuthGuard)
   async updateColumnDetails(
     @Param() param: ObjectIdDto,
     @Param('columnId') columnId,
@@ -97,8 +102,9 @@ export class ProjectController {
     );
   }
 
+  // TODO: Delete all the cards in the project aswell
   @Post('/:id/delete')
-  @UseGuards(SessionAuthGuard)
+  @SetMetadata('permissions', ['manageProjectSettings'])
   async delete(@Param() param: ObjectIdDto): Promise<Project> {
     return await this.projectService.delete(param.id);
   }
