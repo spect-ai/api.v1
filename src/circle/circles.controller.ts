@@ -222,11 +222,12 @@ export class CirclesController {
   }
 
   // TODO: Delete everything withing the circle
-  // @SetMetadata('permissions', ['manageMembers'])
-  // @UseGuards(CircleAuthGuard)  @Post('/:id/delete')
-  // async delete(
-  //   @Param() param: ObjectIdDto,
-  // ): Promise<DetailedCircleResponseDto> {
-  //   return await this.circlesService.delete(param.id);
-  // }
+  @SetMetadata('permissions', ['manageCircleSettings'])
+  @UseGuards(CircleAuthGuard)
+  @Post('/:id/delete')
+  async delete(
+    @Param() param: ObjectIdDto,
+  ): Promise<DetailedCircleResponseDto> {
+    return await this.circlesService.delete(param.id);
+  }
 }

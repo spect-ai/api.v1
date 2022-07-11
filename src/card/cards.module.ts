@@ -28,6 +28,9 @@ import { CardCommandHandler } from './handlers/update.command.handler';
 import { AutomationModule } from 'src/automation/automation.module';
 import { AutomationService } from 'src/automation/automation.service';
 import { WorkCommandHandler } from './handlers/work.command.handler';
+import { RolesService } from 'src/roles/roles.service';
+import { DiscordService } from 'src/common/discord.service';
+import { SessionAuthGuard } from 'src/auth/iron-session.guard';
 
 @Module({
   imports: [
@@ -62,6 +65,9 @@ import { WorkCommandHandler } from './handlers/work.command.handler';
     AutomationService,
     WorkCommandHandler,
     CommonUtility,
+    RolesService,
+    DiscordService,
+    SessionAuthGuard,
   ],
   exports: [
     CardsService,

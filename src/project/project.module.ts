@@ -15,6 +15,9 @@ import { ActionService } from 'src/card/actions.service';
 import { RequestProvider } from 'src/users/user.provider';
 import { CardValidationService } from 'src/card/validation.cards.service';
 import { AutomationModule } from 'src/automation/automation.module';
+import { CircleAuthGuard, SessionAuthGuard } from 'src/auth/iron-session.guard';
+import { RolesService } from 'src/roles/roles.service';
+import { DiscordService } from 'src/common/discord.service';
 
 @Module({
   imports: [
@@ -35,6 +38,10 @@ import { AutomationModule } from 'src/automation/automation.module';
     ActionService,
     RequestProvider,
     CardValidationService,
+    RolesService,
+    DiscordService,
+    CircleAuthGuard,
+    SessionAuthGuard,
   ],
   exports: [ProjectService, ProjectsRepository, ProjectModule],
 })
