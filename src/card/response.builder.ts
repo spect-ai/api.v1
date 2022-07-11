@@ -24,6 +24,7 @@ export class ResponseBuilder {
      */
     if (card.type !== 'Bounty') return card;
     else if (!this.requestProvider.user) return card;
+    else if (!card.application) return card;
     else {
       for (const [applicationId, application] of Object.entries(
         card.application,
