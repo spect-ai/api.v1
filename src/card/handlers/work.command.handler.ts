@@ -60,7 +60,8 @@ export class WorkCommandHandler {
         createWorkThread,
       );
       const globalUpdateAfterAutomation =
-        this.automationService.handleAutomation(card, project, cardUpdate);
+        this.automationService.handleAutomation(card, project, cardUpdate[id]);
+      console.log(JSON.stringify(globalUpdateAfterAutomation));
       return await this.commonUtility.mergeExecuteAndReturn(
         id,
         project.id,
@@ -134,7 +135,7 @@ export class WorkCommandHandler {
         createWorkUnit,
       );
       const globalUpdateAfterAutomation =
-        this.automationService.handleAutomation(card, project, cardUpdate);
+        this.automationService.handleAutomation(card, project, cardUpdate[id]);
 
       return await this.commonUtility.mergeExecuteAndReturn(
         id,
@@ -174,7 +175,7 @@ export class WorkCommandHandler {
       );
       console.log(cardUpdate);
       const globalUpdateAfterAutomation =
-        this.automationService.handleAutomation(card, project, cardUpdate);
+        this.automationService.handleAutomation(card, project, cardUpdate[id]);
 
       return await this.commonUtility.mergeExecuteAndReturn(
         id,

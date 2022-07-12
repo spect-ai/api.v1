@@ -279,29 +279,42 @@ export class CardsService {
             HttpStatus.NOT_FOUND,
           );
       }
-
-      return {
+      const res = {
         [card.id]: {
           ...updateCardDto,
           activity: updatedActivity,
-          status: {
-            ...card.status,
-            ...updateCardDto.status,
-          },
-          reward: {
-            ...card.reward,
-            ...updateCardDto.reward,
-            chain: {
-              ...card.reward.chain,
-              ...updateCardDto.reward?.chain,
-            },
-            token: {
-              ...card.reward.token,
-              ...updateCardDto.reward?.token,
-            },
-          },
         },
       };
+
+      /**
+       * Only add status and rewards when there is an update, otherwise it affects the automation workflow
+       * in case there is a status update due to some automaion. This is because the normal card update is always given higher priority
+       * over the updates due to the automation workflow.
+       * Updating status and rewards like following makes sure partial updates are supported. For example, reward can be update by
+       * just passing one property of reward like 'chain' or 'value'.
+       */
+      if (updateCardDto.status) {
+        res[card.id].status = {
+          ...card.status,
+          ...updateCardDto.status,
+        };
+      }
+      if (updateCardDto.reward) {
+        res[card.id].reward = {
+          ...card.reward,
+          ...updateCardDto.reward,
+          chain: {
+            ...card.reward.chain,
+            ...updateCardDto.reward?.chain,
+          },
+          token: {
+            ...card.reward.token,
+            ...updateCardDto.reward?.token,
+          },
+        };
+      }
+
+      return res;
     } catch (error) {
       console.log(error);
       throw new InternalServerErrorException(
