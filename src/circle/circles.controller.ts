@@ -25,7 +25,6 @@ import { UpdateCircleRequestDto } from './dto/update-circle-request.dto';
 import { RequestProvider } from 'src/users/user.provider';
 import { InviteDto } from './dto/invite.dto';
 import { JoinCircleUsingInvitationRequestDto } from './dto/join-circle.dto';
-import { GetMemberDetailsOfCircleDto } from './dto/get-member-details.dto';
 import { ApiParam, ApiQuery } from '@nestjs/swagger';
 import { ObjectIdDto } from 'src/common/dtos/object-id.dto';
 import { UpdateMemberRolesDto } from './dto/update-member-role.dto';
@@ -164,6 +163,7 @@ export class CirclesController {
     @Param() param: ObjectIdDto,
     @Body() circle: UpdateCircleRequestDto,
   ): Promise<DetailedCircleResponseDto> {
+    console.log({ circle });
     return await this.circlesService.update(param.id, circle);
   }
 

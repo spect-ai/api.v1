@@ -163,4 +163,10 @@ export class Circle extends ProfileModel {
    */
   @prop({ default: [] })
   githubRepos: string[];
+
+  /**
+   * Gradient color of the circle
+   */
+  @prop()
+  gradient: string;
 }

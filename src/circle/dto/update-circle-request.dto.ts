@@ -63,4 +63,11 @@ export class UpdateCircleRequestDto extends OmitType(CreateCircleRequestDto, [
   @IsArray()
   @IsOptional()
   githubRepos?: string[];
+
+  /**
+   * Gradient color of the circle
+   */
+  @IsString()
+  @IsOptional()
+  gradient?: string;
 }
