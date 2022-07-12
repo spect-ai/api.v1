@@ -51,7 +51,9 @@ export class CardCommandHandler {
     try {
       const card = await this.cardsRepository.findById(id);
       this.validationService.validateCardExists(card);
-      const project = await this.projectRepository.findById(card.project);
+      const project = await this.projectRepository.findById(
+        card.project as string,
+      );
 
       const globalUpdate = {
         card: {},
@@ -146,7 +148,9 @@ export class CardCommandHandler {
       }
 
       /** Fetch the project using the first card, as we assume all cards are in the same project */
-      const project = await this.projectRepository.findById(cards[0].project);
+      const project = await this.projectRepository.findById(
+        cards[0].project as string,
+      );
 
       /** Get the payment info for all the cards */
       for (const card of cards) {

@@ -1,6 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { DataStructureManipulationService } from 'src/common/dataStructureManipulation.service';
 import { GlobalDocumentUpdate } from 'src/common/types/update.type';
+import { Project } from 'src/project/model/project.model';
 import { ProjectsRepository } from 'src/project/project.repository';
 import { MappedProject } from 'src/project/types/types';
 import { RequestProvider } from 'src/users/user.provider';
@@ -15,9 +16,12 @@ export class ResponseBuilder {
   constructor(
     private readonly requestProvider: RequestProvider,
     private readonly activityResolver: ActivityResolver,
+    private readonly dataStructureManipulationService: DataStructureManipulationService,
   ) {}
 
-  resolveApplicationView(card: Card): DetailedCardResponseDto {
+  resolveApplicationView(
+    card: DetailedCardResponseDto,
+  ): DetailedCardResponseDto {
     /** Do nothing if card is not bounty, otherwise add the applicant's application
      *
      * TODO: Check if caller is steward, if not, filter out the rest of the applications
@@ -40,12 +44,24 @@ export class ResponseBuilder {
     return card;
   }
 
-  async enrichResponse(card: Card) {
+  async enrichResponse(card: Card): Promise<DetailedCardResponseDto> {
     /** This function should contain everything added to the response for the frontend, to prevent
      * multiple functions needing to be updated seperately for a new item
      */
     card = await this.enrichActivity(card);
-    return this.resolveApplicationView(card);
+
+    const cardProject = card.project as Project;
+    const res = {
+      ...card,
+      project: {
+        ...cardProject,
+        cards: this.dataStructureManipulationService.objectify(
+          cardProject.cards,
+          'id',
+        ),
+      },
+    } as DetailedCardResponseDto;
+    return this.resolveApplicationView(res);
   }
 
   async enrichActivity(card: Card) {

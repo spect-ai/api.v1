@@ -49,7 +49,9 @@ export class WorkCommandHandler {
     try {
       const card = await this.cardsRepository.findById(id);
       this.validationService.validateCardExists(card);
-      const project = await this.projectRepository.findById(card.project);
+      const project = await this.projectRepository.findById(
+        card.project as string,
+      );
       const globalUpdate = {
         card: {},
         project: {},
@@ -85,7 +87,9 @@ export class WorkCommandHandler {
     try {
       const card = await this.cardsRepository.findById(id);
       this.validationService.validateCardExists(card);
-      const project = await this.projectRepository.findById(card.project);
+      const project = await this.projectRepository.findById(
+        card.project as string,
+      );
 
       const globalUpdate = {
         card: {},
@@ -123,7 +127,9 @@ export class WorkCommandHandler {
     try {
       const card = await this.cardsRepository.findById(id);
       this.validationService.validateCardExists(card);
-      const project = await this.projectRepository.findById(card.project);
+      const project = await this.projectRepository.findById(
+        card.project as string,
+      );
 
       const globalUpdate = {
         card: {},
@@ -161,7 +167,9 @@ export class WorkCommandHandler {
     try {
       const card = await this.cardsRepository.findById(id);
       this.validationService.validateCardExists(card);
-      const project = await this.projectRepository.findById(card.project);
+      const project = await this.projectRepository.findById(
+        card.project as string,
+      );
 
       const globalUpdate = {
         card: {},

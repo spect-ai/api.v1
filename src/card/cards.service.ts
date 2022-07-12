@@ -162,7 +162,7 @@ export class CardsService {
         /** Adding the child cards */
         const resCreateMultipleCards = await this.createMultipleCards(
           createCardDto.childCards,
-          createdCard.project,
+          createdCard.project as string,
           createdCard.circle,
           createdCard.columnId,
           parseInt(createdCard.slug) + 1,
@@ -372,7 +372,7 @@ export class CardsService {
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     const updatedProject = await this.cardsProjectService.addCardToProject(
-      card.project,
+      card.project as string,
       card.columnId,
       card.id,
     );

@@ -40,7 +40,7 @@ export class ApplicationService {
 
       const project =
         await this.projectRepository.getProjectWithUnpPopulatedReferences(
-          card.project,
+          card.project as string,
         );
       const memberDetailsRes =
         await this.circleService.getMemberDetailsOfCircles(project.parents);

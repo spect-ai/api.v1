@@ -36,6 +36,7 @@ const populatedCardFieldsOnProject = {
   project: 1,
   creator: 1,
   status: 1,
+  id: 1,
 };
 
 @Injectable()
