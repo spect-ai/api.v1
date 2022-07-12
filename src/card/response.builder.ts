@@ -5,6 +5,7 @@ import { Project } from 'src/project/model/project.model';
 import { ProjectsRepository } from 'src/project/project.repository';
 import { MappedProject } from 'src/project/types/types';
 import { RequestProvider } from 'src/users/user.provider';
+import { ActionService } from './actions.service';
 import { ActivityResolver } from './activity.resolver';
 import { CardsRepository } from './cards.repository';
 import { DetailedCardResponseDto } from './dto/detailed-card-response-dto';
@@ -17,29 +18,46 @@ export class ResponseBuilder {
     private readonly requestProvider: RequestProvider,
     private readonly activityResolver: ActivityResolver,
     private readonly dataStructureManipulationService: DataStructureManipulationService,
+    private readonly actionService: ActionService,
   ) {}
 
-  resolveApplicationView(
-    card: DetailedCardResponseDto,
-  ): DetailedCardResponseDto {
+  resolveApplicationView(card: Card): Card {
     /** Do nothing if card is not bounty, otherwise add the applicant's application
-     *
-     * TODO: Check if caller is steward, if not, filter out the rest of the applications
+     * Cases:
+     * 1. Card is not bounty -> do nothing
+     * 2. User is not logged in -> dont return any application
+     * 3. Application field is null since no one submitted an application -> do nothing
+     * 4. User is potential applicant -> return application if it exists, otherwise dont return any application
+     * 5. User is steward -> do nothing
      */
     if (card.type !== 'Bounty') return card;
-    else if (!this.requestProvider.user) return card;
+    else if (!this.requestProvider.user)
+      return {
+        ...card,
+        application: {},
+        applicationOrder: [],
+      };
     else if (!card.application) return card;
-    else {
+    else if (this.actionService.canApply(card, this.requestProvider.user.id)) {
       for (const [applicationId, application] of Object.entries(
         card.application,
       )) {
-        if (application.user.toString() === this.requestProvider.user.id) {
+        if (application.user?.toString() === this.requestProvider.user.id) {
+          console.log('adding application');
           return {
             ...card,
-            myApplication: application,
+            application: {
+              [applicationId]: application,
+            },
+            applicationOrder: [applicationId],
           };
         }
       }
+      return {
+        ...card,
+        application: {},
+        applicationOrder: [],
+      };
     }
     return card;
   }
@@ -49,8 +67,10 @@ export class ResponseBuilder {
      * multiple functions needing to be updated seperately for a new item
      */
     card = await this.enrichActivity(card);
+    card = this.resolveApplicationView(card);
+    console.log(card.application);
 
-    const cardProject = card.project as Project;
+    const cardProject = card.project as unknown as Project;
     const res = {
       ...card,
       project: {
@@ -61,10 +81,11 @@ export class ResponseBuilder {
         ),
       },
     } as DetailedCardResponseDto;
-    return this.resolveApplicationView(res);
+    console.log(res);
+    return res;
   }
 
-  async enrichActivity(card: Card) {
+  async enrichActivity(card: Card): Promise<Card> {
     card = await this.activityResolver.resolveActivities(card);
     card.activity = card.activity.reverse();
     return card;

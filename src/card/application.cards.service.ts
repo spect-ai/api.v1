@@ -53,7 +53,7 @@ export class ApplicationService {
               members: this.requestProvider.user.id,
             },
             $set: {
-              [`memberRoles.${this.requestProvider.user.id}`]: 'visitor',
+              [`memberRoles.${this.requestProvider.user.id}`]: ['visitor'],
             },
           },
         );

@@ -51,7 +51,7 @@ export class Card extends BaseModel {
    * The project that the card belongs to
    */
   @prop({ ref: () => Project, required: true })
-  project: string | Project;
+  project: string;
 
   /**
    * The project that the card belongs to

@@ -6,6 +6,9 @@ import {
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { ObjectId } from 'mongoose';
+import { ActionService } from 'src/card/actions.service';
+import { CardsRepository } from 'src/card/cards.repository';
+import { Card } from 'src/card/model/card.model';
 import { CirclesRepository } from 'src/circle/circles.repository';
 import { CirclesService } from 'src/circle/circles.service';
 import { Circle } from 'src/circle/model/circle.model';
@@ -33,9 +36,33 @@ export class SessionAuthGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
+    console.log(`request.session.siwe?.address`);
+
+    console.log(request.session.siwe?.address);
     try {
-      request.user = await this.validateUser(request.session.siwe.address);
+      request.user = await this.validateUser(request.session.siwe?.address);
       if (!request.user) return false;
+      return true;
+    } catch (error) {
+      request.session.destroy();
+      throw new HttpException({ message: error }, 422);
+    }
+  }
+}
+
+@Injectable()
+export class PublicViewAuthGuard implements CanActivate {
+  constructor(private readonly sessionAuthGuard: SessionAuthGuard) {}
+
+  async canActivate(context: ExecutionContext): Promise<boolean> {
+    const request = context.switchToHttp().getRequest();
+    console.log(`request.session.siwe?.address`);
+
+    console.log(request.session.siwe?.address);
+    try {
+      request.user = await this.sessionAuthGuard.validateUser(
+        request.session.siwe?.address,
+      );
       return true;
     } catch (error) {
       request.session.destroy();
@@ -216,6 +243,86 @@ export class CreateNewProjectAuthGuard implements CanActivate {
 
       return this.circleAuthGuard.checkPermissions(
         ['createNewProject'],
+        circle?.memberRoles[request.user.id] || [],
+        circle,
+      );
+    } catch (error) {
+      console.log(error);
+      request.session.destroy();
+      throw new HttpException({ message: error }, 422);
+    }
+  }
+}
+
+@Injectable()
+export class CardAuthGuard implements CanActivate {
+  constructor(
+    private readonly sessionAuthGuard: SessionAuthGuard,
+    private readonly circlesRepository: CirclesRepository,
+    private readonly circleAuthGuard: CircleAuthGuard,
+    private readonly cardsRepository: CardsRepository,
+  ) {}
+
+  checkPermissions(
+    body: any,
+    userId: string,
+    card: Card,
+    circle: Circle,
+  ): boolean {
+    return true;
+  }
+
+  async canActivate(context: ExecutionContext): Promise<boolean> {
+    const request = context.switchToHttp().getRequest();
+    try {
+      request.user = (await this.sessionAuthGuard.validateUser(
+        request.session.siwe?.address,
+      )) as unknown as User;
+      if (!request.user) return false;
+      const card = await this.cardsRepository.findById(request.params.id);
+      if (!card) {
+        throw new HttpException('Card not found', 404);
+      }
+      request.card = card;
+
+      const circle = await this.circlesRepository.findById(card.circle);
+      if (!circle) {
+        throw new HttpException('Circle not found', 404);
+      }
+      request.circle = circle;
+
+      return this.checkPermissions(request.body, request.user.id, card, circle);
+    } catch (error) {
+      console.log(error);
+      request.session.destroy();
+      throw new HttpException({ message: error }, 422);
+    }
+  }
+}
+
+@Injectable()
+export class CreateNewCardAuthGuard implements CanActivate {
+  constructor(
+    private readonly sessionAuthGuard: SessionAuthGuard,
+    private readonly circlesRepository: CirclesRepository,
+    private readonly circleAuthGuard: CircleAuthGuard,
+  ) {}
+
+  async canActivate(context: ExecutionContext): Promise<boolean> {
+    const request = context.switchToHttp().getRequest();
+    try {
+      request.user = (await this.sessionAuthGuard.validateUser(
+        request.session.siwe?.address,
+      )) as unknown as User;
+      if (!request.user) return false;
+      const circle = await this.circlesRepository.findById(request.body.circle);
+      if (!circle) {
+        throw new HttpException('Circle not found', 404);
+      }
+      request.circle = circle;
+
+      return this.circleAuthGuard.checkPermissions(
+        ['createNewCard'],
         circle?.memberRoles[request.user.id] || [],
         circle,
       );
