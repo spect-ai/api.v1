@@ -39,7 +39,11 @@ import { AutomationService } from './automation/automation.service';
 import { AutomationModule } from './automation/automation.module';
 import { CardCommandHandler } from './card/handlers/update.command.handler';
 import { WorkCommandHandler } from './card/handlers/work.command.handler';
-import { CircleAuthGuard, SessionAuthGuard } from './auth/iron-session.guard';
+import {
+  CircleAuthGuard,
+  ProjectAuthGuard,
+  SessionAuthGuard,
+} from './auth/iron-session.guard';
 
 const databaseUrl =
   process.env.DATABASE_URL || 'mongodb://localhost:27017/nest';
@@ -96,6 +100,7 @@ console.log({ databaseUrl });
     CommonUtility,
     SessionAuthGuard,
     CircleAuthGuard,
+    ProjectAuthGuard,
   ],
 })
 export class AppModule {}

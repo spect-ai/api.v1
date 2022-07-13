@@ -25,7 +25,7 @@ export class ActionService {
 
   canCreateCard(
     circlePermissions: CirclePermission,
-    cardType: 'Task' | 'Bounty',
+    cardType: 'Task' | 'Bounty' = 'Task',
   ) {
     if (
       circlePermissions.createNewCard &&
@@ -160,7 +160,7 @@ export class ActionService {
       };
   }
 
-  canApply(card: Card, circle: Circle, userId: string) {
+  canApply(card: Card, userId: string) {
     if (
       card.type === 'Bounty' &&
       card.assignee?.length === 0 &&
@@ -176,7 +176,7 @@ export class ActionService {
       };
   }
 
-  canSubmit(card: Card, circle: Circle, userId: string) {
+  canSubmit(card: Card, userId: string) {
     if (card.assignee?.includes(userId)) return { valid: true };
     else
       return {
@@ -319,8 +319,8 @@ export class ActionService {
       updateColumn: this.canUpdateColumn(card, circlePermissions, userId),
       updateAssignee: this.canUpdateAssignee(card, circlePermissions, userId),
       claim: this.canClaim(card, circlePermissions, userId),
-      applyToBounty: this.canApply(card, circle, userId),
-      submit: this.canSubmit(card, circle, userId),
+      applyToBounty: this.canApply(card, userId),
+      submit: this.canSubmit(card, userId),
       addRevisionInstruction: this.canAddRevisionInstructions(
         card,
         circlePermissions,
@@ -339,7 +339,7 @@ export class ActionService {
     ids: string[],
   ): Promise<MultipleValidCardActionResponseDto> {
     const validActions = {} as MultipleValidCardActionResponseDto;
-
+    if (!ids) return validActions;
     for (const id of ids) {
       const validAction = await this.getValidActions(id);
       validActions[id] = validAction;

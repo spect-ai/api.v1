@@ -40,7 +40,7 @@ export class ApplicationService {
 
       const project =
         await this.projectRepository.getProjectWithUnpPopulatedReferences(
-          card.project,
+          card.project as string,
         );
       const memberDetailsRes =
         await this.circleService.getMemberDetailsOfCircles(project.parents);
@@ -53,7 +53,7 @@ export class ApplicationService {
               members: this.requestProvider.user.id,
             },
             $set: {
-              [`memberRoles.${this.requestProvider.user.id}`]: 'visitor',
+              [`memberRoles.${this.requestProvider.user.id}`]: ['visitor'],
             },
           },
         );
