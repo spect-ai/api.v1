@@ -60,8 +60,8 @@ export class ProjectController {
     return await this.projectService.update(param.id, project);
   }
 
-  @Get('/:slug/validActions')
   @UseGuards(SessionAuthGuard)
+  @Get('/:slug/validActions')
   async getValidActions(
     @Param('slug') slug,
   ): Promise<MultipleValidCardActionResponseDto> {

@@ -9,7 +9,9 @@ import {
 } from 'class-validator';
 import { Payment } from 'src/common/models/payment.model';
 import { Status } from 'src/common/types/status.type';
-import { ApplicationUnit } from '../types/types';
+import { DetailedProjectResponseDto } from 'src/project/dto/detailed-project-response.dto';
+import { Project } from 'src/project/model/project.model';
+import { ApplicationDetails, ApplicationUnit } from '../types/types';
 
 export class DetailedCardResponseDto {
   /**
@@ -51,7 +53,7 @@ export class DetailedCardResponseDto {
    * The project of the card
    */
   @IsString()
-  project: string;
+  project: string | Project | DetailedProjectResponseDto;
 
   /**
    * The reward of the card
@@ -100,6 +102,17 @@ export class DetailedCardResponseDto {
   @IsObject()
   status?: Status;
 
+  /**
+   * The applications submitted to a bounty
+   */
+  @IsObject()
+  application?: ApplicationDetails;
+
+  /**
+   * The order in which applications are saved
+   */
+  @IsArray()
+  applicationOrder?: string[];
   /**
    * The application of the caller
    */

@@ -92,7 +92,6 @@ export class ProjectsRepository extends BaseRepository<Project> {
     }
     if (queries.length === 0) return;
     const acknowledgment = await this.bulkWrite(queries);
-    console.log(acknowledgment);
 
     if (acknowledgment.hasWriteErrors()) {
       console.log(acknowledgment.getWriteErrors());

@@ -102,7 +102,7 @@ export class CircleRegistryService {
             symbol: addTokenDto.symbol as TokenInfo['symbol'],
             name: addTokenDto.name as TokenInfo['name'],
             address: addTokenDto.address as TokenInfo['address'],
-          } as TokenInfo,
+          } as any,
         },
       } as any;
     }
