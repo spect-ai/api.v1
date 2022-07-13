@@ -100,6 +100,8 @@ export class CardsService {
     card: Card;
     project: DetailedProjectResponseDto;
   }> {
+    if (!this.requestProvider.project)
+      throw new HttpException('No project found', HttpStatus.NOT_FOUND);
     if (!createCardDto.type) createCardDto.type = 'Task';
     const activity = this.activityBuilder.buildNewCardActivity(createCardDto);
 
@@ -107,7 +109,9 @@ export class CardsService {
       const cardNum = await this.cardsRepository.count({
         project: createCardDto.project,
       });
-      slug = cardNum.toString();
+      /** Card slugs need to be globally unique so they can be moved between projects. Since
+       * project slug is already unique, we can use it to create a unique slug for each card. */
+      slug = `${this.requestProvider.project.slug}-${cardNum.toString()}`;
     }
 
     const createdCard = (await this.cardsRepository.create({
@@ -236,9 +240,13 @@ export class CardsService {
       const newCardIds = [] as string[];
       let res;
       for (const [index, createCardDto] of createCardDtos.entries()) {
+        /** Card slugs need to be globally unique so they can be moved between projects. Since
+         * project slug is already unique, we can use it to create a unique slug for each card. */
         res = await this.createOneCard(
           createCardDto,
-          (numCards + index).toString(),
+          `${this.requestProvider.project.slug}-${(
+            numCards + index
+          ).toString()}`,
         );
         newCardIds.push(res.card.id);
       }
