@@ -22,6 +22,7 @@ import { AutomationService } from './automation.service';
     AutomationService,
     CardsProjectService,
     DataStructureManipulationService,
+    RequestProvider,
   ],
 })
 export class AutomationModule {}

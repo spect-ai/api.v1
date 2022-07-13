@@ -339,7 +339,7 @@ export class ActionService {
     ids: string[],
   ): Promise<MultipleValidCardActionResponseDto> {
     const validActions = {} as MultipleValidCardActionResponseDto;
-
+    if (!ids) return validActions;
     for (const id of ids) {
       const validAction = await this.getValidActions(id);
       validActions[id] = validAction;

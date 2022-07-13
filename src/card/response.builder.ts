@@ -68,7 +68,6 @@ export class ResponseBuilder {
      */
     card = await this.enrichActivity(card);
     card = this.resolveApplicationView(card);
-    console.log(card.application);
 
     const cardProject = card.project as unknown as Project;
     const res = {
@@ -81,7 +80,7 @@ export class ResponseBuilder {
         ),
       },
     } as DetailedCardResponseDto;
-    console.log(res);
+
     return res;
   }
 

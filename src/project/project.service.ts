@@ -58,13 +58,23 @@ export class ProjectService {
   async getValidActions(
     slug: string,
   ): Promise<MultipleValidCardActionResponseDto> {
-    const project =
-      await this.projectRepository.getProjectWithUnpPopulatedReferencesBySlug(
-        slug,
+    try {
+      const project =
+        await this.projectRepository.getProjectWithUnpPopulatedReferencesBySlug(
+          slug,
+        );
+      if (!project)
+        throw new HttpException('Project not found', HttpStatus.NOT_FOUND);
+      return await this.actionService.getValidActionsForMultipleCards(
+        project.cards,
       );
-    return await this.actionService.getValidActionsForMultipleCards(
-      project.cards,
-    );
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException(
+        'Failed getting valid actions',
+        error.message,
+      );
+    }
   }
 
   async create(createProjectDto: CreateProjectRequestDto): Promise<Project> {

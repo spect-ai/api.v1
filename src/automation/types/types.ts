@@ -16,9 +16,9 @@ export type ConditionValue = {
 };
 
 export type ActionValue = {
-  to?: string;
-  add?: string[];
-  remove?: string[];
+  to?: any;
+  add?: any[] | any;
+  remove?: any[];
   clear?: boolean;
 };
 
