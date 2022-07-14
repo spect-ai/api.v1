@@ -38,7 +38,9 @@ export class ResponseBuilder {
         applicationOrder: [],
       };
     else if (!card.application) return card;
-    else if (this.actionService.canApply(card, this.requestProvider.user.id)) {
+    else if (
+      this.actionService.canApply(card, this.requestProvider.user.id).valid
+    ) {
       for (const [applicationId, application] of Object.entries(
         card.application,
       )) {

@@ -12,7 +12,6 @@ import {
 import { ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
 import {
   CardAuthGuard,
-  CircleAuthGuard,
   CreateNewCardAuthGuard,
   PublicViewAuthGuard,
   SessionAuthGuard,
@@ -149,9 +148,10 @@ export class CardsController {
   }
 
   @ApiParam({ name: 'id', type: 'string' })
+  @SetMetadata('permissions', ['update'])
   @UseGuards(CardAuthGuard)
   @Patch('/:id')
-  async updateNew(
+  async update(
     @Param() params: ObjectIdDto,
     @Body() card: UpdateCardRequestDto,
   ): Promise<DetailedCardResponseDto> {
@@ -169,6 +169,7 @@ export class CardsController {
     );
   }
 
+  @SetMetadata('permissions', ['submit'])
   @UseGuards(CardAuthGuard)
   @Patch('/:id/createWorkThread')
   async createWorkThread(
@@ -181,6 +182,7 @@ export class CardsController {
     );
   }
 
+  @SetMetadata('permissions', ['submit'])
   @UseGuards(CardAuthGuard)
   @Patch('/:id/updateWorkThread')
   async updateWorkThread(
@@ -195,6 +197,7 @@ export class CardsController {
     );
   }
 
+  @SetMetadata('permissions', ['submit'])
   @UseGuards(CardAuthGuard)
   @Patch('/:id/createWorkUnit')
   async createWorkUnit(
@@ -209,6 +212,7 @@ export class CardsController {
     );
   }
 
+  @SetMetadata('permissions', ['submit'])
   @UseGuards(CardAuthGuard)
   @Patch('/:id/updateWorkUnit')
   async updateWorkUnit(
@@ -260,6 +264,7 @@ export class CardsController {
     return await this.commentService.deleteComment(params.id, commitId);
   }
 
+  @SetMetadata('permissions', ['update'])
   @UseGuards(CardAuthGuard)
   @Patch('/:id/archive')
   async archive(
@@ -268,6 +273,7 @@ export class CardsController {
     return await this.cardsService.archive(params.id);
   }
 
+  @SetMetadata('permissions', ['update'])
   @UseGuards(CardAuthGuard)
   @Patch('/:id/revertArchive')
   async revertArchive(
@@ -277,6 +283,7 @@ export class CardsController {
   }
 
   @ApiParam({ name: 'id' })
+  @SetMetadata('permissions', ['apply'])
   @UseGuards(CardAuthGuard)
   @Patch('/:id/createApplication')
   async createApplication(
@@ -291,6 +298,7 @@ export class CardsController {
 
   @ApiQuery({ name: 'applicationId', type: 'string' })
   @ApiParam({ name: 'id' })
+  @SetMetadata('permissions', ['apply'])
   @UseGuards(CardAuthGuard)
   @Patch('/:id/updateApplication')
   async updateApplication(
@@ -306,6 +314,7 @@ export class CardsController {
   }
 
   @UseGuards(CardAuthGuard)
+  @SetMetadata('permissions', ['apply'])
   @Patch('/:id/deleteApplication')
   async deleteApplication(
     @Param() params: ObjectIdDto,
@@ -318,6 +327,7 @@ export class CardsController {
   }
 
   @UseGuards(CardAuthGuard)
+  @SetMetadata('permissions', ['update'])
   @Patch('/:id/pickApplications')
   @ApiParam({ name: 'id' })
   async pickApplications(

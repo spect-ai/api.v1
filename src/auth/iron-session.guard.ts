@@ -8,10 +8,18 @@ import { Reflector } from '@nestjs/core';
 import { ObjectId } from 'mongoose';
 import { ActionService } from 'src/card/actions.service';
 import { CardsRepository } from 'src/card/cards.repository';
+import { UpdateCardRequestDto } from 'src/card/dto/update-card-request.dto';
+import {
+  CreateWorkThreadRequestDto,
+  CreateWorkUnitRequestDto,
+  UpdateWorkThreadRequestDto,
+  UpdateWorkUnitRequestDto,
+} from 'src/card/dto/work-request.dto';
 import { Card } from 'src/card/model/card.model';
 import { CirclesRepository } from 'src/circle/circles.repository';
 import { CirclesService } from 'src/circle/circles.service';
 import { Circle } from 'src/circle/model/circle.model';
+import { CirclePermission } from 'src/common/types/role.type';
 import { ProjectsRepository } from 'src/project/project.repository';
 import { RolesService } from 'src/roles/roles.service';
 import { User } from 'src/users/model/users.model';
@@ -247,40 +255,131 @@ export class CreateNewProjectAuthGuard implements CanActivate {
 export class CardAuthGuard implements CanActivate {
   constructor(
     private readonly sessionAuthGuard: SessionAuthGuard,
-    private readonly circlesRepository: CirclesRepository,
-    private readonly circleAuthGuard: CircleAuthGuard,
+    private readonly circlesService: CirclesService,
+    private readonly projectRepository: ProjectsRepository,
     private readonly cardsRepository: CardsRepository,
+    private readonly actionService: ActionService,
+    private readonly reflector: Reflector,
   ) {}
 
-  checkPermissions(
-    body: any,
+  checkApplyPermissions(userId: string, card: Card): boolean {
+    return this.actionService.canApply(card, userId).valid;
+  }
+
+  checkSubmitPermissions(
     userId: string,
     card: Card,
-    circle: Circle,
+    collatedUserPermissions: CirclePermission,
+    param?: any,
   ): boolean {
+    const canSubmit =
+      this.actionService.canSubmit(card, userId).valid ||
+      this.actionService.canAddRevisionInstructions(
+        card,
+        collatedUserPermissions,
+        userId,
+      ).valid;
+
+    if (!param.threadId || !param.workUnitId) return canSubmit;
+    return (
+      canSubmit &&
+      /** Make sure if user is updating a work unit they have permission to do so */
+      (!card.workThreads ||
+        !card.workThreads.hasOwnProperty(param.threadId) ||
+        !card.workThreads[param.threadId].workUnits.hasOwnProperty(
+          param.workUnitId,
+        ) ||
+        card.workThreads[param.threadId]?.workUnits[param.workUnitId].user ===
+          userId)
+    );
+  }
+
+  checkUpdatePermissions(
+    body: UpdateCardRequestDto,
+    userId: string,
+    card: Card,
+    collatedUserPermissions: CirclePermission,
+  ): boolean {
+    if (
+      body.hasOwnProperty('status') &&
+      body.status.archived &&
+      !this.actionService.canArchive(card, collatedUserPermissions, userId)
+    ) {
+      return false;
+    }
+    return this.actionService.canUpdateGeneralInfo(
+      card,
+      collatedUserPermissions,
+      userId,
+    ).valid;
+  }
+
+  async checkPermissions(
+    permissions: string[],
+    request: any,
+    userId: string,
+    card: Card,
+    circleIds: string[],
+  ): Promise<boolean> {
+    const collatedUserPermissions =
+      await this.circlesService.getCollatedUserPermissions(circleIds, userId);
+    for (const permission of permissions) {
+      if (permission === 'update')
+        if (
+          !this.checkUpdatePermissions(
+            request.body,
+            userId,
+            card,
+            collatedUserPermissions,
+          )
+        )
+          return false;
+      if (permission === 'submit')
+        if (
+          !this.checkSubmitPermissions(
+            userId,
+            card,
+            collatedUserPermissions,
+            request.params,
+          )
+        )
+          return false;
+      if (permission === 'apply')
+        if (!this.checkApplyPermissions(userId, card)) return false;
+    }
     return true;
   }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
+    const permissions = this.reflector.get<string[]>(
+      'permissions',
+      context.getHandler(),
+    );
     const request = context.switchToHttp().getRequest();
     try {
       request.user = (await this.sessionAuthGuard.validateUser(
         request.session.siwe?.address,
       )) as unknown as User;
       if (!request.user) return false;
-      const card = await this.cardsRepository.findById(request.params.id);
-      if (!card) {
+
+      request.card = await this.cardsRepository.findById(request.params.id);
+      if (!request.card) {
         throw new HttpException('Card not found', 404);
       }
-      request.card = card;
-
-      const circle = await this.circlesRepository.findById(card.circle);
-      if (!circle) {
-        throw new HttpException('Circle not found', 404);
+      request.project = await this.projectRepository.findById(
+        request.card.project,
+      );
+      if (!request.project) {
+        throw new HttpException('Project not found', 404);
       }
-      request.circle = circle;
 
-      return this.checkPermissions(request.body, request.user.id, card, circle);
+      return await this.checkPermissions(
+        permissions,
+        request,
+        request.user.id,
+        request.card,
+        request.project.parents,
+      );
     } catch (error) {
       console.log(error);
       request.session.destroy();
@@ -293,7 +392,6 @@ export class CardAuthGuard implements CanActivate {
 export class CreateNewCardAuthGuard implements CanActivate {
   constructor(
     private readonly sessionAuthGuard: SessionAuthGuard,
-    private readonly circleService: CirclesService,
     private readonly projectAuthGuard: ProjectAuthGuard,
     private readonly projectRepository: ProjectsRepository,
   ) {}
