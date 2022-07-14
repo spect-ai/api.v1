@@ -63,14 +63,6 @@ export class ProjectController {
     return await this.projectService.update(param.id, project);
   }
 
-  @UseGuards(SessionAuthGuard)
-  @Get('/:slug/validActions')
-  async getValidActions(
-    @Param() param: RequiredSlugDto,
-  ): Promise<MultipleValidCardActionResponseDto> {
-    return await this.projectService.getValidActions(param.slug);
-  }
-
   @SetMetadata('permissions', ['manageProjectSettings'])
   @UseGuards(ProjectAuthGuard)
   @Patch('/:id/column/add')

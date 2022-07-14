@@ -53,6 +53,7 @@ import { CardCommandHandler } from './handlers/update.command.handler';
 import { WorkCommandHandler } from './handlers/work.command.handler';
 import {
   RequiredCommitIdDto,
+  RequiredSlugDto,
   RequiredThreadIdDto,
   RequiredWorkUnitIdDto,
 } from 'src/common/dtos/string.dto';
@@ -126,7 +127,14 @@ export class CardsController {
     );
   }
 
-  @ApiQuery({ name: 'cardIds', type: 'string' })
+  @UseGuards(SessionAuthGuard)
+  @Get('/myValidActions/:projectSlug')
+  async getValidActionsWithProjectSlug(
+    @Param() params: RequiredSlugDto,
+  ): Promise<MultipleValidCardActionResponseDto> {
+    return await this.actionService.getValidActionsWithProjectSlug(params.slug);
+  }
+
   @UseGuards(SessionAuthGuard)
   @Get('/myValidActions/:projectSlug/:cardSlug')
   async getValidActionsWithCardAndProjectSlug(

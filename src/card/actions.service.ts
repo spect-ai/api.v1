@@ -1,7 +1,13 @@
-import { Injectable } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Injectable,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { CirclesService } from 'src/circle/circles.service';
 import { CirclePermission } from 'src/common/types/role.type';
 import { DetailedProjectResponseDto } from 'src/project/dto/detailed-project-response.dto';
+import { ProjectsRepository } from 'src/project/project.repository';
 import { RequestProvider } from 'src/users/user.provider';
 import { CardsRepository } from './cards.repository';
 import { CardsService } from './cards.service';
@@ -20,6 +26,7 @@ export class ActionService {
     private readonly circleService: CirclesService,
     private readonly validationService: CardValidationService,
     private readonly cardsService: CardsService,
+    private readonly projectRepository: ProjectsRepository,
   ) {}
 
   canCreateCard(
@@ -351,6 +358,27 @@ export class ActionService {
     }
 
     return validActions;
+  }
+
+  async getValidActionsWithProjectSlug(
+    slug: string,
+  ): Promise<MultipleValidCardActionResponseDto> {
+    try {
+      const project =
+        await this.projectRepository.getProjectWithUnpPopulatedReferencesBySlug(
+          slug,
+        );
+      if (!project)
+        throw new HttpException('Project not found', HttpStatus.NOT_FOUND);
+      return await this.getValidActionsForMultipleCards(project.cards);
+      return {};
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException(
+        'Failed getting valid actions',
+        error.message,
+      );
+    }
   }
 
   async getValidActionsWithCardAndProjectSlug(

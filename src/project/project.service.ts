@@ -4,14 +4,13 @@ import {
   Injectable,
   InternalServerErrorException,
 } from '@nestjs/common';
-import { ActionService } from 'src/card/actions.service';
 import { CardsRepository } from 'src/card/cards.repository';
-import { MultipleValidCardActionResponseDto } from 'src/card/dto/card-access-response.dto';
 import { CirclesRepository } from 'src/circle/circles.repository';
 import { Circle } from 'src/circle/model/circle.model';
 import { SlugService } from 'src/common/slug.service';
 import { MappedAutomation } from 'src/template/models/template.model';
 import { TemplatesRepository } from 'src/template/tempates.repository';
+import { RequestProvider } from 'src/users/user.provider';
 import { v4 as uuidv4 } from 'uuid';
 import { CardsProjectService } from './cards.project.service';
 import { ColumnDetailsDto } from './dto/column-details.dto';
@@ -21,7 +20,6 @@ import { UpdateColumnRequestDto } from './dto/update-column.dto';
 import { UpdateProjectRequestDto } from './dto/update-project-request.dto';
 import { Project } from './model/project.model';
 import { ProjectsRepository } from './project.repository';
-import { RequestProvider } from 'src/users/user.provider';
 
 @Injectable()
 export class ProjectService {
@@ -31,7 +29,6 @@ export class ProjectService {
     private readonly slugService: SlugService,
     private readonly templateRepository: TemplatesRepository,
     private readonly cardRepository: CardsRepository,
-    private readonly actionService: ActionService,
     private readonly cardsProjectService: CardsProjectService,
     private readonly requestProvider: RequestProvider,
   ) {}
@@ -55,28 +52,6 @@ export class ProjectService {
   async getProjectIdFromSlug(slug: string): Promise<Project> {
     const project = await this.projectRepository.getProjectIdFromSlug(slug);
     return project;
-  }
-
-  async getValidActions(
-    slug: string,
-  ): Promise<MultipleValidCardActionResponseDto> {
-    try {
-      const project =
-        await this.projectRepository.getProjectWithUnpPopulatedReferencesBySlug(
-          slug,
-        );
-      if (!project)
-        throw new HttpException('Project not found', HttpStatus.NOT_FOUND);
-      return await this.actionService.getValidActionsForMultipleCards(
-        project.cards,
-      );
-    } catch (error) {
-      console.log(error);
-      throw new InternalServerErrorException(
-        'Failed getting valid actions',
-        error.message,
-      );
-    }
   }
 
   async create(createProjectDto: CreateProjectRequestDto): Promise<Project> {
