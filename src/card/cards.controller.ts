@@ -126,6 +126,18 @@ export class CardsController {
     );
   }
 
+  @ApiQuery({ name: 'cardIds', type: 'string' })
+  @UseGuards(SessionAuthGuard)
+  @Get('/myValidActions/:projectSlug/:cardSlug')
+  async getValidActionsWithCardAndProjectSlug(
+    @Param() params: GetByProjectSlugAndCardSlugDto,
+  ): Promise<ValidCardActionResponseDto> {
+    return await this.actionService.getValidActionsWithCardAndProjectSlug(
+      params.projectSlug,
+      params.cardSlug,
+    );
+  }
+
   @Get('/:id')
   async findByObjectId(
     @Param() params: ObjectIdDto,
