@@ -30,11 +30,9 @@ import { AutomationService } from 'src/automation/automation.service';
 import { WorkCommandHandler } from './handlers/work.command.handler';
 import { RolesService } from 'src/roles/roles.service';
 import { DiscordService } from 'src/common/discord.service';
-import {
-  CircleAuthGuard,
-  ProjectAuthGuard,
-  SessionAuthGuard,
-} from 'src/auth/iron-session.guard';
+import { SessionAuthGuard } from 'src/auth/iron-session.guard';
+import { CircleAuthGuard } from 'src/auth/circle.guard';
+import { ProjectAuthGuard } from 'src/auth/project.guard';
 
 @Module({
   imports: [

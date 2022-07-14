@@ -11,11 +11,10 @@ import {
 } from '@nestjs/common';
 import { ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
 import {
-  CardAuthGuard,
-  CreateNewCardAuthGuard,
   PublicViewAuthGuard,
   SessionAuthGuard,
 } from 'src/auth/iron-session.guard';
+import { CardAuthGuard, CreateNewCardAuthGuard } from 'src/auth/card.guard';
 import { ObjectIdDto } from 'src/common/dtos/object-id.dto';
 import { DetailedProjectResponseDto } from 'src/project/dto/detailed-project-response.dto';
 import { CreateCardRequestDto } from './dto/create-card-request.dto';
@@ -52,6 +51,11 @@ import { CommentService } from './comments.cards.service';
 import { CardsPaymentService } from './payment.cards.service';
 import { CardCommandHandler } from './handlers/update.command.handler';
 import { WorkCommandHandler } from './handlers/work.command.handler';
+import {
+  RequiredCommitIdDto,
+  RequiredThreadIdDto,
+  RequiredWorkUnitIdDto,
+} from 'src/common/dtos/string.dto';
 
 @Controller('card')
 @ApiTags('card')
@@ -187,12 +191,12 @@ export class CardsController {
   @Patch('/:id/updateWorkThread')
   async updateWorkThread(
     @Param() params: ObjectIdDto,
-    @Query('threadId') threadId: string,
+    @Query() threadIdParam: RequiredThreadIdDto,
     @Body() updateWorkThread: UpdateWorkThreadRequestDto,
   ): Promise<DetailedCardResponseDto> {
     return await this.workCommandHandler.handleUpdateWorkThread(
       params.id,
-      threadId,
+      threadIdParam.threadId,
       updateWorkThread,
     );
   }
@@ -202,12 +206,12 @@ export class CardsController {
   @Patch('/:id/createWorkUnit')
   async createWorkUnit(
     @Param() params: ObjectIdDto,
-    @Query('threadId') threadId: string,
+    @Query() threadIdParam: RequiredThreadIdDto,
     @Body() createWorkUnit: CreateWorkUnitRequestDto,
   ): Promise<DetailedCardResponseDto> {
     return await this.workCommandHandler.handleCreateWorkUnit(
       params.id,
-      threadId,
+      threadIdParam.threadId,
       createWorkUnit,
     );
   }
@@ -217,14 +221,14 @@ export class CardsController {
   @Patch('/:id/updateWorkUnit')
   async updateWorkUnit(
     @Param() params: ObjectIdDto,
-    @Query('threadId') threadId: string,
-    @Query('workUnitId') workUnitId: string,
+    @Query() threadIdParam: RequiredThreadIdDto,
+    @Query() workUnitIdParam: RequiredWorkUnitIdDto,
     @Body() updateWorkUnit: UpdateWorkUnitRequestDto,
   ): Promise<DetailedCardResponseDto> {
     return await this.workCommandHandler.handleUpdateWorkUnit(
       params.id,
-      threadId,
-      workUnitId,
+      threadIdParam.threadId,
+      workUnitIdParam.workUnitId,
       updateWorkUnit,
     );
   }
@@ -245,12 +249,12 @@ export class CardsController {
   @Patch('/:id/updateComment')
   async udpateComment(
     @Param() params: ObjectIdDto,
-    @Query('commitId') commitId: string,
+    @Query() commitIdParam: RequiredCommitIdDto,
     @Body() updateCommentDto: UpdateCommentDto,
   ): Promise<DetailedCardResponseDto> {
     return await this.commentService.updateComment(
       params.id,
-      commitId,
+      commitIdParam.commitId,
       updateCommentDto,
     );
   }
@@ -259,9 +263,12 @@ export class CardsController {
   @Patch('/:id/deleteComment')
   async deleteComment(
     @Param() params: ObjectIdDto,
-    @Query('commitId') commitId: string,
+    @Query() commitIdParam: RequiredCommitIdDto,
   ): Promise<DetailedCardResponseDto> {
-    return await this.commentService.deleteComment(params.id, commitId);
+    return await this.commentService.deleteComment(
+      params.id,
+      commitIdParam.commitId,
+    );
   }
 
   @SetMetadata('permissions', ['update'])

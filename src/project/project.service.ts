@@ -21,6 +21,7 @@ import { UpdateColumnRequestDto } from './dto/update-column.dto';
 import { UpdateProjectRequestDto } from './dto/update-project-request.dto';
 import { Project } from './model/project.model';
 import { ProjectsRepository } from './project.repository';
+import { RequestProvider } from 'src/users/user.provider';
 
 @Injectable()
 export class ProjectService {
@@ -32,6 +33,7 @@ export class ProjectService {
     private readonly cardRepository: CardsRepository,
     private readonly actionService: ActionService,
     private readonly cardsProjectService: CardsProjectService,
+    private readonly requestProvider: RequestProvider,
   ) {}
 
   async getDetailedProject(id: string): Promise<DetailedProjectResponseDto> {
@@ -156,10 +158,7 @@ export class ProjectService {
 
   async addColumn(projectId: string): Promise<DetailedProjectResponseDto> {
     try {
-      const project = await this.projectRepository.findById(projectId);
-      if (!project) {
-        throw new HttpException('Project not found', HttpStatus.NOT_FOUND);
-      }
+      const project = this.requestProvider.project;
       const columnOrder = project.columnOrder;
       const columnDetails = project.columnDetails;
       const newColumnId = uuidv4();
@@ -200,10 +199,7 @@ export class ProjectService {
     columnId: string,
   ): Promise<DetailedProjectResponseDto> {
     try {
-      const project = await this.projectRepository.findById(id);
-      if (!project) {
-        throw new HttpException('Project not found', HttpStatus.NOT_FOUND);
-      }
+      const project = this.requestProvider.project;
 
       const columnOrder = project.columnOrder;
       const columnDetails = project.columnDetails;
@@ -255,10 +251,8 @@ export class ProjectService {
     updateColumnDto: UpdateColumnRequestDto,
   ): Promise<DetailedProjectResponseDto> {
     try {
-      const project = await this.projectRepository.findById(id);
-      if (!project) {
-        throw new HttpException('Project not found', HttpStatus.NOT_FOUND);
-      }
+      const project = this.requestProvider.project;
+
       if (!project.columnDetails[columnId]) {
         throw new HttpException('Column not found', HttpStatus.NOT_FOUND);
       }
@@ -286,7 +280,8 @@ export class ProjectService {
   }
 
   async delete(id: string): Promise<Project> {
-    const project = await this.projectRepository.findById(id);
+    const project = this.requestProvider.project;
+
     if (!project) {
       throw new HttpException('Project not found', HttpStatus.NOT_FOUND);
     }

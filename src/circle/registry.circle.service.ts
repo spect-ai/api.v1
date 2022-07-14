@@ -3,6 +3,7 @@ import { AddNewTokenDto } from 'src/registry/dto/add-new-token.dto';
 import { TokenInfo } from 'src/registry/model/registry.model';
 import { RegistryRepository } from 'src/registry/registry.repository';
 import { RegistryService } from 'src/registry/registry.service';
+import { RequestProvider } from 'src/users/user.provider';
 import { CirclesRepository } from './circles.repository';
 import { UpdateBlacklistDto } from './dto/update-local-registry.dto';
 
@@ -12,6 +13,7 @@ export class CircleRegistryService {
     private readonly circlesRepository: CirclesRepository,
     private readonly registryRepository: RegistryRepository,
     private readonly registryService: RegistryService,
+    private readonly requestProvider: RequestProvider,
   ) {}
 
   async getPaymentMethods(slug: string) {
@@ -68,8 +70,7 @@ export class CircleRegistryService {
   }
 
   async addToken(id: string, addTokenDto: AddNewTokenDto) {
-    const circle =
-      await this.circlesRepository.getCircleWithUnpopulatedReferences(id);
+    const circle = this.requestProvider.circle;
 
     if (!circle) {
       throw new HttpException('Circle not found', HttpStatus.NOT_FOUND);
@@ -124,8 +125,7 @@ export class CircleRegistryService {
     id: string,
     updateLocalRegistryDto: UpdateBlacklistDto,
   ) {
-    const circle =
-      await this.circlesRepository.getCircleWithUnpopulatedReferences(id);
+    const circle = this.requestProvider.circle;
 
     if (!circle) {
       throw new HttpException('Circle not found', HttpStatus.NOT_FOUND);
