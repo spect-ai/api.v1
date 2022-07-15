@@ -49,11 +49,8 @@ export class CardCommandHandler {
     updateCardDto: UpdateCardRequestDto,
   ): Promise<DetailedCardResponseDto> {
     try {
-      const card = await this.cardsRepository.findById(id);
-      this.validationService.validateCardExists(card);
-      const project = await this.projectRepository.findById(
-        card.project as string,
-      );
+      const card = this.requestProvider.card;
+      const project = this.requestProvider.project;
 
       const globalUpdate = {
         card: {},

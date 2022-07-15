@@ -15,7 +15,8 @@ import { ActionService } from 'src/card/actions.service';
 import { RequestProvider } from 'src/users/user.provider';
 import { CardValidationService } from 'src/card/validation.cards.service';
 import { AutomationModule } from 'src/automation/automation.module';
-import { CircleAuthGuard, SessionAuthGuard } from 'src/auth/iron-session.guard';
+import { SessionAuthGuard } from 'src/auth/iron-session.guard';
+import { CircleAuthGuard } from 'src/auth/circle.guard';
 import { RolesService } from 'src/roles/roles.service';
 import { DiscordService } from 'src/common/discord.service';
 

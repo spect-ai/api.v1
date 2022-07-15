@@ -5,7 +5,7 @@ export type WorkUnit = {
   /**
    * The persone thats adding he subission or revision
    */
-  user: ObjectId;
+  user: string;
   /**
    * The type of submission object (e.g. submission, revision instructions)
    */
