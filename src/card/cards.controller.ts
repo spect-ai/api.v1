@@ -128,7 +128,7 @@ export class CardsController {
   }
 
   @UseGuards(SessionAuthGuard)
-  @Get('/myValidActions/:projectSlug')
+  @Get('/myValidActionsInProject/:slug')
   async getValidActionsWithProjectSlug(
     @Param() params: RequiredSlugDto,
   ): Promise<MultipleValidCardActionResponseDto> {
@@ -136,7 +136,7 @@ export class CardsController {
   }
 
   @UseGuards(SessionAuthGuard)
-  @Get('/myValidActions/:projectSlug/:cardSlug')
+  @Get('/myValidActionsInCard/:projectSlug/:cardSlug')
   async getValidActionsWithCardAndProjectSlug(
     @Param() params: GetByProjectSlugAndCardSlugDto,
   ): Promise<ValidCardActionResponseDto> {
