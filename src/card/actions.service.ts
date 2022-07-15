@@ -1,8 +1,13 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
-import { CirclesRepository } from 'src/circle/circles.repository';
+import {
+  HttpException,
+  HttpStatus,
+  Injectable,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { CirclesService } from 'src/circle/circles.service';
-import { Circle } from 'src/circle/model/circle.model';
 import { CirclePermission } from 'src/common/types/role.type';
+import { DetailedProjectResponseDto } from 'src/project/dto/detailed-project-response.dto';
+import { ProjectsRepository } from 'src/project/project.repository';
 import { RequestProvider } from 'src/users/user.provider';
 import { CardsRepository } from './cards.repository';
 import { CardsService } from './cards.service';
@@ -18,9 +23,10 @@ export class ActionService {
   constructor(
     private readonly requestProvider: RequestProvider,
     private readonly cardsRepository: CardsRepository,
-    private readonly circleRepository: CirclesRepository,
     private readonly circleService: CirclesService,
     private readonly validationService: CardValidationService,
+    private readonly cardsService: CardsService,
+    private readonly projectRepository: ProjectsRepository,
   ) {}
 
   canCreateCard(
@@ -288,7 +294,7 @@ export class ActionService {
       };
   }
 
-  canCreateDiscordThread(card: Card, circle: Circle) {
+  canCreateDiscordThread(card: Card) {
     if (!card.status.active)
       return {
         valid: false,
@@ -297,17 +303,11 @@ export class ActionService {
     return { valid: true };
   }
 
-  async getValidActions(id: string): Promise<ValidCardActionResponseDto> {
-    const userId = this.requestProvider.user.id;
-    const card = await this.cardsRepository.getCardWithPopulatedReferences(id);
-    this.validationService.validateCardExists(card);
-
-    const circle = await this.circleRepository.findById(card.circle);
-    const circlePermissions =
-      await this.circleService.getCollatedUserPermissions(
-        [card.circle.toString()],
-        userId,
-      );
+  validActions(
+    card: Card,
+    circlePermissions: CirclePermission,
+    userId: string,
+  ) {
     return {
       createCard: this.canCreateCard(circlePermissions, card.type),
       updateGeneralCardInfo: this.canUpdateGeneralInfo(
@@ -331,8 +331,20 @@ export class ActionService {
       pay: this.canPay(card, circlePermissions),
       archive: this.canArchive(card, circlePermissions, userId),
       duplicate: this.canDuplicate(card, circlePermissions),
-      createDiscordThread: this.canCreateDiscordThread(card, circle),
+      createDiscordThread: this.canCreateDiscordThread(card),
     };
+  }
+
+  async getValidActions(id: string): Promise<ValidCardActionResponseDto> {
+    const userId = this.requestProvider.user.id;
+    const card = await this.cardsRepository.getCardWithPopulatedReferences(id);
+    this.validationService.validateCardExists(card);
+    const circlePermissions =
+      await this.circleService.getCollatedUserPermissions(
+        (card.project as unknown as DetailedProjectResponseDto).parents,
+        userId,
+      );
+    return this.validActions(card, circlePermissions, userId);
   }
 
   async getValidActionsForMultipleCards(
@@ -346,5 +358,44 @@ export class ActionService {
     }
 
     return validActions;
+  }
+
+  async getValidActionsWithProjectSlug(
+    slug: string,
+  ): Promise<MultipleValidCardActionResponseDto> {
+    try {
+      const project =
+        await this.projectRepository.getProjectWithUnpPopulatedReferencesBySlug(
+          slug,
+        );
+      if (!project)
+        throw new HttpException('Project not found', HttpStatus.NOT_FOUND);
+      return await this.getValidActionsForMultipleCards(project.cards);
+      return {};
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException(
+        'Failed getting valid actions',
+        error.message,
+      );
+    }
+  }
+
+  async getValidActionsWithCardAndProjectSlug(
+    projectSlug: string,
+    cardSlug: string,
+  ): Promise<ValidCardActionResponseDto> {
+    const userId = this.requestProvider.user.id;
+    const card =
+      await this.cardsService.getDetailedCardByProjectSlugAndCardSlug(
+        projectSlug,
+        cardSlug,
+      );
+    const circlePermissions =
+      await this.circleService.getCollatedUserPermissions(
+        (card.project as DetailedProjectResponseDto).parents,
+        userId,
+      );
+    return this.validActions(card as Card, circlePermissions, userId);
   }
 }

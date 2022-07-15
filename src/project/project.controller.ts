@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   Patch,
@@ -8,14 +9,17 @@ import {
   SetMetadata,
   UseGuards,
 } from '@nestjs/common';
+import { SessionAuthGuard } from 'src/auth/iron-session.guard';
 import {
-  CircleAuthGuard,
   CreateNewProjectAuthGuard,
   ProjectAuthGuard,
-  SessionAuthGuard,
-} from 'src/auth/iron-session.guard';
+} from 'src/auth/project.guard';
 import { MultipleValidCardActionResponseDto } from 'src/card/dto/card-access-response.dto';
 import { ObjectIdDto } from 'src/common/dtos/object-id.dto';
+import {
+  RequiredColumnIdDto,
+  RequiredSlugDto,
+} from 'src/common/dtos/string.dto';
 import { CardsProjectService } from './cards.project.service';
 import { CreateProjectRequestDto } from './dto/create-project-request.dto';
 import { DetailedProjectResponseDto } from './dto/detailed-project-response.dto';
@@ -26,10 +30,7 @@ import { ProjectService } from './project.service';
 
 @Controller('project')
 export class ProjectController {
-  constructor(
-    private readonly projectService: ProjectService,
-    private readonly cardsProjectService: CardsProjectService,
-  ) {}
+  constructor(private readonly projectService: ProjectService) {}
 
   @Get('/:id')
   async findByObjectId(
@@ -39,8 +40,10 @@ export class ProjectController {
   }
 
   @Get('/slug/:slug')
-  async findBySlug(@Param('slug') slug): Promise<DetailedProjectResponseDto> {
-    return await this.projectService.getDetailedProjectBySlug(slug);
+  async findBySlug(
+    @Param() param: RequiredSlugDto,
+  ): Promise<DetailedProjectResponseDto> {
+    return await this.projectService.getDetailedProjectBySlug(param.slug);
   }
 
   @SetMetadata('permissions', ['createNewProject'])
@@ -60,14 +63,6 @@ export class ProjectController {
     return await this.projectService.update(param.id, project);
   }
 
-  @UseGuards(SessionAuthGuard)
-  @Get('/:slug/validActions')
-  async getValidActions(
-    @Param('slug') slug,
-  ): Promise<MultipleValidCardActionResponseDto> {
-    return await this.projectService.getValidActions(slug);
-  }
-
   @SetMetadata('permissions', ['manageProjectSettings'])
   @UseGuards(ProjectAuthGuard)
   @Patch('/:id/column/add')
@@ -82,9 +77,12 @@ export class ProjectController {
   @Patch('/:id/column/:columnId/delete')
   async deleteColumn(
     @Param() param: ObjectIdDto,
-    @Param('columnId') columnId,
+    @Param() columnIdParam: RequiredColumnIdDto,
   ): Promise<DetailedProjectResponseDto> {
-    return await this.projectService.deleteColumn(param.id, columnId);
+    return await this.projectService.deleteColumn(
+      param.id,
+      columnIdParam.columnId,
+    );
   }
 
   @SetMetadata('permissions', ['manageProjectSettings'])
@@ -92,19 +90,20 @@ export class ProjectController {
   @Patch('/:id/column/:columnId/')
   async updateColumnDetails(
     @Param() param: ObjectIdDto,
-    @Param('columnId') columnId,
+    @Param() columnIdParam: RequiredColumnIdDto,
     @Body() updateColumnDetails: UpdateColumnRequestDto,
   ): Promise<DetailedProjectResponseDto> {
     return await this.projectService.updateColumnDetails(
       param.id,
-      columnId,
+      columnIdParam.columnId,
       updateColumnDetails,
     );
   }
 
   // TODO: Delete all the cards in the project aswell
-  @Post('/:id/delete')
   @SetMetadata('permissions', ['manageProjectSettings'])
+  @UseGuards(ProjectAuthGuard)
+  @Delete('/:id/delete')
   async delete(@Param() param: ObjectIdDto): Promise<Project> {
     return await this.projectService.delete(param.id);
   }

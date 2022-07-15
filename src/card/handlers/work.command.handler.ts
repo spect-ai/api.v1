@@ -47,8 +47,7 @@ export class WorkCommandHandler {
     createWorkThread: CreateWorkThreadRequestDto,
   ): Promise<DetailedCardResponseDto> {
     try {
-      const card = await this.cardsRepository.findById(id);
-      this.validationService.validateCardExists(card);
+      const card = this.requestProvider.card;
       const project = await this.projectRepository.findById(
         card.project as string,
       );
@@ -85,8 +84,7 @@ export class WorkCommandHandler {
     updateWorkThread: UpdateWorkThreadRequestDto,
   ): Promise<DetailedCardResponseDto> {
     try {
-      const card = await this.cardsRepository.findById(id);
-      this.validationService.validateCardExists(card);
+      const card = this.requestProvider.card;
       const project = await this.projectRepository.findById(
         card.project as string,
       );
@@ -125,8 +123,7 @@ export class WorkCommandHandler {
     createWorkUnit: CreateWorkUnitRequestDto,
   ): Promise<DetailedCardResponseDto> {
     try {
-      const card = await this.cardsRepository.findById(id);
-      this.validationService.validateCardExists(card);
+      const card = this.requestProvider.card;
       const project = await this.projectRepository.findById(
         card.project as string,
       );
@@ -165,8 +162,7 @@ export class WorkCommandHandler {
     updateWorkUnit: UpdateWorkUnitRequestDto,
   ): Promise<DetailedCardResponseDto> {
     try {
-      const card = await this.cardsRepository.findById(id);
-      this.validationService.validateCardExists(card);
+      const card = this.requestProvider.card;
       const project = await this.projectRepository.findById(
         card.project as string,
       );

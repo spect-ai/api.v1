@@ -9,21 +9,17 @@ import { CirclesRepository } from 'src/circle/circles.repository';
 import { DataStructureManipulationService } from 'src/common/dataStructureManipulation.service';
 import { CardsProjectService } from 'src/project/cards.project.service';
 import { DetailedProjectResponseDto } from 'src/project/dto/detailed-project-response.dto';
-import { ReorderCardReqestDto } from 'src/project/dto/reorder-card-request.dto';
 import { Project } from 'src/project/model/project.model';
 import { ProjectService } from 'src/project/project.service';
 import { RequestProvider } from 'src/users/user.provider';
 import { CardsRepository } from './cards.repository';
 import { CreateCardRequestDto } from './dto/create-card-request.dto';
 import { DetailedCardResponseDto } from './dto/detailed-card-response-dto';
-import { AggregatedFlattenedPaymentInfo } from './dto/payment-info-response.dto';
 import { UpdateCardRequestDto } from './dto/update-card-request.dto';
-import { UpdatePaymentInfoDto } from './dto/update-payment-info.dto';
 import { Card } from './model/card.model';
 import { ResponseBuilder } from './response.builder';
-import { CardValidationService } from './validation.cards.service';
-import mongodb from 'mongodb';
 import { MappedCard } from './types/types';
+import { CardValidationService } from './validation.cards.service';
 
 @Injectable()
 export class CardsService {
@@ -34,7 +30,6 @@ export class CardsService {
     private readonly circleRepository: CirclesRepository,
     private readonly projectService: ProjectService,
     private readonly cardsProjectService: CardsProjectService,
-    private readonly datastructureManipulationService: DataStructureManipulationService,
     private readonly validationService: CardValidationService,
     private readonly responseBuilder: ResponseBuilder,
   ) {}

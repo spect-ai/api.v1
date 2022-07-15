@@ -4,27 +4,25 @@ import {
   Injectable,
   InternalServerErrorException,
 } from '@nestjs/common';
+import moment from 'moment';
+import { ObjectId } from 'mongoose';
+import { DataStructureManipulationService } from 'src/common/dataStructureManipulation.service';
+import { DiscordService } from 'src/common/discord.service';
+import { GithubService } from 'src/common/github.service';
 import { SlugService } from 'src/common/slug.service';
-import { InviteDto } from './dto/invite.dto';
+import { CirclePermission } from 'src/common/types/role.type';
+import { RegistryService } from 'src/registry/registry.service';
+import { RolesService } from 'src/roles/roles.service';
 import { RequestProvider } from 'src/users/user.provider';
+import { v4 as uuidv4 } from 'uuid';
 import { CirclesRepository } from './circles.repository';
 import { CreateCircleRequestDto } from './dto/create-circle-request.dto';
 import { DetailedCircleResponseDto } from './dto/detailed-circle-response.dto';
+import { InviteDto } from './dto/invite.dto';
 import { JoinCircleUsingInvitationRequestDto } from './dto/join-circle.dto';
 import { UpdateCircleRequestDto } from './dto/update-circle-request.dto';
-import { Circle, LocalRegistry } from './model/circle.model';
-import { DiscordService } from 'src/common/discord.service';
-import { GithubService } from 'src/common/github.service';
-import { RolesService } from 'src/roles/roles.service';
-import { v4 as uuidv4 } from 'uuid';
-import moment from 'moment';
-import { DataStructureManipulationService } from 'src/common/dataStructureManipulation.service';
-import { ObjectId } from 'mongoose';
-import { GetMemberDetailsOfCircleDto } from './dto/get-member-details.dto';
-import { User } from 'src/users/model/users.model';
-import { CirclePermission } from 'src/common/types/role.type';
 import { UpdateMemberRolesDto } from './dto/update-member-role.dto';
-import { RegistryService } from 'src/registry/registry.service';
+import { Circle } from './model/circle.model';
 
 @Injectable()
 export class CirclesService {
@@ -224,7 +222,6 @@ export class CirclesService {
     updateCircleDto: UpdateCircleRequestDto,
   ): Promise<DetailedCircleResponseDto> {
     try {
-      console.log({ updateCircleDto });
       const updatedCircle =
         await this.circlesRepository.updateCircleAndReturnWithPopulatedReferences(
           id,
@@ -245,8 +242,7 @@ export class CirclesService {
     newInvite: InviteDto,
   ): Promise<DetailedCircleResponseDto> {
     try {
-      const circle =
-        await this.circlesRepository.getCircleWithUnpopulatedReferences(id);
+      const circle = this.requestProvider.circle;
       const invites = circle.invites;
       const inviteId = uuidv4();
       const updatedCircle = await this.circlesRepository.updateById(id, {
@@ -357,8 +353,7 @@ export class CirclesService {
     updateMemberRolesDto: UpdateMemberRolesDto,
   ): Promise<DetailedCircleResponseDto> {
     try {
-      const circle =
-        await this.circlesRepository.getCircleWithUnpopulatedReferences(id);
+      const circle = this.requestProvider.circle;
       this.validateExistingMember(circle, member);
       this.validateRolesExistInCircle(circle, updateMemberRolesDto.roles);
 
@@ -386,8 +381,7 @@ export class CirclesService {
     member: string,
   ): Promise<DetailedCircleResponseDto> {
     try {
-      const circle =
-        await this.circlesRepository.getCircleWithUnpopulatedReferences(id);
+      const circle = this.requestProvider.circle;
       this.validateExistingMember(circle, member);
       delete circle.memberRoles[member];
       const updatedCircle =

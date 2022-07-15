@@ -18,7 +18,6 @@ export class ResponseBuilder {
     private readonly requestProvider: RequestProvider,
     private readonly activityResolver: ActivityResolver,
     private readonly dataStructureManipulationService: DataStructureManipulationService,
-    private readonly actionService: ActionService,
   ) {}
 
   resolveApplicationView(card: Card): Card {
@@ -38,7 +37,7 @@ export class ResponseBuilder {
         applicationOrder: [],
       };
     else if (!card.application) return card;
-    else if (this.actionService.canApply(card, this.requestProvider.user.id)) {
+    else if (!card.reviewer?.includes(this.requestProvider.user.id)) {
       for (const [applicationId, application] of Object.entries(
         card.application,
       )) {
