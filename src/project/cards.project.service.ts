@@ -1,6 +1,5 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { CardsRepository } from 'src/card/cards.repository';
-import { DataStructureManipulationService } from 'src/common/dataStructureManipulation.service';
+import { CommonTools } from 'src/common/common.service';
 import { DetailedProjectResponseDto } from './dto/detailed-project-response.dto';
 import { ReorderCardReqestDto } from './dto/reorder-card-request.dto';
 import { Project } from './model/project.model';
@@ -11,8 +10,7 @@ import { CardLoc, MappedProject } from './types/types';
 export class CardsProjectService {
   constructor(
     private readonly projectRepository: ProjectsRepository,
-    private readonly cardRepository: CardsRepository,
-    private readonly datastructureManipulationService: DataStructureManipulationService,
+    private readonly commonTools: CommonTools,
   ) {}
 
   projectPopulatedWithCardDetails(
@@ -20,10 +18,7 @@ export class CardsProjectService {
   ): DetailedProjectResponseDto {
     return {
       ...project,
-      cards: this.datastructureManipulationService.objectify(
-        project.cards,
-        'id',
-      ),
+      cards: this.commonTools.objectify(project.cards, 'id'),
     };
   }
 

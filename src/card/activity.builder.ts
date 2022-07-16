@@ -254,17 +254,6 @@ export class ActivityBuilder {
     return newCardActivity;
   }
 
-  isValidWorkUpdateActivity(
-    card: Card,
-    threadId: string,
-    threadName: string,
-    threadStatus?: string,
-    workUnitId?: string,
-    content?: string,
-  ) {
-    return true;
-  }
-
   buildCreateWorkActivity(
     activityId: 'createWorkThread' | 'createWorkUnit',
     threadName: string,
@@ -330,7 +319,6 @@ export class ActivityBuilder {
     const newCardActivity = {} as Activity;
     newCardActivity.activityId = 'updateWorkUnit';
 
-    // const isValidWorkActivity = this.isValidWorkUpdateActivity(card, threadId);
     newCardActivity.changeLog = {
       prev: {
         work: {

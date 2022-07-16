@@ -1,22 +1,12 @@
 import { Module } from '@nestjs/common';
-import { DataStructureManipulationService } from './dataStructureManipulation.service';
+import { CommonTools } from './common.service';
 import { DiscordService } from './discord.service';
 import { GithubService } from './github.service';
 import { SlugService } from './slug.service';
 
 @Module({
   controllers: [],
-  providers: [
-    SlugService,
-    DiscordService,
-    GithubService,
-    DataStructureManipulationService,
-  ],
-  exports: [
-    SlugService,
-    DiscordService,
-    GithubService,
-    DataStructureManipulationService,
-  ],
+  providers: [SlugService, DiscordService, GithubService, CommonTools],
+  exports: [SlugService, DiscordService, GithubService, CommonTools],
 })
 export class CommonModule {}

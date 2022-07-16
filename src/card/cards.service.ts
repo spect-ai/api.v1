@@ -6,7 +6,6 @@ import {
 } from '@nestjs/common';
 import { ActivityBuilder } from 'src/card/activity.builder';
 import { CirclesRepository } from 'src/circle/circles.repository';
-import { DataStructureManipulationService } from 'src/common/dataStructureManipulation.service';
 import { CardsProjectService } from 'src/project/cards.project.service';
 import { DetailedProjectResponseDto } from 'src/project/dto/detailed-project-response.dto';
 import { Project } from 'src/project/model/project.model';

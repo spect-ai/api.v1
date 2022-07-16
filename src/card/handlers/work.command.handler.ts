@@ -1,15 +1,8 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { AutomationService } from 'src/automation/automation.service';
-import { CirclesRepository } from 'src/circle/circles.repository';
-import { DataStructureManipulationService } from 'src/common/dataStructureManipulation.service';
 import { GlobalDocumentUpdate } from 'src/common/types/update.type';
-import { CardsProjectService } from 'src/project/cards.project.service';
 import { ProjectsRepository } from 'src/project/project.repository';
-import { ProjectService } from 'src/project/project.service';
 import { RequestProvider } from 'src/users/user.provider';
-import { ActivityBuilder } from '../activity.builder';
-import { CardsRepository } from '../cards.repository';
-import { CardsService } from '../cards.service';
 import { DetailedCardResponseDto } from '../dto/detailed-card-response-dto';
 import {
   CreateWorkThreadRequestDto,
@@ -17,27 +10,15 @@ import {
   UpdateWorkThreadRequestDto,
   UpdateWorkUnitRequestDto,
 } from '../dto/work-request.dto';
-import { CardsPaymentService } from '../payment.cards.service';
-import { CommonUtility, ResponseBuilder } from '../response.builder';
-import { CardValidationService } from '../validation.cards.service';
+import { CommonUtility } from '../response.builder';
 import { WorkService } from '../work.cards.service';
 
 @Injectable()
 export class WorkCommandHandler {
   constructor(
     private readonly requestProvider: RequestProvider,
-    private readonly cardsRepository: CardsRepository,
-    private readonly activityBuilder: ActivityBuilder,
-    private readonly circleRepository: CirclesRepository,
-    private readonly projectService: ProjectService,
-    private readonly cardsProjectService: CardsProjectService,
-    private readonly datastructureManipulationService: DataStructureManipulationService,
-    private readonly validationService: CardValidationService,
-    private readonly responseBuilder: ResponseBuilder,
-    private readonly cardsService: CardsService,
     private readonly projectRepository: ProjectsRepository,
     private readonly automationService: AutomationService,
-    private readonly cardPaymentService: CardsPaymentService,
     private readonly workService: WorkService,
     private readonly commonUtility: CommonUtility,
   ) {}

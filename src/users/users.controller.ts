@@ -25,11 +25,11 @@ export class UsersController {
 
   @UseGuards(SessionAuthGuard)
   @Patch('/me')
-  update(@Body() updateUserDto: UpdateUserDto, @Request() req) {
-    return this.usersService.update(updateUserDto, req.user);
+  update(@Body() updateUserDto: UpdateUserDto) {
+    return this.usersService.update(updateUserDto);
   }
 
-  @Get(':id')
+  @Get('/:id')
   findById(@Param('id') id: string) {
     return this.usersService.getUserPublicProfile(id);
   }

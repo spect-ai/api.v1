@@ -41,4 +41,34 @@ export class User extends ProfileModel {
    */
   @prop()
   githubId: string;
+
+  /**
+   * List of circles this user is a member of, these will also contain circles that the user was historically a member of
+   * as removal from a circle will not be reflected in the user's circles.
+   */
+  @prop(() => Circle)
+  circles: string[];
+
+  /**
+   * List of projects a user is assigned or reviewing
+   */
+  @prop(() => Circle)
+  projects: string[];
+
+  /**
+   * List of cards a user is assigned or reviewing
+   */
+  @prop(() => Circle)
+  cards: string[];
+
+  /**
+   * Activities taken by the user
+   */
+  activities: string[];
+
+  /**
+   * Notifications for the user
+   */
+  @prop()
+  notifications: string[];
 }

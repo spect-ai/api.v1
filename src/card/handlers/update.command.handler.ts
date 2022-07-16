@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { AutomationService } from 'src/automation/automation.service';
 import { CirclesRepository } from 'src/circle/circles.repository';
-import { DataStructureManipulationService } from 'src/common/dataStructureManipulation.service';
+import { CommonTools } from 'src/common/common.service';
 import { GlobalDocumentUpdate } from 'src/common/types/update.type';
 import { CardsProjectService } from 'src/project/cards.project.service';
 import { DetailedProjectResponseDto } from 'src/project/dto/detailed-project-response.dto';
@@ -15,6 +15,8 @@ import { ProjectsRepository } from 'src/project/project.repository';
 import { ProjectService } from 'src/project/project.service';
 import { MappedProject } from 'src/project/types/types';
 import { RequestProvider } from 'src/users/user.provider';
+import { UsersRepository } from 'src/users/users.repository';
+import { UsersService } from 'src/users/users.service';
 import { ActivityBuilder } from '../activity.builder';
 import { CardsRepository } from '../cards.repository';
 import { CardsService } from '../cards.service';
@@ -26,22 +28,26 @@ import { ResponseBuilder } from '../response.builder';
 import { MappedCard } from '../types/types';
 import { CardValidationService } from '../validation.cards.service';
 
+const globalUpdate = {
+  card: {},
+  project: {},
+} as GlobalDocumentUpdate;
+
 @Injectable()
 export class CardCommandHandler {
   constructor(
     private readonly requestProvider: RequestProvider,
     private readonly cardsRepository: CardsRepository,
-    private readonly activityBuilder: ActivityBuilder,
-    private readonly circleRepository: CirclesRepository,
     private readonly projectService: ProjectService,
     private readonly cardsProjectService: CardsProjectService,
-    private readonly datastructureManipulationService: DataStructureManipulationService,
-    private readonly validationService: CardValidationService,
+    private readonly commonTools: CommonTools,
     private readonly responseBuilder: ResponseBuilder,
     private readonly cardsService: CardsService,
     private readonly projectRepository: ProjectsRepository,
     private readonly automationService: AutomationService,
     private readonly cardPaymentService: CardsPaymentService,
+    private readonly userService: UsersService,
+    private readonly userRepository: UsersRepository,
   ) {}
 
   async update(
@@ -52,15 +58,13 @@ export class CardCommandHandler {
       const card = this.requestProvider.card;
       const project = this.requestProvider.project;
 
-      const globalUpdate = {
-        card: {},
-        project: {},
-      } as GlobalDocumentUpdate;
-
       const cardUpdate = this.cardsService.update(card, project, updateCardDto);
 
-      const globalUpdateAfterAutomation =
-        this.automationService.handleAutomation(card, project, cardUpdate[id]);
+      const automationUpdate = this.automationService.handleAutomation(
+        card,
+        project,
+        cardUpdate[id],
+      );
 
       let projectUpdate = {};
       if (updateCardDto.columnId || updateCardDto.cardIndex) {
@@ -74,28 +78,30 @@ export class CardCommandHandler {
         } as ReorderCardReqestDto);
       }
 
-      globalUpdate.project[project.id] =
-        this.datastructureManipulationService.mergeObjects(
-          globalUpdate.project[project.id],
-          globalUpdateAfterAutomation.project[project.id],
-          projectUpdate[project.id],
-        ) as MappedProject;
+      globalUpdate.project[project.id] = this.commonTools.mergeObjects(
+        globalUpdate.project[project.id],
+        automationUpdate.project[project.id],
+        projectUpdate[project.id],
+      ) as MappedProject;
 
-      globalUpdate.card[id] =
-        this.datastructureManipulationService.mergeObjects(
-          globalUpdate.card[id],
-          globalUpdateAfterAutomation.card[id],
-          cardUpdate[id],
-        ) as MappedCard;
+      globalUpdate.card[id] = this.commonTools.mergeObjects(
+        globalUpdate.card[id],
+        automationUpdate.card[id],
+        cardUpdate[id],
+      ) as MappedCard;
 
-      const acknowledgment = await this.cardsRepository.bundleUpdatesAndExecute(
-        globalUpdate.card,
-      );
+      const userUpdate = this.userService.updateUserCards(globalUpdate.card);
+
+      const cardUpdateAcknowledgment =
+        await this.cardsRepository.bundleUpdatesAndExecute(globalUpdate.card);
 
       const projectUpdateAcknowledgment =
         await this.projectRepository.bundleUpdatesAndExecute(
           globalUpdate.project,
         );
+
+      const userUpdateAcknowledgment =
+        await this.userRepository.bundleUpdatesAndExecute(userUpdate);
 
       const resultingCard =
         await this.cardsRepository.getCardWithPopulatedReferences(id);
@@ -156,23 +162,20 @@ export class CardCommandHandler {
             child,
             updatePaymentInfo,
           );
-          const globalUpdateAfterAutomation =
-            this.automationService.handleAutomation(
-              child,
-              project,
-              childCardUpdate[child.id],
-            );
-          globalUpdate.card[child.id] =
-            this.datastructureManipulationService.mergeObjects(
-              globalUpdate.card[child.id],
-              globalUpdateAfterAutomation.card[child.id],
-              childCardUpdate[child.id],
-            );
-          globalUpdate.project[project.id] =
-            this.datastructureManipulationService.mergeObjects(
-              globalUpdate.project[project.id],
-              globalUpdateAfterAutomation.project[project.id],
-            );
+          const automationUpdate = this.automationService.handleAutomation(
+            child,
+            project,
+            childCardUpdate[child.id],
+          );
+          globalUpdate.card[child.id] = this.commonTools.mergeObjects(
+            globalUpdate.card[child.id],
+            automationUpdate.card[child.id],
+            childCardUpdate[child.id],
+          );
+          globalUpdate.project[project.id] = this.commonTools.mergeObjects(
+            globalUpdate.project[project.id],
+            automationUpdate.project[project.id],
+          );
         }
 
         const parentCardUpdate = this.cardPaymentService.updatePaymentInfo(
@@ -180,24 +183,21 @@ export class CardCommandHandler {
           updatePaymentInfo,
         );
 
-        const globalUpdateAfterAutomation =
-          this.automationService.handleAutomation(
-            card,
-            project,
-            parentCardUpdate[card.id],
-          );
-        globalUpdate.card[card.id] =
-          this.datastructureManipulationService.mergeObjects(
-            globalUpdate.card[card.id],
-            globalUpdateAfterAutomation.card[card.id],
-            parentCardUpdate[card.id],
-          );
+        const automationUpdate = this.automationService.handleAutomation(
+          card,
+          project,
+          parentCardUpdate[card.id],
+        );
+        globalUpdate.card[card.id] = this.commonTools.mergeObjects(
+          globalUpdate.card[card.id],
+          automationUpdate.card[card.id],
+          parentCardUpdate[card.id],
+        );
 
-        globalUpdate.project[project.id] =
-          this.datastructureManipulationService.mergeObjects(
-            globalUpdate.project[project.id],
-            globalUpdateAfterAutomation.project[project.id],
-          );
+        globalUpdate.project[project.id] = this.commonTools.mergeObjects(
+          globalUpdate.project[project.id],
+          automationUpdate.project[project.id],
+        );
       }
 
       // /** Mongo only returns an acknowledgment on bulk write and not the updated records itself */

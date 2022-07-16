@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 
 @Injectable()
-export class DataStructureManipulationService {
+export class CommonTools {
   objectify(arrOfObjects: any[], key: string) {
     const res = {};
     for (const obj of arrOfObjects) {

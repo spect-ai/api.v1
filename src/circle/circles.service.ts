@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import moment from 'moment';
 import { ObjectId } from 'mongoose';
-import { DataStructureManipulationService } from 'src/common/dataStructureManipulation.service';
+import { CommonTools } from 'src/common/common.service';
 import { DiscordService } from 'src/common/discord.service';
 import { GithubService } from 'src/common/github.service';
 import { SlugService } from 'src/common/slug.service';
@@ -33,7 +33,7 @@ export class CirclesService {
     private readonly discordService: DiscordService,
     private readonly githubService: GithubService,
     private readonly roleService: RolesService,
-    private readonly datastructureManipulationService: DataStructureManipulationService,
+    private readonly commonTools: CommonTools,
     private readonly registryService: RegistryService,
   ) {}
 
@@ -115,15 +115,9 @@ export class CirclesService {
         },
       )
       .populate('members');
-    let res = this.datastructureManipulationService.arrayify(
-      circles,
-      'members',
-    );
-    res = this.datastructureManipulationService.distinctify(res, 'id');
-    const memberDetails = this.datastructureManipulationService.objectify(
-      res,
-      'id',
-    );
+    let res = this.commonTools.arrayify(circles, 'members');
+    res = this.commonTools.distinctify(res, 'id');
+    const memberDetails = this.commonTools.objectify(res, 'id');
     return {
       memberDetails,
       members: Object.keys(memberDetails),
@@ -143,15 +137,9 @@ export class CirclesService {
         },
       )
       .populate('members');
-    let res = this.datastructureManipulationService.arrayify(
-      circles,
-      'members',
-    );
-    res = this.datastructureManipulationService.distinctify(res, 'id');
-    const memberDetails = this.datastructureManipulationService.objectify(
-      res,
-      'id',
-    );
+    let res = this.commonTools.arrayify(circles, 'members');
+    res = this.commonTools.distinctify(res, 'id');
+    const memberDetails = this.commonTools.objectify(res, 'id');
     return {
       memberDetails,
       members: Object.keys(memberDetails),

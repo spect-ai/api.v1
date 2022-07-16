@@ -1,9 +1,13 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { ObjectId } from 'mongoose';
+import { CreateCardRequestDto } from 'src/card/dto/create-card-request.dto';
+import { Card } from 'src/card/model/card.model';
+import { MappedCard } from 'src/card/types/types';
 import { EthAddressRepository } from 'src/_eth-address/_eth_address.repository';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './model/users.model';
+import { MappedUser } from './types/types';
 import { RequestProvider } from './user.provider';
 import { UsersRepository } from './users.repository';
 
@@ -28,9 +32,12 @@ export class UsersService {
     return user;
   }
 
-  async update(updateUserDto: UpdateUserDto, user: User): Promise<User> {
+  async update(updateUserDto: UpdateUserDto): Promise<User> {
     try {
-      if (updateUserDto.username && user.username !== updateUserDto.username) {
+      if (
+        updateUserDto.username &&
+        this.requestProvider.user.username !== updateUserDto.username
+      ) {
         const usernameTaken = await this.usersRepository.exists({
           username: updateUserDto.username,
         });
@@ -46,6 +53,26 @@ export class UsersService {
         error.message,
       );
     }
+  }
+
+  updateUserCards(cards: MappedCard): MappedUser {
+    const userToCards = {};
+    for (const [cardId, card] of Object.entries(cards)) {
+      console.log(card);
+      for (const user of card.assignee) {
+        if (userToCards.hasOwnProperty(user)) {
+          userToCards[user] = {
+            ...userToCards[user],
+            cards: [...userToCards[user].cards, cardId],
+          };
+        } else {
+          userToCards[user] = {
+            cards: [cardId],
+          };
+        }
+      }
+    }
+    return userToCards;
   }
 
   async getUserPublicProfile(userId: string): Promise<User> {
