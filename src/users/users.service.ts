@@ -92,72 +92,92 @@ export class UsersService {
     return users;
   }
 
-  async updateUserCards(mappedDiff: MappedDiff): Promise<MappedUser> {
-    const userToCards = {};
-    const users = await this.findStakeholders(mappedDiff);
-    const mappedUsers = this.commonTools.objectify(users, 'id');
-
-    for (const [cardId, cardDiff] of Object.entries(mappedDiff)) {
-      const addedAssignees = cardDiff.added.assignee || [];
-      const removedAssignees = cardDiff.deleted.assignee || [];
-      const addedReviewers = cardDiff.added.reviewer || [];
-      const removedReviewers = cardDiff.deleted.reviewer || [];
-
-      for (const userId of addedAssignees) {
-        if (!userToCards[userId]) userToCards[userId] = {};
-        if (!mappedUsers[userId].assignedCards)
-          mappedUsers[userId].assignedCards = [];
-        userToCards[userId] = {
-          ...userToCards[userId],
-          assignedCards: mappedUsers[userId].assignedCards
-            .map((x) => x.toString())
-            .includes(cardId)
-            ? mappedUsers[userId].assignedCards
-            : [...mappedUsers[userId].assignedCards, cardId],
-        };
-      }
-
-      for (const userId of removedAssignees) {
-        if (!userToCards[userId]) userToCards[userId] = {};
-        if (!mappedUsers[userId].assignedCards)
-          mappedUsers[userId].assignedCards = [];
-
-        userToCards[userId] = {
-          ...userToCards[userId],
-          assignedCards: mappedUsers[userId].assignedCards.filter(
-            (x) => x.toString() !== cardId,
-          ),
-        };
-      }
-
-      for (const userId of addedReviewers) {
-        if (!userToCards[userId]) userToCards[userId] = {};
-        if (!mappedUsers[userId].reviewingCards)
-          mappedUsers[userId].reviewingCards = [];
-
-        userToCards[userId] = {
-          ...userToCards[userId],
-          reviewingCards: mappedUsers[userId].reviewingCards
-            .map((x) => x.toString())
-            .includes(cardId)
-            ? mappedUsers[userId].reviewingCards
-            : [...mappedUsers[userId].reviewingCards, cardId],
-        };
-      }
-
-      for (const userId of removedReviewers) {
-        if (!userToCards[userId]) userToCards[userId] = {};
-        if (!mappedUsers[userId].reviewingCards)
-          mappedUsers[userId].reviewingCards = [];
-
-        userToCards[userId] = {
-          ...userToCards[userId],
-          reviewingCards: mappedUsers[userId].reviewingCards.filter(
-            (x) => x.toString() !== cardId,
-          ),
-        };
-      }
+  async addCardToUsers(
+    mappedUsers: MappedUser,
+    stakeholders: string[],
+    key: string,
+    userToCards: MappedUser,
+    cardId: string,
+  ) {
+    for (const userId of stakeholders) {
+      if (!userToCards[userId]) userToCards[userId] = {};
+      if (!mappedUsers[userId][key]) mappedUsers[userId][key] = [];
+      userToCards[userId] = {
+        ...userToCards[userId],
+        [key]: mappedUsers[userId][key]
+          .map((x) => x.toString())
+          .includes(cardId)
+          ? mappedUsers[userId][key]
+          : [...mappedUsers[userId][key], cardId],
+      };
     }
     return userToCards;
+  }
+
+  async removeCardFromUsers(
+    mappedUsers: MappedUser,
+    stakeholders: string[],
+    key: string,
+    userToCards: MappedUser,
+    cardId: string,
+  ) {
+    for (const userId of stakeholders) {
+      if (!userToCards[userId]) userToCards[userId] = {};
+      if (!mappedUsers[userId][key]) mappedUsers[userId][key] = [];
+
+      userToCards[userId] = {
+        ...userToCards[userId],
+        [key]: mappedUsers[userId][key].filter((x) => x.toString() !== cardId),
+      };
+    }
+    return userToCards;
+  }
+
+  async updateUserCards(mappedDiff: MappedDiff): Promise<MappedUser> {
+    try {
+      const userToCards = {};
+      const users = await this.findStakeholders(mappedDiff);
+      const mappedUsers = this.commonTools.objectify(users, 'id');
+
+      for (const [cardId, cardDiff] of Object.entries(mappedDiff)) {
+        const addedAssignees = cardDiff.added.assignee || [];
+        const removedAssignees = cardDiff.deleted.assignee || [];
+        const addedReviewers = cardDiff.added.reviewer || [];
+        const removedReviewers = cardDiff.deleted.reviewer || [];
+
+        this.addCardToUsers(
+          mappedUsers,
+          addedAssignees,
+          'assignedCards',
+          userToCards,
+          cardId,
+        );
+        this.removeCardFromUsers(
+          mappedUsers,
+          removedAssignees,
+          'assignedCards',
+          userToCards,
+          cardId,
+        );
+        this.addCardToUsers(
+          mappedUsers,
+          addedReviewers,
+          'reviewingCards',
+          userToCards,
+          cardId,
+        );
+        this.removeCardFromUsers(
+          mappedUsers,
+          removedReviewers,
+          'reviewingCards',
+          userToCards,
+          cardId,
+        );
+      }
+      return userToCards;
+    } catch (error) {
+      console.log(error);
+      return {};
+    }
   }
 }

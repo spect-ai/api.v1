@@ -12,6 +12,7 @@ import {
 } from '../dto/work-request.dto';
 import { CommonUtility } from '../response.builder';
 import { WorkService } from '../work.cards.service';
+import { CardsRepository } from '../cards.repository';
 
 @Injectable()
 export class WorkCommandHandler {
@@ -21,6 +22,7 @@ export class WorkCommandHandler {
     private readonly automationService: AutomationService,
     private readonly workService: WorkService,
     private readonly commonUtility: CommonUtility,
+    private readonly cardsRepository: CardsRepository,
   ) {}
 
   async handleCreateWorkThread(
@@ -28,7 +30,9 @@ export class WorkCommandHandler {
     createWorkThread: CreateWorkThreadRequestDto,
   ): Promise<DetailedCardResponseDto> {
     try {
-      const card = this.requestProvider.card;
+      const card = this.requestProvider.card
+        ? this.requestProvider.card
+        : await this.cardsRepository.findById(id);
       const project = await this.projectRepository.findById(
         card.project as string,
       );
@@ -52,6 +56,7 @@ export class WorkCommandHandler {
         cardUpdate,
       );
     } catch (error) {
+      console.log(error);
       throw new InternalServerErrorException(
         'Failed creating work thread',
         error.message,

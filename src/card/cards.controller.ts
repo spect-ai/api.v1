@@ -183,6 +183,7 @@ export class CardsController {
   }
 
   @Patch('/:id/createWorkThreadWithPR')
+  @UseGuards(PublicViewAuthGuard)
   async createWorkThreadWithPR(
     @Param() params: ObjectIdDto,
     @Body() createWorkThread: CreateWorkThreadRequestDto,

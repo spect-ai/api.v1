@@ -1,30 +1,21 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { RequestProvider } from 'src/users/user.provider';
-import { CardsRepository } from './cards.repository';
-import { CardsService } from './cards.service';
-import { DetailedCardResponseDto } from './dto/detailed-card-response-dto';
+import { v4 as uuidv4 } from 'uuid';
+import { ActivityBuilder } from './activity.builder';
 import {
   CreateWorkThreadRequestDto,
   CreateWorkUnitRequestDto,
   UpdateWorkThreadRequestDto,
   UpdateWorkUnitRequestDto,
 } from './dto/work-request.dto';
-import { v4 as uuidv4 } from 'uuid';
-import { ActivityBuilder } from './activity.builder';
-import { ResponseBuilder } from './response.builder';
-import { CardValidationService } from './validation.cards.service';
 import { Card } from './model/card.model';
-import { MappedCard, WorkThread, WorkThreads } from './types/types';
+import { MappedCard } from './types/types';
 
 @Injectable()
 export class WorkService {
   constructor(
-    private readonly requestProvider: RequestProvider,
-    private readonly cardsRepository: CardsRepository,
-    private readonly cardsService: CardsService,
     private readonly activityBuilder: ActivityBuilder,
-    private readonly validationService: CardValidationService,
-    private readonly responseBuilder: ResponseBuilder,
+    private readonly requestProvider: RequestProvider,
   ) {}
 
   async createWorkThread(
@@ -34,8 +25,10 @@ export class WorkService {
     try {
       const workUnitId = uuidv4();
       const workUnit = {};
+      console.log(`ddd`);
+
       workUnit[workUnitId] = {
-        user: this.requestProvider.user._id,
+        user: this.requestProvider.user.id,
         content: createWorkThread.content,
         workUnitId,
         createdAt: new Date(),
@@ -58,6 +51,7 @@ export class WorkService {
         },
       };
       const workThreadOrder = [...card.workThreadOrder, threadId];
+      console.log(workThreadOrder);
 
       const activity = this.activityBuilder.buildCreateWorkActivity(
         'createWorkUnit',
@@ -127,7 +121,7 @@ export class WorkService {
         ...card.workThreads[threadId].workUnits,
         [workUnitId]: {
           unitId: workUnitId,
-          user: this.requestProvider.user._id,
+          user: this.requestProvider.user.id,
           content: createWorkUnit.content,
           workUnitId,
           createdAt: new Date(),
