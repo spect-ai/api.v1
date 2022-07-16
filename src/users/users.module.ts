@@ -8,6 +8,7 @@ import { EthAddressModule } from 'src/_eth-address/_eth-address.module';
 import { AuthModule } from 'src/auth/auth.module';
 import { RequestProvider } from './user.provider';
 import { CardsModule } from 'src/card/cards.module';
+import { CommonTools } from 'src/common/common.service';
 
 @Module({
   imports: [
@@ -16,7 +17,7 @@ import { CardsModule } from 'src/card/cards.module';
     forwardRef(() => CardsModule),
   ],
   controllers: [UsersController],
-  providers: [UsersService, UsersRepository, RequestProvider],
+  providers: [UsersService, UsersRepository, RequestProvider, CommonTools],
   exports: [UsersService, UsersRepository, UsersModule],
 })
 export class UsersModule {}

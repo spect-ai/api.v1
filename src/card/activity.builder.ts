@@ -18,6 +18,7 @@ import {
   CreateApplicationDto,
   UpdateApplicationDto,
 } from './dto/application.dto';
+import { CommonTools } from 'src/common/common.service';
 
 const fieldUpdateToActiityIdMap = {
   deadline: 'updateDeadline',
@@ -34,7 +35,10 @@ const fieldUpdateToActiityIdMap = {
 @Injectable()
 export class ActivityBuilder {
   commitId: string;
-  constructor(private readonly requestProvider: RequestProvider) {
+  constructor(
+    private readonly requestProvider: RequestProvider,
+    private readonly commonTools: CommonTools,
+  ) {
     this.commitId = uuidv4();
   }
 

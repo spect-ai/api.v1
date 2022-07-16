@@ -17,8 +17,9 @@ import { DetailedCardResponseDto } from './dto/detailed-card-response-dto';
 import { UpdateCardRequestDto } from './dto/update-card-request.dto';
 import { Card } from './model/card.model';
 import { ResponseBuilder } from './response.builder';
-import { MappedCard } from './types/types';
+import { Diff, MappedCard } from './types/types';
 import { CardValidationService } from './validation.cards.service';
+import { CommonTools } from 'src/common/common.service';
 
 @Injectable()
 export class CardsService {
@@ -31,7 +32,47 @@ export class CardsService {
     private readonly cardsProjectService: CardsProjectService,
     private readonly validationService: CardValidationService,
     private readonly responseBuilder: ResponseBuilder,
+    private readonly commonTools: CommonTools,
   ) {}
+
+  getDifference(card: Card, request: UpdateCardRequestDto): Diff {
+    const filteredCard = {};
+    const filteredCardArrayFields = {};
+    const filteredRequest = {};
+
+    for (const key in request) {
+      if (Array.isArray(card[key])) filteredCardArrayFields[key] = card[key];
+      else {
+        filteredCard[key] = card[key];
+        filteredRequest[key] = request[key];
+      }
+    }
+
+    const objDiff = this.commonTools.findDifference(
+      filteredCard,
+      filteredRequest,
+    ) as Diff;
+    const arrayDiff = {};
+    for (const key in filteredCardArrayFields) {
+      arrayDiff[key] = this.commonTools.findDifference(
+        filteredCardArrayFields[key],
+        request[key],
+      );
+      if (arrayDiff[key]['added'].length > 0) {
+        objDiff['added'] = {
+          ...objDiff['added'],
+          [key]: arrayDiff[key]['added'],
+        };
+      }
+      if (arrayDiff[key]['removed'].length > 0) {
+        objDiff['deleted'] = {
+          ...objDiff['deleted'],
+          [key]: arrayDiff[key]['removed'],
+        };
+      }
+    }
+    return objDiff;
+  }
 
   async getDetailedCard(id: string): Promise<DetailedCardResponseDto> {
     try {

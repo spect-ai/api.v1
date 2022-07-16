@@ -4,11 +4,32 @@ import { BaseRepository } from 'src/base/base.repository';
 import { User } from './model/users.model';
 import { MappedUser } from './types/types';
 import mongodb from 'mongodb';
+import { DetailedUserPubliceResponseDto } from './dto/detailed-user-response.dto';
 
 @Injectable()
 export class UsersRepository extends BaseRepository<User> {
   constructor(@InjectModel(User) userModel) {
     super(userModel);
+  }
+
+  async getUserDetailsByUserId(
+    id: string,
+  ): Promise<DetailedUserPubliceResponseDto> {
+    const user = await this.findById(id)
+      .populate('assignedCards')
+      .populate('reviewingCards')
+      .populate('circles');
+    return user;
+  }
+
+  async getUserDetailsByUsername(
+    username: string,
+  ): Promise<DetailedUserPubliceResponseDto> {
+    const user = await this.findOne({ username })
+      .populate('assignedCards')
+      .populate('reviewingCards')
+      .populate('circles');
+    return user;
   }
 
   async bundleUpdatesAndExecute(

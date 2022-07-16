@@ -3,6 +3,8 @@ import { ProfileModel } from 'src/common/models/profile.model';
 import { useMongoosePlugin } from 'src/base/decorators/use-mongoose-plugins.decorator';
 import { ObjectId } from 'mongoose';
 import { Circle } from 'src/circle/model/circle.model';
+import { Card } from 'src/card/model/card.model';
+import { Project } from 'src/project/model/project.model';
 
 @useMongoosePlugin()
 export class User extends ProfileModel {
@@ -46,20 +48,26 @@ export class User extends ProfileModel {
    * List of circles this user is a member of, these will also contain circles that the user was historically a member of
    * as removal from a circle will not be reflected in the user's circles.
    */
-  @prop(() => Circle)
+  @prop({ ref: () => Circle, default: [] })
   circles: string[];
 
   /**
    * List of projects a user is assigned or reviewing
    */
-  @prop(() => Circle)
+  @prop({ ref: () => Project, default: [] })
   projects: string[];
 
   /**
    * List of cards a user is assigned or reviewing
    */
-  @prop(() => Circle)
-  cards: string[];
+  @prop({ ref: () => Card, default: [] })
+  assignedCards: string[];
+
+  /**
+   * List of cards a user is assigned or reviewing
+   */
+  @prop({ ref: () => Card, default: [] })
+  reviewingCards: string[];
 
   /**
    * Activities taken by the user
