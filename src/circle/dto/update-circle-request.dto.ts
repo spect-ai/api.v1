@@ -71,3 +71,14 @@ export class UpdateCircleRequestDto extends OmitType(CreateCircleRequestDto, [
   @IsOptional()
   gradient?: string;
 }
+
+export class UpdateCircleGithubRepoRequestDto {
+  /**
+   * A list of repos that the circle uses
+   */
+  @IsArray()
+  githubRepos?: string[];
+
+  @IsString()
+  githubId: string;
+}

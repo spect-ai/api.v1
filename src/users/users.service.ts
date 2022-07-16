@@ -86,6 +86,7 @@ export class UsersService {
         .concat(cardDiff.deleted.reviewer || []);
       userIds = [...userIds, ...stakeholders];
     }
+    if (userIds.length === 0) return [];
     const users = await this.usersRepository.findAll({
       _id: { $in: userIds },
     });
