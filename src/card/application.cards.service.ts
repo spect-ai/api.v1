@@ -34,8 +34,8 @@ export class ApplicationService {
     createApplicationDto: CreateApplicationDto,
   ): Promise<DetailedCardResponseDto> {
     try {
-      const card = this.requestProvider.card;
-      this.validationService.validateCardExists(card);
+      const card =
+        this.requestProvider.card || (await this.cardsRepository.findById(id));
       this.validationService.validateUserHasntSubmittedApplicaiton(card);
 
       const project =
@@ -103,7 +103,8 @@ export class ApplicationService {
     updateApplicationDto: UpdateApplicationDto,
   ): Promise<DetailedCardResponseDto> {
     try {
-      const card = this.requestProvider.card;
+      const card =
+        this.requestProvider.card || (await this.cardsRepository.findById(id));
       this.validationService.validateApplicationExists(card, applicationId);
       this.validationService.validateCallerIsOwner(card, applicationId);
 
@@ -142,7 +143,8 @@ export class ApplicationService {
     applicationId: string,
   ): Promise<DetailedCardResponseDto> {
     try {
-      const card = this.requestProvider.card;
+      const card =
+        this.requestProvider.card || (await this.cardsRepository.findById(id));
       this.validationService.validateApplicationExists(card, applicationId);
       this.validationService.validateCallerIsOwner(card, applicationId);
 
@@ -178,7 +180,8 @@ export class ApplicationService {
 
   async pickApplications(id: string, applicationIds: string[]) {
     try {
-      const card = this.requestProvider.card;
+      const card =
+        this.requestProvider.card || (await this.cardsRepository.findById(id));
       const applicants = [];
       for (const applicationId of applicationIds) {
         this.validationService.validateApplicationExists(card, applicationId);

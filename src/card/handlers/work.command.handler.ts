@@ -14,6 +14,10 @@ import { CommonUtility } from '../response.builder';
 import { WorkService } from '../work.cards.service';
 import { CardsRepository } from '../cards.repository';
 
+const globalUpdate = {
+  card: {},
+  project: {},
+} as GlobalDocumentUpdate;
 @Injectable()
 export class WorkCommandHandler {
   constructor(
@@ -30,16 +34,11 @@ export class WorkCommandHandler {
     createWorkThread: CreateWorkThreadRequestDto,
   ): Promise<DetailedCardResponseDto> {
     try {
-      const card = this.requestProvider.card
-        ? this.requestProvider.card
-        : await this.cardsRepository.findById(id);
-      const project = await this.projectRepository.findById(
-        card.project as string,
-      );
-      const globalUpdate = {
-        card: {},
-        project: {},
-      } as GlobalDocumentUpdate;
+      const card =
+        this.requestProvider.card || (await this.cardsRepository.findById(id));
+      const project =
+        this.requestProvider.project ||
+        (await this.projectRepository.findById(card.project as string));
 
       const cardUpdate = await this.workService.createWorkThread(
         card,
@@ -70,15 +69,12 @@ export class WorkCommandHandler {
     updateWorkThread: UpdateWorkThreadRequestDto,
   ): Promise<DetailedCardResponseDto> {
     try {
-      const card = this.requestProvider.card;
-      const project = await this.projectRepository.findById(
-        card.project as string,
-      );
+      const card =
+        this.requestProvider.card || (await this.cardsRepository.findById(id));
+      const project =
+        this.requestProvider.project ||
+        (await this.projectRepository.findById(card.project as string));
 
-      const globalUpdate = {
-        card: {},
-        project: {},
-      } as GlobalDocumentUpdate;
       const cardUpdate = await this.workService.updateWorkThread(
         card,
         threadId,
@@ -109,15 +105,12 @@ export class WorkCommandHandler {
     createWorkUnit: CreateWorkUnitRequestDto,
   ): Promise<DetailedCardResponseDto> {
     try {
-      const card = this.requestProvider.card;
-      const project = await this.projectRepository.findById(
-        card.project as string,
-      );
+      const card =
+        this.requestProvider.card || (await this.cardsRepository.findById(id));
+      const project =
+        this.requestProvider.project ||
+        (await this.projectRepository.findById(card.project as string));
 
-      const globalUpdate = {
-        card: {},
-        project: {},
-      } as GlobalDocumentUpdate;
       const cardUpdate = await this.workService.createWorkUnit(
         card,
         threadId,
@@ -148,15 +141,12 @@ export class WorkCommandHandler {
     updateWorkUnit: UpdateWorkUnitRequestDto,
   ): Promise<DetailedCardResponseDto> {
     try {
-      const card = this.requestProvider.card;
-      const project = await this.projectRepository.findById(
-        card.project as string,
-      );
+      const card =
+        this.requestProvider.card || (await this.cardsRepository.findById(id));
+      const project =
+        this.requestProvider.project ||
+        (await this.projectRepository.findById(card.project as string));
 
-      const globalUpdate = {
-        card: {},
-        project: {},
-      } as GlobalDocumentUpdate;
       const cardUpdate = await this.workService.updateWorkUnit(
         card,
         threadId,

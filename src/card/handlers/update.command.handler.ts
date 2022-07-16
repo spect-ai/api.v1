@@ -55,8 +55,11 @@ export class CardCommandHandler {
     updateCardDto: UpdateCardRequestDto,
   ): Promise<DetailedCardResponseDto> {
     try {
-      const card = this.requestProvider.card;
-      const project = this.requestProvider.project;
+      const card =
+        this.requestProvider.card || (await this.cardsRepository.findById(id));
+      const project =
+        this.requestProvider.project ||
+        (await this.projectRepository.findById(card.project as string));
       const cardUpdate = this.cardsService.update(card, project, updateCardDto);
 
       const automationUpdate = this.automationService.handleAutomation(

@@ -70,7 +70,9 @@ export class CircleRegistryService {
   }
 
   async addToken(id: string, addTokenDto: AddNewTokenDto) {
-    const circle = this.requestProvider.circle;
+    const circle =
+      this.requestProvider.circle ||
+      (await this.circlesRepository.findById(id));
 
     if (!circle) {
       throw new HttpException('Circle not found', HttpStatus.NOT_FOUND);
@@ -125,7 +127,9 @@ export class CircleRegistryService {
     id: string,
     updateLocalRegistryDto: UpdateBlacklistDto,
   ) {
-    const circle = this.requestProvider.circle;
+    const circle =
+      this.requestProvider.circle ||
+      (await this.circlesRepository.findById(id));
 
     if (!circle) {
       throw new HttpException('Circle not found', HttpStatus.NOT_FOUND);

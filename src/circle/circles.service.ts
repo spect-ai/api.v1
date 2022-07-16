@@ -230,7 +230,9 @@ export class CirclesService {
     newInvite: InviteDto,
   ): Promise<DetailedCircleResponseDto> {
     try {
-      const circle = this.requestProvider.circle;
+      const circle =
+        this.requestProvider.circle ||
+        (await this.circlesRepository.findById(id));
       const invites = circle.invites;
       const inviteId = uuidv4();
       const updatedCircle = await this.circlesRepository.updateById(id, {
@@ -341,7 +343,9 @@ export class CirclesService {
     updateMemberRolesDto: UpdateMemberRolesDto,
   ): Promise<DetailedCircleResponseDto> {
     try {
-      const circle = this.requestProvider.circle;
+      const circle =
+        this.requestProvider.circle ||
+        (await this.circlesRepository.findById(id));
       this.validateExistingMember(circle, member);
       this.validateRolesExistInCircle(circle, updateMemberRolesDto.roles);
 
@@ -369,7 +373,9 @@ export class CirclesService {
     member: string,
   ): Promise<DetailedCircleResponseDto> {
     try {
-      const circle = this.requestProvider.circle;
+      const circle =
+        this.requestProvider.circle ||
+        (await this.circlesRepository.findById(id));
       this.validateExistingMember(circle, member);
       delete circle.memberRoles[member];
       const updatedCircle =
