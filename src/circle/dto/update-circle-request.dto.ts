@@ -79,6 +79,6 @@ export class UpdateCircleGithubRepoRequestDto {
   @IsArray()
   githubRepos?: string[];
 
-  @IsString()
-  githubId: string;
+  // @IsString()
+  // githubId: string;
 }
