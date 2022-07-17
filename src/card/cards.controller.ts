@@ -57,6 +57,7 @@ import {
   RequiredThreadIdDto,
   RequiredWorkUnitIdDto,
 } from 'src/common/dtos/string.dto';
+import { CreateCardCommandHandler } from './handlers/create.command.handler';
 
 @Controller('card')
 @ApiTags('card')
@@ -65,11 +66,11 @@ export class CardsController {
     private readonly cardsService: CardsService,
     private readonly actionService: ActionService,
     private readonly applicationService: ApplicationService,
-    private readonly workService: WorkService,
     private readonly commentService: CommentService,
     private readonly paymentService: CardsPaymentService,
     private readonly cardCommandHandler: CardCommandHandler,
     private readonly workCommandHandler: WorkCommandHandler,
+    private readonly createCommandHandler: CreateCardCommandHandler,
   ) {}
 
   @UseGuards(PublicViewAuthGuard)
@@ -168,7 +169,7 @@ export class CardsController {
     card: DetailedCardResponseDto;
     project: DetailedProjectResponseDto;
   }> {
-    return await this.cardsService.create(card);
+    return await this.createCommandHandler.handle(card);
   }
 
   @ApiParam({ name: 'id', type: 'string' })

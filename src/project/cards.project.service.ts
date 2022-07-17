@@ -1,4 +1,5 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { Card } from 'src/card/model/card.model';
 import { CommonTools } from 'src/common/common.service';
 import { DetailedProjectResponseDto } from './dto/detailed-project-response.dto';
 import { ReorderCardReqestDto } from './dto/reorder-card-request.dto';
@@ -19,6 +20,59 @@ export class CardsProjectService {
     return {
       ...project,
       cards: this.commonTools.objectify(project.cards, 'id'),
+    };
+  }
+
+  addCardsToProject(project: Project, cards: Card[]): MappedProject {
+    const cardIds = [];
+    const columnDetails = { ...project.columnDetails };
+    for (const card of cards) {
+      cardIds.push(card._id);
+      columnDetails[card.columnId].cards.push(card._id.toString());
+    }
+
+    return {
+      [project.id]: {
+        cards: [...cardIds, ...project.cards],
+        columnDetails: columnDetails,
+      },
+    };
+  }
+
+  addCardToProjectNew(
+    project: Project,
+    columnId: string,
+    cardId: string,
+    addInFirstColumnIfColumnDoesntExist = true,
+  ): MappedProject {
+    if (
+      !project.columnDetails[columnId] ||
+      !project.columnOrder.includes(columnId)
+    ) {
+      if (addInFirstColumnIfColumnDoesntExist) {
+        if (project.columnOrder.length === 0) {
+          throw new HttpException(
+            'Project doesnt have a column',
+            HttpStatus.NOT_FOUND,
+          );
+        }
+        columnId = project.columnOrder[0];
+      } else throw new HttpException('Column not found', HttpStatus.NOT_FOUND);
+    }
+    return {
+      [project.id]: {
+        cards: [...project.cards, cardId],
+        columnDetails: {
+          ...project.columnDetails,
+          [columnId]: {
+            ...project.columnDetails[columnId],
+            cards: [
+              cardId.toString(),
+              ...project.columnDetails[columnId].cards,
+            ],
+          },
+        },
+      },
     };
   }
 
