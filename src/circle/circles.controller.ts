@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpException,
   InternalServerErrorException,
@@ -12,11 +13,8 @@ import {
   SetMetadata,
   UseGuards,
 } from '@nestjs/common';
-import {
-  CircleAuthGuard,
-  CreateCircleAuthGuard,
-  SessionAuthGuard,
-} from 'src/auth/iron-session.guard';
+import { SessionAuthGuard } from 'src/auth/iron-session.guard';
+import { CircleAuthGuard, CreateCircleAuthGuard } from 'src/auth/circle.guard';
 import { CirclesService } from './circles.service';
 import { CirclesRepository } from './circles.repository';
 import { CreateCircleRequestDto } from './dto/create-circle-request.dto';
@@ -32,6 +30,7 @@ import { MemberDto } from './dto/params.dto';
 import { CircleRegistryService } from './registry.circle.service';
 import { AddNewTokenDto } from 'src/registry/dto/add-new-token.dto';
 import { UpdateBlacklistDto } from './dto/update-local-registry.dto';
+import { RequiredSlugDto } from 'src/common/dtos/string.dto';
 
 @Controller('circle')
 export class CirclesController {
@@ -104,13 +103,15 @@ export class CirclesController {
   }
 
   @Get('/slug/:slug/getRegistry')
-  async getRegistry(@Param('slug') slug) {
-    return await this.circleRegistryService.getPaymentMethods(slug);
+  async getRegistry(@Param() param: RequiredSlugDto) {
+    return await this.circleRegistryService.getPaymentMethods(param.slug);
   }
 
   @Get('/slug/:slug')
-  async findBySlug(@Param('slug') slug): Promise<DetailedCircleResponseDto> {
-    return await this.circlesService.getCircleWithSlug(slug);
+  async findBySlug(
+    @Param() param: RequiredSlugDto,
+  ): Promise<DetailedCircleResponseDto> {
+    return await this.circlesService.getCircleWithSlug(param.slug);
   }
 
   @Get('/:id')
@@ -224,7 +225,7 @@ export class CirclesController {
   // TODO: Delete everything withing the circle
   @SetMetadata('permissions', ['manageCircleSettings'])
   @UseGuards(CircleAuthGuard)
-  @Post('/:id/delete')
+  @Delete('/:id/delete')
   async delete(
     @Param() param: ObjectIdDto,
   ): Promise<DetailedCircleResponseDto> {

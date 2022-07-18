@@ -9,21 +9,17 @@ import { CirclesRepository } from 'src/circle/circles.repository';
 import { DataStructureManipulationService } from 'src/common/dataStructureManipulation.service';
 import { CardsProjectService } from 'src/project/cards.project.service';
 import { DetailedProjectResponseDto } from 'src/project/dto/detailed-project-response.dto';
-import { ReorderCardReqestDto } from 'src/project/dto/reorder-card-request.dto';
 import { Project } from 'src/project/model/project.model';
 import { ProjectService } from 'src/project/project.service';
 import { RequestProvider } from 'src/users/user.provider';
 import { CardsRepository } from './cards.repository';
 import { CreateCardRequestDto } from './dto/create-card-request.dto';
 import { DetailedCardResponseDto } from './dto/detailed-card-response-dto';
-import { AggregatedFlattenedPaymentInfo } from './dto/payment-info-response.dto';
 import { UpdateCardRequestDto } from './dto/update-card-request.dto';
-import { UpdatePaymentInfoDto } from './dto/update-payment-info.dto';
 import { Card } from './model/card.model';
 import { ResponseBuilder } from './response.builder';
-import { CardValidationService } from './validation.cards.service';
-import mongodb from 'mongodb';
 import { MappedCard } from './types/types';
+import { CardValidationService } from './validation.cards.service';
 
 @Injectable()
 export class CardsService {
@@ -34,7 +30,6 @@ export class CardsService {
     private readonly circleRepository: CirclesRepository,
     private readonly projectService: ProjectService,
     private readonly cardsProjectService: CardsProjectService,
-    private readonly datastructureManipulationService: DataStructureManipulationService,
     private readonly validationService: CardValidationService,
     private readonly responseBuilder: ResponseBuilder,
   ) {}
@@ -100,6 +95,8 @@ export class CardsService {
     card: Card;
     project: DetailedProjectResponseDto;
   }> {
+    if (!this.requestProvider.project)
+      throw new HttpException('No project found', HttpStatus.NOT_FOUND);
     if (!createCardDto.type) createCardDto.type = 'Task';
     const activity = this.activityBuilder.buildNewCardActivity(createCardDto);
 
@@ -107,7 +104,9 @@ export class CardsService {
       const cardNum = await this.cardsRepository.count({
         project: createCardDto.project,
       });
-      slug = cardNum.toString();
+      /** Card slugs need to be globally unique so they can be moved between projects. Since
+       * project slug is already unique, we can use it to create a unique slug for each card. */
+      slug = `${this.requestProvider.project.slug}-${cardNum.toString()}`;
     }
 
     const createdCard = (await this.cardsRepository.create({
@@ -162,7 +161,7 @@ export class CardsService {
         /** Adding the child cards */
         const resCreateMultipleCards = await this.createMultipleCards(
           createCardDto.childCards,
-          createdCard.project,
+          createdCard.project as string,
           createdCard.circle,
           createdCard.columnId,
           parseInt(createdCard.slug) + 1,
@@ -236,9 +235,13 @@ export class CardsService {
       const newCardIds = [] as string[];
       let res;
       for (const [index, createCardDto] of createCardDtos.entries()) {
+        /** Card slugs need to be globally unique so they can be moved between projects. Since
+         * project slug is already unique, we can use it to create a unique slug for each card. */
         res = await this.createOneCard(
           createCardDto,
-          (numCards + index).toString(),
+          `${this.requestProvider.project.slug}-${(
+            numCards + index
+          ).toString()}`,
         );
         newCardIds.push(res.card.id);
       }
@@ -279,29 +282,42 @@ export class CardsService {
             HttpStatus.NOT_FOUND,
           );
       }
-
-      return {
+      const res = {
         [card.id]: {
           ...updateCardDto,
           activity: updatedActivity,
-          status: {
-            ...card.status,
-            ...updateCardDto.status,
-          },
-          reward: {
-            ...card.reward,
-            ...updateCardDto.reward,
-            chain: {
-              ...card.reward.chain,
-              ...updateCardDto.reward?.chain,
-            },
-            token: {
-              ...card.reward.token,
-              ...updateCardDto.reward?.token,
-            },
-          },
         },
       };
+
+      /**
+       * Only add status and rewards when there is an update, otherwise it affects the automation workflow
+       * in case there is a status update due to some automaion. This is because the normal card update is always given higher priority
+       * over the updates due to the automation workflow.
+       * Updating status and rewards like following makes sure partial updates are supported. For example, reward can be update by
+       * just passing one property of reward like 'chain' or 'value'.
+       */
+      if (updateCardDto.status) {
+        res[card.id].status = {
+          ...card.status,
+          ...updateCardDto.status,
+        };
+      }
+      if (updateCardDto.reward) {
+        res[card.id].reward = {
+          ...card.reward,
+          ...updateCardDto.reward,
+          chain: {
+            ...card.reward.chain,
+            ...updateCardDto.reward?.chain,
+          },
+          token: {
+            ...card.reward.token,
+            ...updateCardDto.reward?.token,
+          },
+        };
+      }
+
+      return res;
     } catch (error) {
       console.log(error);
       throw new InternalServerErrorException(
@@ -359,7 +375,7 @@ export class CardsService {
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     const updatedProject = await this.cardsProjectService.addCardToProject(
-      card.project,
+      card.project as string,
       card.columnId,
       card.id,
     );

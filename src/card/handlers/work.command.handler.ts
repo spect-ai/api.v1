@@ -47,9 +47,10 @@ export class WorkCommandHandler {
     createWorkThread: CreateWorkThreadRequestDto,
   ): Promise<DetailedCardResponseDto> {
     try {
-      const card = await this.cardsRepository.findById(id);
-      this.validationService.validateCardExists(card);
-      const project = await this.projectRepository.findById(card.project);
+      const card = this.requestProvider.card;
+      const project = await this.projectRepository.findById(
+        card.project as string,
+      );
       const globalUpdate = {
         card: {},
         project: {},
@@ -60,7 +61,8 @@ export class WorkCommandHandler {
         createWorkThread,
       );
       const globalUpdateAfterAutomation =
-        this.automationService.handleAutomation(card, project, cardUpdate);
+        this.automationService.handleAutomation(card, project, cardUpdate[id]);
+      console.log(JSON.stringify(globalUpdateAfterAutomation));
       return await this.commonUtility.mergeExecuteAndReturn(
         id,
         project.id,
@@ -82,9 +84,10 @@ export class WorkCommandHandler {
     updateWorkThread: UpdateWorkThreadRequestDto,
   ): Promise<DetailedCardResponseDto> {
     try {
-      const card = await this.cardsRepository.findById(id);
-      this.validationService.validateCardExists(card);
-      const project = await this.projectRepository.findById(card.project);
+      const card = this.requestProvider.card;
+      const project = await this.projectRepository.findById(
+        card.project as string,
+      );
 
       const globalUpdate = {
         card: {},
@@ -120,9 +123,10 @@ export class WorkCommandHandler {
     createWorkUnit: CreateWorkUnitRequestDto,
   ): Promise<DetailedCardResponseDto> {
     try {
-      const card = await this.cardsRepository.findById(id);
-      this.validationService.validateCardExists(card);
-      const project = await this.projectRepository.findById(card.project);
+      const card = this.requestProvider.card;
+      const project = await this.projectRepository.findById(
+        card.project as string,
+      );
 
       const globalUpdate = {
         card: {},
@@ -134,7 +138,7 @@ export class WorkCommandHandler {
         createWorkUnit,
       );
       const globalUpdateAfterAutomation =
-        this.automationService.handleAutomation(card, project, cardUpdate);
+        this.automationService.handleAutomation(card, project, cardUpdate[id]);
 
       return await this.commonUtility.mergeExecuteAndReturn(
         id,
@@ -158,9 +162,10 @@ export class WorkCommandHandler {
     updateWorkUnit: UpdateWorkUnitRequestDto,
   ): Promise<DetailedCardResponseDto> {
     try {
-      const card = await this.cardsRepository.findById(id);
-      this.validationService.validateCardExists(card);
-      const project = await this.projectRepository.findById(card.project);
+      const card = this.requestProvider.card;
+      const project = await this.projectRepository.findById(
+        card.project as string,
+      );
 
       const globalUpdate = {
         card: {},
@@ -174,7 +179,7 @@ export class WorkCommandHandler {
       );
       console.log(cardUpdate);
       const globalUpdateAfterAutomation =
-        this.automationService.handleAutomation(card, project, cardUpdate);
+        this.automationService.handleAutomation(card, project, cardUpdate[id]);
 
       return await this.commonUtility.mergeExecuteAndReturn(
         id,

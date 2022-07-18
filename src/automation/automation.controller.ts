@@ -22,7 +22,9 @@ export class AutomationController {
     @Body() updateCardRequestDto: UpdateCardRequestDto,
   ) {
     const card = await this.cardsRepository.findById(params.id);
-    const project = await this.projectRepository.findById(card.project);
+    const project = await this.projectRepository.findById(
+      card.project as string,
+    );
     return await this.automationService.handleAutomation(
       card,
       project,

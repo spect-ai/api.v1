@@ -7,16 +7,19 @@ import { Project } from 'src/project/model/project.model';
 import { ProjectsRepository } from 'src/project/project.repository';
 import { ProjectService } from 'src/project/project.service';
 import { GlobalDocumentUpdate } from 'src/common/types/update.type';
-import { Condition } from './types/types';
+import { ActionValue, Condition } from './types/types';
+import { RequestProvider } from 'src/users/user.provider';
+import diff from 'fast-array-diff';
+import { diff as objDiff } from 'deep-object-diff';
+import { MappedCard } from 'src/card/types/types';
 
 @Injectable()
 export class AutomationService {
   constructor(
     private readonly projectService: ProjectService,
     private readonly cardProjectService: CardsProjectService,
-    private readonly projectRepository: ProjectsRepository,
-    private readonly cardRepository: CardsRepository,
     private readonly cardService: CardsService,
+    private readonly requestProvider: RequestProvider,
   ) {}
 
   // TODO: Handle all data types
@@ -26,20 +29,22 @@ export class AutomationService {
     condition: 'is' | 'has' | 'isNot' | 'hasNot' | 'isEmpty' | 'isNotEmpty',
   ) {
     if (condition === 'is') {
-      // console.log('is');
-      // console.log(valueToCheck, valueToCheckAgainst);
       return valueToCheck === valueToCheckAgainst;
     } else if (condition === 'has') {
       return valueToCheck.includes(valueToCheckAgainst);
     } else if (condition === 'isNot') {
-      console.log(valueToCheck, valueToCheckAgainst);
       return valueToCheck !== valueToCheckAgainst;
     } else if (condition === 'hasNot') {
       return !valueToCheck.includes(valueToCheckAgainst);
     } else if (condition === 'isEmpty') {
-      return valueToCheck === '';
+      return (
+        valueToCheck === '' ||
+        (Array.isArray(valueToCheck) && valueToCheck.length === 0) ||
+        (typeof valueToCheck === 'object' &&
+          Object.keys(valueToCheck).length === 0)
+      );
     } else if (condition === 'isNotEmpty') {
-      return valueToCheck !== '';
+      return valueToCheck !== '' && valueToCheck !== [] && valueToCheck !== {};
     } else {
       return false;
     }
@@ -61,11 +66,11 @@ export class AutomationService {
     value: any,
     condition: 'is' | 'has' | 'isNot' | 'hasNot' | 'isEmpty' | 'isNotEmpty',
   ): boolean {
-    console.log('in satisfies condition');
-    console.log(cardTree);
+    // console.log('in satisfies condition');
+    // console.log(cardTree);
 
-    console.log(triggerPropertyArray);
-    console.log(value);
+    // console.log(triggerPropertyArray);
+    // console.log(value);
     if (triggerPropertyArray.length === 0)
       return this.satisfied(cardTree, value, condition);
 
@@ -117,7 +122,6 @@ export class AutomationService {
     properties: string[],
     values: any,
   ): boolean {
-    // console.log(prevCard.status, newCard.status);
     if (values.hasOwnProperty('to') && values.hasOwnProperty('from')) {
       // console.log('has to and from');
       // console.log(values.from, values.to);
@@ -152,12 +156,12 @@ export class AutomationService {
 
   satisfiesConditions(card: Card, conditions: Condition[]): boolean {
     for (const condition of conditions) {
-      for (const [key, value] of Object.entries(condition)) {
+      for (const [key, val] of Object.entries(condition.value)) {
         if (
           !this.satisfiesCondition(
             card,
             condition.property.split('.'),
-            value,
+            val,
             key as 'is' | 'has' | 'isNot' | 'hasNot' | 'isEmpty' | 'isNotEmpty',
           )
         ) {
@@ -191,8 +195,9 @@ export class AutomationService {
         )
       )
         continue;
-      // console.log('satisfies values');
+      console.log('satisfies values');
       if (!this.satisfiesConditions(card, automation.conditions)) continue;
+      console.log('satisfies conditions');
       for (const action of automation.actions) {
         const properties = action.property.split('.');
         const value = action.value;
@@ -207,6 +212,13 @@ export class AutomationService {
           globalUpdate = this.takeStatusAction(
             globalUpdate,
             properties,
+            value,
+            card,
+          );
+        } else {
+          globalUpdate = this.takeGeneralFieldAction(
+            globalUpdate,
+            properties[0],
             value,
             card,
           );
@@ -274,5 +286,73 @@ export class AutomationService {
       }
     }
     return globalUpdate;
+  }
+
+  takeGeneralFieldAction(
+    globalUpdate: GlobalDocumentUpdate,
+    property: string,
+    value: ActionValue,
+    card: Card,
+  ): GlobalDocumentUpdate {
+    let cardUpdate = {
+      [card.id]: {},
+    };
+    // eslint-disable-next-line prefer-const
+    for (let [key, val] of Object.entries(value)) {
+      val = this.replaceCaller(val);
+      if (key === 'to') {
+        cardUpdate[card.id][property] = val;
+      } else if (key === 'add') {
+        cardUpdate = this.handleAddArrayElem(
+          cardUpdate,
+          card.id,
+          property,
+          val,
+        );
+      }
+    }
+
+    if (Object.keys(cardUpdate[card.id]).length > 0) {
+      globalUpdate.card[card.id] = {
+        ...globalUpdate.card[card.id],
+        ...cardUpdate[card.id],
+      };
+    }
+    return globalUpdate;
+  }
+
+  handleAddArrayElem(
+    cardUpdate: MappedCard,
+    cardId: string,
+    property: string,
+    newItem: any[] | any,
+  ) {
+    if (!Array.isArray(cardUpdate[cardId][property])) {
+      cardUpdate[cardId][property] = Array.isArray(newItem)
+        ? newItem
+        : [newItem];
+      return cardUpdate;
+    }
+    return {
+      ...cardUpdate,
+      [cardId]: {
+        ...cardUpdate[cardId],
+        [property]: Array.isArray(newItem)
+          ? [...cardUpdate[cardId][property], ...newItem]
+          : [...cardUpdate[cardId][property], newItem],
+      },
+    };
+  }
+
+  replaceCaller(value: any) {
+    if (value === '[caller]') {
+      value = this.requestProvider.user.id;
+    }
+    if (Array.isArray(value)) {
+      value = value.map((v) =>
+        v === '[caller]' ? this.requestProvider.user.id : v,
+      );
+    }
+    return value;
   }
 }

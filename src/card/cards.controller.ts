@@ -6,10 +6,15 @@ import {
   Patch,
   Post,
   Query,
+  SetMetadata,
   UseGuards,
 } from '@nestjs/common';
 import { ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
-import { SessionAuthGuard } from 'src/auth/iron-session.guard';
+import {
+  PublicViewAuthGuard,
+  SessionAuthGuard,
+} from 'src/auth/iron-session.guard';
+import { CardAuthGuard, CreateNewCardAuthGuard } from 'src/auth/card.guard';
 import { ObjectIdDto } from 'src/common/dtos/object-id.dto';
 import { DetailedProjectResponseDto } from 'src/project/dto/detailed-project-response.dto';
 import { CreateCardRequestDto } from './dto/create-card-request.dto';
@@ -46,6 +51,12 @@ import { CommentService } from './comments.cards.service';
 import { CardsPaymentService } from './payment.cards.service';
 import { CardCommandHandler } from './handlers/update.command.handler';
 import { WorkCommandHandler } from './handlers/work.command.handler';
+import {
+  RequiredCommitIdDto,
+  RequiredSlugDto,
+  RequiredThreadIdDto,
+  RequiredWorkUnitIdDto,
+} from 'src/common/dtos/string.dto';
 
 @Controller('card')
 @ApiTags('card')
@@ -61,6 +72,7 @@ export class CardsController {
     private readonly workCommandHandler: WorkCommandHandler,
   ) {}
 
+  @UseGuards(PublicViewAuthGuard)
   @Get('/byProjectSlugAndCardSlug/:projectSlug/:cardSlug')
   async findByProjectSlugAndCardSlug(
     @Param() params: GetByProjectSlugAndCardSlugDto,
@@ -71,6 +83,7 @@ export class CardsController {
     );
   }
 
+  @UseGuards(PublicViewAuthGuard)
   @Get('/byProjectAndSlug/:project/:slug')
   async findByProjectIdAndCardSlug(
     @Param() params: GetByProjectAndSlugDto,
@@ -92,6 +105,7 @@ export class CardsController {
     return await this.paymentService.aggregatePaymentInfo(cardIds, chainId);
   }
 
+  //@SetMetadata('permissions', ['makePayment'])
   @UseGuards(SessionAuthGuard)
   @Patch('/updatePaymentInfoAndClose')
   async updatePaymentInfoAndClose(
@@ -102,14 +116,33 @@ export class CardsController {
     );
   }
 
-  @Get('/myValidActions')
   @ApiQuery({ name: 'cardIds', type: 'string' })
   @UseGuards(SessionAuthGuard)
+  @Get('/myValidActions')
   async getValidActionsForMultipleCards(
     @Query('cardIds') cardIds: string,
   ): Promise<MultipleValidCardActionResponseDto> {
     return await this.actionService.getValidActionsForMultipleCards(
       cardIds.split(',').map((c) => c.trim()),
+    );
+  }
+
+  @UseGuards(SessionAuthGuard)
+  @Get('/myValidActionsInProject/:slug')
+  async getValidActionsWithProjectSlug(
+    @Param() params: RequiredSlugDto,
+  ): Promise<MultipleValidCardActionResponseDto> {
+    return await this.actionService.getValidActionsWithProjectSlug(params.slug);
+  }
+
+  @UseGuards(SessionAuthGuard)
+  @Get('/myValidActionsInCard/:projectSlug/:cardSlug')
+  async getValidActionsWithCardAndProjectSlug(
+    @Param() params: GetByProjectSlugAndCardSlugDto,
+  ): Promise<ValidCardActionResponseDto> {
+    return await this.actionService.getValidActionsWithCardAndProjectSlug(
+      params.projectSlug,
+      params.cardSlug,
     );
   }
 
@@ -120,9 +153,9 @@ export class CardsController {
     return await this.cardsService.getDetailedCard(params.id);
   }
 
-  @Get('/:id/myValidActions')
   @ApiParam({ name: 'id', type: 'string' })
   @UseGuards(SessionAuthGuard)
+  @Get('/:id/myValidActions')
   async getValidActions(
     @Param() params: ObjectIdDto,
   ): Promise<ValidCardActionResponseDto> {
@@ -130,7 +163,7 @@ export class CardsController {
   }
 
   @Post('/')
-  @UseGuards(SessionAuthGuard)
+  @UseGuards(CreateNewCardAuthGuard)
   async create(@Body() card: CreateCardRequestDto): Promise<{
     card: DetailedCardResponseDto;
     project: DetailedProjectResponseDto;
@@ -138,10 +171,11 @@ export class CardsController {
     return await this.cardsService.create(card);
   }
 
-  @Patch('/:id')
-  @UseGuards(SessionAuthGuard)
   @ApiParam({ name: 'id', type: 'string' })
-  async updateNew(
+  @SetMetadata('permissions', ['update'])
+  @UseGuards(CardAuthGuard)
+  @Patch('/:id')
+  async update(
     @Param() params: ObjectIdDto,
     @Body() card: UpdateCardRequestDto,
   ): Promise<DetailedCardResponseDto> {
@@ -159,8 +193,9 @@ export class CardsController {
     );
   }
 
+  @SetMetadata('permissions', ['submit'])
+  @UseGuards(CardAuthGuard)
   @Patch('/:id/createWorkThread')
-  @UseGuards(SessionAuthGuard)
   async createWorkThread(
     @Param() params: ObjectIdDto,
     @Body() createWorkThread: CreateWorkThreadRequestDto,
@@ -171,53 +206,56 @@ export class CardsController {
     );
   }
 
+  @SetMetadata('permissions', ['submit'])
+  @UseGuards(CardAuthGuard)
   @Patch('/:id/updateWorkThread')
-  @UseGuards(SessionAuthGuard)
   async updateWorkThread(
     @Param() params: ObjectIdDto,
-    @Query('threadId') threadId: string,
+    @Query() threadIdParam: RequiredThreadIdDto,
     @Body() updateWorkThread: UpdateWorkThreadRequestDto,
   ): Promise<DetailedCardResponseDto> {
     return await this.workCommandHandler.handleUpdateWorkThread(
       params.id,
-      threadId,
+      threadIdParam.threadId,
       updateWorkThread,
     );
   }
 
+  @SetMetadata('permissions', ['submit'])
+  @UseGuards(CardAuthGuard)
   @Patch('/:id/createWorkUnit')
-  @UseGuards(SessionAuthGuard)
   async createWorkUnit(
     @Param() params: ObjectIdDto,
-    @Query('threadId') threadId: string,
+    @Query() threadIdParam: RequiredThreadIdDto,
     @Body() createWorkUnit: CreateWorkUnitRequestDto,
   ): Promise<DetailedCardResponseDto> {
     return await this.workCommandHandler.handleCreateWorkUnit(
       params.id,
-      threadId,
+      threadIdParam.threadId,
       createWorkUnit,
     );
   }
 
+  @SetMetadata('permissions', ['submit'])
+  @UseGuards(CardAuthGuard)
   @Patch('/:id/updateWorkUnit')
-  @UseGuards(SessionAuthGuard)
   async updateWorkUnit(
     @Param() params: ObjectIdDto,
-    @Query('threadId') threadId: string,
-    @Query('workUnitId') workUnitId: string,
+    @Query() threadIdParam: RequiredThreadIdDto,
+    @Query() workUnitIdParam: RequiredWorkUnitIdDto,
     @Body() updateWorkUnit: UpdateWorkUnitRequestDto,
   ): Promise<DetailedCardResponseDto> {
     return await this.workCommandHandler.handleUpdateWorkUnit(
       params.id,
-      threadId,
-      workUnitId,
+      threadIdParam.threadId,
+      workUnitIdParam.workUnitId,
       updateWorkUnit,
     );
   }
 
-  @Patch('/:id/addComment')
   @ApiParam({ name: 'id', type: 'string' })
-  @UseGuards(SessionAuthGuard)
+  @UseGuards(CardAuthGuard)
+  @Patch('/:id/addComment')
   async addComment(
     @Param() params: ObjectIdDto,
     @Body() addCommentDto: AddCommentDto,
@@ -225,32 +263,36 @@ export class CardsController {
     return await this.commentService.addComment(params.id, addCommentDto);
   }
 
-  @Patch('/:id/updateComment')
   @ApiParam({ name: 'id', type: 'string' })
   @ApiQuery({ name: 'commitId', type: 'string' })
-  @UseGuards(SessionAuthGuard)
+  @UseGuards(CardAuthGuard)
+  @Patch('/:id/updateComment')
   async udpateComment(
     @Param() params: ObjectIdDto,
-    @Query('commitId') commitId: string,
+    @Query() commitIdParam: RequiredCommitIdDto,
     @Body() updateCommentDto: UpdateCommentDto,
   ): Promise<DetailedCardResponseDto> {
     return await this.commentService.updateComment(
       params.id,
-      commitId,
+      commitIdParam.commitId,
       updateCommentDto,
     );
   }
 
+  @UseGuards(CardAuthGuard)
   @Patch('/:id/deleteComment')
-  @UseGuards(SessionAuthGuard)
   async deleteComment(
     @Param() params: ObjectIdDto,
-    @Query('commitId') commitId: string,
+    @Query() commitIdParam: RequiredCommitIdDto,
   ): Promise<DetailedCardResponseDto> {
-    return await this.commentService.deleteComment(params.id, commitId);
+    return await this.commentService.deleteComment(
+      params.id,
+      commitIdParam.commitId,
+    );
   }
 
-  @UseGuards(SessionAuthGuard)
+  @SetMetadata('permissions', ['update'])
+  @UseGuards(CardAuthGuard)
   @Patch('/:id/archive')
   async archive(
     @Param() params: ObjectIdDto,
@@ -258,7 +300,8 @@ export class CardsController {
     return await this.cardsService.archive(params.id);
   }
 
-  @UseGuards(SessionAuthGuard)
+  @SetMetadata('permissions', ['update'])
+  @UseGuards(CardAuthGuard)
   @Patch('/:id/revertArchive')
   async revertArchive(
     @Param() params: ObjectIdDto,
@@ -266,9 +309,10 @@ export class CardsController {
     return await this.cardsService.revertArchive(params.id);
   }
 
-  @UseGuards(SessionAuthGuard)
-  @Patch('/:id/createApplication')
   @ApiParam({ name: 'id' })
+  @SetMetadata('permissions', ['apply'])
+  @UseGuards(CardAuthGuard)
+  @Patch('/:id/createApplication')
   async createApplication(
     @Param() params: ObjectIdDto,
     @Body() createApplicationDto: CreateApplicationDto,
@@ -279,10 +323,11 @@ export class CardsController {
     );
   }
 
-  @UseGuards(SessionAuthGuard)
-  @Patch('/:id/updateApplication')
   @ApiQuery({ name: 'applicationId', type: 'string' })
   @ApiParam({ name: 'id' })
+  @SetMetadata('permissions', ['apply'])
+  @UseGuards(CardAuthGuard)
+  @Patch('/:id/updateApplication')
   async updateApplication(
     @Param() params: ObjectIdDto,
     @Query() updateApplicationQueryParam: UpdateApplicationParamDto,
@@ -295,7 +340,8 @@ export class CardsController {
     );
   }
 
-  @UseGuards(SessionAuthGuard)
+  @UseGuards(CardAuthGuard)
+  @SetMetadata('permissions', ['apply'])
   @Patch('/:id/deleteApplication')
   async deleteApplication(
     @Param() params: ObjectIdDto,
@@ -307,7 +353,8 @@ export class CardsController {
     );
   }
 
-  @UseGuards(SessionAuthGuard)
+  @UseGuards(CardAuthGuard)
+  @SetMetadata('permissions', ['update'])
   @Patch('/:id/pickApplications')
   @ApiParam({ name: 'id' })
   async pickApplications(
