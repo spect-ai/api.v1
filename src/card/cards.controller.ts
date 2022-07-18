@@ -11,6 +11,7 @@ import {
 } from '@nestjs/common';
 import { ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
 import {
+  ConnectedGithubAuthGuard,
   PublicViewAuthGuard,
   SessionAuthGuard,
 } from 'src/auth/iron-session.guard';
@@ -23,12 +24,16 @@ import {
   GetByProjectAndSlugDto,
   GetByProjectSlugAndCardSlugDto,
 } from './dto/get-card-params.dto';
-import { UpdateCardRequestDto } from './dto/update-card-request.dto';
+import {
+  UpdateCardRequestDto,
+  UpdateCardStatusRequestDto,
+} from './dto/update-card-request.dto';
 import {
   UpdateWorkUnitRequestDto,
   CreateWorkThreadRequestDto,
   UpdateWorkThreadRequestDto,
   CreateWorkUnitRequestDto,
+  CreateGithubPRDto,
 } from './dto/work-request.dto';
 import { AddCommentDto, UpdateCommentDto } from './dto/comment-body.dto';
 import {
@@ -171,6 +176,15 @@ export class CardsController {
     return await this.createCommandHandler.handle(card);
   }
 
+  @Patch('/createWorkThreadWithPR')
+  @UseGuards(PublicViewAuthGuard)
+  async createWorkThreadWithPR(
+    @Body() createGithubPRDto: CreateGithubPRDto,
+  ): Promise<boolean> {
+    console.log(createGithubPRDto);
+    return await this.workCommandHandler.handleGithubPR(createGithubPRDto);
+  }
+
   @ApiParam({ name: 'id', type: 'string' })
   @SetMetadata('permissions', ['update'])
   @UseGuards(CardAuthGuard)
@@ -182,16 +196,13 @@ export class CardsController {
     return await this.cardCommandHandler.update(params.id, card);
   }
 
-  @Patch('/:id/createWorkThreadWithPR')
+  @Patch('/:id/updateStatusFromBot')
   @UseGuards(PublicViewAuthGuard)
-  async createWorkThreadWithPR(
+  async updateStatusFromBot(
     @Param() params: ObjectIdDto,
-    @Body() createWorkThread: CreateWorkThreadRequestDto,
+    @Body() updateStatusDto: UpdateCardStatusRequestDto,
   ): Promise<DetailedCardResponseDto> {
-    return await this.workCommandHandler.handleCreateWorkThread(
-      params.id,
-      createWorkThread,
-    );
+    return await this.cardCommandHandler.update(params.id, updateStatusDto);
   }
 
   @SetMetadata('permissions', ['submit'])

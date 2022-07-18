@@ -5,6 +5,7 @@ import { ProjectsRepository } from 'src/project/project.repository';
 import { RequestProvider } from 'src/users/user.provider';
 import { DetailedCardResponseDto } from '../dto/detailed-card-response-dto';
 import {
+  CreateGithubPRDto,
   CreateWorkThreadRequestDto,
   CreateWorkUnitRequestDto,
   UpdateWorkThreadRequestDto,
@@ -13,6 +14,7 @@ import {
 import { CommonUtility } from '../response.builder';
 import { WorkService } from '../work.cards.service';
 import { CardsRepository } from '../cards.repository';
+import { CommonTools } from 'src/common/common.service';
 
 const globalUpdate = {
   card: {},
@@ -27,7 +29,68 @@ export class WorkCommandHandler {
     private readonly workService: WorkService,
     private readonly commonUtility: CommonUtility,
     private readonly cardsRepository: CardsRepository,
+    private readonly commonTool: CommonTools,
   ) {}
+
+  async handleGithubPR(createGithubPRDto: CreateGithubPRDto): Promise<boolean> {
+    try {
+      /** Assumes all cards are from the same project */
+      const cards = await this.cardsRepository.findAll({
+        slug: { $in: createGithubPRDto.slugs },
+      });
+
+      const project = await this.projectRepository.findById(
+        cards[0].project as string,
+      );
+
+      const objectifiedCards = this.commonTool.objectify(cards, 'id');
+      const cardUpdates =
+        await this.workService.createSameWorkThreadInMultipleCards(
+          cards,
+          createGithubPRDto,
+        );
+
+      let globalUpdateAfterAutomation: GlobalDocumentUpdate = {
+        card: {},
+        project: {},
+      };
+      for (const [cardId, cardUpdate] of Object.entries(cardUpdates)) {
+        const update = this.automationService.handleAutomation(
+          objectifiedCards[cardId],
+          project,
+          cardUpdate,
+        );
+
+        globalUpdateAfterAutomation = {
+          ...globalUpdateAfterAutomation,
+          ...update,
+        };
+      }
+      const updates = await this.commonTool.mergeObjects(
+        globalUpdateAfterAutomation.card,
+        cardUpdates,
+      );
+      console.log(updates);
+      const acknowledgment = await this.cardsRepository.bundleUpdatesAndExecute(
+        updates,
+      );
+
+      const projectAcknowledgment =
+        await this.projectRepository.bundleUpdatesAndExecute(
+          globalUpdateAfterAutomation.project,
+        );
+      if (acknowledgment.hasWriteErrors()) {
+        console.log(acknowledgment.getWriteErrors());
+        throw new InternalServerErrorException('Failed creating work thread');
+      }
+      return true;
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Failed creating work thread',
+        error.message,
+      );
+    }
+  }
 
   async handleCreateWorkThread(
     id: string,

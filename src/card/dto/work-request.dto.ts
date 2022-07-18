@@ -1,6 +1,48 @@
 import { PartialType } from '@nestjs/swagger';
-import { IsBoolean, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import {
+  IsArray,
+  IsBoolean,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 import { CreateCardRequestDto } from './create-card-request.dto';
+
+export class CreateGithubPRDto {
+  /**
+   * Submission name
+   */
+  @IsString()
+  @IsNotEmpty()
+  name: string;
+  /**
+   * Submission content
+   */
+  @IsString()
+  @IsNotEmpty()
+  @IsOptional()
+  content: string;
+
+  /**
+   * submission thread status
+   */
+  @IsString()
+  @IsNotEmpty()
+  status: 'inReview' | 'draft';
+
+  /**
+   * Submission PR if any
+   */
+  @IsString()
+  @IsOptional()
+  pr: string;
+
+  /**
+   * Submission PR if any
+   */
+  @IsArray()
+  slugs: string[];
+}
 
 export class CreateWorkThreadRequestDto {
   /**
@@ -14,6 +56,7 @@ export class CreateWorkThreadRequestDto {
    */
   @IsString()
   @IsNotEmpty()
+  @IsOptional()
   content: string;
 
   /**
@@ -22,6 +65,13 @@ export class CreateWorkThreadRequestDto {
   @IsString()
   @IsNotEmpty()
   status: 'inReview' | 'draft';
+
+  /**
+   * Submission PR if any
+   */
+  @IsString()
+  @IsOptional()
+  pr: string;
 }
 
 export class UpdateWorkThreadRequestDto {
@@ -61,6 +111,7 @@ export class CreateWorkUnitRequestDto {
    */
   @IsString()
   @IsNotEmpty()
+  @IsOptional()
   content: string;
 
   /**
@@ -70,6 +121,13 @@ export class CreateWorkUnitRequestDto {
   @IsNotEmpty()
   @IsOptional()
   status: 'accepted' | 'inRevision' | 'inReview' | 'draft';
+
+  /**
+   * Submission PR if any
+   */
+  @IsString()
+  @IsOptional()
+  pr: string;
 }
 
 export class UpdateWorkUnitRequestDto {
@@ -96,4 +154,11 @@ export class UpdateWorkUnitRequestDto {
   @IsNotEmpty()
   @IsOptional()
   status: 'accepted' | 'inRevision' | 'inReview' | 'draft';
+
+  /**
+   * Submission PR if any
+   */
+  @IsString()
+  @IsOptional()
+  pr: string;
 }

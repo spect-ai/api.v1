@@ -3,6 +3,7 @@ import { RequestProvider } from 'src/users/user.provider';
 import { v4 as uuidv4 } from 'uuid';
 import { ActivityBuilder } from './activity.builder';
 import {
+  CreateGithubPRDto,
   CreateWorkThreadRequestDto,
   CreateWorkUnitRequestDto,
   UpdateWorkThreadRequestDto,
@@ -18,6 +19,25 @@ export class WorkService {
     private readonly requestProvider: RequestProvider,
   ) {}
 
+  async createSameWorkThreadInMultipleCards(
+    cards: Card[],
+    createWorkThread: CreateWorkThreadRequestDto,
+  ): Promise<MappedCard> {
+    try {
+      let threads = {};
+      for (const cardId of cards) {
+        const thread = await this.createWorkThread(cardId, createWorkThread);
+        threads = { ...threads, ...thread };
+      }
+      return threads;
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Failed creating work thread',
+        error.message,
+      );
+    }
+  }
+
   async createWorkThread(
     card: Card,
     createWorkThread: CreateWorkThreadRequestDto,
@@ -25,15 +45,15 @@ export class WorkService {
     try {
       const workUnitId = uuidv4();
       const workUnit = {};
-      console.log(`ddd`);
 
       workUnit[workUnitId] = {
         user: this.requestProvider.user.id,
-        content: createWorkThread.content,
+        content: createWorkThread.content || '',
         workUnitId,
         createdAt: new Date(),
         updatedAt: new Date(),
         type: 'submission',
+        pr: createWorkThread.pr,
       };
 
       const threadId = uuidv4();
@@ -122,11 +142,12 @@ export class WorkService {
         [workUnitId]: {
           unitId: workUnitId,
           user: this.requestProvider.user.id,
-          content: createWorkUnit.content,
+          content: createWorkUnit.content || '',
           workUnitId,
           createdAt: new Date(),
           updatedAt: new Date(),
           type: createWorkUnit.type,
+          pr: createWorkUnit.pr,
         },
       };
       const workThreads = {
@@ -174,10 +195,14 @@ export class WorkService {
         ...card.workThreads[threadId].workUnits[workUnitId],
         content:
           updateWorkUnit.content ||
-          card.workThreads[threadId].workUnits[workUnitId].content,
+          card.workThreads[threadId].workUnits[workUnitId].content ||
+          '',
         type:
           updateWorkUnit.type ||
           card.workThreads[threadId].workUnits[workUnitId].type,
+        pr:
+          updateWorkUnit.pr ||
+          card.workThreads[threadId].workUnits[workUnitId].pr,
         updatedAt: new Date(),
       };
 

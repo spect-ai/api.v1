@@ -56,3 +56,13 @@ export class UpdateCardRequestDto extends OmitType(CreateCardRequestDto, [
   @IsNotEmpty()
   status?: Status;
 }
+
+export class UpdateCardStatusRequestDto {
+  /**
+   * The status of the card (active, inreview etc) - TODO: Add custom validation
+   */
+  @IsObject()
+  @IsOptional()
+  @IsNotEmpty()
+  status?: Status;
+}
