@@ -17,6 +17,7 @@ import { CardValidationService } from '../validation.cards.service';
 import { CardsService } from '../cards.service';
 import { ProjectsRepository } from 'src/project/project.repository';
 import { CommonTools } from 'src/common/common.service';
+import { Project } from 'src/project/model/project.model';
 @Injectable()
 export class CreateCardCommandHandler {
   constructor(
@@ -33,7 +34,8 @@ export class CreateCardCommandHandler {
 
   async handle(createCardDto: CreateCardRequestDto): Promise<{
     card: Card;
-    project: DetailedProjectResponseDto;
+    project: Project;
+    parentCard?: Card;
   }> {
     try {
       /**
@@ -106,15 +108,26 @@ export class CreateCardCommandHandler {
         cardWithUpdatedChildren,
       );
 
-      const parentCardUpdateAcknowledgement =
+      const updateAcknowledgment =
         await this.cardsRepository.bundleUpdatesAndExecute(updatedCards);
+
+      if (updateAcknowledgment.hasWriteErrors()) {
+        throw new InternalServerErrorException(
+          'Error updating cards in database',
+        );
+      }
+
+      /** Get parent card and return it if there is a parent */
+      if (Object.keys(updatedParentCard)?.length > 0) {
+        parentCard = await this.cardsRepository.getCardWithPopulatedReferences(
+          parentCard.id,
+        );
+      }
 
       return {
         card: createdCard,
-        project:
-          this.cardsProjectService.projectPopulatedWithCardDetails(
-            updatedProject,
-          ),
+        project: updatedProject,
+        parentCard,
       };
     } catch (error) {
       console.log(error);

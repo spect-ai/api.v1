@@ -167,7 +167,6 @@ export class CardsController {
   @UseGuards(CreateNewCardAuthGuard)
   async create(@Body() card: CreateCardRequestDto): Promise<{
     card: DetailedCardResponseDto;
-    project: DetailedProjectResponseDto;
   }> {
     return await this.createCommandHandler.handle(card);
   }
