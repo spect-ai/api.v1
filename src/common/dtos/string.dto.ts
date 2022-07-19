@@ -44,3 +44,12 @@ export class RequiredCommitIdDto {
   @IsString()
   commitId: string;
 }
+
+export class RequiredViewIdDto {
+  /**
+   * Object Id
+   */
+  @IsNotEmpty()
+  @IsString()
+  viewId: string;
+}

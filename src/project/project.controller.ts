@@ -9,22 +9,23 @@ import {
   SetMetadata,
   UseGuards,
 } from '@nestjs/common';
-import { SessionAuthGuard } from 'src/auth/iron-session.guard';
 import {
   CreateNewProjectAuthGuard,
   ProjectAuthGuard,
 } from 'src/auth/project.guard';
-import { MultipleValidCardActionResponseDto } from 'src/card/dto/card-access-response.dto';
 import { ObjectIdDto } from 'src/common/dtos/object-id.dto';
 import {
   RequiredColumnIdDto,
   RequiredSlugDto,
+  RequiredViewIdDto,
 } from 'src/common/dtos/string.dto';
-import { CardsProjectService } from './cards.project.service';
 import { CreateProjectRequestDto } from './dto/create-project-request.dto';
 import { DetailedProjectResponseDto } from './dto/detailed-project-response.dto';
 import { UpdateColumnRequestDto } from './dto/update-column.dto';
-import { UpdateProjectRequestDto } from './dto/update-project-request.dto';
+import {
+  AddOrUpdateViewDto,
+  UpdateProjectRequestDto,
+} from './dto/update-project-request.dto';
 import { Project } from './model/project.model';
 import { ProjectService } from './project.service';
 
@@ -98,6 +99,41 @@ export class ProjectController {
       columnIdParam.columnId,
       updateColumnDetails,
     );
+  }
+
+  @SetMetadata('permissions', ['manageProjectSettings'])
+  @UseGuards(ProjectAuthGuard)
+  @Patch('/:id/view/add')
+  async addView(
+    @Param() param: ObjectIdDto,
+    @Body() addViewDto: AddOrUpdateViewDto,
+  ): Promise<DetailedProjectResponseDto> {
+    return await this.projectService.addView(param.id, addViewDto);
+  }
+
+  @SetMetadata('permissions', ['manageProjectSettings'])
+  @UseGuards(ProjectAuthGuard)
+  @Patch('/:id/view/:viewId/update')
+  async updateView(
+    @Param() param: ObjectIdDto,
+    @Param() viewParam: RequiredViewIdDto,
+    @Body() updateViewDto: AddOrUpdateViewDto,
+  ): Promise<DetailedProjectResponseDto> {
+    return await this.projectService.updateView(
+      param.id,
+      viewParam.viewId,
+      updateViewDto,
+    );
+  }
+
+  @SetMetadata('permissions', ['manageProjectSettings'])
+  @UseGuards(ProjectAuthGuard)
+  @Patch('/:id/view/:viewId/delete')
+  async deleteView(
+    @Param() param: ObjectIdDto,
+    @Param() viewParam: RequiredViewIdDto,
+  ): Promise<DetailedProjectResponseDto> {
+    return await this.projectService.deleteView(param.id, viewParam.viewId);
   }
 
   // TODO: Delete all the cards in the project aswell
