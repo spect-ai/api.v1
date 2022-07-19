@@ -42,6 +42,13 @@ export class CreateGithubPRDto {
    */
   @IsArray()
   slugs: string[];
+
+  /**
+   * Github Id of the user who submitted the PR
+   */
+  @IsString()
+  @IsNotEmpty()
+  githubId: string;
 }
 
 export class CreateWorkThreadRequestDto {
