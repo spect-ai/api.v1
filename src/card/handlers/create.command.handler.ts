@@ -18,11 +18,14 @@ import { CardsService } from '../cards.service';
 import { ProjectsRepository } from 'src/project/project.repository';
 import { CommonTools } from 'src/common/common.service';
 import { Project } from 'src/project/model/project.model';
+import { UsersService } from 'src/users/users.service';
+import { UsersRepository } from 'src/users/users.repository';
 @Injectable()
 export class CreateCardCommandHandler {
   constructor(
     private readonly requestProvider: RequestProvider,
-    private readonly activityBuilder: ActivityBuilder,
+    private readonly userService: UsersService,
+    private readonly userRepository: UsersRepository,
     private readonly cardsRepository: CardsRepository,
     private readonly cardsProjectService: CardsProjectService,
     private readonly circleRepository: CirclesRepository,
@@ -102,6 +105,7 @@ export class CreateCardCommandHandler {
         createdChildCards,
         createdCard,
       );
+
       /** Merge all the card updates */
       const updatedCards = this.commonTools.mergeObjects(
         updatedParentCard,
@@ -124,8 +128,13 @@ export class CreateCardCommandHandler {
         );
       }
 
+      const success = await this.handleUserUpdates([
+        createdCard,
+        ...createdChildCards,
+      ]);
+
       return {
-        card: createdCard,
+        card: Object.assign(createdCard, { children: createdChildCards }),
         project: updatedProject,
         parentCard,
       };
@@ -133,6 +142,51 @@ export class CreateCardCommandHandler {
       console.log(error);
       throw new InternalServerErrorException(
         'Failed creating new card',
+        error.message,
+      );
+    }
+  }
+
+  async handleUserUpdates(createdCards: Card[]): Promise<boolean> {
+    try {
+      const { assignee, reviewer } =
+        this.cardsService.getStakeholders(createdCards);
+      const users = await this.userRepository.findAll({
+        _id: assignee.concat(reviewer),
+      });
+      const mappedUsers = this.commonTools.objectify(users, 'id');
+      const userToCards = {};
+      for (const card of createdCards) {
+        this.userService.addCardToUsers(
+          mappedUsers,
+          card.assignee,
+          'assignedCards',
+          userToCards,
+          card.id,
+        );
+        this.userService.addCardToUsers(
+          mappedUsers,
+          card.reviewer,
+          'reviewingCards',
+          userToCards,
+          card.id,
+        );
+      }
+      console.log(userToCards);
+      const userUpdateAcknowledgment =
+        await this.userRepository.bundleUpdatesAndExecute(userToCards);
+
+      if (userUpdateAcknowledgment.hasWriteErrors()) {
+        console.log(userUpdateAcknowledgment.getWriteErrors());
+        throw new InternalServerErrorException(
+          'Error updating users in database',
+        );
+      }
+      return true;
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException(
+        'Failed while handling user updates',
         error.message,
       );
     }

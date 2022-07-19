@@ -77,6 +77,13 @@ export class UsersService {
     }
   }
 
+  /**
+   *
+   * @param mappedDiff Difference between two cards in terms of stakeholders being added or removed
+   * @returns
+   *
+   * Find all stakeholders that are added or removed from a card and return their user objects
+   */
   async findStakeholders(mappedDiff: MappedDiff) {
     let userIds = [];
     for (const [cardId, cardDiff] of Object.entries(mappedDiff)) {
@@ -93,7 +100,7 @@ export class UsersService {
     return users;
   }
 
-  async addCardToUsers(
+  addCardToUsers(
     mappedUsers: MappedUser,
     stakeholders: string[],
     key: string,
@@ -101,7 +108,11 @@ export class UsersService {
     cardId: string,
   ) {
     for (const userId of stakeholders) {
-      if (!userToCards[userId]) userToCards[userId] = {};
+      if (!userToCards[userId])
+        userToCards[userId] = {
+          assignedCards: [],
+          reviewingCards: [],
+        };
       if (!mappedUsers[userId][key]) mappedUsers[userId][key] = [];
       userToCards[userId] = {
         ...userToCards[userId],
@@ -115,7 +126,7 @@ export class UsersService {
     return userToCards;
   }
 
-  async removeCardFromUsers(
+  removeCardFromUsers(
     mappedUsers: MappedUser,
     stakeholders: string[],
     key: string,
@@ -123,7 +134,11 @@ export class UsersService {
     cardId: string,
   ) {
     for (const userId of stakeholders) {
-      if (!userToCards[userId]) userToCards[userId] = {};
+      if (!userToCards[userId])
+        userToCards[userId] = {
+          assignedCards: [],
+          reviewingCards: [],
+        };
       if (!mappedUsers[userId][key]) mappedUsers[userId][key] = [];
 
       userToCards[userId] = {
