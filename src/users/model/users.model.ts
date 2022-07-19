@@ -70,6 +70,18 @@ export class User extends ProfileModel {
   reviewingCards: string[];
 
   /**
+   * List of cards a user is assigned or reviewing
+   */
+  @prop({ ref: () => Card, default: [] })
+  assignedClosedCards: string[];
+
+  /**
+   * List of cards a user is assigned or reviewing
+   */
+  @prop({ ref: () => Card, default: [] })
+  reviewingClosedCards: string[];
+
+  /**
    * Activities taken by the user
    */
   activities: string[];

@@ -26,6 +26,7 @@ import { UpdatePaymentInfoDto } from '../dto/update-payment-info.dto';
 import { CardsPaymentService } from '../payment.cards.service';
 import { ResponseBuilder } from '../response.builder';
 import { MappedCard, MappedDiff } from '../types/types';
+import { UserCardsService } from '../user.cards.service';
 import { CardValidationService } from '../validation.cards.service';
 
 const globalUpdate = {
@@ -46,8 +47,8 @@ export class CardCommandHandler {
     private readonly projectRepository: ProjectsRepository,
     private readonly automationService: AutomationService,
     private readonly cardPaymentService: CardsPaymentService,
-    private readonly userService: UsersService,
     private readonly userRepository: UsersRepository,
+    private readonly userCardsService: UserCardsService,
   ) {}
 
   async update(
@@ -95,9 +96,12 @@ export class CardCommandHandler {
       const diff = this.cardsService.getDifference(card, globalUpdate.card[id]);
 
       /** Doing it like this so it can support multiple cards, sub cards in the future */
-      const userUpdate = await this.userService.updateUserCards({
-        [id]: diff,
-      } as MappedDiff);
+      const userUpdate = await this.userCardsService.updateUserCards(
+        {
+          [id]: diff,
+        } as MappedDiff,
+        this.commonTools.objectify([card], 'id'),
+      );
 
       const cardUpdateAcknowledgment =
         await this.cardsRepository.bundleUpdatesAndExecute(globalUpdate.card);

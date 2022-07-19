@@ -1,5 +1,6 @@
 import { OmitType } from '@nestjs/swagger';
 import {
+  IsBoolean,
   IsNotEmpty,
   IsNumber,
   IsObject,
@@ -15,6 +16,8 @@ export class UpdateCardRequestDto extends OmitType(CreateCardRequestDto, [
   'circle',
   'columnId',
   'type',
+  'childCards',
+  'parent',
 ] as const) {
   /**
    * The title of the card
@@ -55,6 +58,14 @@ export class UpdateCardRequestDto extends OmitType(CreateCardRequestDto, [
   @IsOptional()
   @IsNotEmpty()
   status?: Status;
+
+  /**
+   * Should this update also make the same updates to the child cards. This is
+   * relevant when moving a card to a different column, status update, project update.
+   */
+  @IsBoolean()
+  @IsOptional()
+  updateChildCards?: boolean;
 }
 
 export class UpdateCardStatusRequestDto {

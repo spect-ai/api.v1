@@ -129,22 +129,6 @@ export class CardsService {
     }
   }
 
-  getStakeholders(cards: Card[]): {
-    assignee: string[];
-    reviewer: string[];
-  } {
-    let assignee = [];
-    let reviewer = [];
-    for (const card of cards) {
-      if (card.assignee) assignee = [...assignee, ...card.assignee];
-      if (card.reviewer) reviewer = [...reviewer, ...card.reviewer];
-    }
-    return {
-      assignee,
-      reviewer,
-    };
-  }
-
   createNew(
     createCardDto: CreateCardRequestDto,
     projectSlug: string,

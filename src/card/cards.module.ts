@@ -36,6 +36,7 @@ import { ProjectAuthGuard } from 'src/auth/project.guard';
 import { UsersRepository } from 'src/users/users.repository';
 import { UsersService } from 'src/users/users.service';
 import { CreateCardCommandHandler } from './handlers/create.command.handler';
+import { UserCardsService } from './user.cards.service';
 
 @Module({
   imports: [
@@ -77,6 +78,7 @@ import { CreateCardCommandHandler } from './handlers/create.command.handler';
     ProjectAuthGuard,
     UsersService,
     CreateCardCommandHandler,
+    UserCardsService,
   ],
   exports: [
     CardsService,

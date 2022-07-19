@@ -20,11 +20,11 @@ import { CommonTools } from 'src/common/common.service';
 import { Project } from 'src/project/model/project.model';
 import { UsersService } from 'src/users/users.service';
 import { UsersRepository } from 'src/users/users.repository';
+import { UserCardsService } from '../user.cards.service';
 @Injectable()
 export class CreateCardCommandHandler {
   constructor(
     private readonly requestProvider: RequestProvider,
-    private readonly userService: UsersService,
     private readonly userRepository: UsersRepository,
     private readonly cardsRepository: CardsRepository,
     private readonly cardsProjectService: CardsProjectService,
@@ -33,6 +33,7 @@ export class CreateCardCommandHandler {
     private readonly projectRepository: ProjectsRepository,
     private readonly cardsService: CardsService,
     private readonly commonTools: CommonTools,
+    private readonly userCardsService: UserCardsService,
   ) {}
 
   async handle(createCardDto: CreateCardRequestDto): Promise<{
@@ -150,21 +151,21 @@ export class CreateCardCommandHandler {
   async handleUserUpdates(createdCards: Card[]): Promise<boolean> {
     try {
       const { assignee, reviewer } =
-        this.cardsService.getStakeholders(createdCards);
+        this.userCardsService.getStakeholders(createdCards);
       const users = await this.userRepository.findAll({
         _id: assignee.concat(reviewer),
       });
       const mappedUsers = this.commonTools.objectify(users, 'id');
       const userToCards = {};
       for (const card of createdCards) {
-        this.userService.addCardToUsers(
+        this.userCardsService.addCardToUsers(
           mappedUsers,
           card.assignee,
           'assignedCards',
           userToCards,
           card.id,
         );
-        this.userService.addCardToUsers(
+        this.userCardsService.addCardToUsers(
           mappedUsers,
           card.reviewer,
           'reviewingCards',
