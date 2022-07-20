@@ -5,6 +5,7 @@ import { User } from './model/users.model';
 import { MappedUser } from './types/types';
 import mongodb from 'mongodb';
 import { DetailedUserPubliceResponseDto } from './dto/detailed-user-response.dto';
+import { UpdateQuery } from 'mongoose';
 
 @Injectable()
 export class UsersRepository extends BaseRepository<User> {
@@ -30,6 +31,17 @@ export class UsersRepository extends BaseRepository<User> {
       .populate('reviewingCards')
       .populate('circles');
     return user;
+  }
+
+  async updateAndReturnWithPopulatedFields(
+    id: string,
+    update: UpdateQuery<DetailedUserPubliceResponseDto>,
+  ): Promise<DetailedUserPubliceResponseDto> {
+    return await this.updateById(id, update)
+      .populate('circles')
+      .populate('assignedCards')
+      .populate('reviewingCards')
+      .populate('bookmarks');
   }
 
   async bundleUpdatesAndExecute(

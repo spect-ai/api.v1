@@ -68,4 +68,55 @@ export class UsersService {
       );
     }
   }
+
+  async addItem(
+    itemType: 'bookmarks' | 'followingCircles' | 'followingUsers' | 'followers',
+    itemId: string,
+    userId?: string,
+  ): Promise<DetailedUserPubliceResponseDto> {
+    try {
+      let user = this.requestProvider.user;
+      if (userId) user = await this.usersRepository.findById(userId);
+      if (user[itemType].includes(itemId))
+        throw new Error('Item already added');
+      return await this.usersRepository.updateAndReturnWithPopulatedFields(
+        userId || this.requestProvider.user.id,
+        {
+          $push: {
+            [itemType]: itemId,
+          },
+        },
+      );
+    } catch (error) {
+      throw new InternalServerErrorException(
+        `Failed adding ${itemType} to user`,
+        error.message,
+      );
+    }
+  }
+
+  async removeItem(
+    itemType: 'bookmarks' | 'followingCircles' | 'followingUsers' | 'followers',
+    itemId: string,
+    userId?: string,
+  ): Promise<DetailedUserPubliceResponseDto> {
+    try {
+      let user = this.requestProvider.user;
+      if (userId) user = await this.usersRepository.findById(userId);
+      user[itemType] = user[itemType].filter((id) => id.toString() !== itemId);
+      return await this.usersRepository.updateAndReturnWithPopulatedFields(
+        userId || this.requestProvider.user?.id,
+        {
+          $set: {
+            [itemType]: user[itemType],
+          },
+        },
+      );
+    } catch (error) {
+      throw new InternalServerErrorException(
+        `Failed adding ${itemType} to user`,
+        error.message,
+      );
+    }
+  }
 }

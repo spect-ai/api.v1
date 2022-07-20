@@ -84,11 +84,36 @@ export class User extends ProfileModel {
   /**
    * Activities taken by the user
    */
+  @prop({ default: [] })
   activities: string[];
 
   /**
    * Notifications for the user
    */
-  @prop()
+  @prop({ default: [] })
   notifications: string[];
+
+  /**
+   * Card bookmarks for the user
+   */
+  @prop({ ref: () => Card, default: [] })
+  bookmarks: string[];
+
+  /**
+   * Circles followed by the user
+   */
+  @prop({ ref: () => Circle, default: [] })
+  followedCircles: string[];
+
+  /**
+   * Users followed by the user
+   */
+  @prop({ default: [] })
+  followedUsers: string[];
+
+  /**
+   * Users following the user
+   */
+  @prop({ default: [] })
+  followedByUsers: string[];
 }
