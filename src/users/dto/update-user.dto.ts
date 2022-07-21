@@ -23,6 +23,13 @@ export class UpdateUserDto extends PartialType(User) {
   @IsString()
   @IsOptional()
   discordId?: string;
+
+  /**
+   * Github Id associated with the profile
+   */
+  @IsString()
+  @IsOptional()
+  githubId?: string;
 }
 
 export class UpdateMetadata {
