@@ -37,8 +37,8 @@ export class CreateCardCommandHandler {
   ) {}
 
   async handle(createCardDto: CreateCardRequestDto): Promise<{
-    card: Card;
-    project: Project;
+    card: DetailedCardResponseDto;
+    project: DetailedProjectResponseDto;
     parentCard?: Card;
   }> {
     try {
@@ -136,7 +136,10 @@ export class CreateCardCommandHandler {
 
       return {
         card: Object.assign(createdCard, { children: createdChildCards }),
-        project: updatedProject,
+        project: {
+          ...updatedProject,
+          cards: this.commonTools.objectify(updatedProject.cards, 'id'),
+        },
         parentCard,
       };
     } catch (error) {
@@ -152,6 +155,7 @@ export class CreateCardCommandHandler {
     try {
       const { assignee, reviewer } =
         this.userCardsService.getStakeholders(createdCards);
+      if (assignee.length === 0 && reviewer.length === 0) return true;
       const users = await this.userRepository.findAll({
         _id: assignee.concat(reviewer),
       });
