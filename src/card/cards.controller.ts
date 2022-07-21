@@ -25,6 +25,8 @@ import {
   GetByProjectSlugAndCardSlugDto,
 } from './dto/get-card-params.dto';
 import {
+  MultiCardCloseDto,
+  MultiCardCloseWithSlugDto,
   UpdateCardRequestDto,
   UpdateCardStatusRequestDto,
 } from './dto/update-card-request.dto';
@@ -120,6 +122,14 @@ export class CardsController {
     return await this.cardCommandHandler.updatePaymentInfoAndClose(
       updatePaymentInfoDto,
     );
+  }
+
+  @UseGuards(PublicViewAuthGuard)
+  @Patch('/closeWithBot')
+  async closeWithBot(
+    @Body() multiCardCloseDto: MultiCardCloseWithSlugDto,
+  ): Promise<boolean> {
+    return await this.cardCommandHandler.closeMultipleCards(multiCardCloseDto);
   }
 
   @ApiQuery({ name: 'cardIds', type: 'string' })

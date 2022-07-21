@@ -315,4 +315,27 @@ export class CardsService {
       },
     );
   }
+
+  closeCard(card: Card): MappedCard {
+    const activities = this.activityBuilder.buildUpdatedCardActivity(
+      {
+        status: {
+          active: false,
+          paid: true,
+          archived: true,
+        },
+      },
+      card,
+    );
+
+    return {
+      [card.id]: {
+        activity: card.activity.concat(activities),
+        status: {
+          ...card.status,
+          active: false,
+        },
+      },
+    };
+  }
 }

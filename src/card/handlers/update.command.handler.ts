@@ -21,7 +21,11 @@ import { ActivityBuilder } from '../activity.builder';
 import { CardsRepository } from '../cards.repository';
 import { CardsService } from '../cards.service';
 import { DetailedCardResponseDto } from '../dto/detailed-card-response-dto';
-import { UpdateCardRequestDto } from '../dto/update-card-request.dto';
+import {
+  MultiCardCloseDto,
+  MultiCardCloseWithSlugDto,
+  UpdateCardRequestDto,
+} from '../dto/update-card-request.dto';
 import { UpdatePaymentInfoDto } from '../dto/update-payment-info.dto';
 import { CardsPaymentService } from '../payment.cards.service';
 import { ResponseBuilder } from '../response.builder';
@@ -146,11 +150,6 @@ export class CardCommandHandler {
           HttpStatus.INTERNAL_SERVER_ERROR,
         );
       }
-      const globalUpdate = {
-        card: {},
-        project: {},
-      } as GlobalDocumentUpdate;
-
       /** Get all the cards with all their children */
       const cards =
         await this.cardsRepository.getCardWithAllChildrenForMultipleCards(
@@ -225,6 +224,53 @@ export class CardCommandHandler {
       console.log(error);
       throw new InternalServerErrorException(
         'Failed updating payment info',
+        error.message,
+      );
+    }
+  }
+
+  async closeMultipleCards(
+    multiCardCloseDto: MultiCardCloseWithSlugDto,
+  ): Promise<boolean> {
+    try {
+      const cards = await this.cardsRepository.findAll({
+        slug: { $in: multiCardCloseDto.slugs },
+      });
+      const project = await this.projectRepository.findById(
+        cards[0].project as string,
+      );
+
+      for (const card of cards) {
+        const cardUpdate = this.cardsService.closeCard(card);
+        const automationUpdate = this.automationService.handleAutomation(
+          card,
+          project,
+          cardUpdate[card.id],
+        );
+        globalUpdate.card[card.id] = this.commonTools.mergeObjects(
+          globalUpdate.card[card.id],
+          automationUpdate.card[card.id],
+          cardUpdate[card.id],
+        );
+        globalUpdate.project[project.id] = this.commonTools.mergeObjects(
+          globalUpdate.project[project.id],
+          automationUpdate.project[project.id],
+        );
+      }
+
+      const cardUpdateAcknowledgment =
+        await this.cardsRepository.bundleUpdatesAndExecute(globalUpdate.card);
+
+      const projectUpdateAcknowledgment =
+        await this.projectRepository.bundleUpdatesAndExecute(
+          globalUpdate.project,
+        );
+
+      return true;
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException(
+        'Failed closing cards',
         error.message,
       );
     }

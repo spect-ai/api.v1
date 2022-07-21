@@ -1,5 +1,6 @@
 import { OmitType } from '@nestjs/swagger';
 import {
+  IsArray,
   IsBoolean,
   IsNotEmpty,
   IsNumber,
@@ -76,4 +77,22 @@ export class UpdateCardStatusRequestDto {
   @IsOptional()
   @IsNotEmpty()
   status?: Status;
+}
+
+export class MultiCardCloseDto {
+  /**
+   * The status of the card (active, inreview etc) - TODO: Add custom validation
+   */
+  @IsArray()
+  @IsNotEmpty()
+  cardIds: string[];
+}
+
+export class MultiCardCloseWithSlugDto {
+  /**
+   * The status of the card (active, inreview etc) - TODO: Add custom validation
+   */
+  @IsArray()
+  @IsNotEmpty()
+  slugs: string[];
 }
