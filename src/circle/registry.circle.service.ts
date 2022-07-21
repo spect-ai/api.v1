@@ -70,10 +70,7 @@ export class CircleRegistryService {
   }
 
   async addToken(id: string, addTokenDto: AddNewTokenDto) {
-    const circle =
-      this.requestProvider.circle ||
-      (await this.circlesRepository.findById(id));
-
+    const circle = await this.circlesRepository.findById(id);
     if (!circle) {
       throw new HttpException('Circle not found', HttpStatus.NOT_FOUND);
     }
@@ -110,7 +107,7 @@ export class CircleRegistryService {
       };
     }
 
-    const updatedRegistry = await this.circlesRepository.updateByFilter(
+    const updatedCircle = await this.circlesRepository.updateByFilter(
       {
         _id: id,
       },
@@ -120,7 +117,7 @@ export class CircleRegistryService {
       },
     );
 
-    return await this.getPaymentMethods(id);
+    return await this.getPaymentMethods(circle.slug);
   }
 
   async updateBlacklist(
