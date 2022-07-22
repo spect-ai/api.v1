@@ -28,7 +28,10 @@ export class CardsProjectService {
     const columnDetails = { ...project.columnDetails };
     for (const card of cards) {
       cardIds.push(card._id);
-      columnDetails[card.columnId].cards.push(card._id.toString());
+      columnDetails[card.columnId].cards = [
+        card._id.toString(),
+        ...columnDetails[card.columnId].cards,
+      ];
     }
 
     return {
