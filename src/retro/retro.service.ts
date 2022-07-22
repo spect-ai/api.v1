@@ -4,16 +4,15 @@ import {
   Injectable,
   InternalServerErrorException,
 } from '@nestjs/common';
-import { CirclesRepository } from 'src/circle/circles.repository';
+import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { RequestProvider } from 'src/users/user.provider';
-import {
-  CreateRetroRequestDto,
-  MemberStats,
-} from './dto/create-retro-request.dto';
+import { CreateRetroCommand } from './commands/impl';
+import { UpdateRetroCommand } from './commands/impl/update-retro.command';
+import { CreateRetroRequestDto } from './dto/create-retro-request.dto';
 import { DetailedRetroResponseDto } from './dto/detailed-retro-response.dto';
 import { UpdateRetroRequestDto } from './dto/update-retro-request.dto';
 import { Retro } from './models/retro.model';
-import { Stats } from './models/stats.model';
+import { GetRetroByIdQuery, GetRetroBySlugQuery } from './queries/impl';
 import { RetroRepository } from './retro.repository';
 
 @Injectable()
@@ -21,47 +20,20 @@ export class RetroService {
   constructor(
     private readonly requestProvider: RequestProvider,
     private readonly retroRepository: RetroRepository,
-    private readonly circleRepository: CirclesRepository,
+    private readonly commandBus: CommandBus,
+    private readonly queryBus: QueryBus,
   ) {}
-
-  initStats(memberStats: MemberStats[]): Stats {
-    const stats = {} as Stats;
-    const votesGiven = {};
-    for (const memberStat of memberStats) {
-      votesGiven[memberStat.member?.toString()] = 0;
-    }
-    for (const memberStat of memberStats) {
-      stats[memberStat.member.toString()] = {
-        owner: memberStat.member,
-        votesGiven: votesGiven,
-        votesRemaining: memberStat.allocation,
-        votesAllocated: memberStat.allocation,
-        canGive: memberStat.canGive,
-        canReceive: memberStat.canReceive,
-      };
-    }
-    return stats;
-  }
 
   async create(
     createRetroDto: CreateRetroRequestDto,
   ): Promise<DetailedRetroResponseDto> {
     try {
-      if (!createRetroDto.reward) {
-        createRetroDto.reward = await this.circleRepository.getDefaultPayment(
-          createRetroDto.circle,
-        );
-      }
-      const stats = this.initStats(createRetroDto.memberStats);
-      const retroNum = await this.retroRepository.count({
-        circle: createRetroDto.circle,
-      });
-      return await this.retroRepository.create({
-        ...createRetroDto,
-        slug: retroNum.toString(),
-        stats: stats,
-      });
+      const createdRetro = await this.commandBus.execute(
+        new CreateRetroCommand(createRetroDto),
+      );
+      return createdRetro;
     } catch (error) {
+      console.log(error);
       throw new InternalServerErrorException(
         'Failed retro creation',
         error.message,
@@ -69,34 +41,44 @@ export class RetroService {
     }
   }
 
-  async getDetailedRetro(id: string): Promise<DetailedRetroResponseDto> {
-    const retro = await this.retroRepository.getRetroWithPopulatedReferences(
-      id,
-    );
-    return retro;
-  }
-
-  async getDetailedRetroBySlug(
-    slug: string,
-  ): Promise<DetailedRetroResponseDto> {
-    const retro =
-      await this.retroRepository.getRetroWithPopulatedReferencesBySlug(slug);
-    return retro;
-  }
-
   async update(
     id: string,
     updateRetroDto: UpdateRetroRequestDto,
   ): Promise<DetailedRetroResponseDto> {
     try {
-      const updatedRetro = await this.retroRepository.updateById(
-        id,
-        updateRetroDto,
+      const updatedRetro = await this.commandBus.execute(
+        new UpdateRetroCommand(id, updateRetroDto),
       );
       return updatedRetro;
     } catch (error) {
       throw new InternalServerErrorException(
         'Failed retro update',
+        error.message,
+      );
+    }
+  }
+
+  async getDetailedRetro(id: string): Promise<DetailedRetroResponseDto> {
+    try {
+      const retro = await this.queryBus.execute(new GetRetroByIdQuery(id));
+      return retro;
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Failed while getting retro',
+        error.message,
+      );
+    }
+  }
+
+  async getDetailedRetroBySlug(
+    slug: string,
+  ): Promise<DetailedRetroResponseDto> {
+    try {
+      const retro = await this.queryBus.execute(new GetRetroBySlugQuery(slug));
+      return retro;
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Failed while getting retro',
         error.message,
       );
     }

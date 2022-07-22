@@ -1,4 +1,6 @@
 import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
+import { ObjectIdDto } from 'src/common/dtos/object-id.dto';
+import { RequiredSlugDto } from 'src/common/dtos/string.dto';
 import { CreateRetroRequestDto } from './dto/create-retro-request.dto';
 import { DetailedRetroResponseDto } from './dto/detailed-retro-response.dto';
 import { UpdateRetroRequestDto } from './dto/update-retro-request.dto';
@@ -9,13 +11,17 @@ export class RetroController {
   constructor(private readonly retroService: RetroService) {}
 
   @Get('/slug/:slug')
-  async findBySlug(@Param('slug') slug): Promise<DetailedRetroResponseDto> {
-    return await this.retroService.getDetailedRetroBySlug(slug);
+  async findBySlug(
+    @Param() param: RequiredSlugDto,
+  ): Promise<DetailedRetroResponseDto> {
+    return await this.retroService.getDetailedRetroBySlug(param.slug);
   }
 
   @Get('/:id')
-  async findByObjectId(@Param('id') id): Promise<DetailedRetroResponseDto> {
-    return await this.retroService.getDetailedRetro(id);
+  async findByObjectId(
+    @Param() param: ObjectIdDto,
+  ): Promise<DetailedRetroResponseDto> {
+    return await this.retroService.getDetailedRetro(param.id);
   }
 
   @Post('/')

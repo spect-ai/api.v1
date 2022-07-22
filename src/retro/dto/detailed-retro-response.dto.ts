@@ -8,10 +8,13 @@ import {
 } from 'class-validator';
 import { Date } from 'mongoose';
 import { Activity } from 'src/common/types/activity.type';
-import { FeedbackModel } from 'src/common/models/feedback.model';
 import { Payment } from 'src/common/models/payment.model';
-import { Stats, StatsModel } from '../models/stats.model';
-
+import {
+  FeedbackGiven,
+  FeedbackReceived,
+  IndexedFeedback,
+  MappedStats,
+} from '../types';
 export class DetailedRetroResponseDto {
   /**
    * The title associated with the retro period
@@ -67,14 +70,28 @@ export class DetailedRetroResponseDto {
    */
   @IsObject()
   @IsOptional()
-  stats: Stats;
+  stats: MappedStats;
 
   /**
    * The feedbacks exchanged during the retro period
    */
   @IsObject()
   @IsOptional()
-  feedbacks: FeedbackModel[];
+  feedbacks: IndexedFeedback;
+
+  /**
+   * The feedbacks given by user
+   */
+  @IsObject()
+  @IsOptional()
+  feedbacksGiven: FeedbackGiven;
+
+  /**
+   * The feedbacks received by user
+   */
+  @IsObject()
+  @IsOptional()
+  feedbacksReceived: FeedbackReceived;
 
   /**
    * The activity history of the retro period

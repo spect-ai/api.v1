@@ -1,14 +1,18 @@
-import { plugin, prop, Ref } from '@typegoose/typegoose';
-import { useMongoosePlugin } from 'src/base/decorators/use-mongoose-plugins.decorator';
+import { prop } from '@typegoose/typegoose';
+import { Date } from 'mongoose';
 import { BaseModel } from 'src/base/base.model';
+import { useMongoosePlugin } from 'src/base/decorators/use-mongoose-plugins.decorator';
+import { Circle } from 'src/circle/model/circle.model';
 import { Payment } from 'src/common/models/payment.model';
-import { Date, ObjectId } from 'mongoose';
 import { Activity } from 'src/common/types/activity.type';
 import { User } from 'src/users/model/users.model';
 import { Status } from '../../common/types/status.type';
-import { Circle } from 'src/circle/model/circle.model';
-import { FeedbackModel } from 'src/common/models/feedback.model';
-import { Stats, StatsModel } from './stats.model';
+import {
+  FeedbackGiven,
+  FeedbackReceived,
+  IndexedFeedback,
+  MappedStats,
+} from '../types';
 
 @useMongoosePlugin()
 export class Retro extends BaseModel {
@@ -34,13 +38,13 @@ export class Retro extends BaseModel {
    * The circle that the retro belongs to
    */
   @prop({ ref: () => Circle, required: true })
-  circle: ObjectId;
+  circle: string;
 
   /**
    * The creator of the retro period
    */
   @prop({ ref: () => User })
-  creator: ObjectId;
+  creator: string;
 
   /**
    * The status of the retro period
@@ -88,13 +92,25 @@ export class Retro extends BaseModel {
    * The voting stats of different users
    */
   @prop({ required: true })
-  stats: Stats;
+  stats: MappedStats;
 
   /**
    * The feedbacks exchanged during the retro period
    */
   @prop({ default: [] })
-  feedbacks: FeedbackModel[];
+  feedbacks: IndexedFeedback;
+
+  /**
+   * The feedbacks exchanged during the retro period
+   */
+  @prop({ default: [] })
+  feedbacksGiven: FeedbackGiven;
+
+  /**
+   * The feedbacks exchanged during the retro period
+   */
+  @prop({ default: [] })
+  feedbacksReceived: FeedbackReceived;
 
   /**
    * The activity history of the retro period
