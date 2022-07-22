@@ -5,6 +5,7 @@ import { ObjectId } from 'mongoose';
 import { Circle } from 'src/circle/model/circle.model';
 import { Card } from 'src/card/model/card.model';
 import { Project } from 'src/project/model/project.model';
+import { Activity, Notification } from '../types/types';
 
 @useMongoosePlugin()
 export class User extends ProfileModel {
@@ -85,13 +86,13 @@ export class User extends ProfileModel {
    * Activities taken by the user
    */
   @prop({ default: [] })
-  activities: string[];
+  activities: Activity[];
 
   /**
    * Notifications for the user
    */
   @prop({ default: [] })
-  notifications: string[];
+  notifications: Notification[];
 
   /**
    * Card bookmarks for the user

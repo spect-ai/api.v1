@@ -6,13 +6,10 @@ export type MappedUser = {
 };
 
 export type Notification = {
-  active: boolean;
-  /* This redirection policy could cause issues if a card/project/circle is deleted or moved to a different location. Need
-  to handle this on the frontend. */
-  redirectTo: string[];
-  objectRedirectTo: 'Card' | 'Project' | 'Circle';
+  content: string;
+  linkPath: string[];
   actor: string;
-  action: string;
+  timestamp: Date;
 };
 
 export type Activity = {
@@ -20,5 +17,6 @@ export type Activity = {
   type: string;
   content: string;
   timestamp: Date;
-  changeLog: ChangeLog;
+  linkPath: string[];
+  actors: string[];
 };

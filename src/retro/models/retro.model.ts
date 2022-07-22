@@ -43,7 +43,7 @@ export class Retro extends BaseModel {
   /**
    * The creator of the retro period
    */
-  @prop({ ref: () => User })
+  @prop({ ref: () => User, required: true })
   creator: string;
 
   /**
@@ -115,6 +115,6 @@ export class Retro extends BaseModel {
   /**
    * The activity history of the retro period
    */
-  @prop({ default: [] })
-  activity: Activity[];
+  @prop({ ref: () => User, required: true })
+  members: string[];
 }

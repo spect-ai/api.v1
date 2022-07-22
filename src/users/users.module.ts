@@ -1,30 +1,31 @@
 import { forwardRef, Module } from '@nestjs/common';
-import { UsersService } from './users.service';
-import { UsersController } from './users.controller';
-import { User } from './model/users.model';
+import { CqrsModule } from '@nestjs/cqrs';
 import { TypegooseModule } from 'nestjs-typegoose';
-import { UsersRepository } from './users.repository';
-import { EthAddressModule } from 'src/_eth-address/_eth-address.module';
-import { AuthModule } from 'src/auth/auth.module';
-import { RequestProvider } from './user.provider';
 import { CardsModule } from 'src/card/cards.module';
+import { EventHandlers } from './events/handlers';
 import { CommonTools } from 'src/common/common.service';
-import { CardsService } from 'src/card/cards.service';
-import { ActivityBuilder } from 'src/card/activity.builder';
-import { CirclesRepository } from 'src/circle/circles.repository';
-import { ProjectService } from 'src/project/project.service';
-import { CardsProjectService } from 'src/project/cards.project.service';
-import { CardValidationService } from 'src/card/validation.cards.service';
-import { ResponseBuilder } from 'src/card/response.builder';
+import { EthAddressModule } from 'src/_eth-address/_eth-address.module';
+import { User } from './model/users.model';
+import { RequestProvider } from './user.provider';
+import { UsersController } from './users.controller';
+import { UsersRepository } from './users.repository';
+import { UsersService } from './users.service';
 
 @Module({
   imports: [
     TypegooseModule.forFeature([User]),
     EthAddressModule,
     forwardRef(() => CardsModule),
+    CqrsModule,
   ],
   controllers: [UsersController],
-  providers: [UsersService, UsersRepository, RequestProvider, CommonTools],
+  providers: [
+    UsersService,
+    UsersRepository,
+    RequestProvider,
+    CommonTools,
+    ...EventHandlers,
+  ],
   exports: [UsersService, UsersRepository, UsersModule],
 })
 export class UsersModule {}

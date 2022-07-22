@@ -31,6 +31,19 @@ export class DetailedRetroResponseDto {
   description?: string;
 
   /**
+   * The slug associated with the retro period
+   */
+  @IsString()
+  @IsNotEmpty()
+  slug: string;
+
+  /**
+   * The creator of the retro period
+   */
+  @IsString()
+  creator: string;
+
+  /**
    * The strategy used in the retro period, ie, Quadratic or Normal Voting
    */
   @IsString()
@@ -97,6 +110,5 @@ export class DetailedRetroResponseDto {
    * The activity history of the retro period
    */
   @IsObject()
-  @IsOptional()
-  activity: Activity[];
+  members: string[];
 }

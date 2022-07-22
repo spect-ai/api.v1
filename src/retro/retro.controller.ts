@@ -1,4 +1,14 @@
-import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Patch,
+  Post,
+  SetMetadata,
+  UseGuards,
+} from '@nestjs/common';
+import { CreateNewRetroAuthGuard } from 'src/auth/retro.guard';
 import { ObjectIdDto } from 'src/common/dtos/object-id.dto';
 import { RequiredSlugDto } from 'src/common/dtos/string.dto';
 import { CreateRetroRequestDto } from './dto/create-retro-request.dto';
@@ -24,6 +34,7 @@ export class RetroController {
     return await this.retroService.getDetailedRetro(param.id);
   }
 
+  @UseGuards(CreateNewRetroAuthGuard)
   @Post('/')
   async create(
     @Body() retro: CreateRetroRequestDto,
