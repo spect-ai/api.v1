@@ -61,7 +61,6 @@ export class RetroController {
     @Param() param: ObjectIdDto,
     @Body() updateVotesRequestDto: UpdateVoteRequestDto,
   ): Promise<DetailedRetroResponseDto> {
-    console.log(param, updateVotesRequestDto);
     return await this.retroService.vote(param.id, updateVotesRequestDto);
   }
 

@@ -84,27 +84,17 @@ export class CircleRegistryService {
     if (!network)
       throw new HttpException('Invalid network', HttpStatus.NOT_FOUND);
     const localRegistry = circle.localRegistry || {};
-    if (
-      addTokenDto.chainId in localRegistry &&
-      'tokenDetails' in localRegistry[addTokenDto.chainId]
-    ) {
-      localRegistry[addTokenDto.chainId].tokenDetails = {
-        ...localRegistry[addTokenDto.chainId].tokenDetails,
-        [addTokenDto.address]: {
-          symbol: addTokenDto.symbol,
-          name: addTokenDto.name,
-          address: addTokenDto.address,
-        } as TokenInfo,
-      };
-    } else {
-      localRegistry[addTokenDto.chainId].tokenDetails = {
-        [addTokenDto.address]: {
-          symbol: addTokenDto.symbol,
-          name: addTokenDto.name,
-          address: addTokenDto.address,
-        } as TokenInfo,
-      };
-    }
+    if (!(addTokenDto.chainId in localRegistry))
+      localRegistry[addTokenDto.chainId] = { tokenDetails: {} };
+
+    localRegistry[addTokenDto.chainId].tokenDetails = {
+      ...localRegistry[addTokenDto.chainId].tokenDetails,
+      [addTokenDto.address]: {
+        symbol: addTokenDto.symbol,
+        name: addTokenDto.name,
+        address: addTokenDto.address,
+      } as TokenInfo,
+    };
 
     const updatedCircle = await this.circlesRepository.updateByFilter(
       {

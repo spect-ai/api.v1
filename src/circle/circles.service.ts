@@ -181,6 +181,7 @@ export class CirclesService {
           members: [this.requestProvider.user.id],
           memberRoles: memberRoles,
           roles: this.roleService.defaultCircleRoles(),
+          localRegistry: {},
         });
         await this.circlesRepository.updateById(parentCircle.id as string, {
           ...parentCircle,
@@ -193,6 +194,7 @@ export class CirclesService {
           members: [this.requestProvider.user.id],
           memberRoles: memberRoles,
           roles: this.roleService.defaultCircleRoles(),
+          localRegistry: {},
         });
       }
 
