@@ -35,38 +35,12 @@ export type Stats = {
   canReceive?: boolean;
 };
 
-/** Feedback id mapped to feedback */
-export type IndexedFeedback = {
-  [id: string]: Feedback;
+export type MappedFeedback = {
+  [recipient: string]: string;
 };
 
 export type Feedback = {
-  /**
-   * The id of the feedback
-   */
-  id: string;
-  /**
-   * The person who has given the feedback
-   */
-  giver: string;
-
-  /**
-   * The person who has received the feedback
-   */
-  receiver: string;
-
-  /**
-   * The content of the feedback
-   */
-  content: string;
-};
-
-export type FeedbackGiven = {
-  [user: string]: string[];
-};
-
-export type FeedbackReceived = {
-  [user: string]: string[];
+  [giver: string]: MappedFeedback;
 };
 
 export type PopulatedRetroFields = {

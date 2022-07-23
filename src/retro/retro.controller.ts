@@ -8,12 +8,15 @@ import {
   SetMetadata,
   UseGuards,
 } from '@nestjs/common';
-import { CreateNewRetroAuthGuard } from 'src/auth/retro.guard';
+import { SessionAuthGuard } from 'src/auth/iron-session.guard';
+import { CreateNewRetroAuthGuard, RetroAuthGuard } from 'src/auth/retro.guard';
 import { ObjectIdDto } from 'src/common/dtos/object-id.dto';
 import { RequiredSlugDto } from 'src/common/dtos/string.dto';
+import { AddFeedbackRequestDto } from './dto/add-feedback-request.dto';
 import { CreateRetroRequestDto } from './dto/create-retro-request.dto';
 import { DetailedRetroResponseDto } from './dto/detailed-retro-response.dto';
 import { UpdateRetroRequestDto } from './dto/update-retro-request.dto';
+import { UpdateVoteRequestDto } from './dto/update-retro-vote-request.dto';
 import { RetroService } from './retro.service';
 
 @Controller('retro')
@@ -37,17 +40,46 @@ export class RetroController {
   @UseGuards(CreateNewRetroAuthGuard)
   @Post('/')
   async create(
-    @Body() retro: CreateRetroRequestDto,
+    @Body() createRetroRequestDto: CreateRetroRequestDto,
   ): Promise<DetailedRetroResponseDto> {
-    return await this.retroService.create(retro);
+    return await this.retroService.create(createRetroRequestDto);
   }
 
+  @SetMetadata('permissions', ['createNewRetro'])
+  @UseGuards(RetroAuthGuard)
   @Patch('/:id')
   async update(
-    @Param('id') id,
-    @Body() circle: UpdateRetroRequestDto,
+    @Param() param: ObjectIdDto,
+    @Body() updateRetroRequestDto: UpdateRetroRequestDto,
   ): Promise<DetailedRetroResponseDto> {
-    return await this.retroService.update(id, circle);
+    return await this.retroService.update(param.id, updateRetroRequestDto);
+  }
+
+  @UseGuards(SessionAuthGuard)
+  @Patch('/:id/vote')
+  async vote(
+    @Param() param: ObjectIdDto,
+    @Body() updateVotesRequestDto: UpdateVoteRequestDto,
+  ): Promise<DetailedRetroResponseDto> {
+    console.log(param, updateVotesRequestDto);
+    return await this.retroService.vote(param.id, updateVotesRequestDto);
+  }
+
+  @UseGuards(SessionAuthGuard)
+  @Patch('/:id/giveFeedback')
+  async giveFeedback(
+    @Param() param: ObjectIdDto,
+    @Body() addFeedbackRequestDto: AddFeedbackRequestDto,
+  ): Promise<DetailedRetroResponseDto> {
+    return await this.retroService.addFeedback(param.id, addFeedbackRequestDto);
+  }
+
+  @SetMetadata('permissions', ['endRetro'])
+  @Patch('/:id/endRetro')
+  async endRetro(
+    @Param() param: ObjectIdDto,
+  ): Promise<DetailedRetroResponseDto> {
+    return await this.retroService.endRetro(param.id);
   }
 
   @Post('/:id/delete')

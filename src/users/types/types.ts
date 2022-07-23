@@ -1,4 +1,3 @@
-import { ChangeLog } from 'src/common/types/activity.type';
 import { User } from '../model/users.model';
 
 export type MappedUser = {
@@ -18,5 +17,5 @@ export type Activity = {
   content: string;
   timestamp: Date;
   linkPath: string[];
-  actors: string[];
+  stakeholders: string[];
 };

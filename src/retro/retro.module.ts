@@ -17,6 +17,7 @@ import { RolesService } from 'src/roles/roles.service';
 import { SessionAuthGuard } from 'src/auth/iron-session.guard';
 import { DiscordService } from 'src/common/discord.service';
 import { EthAddressModule } from 'src/_eth-address/_eth-address.module';
+import { CommonTools } from 'src/common/common.service';
 
 @Module({
   imports: [
@@ -39,6 +40,7 @@ import { EthAddressModule } from 'src/_eth-address/_eth-address.module';
     RolesService,
     SessionAuthGuard,
     DiscordService,
+    CommonTools,
   ],
   exports: [RetroService, RetroRepository, RetroModule],
 })

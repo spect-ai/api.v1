@@ -4,15 +4,9 @@ import { BaseModel } from 'src/base/base.model';
 import { useMongoosePlugin } from 'src/base/decorators/use-mongoose-plugins.decorator';
 import { Circle } from 'src/circle/model/circle.model';
 import { Payment } from 'src/common/models/payment.model';
-import { Activity } from 'src/common/types/activity.type';
 import { User } from 'src/users/model/users.model';
 import { Status } from '../../common/types/status.type';
-import {
-  FeedbackGiven,
-  FeedbackReceived,
-  IndexedFeedback,
-  MappedStats,
-} from '../types';
+import { Feedback, MappedStats } from '../types';
 
 @useMongoosePlugin()
 export class Retro extends BaseModel {
@@ -97,24 +91,18 @@ export class Retro extends BaseModel {
   /**
    * The feedbacks exchanged during the retro period
    */
-  @prop({ default: [] })
-  feedbacks: IndexedFeedback;
-
-  /**
-   * The feedbacks exchanged during the retro period
-   */
-  @prop({ default: [] })
-  feedbacksGiven: FeedbackGiven;
-
-  /**
-   * The feedbacks exchanged during the retro period
-   */
-  @prop({ default: [] })
-  feedbacksReceived: FeedbackReceived;
+  @prop({ default: {} })
+  feedbackGiven: Feedback;
 
   /**
    * The activity history of the retro period
    */
   @prop({ ref: () => User, required: true })
   members: string[];
+
+  /**
+   * The distribution of votes among the members
+   */
+  @prop({ default: {} })
+  distribution: { [key: string]: number };
 }

@@ -8,10 +8,7 @@ import { UpdateRetroCommand } from '../impl/update-retro.command';
 export class UpdateRetroCommandHandler
   implements ICommandHandler<UpdateRetroCommand>
 {
-  constructor(
-    private readonly queryBus: QueryBus,
-    private readonly retroRepository: RetroRepository,
-  ) {}
+  constructor(private readonly retroRepository: RetroRepository) {}
 
   async execute(
     command: UpdateRetroCommand,

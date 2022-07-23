@@ -8,11 +8,18 @@ import { CommandBus, QueryBus, EventBus } from '@nestjs/cqrs';
 import { GetCircleByIdQuery } from 'src/circle-v1/queries/impl';
 import { NotificationEvent } from 'src/users/events/impl';
 import { RequestProvider } from 'src/users/user.provider';
-import { CreateRetroCommand } from './commands/impl';
+import {
+  CreateRetroCommand,
+  EndRetroCommand,
+  UpdateRetroVoteCommand,
+} from './commands/impl';
+import { AddFeedbackCommand } from './commands/impl/add-feedback.command';
 import { UpdateRetroCommand } from './commands/impl/update-retro.command';
+import { AddFeedbackRequestDto } from './dto/add-feedback-request.dto';
 import { CreateRetroRequestDto } from './dto/create-retro-request.dto';
 import { DetailedRetroResponseDto } from './dto/detailed-retro-response.dto';
 import { UpdateRetroRequestDto } from './dto/update-retro-request.dto';
+import { UpdateVoteRequestDto } from './dto/update-retro-vote-request.dto';
 import { RetroCreatedEvent } from './events/impl';
 import { Retro } from './models/retro.model';
 import { GetRetroByIdQuery, GetRetroBySlugQuery } from './queries/impl';
@@ -68,6 +75,44 @@ export class RetroService {
         error.message,
       );
     }
+  }
+
+  async vote(
+    id: string,
+    updateVoteRequestDto: UpdateVoteRequestDto,
+  ): Promise<Retro> {
+    const retro = await this.queryBus.execute(new GetRetroByIdQuery(id));
+    const updatedRetro = await this.commandBus.execute(
+      new UpdateRetroVoteCommand(
+        this.requestProvider.user.id,
+        retro,
+        updateVoteRequestDto,
+      ),
+    );
+    return updatedRetro;
+  }
+
+  async addFeedback(
+    id: string,
+    addFeedbackRequestDto: AddFeedbackRequestDto,
+  ): Promise<Retro> {
+    const retro = await this.queryBus.execute(new GetRetroByIdQuery(id));
+    const updatedRetro = await this.commandBus.execute(
+      new AddFeedbackCommand(
+        this.requestProvider.user.id,
+        retro,
+        addFeedbackRequestDto,
+      ),
+    );
+    return updatedRetro;
+  }
+
+  async endRetro(id: string): Promise<Retro> {
+    const retro = await this.queryBus.execute(new GetRetroByIdQuery(id));
+    const updatedRetro = await this.commandBus.execute(
+      new EndRetroCommand(retro),
+    );
+    return updatedRetro;
   }
 
   async getDetailedRetro(id: string): Promise<DetailedRetroResponseDto> {
