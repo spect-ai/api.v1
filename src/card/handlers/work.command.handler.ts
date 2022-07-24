@@ -218,6 +218,7 @@ export class WorkCommandHandler {
           circle.slug,
           project.slug,
           this.requestProvider.user.id,
+          threadId,
         ),
       );
 

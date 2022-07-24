@@ -7,7 +7,7 @@ import { Activity } from 'src/common/types/activity.type';
 import { Project } from 'src/project/model/project.model';
 import { Status } from '../../common/types/status.type';
 import { ApplicationDetails } from '../types/types';
-import { WorkThreads } from './workHistory.type';
+import { WorkThreads } from '../types/types';
 
 @useMongoosePlugin()
 export class Card extends BaseModel {

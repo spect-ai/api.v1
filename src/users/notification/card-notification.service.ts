@@ -19,6 +19,10 @@ export class CardNotificationService {
         return this.updateCardNotification(recipient, card, diff, actor);
       case 'submission':
         return this.submitWorkNotification(card, actor);
+      case 'revision':
+        return this.reviseWorkNotification(card, actor);
+      case 'feedback':
+        return this.addFeedbackNotification(card, actor);
       case 'pickApplication':
         return this.pickApplicationNotification(card, actor);
       default:
@@ -108,6 +112,26 @@ export class CardNotificationService {
   ): { content: string; ref: object } {
     return {
       content: `[actor] added a new submission on ${card.title}`,
+      ref: { actor },
+    };
+  }
+
+  reviseWorkNotification(
+    card: Card,
+    actor: string,
+  ): { content: string; ref: object } {
+    return {
+      content: `[actor] added revision instructions on ${card.title}`,
+      ref: { actor },
+    };
+  }
+
+  addFeedbackNotification(
+    card: Card,
+    actor: string,
+  ): { content: string; ref: object } {
+    return {
+      content: `[actor] added feedback on ${card.title}`,
       ref: { actor },
     };
   }

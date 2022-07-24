@@ -11,10 +11,16 @@ export class WorkUnitCreatedEventHandler
 
   async handle(event: WorkUnitCreatedEvent) {
     console.log('WorkUnitCreatedEventHandler');
-    const { card, createWorkUnitRequestDto, circleSlug, projectSlug, caller } =
-      event;
+    const {
+      card,
+      createWorkUnitRequestDto,
+      circleSlug,
+      projectSlug,
+      caller,
+      workThreadId,
+    } = event;
     for (const user of card.reviewer) {
-      if (user !== caller) {
+      if (user !== caller && createWorkUnitRequestDto.type === 'submission') {
         this.eventBus.publish(
           new NotificationEvent(
             createWorkUnitRequestDto.type,
@@ -22,11 +28,26 @@ export class WorkUnitCreatedEventHandler
             card as Card,
             user,
             [circleSlug, projectSlug, card.slug],
-            card.creator,
+            caller,
             null,
           ),
         );
       }
+    }
+    if (['revision', 'feedback'].includes(createWorkUnitRequestDto.type)) {
+      const thread = card.workThreads[workThreadId];
+      const workUnitId = thread.workUnitOrder[thread.workUnitOrder.length - 2];
+      this.eventBus.publish(
+        new NotificationEvent(
+          createWorkUnitRequestDto.type,
+          'card',
+          card as Card,
+          thread.workUnits[workUnitId].user,
+          [],
+          caller,
+          null,
+        ),
+      );
     }
     // this.eventBus.publish(
     //   new UserActivityEvent('create', 'card', card as Card, [], card.creator, {
