@@ -1,13 +1,12 @@
 import { EventsHandler, IEventHandler } from '@nestjs/cqrs';
-import { ChangeLog } from 'src/common/types/activity.type';
-import { UsersRepository } from 'src/users/users.repository';
-import { NotificationEvent, UserActivityEvent } from '../impl';
-import { v4 as uuidv4 } from 'uuid';
 import { Card } from 'src/card/model/card.model';
 import { Circle } from 'src/circle/model/circle.model';
+import { Diff } from 'src/common/interfaces';
 import { Project } from 'src/project/model/project.model';
 import { Retro } from 'src/retro/models/retro.model';
-import { Diff } from 'src/common/interfaces';
+import { UsersRepository } from 'src/users/users.repository';
+import { v4 as uuidv4 } from 'uuid';
+import { UserActivityEvent } from '../impl';
 
 @EventsHandler(UserActivityEvent)
 export class UserActivityEventHandler
@@ -17,24 +16,25 @@ export class UserActivityEventHandler
 
   async handle(event: UserActivityEvent) {
     console.log('ActivityEventHandler');
-    const { type, itemType, item, linkPath, actor, changeLog } = event;
+    const { actionType, itemType, item, linkPath, actor, changeLog } = event;
     const actorEntity = await this.userRepository.findById(actor);
     if (!actorEntity.activities) {
       actorEntity.activities = [];
     }
     actorEntity.activities.push({
       id: uuidv4(),
-      content: this.generateContent(type, changeLog, itemType, item),
+      content: this.generateContent(actionType, changeLog, itemType, item),
       linkPath,
       timestamp: new Date(),
-      type,
+      actionType,
       stakeholders: [],
+      ref: {},
     });
     await this.userRepository.update(actorEntity);
   }
 
   generateContent(
-    type: string,
+    actionType: string,
     changeLog: Diff<Card | Circle | Project | Retro>,
     itemType: string,
     item: Card | Circle | Project | Retro,
@@ -42,31 +42,35 @@ export class UserActivityEventHandler
     switch (itemType) {
       case 'card':
         return this.generateCardContent(
-          type,
+          actionType,
           changeLog as Diff<Card>,
           item as Card,
         );
       case 'circle':
         return this.generateCircleContent(
-          type,
+          actionType,
           changeLog as Diff<Circle>,
           item as Circle,
         );
       case 'project':
         return this.generateProjectContent(
-          type,
+          actionType,
           changeLog as Diff<Project>,
           item as Project,
         );
       case 'retro':
-        return this.generateRetroContent(type, changeLog, item as Retro);
+        return this.generateRetroContent(actionType, changeLog, item as Retro);
       default:
         return '';
     }
   }
 
-  generateCardContent(type: string, changeLog: Diff<Card>, card: Card): string {
-    switch (type) {
+  generateCardContent(
+    actionType: string,
+    changeLog: Diff<Card>,
+    card: Card,
+  ): string {
+    switch (actionType) {
       case 'create':
         return `has added a card`;
         break;
@@ -82,31 +86,31 @@ export class UserActivityEventHandler
   }
 
   generateCircleContent(
-    type: string,
+    actionType: string,
     changeLog: Diff<Circle>,
-    card: Circle,
+    circle: Circle,
   ): string {
-    if (type === 'create') {
+    if (actionType === 'create') {
       return `has added a card`;
     }
   }
 
   generateProjectContent(
-    type: string,
+    actionType: string,
     changeLog: Diff<Project>,
-    card: Project,
+    project: Project,
   ): string {
-    if (type === 'create') {
+    if (actionType === 'create') {
       return `has added a card`;
     }
   }
 
   generateRetroContent(
-    type: string,
+    actionType: string,
     changeLog: Diff<Retro>,
-    card: Retro,
+    retro: Retro,
   ): string {
-    if (type === 'create') {
+    if (actionType === 'create') {
       return `has added a card`;
     }
   }

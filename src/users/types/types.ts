@@ -9,13 +9,15 @@ export type Notification = {
   linkPath: string[];
   actor: string;
   timestamp: Date;
+  ref: object;
 };
 
 export type Activity = {
   id: string;
-  type: string;
+  actionType: string;
   content: string;
   timestamp: Date;
   linkPath: string[];
   stakeholders: string[];
+  ref: object;
 };

@@ -214,10 +214,7 @@ export class CardsProjectService {
     // Remove Card from column
     const columnDetails = project.columnDetails;
     for (const cardId of cardIds) {
-      console.log(cardId);
-
       const sourceCardLoc = this.findCardLocationInProject(project, cardId);
-      console.log(sourceCardLoc);
       columnDetails[sourceCardLoc.columnId].cards.splice(
         sourceCardLoc.cardIndex,
         1,

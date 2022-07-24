@@ -10,6 +10,7 @@ import { RequestProvider } from './user.provider';
 import { UsersController } from './users.controller';
 import { UsersRepository } from './users.repository';
 import { UsersService } from './users.service';
+import { CardNotificationService } from './notification/card-notification.service';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { UsersService } from './users.service';
     UsersRepository,
     RequestProvider,
     CommonTools,
+    CardNotificationService,
     ...EventHandlers,
   ],
   exports: [UsersService, UsersRepository, UsersModule],

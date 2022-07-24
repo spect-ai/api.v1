@@ -4,6 +4,7 @@ import {
   Injectable,
   InternalServerErrorException,
 } from '@nestjs/common';
+import { EventBus } from '@nestjs/cqrs';
 import { AutomationService } from 'src/automation/automation.service';
 import { CirclesRepository } from 'src/circle/circles.repository';
 import { CommonTools } from 'src/common/common.service';
@@ -27,6 +28,7 @@ import {
   UpdateCardRequestDto,
 } from '../dto/update-card-request.dto';
 import { UpdatePaymentInfoDto } from '../dto/update-payment-info.dto';
+import { CardUpdatedEvent } from '../events/impl';
 import { CardsPaymentService } from '../payment.cards.service';
 import { ResponseBuilder } from '../response.builder';
 import { MappedCard, MappedDiff } from '../types/types';
@@ -53,6 +55,8 @@ export class CardCommandHandler {
     private readonly cardPaymentService: CardsPaymentService,
     private readonly userRepository: UsersRepository,
     private readonly userCardsService: UserCardsService,
+    private readonly circleRepository: CirclesRepository,
+    private readonly eventBus: EventBus,
   ) {}
 
   async update(
@@ -65,6 +69,9 @@ export class CardCommandHandler {
       const project =
         this.requestProvider.project ||
         (await this.projectRepository.findById(card.project as string));
+      const circle =
+        this.requestProvider.circle ||
+        (await this.circleRepository.findById(card.circle as string));
       const cardUpdate = this.cardsService.update(card, project, updateCardDto);
 
       const automationUpdate = this.automationService.handleAutomation(
@@ -120,6 +127,10 @@ export class CardCommandHandler {
 
       const resultingCard =
         await this.cardsRepository.getCardWithPopulatedReferences(id);
+
+      this.eventBus.publish(
+        new CardUpdatedEvent(resultingCard, diff, circle.slug, project.slug),
+      );
       return this.responseBuilder.enrichResponse(resultingCard);
     } catch (error) {
       console.log(error);

@@ -276,7 +276,7 @@ export class CardsController {
   }
 
   @ApiParam({ name: 'id', type: 'string' })
-  @UseGuards(CardAuthGuard)
+  @UseGuards(SessionAuthGuard)
   @Patch('/:id/addComment')
   async addComment(
     @Param() params: ObjectIdDto,
@@ -287,7 +287,7 @@ export class CardsController {
 
   @ApiParam({ name: 'id', type: 'string' })
   @ApiQuery({ name: 'commitId', type: 'string' })
-  @UseGuards(CardAuthGuard)
+  @UseGuards(SessionAuthGuard)
   @Patch('/:id/updateComment')
   async udpateComment(
     @Param() params: ObjectIdDto,
@@ -301,7 +301,7 @@ export class CardsController {
     );
   }
 
-  @UseGuards(CardAuthGuard)
+  @UseGuards(SessionAuthGuard)
   @Patch('/:id/deleteComment')
   async deleteComment(
     @Param() params: ObjectIdDto,

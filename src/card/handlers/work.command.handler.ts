@@ -15,6 +15,12 @@ import { CommonUtility } from '../response.builder';
 import { WorkService } from '../work.cards.service';
 import { CardsRepository } from '../cards.repository';
 import { CommonTools } from 'src/common/common.service';
+import { EventBus } from '@nestjs/cqrs';
+import {
+  WorkThreadCreatedEvent,
+  WorkUnitCreatedEvent,
+} from '../events/work/impl';
+import { CirclesRepository } from 'src/circle/circles.repository';
 
 const globalUpdate = {
   card: {},
@@ -30,6 +36,8 @@ export class WorkCommandHandler {
     private readonly commonUtility: CommonUtility,
     private readonly cardsRepository: CardsRepository,
     private readonly commonTool: CommonTools,
+    private readonly eventBus: EventBus,
+    private readonly circleRepository: CirclesRepository,
   ) {}
 
   async handleGithubPR(createGithubPRDto: CreateGithubPRDto): Promise<boolean> {
@@ -70,7 +78,6 @@ export class WorkCommandHandler {
         globalUpdateAfterAutomation.card,
         cardUpdates,
       );
-      console.log(updates);
       const acknowledgment = await this.cardsRepository.bundleUpdatesAndExecute(
         updates,
       );
@@ -102,6 +109,9 @@ export class WorkCommandHandler {
       const project =
         this.requestProvider.project ||
         (await this.projectRepository.findById(card.project as string));
+      const circle =
+        this.requestProvider.circle ||
+        (await this.circleRepository.findById(card.circle));
 
       const cardUpdate = await this.workService.createWorkThread(
         card,
@@ -109,14 +119,23 @@ export class WorkCommandHandler {
       );
       const globalUpdateAfterAutomation =
         this.automationService.handleAutomation(card, project, cardUpdate[id]);
-      console.log(JSON.stringify(globalUpdateAfterAutomation));
-      return await this.commonUtility.mergeExecuteAndReturn(
+      const resCard = await this.commonUtility.mergeExecuteAndReturn(
         id,
         project.id,
         globalUpdate,
         globalUpdateAfterAutomation,
         cardUpdate,
       );
+      this.eventBus.publish(
+        new WorkThreadCreatedEvent(
+          resCard,
+          createWorkThread,
+          circle.slug,
+          project.slug,
+          this.requestProvider.user.id,
+        ),
+      );
+      return resCard;
     } catch (error) {
       console.log(error);
       throw new InternalServerErrorException(
@@ -173,6 +192,9 @@ export class WorkCommandHandler {
       const project =
         this.requestProvider.project ||
         (await this.projectRepository.findById(card.project as string));
+      const circle =
+        this.requestProvider.circle ||
+        (await this.circleRepository.findById(card.circle));
 
       const cardUpdate = await this.workService.createWorkUnit(
         card,
@@ -182,13 +204,25 @@ export class WorkCommandHandler {
       const globalUpdateAfterAutomation =
         this.automationService.handleAutomation(card, project, cardUpdate[id]);
 
-      return await this.commonUtility.mergeExecuteAndReturn(
+      const resCard = await this.commonUtility.mergeExecuteAndReturn(
         id,
         project.id,
         globalUpdate,
         globalUpdateAfterAutomation,
         cardUpdate,
       );
+      this.eventBus.publish(
+        new WorkUnitCreatedEvent(
+          resCard,
+          createWorkUnit,
+          circle.slug,
+          project.slug,
+          this.requestProvider.user.id,
+          threadId,
+        ),
+      );
+
+      return resCard;
     } catch (error) {
       throw new InternalServerErrorException(
         'Failed creating work thread',
@@ -216,7 +250,6 @@ export class WorkCommandHandler {
         workUnitId,
         updateWorkUnit,
       );
-      console.log(cardUpdate);
       const globalUpdateAfterAutomation =
         this.automationService.handleAutomation(card, project, cardUpdate[id]);
 
