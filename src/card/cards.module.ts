@@ -2,7 +2,7 @@ import { forwardRef, Module } from '@nestjs/common';
 import { TypegooseModule } from 'nestjs-typegoose';
 import { CirclesModule } from 'src/circle/circles.module';
 import { ActivityBuilder } from 'src/card/activity.builder';
-import { DataStructureManipulationService } from 'src/common/dataStructureManipulation.service';
+import { CommonTools } from 'src/common/common.service';
 import { SlugService } from 'src/common/slug.service';
 import { ProjectModule } from 'src/project/project.module';
 import { ProjectService } from 'src/project/project.service';
@@ -33,6 +33,10 @@ import { DiscordService } from 'src/common/discord.service';
 import { SessionAuthGuard } from 'src/auth/iron-session.guard';
 import { CircleAuthGuard } from 'src/auth/circle.guard';
 import { ProjectAuthGuard } from 'src/auth/project.guard';
+import { UsersRepository } from 'src/users/users.repository';
+import { UsersService } from 'src/users/users.service';
+import { CreateCardCommandHandler } from './handlers/create.command.handler';
+import { UserCardsService } from './user.cards.service';
 
 @Module({
   imports: [
@@ -42,7 +46,7 @@ import { ProjectAuthGuard } from 'src/auth/project.guard';
     TemplatesModule,
     EthAddressModule,
     RequestProvider,
-    UsersModule,
+    forwardRef(() => UsersModule),
     forwardRef(() => AutomationModule),
   ],
   controllers: [CardsController],
@@ -53,7 +57,7 @@ import { ProjectAuthGuard } from 'src/auth/project.guard';
     RequestProvider,
     ProjectService,
     CardsProjectService,
-    DataStructureManipulationService,
+    CommonTools,
     ActionService,
     ActivityBuilder,
     ActivityResolver,
@@ -72,6 +76,9 @@ import { ProjectAuthGuard } from 'src/auth/project.guard';
     SessionAuthGuard,
     CircleAuthGuard,
     ProjectAuthGuard,
+    UsersService,
+    CreateCardCommandHandler,
+    UserCardsService,
   ],
   exports: [
     CardsService,

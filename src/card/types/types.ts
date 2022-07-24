@@ -72,3 +72,13 @@ export type ApplicationUnit = {
 export type ApplicationDetails = {
   [key: string]: ApplicationUnit;
 };
+
+export type Diff = {
+  added: Partial<Card>;
+  deleted: Partial<Card>;
+  updated: Partial<Card>;
+};
+
+export type MappedDiff = {
+  [id: string]: Diff;
+};

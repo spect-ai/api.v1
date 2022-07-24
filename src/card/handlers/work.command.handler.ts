@@ -1,60 +1,107 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { AutomationService } from 'src/automation/automation.service';
-import { CirclesRepository } from 'src/circle/circles.repository';
-import { DataStructureManipulationService } from 'src/common/dataStructureManipulation.service';
 import { GlobalDocumentUpdate } from 'src/common/types/update.type';
-import { CardsProjectService } from 'src/project/cards.project.service';
 import { ProjectsRepository } from 'src/project/project.repository';
-import { ProjectService } from 'src/project/project.service';
 import { RequestProvider } from 'src/users/user.provider';
-import { ActivityBuilder } from '../activity.builder';
-import { CardsRepository } from '../cards.repository';
-import { CardsService } from '../cards.service';
 import { DetailedCardResponseDto } from '../dto/detailed-card-response-dto';
 import {
+  CreateGithubPRDto,
   CreateWorkThreadRequestDto,
   CreateWorkUnitRequestDto,
   UpdateWorkThreadRequestDto,
   UpdateWorkUnitRequestDto,
 } from '../dto/work-request.dto';
-import { CardsPaymentService } from '../payment.cards.service';
-import { CommonUtility, ResponseBuilder } from '../response.builder';
-import { CardValidationService } from '../validation.cards.service';
+import { CommonUtility } from '../response.builder';
 import { WorkService } from '../work.cards.service';
+import { CardsRepository } from '../cards.repository';
+import { CommonTools } from 'src/common/common.service';
 
+const globalUpdate = {
+  card: {},
+  project: {},
+} as GlobalDocumentUpdate;
 @Injectable()
 export class WorkCommandHandler {
   constructor(
     private readonly requestProvider: RequestProvider,
-    private readonly cardsRepository: CardsRepository,
-    private readonly activityBuilder: ActivityBuilder,
-    private readonly circleRepository: CirclesRepository,
-    private readonly projectService: ProjectService,
-    private readonly cardsProjectService: CardsProjectService,
-    private readonly datastructureManipulationService: DataStructureManipulationService,
-    private readonly validationService: CardValidationService,
-    private readonly responseBuilder: ResponseBuilder,
-    private readonly cardsService: CardsService,
     private readonly projectRepository: ProjectsRepository,
     private readonly automationService: AutomationService,
-    private readonly cardPaymentService: CardsPaymentService,
     private readonly workService: WorkService,
     private readonly commonUtility: CommonUtility,
+    private readonly cardsRepository: CardsRepository,
+    private readonly commonTool: CommonTools,
   ) {}
+
+  async handleGithubPR(createGithubPRDto: CreateGithubPRDto): Promise<boolean> {
+    try {
+      /** Assumes all cards are from the same project */
+      const cards = await this.cardsRepository.findAll({
+        slug: { $in: createGithubPRDto.slugs },
+      });
+
+      const project = await this.projectRepository.findById(
+        cards[0].project as string,
+      );
+
+      const objectifiedCards = this.commonTool.objectify(cards, 'id');
+      const cardUpdates =
+        await this.workService.createSameWorkThreadInMultipleCards(
+          cards,
+          createGithubPRDto,
+        );
+
+      let globalUpdateAfterAutomation: GlobalDocumentUpdate = {
+        card: {},
+        project: {},
+      };
+      for (const [cardId, cardUpdate] of Object.entries(cardUpdates)) {
+        const update = this.automationService.handleAutomation(
+          objectifiedCards[cardId],
+          project,
+          cardUpdate,
+        );
+
+        globalUpdateAfterAutomation = {
+          ...globalUpdateAfterAutomation,
+          ...update,
+        };
+      }
+      const updates = await this.commonTool.mergeObjects(
+        globalUpdateAfterAutomation.card,
+        cardUpdates,
+      );
+      console.log(updates);
+      const acknowledgment = await this.cardsRepository.bundleUpdatesAndExecute(
+        updates,
+      );
+
+      const projectAcknowledgment =
+        await this.projectRepository.bundleUpdatesAndExecute(
+          globalUpdateAfterAutomation.project,
+        );
+      if (acknowledgment.hasWriteErrors()) {
+        console.log(acknowledgment.getWriteErrors());
+        throw new InternalServerErrorException('Failed creating work thread');
+      }
+      return true;
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Failed creating work thread',
+        error.message,
+      );
+    }
+  }
 
   async handleCreateWorkThread(
     id: string,
     createWorkThread: CreateWorkThreadRequestDto,
   ): Promise<DetailedCardResponseDto> {
     try {
-      const card = this.requestProvider.card;
-      const project = await this.projectRepository.findById(
-        card.project as string,
-      );
-      const globalUpdate = {
-        card: {},
-        project: {},
-      } as GlobalDocumentUpdate;
+      const card =
+        this.requestProvider.card || (await this.cardsRepository.findById(id));
+      const project =
+        this.requestProvider.project ||
+        (await this.projectRepository.findById(card.project as string));
 
       const cardUpdate = await this.workService.createWorkThread(
         card,
@@ -71,6 +118,7 @@ export class WorkCommandHandler {
         cardUpdate,
       );
     } catch (error) {
+      console.log(error);
       throw new InternalServerErrorException(
         'Failed creating work thread',
         error.message,
@@ -84,15 +132,12 @@ export class WorkCommandHandler {
     updateWorkThread: UpdateWorkThreadRequestDto,
   ): Promise<DetailedCardResponseDto> {
     try {
-      const card = this.requestProvider.card;
-      const project = await this.projectRepository.findById(
-        card.project as string,
-      );
+      const card =
+        this.requestProvider.card || (await this.cardsRepository.findById(id));
+      const project =
+        this.requestProvider.project ||
+        (await this.projectRepository.findById(card.project as string));
 
-      const globalUpdate = {
-        card: {},
-        project: {},
-      } as GlobalDocumentUpdate;
       const cardUpdate = await this.workService.updateWorkThread(
         card,
         threadId,
@@ -123,15 +168,12 @@ export class WorkCommandHandler {
     createWorkUnit: CreateWorkUnitRequestDto,
   ): Promise<DetailedCardResponseDto> {
     try {
-      const card = this.requestProvider.card;
-      const project = await this.projectRepository.findById(
-        card.project as string,
-      );
+      const card =
+        this.requestProvider.card || (await this.cardsRepository.findById(id));
+      const project =
+        this.requestProvider.project ||
+        (await this.projectRepository.findById(card.project as string));
 
-      const globalUpdate = {
-        card: {},
-        project: {},
-      } as GlobalDocumentUpdate;
       const cardUpdate = await this.workService.createWorkUnit(
         card,
         threadId,
@@ -162,15 +204,12 @@ export class WorkCommandHandler {
     updateWorkUnit: UpdateWorkUnitRequestDto,
   ): Promise<DetailedCardResponseDto> {
     try {
-      const card = this.requestProvider.card;
-      const project = await this.projectRepository.findById(
-        card.project as string,
-      );
+      const card =
+        this.requestProvider.card || (await this.cardsRepository.findById(id));
+      const project =
+        this.requestProvider.project ||
+        (await this.projectRepository.findById(card.project as string));
 
-      const globalUpdate = {
-        card: {},
-        project: {},
-      } as GlobalDocumentUpdate;
       const cardUpdate = await this.workService.updateWorkUnit(
         card,
         threadId,

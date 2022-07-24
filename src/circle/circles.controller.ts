@@ -13,13 +13,19 @@ import {
   SetMetadata,
   UseGuards,
 } from '@nestjs/common';
-import { SessionAuthGuard } from 'src/auth/iron-session.guard';
+import {
+  PublicViewAuthGuard,
+  SessionAuthGuard,
+} from 'src/auth/iron-session.guard';
 import { CircleAuthGuard, CreateCircleAuthGuard } from 'src/auth/circle.guard';
 import { CirclesService } from './circles.service';
 import { CirclesRepository } from './circles.repository';
 import { CreateCircleRequestDto } from './dto/create-circle-request.dto';
 import { DetailedCircleResponseDto } from './dto/detailed-circle-response.dto';
-import { UpdateCircleRequestDto } from './dto/update-circle-request.dto';
+import {
+  UpdateCircleGithubRepoRequestDto,
+  UpdateCircleRequestDto,
+} from './dto/update-circle-request.dto';
 import { RequestProvider } from 'src/users/user.provider';
 import { InviteDto } from './dto/invite.dto';
 import { JoinCircleUsingInvitationRequestDto } from './dto/join-circle.dto';
@@ -164,7 +170,16 @@ export class CirclesController {
     @Param() param: ObjectIdDto,
     @Body() circle: UpdateCircleRequestDto,
   ): Promise<DetailedCircleResponseDto> {
-    console.log({ circle });
+    return await this.circlesService.update(param.id, circle);
+  }
+
+  @SetMetadata('permissions', ['manageCircleSettings'])
+  @UseGuards(PublicViewAuthGuard)
+  @Patch('/:id/updateRepos')
+  async updateGithubRepos(
+    @Param() param: ObjectIdDto,
+    @Body() circle: UpdateCircleGithubRepoRequestDto,
+  ): Promise<DetailedCircleResponseDto> {
     return await this.circlesService.update(param.id, circle);
   }
 

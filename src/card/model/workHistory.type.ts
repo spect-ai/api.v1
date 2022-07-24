@@ -16,6 +16,11 @@ export type WorkUnit = {
    */
   content: string;
 
+  /**
+   * The submission pr if any
+   */
+  pr?: string;
+
   createdAt: Date;
   updatedAt: Date;
 };

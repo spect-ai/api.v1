@@ -42,6 +42,10 @@ import { WorkCommandHandler } from './card/handlers/work.command.handler';
 import { SessionAuthGuard } from './auth/iron-session.guard';
 import { CircleAuthGuard } from './auth/circle.guard';
 import { ProjectAuthGuard } from './auth/project.guard';
+import { CreateCardCommandHandler } from './card/handlers/create.command.handler';
+import { UserCardsService } from './card/user.cards.service';
+import { CircleV1Module } from './circle-v1/circle-v1.module';
+import { CqrsModule } from '@nestjs/cqrs';
 
 const databaseUrl =
   process.env.DATABASE_URL || 'mongodb://localhost:27017/nest';
@@ -63,6 +67,8 @@ console.log({ databaseUrl });
     IntegrationsModule,
     RegistryModule,
     AutomationModule,
+    CircleV1Module,
+    CqrsModule,
   ],
   controllers: [
     AppController,
@@ -99,6 +105,8 @@ console.log({ databaseUrl });
     SessionAuthGuard,
     CircleAuthGuard,
     ProjectAuthGuard,
+    CreateCardCommandHandler,
+    UserCardsService,
   ],
 })
 export class AppModule {}

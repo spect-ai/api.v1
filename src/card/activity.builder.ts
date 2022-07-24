@@ -18,6 +18,7 @@ import {
   CreateApplicationDto,
   UpdateApplicationDto,
 } from './dto/application.dto';
+import { CommonTools } from 'src/common/common.service';
 
 const fieldUpdateToActiityIdMap = {
   deadline: 'updateDeadline',
@@ -34,7 +35,10 @@ const fieldUpdateToActiityIdMap = {
 @Injectable()
 export class ActivityBuilder {
   commitId: string;
-  constructor(private readonly requestProvider: RequestProvider) {
+  constructor(
+    private readonly requestProvider: RequestProvider,
+    private readonly commonTools: CommonTools,
+  ) {
     this.commitId = uuidv4();
   }
 
@@ -254,17 +258,6 @@ export class ActivityBuilder {
     return newCardActivity;
   }
 
-  isValidWorkUpdateActivity(
-    card: Card,
-    threadId: string,
-    threadName: string,
-    threadStatus?: string,
-    workUnitId?: string,
-    content?: string,
-  ) {
-    return true;
-  }
-
   buildCreateWorkActivity(
     activityId: 'createWorkThread' | 'createWorkUnit',
     threadName: string,
@@ -330,7 +323,6 @@ export class ActivityBuilder {
     const newCardActivity = {} as Activity;
     newCardActivity.activityId = 'updateWorkUnit';
 
-    // const isValidWorkActivity = this.isValidWorkUpdateActivity(card, threadId);
     newCardActivity.changeLog = {
       prev: {
         work: {

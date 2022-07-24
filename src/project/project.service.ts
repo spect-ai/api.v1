@@ -17,7 +17,10 @@ import { ColumnDetailsDto } from './dto/column-details.dto';
 import { CreateProjectRequestDto } from './dto/create-project-request.dto';
 import { DetailedProjectResponseDto } from './dto/detailed-project-response.dto';
 import { UpdateColumnRequestDto } from './dto/update-column.dto';
-import { UpdateProjectRequestDto } from './dto/update-project-request.dto';
+import {
+  AddOrUpdateViewDto,
+  UpdateProjectRequestDto,
+} from './dto/update-project-request.dto';
 import { Project } from './model/project.model';
 import { ProjectsRepository } from './project.repository';
 
@@ -133,7 +136,9 @@ export class ProjectService {
 
   async addColumn(projectId: string): Promise<DetailedProjectResponseDto> {
     try {
-      const project = this.requestProvider.project;
+      const project =
+        this.requestProvider.project ||
+        (await this.projectRepository.findById(projectId));
       const columnOrder = project.columnOrder;
       const columnDetails = project.columnDetails;
       const newColumnId = uuidv4();
@@ -174,7 +179,9 @@ export class ProjectService {
     columnId: string,
   ): Promise<DetailedProjectResponseDto> {
     try {
-      const project = this.requestProvider.project;
+      const project =
+        this.requestProvider.project ||
+        (await this.projectRepository.findById(id));
 
       const columnOrder = project.columnOrder;
       const columnDetails = project.columnDetails;
@@ -226,7 +233,9 @@ export class ProjectService {
     updateColumnDto: UpdateColumnRequestDto,
   ): Promise<DetailedProjectResponseDto> {
     try {
-      const project = this.requestProvider.project;
+      const project =
+        this.requestProvider.project ||
+        (await this.projectRepository.findById(id));
 
       if (!project.columnDetails[columnId]) {
         throw new HttpException('Column not found', HttpStatus.NOT_FOUND);
@@ -248,14 +257,132 @@ export class ProjectService {
       );
     } catch (error) {
       throw new InternalServerErrorException(
-        'Failed column renaming',
+        'Failed column update',
+        error.message,
+      );
+    }
+  }
+
+  async addView(
+    projectId: string,
+    addViewDto: AddOrUpdateViewDto,
+  ): Promise<DetailedProjectResponseDto> {
+    try {
+      const project =
+        this.requestProvider.project ||
+        (await this.projectRepository.findById(projectId));
+      const viewOrder = project.viewOrder || [];
+      const viewDetails = project.viewDetails || {};
+      const newViewId = uuidv4();
+      const newView = {
+        ...addViewDto,
+        viewId: newViewId,
+      };
+      const newViewDetails = {
+        ...viewDetails,
+        [newViewId]: newView,
+      };
+      const newViewOrder = [...viewOrder, newViewId];
+
+      const udpatedProject =
+        await this.projectRepository.updateProjectAndReturnWithPopulatedReferences(
+          projectId,
+          {
+            viewOrder: newViewOrder,
+            viewDetails: newViewDetails,
+          },
+        );
+
+      return this.cardsProjectService.projectPopulatedWithCardDetails(
+        udpatedProject,
+      );
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Failed view addition',
+        error.message,
+      );
+    }
+  }
+
+  async updateView(
+    id: string,
+    viewId: string,
+    updateColumnDto: AddOrUpdateViewDto,
+  ): Promise<DetailedProjectResponseDto> {
+    try {
+      const project =
+        this.requestProvider.project ||
+        (await this.projectRepository.findById(id));
+
+      if (!project.viewDetails[viewId]) {
+        throw new HttpException('Column not found', HttpStatus.NOT_FOUND);
+      }
+      const viewDetails = project.viewDetails;
+      viewDetails[viewId] = {
+        ...viewDetails[viewId],
+        ...updateColumnDto,
+      };
+      const updatedProject =
+        await this.projectRepository.updateProjectAndReturnWithPopulatedReferences(
+          id,
+          {
+            viewDetails,
+          },
+        );
+      return this.cardsProjectService.projectPopulatedWithCardDetails(
+        updatedProject,
+      );
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Failed view update',
+        error.message,
+      );
+    }
+  }
+
+  async deleteView(
+    id: string,
+    viewId: string,
+  ): Promise<DetailedProjectResponseDto> {
+    try {
+      const project =
+        this.requestProvider.project ||
+        (await this.projectRepository.findById(id));
+
+      const viewOrder = project.viewOrder;
+      const viewDetails = project.viewDetails;
+      const columnIndex = project.viewOrder.indexOf(viewId, 0);
+      if (columnIndex > -1) {
+        viewOrder.splice(columnIndex, 1);
+      }
+      if (viewId in viewDetails) {
+        delete viewDetails[viewId];
+      }
+
+      const udpatedProject =
+        await this.projectRepository.updateProjectAndReturnWithPopulatedReferences(
+          id,
+          {
+            viewOrder,
+            viewDetails,
+          },
+        );
+
+      return this.cardsProjectService.projectPopulatedWithCardDetails(
+        udpatedProject,
+      );
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Failed view deletion',
         error.message,
       );
     }
   }
 
   async delete(id: string): Promise<Project> {
-    const project = this.requestProvider.project;
+    const project =
+      this.requestProvider.project ||
+      (await this.projectRepository.findById(id));
 
     if (!project) {
       throw new HttpException('Project not found', HttpStatus.NOT_FOUND);

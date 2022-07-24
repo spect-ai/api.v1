@@ -40,9 +40,6 @@ export type DiscordToCircleRoles = {
   };
 };
 
-// eslint-disable-next-line @typescript-eslint/ban-types
-export type EmptyObject = {};
-
 @useMongoosePlugin()
 export class Circle extends ProfileModel {
   /**
@@ -131,14 +128,16 @@ export class Circle extends ProfileModel {
   /**
    * The tokens whitelisted in the circle, these will be available in the circle on top of the globally available tokens
    */
-  @prop()
-  localRegistry: LocalRegistry | EmptyObject;
+  @prop({ default: {} })
+  // eslint-disable-next-line @typescript-eslint/ban-types
+  localRegistry: LocalRegistry | {};
 
   /**
    * The tokens whitelisted in the circle, these will be available in the circle on top of the globally available tokens
    */
-  @prop()
-  blacklistRegistry: BlacklistRegistry | EmptyObject;
+  @prop({ default: {} })
+  // eslint-disable-next-line @typescript-eslint/ban-types
+  blacklistRegistry: BlacklistRegistry | {};
 
   /**
    * Invitations to the circle
