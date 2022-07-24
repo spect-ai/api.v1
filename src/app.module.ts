@@ -46,6 +46,7 @@ import { CreateCardCommandHandler } from './card/handlers/create.command.handler
 import { UserCardsService } from './card/user.cards.service';
 import { CircleV1Module } from './circle-v1/circle-v1.module';
 import { CqrsModule } from '@nestjs/cqrs';
+import { CardNotificationService } from './users/notification/card-notification.service';
 
 const databaseUrl =
   process.env.DATABASE_URL || 'mongodb://localhost:27017/nest';
@@ -107,6 +108,7 @@ console.log({ databaseUrl });
     ProjectAuthGuard,
     CreateCardCommandHandler,
     UserCardsService,
+    CardNotificationService,
   ],
 })
 export class AppModule {}

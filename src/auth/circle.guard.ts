@@ -25,13 +25,11 @@ export class CircleAuthGuard implements CanActivate {
     userRoles: string[],
     circle: Circle,
   ): boolean {
-    console.log(userRoles);
     if (!userRoles) return false;
     if (permissions.length === 0) return true;
     const userPermissions = userRoles.map(
       (role) => circle.roles[role].permissions,
     );
-    console.log(userPermissions);
 
     const collatedUserPermissions =
       this.roleService.collatePermissions(userPermissions);

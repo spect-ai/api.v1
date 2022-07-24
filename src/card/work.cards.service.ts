@@ -11,12 +11,14 @@ import {
 } from './dto/work-request.dto';
 import { Card } from './model/card.model';
 import { MappedCard } from './types/types';
+import { EventBus } from '@nestjs/cqrs';
 
 @Injectable()
 export class WorkService {
   constructor(
     private readonly activityBuilder: ActivityBuilder,
     private readonly requestProvider: RequestProvider,
+    private readonly eventBus: EventBus,
   ) {}
 
   async createSameWorkThreadInMultipleCards(
@@ -71,7 +73,6 @@ export class WorkService {
         },
       };
       const workThreadOrder = [...card.workThreadOrder, threadId];
-      console.log(workThreadOrder);
 
       const activity = this.activityBuilder.buildCreateWorkActivity(
         'createWorkUnit',

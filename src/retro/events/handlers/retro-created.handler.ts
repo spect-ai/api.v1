@@ -13,15 +13,19 @@ export class RetroCreatedEventHandler
     console.log('RetroCreatedEventHandler');
     const { retro, circleSlug } = event;
     for (const member of retro.members) {
-      this.eventBus.publish(
-        new NotificationEvent(
-          'createRetro',
-          member,
-          [circleSlug, retro.slug],
-          retro.creator,
-          retro.title,
-        ),
-      );
+      if (member !== retro.creator) {
+        this.eventBus.publish(
+          new NotificationEvent(
+            'create',
+            'retro',
+            retro as Retro,
+            member,
+            [circleSlug, retro.slug],
+            retro.creator,
+            null,
+          ),
+        );
+      }
     }
     this.eventBus.publish(
       new UserActivityEvent(

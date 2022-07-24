@@ -36,6 +36,12 @@ export class DetailedCardResponseDto {
   slug: string;
 
   /**
+   * The creator of the card
+   */
+  @IsString()
+  creator: string;
+
+  /**
    * The reviewers of the card
    */
   @IsArray()

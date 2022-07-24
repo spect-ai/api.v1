@@ -21,6 +21,8 @@ import { Project } from 'src/project/model/project.model';
 import { UsersService } from 'src/users/users.service';
 import { UsersRepository } from 'src/users/users.repository';
 import { UserCardsService } from '../user.cards.service';
+import { EventBus } from '@nestjs/cqrs';
+import { CardCreatedEvent } from '../events/impl';
 @Injectable()
 export class CreateCardCommandHandler {
   constructor(
@@ -34,6 +36,7 @@ export class CreateCardCommandHandler {
     private readonly cardsService: CardsService,
     private readonly commonTools: CommonTools,
     private readonly userCardsService: UserCardsService,
+    private readonly eventBus: EventBus,
   ) {}
 
   async handle(createCardDto: CreateCardRequestDto): Promise<{
@@ -134,6 +137,10 @@ export class CreateCardCommandHandler {
         ...createdChildCards,
       ]);
 
+      this.eventBus.publish(
+        new CardCreatedEvent(createdCard, project.slug, circle.slug),
+      );
+
       return {
         card: Object.assign(createdCard, { children: createdChildCards }),
         project: {
@@ -177,7 +184,6 @@ export class CreateCardCommandHandler {
           card.id,
         );
       }
-      console.log(userToCards);
       const userUpdateAcknowledgment =
         await this.userRepository.bundleUpdatesAndExecute(userToCards);
 

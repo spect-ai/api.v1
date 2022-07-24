@@ -170,7 +170,6 @@ export class ActivityBuilder {
         req.content && existingApplication.content !== req.content;
       isDifferent['title'] =
         req.title && existingApplication.title !== req.title;
-      console.log(isDifferent);
       /** If there is no difference return */
       if (!Object.values(isDifferent).includes(true)) return;
 

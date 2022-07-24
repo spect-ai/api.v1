@@ -15,7 +15,6 @@ export class UpdateRetroCommandHandler
   ): Promise<DetailedRetroResponseDto> {
     try {
       const { id, updateRetroRequestDto } = command;
-      console.log(id, updateRetroRequestDto);
       const updatedRetro = await this.retroRepository.updateById(
         id,
         updateRetroRequestDto,
