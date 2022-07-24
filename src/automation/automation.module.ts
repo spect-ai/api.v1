@@ -1,6 +1,6 @@
 import { forwardRef, Module } from '@nestjs/common';
 import { CardsModule } from 'src/card/cards.module';
-import { DataStructureManipulationService } from 'src/common/dataStructureManipulation.service';
+import { CommonTools } from 'src/common/common.service';
 import { CardsProjectService } from 'src/project/cards.project.service';
 import { ProjectModule } from 'src/project/project.module';
 import { RequestProvider } from 'src/users/user.provider';
@@ -21,7 +21,7 @@ import { AutomationService } from './automation.service';
     EthAddressService,
     AutomationService,
     CardsProjectService,
-    DataStructureManipulationService,
+    CommonTools,
     RequestProvider,
   ],
 })

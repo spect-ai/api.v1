@@ -1,45 +1,48 @@
-import { prop, Ref } from '@typegoose/typegoose';
-import { ObjectId } from 'mongoose';
-import { User } from 'src/users/model/users.model';
-
-export type Stats = {
-  [key: string]: StatsModel;
+/** Mapping of owner of stats to the stats */
+export type MappedStats = {
+  [owner: string]: Stats;
 };
 
-export abstract class StatsModel {
+export type Stats = {
   /**
-   * The chainId of the chain
+   * The owner of these stats
    */
-  @prop({ ref: () => User, required: true })
-  owner?: ObjectId;
+  owner?: string;
 
   /**
    * The votes given by stats owner
    */
-  @prop()
   votesGiven?: object;
 
   /**
    * The votes remaining of stats owner
    */
-  @prop()
   votesRemaining?: number;
 
   /**
    * The votes allocated to stats owner
    */
-  @prop()
   votesAllocated?: number;
 
   /**
    * Can give votes to other members
    */
-  @prop()
   canGive?: boolean;
 
   /**
    * Can receive votes from other members
    */
-  @prop()
   canReceive?: boolean;
-}
+};
+
+export type MappedFeedback = {
+  [recipient: string]: string;
+};
+
+export type Feedback = {
+  [giver: string]: MappedFeedback;
+};
+
+export type PopulatedRetroFields = {
+  circle?: { [fieldName: string]: 0 | 1 };
+};

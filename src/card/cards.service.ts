@@ -6,7 +6,6 @@ import {
 } from '@nestjs/common';
 import { ActivityBuilder } from 'src/card/activity.builder';
 import { CirclesRepository } from 'src/circle/circles.repository';
-import { DataStructureManipulationService } from 'src/common/dataStructureManipulation.service';
 import { CardsProjectService } from 'src/project/cards.project.service';
 import { DetailedProjectResponseDto } from 'src/project/dto/detailed-project-response.dto';
 import { Project } from 'src/project/model/project.model';
@@ -18,8 +17,10 @@ import { DetailedCardResponseDto } from './dto/detailed-card-response-dto';
 import { UpdateCardRequestDto } from './dto/update-card-request.dto';
 import { Card } from './model/card.model';
 import { ResponseBuilder } from './response.builder';
-import { MappedCard } from './types/types';
+import { Diff, MappedCard } from './types/types';
 import { CardValidationService } from './validation.cards.service';
+import { CommonTools } from 'src/common/common.service';
+import { Circle } from 'src/circle/model/circle.model';
 
 @Injectable()
 export class CardsService {
@@ -32,7 +33,47 @@ export class CardsService {
     private readonly cardsProjectService: CardsProjectService,
     private readonly validationService: CardValidationService,
     private readonly responseBuilder: ResponseBuilder,
+    private readonly commonTools: CommonTools,
   ) {}
+
+  getDifference(card: Card, request: UpdateCardRequestDto): Diff {
+    const filteredCard = {};
+    const filteredCardArrayFields = {};
+    const filteredRequest = {};
+
+    for (const key in request) {
+      if (Array.isArray(card[key])) filteredCardArrayFields[key] = card[key];
+      else {
+        filteredCard[key] = card[key];
+        filteredRequest[key] = request[key];
+      }
+    }
+
+    const objDiff = this.commonTools.findDifference(
+      filteredCard,
+      filteredRequest,
+    ) as Diff;
+    const arrayDiff = {};
+    for (const key in filteredCardArrayFields) {
+      arrayDiff[key] = this.commonTools.findDifference(
+        filteredCardArrayFields[key],
+        request[key],
+      );
+      if (arrayDiff[key]['added'].length > 0) {
+        objDiff['added'] = {
+          ...objDiff['added'],
+          [key]: arrayDiff[key]['added'],
+        };
+      }
+      if (arrayDiff[key]['removed'].length > 0) {
+        objDiff['deleted'] = {
+          ...objDiff['deleted'],
+          [key]: arrayDiff[key]['removed'],
+        };
+      }
+    }
+    return objDiff;
+  }
 
   async getDetailedCard(id: string): Promise<DetailedCardResponseDto> {
     try {
@@ -88,178 +129,65 @@ export class CardsService {
     }
   }
 
-  private async createOneCard(
+  createNew(
     createCardDto: CreateCardRequestDto,
-    slug?: string,
-  ): Promise<{
-    card: Card;
-    project: DetailedProjectResponseDto;
-  }> {
-    if (!this.requestProvider.project)
-      throw new HttpException('No project found', HttpStatus.NOT_FOUND);
-    if (!createCardDto.type) createCardDto.type = 'Task';
+    projectSlug: string,
+    slugNum: number,
+  ): Partial<Card> {
+    createCardDto.type = createCardDto.type || 'Task';
     const activity = this.activityBuilder.buildNewCardActivity(createCardDto);
 
-    if (!slug) {
-      const cardNum = await this.cardsRepository.count({
-        project: createCardDto.project,
-      });
-      /** Card slugs need to be globally unique so they can be moved between projects. Since
-       * project slug is already unique, we can use it to create a unique slug for each card. */
-      slug = `${this.requestProvider.project.slug}-${cardNum.toString()}`;
-    }
-
-    const createdCard = (await this.cardsRepository.create({
-      ...createCardDto,
-      activity: [activity],
-      slug,
-      creator: this.requestProvider.user.id,
-    })) as Card;
-
-    /** Add the card to the project column */
-    const project = await this.cardsProjectService.addCardToProject(
-      createCardDto.project,
-      createCardDto.columnId,
-      createdCard.id,
-    );
-
     return {
-      card: createdCard,
-      project: project,
+      ...createCardDto,
+      slug: `${projectSlug}-${slugNum.toString()}`,
+      activity: [activity],
+      creator: this.requestProvider.user.id,
     };
   }
 
-  async create(createCardDto: CreateCardRequestDto): Promise<{
-    card: DetailedCardResponseDto;
-    project: DetailedProjectResponseDto;
-    parentCard?: DetailedCardResponseDto;
-  }> {
-    try {
-      const res = await this.createOneCard(createCardDto);
-      let createdCard = res.card;
-      let project = res.project;
+  addChildCards(
+    createCardDto: CreateCardRequestDto,
+    parentCard: Card,
+    circle: Circle,
+    projectSlug: string,
+    startSlugNum: number,
+  ): Card[] {
+    const childCards = createCardDto.childCards;
+    if (!childCards || childCards.length === 0) return [];
 
-      /** If card has a parent, add the card as a child in the parent card */
-      let updatedParentCard: Card;
-      if (createdCard.parent) {
-        /** Find the parent card to be able to append children to contain current card. */
-        const parentCard =
-          await this.cardsRepository.getCardWithUnpopulatedReferences(
-            createdCard.parent,
-          );
-        this.validationService.validateCardExists(parentCard);
-        updatedParentCard =
-          await this.cardsRepository.updateCardAndReturnWithPopulatedReferences(
-            parentCard.id,
-            {
-              children: [...parentCard.children, createdCard.id],
-            },
-          );
-      }
-      /** If card has children add the child cards first and then update the parent card to reference the children */
-      if (createCardDto.childCards?.length > 0) {
-        /** Adding the child cards */
-        const resCreateMultipleCards = await this.createMultipleCards(
-          createCardDto.childCards,
-          createdCard.project as string,
-          createdCard.circle,
-          createdCard.columnId,
-          parseInt(createdCard.slug) + 1,
-          createdCard.id,
-        );
-        project = resCreateMultipleCards.project;
-        /** Update the parent card with the children */
-        createdCard =
-          await this.cardsRepository.updateCardAndReturnWithPopulatedReferences(
-            createdCard.id,
-            {
-              children: createdCard.children.concat(
-                resCreateMultipleCards.cardIds,
-              ),
-            },
-          );
-      }
+    let slugNum = startSlugNum;
+    const cards = [];
+    for (const childCard of childCards) {
+      createCardDto.type = createCardDto.type || 'Task';
+      const activity = this.activityBuilder.buildNewCardActivity(createCardDto);
 
-      return {
-        project: project,
-        card: createdCard,
-        parentCard: updatedParentCard,
-      };
-    } catch (error) {
-      throw new InternalServerErrorException(
-        'Failed card creation',
-        error.message,
-      );
+      cards.push({
+        ...childCard,
+        project: childCard.project || createCardDto.project,
+        circle: childCard.circle || circle.id,
+        parent: parentCard.id,
+        reward: createCardDto.reward || { ...circle.defaultPayment, value: 0 }, //TODO: add reward to child cards
+        columnId: childCard.columnId || createCardDto.columnId,
+        activity: [activity],
+        slug: `${projectSlug}-${slugNum.toString()}`,
+      });
+      slugNum++;
     }
+    return cards;
   }
 
-  async createMultipleCards(
-    createCardDtos: CreateCardRequestDto[],
-    project: string,
-    circleId: string,
-    columnId?: string,
-    numCards?: number,
-    parent?: string,
-  ): Promise<{
-    cardIds: string[];
-    project: DetailedProjectResponseDto;
-  }> {
-    try {
-      const circle = await this.circleRepository.getCircle(circleId);
-      const defaultReward = { ...circle.defaultPayment, value: 0 };
-      /** Add the project, column and circle for cards, dont create card in this loop in case there's a failure.
-       * We want to prevent a scenario where some cards are created and others are not. */
-      for (const createCardDto of createCardDtos) {
-        createCardDto.project = project;
-        createCardDto.circle = circleId;
-        createCardDto.parent = parent;
-        if (!createCardDto.reward) createCardDto.reward = defaultReward;
-        if (!createCardDto.columnId && columnId) {
-          createCardDto.columnId = columnId;
-        }
-        if (!createCardDto.columnId) {
-          throw new HttpException(
-            'Column Id must be entered',
-            HttpStatus.NOT_FOUND,
-          );
-        }
-      }
-
-      /** Set the number of cards that exists presently in the project */
-      if (!numCards) {
-        numCards = await this.cardsRepository.count({
-          project: project,
-        });
-      }
-      /** Create the card */
-      const newCardIds = [] as string[];
-      let res;
-      for (const [index, createCardDto] of createCardDtos.entries()) {
-        /** Card slugs need to be globally unique so they can be moved between projects. Since
-         * project slug is already unique, we can use it to create a unique slug for each card. */
-        res = await this.createOneCard(
-          createCardDto,
-          `${this.requestProvider.project.slug}-${(
-            numCards + index
-          ).toString()}`,
-        );
-        newCardIds.push(res.card.id);
-      }
-
-      return {
-        cardIds: newCardIds,
-        project:
-          'project' in res
-            ? (res.project as DetailedProjectResponseDto)
-            : ({} as DetailedProjectResponseDto),
-      };
-    } catch (error) {
-      console.log(error);
-      throw new InternalServerErrorException(
-        'Failed multiple card creation',
-        error.message,
-      );
-    }
+  async addToParentCard(
+    cards: Card[] | Card,
+    parentCard: Card,
+  ): Promise<MappedCard> {
+    if (!parentCard) return {};
+    if (!Array.isArray(cards)) cards = [cards];
+    const cardIds = cards.map((card) => card.id);
+    return {
+      [parentCard.id]: {
+        children: [...parentCard.children, ...cardIds],
+      },
+    };
   }
 
   update(
@@ -386,5 +314,28 @@ export class CardsService {
         'status.active': true,
       },
     );
+  }
+
+  closeCard(card: Card): MappedCard {
+    const activities = this.activityBuilder.buildUpdatedCardActivity(
+      {
+        status: {
+          active: false,
+          paid: true,
+          archived: true,
+        },
+      },
+      card,
+    );
+
+    return {
+      [card.id]: {
+        activity: card.activity.concat(activities),
+        status: {
+          ...card.status,
+          active: false,
+        },
+      },
+    };
   }
 }

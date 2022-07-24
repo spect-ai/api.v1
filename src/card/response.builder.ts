@@ -1,11 +1,10 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { DataStructureManipulationService } from 'src/common/dataStructureManipulation.service';
+import { Injectable } from '@nestjs/common';
+import { CommonTools } from 'src/common/common.service';
 import { GlobalDocumentUpdate } from 'src/common/types/update.type';
 import { Project } from 'src/project/model/project.model';
 import { ProjectsRepository } from 'src/project/project.repository';
 import { MappedProject } from 'src/project/types/types';
 import { RequestProvider } from 'src/users/user.provider';
-import { ActionService } from './actions.service';
 import { ActivityResolver } from './activity.resolver';
 import { CardsRepository } from './cards.repository';
 import { DetailedCardResponseDto } from './dto/detailed-card-response-dto';
@@ -17,7 +16,7 @@ export class ResponseBuilder {
   constructor(
     private readonly requestProvider: RequestProvider,
     private readonly activityResolver: ActivityResolver,
-    private readonly dataStructureManipulationService: DataStructureManipulationService,
+    private readonly commonTools: CommonTools,
   ) {}
 
   resolveApplicationView(card: Card): Card {
@@ -73,10 +72,7 @@ export class ResponseBuilder {
       ...card,
       project: {
         ...cardProject,
-        cards: this.dataStructureManipulationService.objectify(
-          cardProject.cards,
-          'id',
-        ),
+        cards: this.commonTools.objectify(cardProject.cards, 'id'),
       },
     } as DetailedCardResponseDto;
 
@@ -97,7 +93,7 @@ export class CommonUtility {
     private readonly responseBuilder: ResponseBuilder,
     private readonly cardsRepository: CardsRepository,
     private readonly projectRepository: ProjectsRepository,
-    private readonly datastructureManipulationService: DataStructureManipulationService,
+    private readonly commonTools: CommonTools,
   ) {}
 
   async mergeExecuteAndReturn(
@@ -108,18 +104,16 @@ export class CommonUtility {
     cardUpdate: MappedCard,
     projectUpdate?: MappedProject,
   ) {
-    globalUpdate.project[projectId] =
-      this.datastructureManipulationService.mergeObjects(
-        globalUpdate.project[projectId],
-        globalUpdateAfterAutomation.project[projectId],
-      ) as MappedProject;
+    globalUpdate.project[projectId] = this.commonTools.mergeObjects(
+      globalUpdate.project[projectId],
+      globalUpdateAfterAutomation.project[projectId],
+    ) as MappedProject;
 
-    globalUpdate.card[cardId] =
-      this.datastructureManipulationService.mergeObjects(
-        globalUpdate.card[cardId],
-        globalUpdateAfterAutomation.card[cardId],
-        cardUpdate[cardId],
-      ) as MappedCard;
+    globalUpdate.card[cardId] = this.commonTools.mergeObjects(
+      globalUpdate.card[cardId],
+      globalUpdateAfterAutomation.card[cardId],
+      cardUpdate[cardId],
+    ) as MappedCard;
 
     const acknowledgment = await this.cardsRepository.bundleUpdatesAndExecute(
       globalUpdate.card,

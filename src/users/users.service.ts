@@ -1,7 +1,6 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
-import { ObjectId } from 'mongoose';
 import { EthAddressRepository } from 'src/_eth-address/_eth_address.repository';
-import { CreateUserDto } from './dto/create-user.dto';
+import { DetailedUserPubliceResponseDto } from './dto/detailed-user-response.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './model/users.model';
 import { RequestProvider } from './user.provider';
@@ -14,6 +13,25 @@ export class UsersService {
     private readonly usersRepository: UsersRepository,
     private readonly requestProvider: RequestProvider,
   ) {}
+
+  async getUserPublicProfile(
+    userId: string,
+  ): Promise<DetailedUserPubliceResponseDto> {
+    return await this.usersRepository.getUserDetailsByUserId(userId);
+  }
+
+  async getPublicProfileOfMultipleUsers(userIds: string[]): Promise<User[]> {
+    if (userIds.length === 0) return [];
+    return await this.usersRepository.findAll({
+      _id: { $in: userIds },
+    });
+  }
+
+  async getUserPublicProfileByUsername(
+    username: string,
+  ): Promise<DetailedUserPubliceResponseDto> {
+    return await this.usersRepository.getUserDetailsByUsername(username);
+  }
 
   async create(ethAddress: string) {
     const numUsers = await this.usersRepository.count();
@@ -28,9 +46,12 @@ export class UsersService {
     return user;
   }
 
-  async update(updateUserDto: UpdateUserDto, user: User): Promise<User> {
+  async update(updateUserDto: UpdateUserDto): Promise<User> {
     try {
-      if (updateUserDto.username && user.username !== updateUserDto.username) {
+      if (
+        updateUserDto.username &&
+        this.requestProvider.user.username !== updateUserDto.username
+      ) {
         const usernameTaken = await this.usersRepository.exists({
           username: updateUserDto.username,
         });
@@ -48,21 +69,54 @@ export class UsersService {
     }
   }
 
-  async getUserPublicProfile(userId: string): Promise<User> {
-    // Filter what fields get returned as private data is added to user table
-    return await this.usersRepository.findById(userId);
+  async addItem(
+    itemType: 'bookmarks' | 'followingCircles' | 'followingUsers' | 'followers',
+    itemId: string,
+    userId?: string,
+  ): Promise<DetailedUserPubliceResponseDto> {
+    try {
+      let user = this.requestProvider.user;
+      if (userId) user = await this.usersRepository.findById(userId);
+      if (user[itemType].includes(itemId))
+        throw new Error('Item already added');
+      return await this.usersRepository.updateAndReturnWithPopulatedFields(
+        userId || this.requestProvider.user.id,
+        {
+          $push: {
+            [itemType]: itemId,
+          },
+        },
+      );
+    } catch (error) {
+      throw new InternalServerErrorException(
+        `Failed adding ${itemType} to user`,
+        error.message,
+      );
+    }
   }
 
-  async getPublicProfileOfMultipleUsers(userIds: string[]): Promise<User[]> {
-    // Filter what fields get returned as private data is added to user table
-    if (userIds.length === 0) return [];
-    return await this.usersRepository.findAll({
-      _id: { $in: userIds },
-    });
-  }
-
-  async getUserPublicProfileByUsername(username: string): Promise<User> {
-    // Filter what fields get returned as private data is added to user table
-    return await this.usersRepository.findOne({ username });
+  async removeItem(
+    itemType: 'bookmarks' | 'followingCircles' | 'followingUsers' | 'followers',
+    itemId: string,
+    userId?: string,
+  ): Promise<DetailedUserPubliceResponseDto> {
+    try {
+      let user = this.requestProvider.user;
+      if (userId) user = await this.usersRepository.findById(userId);
+      user[itemType] = user[itemType].filter((id) => id.toString() !== itemId);
+      return await this.usersRepository.updateAndReturnWithPopulatedFields(
+        userId || this.requestProvider.user?.id,
+        {
+          $set: {
+            [itemType]: user[itemType],
+          },
+        },
+      );
+    } catch (error) {
+      throw new InternalServerErrorException(
+        `Failed adding ${itemType} to user`,
+        error.message,
+      );
+    }
   }
 }

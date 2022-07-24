@@ -10,7 +10,7 @@ import { DiscordService } from 'src/common/discord.service';
 import { GithubService } from 'src/common/github.service';
 import { EthAddressModule } from 'src/_eth-address/_eth-address.module';
 import { RolesService } from 'src/roles/roles.service';
-import { DataStructureManipulationService } from 'src/common/dataStructureManipulation.service';
+import { CommonTools } from 'src/common/common.service';
 import { CircleRegistryService } from './registry.circle.service';
 import { RegistryModule } from 'src/registry/registry.module';
 import { SessionAuthGuard } from 'src/auth/iron-session.guard';
@@ -31,7 +31,7 @@ import { CircleAuthGuard } from 'src/auth/circle.guard';
     DiscordService,
     GithubService,
     RolesService,
-    DataStructureManipulationService,
+    CommonTools,
     CircleRegistryService,
     SessionAuthGuard,
     CircleAuthGuard,

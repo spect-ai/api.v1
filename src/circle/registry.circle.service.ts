@@ -30,22 +30,23 @@ export class CircleRegistryService {
      */
     const globalRegistry = await this.registryService.getRegistry();
     const blacklistRegistry = circle.blacklistRegistry;
-
     /**
      * Loop through all networks and tokens in global registry, this is mainly to sync global registry records
      * that were added after circle was created
      */
     if (!circle.localRegistry) circle.localRegistry = {};
+
     for (const [chainId, chain] of Object.entries(globalRegistry)) {
       if (!(chainId in circle.localRegistry))
-        circle.localRegistry[chainId] = {};
-
-      circle.localRegistry[chainId] = Object.assign(globalRegistry[chainId]);
-
-      circle.localRegistry[chainId].tokenDetails = Object.assign(
-        circle.localRegistry[chainId].tokenDetails || {},
-        globalRegistry[chainId].tokenDetails,
-      );
+        circle.localRegistry[chainId] = { tokenDetails: {} };
+      circle.localRegistry[chainId] = {
+        ...globalRegistry[chainId],
+        ...circle.localRegistry[chainId],
+      };
+      circle.localRegistry[chainId].tokenDetails = {
+        ...circle.localRegistry[chainId].tokenDetails,
+        ...globalRegistry[chainId].tokenDetails,
+      };
     }
 
     /**
@@ -70,8 +71,9 @@ export class CircleRegistryService {
   }
 
   async addToken(id: string, addTokenDto: AddNewTokenDto) {
-    const circle = this.requestProvider.circle;
-
+    const circle =
+      this.requestProvider.circle ||
+      (await this.circlesRepository.findById(id));
     if (!circle) {
       throw new HttpException('Circle not found', HttpStatus.NOT_FOUND);
     }
@@ -81,34 +83,20 @@ export class CircleRegistryService {
     });
     if (!network)
       throw new HttpException('Invalid network', HttpStatus.NOT_FOUND);
-
     const localRegistry = circle.localRegistry || {};
-    if (
-      addTokenDto.chainId in localRegistry &&
-      'tokenDetails' in localRegistry[addTokenDto.chainId]
-    ) {
-      localRegistry[addTokenDto.chainId].tokenDetails = {
-        ...localRegistry[addTokenDto.chainId].tokenDetails,
-        [addTokenDto.address]: {
-          symbol: addTokenDto.symbol,
-          name: addTokenDto.name,
-          address: addTokenDto.address,
-        } as TokenInfo,
-      };
-    } else {
-      localRegistry[addTokenDto.chainId] = {
-        ...network,
-        tokenDetails: {
-          [addTokenDto.address]: {
-            symbol: addTokenDto.symbol as TokenInfo['symbol'],
-            name: addTokenDto.name as TokenInfo['name'],
-            address: addTokenDto.address as TokenInfo['address'],
-          } as TokenInfo,
-        },
-      } as any;
-    }
+    if (!(addTokenDto.chainId in localRegistry))
+      localRegistry[addTokenDto.chainId] = { tokenDetails: {} };
 
-    const updatedRegistry = await this.circlesRepository.updateByFilter(
+    localRegistry[addTokenDto.chainId].tokenDetails = {
+      ...localRegistry[addTokenDto.chainId].tokenDetails,
+      [addTokenDto.address]: {
+        symbol: addTokenDto.symbol,
+        name: addTokenDto.name,
+        address: addTokenDto.address,
+      } as TokenInfo,
+    };
+
+    const updatedCircle = await this.circlesRepository.updateByFilter(
       {
         _id: id,
       },
@@ -118,14 +106,16 @@ export class CircleRegistryService {
       },
     );
 
-    return await this.getPaymentMethods(id);
+    return await this.getPaymentMethods(circle.slug);
   }
 
   async updateBlacklist(
     id: string,
     updateLocalRegistryDto: UpdateBlacklistDto,
   ) {
-    const circle = this.requestProvider.circle;
+    const circle =
+      this.requestProvider.circle ||
+      (await this.circlesRepository.findById(id));
 
     if (!circle) {
       throw new HttpException('Circle not found', HttpStatus.NOT_FOUND);

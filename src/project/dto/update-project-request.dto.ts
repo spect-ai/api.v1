@@ -2,9 +2,11 @@ import {
   IsArray,
   IsBoolean,
   IsNotEmpty,
+  IsObject,
   IsOptional,
   IsString,
 } from 'class-validator';
+import { Filter, View } from '../types/types';
 
 export class UpdateProjectRequestDto {
   /**
@@ -51,4 +53,26 @@ export class UpdateProjectRequestDto {
     id: string;
     name: string;
   };
+}
+
+export class AddOrUpdateViewDto {
+  /**
+   * The type of the view
+   */
+  @IsObject()
+  @IsNotEmpty()
+  filters: Filter;
+
+  /**
+   * The type of the view
+   */
+  @IsString()
+  @IsNotEmpty()
+  type: View['type'];
+
+  /**
+   * Is the view hidden?
+   */
+  @IsBoolean()
+  hidden: boolean;
 }

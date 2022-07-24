@@ -1,31 +1,44 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { RequestProvider } from 'src/users/user.provider';
-import { CardsRepository } from './cards.repository';
-import { CardsService } from './cards.service';
-import { DetailedCardResponseDto } from './dto/detailed-card-response-dto';
+import { v4 as uuidv4 } from 'uuid';
+import { ActivityBuilder } from './activity.builder';
 import {
+  CreateGithubPRDto,
   CreateWorkThreadRequestDto,
   CreateWorkUnitRequestDto,
   UpdateWorkThreadRequestDto,
   UpdateWorkUnitRequestDto,
 } from './dto/work-request.dto';
-import { v4 as uuidv4 } from 'uuid';
-import { ActivityBuilder } from './activity.builder';
-import { ResponseBuilder } from './response.builder';
-import { CardValidationService } from './validation.cards.service';
 import { Card } from './model/card.model';
-import { MappedCard, WorkThread, WorkThreads } from './types/types';
+import { MappedCard } from './types/types';
+import { EventBus } from '@nestjs/cqrs';
 
 @Injectable()
 export class WorkService {
   constructor(
-    private readonly requestProvider: RequestProvider,
-    private readonly cardsRepository: CardsRepository,
-    private readonly cardsService: CardsService,
     private readonly activityBuilder: ActivityBuilder,
-    private readonly validationService: CardValidationService,
-    private readonly responseBuilder: ResponseBuilder,
+    private readonly requestProvider: RequestProvider,
+    private readonly eventBus: EventBus,
   ) {}
+
+  async createSameWorkThreadInMultipleCards(
+    cards: Card[],
+    createWorkThread: CreateWorkThreadRequestDto,
+  ): Promise<MappedCard> {
+    try {
+      let threads = {};
+      for (const cardId of cards) {
+        const thread = await this.createWorkThread(cardId, createWorkThread);
+        threads = { ...threads, ...thread };
+      }
+      return threads;
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Failed creating work thread',
+        error.message,
+      );
+    }
+  }
 
   async createWorkThread(
     card: Card,
@@ -34,13 +47,15 @@ export class WorkService {
     try {
       const workUnitId = uuidv4();
       const workUnit = {};
+
       workUnit[workUnitId] = {
-        user: this.requestProvider.user._id,
-        content: createWorkThread.content,
+        user: this.requestProvider.user.id,
+        content: createWorkThread.content || '',
         workUnitId,
         createdAt: new Date(),
         updatedAt: new Date(),
         type: 'submission',
+        pr: createWorkThread.pr,
       };
 
       const threadId = uuidv4();
@@ -127,12 +142,13 @@ export class WorkService {
         ...card.workThreads[threadId].workUnits,
         [workUnitId]: {
           unitId: workUnitId,
-          user: this.requestProvider.user._id,
-          content: createWorkUnit.content,
+          user: this.requestProvider.user.id,
+          content: createWorkUnit.content || '',
           workUnitId,
           createdAt: new Date(),
           updatedAt: new Date(),
           type: createWorkUnit.type,
+          pr: createWorkUnit.pr,
         },
       };
       const workThreads = {
@@ -180,10 +196,14 @@ export class WorkService {
         ...card.workThreads[threadId].workUnits[workUnitId],
         content:
           updateWorkUnit.content ||
-          card.workThreads[threadId].workUnits[workUnitId].content,
+          card.workThreads[threadId].workUnits[workUnitId].content ||
+          '',
         type:
           updateWorkUnit.type ||
           card.workThreads[threadId].workUnits[workUnitId].type,
+        pr:
+          updateWorkUnit.pr ||
+          card.workThreads[threadId].workUnits[workUnitId].pr,
         updatedAt: new Date(),
       };
 

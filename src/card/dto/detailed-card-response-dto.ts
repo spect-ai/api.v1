@@ -11,7 +11,11 @@ import { Payment } from 'src/common/models/payment.model';
 import { Status } from 'src/common/types/status.type';
 import { DetailedProjectResponseDto } from 'src/project/dto/detailed-project-response.dto';
 import { Project } from 'src/project/model/project.model';
-import { ApplicationDetails, ApplicationUnit } from '../types/types';
+import {
+  ApplicationDetails,
+  ApplicationUnit,
+  WorkThreads,
+} from '../types/types';
 
 export class DetailedCardResponseDto {
   /**
@@ -34,6 +38,12 @@ export class DetailedCardResponseDto {
   @IsString()
   @IsNotEmpty()
   slug: string;
+
+  /**
+   * The creator of the card
+   */
+  @IsString()
+  creator: string;
 
   /**
    * The reviewers of the card
@@ -118,4 +128,11 @@ export class DetailedCardResponseDto {
    */
   @IsObject()
   myApplication?: ApplicationUnit;
+
+  /**
+   * The history of work done on the card, supports multiple parallel work histories so
+   * multiple people can work on the same card (relevant for contests, cooperatives etc)
+   */
+  @IsObject()
+  workThreads?: WorkThreads;
 }

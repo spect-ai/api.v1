@@ -6,61 +6,14 @@ import { DetailedTemplateResponseDto } from './dto/detailed-template-response.dt
 import { TemplatesRepository } from './tempates.repository';
 import { v4 as uuidv4 } from 'uuid';
 import { MinimalColumnDetails } from './models/template.model';
-import { DataStructureManipulationService } from 'src/common/dataStructureManipulation.service';
-
-// const automations = [
-//   {
-//     name: 'some automation',
-//     triggerProperty: 'status.active',
-//     value: {
-//       from: false,
-//       to: true,
-//     },
-//     conditions: [
-//       {
-//         property: 'assignee',
-//         value: { has: 'some user' },
-//       },
-//     ],
-//     actions: [
-//       {
-//         property: 'column',
-//         value: {
-//           to: 'Done',
-//         },
-//       },
-//     ],
-//   },
-//   {
-//     name: 'some automation',
-//     triggerProperty: 'status.active',
-//     value: {
-//       from: false, // to, from, added, removed, cleared
-//       to: true,
-//     },
-//     conditions: [
-//       {
-//         property: 'assignee',
-//         value: { has: 'some user' }, // is, has, hasNot, isNot, isOneOf, isNotOneOf, isEmpty, isNotEmpty
-//       },
-//     ],
-//     actions: [
-//       {
-//         property: 'columnId',
-//         value: {
-//           to: 'Done', // to, add, removee, clear
-//         },
-//       },
-//     ],
-//   },
-// ];
+import { CommonTools } from 'src/common/common.service';
 
 @Injectable()
 export class TemplatesService {
   constructor(
     private readonly templatesRepository: TemplatesRepository,
     private readonly requestProvider: RequestProvider,
-    private readonly datastructuresService: DataStructureManipulationService,
+    private readonly commonTools: CommonTools,
   ) {}
 
   async getTemplates(
@@ -122,7 +75,7 @@ export class TemplatesService {
       automationOrder.push(automationId);
     }
 
-    automations = this.datastructuresService.objectify(automations, 'id');
+    automations = this.commonTools.objectify(automations, 'id');
 
     return [automations, automationOrder];
   }

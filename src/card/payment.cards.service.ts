@@ -1,35 +1,18 @@
-import {
-  HttpException,
-  HttpStatus,
-  Injectable,
-  InternalServerErrorException,
-} from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ActivityBuilder } from 'src/card/activity.builder';
-import { CirclesRepository } from 'src/circle/circles.repository';
-import { DataStructureManipulationService } from 'src/common/dataStructureManipulation.service';
-import { CardsProjectService } from 'src/project/cards.project.service';
-import { Project } from 'src/project/model/project.model';
-import { ProjectService } from 'src/project/project.service';
-import { RequestProvider } from 'src/users/user.provider';
+import { CommonTools } from 'src/common/common.service';
 import { CardsRepository } from './cards.repository';
 import { AggregatedFlattenedPaymentInfo } from './dto/payment-info-response.dto';
 import { UpdatePaymentInfoDto } from './dto/update-payment-info.dto';
 import { Card } from './model/card.model';
-import { ResponseBuilder } from './response.builder';
 import { MappedCard } from './types/types';
-import { CardValidationService } from './validation.cards.service';
 
 @Injectable()
 export class CardsPaymentService {
   constructor(
-    private readonly requestProvider: RequestProvider,
     private readonly cardsRepository: CardsRepository,
     private readonly activityBuilder: ActivityBuilder,
-    private readonly projectService: ProjectService,
-    private readonly cardsProjectService: CardsProjectService,
-    private readonly datastructureManipulationService: DataStructureManipulationService,
-    private readonly validationService: CardValidationService,
-    private readonly responseBuilder: ResponseBuilder,
+    private readonly commonTools: CommonTools,
   ) {}
 
   getDividedRewards(value: number, members: string[]) {
@@ -67,7 +50,7 @@ export class CardsPaymentService {
     for (const card of cards) {
       if (card.reward.token.address !== '0x0')
         aggregatedRewardValuesGroupedByToken =
-          this.datastructureManipulationService.setOrAggregateObjectKey(
+          this.commonTools.setOrAggregateObjectKey(
             aggregatedRewardValuesGroupedByToken,
             card.reward.token.address,
             card.reward.value,
@@ -96,7 +79,7 @@ export class CardsPaymentService {
             paymentInfo[reward.token.address] = {};
           }
           paymentInfo[reward.token.address] =
-            this.datastructureManipulationService.setOrAggregateObjectKey(
+            this.commonTools.setOrAggregateObjectKey(
               paymentInfo[reward.token.address],
               assignee,
               rewardValues[index],

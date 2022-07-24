@@ -1,4 +1,5 @@
 import { IsNotEmpty, IsString } from 'class-validator';
+import { IsObjectId } from 'class-validator-mongo-object-id';
 
 export class RequiredSlugDto {
   /**
@@ -43,4 +44,22 @@ export class RequiredCommitIdDto {
   @IsNotEmpty()
   @IsString()
   commitId: string;
+}
+
+export class RequiredViewIdDto {
+  /**
+   * Object Id
+   */
+  @IsNotEmpty()
+  @IsString()
+  viewId: string;
+}
+
+export class RequiredCardIdDto {
+  /**
+   * Object Id
+   */
+  @IsNotEmpty()
+  @IsObjectId()
+  cardId: string;
 }

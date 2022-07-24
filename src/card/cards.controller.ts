@@ -11,6 +11,7 @@ import {
 } from '@nestjs/common';
 import { ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
 import {
+  ConnectedGithubAuthGuard,
   PublicViewAuthGuard,
   SessionAuthGuard,
 } from 'src/auth/iron-session.guard';
@@ -23,12 +24,18 @@ import {
   GetByProjectAndSlugDto,
   GetByProjectSlugAndCardSlugDto,
 } from './dto/get-card-params.dto';
-import { UpdateCardRequestDto } from './dto/update-card-request.dto';
+import {
+  MultiCardCloseDto,
+  MultiCardCloseWithSlugDto,
+  UpdateCardRequestDto,
+  UpdateCardStatusRequestDto,
+} from './dto/update-card-request.dto';
 import {
   UpdateWorkUnitRequestDto,
   CreateWorkThreadRequestDto,
   UpdateWorkThreadRequestDto,
   CreateWorkUnitRequestDto,
+  CreateGithubPRDto,
 } from './dto/work-request.dto';
 import { AddCommentDto, UpdateCommentDto } from './dto/comment-body.dto';
 import {
@@ -57,6 +64,7 @@ import {
   RequiredThreadIdDto,
   RequiredWorkUnitIdDto,
 } from 'src/common/dtos/string.dto';
+import { CreateCardCommandHandler } from './handlers/create.command.handler';
 
 @Controller('card')
 @ApiTags('card')
@@ -65,11 +73,11 @@ export class CardsController {
     private readonly cardsService: CardsService,
     private readonly actionService: ActionService,
     private readonly applicationService: ApplicationService,
-    private readonly workService: WorkService,
     private readonly commentService: CommentService,
     private readonly paymentService: CardsPaymentService,
     private readonly cardCommandHandler: CardCommandHandler,
     private readonly workCommandHandler: WorkCommandHandler,
+    private readonly createCommandHandler: CreateCardCommandHandler,
   ) {}
 
   @UseGuards(PublicViewAuthGuard)
@@ -114,6 +122,14 @@ export class CardsController {
     return await this.cardCommandHandler.updatePaymentInfoAndClose(
       updatePaymentInfoDto,
     );
+  }
+
+  @UseGuards(PublicViewAuthGuard)
+  @Patch('/closeWithBot')
+  async closeWithBot(
+    @Body() multiCardCloseDto: MultiCardCloseWithSlugDto,
+  ): Promise<boolean> {
+    return await this.cardCommandHandler.closeMultipleCards(multiCardCloseDto);
   }
 
   @ApiQuery({ name: 'cardIds', type: 'string' })
@@ -166,9 +182,17 @@ export class CardsController {
   @UseGuards(CreateNewCardAuthGuard)
   async create(@Body() card: CreateCardRequestDto): Promise<{
     card: DetailedCardResponseDto;
-    project: DetailedProjectResponseDto;
   }> {
-    return await this.cardsService.create(card);
+    return await this.createCommandHandler.handle(card);
+  }
+
+  @Patch('/createWorkThreadWithPR')
+  @UseGuards(PublicViewAuthGuard)
+  async createWorkThreadWithPR(
+    @Body() createGithubPRDto: CreateGithubPRDto,
+  ): Promise<boolean> {
+    console.log(createGithubPRDto);
+    return await this.workCommandHandler.handleGithubPR(createGithubPRDto);
   }
 
   @ApiParam({ name: 'id', type: 'string' })
@@ -182,15 +206,13 @@ export class CardsController {
     return await this.cardCommandHandler.update(params.id, card);
   }
 
-  @Patch('/:id/createWorkThreadWithPR')
-  async createWorkThreadWithPR(
+  @Patch('/:id/updateStatusFromBot')
+  @UseGuards(PublicViewAuthGuard)
+  async updateStatusFromBot(
     @Param() params: ObjectIdDto,
-    @Body() createWorkThread: CreateWorkThreadRequestDto,
+    @Body() updateStatusDto: UpdateCardStatusRequestDto,
   ): Promise<DetailedCardResponseDto> {
-    return await this.workCommandHandler.handleCreateWorkThread(
-      params.id,
-      createWorkThread,
-    );
+    return await this.cardCommandHandler.update(params.id, updateStatusDto);
   }
 
   @SetMetadata('permissions', ['submit'])
@@ -254,7 +276,7 @@ export class CardsController {
   }
 
   @ApiParam({ name: 'id', type: 'string' })
-  @UseGuards(CardAuthGuard)
+  @UseGuards(SessionAuthGuard)
   @Patch('/:id/addComment')
   async addComment(
     @Param() params: ObjectIdDto,
@@ -265,7 +287,7 @@ export class CardsController {
 
   @ApiParam({ name: 'id', type: 'string' })
   @ApiQuery({ name: 'commitId', type: 'string' })
-  @UseGuards(CardAuthGuard)
+  @UseGuards(SessionAuthGuard)
   @Patch('/:id/updateComment')
   async udpateComment(
     @Param() params: ObjectIdDto,
@@ -279,7 +301,7 @@ export class CardsController {
     );
   }
 
-  @UseGuards(CardAuthGuard)
+  @UseGuards(SessionAuthGuard)
   @Patch('/:id/deleteComment')
   async deleteComment(
     @Param() params: ObjectIdDto,
