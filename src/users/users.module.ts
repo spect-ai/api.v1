@@ -11,6 +11,8 @@ import { UsersController } from './users.controller';
 import { UsersRepository } from './users.repository';
 import { UsersService } from './users.service';
 import { CardNotificationService } from './notification/card-notification.service';
+import { QueryHandlers } from './queries/handlers';
+import { UserFieldResolver } from './queries/handlers/get-user.handler';
 
 @Module({
   imports: [
@@ -27,6 +29,8 @@ import { CardNotificationService } from './notification/card-notification.servic
     CommonTools,
     CardNotificationService,
     ...EventHandlers,
+    ...QueryHandlers,
+    UserFieldResolver,
   ],
   exports: [UsersService, UsersRepository, UsersModule],
 })

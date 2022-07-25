@@ -53,31 +53,25 @@ export class User extends ProfileModel {
   circles: string[];
 
   /**
-   * List of projects a user is assigned or reviewing
-   */
-  @prop({ ref: () => Project, default: [] })
-  projects: string[];
-
-  /**
-   * List of cards a user is assigned or reviewing
+   * List of cards a user is currently assigned to
    */
   @prop({ ref: () => Card, default: [] })
   assignedCards: string[];
 
   /**
-   * List of cards a user is assigned or reviewing
+   * List of cards a user is currently reviewing
    */
   @prop({ ref: () => Card, default: [] })
   reviewingCards: string[];
 
   /**
-   * List of cards a user is assigned or reviewing
+   * List of cards a user was assigned to that have been closed
    */
   @prop({ ref: () => Card, default: [] })
   assignedClosedCards: string[];
 
   /**
-   * List of cards a user is assigned or reviewing
+   * List of cards a user was reviewing that have been closed
    */
   @prop({ ref: () => Card, default: [] })
   reviewingClosedCards: string[];

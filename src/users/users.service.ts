@@ -1,22 +1,37 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { EthAddressRepository } from 'src/_eth-address/_eth_address.repository';
-import { DetailedUserPubliceResponseDto } from './dto/detailed-user-response.dto';
+import {
+  DetailedUserPrivateResponseDto,
+  DetailedUserPubliceResponseDto,
+} from './dto/detailed-user-response.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './model/users.model';
 import { RequestProvider } from './user.provider';
 import { UsersRepository } from './users.repository';
-
+import { QueryBus } from '@nestjs/cqrs';
+import { GetUserByIdQuery, GetUserByUsernameQuery } from './queries/impl';
 @Injectable()
 export class UsersService {
   constructor(
     private readonly ethAddressRepository: EthAddressRepository,
     private readonly usersRepository: UsersRepository,
     private readonly requestProvider: RequestProvider,
+    private readonly queryBus: QueryBus,
   ) {}
 
-  async getUserPublicProfile(
-    userId: string,
-  ): Promise<DetailedUserPubliceResponseDto> {
+  async getUserById(
+    id: string,
+  ): Promise<DetailedUserPubliceResponseDto | DetailedUserPrivateResponseDto> {
+    return this.queryBus.execute(new GetUserByIdQuery(id));
+  }
+
+  async getUserByUsername(
+    username: string,
+  ): Promise<DetailedUserPubliceResponseDto | DetailedUserPrivateResponseDto> {
+    return this.queryBus.execute(new GetUserByUsernameQuery(username));
+  }
+
+  async getUserPublicProfile(userId: string): Promise<User> {
     return await this.usersRepository.getUserDetailsByUserId(userId);
   }
 
@@ -27,9 +42,7 @@ export class UsersService {
     });
   }
 
-  async getUserPublicProfileByUsername(
-    username: string,
-  ): Promise<DetailedUserPubliceResponseDto> {
+  async getUserPublicProfileByUsername(username: string): Promise<User> {
     return await this.usersRepository.getUserDetailsByUsername(username);
   }
 

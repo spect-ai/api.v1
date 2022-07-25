@@ -13,9 +13,7 @@ export class UsersRepository extends BaseRepository<User> {
     super(userModel);
   }
 
-  async getUserDetailsByUserId(
-    id: string,
-  ): Promise<DetailedUserPubliceResponseDto> {
+  async getUserDetailsByUserId(id: string): Promise<User> {
     const user = await this.findById(id)
       .populate('assignedCards')
       .populate('reviewingCards')
@@ -23,9 +21,7 @@ export class UsersRepository extends BaseRepository<User> {
     return user;
   }
 
-  async getUserDetailsByUsername(
-    username: string,
-  ): Promise<DetailedUserPubliceResponseDto> {
+  async getUserDetailsByUsername(username: string): Promise<User> {
     const user = await this.findOne({ username })
       .populate('assignedCards')
       .populate('reviewingCards')

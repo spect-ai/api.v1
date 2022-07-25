@@ -26,6 +26,6 @@ export class GetCircleBySlugQueryHandler
   async execute(
     query: GetCircleBySlugQuery,
   ): Promise<DetailedCircleResponseDto> {
-    return await this.circleRepository.findById(query.slug);
+    return await this.circleRepository.findOne({ slug: query.slug });
   }
 }
