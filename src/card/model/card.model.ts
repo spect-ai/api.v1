@@ -5,6 +5,7 @@ import { Circle } from 'src/circle/model/circle.model';
 import { Payment } from 'src/common/models/payment.model';
 import { Activity } from 'src/common/types/activity.type';
 import { Project } from 'src/project/model/project.model';
+import { User } from 'src/users/model/users.model';
 import { Status } from '../../common/types/status.type';
 import { ApplicationDetails } from '../types/types';
 import { WorkThreads } from '../types/types';
@@ -38,13 +39,13 @@ export class Card extends BaseModel {
   /**
    * The ids of all the reviewers of the card
    */
-  @prop({ default: [] })
+  @prop({ ref: () => User, default: [] })
   reviewer?: string[];
 
   /**
    * The ids of all the assignees of the card
    */
-  @prop({ default: [] })
+  @prop({ ref: () => User, default: [] })
   assignee?: string[];
 
   /**

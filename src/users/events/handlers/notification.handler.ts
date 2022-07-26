@@ -5,6 +5,7 @@ import { Diff } from 'src/common/interfaces';
 import { Project } from 'src/project/model/project.model';
 import { Retro } from 'src/retro/models/retro.model';
 import { CardNotificationService } from 'src/users/notification/card-notification.service';
+import { Reference } from 'src/users/types/types';
 import { UsersRepository } from 'src/users/users.repository';
 import { NotificationEvent } from '../impl';
 
@@ -53,7 +54,7 @@ export class NotificationEventHandler
     diff: Diff<Card | Circle | Project | Retro>,
     recipient: string,
     actor: string,
-  ): { content: string; ref: object } {
+  ): { content: string; ref: Reference } {
     switch (itemType) {
       case 'card':
         return this.cardNotificationService.generateCardContent(

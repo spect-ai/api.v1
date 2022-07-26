@@ -2,10 +2,21 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from 'nestjs-typegoose';
 import { BaseRepository } from 'src/base/base.repository';
 import { User } from './model/users.model';
-import { MappedUser } from './types/types';
+import { MappedUser, PopulatedUserFields } from './types/types';
 import mongodb from 'mongodb';
 import { DetailedUserPubliceResponseDto } from './dto/detailed-user-response.dto';
 import { UpdateQuery } from 'mongoose';
+
+const defaultPopulate: PopulatedUserFields = {
+  bookmarks: {},
+  reviewingCards: {},
+  assignedCards: {},
+  reviewingClosedCards: {},
+  assignedClosedCards: {},
+  followedCircles: {},
+  followedUsers: {},
+  followedByUsers: {},
+};
 
 @Injectable()
 export class UsersRepository extends BaseRepository<User> {
@@ -59,5 +70,33 @@ export class UsersRepository extends BaseRepository<User> {
     }
 
     return acknowledgment;
+  }
+
+  async getMultipleUsersByIds(
+    ids: string[],
+    customPopulate?: PopulatedUserFields,
+    selectedFields?: Record<string, unknown>,
+  ): Promise<User[]> {
+    const query = this.findAll(
+      {
+        _id: { $in: ids },
+      },
+      {
+        projection: selectedFields || {},
+      },
+    );
+    let populatedFields = defaultPopulate;
+    if (customPopulate) populatedFields = customPopulate;
+
+    Object.keys(populatedFields).forEach((key) => {
+      query.populate(key, populatedFields[key]);
+    });
+
+    try {
+      return await query.exec();
+    } catch (e) {
+      console.log(e);
+      return [];
+    }
   }
 }

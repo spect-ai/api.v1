@@ -5,6 +5,7 @@ import { Card, ExtendedCard } from './model/card.model';
 import { UpdateQuery, UpdateWriteOpResult } from 'mongoose';
 import { MappedCard } from './types/types';
 import mongodb from 'mongodb';
+import { PopulatedCardFields } from './types/types';
 
 const populatedCardFields = {
   title: 1,
@@ -37,6 +38,27 @@ const populatedCardFieldsOnProject = {
   creator: 1,
   status: 1,
   id: 1,
+};
+
+const defaultPopulate: PopulatedCardFields = {
+  circle: {},
+  parent: {
+    title: 1,
+    slug: 1,
+  },
+  children: {
+    title: 1,
+    reward: 1,
+    status: 1,
+    assignee: 1,
+    reviewer: 1,
+    priority: 1,
+    deadline: 1,
+    slug: 1,
+  },
+  project: {
+    name: 1,
+  },
 };
 
 @Injectable()
@@ -171,5 +193,69 @@ export class CardsRepository extends BaseRepository<Card> {
     }
 
     return acknowledgment;
+  }
+
+  async getCardById(
+    id: string,
+    customPopulate?: PopulatedCardFields,
+    selectedFields?: Record<string, unknown>,
+  ): Promise<Card> {
+    const query = this.findById(id, {
+      projection: selectedFields || {},
+    });
+    let populatedFields = defaultPopulate;
+    if (customPopulate) populatedFields = customPopulate;
+
+    Object.keys(populatedFields).forEach((key) => {
+      query.populate(key, populatedFields[key]);
+    });
+
+    return await query.exec();
+  }
+
+  async getMultipleCardsByIds(
+    ids: string[],
+    customPopulate?: PopulatedCardFields,
+    selectedFields?: Record<string, unknown>,
+  ): Promise<Card[]> {
+    const query = this.findAll(
+      {
+        _id: { $in: ids },
+      },
+      {
+        projection: selectedFields || {},
+      },
+    );
+    let populatedFields = defaultPopulate;
+    if (customPopulate) populatedFields = customPopulate;
+
+    Object.keys(populatedFields).forEach((key) => {
+      query.populate(key, populatedFields[key]);
+    });
+
+    return await query.exec();
+  }
+
+  async getCardBySlug(
+    slug: string,
+    customPopulate?: PopulatedCardFields,
+    selectedFields?: Record<string, unknown>,
+  ): Promise<Card> {
+    const query = this.findOne(
+      {
+        slug: slug,
+      },
+      {
+        projection: selectedFields || {},
+      },
+    );
+    let populatedFields = defaultPopulate;
+    if (customPopulate) populatedFields = customPopulate;
+
+    Object.keys(populatedFields).forEach((key) => {
+      query.populate(key, populatedFields[key]);
+    });
+
+    return await query.exec();
   }
 }

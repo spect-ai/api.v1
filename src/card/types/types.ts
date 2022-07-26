@@ -87,3 +87,12 @@ export type Diff = {
 export type MappedDiff = {
   [id: string]: Diff;
 };
+
+export type PopulatedCardFields = {
+  circle?: { [fieldName: string]: 0 | 1 };
+  project?: { [fieldName: string]: 0 | 1 };
+  parent?: { [fieldName: string]: 0 | 1 };
+  children?: { [fieldName: string]: 0 | 1 };
+  assignee?: { [fieldName: string]: 0 | 1 };
+  reviewer?: { [fieldName: string]: 0 | 1 };
+};

@@ -35,7 +35,7 @@ export class UsersController {
 
   @Get('/:id')
   findById(@Param('id') id: string) {
-    return this.usersService.getUserPublicProfile(id);
+    return this.usersService.getUserById(id);
   }
 
   @Get('/username/:username')
