@@ -6,6 +6,7 @@ import { ProfileModel } from 'src/common/models/profile.model';
 import { Activity } from 'src/common/types/activity.type';
 import { MemberRoles, Roles } from 'src/common/types/role.type';
 import { Project } from 'src/project/model/project.model';
+import { Retro } from 'src/retro/models/retro.model';
 import { User } from 'src/users/model/users.model';
 import {
   BlacklistRegistry,
@@ -51,6 +52,12 @@ export class Circle extends ProfileModel {
    */
   @prop({ ref: () => Project, default: [] })
   projects: ObjectId[];
+
+  /**
+   * Retros in the circle
+   */
+  @prop({ ref: () => Retro, default: [] })
+  retro: ObjectId[];
 
   /**
    * Members in the circle

@@ -9,6 +9,7 @@ import { Chain } from 'src/common/models/chain.model';
 import { ObjectId } from 'mongoose';
 import { MemberRoles, Roles } from 'src/common/types/role.type';
 import { Registry, TokenInfo } from 'src/registry/model/registry.model';
+import { Retro } from 'src/retro/models/retro.model';
 
 export type TokenDetails = {
   [tokenAddress: string]: TokenInfo;
@@ -77,6 +78,12 @@ export class Circle extends ProfileModel {
    */
   @prop({ ref: () => Project, default: [] })
   projects: ObjectId[];
+
+  /**
+   * Retros in the circle
+   */
+  @prop({ ref: () => Retro, default: [] })
+  retro: ObjectId[];
 
   /**
    * Members in the circle

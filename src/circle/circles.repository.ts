@@ -19,6 +19,7 @@ export class CirclesRepository extends BaseRepository<Circle> {
       .populate('parents')
       .populate('children')
       .populate('projects')
+      .populate('retro')
       .exec();
   }
 
@@ -27,6 +28,7 @@ export class CirclesRepository extends BaseRepository<Circle> {
       .populate('parents')
       .populate('children')
       .populate('projects')
+      .populate('retro')
       .exec();
   }
 
@@ -37,7 +39,8 @@ export class CirclesRepository extends BaseRepository<Circle> {
     return await this.updateById(id, update)
       .populate('parents')
       .populate('children')
-      .populate('projects');
+      .populate('projects')
+      .populate('retro');
   }
 
   async getParentCirclesByUser(user: string): Promise<Circle[]> {

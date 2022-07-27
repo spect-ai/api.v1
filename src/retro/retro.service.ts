@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { CommandBus, QueryBus, EventBus } from '@nestjs/cqrs';
 import { GetCircleByIdQuery } from 'src/circle-v1/queries/impl';
+import { CirclesRepository } from 'src/circle/circles.repository';
 import { NotificationEvent } from 'src/users/events/impl';
 import { RequestProvider } from 'src/users/user.provider';
 import {
@@ -37,6 +38,7 @@ export class RetroService {
     private readonly commandBus: CommandBus,
     private readonly queryBus: QueryBus,
     private readonly eventBus: EventBus,
+    private readonly circlesRepository: CirclesRepository,
   ) {}
 
   async create(
@@ -53,6 +55,14 @@ export class RetroService {
           this.requestProvider.user.id,
         ),
       );
+
+      // TODO: Switch to command bus
+      if (createdRetro?.circle) {
+        await this.circlesRepository.updateById(createdRetro.circle as string, {
+          ...circle,
+          retro: [...(circle.retro || []), createdRetro],
+        });
+      }
       this.eventBus.publish(new RetroCreatedEvent(createdRetro, circle.slug));
       return createdRetro;
     } catch (error) {
