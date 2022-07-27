@@ -9,7 +9,10 @@ import {
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { ApiTags } from '@nestjs/swagger';
-import { SessionAuthGuard } from 'src/auth/iron-session.guard';
+import {
+  PublicViewAuthGuard,
+  SessionAuthGuard,
+} from 'src/auth/iron-session.guard';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './model/users.model';
 import { ObjectIdDto } from 'src/common/dtos/object-id.dto';
@@ -33,6 +36,7 @@ export class UsersController {
     return this.usersService.update(updateUserDto);
   }
 
+  @UseGuards(PublicViewAuthGuard)
   @Get('/:id')
   findById(@Param('id') id: string) {
     return this.usersService.getUserById(id);

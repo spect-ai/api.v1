@@ -34,7 +34,6 @@ export class UserFieldResolver {
     key: 'cards' | 'users' | 'circles' | 'projects',
   ): string[] {
     const ids = [];
-    console.log(contentField);
     for (const contentObject of contentField) {
       const references = contentObject.ref?.[key];
       if (references) {
@@ -127,13 +126,29 @@ export class UserFieldResolver {
     return this.commonTools.objectify(users, 'id');
   }
 
+  populateActor(user: DetailedUserPrivateResponseDto): any {
+    if (!user.notifications) return user;
+    const updatedNotifs = [];
+    for (const notification of user.notifications) {
+      notification.content = notification.content?.replace(
+        '[actor]',
+        user.userDetails[notification.actor]?.username,
+      );
+      updatedNotifs.push(notification);
+    }
+    user.notifications = updatedNotifs;
+    return user;
+  }
+
   async resolve(
     user: User,
+    caller: string,
   ): Promise<DetailedUserPubliceResponseDto | DetailedUserPrivateResponseDto> {
-    if (`62ba4c6b1e4dccf0ed8b7a5b` === user.id) {
-      return (await this.resolvePrivateFields(
+    if (caller === user.id) {
+      const enrichedUser = (await this.resolvePrivateFields(
         user,
       )) as DetailedUserPrivateResponseDto;
+      return this.populateActor(enrichedUser);
     } else
       return (await this.resolvePublicFields(
         user,
@@ -179,9 +194,8 @@ export class GetUserByIdQueryHandler
   async execute(
     query: GetUserByIdQuery,
   ): Promise<DetailedUserPubliceResponseDto> {
-    console.log(this.userRepository);
     const user = await this.userRepository.findById(query.id);
-    return await this.fieldResolver.resolve(user);
+    return await this.fieldResolver.resolve(user, query.caller);
   }
 }
 
@@ -216,6 +230,6 @@ export class GetUserByUsernameQueryHandler
     const user = await this.userRepository.findOne({
       username: query.username,
     });
-    return await this.fieldResolver.resolve(user);
+    return await this.fieldResolver.resolve(user, query.caller);
   }
 }

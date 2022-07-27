@@ -14,6 +14,10 @@ import { CardNotificationService } from './notification/card-notification.servic
 import { QueryHandlers } from './queries/handlers';
 import { UserFieldResolver } from './queries/handlers/get-user.handler';
 import { RetroNotificationService } from './notification/retro-notification.service';
+import {
+  PublicViewAuthGuard,
+  SessionAuthGuard,
+} from 'src/auth/iron-session.guard';
 
 @Module({
   imports: [
@@ -33,6 +37,8 @@ import { RetroNotificationService } from './notification/retro-notification.serv
     ...EventHandlers,
     ...QueryHandlers,
     UserFieldResolver,
+    PublicViewAuthGuard,
+    SessionAuthGuard,
   ],
   exports: [UsersService, UsersRepository, UsersModule],
 })

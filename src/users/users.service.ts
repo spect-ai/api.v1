@@ -22,13 +22,17 @@ export class UsersService {
   async getUserById(
     id: string,
   ): Promise<DetailedUserPubliceResponseDto | DetailedUserPrivateResponseDto> {
-    return this.queryBus.execute(new GetUserByIdQuery(id));
+    return this.queryBus.execute(
+      new GetUserByIdQuery(id, this.requestProvider.user?.id),
+    );
   }
 
   async getUserByUsername(
     username: string,
   ): Promise<DetailedUserPubliceResponseDto | DetailedUserPrivateResponseDto> {
-    return this.queryBus.execute(new GetUserByUsernameQuery(username));
+    return this.queryBus.execute(
+      new GetUserByUsernameQuery(username, this.requestProvider.user?.id),
+    );
   }
 
   async getUserPublicProfile(userId: string): Promise<User> {
