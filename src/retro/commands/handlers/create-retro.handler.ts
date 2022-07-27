@@ -21,7 +21,8 @@ export class CreateRetroCommandHandler
     try {
       const { createRetroRequestDto, circle, caller } = command;
 
-      createRetroRequestDto.reward = { ...circle.defaultPayment, value: 0 };
+      if (!createRetroRequestDto.reward)
+        createRetroRequestDto.reward = { ...circle.defaultPayment, value: 0 };
       const stats = this.initStats(createRetroRequestDto.memberStats);
       const retroNum = await this.retroRepository.count({
         circle: createRetroRequestDto.circle,

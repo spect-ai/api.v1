@@ -13,6 +13,7 @@ import { UsersService } from './users.service';
 import { CardNotificationService } from './notification/card-notification.service';
 import { QueryHandlers } from './queries/handlers';
 import { UserFieldResolver } from './queries/handlers/get-user.handler';
+import { RetroNotificationService } from './notification/retro-notification.service';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { UserFieldResolver } from './queries/handlers/get-user.handler';
     RequestProvider,
     CommonTools,
     CardNotificationService,
+    RetroNotificationService,
     ...EventHandlers,
     ...QueryHandlers,
     UserFieldResolver,

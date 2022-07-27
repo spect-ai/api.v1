@@ -73,7 +73,8 @@ export class RetroController {
     return await this.retroService.addFeedback(param.id, addFeedbackRequestDto);
   }
 
-  @SetMetadata('permissions', ['endRetro'])
+  @SetMetadata('permissions', ['endRetroManually'])
+  @UseGuards(RetroAuthGuard)
   @Patch('/:id/endRetro')
   async endRetro(
     @Param() param: ObjectIdDto,

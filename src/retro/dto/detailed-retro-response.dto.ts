@@ -38,6 +38,12 @@ export class DetailedRetroResponseDto {
   creator: string;
 
   /**
+   * The cicle the retro belongs to
+   */
+  @IsString()
+  circle: string;
+
+  /**
    * The strategy used in the retro period, ie, Quadratic or Normal Voting
    */
   @IsString()

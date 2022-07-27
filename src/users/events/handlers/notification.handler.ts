@@ -5,6 +5,7 @@ import { Diff } from 'src/common/interfaces';
 import { Project } from 'src/project/model/project.model';
 import { Retro } from 'src/retro/models/retro.model';
 import { CardNotificationService } from 'src/users/notification/card-notification.service';
+import { RetroNotificationService } from 'src/users/notification/retro-notification.service';
 import { Reference } from 'src/users/types/types';
 import { UsersRepository } from 'src/users/users.repository';
 import { NotificationEvent } from '../impl';
@@ -16,6 +17,7 @@ export class NotificationEventHandler
   constructor(
     private readonly userRepository: UsersRepository,
     private readonly cardNotificationService: CardNotificationService,
+    private readonly retroNotificationService: RetroNotificationService,
   ) {}
 
   async handle(event: NotificationEvent) {
@@ -64,16 +66,16 @@ export class NotificationEventHandler
           recipient,
           actor,
         );
-      // case 'retro':
-      //   return this.generateRetroContent(actionType, item as Retro);
+      case 'retro':
+        return this.retroNotificationService.generateRetroContent(
+          actionType,
+          item as Retro,
+          diff as Diff<Retro>,
+          recipient,
+          actor,
+        );
       default:
         return null;
-    }
-  }
-
-  generateRetroContent(actionType: string, retro: Retro): string {
-    if (actionType === 'create') {
-      return `has added a card`;
     }
   }
 }

@@ -20,7 +20,11 @@ import { CreateRetroRequestDto } from './dto/create-retro-request.dto';
 import { DetailedRetroResponseDto } from './dto/detailed-retro-response.dto';
 import { UpdateRetroRequestDto } from './dto/update-retro-request.dto';
 import { UpdateVoteRequestDto } from './dto/update-retro-vote-request.dto';
-import { RetroCreatedEvent } from './events/impl';
+import {
+  RetroCreatedEvent,
+  RetroEndedEvent,
+  RetroUpdatedEvent,
+} from './events/impl';
 import { Retro } from './models/retro.model';
 import { GetRetroByIdQuery, GetRetroBySlugQuery } from './queries/impl';
 import { RetroRepository } from './retro.repository';
@@ -111,6 +115,9 @@ export class RetroService {
     const retro = await this.queryBus.execute(new GetRetroByIdQuery(id));
     const updatedRetro = await this.commandBus.execute(
       new EndRetroCommand(retro),
+    );
+    this.eventBus.publish(
+      new RetroEndedEvent(retro, this.requestProvider.user.id),
     );
     return updatedRetro;
   }

@@ -2,20 +2,18 @@ import { EventBus, EventsHandler, IEventHandler, QueryBus } from '@nestjs/cqrs';
 import { GetCircleByIdQuery } from 'src/circle-v1/queries/impl';
 import { Retro } from 'src/retro/models/retro.model';
 import { NotificationEvent, UserActivityEvent } from 'src/users/events/impl';
-import { RetroUpdatedEvent } from '../impl';
+import { RetroEndedEvent } from '../impl';
 
-@EventsHandler(RetroUpdatedEvent)
-export class RetroUpdatedEventHandler
-  implements IEventHandler<RetroUpdatedEvent>
-{
+@EventsHandler(RetroEndedEvent)
+export class RetroEndedEventHandler implements IEventHandler<RetroEndedEvent> {
   constructor(
     private readonly eventBus: EventBus,
     private readonly queryBus: QueryBus,
   ) {}
 
-  async handle(event: RetroUpdatedEvent) {
-    console.log('RetroUpdatedEventHandler');
-    const { retro, diff, caller } = event;
+  async handle(event: RetroEndedEvent) {
+    console.log('RetroEndedEventHandler');
+    const { retro, caller } = event;
     const circle = await this.queryBus.execute(
       new GetCircleByIdQuery(retro.circle),
     );
@@ -23,7 +21,7 @@ export class RetroUpdatedEventHandler
       if (member !== caller) {
         this.eventBus.publish(
           new NotificationEvent(
-            'update',
+            'end',
             'retro',
             retro as Retro,
             member,
@@ -35,14 +33,11 @@ export class RetroUpdatedEventHandler
       }
     }
     this.eventBus.publish(
-      new UserActivityEvent(
-        'update',
-        'retro',
-        retro as Retro,
-        [],
-        retro.creator,
-        diff,
-      ),
+      new UserActivityEvent('end', 'retro', retro as Retro, [], retro.creator, {
+        added: {},
+        deleted: {},
+        updated: {},
+      }),
     );
   }
 }
