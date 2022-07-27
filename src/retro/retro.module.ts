@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import { CqrsModule } from '@nestjs/cqrs';
 import { TypegooseModule } from 'nestjs-typegoose';
-import { CircleV1Module } from 'src/circle-v1/circle-v1.module';
 import { SlugService } from 'src/common/slug.service';
 import { EventHandlers } from './events/handlers';
 import { RequestProvider } from 'src/users/user.provider';
@@ -23,7 +22,6 @@ import { CommonTools } from 'src/common/common.service';
   imports: [
     TypegooseModule.forFeature([Retro]),
     CqrsModule,
-    CircleV1Module,
     CirclesModule,
     EthAddressModule,
   ],

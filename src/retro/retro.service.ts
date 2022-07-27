@@ -5,7 +5,7 @@ import {
   InternalServerErrorException,
 } from '@nestjs/common';
 import { CommandBus, QueryBus, EventBus } from '@nestjs/cqrs';
-import { GetCircleByIdQuery } from 'src/circle-v1/queries/impl';
+import { GetCircleByIdQuery } from 'src/circle/queries/impl';
 import { CirclesRepository } from 'src/circle/circles.repository';
 import { NotificationEvent } from 'src/users/events/impl';
 import { RequestProvider } from 'src/users/user.provider';

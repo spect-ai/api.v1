@@ -1,13 +1,10 @@
-import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { DetailedRetroResponseDto } from 'src/retro/dto/detailed-retro-response.dto';
-import { CreateRetroCommand } from '../impl';
-import { QueryBus } from '@nestjs/cqrs';
-import { GetCircleByIdQuery } from 'src/circle-v1/queries/impl';
 import { InternalServerErrorException } from '@nestjs/common';
-import { MappedStats } from 'src/retro/types';
+import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { MemberStats } from 'src/retro/dto/create-retro-request.dto';
+import { DetailedRetroResponseDto } from 'src/retro/dto/detailed-retro-response.dto';
 import { RetroRepository } from 'src/retro/retro.repository';
-import { RequestProvider } from 'src/users/user.provider';
+import { MappedStats } from 'src/retro/types';
+import { CreateRetroCommand } from '../impl';
 
 @CommandHandler(CreateRetroCommand)
 export class CreateRetroCommandHandler

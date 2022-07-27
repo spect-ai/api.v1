@@ -1,5 +1,5 @@
 import { EventBus, EventsHandler, IEventHandler, QueryBus } from '@nestjs/cqrs';
-import { GetCircleByIdQuery } from 'src/circle-v1/queries/impl';
+import { GetCircleByIdQuery } from 'src/circle/queries/impl';
 import { Retro } from 'src/retro/models/retro.model';
 import { NotificationEvent, UserActivityEvent } from 'src/users/events/impl';
 import { RetroUpdatedEvent } from '../impl';

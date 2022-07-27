@@ -15,14 +15,18 @@ import { CircleRegistryService } from './registry.circle.service';
 import { RegistryModule } from 'src/registry/registry.module';
 import { SessionAuthGuard } from 'src/auth/iron-session.guard';
 import { CircleAuthGuard } from 'src/auth/circle.guard';
+import { QueryHandlers } from './queries/handlers';
+import { CircleV1Controller } from './circles-v1.controller';
+import { CqrsModule } from '@nestjs/cqrs';
 
 @Module({
   imports: [
     TypegooseModule.forFeature([Circle]),
     EthAddressModule,
     RegistryModule,
+    CqrsModule,
   ],
-  controllers: [CirclesController],
+  controllers: [CirclesController, CircleV1Controller],
   providers: [
     CirclesService,
     CirclesRepository,
@@ -35,6 +39,7 @@ import { CircleAuthGuard } from 'src/auth/circle.guard';
     CircleRegistryService,
     SessionAuthGuard,
     CircleAuthGuard,
+    ...QueryHandlers,
   ],
   exports: [CirclesService, CirclesRepository, CirclesModule],
 })
