@@ -15,10 +15,9 @@ export class UpdateRetroCommandHandler
   ): Promise<DetailedRetroResponseDto> {
     try {
       const { id, updateRetroRequestDto } = command;
-      const updatedRetro = await this.retroRepository.updateById(
-        id,
-        updateRetroRequestDto,
-      );
+      const updatedRetro = await this.retroRepository
+        .updateById(id, updateRetroRequestDto)
+        .populate('circle');
       return updatedRetro;
     } catch (error) {
       throw new InternalServerErrorException(
