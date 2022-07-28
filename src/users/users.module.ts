@@ -18,6 +18,7 @@ import {
   PublicViewAuthGuard,
   SessionAuthGuard,
 } from 'src/auth/iron-session.guard';
+import { CommandHandlers } from './commands/handlers';
 
 @Module({
   imports: [
@@ -36,6 +37,7 @@ import {
     RetroNotificationService,
     ...EventHandlers,
     ...QueryHandlers,
+    ...CommandHandlers,
     UserFieldResolver,
     PublicViewAuthGuard,
     SessionAuthGuard,

@@ -1,8 +1,10 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
-import { EventBus } from '@nestjs/cqrs';
+import { CommandBus, EventBus } from '@nestjs/cqrs';
 import { CirclesRepository } from 'src/circle/circles.repository';
 import { CirclesService } from 'src/circle/circles.service';
 import { ProjectsRepository } from 'src/project/project.repository';
+import { AddItemCommand } from 'src/users/commands/impl';
+import { UserSubmittedApplication } from 'src/users/types/types';
 import { RequestProvider } from 'src/users/user.provider';
 import { v4 as uuidv4 } from 'uuid';
 import { ActivityBuilder } from './activity.builder';
@@ -30,6 +32,7 @@ export class ApplicationService {
     private readonly validationService: CardValidationService,
     private readonly responseBuilder: ResponseBuilder,
     private readonly eventBus: EventBus,
+    private readonly commandBus: CommandBus,
   ) {}
 
   async createApplication(
@@ -89,6 +92,17 @@ export class ApplicationService {
             activity: [...card.activity, activity],
           },
         );
+      await this.commandBus.execute(
+        new AddItemCommand(
+          this.requestProvider.user.id,
+          'activeApplications',
+          {
+            cardId: updatedCard.id,
+            applicationTitle: createApplicationDto.title,
+          } as UserSubmittedApplication,
+          this.requestProvider.user,
+        ),
+      );
 
       return await this.responseBuilder.enrichResponse(updatedCard);
     } catch (error) {

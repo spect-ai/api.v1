@@ -5,7 +5,11 @@ import { ObjectId } from 'mongoose';
 import { Circle } from 'src/circle/model/circle.model';
 import { Card } from 'src/card/model/card.model';
 import { Project } from 'src/project/model/project.model';
-import { Activity, Notification } from '../types/types';
+import {
+  Activity,
+  Notification,
+  UserSubmittedApplication,
+} from '../types/types';
 
 @useMongoosePlugin()
 export class User extends ProfileModel {
@@ -87,6 +91,24 @@ export class User extends ProfileModel {
    */
   @prop({ default: [] })
   notifications: Notification[];
+
+  /**
+   * Applications submitted by the user
+   */
+  @prop({ default: [] })
+  activeAplications: UserSubmittedApplication[];
+
+  /**
+   * Applications submitted by the user that have been picked
+   */
+  @prop({ default: [] })
+  pickedApplications: UserSubmittedApplication[];
+
+  /**
+   * Applications submitted by the user that have been rejected
+   */
+  @prop({ default: [] })
+  rejectedApplications: UserSubmittedApplication[];
 
   /**
    * Card bookmarks for the user

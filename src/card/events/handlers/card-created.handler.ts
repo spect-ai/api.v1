@@ -27,14 +27,14 @@ export class CardCreatedEventHandler
         );
       }
     }
-    this.eventBus.publish(
-      new UserActivityEvent('create', 'card', card as Card, [], card.creator, {
-        added: {
-          title: card.title,
-        },
-        deleted: {},
-        updated: {},
-      }),
-    );
+    // this.eventBus.publish(
+    //   new UserActivityEvent('create', 'card', card as Card, [], card.creator, {
+    //     added: {
+    //       title: card.title,
+    //     },
+    //     deleted: {},
+    //     updated: {},
+    //   }),
+    // );
   }
 }

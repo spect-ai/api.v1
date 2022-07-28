@@ -33,15 +33,15 @@ export class CardUpdatedEventHandler
         );
       }
     }
-    this.eventBus.publish(
-      new UserActivityEvent(
-        'update',
-        'card',
-        card as Card,
-        [],
-        card.creator,
-        diff,
-      ),
-    );
+    // this.eventBus.publish(
+    //   new UserActivityEvent(
+    //     'update',
+    //     'card',
+    //     card as Card,
+    //     [],
+    //     card.creator,
+    //     diff,
+    //   ),
+    // );
   }
 }

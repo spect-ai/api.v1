@@ -43,3 +43,8 @@ export type PopulatedUserFields = {
   followedUsers?: { [fieldName: string]: 0 | 1 };
   followedByUsers?: { [fieldName: string]: 0 | 1 };
 };
+
+export type UserSubmittedApplication = {
+  cardId: string;
+  applicationTitle: string;
+};
