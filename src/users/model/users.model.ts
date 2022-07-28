@@ -96,7 +96,7 @@ export class User extends ProfileModel {
    * Applications submitted by the user
    */
   @prop({ default: [] })
-  activeAplications: UserSubmittedApplication[];
+  activeApplications: UserSubmittedApplication[];
 
   /**
    * Applications submitted by the user that have been picked

@@ -8,5 +8,6 @@ export class CardUpdatedEvent {
     public readonly diff: Diff<Card>,
     public readonly circleSlug: string,
     public readonly projectSlug: string,
+    public readonly caller: string,
   ) {}
 }

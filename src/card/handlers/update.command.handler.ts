@@ -129,7 +129,13 @@ export class CardCommandHandler {
         await this.cardsRepository.getCardWithPopulatedReferences(id);
 
       this.eventBus.publish(
-        new CardUpdatedEvent(resultingCard, diff, circle.slug, project.slug),
+        new CardUpdatedEvent(
+          resultingCard,
+          diff,
+          circle.slug,
+          project.slug,
+          this.requestProvider.user.id,
+        ),
       );
       return this.responseBuilder.enrichResponse(resultingCard);
     } catch (error) {

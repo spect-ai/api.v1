@@ -45,21 +45,6 @@ export class ApplicationPickedEventHandler
       );
     }
 
-    for (const applicationId of card.applicationOrder) {
-      if (!applicationIds.includes(applicationId)) {
-        this.eventBus.publish(
-          new MoveItemCommand(
-            caller,
-            'activeApplications',
-            'rejectedApplications',
-            card.id,
-            null,
-            card.application[applicationId].user,
-          ),
-        );
-      }
-    }
-
     // this.eventBus.publish(
     //   new UserActivityEvent('create', 'card', card as Card, [], card.creator, {
     //     added: {

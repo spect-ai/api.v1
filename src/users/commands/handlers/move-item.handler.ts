@@ -21,12 +21,19 @@ export class MoveItemCommandHandler
       const index = this.findItemIndex(fieldFrom, item, userToUpdate);
       if (index === -1) throw new Error('Item doesnt exist');
 
-      const updatedUser = await this.userRepository.updateById(user.id, {
-        [fieldTo]: [...(userToUpdate[fieldTo] || []), item],
-        [fieldFrom]: userToUpdate[fieldFrom].filter((_, i) => i !== index),
-      });
+      const updatedUser = await this.userRepository.updateById(
+        userToUpdate.id,
+        {
+          [fieldTo]: [
+            ...(userToUpdate[fieldTo] || []),
+            userToUpdate[fieldFrom][index],
+          ],
+          [fieldFrom]: userToUpdate[fieldFrom].filter((_, i) => i !== index),
+        },
+      );
       return updatedUser;
     } catch (error) {
+      console.log(error);
       throw new InternalServerErrorException(
         'Failed adding item update',
         error.message,
@@ -37,14 +44,15 @@ export class MoveItemCommandHandler
   findItemIndex(itemType: string, item: string, user: User): number {
     if (
       [
-        'activeAplications',
+        'activeApplications',
         'pickedApplications',
         'rejectedApplications',
       ].includes(itemType)
     ) {
-      user[itemType].forEach((application, index) => {
-        if (application.cardId === item) return index;
-      });
+      console.log('findItemIndex', itemType, item, user[itemType]);
+      for (const [idx, application] of user[itemType].entries()) {
+        if (application.cardId === item) return idx;
+      }
       return -1;
     } else return user[itemType].indexOf(item);
   }

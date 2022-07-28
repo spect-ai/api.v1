@@ -17,9 +17,12 @@ export class AddItemCommandHandler implements ICommandHandler<AddItemCommand> {
         userToUpdate = await this.userRepository.findById(userId);
       if (userToUpdate[field] && userToUpdate[field].includes(item))
         throw new Error('Item already added');
-      const updatedUser = await this.userRepository.updateById(user.id, {
-        [field]: [...(userToUpdate[field] || []), item],
-      });
+      const updatedUser = await this.userRepository.updateById(
+        userToUpdate.id,
+        {
+          [field]: [...(userToUpdate[field] || []), item],
+        },
+      );
       return updatedUser;
     } catch (error) {
       throw new InternalServerErrorException(
