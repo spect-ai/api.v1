@@ -65,6 +65,15 @@ export class UserFieldResolver {
       ...(activityCardIds || []),
       ...(notifCardIds || []),
     ];
+    if (user.activeApplications) {
+      cardIds.push(...user.activeApplications.map((app) => app.cardId));
+    }
+    if (user.pickedApplications) {
+      cardIds.push(...user.pickedApplications.map((app) => app.cardId));
+    }
+    if (user.rejectedApplications) {
+      cardIds.push(...user.rejectedApplications.map((app) => app.cardId));
+    }
 
     const cards = await this.queryBus.execute(
       new GetMultipleCardsByIdsQuery(
