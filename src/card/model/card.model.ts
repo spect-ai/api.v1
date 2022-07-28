@@ -1,4 +1,5 @@
 import { prop } from '@typegoose/typegoose';
+import { Schema } from 'mongoose';
 import { BaseModel } from 'src/base/base.model';
 import { useMongoosePlugin } from 'src/base/decorators/use-mongoose-plugins.decorator';
 import { Circle } from 'src/circle/model/circle.model';
@@ -39,13 +40,13 @@ export class Card extends BaseModel {
   /**
    * The ids of all the reviewers of the card
    */
-  @prop({ ref: () => User, default: [] })
+  @prop({ ref: () => User, type: Schema.Types.String, default: [] })
   reviewer?: string[];
 
   /**
    * The ids of all the assignees of the card
    */
-  @prop({ ref: () => User, default: [] })
+  @prop({ ref: () => User, type: Schema.Types.String, default: [] })
   assignee?: string[];
 
   /**
