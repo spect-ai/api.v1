@@ -30,4 +30,6 @@ export type View = {
   type: 'List' | 'Board';
   hidden: boolean;
   filters: Filter;
+  slug: string;
+  name: string;
 };
