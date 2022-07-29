@@ -37,13 +37,15 @@ export class EndRetroCommandHandler
         distribution[member] = allocation / total;
       }
 
-      const updatedRetro = await this.retroRepository.updateById(retro.id, {
-        distribution,
-        status: {
-          ...retro.status,
-          active: false,
-        },
-      });
+      const updatedRetro = await this.retroRepository
+        .updateById(retro.id, {
+          distribution,
+          status: {
+            ...retro.status,
+            active: false,
+          },
+        })
+        .populate('circle');
       return updatedRetro;
     } catch (error) {
       throw new InternalServerErrorException(

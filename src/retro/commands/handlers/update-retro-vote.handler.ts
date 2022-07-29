@@ -36,12 +36,14 @@ export class UpdateRetroVoteCommandHandler
         throw new InternalServerErrorException(
           'Caller has exceeded allocated votes',
         );
-      const updatedRetro = await this.retroRepository.updateById(retro.id, {
-        stats: {
-          ...retro.stats,
-          [caller]: ownerStats,
-        },
-      });
+      const updatedRetro = await this.retroRepository
+        .updateById(retro.id, {
+          stats: {
+            ...retro.stats,
+            [caller]: ownerStats,
+          },
+        })
+        .populate('circle');
       return updatedRetro;
     } catch (error) {
       throw new InternalServerErrorException(

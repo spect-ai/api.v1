@@ -25,9 +25,11 @@ export class AddFeedbackCommandHandler
         retro.feedbackGiven[caller][member] = content;
       }
 
-      const updatedRetro = await this.retroRepository.updateById(retro.id, {
-        feedbackGiven: retro.feedbackGiven,
-      });
+      const updatedRetro = await this.retroRepository
+        .updateById(retro.id, {
+          feedbackGiven: retro.feedbackGiven,
+        })
+        .populate('circle');
       return updatedRetro;
     } catch (error) {
       throw new InternalServerErrorException(

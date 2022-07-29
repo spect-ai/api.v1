@@ -23,6 +23,7 @@ import { RetroService } from './retro.service';
 export class RetroController {
   constructor(private readonly retroService: RetroService) {}
 
+  @UseGuards(SessionAuthGuard)
   @Get('/slug/:slug')
   async findBySlug(
     @Param() param: RequiredSlugDto,
@@ -30,6 +31,7 @@ export class RetroController {
     return await this.retroService.getDetailedRetroBySlug(param.slug);
   }
 
+  @UseGuards(SessionAuthGuard)
   @Get('/:id')
   async findByObjectId(
     @Param() param: ObjectIdDto,

@@ -42,29 +42,21 @@ export class RetroService {
   private async enrichResponse(
     retro: Retro,
   ): Promise<DetailedRetroResponseDto> {
-    const collatedUserPermissions =
-      await this.circlesService.getCollatedUserPermissions(
-        [retro.circle],
-        this.requestProvider.user.id,
-      );
-
-    const stats = collatedUserPermissions.makePayment
-      ? retro.stats
-      : {
-          [this.requestProvider.user.id]:
-            retro.stats[this.requestProvider.user.id],
-        };
+    const stats = {
+      [this.requestProvider.user.id]: retro.stats[this.requestProvider.user.id],
+    };
     if (this.requestProvider)
       if (retro.feedbackGiven) {
         const feedbackGiven = retro.feedbackGiven[this.requestProvider.user.id];
         const feedbackReceived = {} as MappedFeedback;
-        for (const [
-          feedbackGiver,
-          feedbackReceiverToFeedback,
-        ] of Object.entries(retro.feedbackGiven)) {
-          feedbackReceived[feedbackGiver] =
-            feedbackReceiverToFeedback[this.requestProvider.user.id];
-        }
+        if (!retro.status.active)
+          for (const [
+            feedbackGiver,
+            feedbackReceiverToFeedback,
+          ] of Object.entries(retro.feedbackGiven)) {
+            feedbackReceived[feedbackGiver] =
+              feedbackReceiverToFeedback[this.requestProvider.user.id];
+          }
         return {
           ...retro,
           feedbackGiven,
