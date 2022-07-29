@@ -2,6 +2,7 @@ import { InternalServerErrorException } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { MemberStats } from 'src/retro/dto/create-retro-request.dto';
 import { DetailedRetroResponseDto } from 'src/retro/dto/detailed-retro-response.dto';
+import { Retro } from 'src/retro/models/retro.model';
 import { RetroRepository } from 'src/retro/retro.repository';
 import { MappedStats } from 'src/retro/types';
 import { CreateRetroCommand } from '../impl';
@@ -12,9 +13,7 @@ export class CreateRetroCommandHandler
 {
   constructor(private readonly retroRepository: RetroRepository) {}
 
-  async execute(
-    command: CreateRetroCommand,
-  ): Promise<DetailedRetroResponseDto> {
+  async execute(command: CreateRetroCommand): Promise<Retro> {
     try {
       const { createRetroRequestDto, circle, caller } = command;
 
