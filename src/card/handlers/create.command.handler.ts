@@ -23,6 +23,7 @@ import { UsersRepository } from 'src/users/users.repository';
 import { UserCardsService } from '../user.cards.service';
 import { EventBus } from '@nestjs/cqrs';
 import { CardCreatedEvent } from '../events/impl';
+import { LoggingService } from 'src/logging/logging.service';
 @Injectable()
 export class CreateCardCommandHandler {
   constructor(
@@ -37,6 +38,7 @@ export class CreateCardCommandHandler {
     private readonly commonTools: CommonTools,
     private readonly userCardsService: UserCardsService,
     private readonly eventBus: EventBus,
+    private readonly logger: LoggingService,
   ) {}
 
   async handle(createCardDto: CreateCardRequestDto): Promise<{

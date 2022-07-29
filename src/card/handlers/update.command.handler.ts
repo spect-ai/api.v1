@@ -34,6 +34,7 @@ import { ResponseBuilder } from '../response.builder';
 import { MappedCard, MappedDiff } from '../types/types';
 import { UserCardsService } from '../user.cards.service';
 import { CardValidationService } from '../validation.cards.service';
+import { LoggingService } from 'src/logging/logging.service';
 
 const globalUpdate = {
   card: {},
@@ -57,12 +58,15 @@ export class CardCommandHandler {
     private readonly userCardsService: UserCardsService,
     private readonly circleRepository: CirclesRepository,
     private readonly eventBus: EventBus,
+    private readonly logger: LoggingService,
   ) {}
 
   async update(
     id: string,
     updateCardDto: UpdateCardRequestDto,
   ): Promise<DetailedCardResponseDto> {
+    this.logger.logInfo('Updating card', this.requestProvider.user.id);
+
     try {
       const card =
         this.requestProvider.card || (await this.cardsRepository.findById(id));

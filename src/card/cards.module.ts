@@ -41,6 +41,7 @@ import { EventHandlers } from './events/handlers';
 import { CardNotificationService } from 'src/users/notification/card-notification.service';
 import { CqrsModule } from '@nestjs/cqrs';
 import { QueryHandlers } from './queries/handlers';
+import { LoggingService } from 'src/logging/logging.service';
 
 @Module({
   imports: [
@@ -87,6 +88,7 @@ import { QueryHandlers } from './queries/handlers';
     ...EventHandlers,
     ...QueryHandlers,
     CardNotificationService,
+    LoggingService,
   ],
   exports: [
     CardsService,
