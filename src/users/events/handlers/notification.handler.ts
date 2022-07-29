@@ -45,7 +45,9 @@ export class NotificationEventHandler
         actor,
         timestamp: new Date(),
       });
-      await this.userRepository.update(recipientEntity);
+      await this.userRepository.updateById(recipientEntity.id, {
+        notifications: recipientEntity.notifications,
+      });
     }
   }
 
