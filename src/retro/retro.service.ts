@@ -25,7 +25,7 @@ import { RetroCreatedEvent, RetroEndedEvent } from './events/impl';
 import { Retro } from './models/retro.model';
 import { GetRetroByIdQuery, GetRetroBySlugQuery } from './queries/impl';
 import { RetroRepository } from './retro.repository';
-import { MappedFeedback } from './types';
+import { MappedFeedback, MappedStats } from './types';
 import { LoggingService } from 'src/logging/logging.service';
 
 @Injectable()
@@ -45,14 +45,18 @@ export class RetroService {
   private async enrichResponse(
     retro: Retro,
   ): Promise<DetailedRetroResponseDto> {
-    const stats = {
-      [this.requestProvider.user.id]: retro.stats[this.requestProvider.user.id],
-    };
-    if (this.requestProvider.user)
+    let feedbackGiven = {} as MappedFeedback;
+    let feedbackReceived = {} as MappedFeedback;
+    let stats = {} as MappedStats;
+    if (this.requestProvider.user) {
+      stats = {
+        [this.requestProvider.user.id]:
+          retro.stats[this.requestProvider.user.id],
+      };
       if (retro.feedbackGiven) {
-        const feedbackGiven = retro.feedbackGiven[this.requestProvider.user.id];
-        const feedbackReceived = {} as MappedFeedback;
-        if (!retro.status.active)
+        feedbackGiven = retro.feedbackGiven[this.requestProvider.user.id] || {};
+        feedbackReceived = {} as MappedFeedback;
+        if (!retro.status.active) {
           for (const [
             feedbackGiver,
             feedbackReceiverToFeedback,
@@ -60,19 +64,14 @@ export class RetroService {
             feedbackReceived[feedbackGiver] =
               feedbackReceiverToFeedback[this.requestProvider.user.id];
           }
-        return {
-          ...retro,
-          feedbackGiven,
-          feedbackReceived,
-          stats,
-        };
+        }
       }
-    return {
-      ...retro,
-      feedbackGiven: {},
-      feedbackReceived: {},
+    }
+    return Object.assign(retro, {
+      feedbackGiven,
+      feedbackReceived,
       stats,
-    };
+    });
   }
 
   async create(
@@ -98,7 +97,10 @@ export class RetroService {
         });
       }
       this.eventBus.publish(new RetroCreatedEvent(createdRetro, circle.slug));
-      return await this.enrichResponse(createdRetro);
+      const res = await this.enrichResponse(createdRetro);
+      console.log(res);
+
+      return res;
     } catch (error) {
       this.logger.logError(
         `Failed retro creation with error: ${error.message}`,
