@@ -21,6 +21,7 @@ import {
   WorkUnitCreatedEvent,
 } from '../events/work/impl';
 import { CirclesRepository } from 'src/circle/circles.repository';
+import { LoggingService } from 'src/logging/logging.service';
 
 const globalUpdate = {
   card: {},
@@ -38,7 +39,10 @@ export class WorkCommandHandler {
     private readonly commonTool: CommonTools,
     private readonly eventBus: EventBus,
     private readonly circleRepository: CirclesRepository,
-  ) {}
+    private readonly logger: LoggingService,
+  ) {
+    logger.setContext('WorkCommandHandler');
+  }
 
   async handleGithubPR(createGithubPRDto: CreateGithubPRDto): Promise<boolean> {
     try {
@@ -92,8 +96,12 @@ export class WorkCommandHandler {
       }
       return true;
     } catch (error) {
+      this.logger.logError(
+        `Failed while creating work thread with github pr with error: ${error.message}`,
+        this.requestProvider,
+      );
       throw new InternalServerErrorException(
-        'Failed creating work thread',
+        'Failed creating work thread with github pr',
         error.message,
       );
     }
@@ -137,7 +145,10 @@ export class WorkCommandHandler {
       );
       return resCard;
     } catch (error) {
-      console.log(error);
+      this.logger.logError(
+        `Failed while creating work thread with error: ${error.message}`,
+        this.requestProvider,
+      );
       throw new InternalServerErrorException(
         'Failed creating work thread',
         error.message,
@@ -174,8 +185,12 @@ export class WorkCommandHandler {
         cardUpdate,
       );
     } catch (error) {
+      this.logger.logError(
+        `Failed while updating work thread with error: ${error.message}`,
+        this.requestProvider,
+      );
       throw new InternalServerErrorException(
-        'Failed creating work thread',
+        'Failed updating work thread',
         error.message,
       );
     }
@@ -224,8 +239,12 @@ export class WorkCommandHandler {
 
       return resCard;
     } catch (error) {
+      this.logger.logError(
+        `Failed while creating work unit with error: ${error.message}`,
+        this.requestProvider,
+      );
       throw new InternalServerErrorException(
-        'Failed creating work thread',
+        'Failed creating work unit',
         error.message,
       );
     }
@@ -261,7 +280,10 @@ export class WorkCommandHandler {
         cardUpdate,
       );
     } catch (error) {
-      console.log(error);
+      this.logger.logError(
+        `Failed while updating work unit with error: ${error.message}`,
+        this.requestProvider,
+      );
       throw new InternalServerErrorException(
         'Failed updating work unit',
         error.message,

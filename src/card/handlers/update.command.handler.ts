@@ -59,14 +59,14 @@ export class CardCommandHandler {
     private readonly circleRepository: CirclesRepository,
     private readonly eventBus: EventBus,
     private readonly logger: LoggingService,
-  ) {}
+  ) {
+    logger.setContext('CardCommandHandler');
+  }
 
   async update(
     id: string,
     updateCardDto: UpdateCardRequestDto,
   ): Promise<DetailedCardResponseDto> {
-    this.logger.logInfo('Updating card', this.requestProvider.user.id);
-
     try {
       const card =
         this.requestProvider.card || (await this.cardsRepository.findById(id));
@@ -143,7 +143,10 @@ export class CardCommandHandler {
       );
       return this.responseBuilder.enrichResponse(resultingCard);
     } catch (error) {
-      console.log(error);
+      this.logger.logError(
+        `Failed while card update with error: ${error.message}`,
+        this.requestProvider,
+      );
       throw new InternalServerErrorException(
         'Failed card update',
         error.message,
@@ -242,7 +245,10 @@ export class CardCommandHandler {
 
       return await this.projectService.getDetailedProject(project.id);
     } catch (error) {
-      console.log(error);
+      this.logger.logError(
+        `Failed while updating payment info with error: ${error.message}`,
+        this.requestProvider,
+      );
       throw new InternalServerErrorException(
         'Failed updating payment info',
         error.message,
@@ -289,7 +295,10 @@ export class CardCommandHandler {
 
       return true;
     } catch (error) {
-      console.log(error);
+      this.logger.logError(
+        `Failed while closing cards with error: ${error.message}`,
+        this.requestProvider,
+      );
       throw new InternalServerErrorException(
         'Failed closing cards',
         error.message,

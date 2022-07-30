@@ -2,13 +2,19 @@ import { InternalServerErrorException } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { User } from 'src/users/model/users.model';
 import { UsersRepository } from 'src/users/users.repository';
-import { AddItemCommand, MoveItemCommand } from '../impl';
+import { MoveItemCommand } from '../impl';
+import { LoggingService } from 'src/logging/logging.service';
 
 @CommandHandler(MoveItemCommand)
 export class MoveItemCommandHandler
   implements ICommandHandler<MoveItemCommand>
 {
-  constructor(private readonly userRepository: UsersRepository) {}
+  constructor(
+    private readonly userRepository: UsersRepository,
+    private readonly logger: LoggingService,
+  ) {
+    this.logger.setContext('MoveItemCommandHandler');
+  }
 
   async execute(command: MoveItemCommand): Promise<User> {
     try {
@@ -33,9 +39,12 @@ export class MoveItemCommandHandler
       );
       return updatedUser;
     } catch (error) {
-      console.log(error);
+      this.logger.error(
+        `Failed move item with error: ${error.message}`,
+        command,
+      );
       throw new InternalServerErrorException(
-        'Failed adding item update',
+        'Failed move item update',
         error.message,
       );
     }

@@ -1,29 +1,21 @@
-import {
-  HttpException,
-  HttpStatus,
-  Injectable,
-  InternalServerErrorException,
-} from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { EventBus } from '@nestjs/cqrs';
 import { CirclesRepository } from 'src/circle/circles.repository';
+import { CommonTools } from 'src/common/common.service';
+import { LoggingService } from 'src/logging/logging.service';
 import { CardsProjectService } from 'src/project/cards.project.service';
 import { DetailedProjectResponseDto } from 'src/project/dto/detailed-project-response.dto';
+import { ProjectsRepository } from 'src/project/project.repository';
 import { RequestProvider } from 'src/users/user.provider';
-import { ActivityBuilder } from '../activity.builder';
+import { UsersRepository } from 'src/users/users.repository';
 import { CardsRepository } from '../cards.repository';
+import { CardsService } from '../cards.service';
 import { CreateCardRequestDto } from '../dto/create-card-request.dto';
 import { DetailedCardResponseDto } from '../dto/detailed-card-response-dto';
-import { Card } from '../model/card.model';
-import { CardValidationService } from '../validation.cards.service';
-import { CardsService } from '../cards.service';
-import { ProjectsRepository } from 'src/project/project.repository';
-import { CommonTools } from 'src/common/common.service';
-import { Project } from 'src/project/model/project.model';
-import { UsersService } from 'src/users/users.service';
-import { UsersRepository } from 'src/users/users.repository';
-import { UserCardsService } from '../user.cards.service';
-import { EventBus } from '@nestjs/cqrs';
 import { CardCreatedEvent } from '../events/impl';
-import { LoggingService } from 'src/logging/logging.service';
+import { Card } from '../model/card.model';
+import { UserCardsService } from '../user.cards.service';
+import { CardValidationService } from '../validation.cards.service';
 @Injectable()
 export class CreateCardCommandHandler {
   constructor(
@@ -39,7 +31,9 @@ export class CreateCardCommandHandler {
     private readonly userCardsService: UserCardsService,
     private readonly eventBus: EventBus,
     private readonly logger: LoggingService,
-  ) {}
+  ) {
+    logger.setContext('CreateCardCommandHandler');
+  }
 
   async handle(createCardDto: CreateCardRequestDto): Promise<{
     card: DetailedCardResponseDto;
@@ -152,7 +146,10 @@ export class CreateCardCommandHandler {
         parentCard,
       };
     } catch (error) {
-      console.log(error);
+      this.logger.logError(
+        `Failed creating new card with error: ${error.message}`,
+        this.requestProvider,
+      );
       throw new InternalServerErrorException(
         'Failed creating new card',
         error.message,
@@ -197,7 +194,10 @@ export class CreateCardCommandHandler {
       }
       return true;
     } catch (error) {
-      console.log(error);
+      this.logger.logError(
+        `Failed while handling user updates with error: ${error.message}`,
+        this.requestProvider,
+      );
       throw new InternalServerErrorException(
         'Failed while handling user updates',
         error.message,

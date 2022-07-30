@@ -3,6 +3,7 @@ import {
   HttpStatus,
   Injectable,
   InternalServerErrorException,
+  Logger,
 } from '@nestjs/common';
 import moment from 'moment';
 import { ObjectId } from 'mongoose';
@@ -11,6 +12,7 @@ import { DiscordService } from 'src/common/discord.service';
 import { GithubService } from 'src/common/github.service';
 import { SlugService } from 'src/common/slug.service';
 import { CirclePermission } from 'src/common/types/role.type';
+import { LoggingService } from 'src/logging/logging.service';
 import { RegistryService } from 'src/registry/registry.service';
 import { RolesService } from 'src/roles/roles.service';
 import { RequestProvider } from 'src/users/user.provider';
@@ -35,7 +37,10 @@ export class CirclesService {
     private readonly roleService: RolesService,
     private readonly commonTools: CommonTools,
     private readonly registryService: RegistryService,
-  ) {}
+    private readonly logger: LoggingService,
+  ) {
+    logger.setContext('CirclesService');
+  }
 
   validateNewMember(circle: Circle, newMember: string) {
     const members = circle.members.map((m) => m.toString());
@@ -200,6 +205,10 @@ export class CirclesService {
 
       return createdCircle;
     } catch (error) {
+      this.logger.logError(
+        `Failed circle creation with error: ${error.message}`,
+        this.requestProvider,
+      );
       throw new InternalServerErrorException(
         'Failed circle creation',
         error.message,
@@ -220,6 +229,11 @@ export class CirclesService {
 
       return updatedCircle;
     } catch (error) {
+      this.logger.logError(
+        `Failed circle update with error: ${error.message}`,
+        this.requestProvider,
+      );
+
       throw new InternalServerErrorException(
         'Failed circle update',
         error.message,
@@ -249,8 +263,12 @@ export class CirclesService {
       });
       return inviteId;
     } catch (error) {
+      this.logger.logError(
+        `Failed generating invite link with error: ${error.message}`,
+        this.requestProvider,
+      );
       throw new InternalServerErrorException(
-        'Failed circle update',
+        'Failed generating invite link',
         error.message,
       );
     }
@@ -296,7 +314,10 @@ export class CirclesService {
         );
       return updatedCircle;
     } catch (error) {
-      console.log(error);
+      this.logger.logError(
+        `Failed joining circle using invite link with error: ${error.message}`,
+        this.requestProvider,
+      );
       throw new InternalServerErrorException(
         'Failed joining circle',
         error.message,
@@ -332,6 +353,10 @@ export class CirclesService {
         );
       return updatedCircle;
     } catch (error) {
+      this.logger.logError(
+        `Failed joining circle using discord with error: ${error.message}`,
+        this.requestProvider,
+      );
       throw new InternalServerErrorException(
         'Failed joining circle',
         error.message,
@@ -363,6 +388,10 @@ export class CirclesService {
         );
       return updatedCircle;
     } catch (error) {
+      this.logger.logError(
+        `Failed updating member roles with error: ${error.message}`,
+        this.requestProvider,
+      );
       throw new InternalServerErrorException(
         'Failed updating member roles',
         error.message,
@@ -390,6 +419,10 @@ export class CirclesService {
         );
       return updatedCircle;
     } catch (error) {
+      this.logger.logError(
+        `Failed removing member with error: ${error.message}`,
+        this.requestProvider,
+      );
       throw new InternalServerErrorException(
         'Failed removing member',
         error.message,

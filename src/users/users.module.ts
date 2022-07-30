@@ -19,6 +19,7 @@ import {
   SessionAuthGuard,
 } from 'src/auth/iron-session.guard';
 import { CommandHandlers } from './commands/handlers';
+import { LoggingService } from 'src/logging/logging.service';
 
 @Module({
   imports: [
@@ -41,6 +42,7 @@ import { CommandHandlers } from './commands/handlers';
     UserFieldResolver,
     PublicViewAuthGuard,
     SessionAuthGuard,
+    LoggingService,
   ],
   exports: [UsersService, UsersRepository, UsersModule],
 })

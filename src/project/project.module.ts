@@ -19,6 +19,7 @@ import { SessionAuthGuard } from 'src/auth/iron-session.guard';
 import { CircleAuthGuard } from 'src/auth/circle.guard';
 import { RolesService } from 'src/roles/roles.service';
 import { DiscordService } from 'src/common/discord.service';
+import { LoggingService } from 'src/logging/logging.service';
 
 @Module({
   imports: [
@@ -43,6 +44,7 @@ import { DiscordService } from 'src/common/discord.service';
     DiscordService,
     CircleAuthGuard,
     SessionAuthGuard,
+    LoggingService,
   ],
   exports: [ProjectService, ProjectsRepository, ProjectModule],
 })

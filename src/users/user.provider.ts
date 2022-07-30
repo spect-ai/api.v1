@@ -25,5 +25,25 @@ export class RequestProvider {
     return this.req.circle;
   }
 
+  get body(): object {
+    return this.req.body;
+  }
+
+  get params(): object {
+    return this.req.params;
+  }
+
+  get url(): object {
+    return this.req.url;
+  }
+
+  get query(): object {
+    return this.req.query;
+  }
+
+  get method(): string {
+    return this.req.method;
+  }
+
   constructor(@Inject(REQUEST) private readonly req) {}
 }

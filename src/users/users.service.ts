@@ -10,6 +10,8 @@ import { RequestProvider } from './user.provider';
 import { UsersRepository } from './users.repository';
 import { QueryBus } from '@nestjs/cqrs';
 import { GetUserByIdQuery, GetUserByUsernameQuery } from './queries/impl';
+import { LoggingService } from 'src/logging/logging.service';
+
 @Injectable()
 export class UsersService {
   constructor(
@@ -17,22 +19,47 @@ export class UsersService {
     private readonly usersRepository: UsersRepository,
     private readonly requestProvider: RequestProvider,
     private readonly queryBus: QueryBus,
-  ) {}
+    private readonly logger: LoggingService,
+  ) {
+    logger.setContext('UsersService');
+  }
 
   async getUserById(
     id: string,
   ): Promise<DetailedUserPubliceResponseDto | DetailedUserPrivateResponseDto> {
-    return this.queryBus.execute(
-      new GetUserByIdQuery(id, this.requestProvider.user?.id),
-    );
+    try {
+      return this.queryBus.execute(
+        new GetUserByIdQuery(id, this.requestProvider.user?.id),
+      );
+    } catch (error) {
+      this.logger.logError(
+        `Failed getting user by id with error: ${error.message}`,
+        this.requestProvider,
+      );
+      throw new InternalServerErrorException(
+        `Failed getting user by id`,
+        error.message,
+      );
+    }
   }
 
   async getUserByUsername(
     username: string,
   ): Promise<DetailedUserPubliceResponseDto | DetailedUserPrivateResponseDto> {
-    return this.queryBus.execute(
-      new GetUserByUsernameQuery(username, this.requestProvider.user?.id),
-    );
+    try {
+      return this.queryBus.execute(
+        new GetUserByUsernameQuery(username, this.requestProvider.user?.id),
+      );
+    } catch (error) {
+      this.logger.logError(
+        `Failed getting user by username with error: ${error.message}`,
+        this.requestProvider,
+      );
+      throw new InternalServerErrorException(
+        `Failed getting user by username`,
+        error.message,
+      );
+    }
   }
 
   async getUserPublicProfile(userId: string): Promise<User> {
@@ -51,16 +78,27 @@ export class UsersService {
   }
 
   async create(ethAddress: string) {
-    const numUsers = await this.usersRepository.count();
-    const user = await this.usersRepository.create({
-      username: `fren${numUsers}`,
-      ethAddress: ethAddress,
-    });
-    await this.ethAddressRepository.create({
-      ethAddress: ethAddress,
-      user: user._id,
-    });
-    return user;
+    try {
+      const numUsers = await this.usersRepository.count();
+      const user = await this.usersRepository.create({
+        username: `fren${numUsers}`,
+        ethAddress: ethAddress,
+      });
+      await this.ethAddressRepository.create({
+        ethAddress: ethAddress,
+        user: user._id,
+      });
+      return user;
+    } catch (error) {
+      this.logger.logError(
+        `Failed user creation with error: ${error.message}`,
+        this.requestProvider,
+      );
+      throw new InternalServerErrorException(
+        `Failed user creation`,
+        error.message,
+      );
+    }
   }
 
   async update(updateUserDto: UpdateUserDto): Promise<User> {
@@ -79,6 +117,10 @@ export class UsersService {
         updateUserDto,
       );
     } catch (error) {
+      this.logger.logError(
+        `Failed user update with error: ${error.message}`,
+        this.requestProvider,
+      );
       throw new InternalServerErrorException(
         'Failed user update',
         error.message,
@@ -105,6 +147,10 @@ export class UsersService {
         },
       );
     } catch (error) {
+      this.logger.logError(
+        `Failed adding ${itemType} to user with error: ${error.message}`,
+        this.requestProvider,
+      );
       throw new InternalServerErrorException(
         `Failed adding ${itemType} to user`,
         error.message,
@@ -130,8 +176,12 @@ export class UsersService {
         },
       );
     } catch (error) {
+      this.logger.logError(
+        `Failed removing ${itemType} to user with error: ${error.message}`,
+        this.requestProvider,
+      );
       throw new InternalServerErrorException(
-        `Failed adding ${itemType} to user`,
+        `Failed removing ${itemType} to user`,
         error.message,
       );
     }

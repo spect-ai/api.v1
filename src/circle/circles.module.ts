@@ -18,6 +18,7 @@ import { CircleAuthGuard } from 'src/auth/circle.guard';
 import { QueryHandlers } from './queries/handlers';
 import { CircleV1Controller } from './circles-v1.controller';
 import { CqrsModule } from '@nestjs/cqrs';
+import { LoggingService } from 'src/logging/logging.service';
 
 @Module({
   imports: [
@@ -40,6 +41,7 @@ import { CqrsModule } from '@nestjs/cqrs';
     SessionAuthGuard,
     CircleAuthGuard,
     ...QueryHandlers,
+    LoggingService,
   ],
   exports: [CirclesService, CirclesRepository, CirclesModule],
 })

@@ -1,21 +1,14 @@
-import { Injectable } from '@nestjs/common';
+import { ConsoleLogger, Injectable, Scope } from '@nestjs/common';
 import fetch from 'node-fetch';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface LogContent {
-  caller?: string;
-  level: string;
-  message: string;
-}
-
-@Injectable()
-export class LoggingService {
-  log(content: LogContent): void {
-    console.log(process.env.SEMA_TOKEN);
-    console.log(process.env.ENV);
-
+@Injectable({ scope: Scope.TRANSIENT })
+export class LoggingService extends ConsoleLogger {
+  recordLog(
+    message: any,
+    level: string,
+    ...optionalParams: [...any, string?]
+  ): void {
     if (process.env.ENV === 'Production') {
-      console.log(content);
       fetch(
         `https://logsene-receiver.sematext.com/${process.env.SEMA_TOKEN}/example/`,
         {
@@ -23,49 +16,52 @@ export class LoggingService {
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify(content),
+          body: JSON.stringify({
+            message,
+            optionalParams,
+            context: this.context,
+            level,
+          }),
         },
-      )
-        .then((res) => {
-          console.log(res);
-        })
-        .catch((err) => {
-          console.log(err);
-        });
+      );
     } else {
-      console.log(content);
+      console.log(message);
     }
   }
-
-  logInfo(message: string, caller?: string): void {
-    this.log({
-      caller,
-      level: 'info',
-      message,
-    });
+  log(message: any, ...optionalParams: [...any, string?]): void {
+    this.recordLog(message, 'info', ...optionalParams);
   }
 
-  logError(message: string, caller?: string): void {
-    this.log({
-      caller,
-      level: 'error',
-      message,
-    });
+  debug(message: any, ...optionalParams: [...any, string?]): void {
+    this.recordLog(message, 'debug', ...optionalParams);
   }
 
-  logDebug(message: string, caller?: string): void {
-    this.log({
-      caller,
-      level: 'debug',
-      message,
-    });
+  warn(message: any, ...optionalParams: [...any, string?]): void {
+    this.recordLog(message, 'warn', ...optionalParams);
   }
 
-  logWarn(message: string, caller?: string): void {
-    this.log({
-      caller,
-      level: 'warn',
-      message,
+  error(message: any, ...optionalParams: [...any, string?]): void {
+    this.recordLog(message, 'error', ...optionalParams);
+  }
+
+  async logError(
+    message: any,
+    request?: any,
+    ...optionalParams: [...any, string?]
+  ): Promise<void> {
+    const bodySizeInBytes = new TextEncoder().encode(request.body).length;
+    this.error(message, {
+      ...optionalParams,
+      request: request
+        ? {
+            method: request.method,
+            url: request.url,
+            body: bodySizeInBytes < 500000 ? request.body : '', // 500kb
+            query: request.query,
+            params: request.params,
+            caller: request.user?.id,
+          }
+        : {},
     });
   }
 }

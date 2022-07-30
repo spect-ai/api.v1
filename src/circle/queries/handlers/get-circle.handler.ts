@@ -5,15 +5,34 @@ import {
   GetCircleBySlugQuery,
   GetCircleByIdQuery,
 } from '../impl/get-circle.query';
+import { LoggingService } from 'src/logging/logging.service';
+import { InternalServerErrorException } from '@nestjs/common';
 
 @QueryHandler(GetCircleByIdQuery)
 export class GetCircleByIdQueryHandler
   implements IQueryHandler<GetCircleByIdQuery>
 {
-  constructor(private readonly circleRepository: CirclesRepository) {}
+  constructor(
+    private readonly circleRepository: CirclesRepository,
+    private readonly logger: LoggingService,
+  ) {
+    logger.setContext('GetCircleByIdQueryHandler');
+  }
 
   async execute(query: GetCircleByIdQuery): Promise<DetailedCircleResponseDto> {
-    return await this.circleRepository.getCircleById(query.id);
+    try {
+      return await this.circleRepository.getCircleById(query.id);
+    } catch (error) {
+      console.log(this.logger);
+      this.logger.error(
+        `Failed while getting circle using id with error: ${error.message}`,
+        query,
+      );
+      throw new InternalServerErrorException(
+        'Failed while getting circle using id',
+        error.message,
+      );
+    }
   }
 }
 
@@ -21,11 +40,27 @@ export class GetCircleByIdQueryHandler
 export class GetCircleBySlugQueryHandler
   implements IQueryHandler<GetCircleBySlugQuery>
 {
-  constructor(private readonly circleRepository: CirclesRepository) {}
+  constructor(
+    private readonly circleRepository: CirclesRepository,
+    private readonly logger: LoggingService,
+  ) {
+    logger.setContext('GetCircleBySlugQueryHandler');
+  }
 
   async execute(
     query: GetCircleBySlugQuery,
   ): Promise<DetailedCircleResponseDto> {
-    return await this.circleRepository.findOne({ slug: query.slug });
+    try {
+      return await this.circleRepository.findOne({ slug: query.slug });
+    } catch (error) {
+      this.logger.logError(
+        `Failed while getting circle using slug with error: ${error.message}`,
+        query,
+      );
+      throw new InternalServerErrorException(
+        'Failed while getting circle using slug',
+        error.message,
+      );
+    }
   }
 }
