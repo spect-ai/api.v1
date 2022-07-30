@@ -4,7 +4,7 @@ import { UpdateQuery } from 'mongoose';
 import { InjectModel } from 'nestjs-typegoose';
 import { BaseRepository } from 'src/base/base.repository';
 import { Project } from './model/project.model';
-import { MappedProject } from './types/types';
+import { MappedProject, PopulatedProjectFields } from './types/types';
 
 const populatedCardFields = {
   title: 1,
@@ -19,6 +19,24 @@ const populatedCardFields = {
   project: 1,
   creator: 1,
   status: 1,
+};
+
+const defaultPopulate: PopulatedProjectFields = {
+  parents: {
+    name: 1,
+    slug: 1,
+  },
+  cards: {
+    title: 1,
+    labels: 1,
+    assignee: 1,
+    reviewer: 1,
+    reward: 1,
+    priority: 1,
+    deadline: 1,
+    slug: 1,
+    type: 1,
+  },
 };
 
 @Injectable()
@@ -102,5 +120,46 @@ export class ProjectsRepository extends BaseRepository<Project> {
     }
 
     return acknowledgment;
+  }
+
+  async getProjectBySlug(
+    slug: string,
+    customPopulate?: PopulatedProjectFields,
+    selectedFields?: Record<string, unknown>,
+  ): Promise<Project> {
+    const query = this.findOne(
+      {
+        slug: slug,
+      },
+      {
+        projection: selectedFields || {},
+      },
+    );
+    let populatedFields = defaultPopulate;
+    if (customPopulate) populatedFields = customPopulate;
+
+    Object.keys(populatedFields).forEach((key) => {
+      query.populate(key, populatedFields[key]);
+    });
+
+    return await query.exec();
+  }
+
+  async getProjectById(
+    id: string,
+    customPopulate?: PopulatedProjectFields,
+    selectedFields?: Record<string, unknown>,
+  ): Promise<Project> {
+    const query = this.findById(id, {
+      projection: selectedFields || {},
+    });
+    let populatedFields = defaultPopulate;
+    if (customPopulate) populatedFields = customPopulate;
+
+    Object.keys(populatedFields).forEach((key) => {
+      query.populate(key, populatedFields[key]);
+    });
+
+    return await query.exec();
   }
 }

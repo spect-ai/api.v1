@@ -34,4 +34,5 @@ export type PopulatedCircleFields = {
   projects?: { [fieldName: string]: 0 | 1 };
   parents?: { [fieldName: string]: 0 | 1 };
   children?: { [fieldName: string]: 0 | 1 };
+  retro?: { [fieldName: string]: 0 | 1 };
 };

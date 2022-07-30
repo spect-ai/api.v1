@@ -48,7 +48,7 @@ export class RetroService {
     const stats = {
       [this.requestProvider.user.id]: retro.stats[this.requestProvider.user.id],
     };
-    if (this.requestProvider)
+    if (this.requestProvider.user)
       if (retro.feedbackGiven) {
         const feedbackGiven = retro.feedbackGiven[this.requestProvider.user.id];
         const feedbackReceived = {} as MappedFeedback;
@@ -70,6 +70,7 @@ export class RetroService {
     return {
       ...retro,
       feedbackGiven: {},
+      feedbackReceived: {},
       stats,
     };
   }

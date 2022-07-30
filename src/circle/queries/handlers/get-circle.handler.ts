@@ -21,7 +21,11 @@ export class GetCircleByIdQueryHandler
 
   async execute(query: GetCircleByIdQuery): Promise<DetailedCircleResponseDto> {
     try {
-      return await this.circleRepository.getCircleById(query.id);
+      return await this.circleRepository.getCircleById(
+        query.id,
+        query.customPopulate,
+        query.selectedFields,
+      );
     } catch (error) {
       console.log(this.logger);
       this.logger.error(
@@ -51,7 +55,11 @@ export class GetCircleBySlugQueryHandler
     query: GetCircleBySlugQuery,
   ): Promise<DetailedCircleResponseDto> {
     try {
-      return await this.circleRepository.findOne({ slug: query.slug });
+      return await this.circleRepository.getCircleBySlug(
+        query.slug,
+        query.customPopulate,
+        query.selectedFields,
+      );
     } catch (error) {
       this.logger.logError(
         `Failed while getting circle using slug with error: ${error.message}`,

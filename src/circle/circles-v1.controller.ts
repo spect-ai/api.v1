@@ -14,6 +14,42 @@ export class CircleV1Controller {
 
   @Get('/:id')
   async findByObjectId(@Param() param: ObjectIdDto): Promise<Circle> {
-    return await this.queryBus.execute(new GetCircleByIdQuery(param.id));
+    return await this.queryBus.execute(
+      new GetCircleByIdQuery(
+        param.id,
+        {
+          projects: {
+            title: 1,
+            slug: 1,
+            description: 1,
+            id: 1,
+          },
+          retro: {
+            title: 1,
+            slug: 1,
+            id: 1,
+            status: 1,
+            reward: 1,
+            members: 1,
+          },
+          parents: {
+            title: 1,
+            slug: 1,
+            description: 1,
+            id: 1,
+          },
+          children: {
+            title: 1,
+            slug: 1,
+            description: 1,
+            id: 1,
+          },
+        },
+        {
+          invites: 0,
+          localRegistry: 0,
+        },
+      ),
+    );
   }
 }

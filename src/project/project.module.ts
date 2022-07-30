@@ -20,6 +20,7 @@ import { CircleAuthGuard } from 'src/auth/circle.guard';
 import { RolesService } from 'src/roles/roles.service';
 import { DiscordService } from 'src/common/discord.service';
 import { LoggingService } from 'src/logging/logging.service';
+import { QueryHandlers } from './queries/handlers';
 
 @Module({
   imports: [
@@ -45,6 +46,7 @@ import { LoggingService } from 'src/logging/logging.service';
     CircleAuthGuard,
     SessionAuthGuard,
     LoggingService,
+    ...QueryHandlers,
   ],
   exports: [ProjectService, ProjectsRepository, ProjectModule],
 })

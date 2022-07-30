@@ -33,3 +33,8 @@ export type View = {
   slug: string;
   name: string;
 };
+
+export type PopulatedProjectFields = {
+  cards?: { [fieldName: string]: 0 | 1 };
+  parents?: { [fieldName: string]: 0 | 1 };
+};

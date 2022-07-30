@@ -41,7 +41,10 @@ const populatedCardFieldsOnProject = {
 };
 
 const defaultPopulate: PopulatedCardFields = {
-  circle: {},
+  circle: {
+    name: 1,
+    slug: 1,
+  },
   parent: {
     title: 1,
     slug: 1,
@@ -58,6 +61,7 @@ const defaultPopulate: PopulatedCardFields = {
   },
   project: {
     name: 1,
+    slug: 1,
   },
 };
 
