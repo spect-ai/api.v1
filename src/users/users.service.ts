@@ -8,9 +8,10 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './model/users.model';
 import { RequestProvider } from './user.provider';
 import { UsersRepository } from './users.repository';
-import { QueryBus } from '@nestjs/cqrs';
+import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { GetUserByIdQuery, GetUserByUsernameQuery } from './queries/impl';
 import { LoggingService } from 'src/logging/logging.service';
+import { AddItemCommand } from './commands/impl';
 
 @Injectable()
 export class UsersService {
@@ -19,6 +20,7 @@ export class UsersService {
     private readonly usersRepository: UsersRepository,
     private readonly requestProvider: RequestProvider,
     private readonly queryBus: QueryBus,
+    private readonly commandBus: CommandBus,
     private readonly logger: LoggingService,
   ) {
     logger.setContext('UsersService');
@@ -134,17 +136,17 @@ export class UsersService {
     userId?: string,
   ): Promise<DetailedUserPubliceResponseDto> {
     try {
-      let user = this.requestProvider.user;
-      if (userId) user = await this.usersRepository.findById(userId);
-      if (user[itemType].includes(itemId))
-        throw new Error('Item already added');
-      return await this.usersRepository.updateAndReturnWithPopulatedFields(
-        userId || this.requestProvider.user.id,
-        {
-          $push: {
-            [itemType]: itemId,
-          },
-        },
+      if (!userId) userId = this.requestProvider.user?.id;
+      if (!userId) throw new Error('User id cannot be null');
+
+      return await this.commandBus.execute(
+        new AddItemCommand(
+          this.requestProvider.user?.id,
+          itemType,
+          itemId,
+          null,
+          userId,
+        ),
       );
     } catch (error) {
       this.logger.logError(
