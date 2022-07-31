@@ -1,13 +1,15 @@
 import {
-  IsNotEmpty,
-  IsString,
-  IsOptional,
   IsArray,
+  IsNotEmpty,
   IsObject,
+  IsOptional,
+  IsString,
 } from 'class-validator';
-import { MappedCard } from 'src/card/types/types';
+import { Card } from 'src/card/model/card.model';
 import { Circle } from 'src/circle/model/circle.model';
-import { Activity, MappedUser, Notification } from '../types/types';
+import { MappedItem } from 'src/common/interfaces';
+import { User } from '../model/users.model';
+import { Activity, Notification } from '../types/types';
 
 export class DetailedUserPubliceResponseDto {
   /**
@@ -17,6 +19,20 @@ export class DetailedUserPubliceResponseDto {
   @IsNotEmpty()
   @IsOptional()
   username: string;
+
+  /**
+   * Bio of the user
+   */
+  @IsString()
+  @IsOptional()
+  bio?: string;
+
+  /**
+   * Skills of the user
+   */
+  @IsArray()
+  @IsOptional()
+  skills?: string[];
 
   /**
    * The ethereum address of the user
@@ -92,19 +108,19 @@ export class DetailedUserPubliceResponseDto {
    * Associated user details
    */
   @IsObject()
-  userDetails: MappedUser;
+  userDetails: MappedItem<User>;
 
   /**
    * Assciated card details
    */
   @IsObject()
-  cardDetails: MappedCard;
+  cardDetails: MappedItem<Card>;
 
   /**
    * Assciated circle details
    */
   @IsObject()
-  circleDetails: { [id: string]: Partial<Circle> };
+  circleDetails: MappedItem<Circle>;
 }
 
 export class DetailedUserPrivateResponseDto extends DetailedUserPubliceResponseDto {

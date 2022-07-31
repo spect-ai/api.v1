@@ -20,6 +20,18 @@ export class User extends ProfileModel {
   username: string;
 
   /**
+   * The description of the profile
+   */
+  @prop({ default: '' })
+  bio: string;
+
+  /**
+   * The skills of the profile
+   */
+  @prop({ default: [] })
+  skills: string[];
+
+  /**
    * Ethereum address
    */
   @prop({ required: true })
