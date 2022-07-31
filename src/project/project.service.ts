@@ -18,8 +18,9 @@ import { CreateProjectRequestDto } from './dto/create-project-request.dto';
 import { DetailedProjectResponseDto } from './dto/detailed-project-response.dto';
 import { UpdateColumnRequestDto } from './dto/update-column.dto';
 import {
-  AddOrUpdateViewDto,
+  AddViewDto,
   UpdateProjectRequestDto,
+  UpdateViewDto,
 } from './dto/update-project-request.dto';
 import { Project } from './model/project.model';
 import { ProjectsRepository } from './project.repository';
@@ -311,7 +312,7 @@ export class ProjectService {
 
   async addView(
     projectId: string,
-    addViewDto: AddOrUpdateViewDto,
+    addViewDto: AddViewDto,
   ): Promise<DetailedProjectResponseDto> {
     try {
       const project =
@@ -323,6 +324,7 @@ export class ProjectService {
       const newView = {
         ...addViewDto,
         viewId: newViewId,
+        slug: `${project.slug}-view${project.viewOrder?.length}`,
       };
       const newViewDetails = {
         ...viewDetails,
@@ -357,7 +359,7 @@ export class ProjectService {
   async updateView(
     id: string,
     viewId: string,
-    updateColumnDto: AddOrUpdateViewDto,
+    updateColumnDto: UpdateViewDto,
   ): Promise<DetailedProjectResponseDto> {
     try {
       const project =

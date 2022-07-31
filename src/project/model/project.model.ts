@@ -7,6 +7,8 @@ import { ColumnDetailsDto } from '../dto/column-details.dto';
 import { Card } from 'src/card/model/card.model';
 import { MappedAutomation } from 'src/template/models/template.model';
 import { MappedView, View } from '../types/types';
+import { MappedItem } from 'src/common/interfaces';
+import { Automation } from 'src/automation/types/types';
 
 @useMongoosePlugin()
 export class Project extends BaseModel {
@@ -58,7 +60,7 @@ export class Project extends BaseModel {
 
   /** Automation rule */
   @prop({ default: {} })
-  automations: MappedAutomation;
+  automations: MappedItem<Automation>;
 
   /**
    * Cards of the project
@@ -93,5 +95,5 @@ export class Project extends BaseModel {
    * Details of the views in the project
    */
   @prop({ default: [] })
-  viewDetails: MappedView;
+  viewDetails: MappedItem<View>;
 }
