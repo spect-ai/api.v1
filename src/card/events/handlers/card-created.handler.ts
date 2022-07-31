@@ -1,25 +1,35 @@
-import { EventBus, EventsHandler, IEventHandler } from '@nestjs/cqrs';
+import {
+  CommandBus,
+  EventBus,
+  EventsHandler,
+  IEventHandler,
+} from '@nestjs/cqrs';
 import { Card } from 'src/card/model/card.model';
-import { NotificationEvent, UserActivityEvent } from 'src/users/events/impl';
+import { AddItemCommand } from 'src/users/commands/impl';
+import { NotificationEvent } from 'src/users/events/impl';
 import { CardCreatedEvent } from '../impl/card-created.event';
 
 @EventsHandler(CardCreatedEvent)
 export class CardCreatedEventHandler
   implements IEventHandler<CardCreatedEvent>
 {
-  constructor(private readonly eventBus: EventBus) {}
+  constructor(
+    private readonly eventBus: EventBus,
+    private readonly commandBus: CommandBus,
+  ) {}
 
   async handle(event: CardCreatedEvent) {
     console.log('CardCreatedEventHandler');
     const { card, circleSlug, projectSlug } = event;
-    for (const user of card.assignee.concat(card.reviewer)) {
-      if (user !== card.creator) {
+    const stakeholders = card.assignee.concat(card.reviewer);
+    for (const userId of stakeholders) {
+      if (userId !== card.creator) {
         this.eventBus.publish(
           new NotificationEvent(
             'create',
             'card',
             card as Card,
-            user,
+            userId,
             [circleSlug, projectSlug, card.slug],
             card.creator,
             null,
@@ -27,14 +37,28 @@ export class CardCreatedEventHandler
         );
       }
     }
-    // this.eventBus.publish(
-    //   new UserActivityEvent('create', 'card', card as Card, [], card.creator, {
-    //     added: {
-    //       title: card.title,
-    //     },
-    //     deleted: {},
-    //     updated: {},
-    //   }),
-    // );
+
+    for (const userId of card.assignee) {
+      this.commandBus.execute(
+        new AddItemCommand(
+          card.creator,
+          'assignedCards',
+          card.id,
+          null,
+          userId,
+        ),
+      );
+    }
+    for (const userId of card.reviewer) {
+      this.commandBus.execute(
+        new AddItemCommand(
+          card.creator,
+          'reviewingCards',
+          card.id,
+          null,
+          userId,
+        ),
+      );
+    }
   }
 }

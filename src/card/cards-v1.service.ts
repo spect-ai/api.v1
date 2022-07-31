@@ -1,5 +1,5 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
-import { CommandBus, QueryBus } from '@nestjs/cqrs';
+import { CommandBus, EventBus, QueryBus } from '@nestjs/cqrs';
 import { GetCircleByIdQuery } from 'src/circle/queries/impl';
 import { CommonTools } from 'src/common/common.service';
 import { AddCardsCommand } from 'src/project/commands/impl';
@@ -15,6 +15,7 @@ import { Card } from './model/card.model';
 import { GetCardByIdQuery } from './queries/impl';
 import { CardValidationService } from './validation.cards.service';
 import { ResponseBuilder } from './response.builder';
+import { CardCreatedEvent } from './events/impl';
 
 @Injectable()
 export class CardsV1Service {
@@ -26,6 +27,7 @@ export class CardsV1Service {
     private readonly logger: LoggingService,
     private readonly validationService: CardValidationService,
     private readonly responseBuilder: ResponseBuilder,
+    private readonly eventBus: EventBus,
   ) {
     logger.setContext('CardsV1Service');
   }
@@ -68,6 +70,10 @@ export class CardsV1Service {
           new AddCardsCommand([card], project, this.requestProvider.user.id),
         );
       }
+      this.eventBus.publish(
+        new CardCreatedEvent(card, project.slug, circle.slug),
+      );
+
       return {
         card: await this.responseBuilder.enrichResponse(card),
         project: {

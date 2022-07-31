@@ -1,5 +1,5 @@
 import { InternalServerErrorException } from '@nestjs/common';
-import { CommandHandler, ICommandHandler, QueryBus } from '@nestjs/cqrs';
+import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { CardsRepository } from 'src/card/cards.repository';
 import { CreateCardRequestDto } from 'src/card/dto/create-card-request.dto';
 import { Card } from 'src/card/model/card.model';
@@ -16,7 +16,6 @@ export class CreateCardCommandHandler
 {
   constructor(
     private readonly cardsRepository: CardsRepository,
-    private readonly queryBus: QueryBus,
     private readonly commonTools: CommonTools,
   ) {}
 
@@ -77,7 +76,6 @@ export class CreateCardCommandHandler
         const res = await this.cardsRepository.getCardWithPopulatedReferences(
           parentCard.id,
         );
-        console.log(res);
         return res;
       }
 
@@ -106,6 +104,7 @@ export class CreateCardCommandHandler
       activity: [activity],
       creator: caller,
       columnId: createCardDto.parent ? null : createCardDto.columnId,
+      //parent: createCardDto.parent || null,
     };
   }
 

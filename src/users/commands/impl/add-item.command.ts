@@ -10,13 +10,3 @@ export class AddItemCommand {
     public readonly userId?: string,
   ) {}
 }
-
-export class AddMultipleItemsForMultipleUsersCommand {
-  constructor(
-    public readonly caller: string,
-    public readonly field: ArrayField[],
-    public readonly item: string | UserSubmittedApplication,
-    public readonly user?: User,
-    public readonly userId?: string,
-  ) {}
-}
