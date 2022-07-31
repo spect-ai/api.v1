@@ -5,6 +5,7 @@ import { CommonTools } from 'src/common/common.service';
 import { LoggingService } from 'src/logging/logging.service';
 import { CardsProjectService } from 'src/project/cards.project.service';
 import { DetailedProjectResponseDto } from 'src/project/dto/detailed-project-response.dto';
+import { Project } from 'src/project/model/project.model';
 import { ProjectsRepository } from 'src/project/project.repository';
 import { RequestProvider } from 'src/users/user.provider';
 import { UsersRepository } from 'src/users/users.repository';
@@ -55,7 +56,7 @@ export class CreateCardCommandHandler {
         project: createCardDto.project,
       });
       /** In case this is a sub card, find the parent card and validate it exists */
-      let parentCard;
+      let parentCard: Card;
       if (createCardDto.parent) {
         parentCard =
           await this.cardsRepository.getCardWithUnpopulatedReferences(
@@ -65,7 +66,7 @@ export class CreateCardCommandHandler {
       }
 
       /** Get the created card object */
-      const newCard = await this.cardsService.createNew(
+      const newCard = this.cardsService.createNew(
         createCardDto,
         project.slug,
         cardNum,
@@ -85,15 +86,20 @@ export class CreateCardCommandHandler {
       const createdChildCards = await this.cardsRepository.insertMany(
         newChildCards,
       );
-      const projectWithCards = this.cardsProjectService.addCardsToProject(
-        project,
-        [createdCard, ...createdChildCards],
-      );
-      const updatedProject =
-        await this.projectRepository.updateProjectAndReturnWithPopulatedReferences(
-          project.id,
-          projectWithCards[project.id],
+
+      let updatedProject: Project;
+      if (!createCardDto.parent) {
+        const projectWithCards = this.cardsProjectService.addCardsToProject(
+          project,
+          [createdCard],
         );
+
+        updatedProject =
+          await this.projectRepository.updateProjectAndReturnWithPopulatedReferences(
+            project.id,
+            projectWithCards[project.id],
+          );
+      }
 
       /** Update parent card's children if it is a sub card and get the parent card object. */
       const updatedParentCard = await this.cardsService.addToParentCard(
@@ -116,9 +122,7 @@ export class CreateCardCommandHandler {
         await this.cardsRepository.bundleUpdatesAndExecute(updatedCards);
 
       if (updateAcknowledgment.hasWriteErrors()) {
-        throw new InternalServerErrorException(
-          'Error updating cards in database',
-        );
+        throw updateAcknowledgment.getWriteErrors();
       }
 
       /** Get parent card and return it if there is a parent */
@@ -137,12 +141,19 @@ export class CreateCardCommandHandler {
         new CardCreatedEvent(createdCard, project.slug, circle.slug),
       );
 
+      const resProject = updatedProject
+        ? {
+            ...updatedProject,
+            cards: this.commonTools.objectify(updatedProject.cards, 'id'),
+          }
+        : {
+            ...project,
+            cards: this.commonTools.objectify(project.cards, 'id'),
+          };
+
       return {
         card: Object.assign(createdCard, { children: createdChildCards }),
-        project: {
-          ...updatedProject,
-          cards: this.commonTools.objectify(updatedProject.cards, 'id'),
-        },
+        project: resProject,
         parentCard,
       };
     } catch (error) {

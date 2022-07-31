@@ -48,3 +48,16 @@ export type UserSubmittedApplication = {
   cardId: string;
   applicationTitle: string;
 };
+
+export type ArrayField =
+  | 'bookmarks'
+  | 'followingCircles'
+  | 'followingUsers'
+  | 'followers'
+  | 'activeApplications'
+  | 'pickedApplications'
+  | 'rejectedApplications'
+  | 'assignedCards'
+  | 'reviewingCards'
+  | 'assignedClosedCards'
+  | 'reviewingClosedCards';

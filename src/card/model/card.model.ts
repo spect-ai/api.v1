@@ -99,7 +99,7 @@ export class Card extends BaseModel {
   /**
    * The column that the card belongs to
    */
-  @prop({ required: true })
+  @prop({})
   columnId: string;
 
   /**

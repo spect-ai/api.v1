@@ -76,6 +76,12 @@ export class CardCommandHandler {
       const circle =
         this.requestProvider.circle ||
         (await this.circleRepository.findById(card.circle as string));
+
+      if (updateCardDto.columnId && card.parent)
+        throw new InternalServerErrorException(
+          'Cannot update column if it is a child card',
+        );
+
       const cardUpdate = this.cardsService.update(card, project, updateCardDto);
 
       const automationUpdate = this.automationService.handleAutomation(

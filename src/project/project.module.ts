@@ -21,6 +21,7 @@ import { RolesService } from 'src/roles/roles.service';
 import { DiscordService } from 'src/common/discord.service';
 import { LoggingService } from 'src/logging/logging.service';
 import { QueryHandlers } from './queries/handlers';
+import { CommandHandlers } from './commands/handlers';
 
 @Module({
   imports: [
@@ -47,6 +48,7 @@ import { QueryHandlers } from './queries/handlers';
     SessionAuthGuard,
     LoggingService,
     ...QueryHandlers,
+    ...CommandHandlers,
   ],
   exports: [ProjectService, ProjectsRepository, ProjectModule],
 })

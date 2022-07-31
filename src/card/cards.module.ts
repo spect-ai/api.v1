@@ -43,6 +43,8 @@ import { CqrsModule } from '@nestjs/cqrs';
 import { QueryHandlers } from './queries/handlers';
 import { LoggingService } from 'src/logging/logging.service';
 import { CardsV1Controller } from './cards-v1.controller';
+import { CommandHandlers } from './commands/handlers';
+import { CardsV1Service } from './cards-v1.service';
 
 @Module({
   imports: [
@@ -88,8 +90,10 @@ import { CardsV1Controller } from './cards-v1.controller';
     UserCardsService,
     ...EventHandlers,
     ...QueryHandlers,
+    ...CommandHandlers,
     CardNotificationService,
     LoggingService,
+    CardsV1Service,
   ],
   exports: [
     CardsService,

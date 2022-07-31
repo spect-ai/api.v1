@@ -68,11 +68,14 @@ export class ResponseBuilder {
     card = this.resolveApplicationView(card);
 
     const cardProject = card.project as unknown as Project;
+    console.log('cardProject', cardProject.cards);
     const res = {
       ...card,
       project: {
         ...cardProject,
-        cards: this.commonTools.objectify(cardProject.cards, 'id'),
+        cards: cardProject.cards
+          ? this.commonTools.objectify(cardProject.cards, 'id')
+          : {},
       },
     } as DetailedCardResponseDto;
 

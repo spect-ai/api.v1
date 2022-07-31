@@ -157,6 +157,7 @@ export class CardsService {
       slug: `${projectSlug}-${slugNum.toString()}`,
       activity: [activity],
       creator: this.requestProvider.user.id,
+      columnId: createCardDto.parent ? null : createCardDto.columnId,
     };
   }
 
@@ -182,7 +183,7 @@ export class CardsService {
         circle: childCard.circle || circle.id,
         parent: parentCard.id,
         reward: createCardDto.reward || { ...circle.defaultPayment, value: 0 }, //TODO: add reward to child cards
-        columnId: childCard.columnId || createCardDto.columnId,
+        columnId: null, // Child cards dont have a column
         activity: [activity],
         slug: `${projectSlug}-${slugNum.toString()}`,
       });
