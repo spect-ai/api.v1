@@ -68,7 +68,6 @@ export class ResponseBuilder {
     card = this.resolveApplicationView(card);
 
     const cardProject = card.project as unknown as Project;
-    console.log('cardProject', cardProject.cards);
     const res = {
       ...card,
       project: {

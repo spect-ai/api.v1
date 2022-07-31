@@ -38,13 +38,21 @@ export class AutomationService {
       return !valueToCheck.includes(valueToCheckAgainst);
     } else if (condition === 'isEmpty') {
       return (
+        valueToCheck === undefined ||
+        valueToCheck === null ||
         valueToCheck === '' ||
         (Array.isArray(valueToCheck) && valueToCheck.length === 0) ||
         (typeof valueToCheck === 'object' &&
           Object.keys(valueToCheck).length === 0)
       );
     } else if (condition === 'isNotEmpty') {
-      return valueToCheck !== '' && valueToCheck !== [] && valueToCheck !== {};
+      return (
+        valueToCheck !== '' &&
+        valueToCheck !== [] &&
+        valueToCheck !== {} &&
+        valueToCheck !== undefined &&
+        valueToCheck !== null
+      );
     } else {
       return false;
     }
