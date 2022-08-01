@@ -14,7 +14,7 @@ export class UpdateRetroRequestDto {
    * The title associated with the retro period
    */
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   title: string;
 
   /**
@@ -51,4 +51,11 @@ export class UpdateRetroRequestDto {
   @IsObject()
   @IsOptional()
   reward?: Payment;
+
+  /**
+   * The status of the retro period
+   */
+  @IsObject()
+  @IsOptional()
+  status?: Payment;
 }

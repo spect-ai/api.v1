@@ -68,6 +68,7 @@ export class CardCommandHandler {
     updateCardDto: UpdateCardRequestDto,
   ): Promise<DetailedCardResponseDto> {
     try {
+      console.log('updateCardDto', updateCardDto);
       const card =
         this.requestProvider.card || (await this.cardsRepository.findById(id));
       const project =
@@ -91,7 +92,10 @@ export class CardCommandHandler {
       );
 
       let projectUpdate = {};
-      if (updateCardDto.columnId || updateCardDto.cardIndex) {
+      if (
+        (updateCardDto.columnId && updateCardDto.columnId !== card.columnId) ||
+        updateCardDto.cardIndex
+      ) {
         projectUpdate = this.cardsProjectService.reorderCard(project, id, {
           destinationColumnId: updateCardDto.columnId
             ? updateCardDto.columnId

@@ -13,8 +13,19 @@ export class UpdateRetroCommandHandler
   async execute(command: UpdateRetroCommand): Promise<Retro> {
     try {
       const { id, updateRetroRequestDto } = command;
+      const retro = await this.retroRepository.findById(id);
       const updatedRetro = await this.retroRepository
-        .updateById(id, updateRetroRequestDto)
+        .updateById(id, {
+          ...updateRetroRequestDto,
+          status: {
+            ...retro.status,
+            ...updateRetroRequestDto.status,
+          },
+          reward: {
+            ...retro.reward,
+            ...updateRetroRequestDto.reward,
+          },
+        })
         .populate('circle');
       return updatedRetro;
     } catch (error) {
