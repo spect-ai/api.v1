@@ -14,14 +14,16 @@ export class RemoveCardsCommandHandler
     try {
       const { project, id, cardIds } = command;
       let projectToUpdate = project;
+
       if (!projectToUpdate) {
         projectToUpdate = await this.projectRepository.findById(id);
       }
+
       if (!projectToUpdate) {
         throw new InternalServerErrorException('Project not found');
       }
 
-      const columnDetails = { ...project.columnDetails };
+      const columnDetails = { ...projectToUpdate.columnDetails };
       for (const columnId in columnDetails) {
         const cards = columnDetails[columnId].cards;
         columnDetails[columnId].cards = cards.filter(
@@ -33,13 +35,14 @@ export class RemoveCardsCommandHandler
         (cardId) => !cardIds.includes(cardId),
       );
 
-      const updatedProject = await this.projectRepository.updateById(
-        project.id,
-        {
-          columnDetails,
-          cards,
-        },
-      );
+      const updatedProject =
+        await this.projectRepository.updateProjectAndReturnWithPopulatedReferences(
+          projectToUpdate.id,
+          {
+            columnDetails,
+            cards,
+          },
+        );
       return updatedProject;
     } catch (error) {
       throw new InternalServerErrorException(error.message);

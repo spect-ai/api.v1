@@ -6,7 +6,7 @@ import {
 } from '@nestjs/cqrs';
 import { Card } from 'src/card/model/card.model';
 import { MoveItemCommand } from 'src/users/commands/impl';
-import { NotificationEvent, UserActivityEvent } from 'src/users/events/impl';
+import { NotificationEvent } from 'src/users/events/impl';
 import { CardUpdatedEvent } from '../impl';
 
 @EventsHandler(CardUpdatedEvent)

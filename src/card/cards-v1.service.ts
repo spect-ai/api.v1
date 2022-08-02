@@ -2,20 +2,21 @@ import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { CommandBus, EventBus, QueryBus } from '@nestjs/cqrs';
 import { GetCircleByIdQuery } from 'src/circle/queries/impl';
 import { CommonTools } from 'src/common/common.service';
+import { LoggingService } from 'src/logging/logging.service';
 import { AddCardsCommand } from 'src/project/commands/impl';
 import { DetailedProjectResponseDto } from 'src/project/dto/detailed-project-response.dto';
-import { Project } from 'src/project/model/project.model';
 import { GetProjectByIdQuery } from 'src/project/queries/impl';
 import { RequestProvider } from 'src/users/user.provider';
+import { ArchiveCardByIdCommand } from './commands/archive/impl/archive-card.command';
 import { CreateCardCommand } from './commands/impl';
 import { CreateCardRequestDto } from './dto/create-card-request.dto';
 import { DetailedCardResponseDto } from './dto/detailed-card-response-dto';
-import { LoggingService } from 'src/logging/logging.service';
+import { CardsArchivedEvent } from './events/archive/impl/card-archived.event';
+import { CardCreatedEvent } from './events/impl';
 import { Card } from './model/card.model';
 import { GetCardByIdQuery } from './queries/impl';
-import { CardValidationService } from './validation.cards.service';
 import { ResponseBuilder } from './response.builder';
-import { CardCreatedEvent } from './events/impl';
+import { CardValidationService } from './validation.cards.service';
 
 @Injectable()
 export class CardsV1Service {
@@ -88,6 +89,29 @@ export class CardsV1Service {
       );
       throw new InternalServerErrorException(
         'Failed creating new card',
+        error.message,
+      );
+    }
+  }
+
+  async archive(id: string): Promise<DetailedProjectResponseDto> {
+    try {
+      const { project, cardIds } = await this.commandBus.execute(
+        new ArchiveCardByIdCommand(id),
+      );
+      console.log(project);
+      this.eventBus.publish(new CardsArchivedEvent(cardIds));
+      return {
+        ...project,
+        cards: this.commonTools.objectify(project.cards, 'id'),
+      };
+    } catch (error) {
+      this.logger.logError(
+        `Failed archiving card with error: ${error.message}`,
+        this.requestProvider,
+      );
+      throw new InternalServerErrorException(
+        'Failed archiving card',
         error.message,
       );
     }

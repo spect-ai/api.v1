@@ -3,6 +3,7 @@ import { CardUpdatedEventHandler } from './card-updated.handler';
 import { WorkThreadCreatedEventHandler } from '../work/handlers/work-thread-created.handler';
 import { WorkUnitCreatedEventHandler } from '../work/handlers/work-unit-created.handler';
 import { ApplicationPickedEventHandler } from '../application/handlers/application-picked.handler';
+import { CardsArchivedEventHandler } from '../archive/handlers/card-archived.handler';
 
 export const EventHandlers = [
   CardCreatedEventHandler,
@@ -10,4 +11,5 @@ export const EventHandlers = [
   WorkThreadCreatedEventHandler,
   WorkUnitCreatedEventHandler,
   ApplicationPickedEventHandler,
+  CardsArchivedEventHandler,
 ];

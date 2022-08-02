@@ -2,7 +2,6 @@ import { InternalServerErrorException } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { Project } from 'src/project/model/project.model';
 import { ProjectsRepository } from 'src/project/project.repository';
-import { RemoveCardsCommand } from '../../impl';
 import { RemoveItemsCommand } from '../impl/remove-items.command';
 
 @CommandHandler(RemoveItemsCommand)
