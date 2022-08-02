@@ -6,7 +6,7 @@ import { DeleteProjectByIdCommand } from 'src/project/commands/impl';
 import { ProjectsRepository } from 'src/project/project.repository';
 
 @CommandHandler(DeleteProjectByIdCommand)
-export class DeleteCardByIdCommandHandler
+export class DeleteProjectByIdCommandHandler
   implements ICommandHandler<DeleteProjectByIdCommand>
 {
   constructor(
@@ -33,13 +33,15 @@ export class DeleteCardByIdCommandHandler
         _id: command.id,
       });
 
-      await this.commandBus.execute(
-        new RemoveProjectsFromMultipleCirclesCommand(
-          [projectToDelete.id],
-          null,
-          projectToDelete.parents,
-        ),
-      );
+      if (command.deleteFromCircle) {
+        await this.commandBus.execute(
+          new RemoveProjectsFromMultipleCirclesCommand(
+            [projectToDelete.id],
+            null,
+            projectToDelete.parents,
+          ),
+        );
+      }
       return true;
     } catch (error) {
       throw new InternalServerErrorException(error);

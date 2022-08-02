@@ -22,6 +22,7 @@ import { DiscordService } from 'src/common/discord.service';
 import { LoggingService } from 'src/logging/logging.service';
 import { QueryHandlers } from './queries/handlers';
 import { CommandHandlers } from './commands/handlers';
+import { CqrsModule } from '@nestjs/cqrs';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { CommandHandlers } from './commands/handlers';
     forwardRef(() => CardsModule),
     forwardRef(() => AutomationModule),
     EthAddressModule,
+    CqrsModule,
   ],
   controllers: [ProjectController],
   providers: [

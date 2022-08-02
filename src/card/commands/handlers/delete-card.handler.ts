@@ -1,7 +1,7 @@
 import { InternalServerErrorException } from '@nestjs/common';
 import { CommandBus, CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { CardsRepository } from 'src/card/cards.repository';
-import { Card, ExtendedCard } from 'src/card/model/card.model';
+import { ExtendedCard } from 'src/card/model/card.model';
 import { CommonTools } from 'src/common/common.service';
 import { RemoveCardsCommand } from 'src/project/commands/impl';
 import {
@@ -113,7 +113,7 @@ export class DeleteMultipleCardsByIdHandler
         }
 
         for (const [projectId, cardIds] of Object.entries(projectToCards)) {
-          const deletedFromProject = await this.commandBus.execute(
+          await this.commandBus.execute(
             new RemoveCardsCommand(cardIds as string[], null, projectId),
           );
         }
