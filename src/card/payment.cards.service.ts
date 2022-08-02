@@ -37,12 +37,27 @@ export class CardsPaymentService {
   async aggregatePaymentInfo(
     cardIds: string[],
     chainId: string,
+    payForChildren = true,
   ): Promise<AggregatedFlattenedPaymentInfo> {
     try {
-      const cards = await this.cardsRepository.findAll({
-        _id: { $in: cardIds },
-        'reward.chain.chainId': chainId,
-      });
+      let cards: Card[] = [];
+
+      if (payForChildren) {
+        const cardsWithChildren =
+          await this.cardsRepository.getCardWithAllChildrenForMultipleCards(
+            cardIds,
+          );
+        for (const card of cardsWithChildren) {
+          cards.push(card);
+          cards = [...cards, ...card.flattenedChildren];
+        }
+        //cards = cards.filter((card) => card.reward.chain?.chainId === chainId);
+      } else {
+        cards = await this.cardsRepository.findAll({
+          _id: { $in: cardIds },
+          'reward.chain.chainId': chainId,
+        });
+      }
       const aggregatedPaymentInfo = {
         approval: { tokenAddresses: [], values: [] },
         currency: { userIds: [], values: [] },
