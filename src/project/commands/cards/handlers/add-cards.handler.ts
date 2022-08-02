@@ -2,7 +2,7 @@ import { InternalServerErrorException } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { Project } from 'src/project/model/project.model';
 import { ProjectsRepository } from 'src/project/project.repository';
-import { AddCardsCommand } from '../impl';
+import { AddCardsCommand } from '../../impl';
 
 @CommandHandler(AddCardsCommand)
 export class AddCardsCommandHandler
