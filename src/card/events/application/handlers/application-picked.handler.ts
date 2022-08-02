@@ -35,7 +35,6 @@ export class ApplicationPickedEventHandler
       );
       this.commandBus.execute(
         new MoveItemCommand(
-          caller,
           'activeApplications',
           'pickedApplications',
           card.id,

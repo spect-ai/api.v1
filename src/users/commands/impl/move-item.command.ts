@@ -2,7 +2,6 @@ import { User } from 'src/users/model/users.model';
 
 export class MoveItemCommand {
   constructor(
-    public readonly caller: string,
     public readonly fieldFrom:
       | 'bookmarks'
       | 'followingCircles'

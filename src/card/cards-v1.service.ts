@@ -102,10 +102,10 @@ export class CardsV1Service {
 
   async archive(id: string): Promise<DetailedProjectResponseDto> {
     try {
-      const { project, cardIds } = await this.commandBus.execute(
+      const { project, cards } = await this.commandBus.execute(
         new ArchiveCardByIdCommand(id),
       );
-      this.eventBus.publish(new CardsArchivedEvent(cardIds));
+      this.eventBus.publish(new CardsArchivedEvent(cards));
       return {
         ...project,
         cards: this.commonTools.objectify(project.cards, 'id'),
@@ -124,10 +124,10 @@ export class CardsV1Service {
 
   async revertArchival(id: string): Promise<DetailedProjectResponseDto> {
     try {
-      const { project, cardIds } = await this.commandBus.execute(
+      const { project, cards } = await this.commandBus.execute(
         new RevertArchiveCardByIdCommand(id),
       );
-      this.eventBus.publish(new CardArchivalRevertedEvent(cardIds));
+      this.eventBus.publish(new CardArchivalRevertedEvent(cards));
       return {
         ...project,
         cards: this.commonTools.objectify(project.cards, 'id'),

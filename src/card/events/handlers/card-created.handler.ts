@@ -5,7 +5,7 @@ import {
   IEventHandler,
 } from '@nestjs/cqrs';
 import { Card } from 'src/card/model/card.model';
-import { AddItemCommand } from 'src/users/commands/impl';
+import { AddItemsCommand } from 'src/users/commands/impl';
 import { NotificationEvent } from 'src/users/events/impl';
 import { CardCreatedEvent } from '../impl/card-created.event';
 
@@ -40,10 +40,13 @@ export class CardCreatedEventHandler
 
     for (const userId of card.assignee) {
       this.commandBus.execute(
-        new AddItemCommand(
-          card.creator,
-          'assignedCards',
-          card.id,
+        new AddItemsCommand(
+          [
+            {
+              fieldName: 'assignedCards',
+              itemIds: [card.id],
+            },
+          ],
           null,
           userId,
         ),
@@ -51,10 +54,13 @@ export class CardCreatedEventHandler
     }
     for (const userId of card.reviewer) {
       this.commandBus.execute(
-        new AddItemCommand(
-          card.creator,
-          'reviewingCards',
-          card.id,
+        new AddItemsCommand(
+          [
+            {
+              fieldName: 'reviewingCards',
+              itemIds: [card.id],
+            },
+          ],
           null,
           userId,
         ),

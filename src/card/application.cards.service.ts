@@ -3,7 +3,7 @@ import { CommandBus, EventBus } from '@nestjs/cqrs';
 import { CirclesRepository } from 'src/circle/circles.repository';
 import { CirclesService } from 'src/circle/circles.service';
 import { ProjectsRepository } from 'src/project/project.repository';
-import { AddItemCommand } from 'src/users/commands/impl';
+import { AddItemsCommand } from 'src/users/commands/impl';
 import { UserSubmittedApplication } from 'src/users/types/types';
 import { RequestProvider } from 'src/users/user.provider';
 import { v4 as uuidv4 } from 'uuid';
@@ -97,13 +97,18 @@ export class ApplicationService {
           },
         );
       await this.commandBus.execute(
-        new AddItemCommand(
-          this.requestProvider.user.id,
-          'activeApplications',
-          {
-            cardId: updatedCard.id,
-            applicationTitle: createApplicationDto.title,
-          } as UserSubmittedApplication,
+        new AddItemsCommand(
+          [
+            {
+              fieldName: 'activeApplications',
+              itemIds: [
+                {
+                  cardId: updatedCard.id,
+                  applicationTitle: createApplicationDto.title,
+                } as UserSubmittedApplication,
+              ],
+            },
+          ],
           this.requestProvider.user,
         ),
       );

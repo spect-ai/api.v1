@@ -11,7 +11,7 @@ import { UsersRepository } from './users.repository';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { GetUserByIdQuery, GetUserByUsernameQuery } from './queries/impl';
 import { LoggingService } from 'src/logging/logging.service';
-import { AddItemCommand } from './commands/impl';
+import { AddItemsCommand } from './commands/impl';
 
 @Injectable()
 export class UsersService {
@@ -140,10 +140,13 @@ export class UsersService {
       if (!userId) throw new Error('User id cannot be null');
 
       return await this.commandBus.execute(
-        new AddItemCommand(
-          this.requestProvider.user?.id,
-          itemType,
-          itemId,
+        new AddItemsCommand(
+          [
+            {
+              fieldName: itemType,
+              itemIds: [itemId],
+            },
+          ],
           null,
           userId,
         ),

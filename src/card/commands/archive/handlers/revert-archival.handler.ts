@@ -21,11 +21,10 @@ export class RevertArchiveCardByIdCommandHandler
 
   async execute(
     command: RevertArchiveCardByIdCommand,
-  ): Promise<{ project: Project; cardIds: string[] }> {
+  ): Promise<{ project: Project; cards: Card[] }> {
     try {
       const cardWithChildren =
         await this.cardsRepository.getCardWithAllChildren(command.id);
-      console.log(cardWithChildren);
       const cards = [
         ...cardWithChildren.flattenedChildren,
         cardWithChildren,
@@ -62,7 +61,7 @@ export class RevertArchiveCardByIdCommandHandler
       }
       return {
         project: updatedProject,
-        cardIds,
+        cards,
       };
     } catch (error) {
       throw new InternalServerErrorException(error);

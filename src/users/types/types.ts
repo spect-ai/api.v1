@@ -61,3 +61,8 @@ export type ArrayField =
   | 'reviewingCards'
   | 'assignedClosedCards'
   | 'reviewingClosedCards';
+
+export type FlattendedArrayFieldItems = {
+  fieldName: ArrayField;
+  itemIds: string[] | UserSubmittedApplication[];
+};

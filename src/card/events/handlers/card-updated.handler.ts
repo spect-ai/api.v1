@@ -47,7 +47,6 @@ export class CardUpdatedEventHandler
         for (const userId of diff.added?.assignee) {
           this.commandBus.execute(
             new MoveItemCommand(
-              caller,
               'activeApplications',
               'pickedApplications',
               card.id,
@@ -61,7 +60,6 @@ export class CardUpdatedEventHandler
         for (const userId of diff.deleted?.assignee) {
           this.commandBus.execute(
             new MoveItemCommand(
-              caller,
               'pickedApplications',
               'activeApplications',
               card.id,

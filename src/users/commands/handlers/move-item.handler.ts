@@ -19,7 +19,7 @@ export class MoveItemCommandHandler
   async execute(command: MoveItemCommand): Promise<User> {
     try {
       console.log('MoveItemCommandHandler');
-      const { caller, fieldFrom, fieldTo, item, user, userId } = command;
+      const { fieldFrom, fieldTo, item, user, userId } = command;
       let userToUpdate = user;
       if (!userToUpdate)
         userToUpdate = await this.userRepository.findById(userId);

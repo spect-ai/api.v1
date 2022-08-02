@@ -2,11 +2,11 @@ import { InternalServerErrorException } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { User } from 'src/users/model/users.model';
 import { UsersRepository } from 'src/users/users.repository';
-import { AddItemCommand } from '../impl';
+import { AddItemsCommand } from '../impl';
 import { LoggingService } from 'src/logging/logging.service';
 
-@CommandHandler(AddItemCommand)
-export class AddItemCommandHandler implements ICommandHandler<AddItemCommand> {
+@CommandHandler(AddItemsCommand)
+export class AddItemCommandHandler implements ICommandHandler<AddItemsCommand> {
   constructor(
     private readonly userRepository: UsersRepository,
     private readonly logger: LoggingService,
@@ -14,22 +14,31 @@ export class AddItemCommandHandler implements ICommandHandler<AddItemCommand> {
     this.logger.setContext('AddItemCommandHandler');
   }
 
-  async execute(command: AddItemCommand): Promise<User> {
+  async execute(command: AddItemsCommand): Promise<User> {
     try {
       console.log('AddItemCommandHandler');
-      const { caller, field, item, user, userId } = command;
+      const { items, user, userId } = command;
       let userToUpdate = user;
       if (!userToUpdate)
         userToUpdate = await this.userRepository.findById(userId);
+      if (!userToUpdate) throw new Error('User not found');
 
-      // Item already exists
-      if (userToUpdate[field] && userToUpdate[field].includes(item)) return;
+      const updateObj = {};
+      for (const item of items) {
+        if (!userToUpdate[item.fieldName])
+          throw new Error('Field doesnt exist');
+        for (const itemId of item.itemIds) {
+          if (!userToUpdate[item.fieldName].includes(itemId))
+            updateObj[item.fieldName] = [
+              ...(userToUpdate[item.fieldName] || []),
+              itemId,
+            ];
+        }
+      }
 
       const updatedUser = await this.userRepository.updateById(
         userToUpdate.id,
-        {
-          [field]: [...(userToUpdate[field] || []), item],
-        },
+        updateObj,
       );
       return updatedUser;
     } catch (error) {

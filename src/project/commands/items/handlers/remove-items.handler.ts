@@ -21,14 +21,15 @@ export class RemoveItemsCommandHandler
         throw new InternalServerErrorException('Project not found');
       }
 
+      const updateObj = {};
       for (const item of items) {
-        projectToUpdate[item.fieldName] = projectToUpdate[
-          item.fieldName
-        ].filter((cardId) => !item.itemIds.includes(cardId));
+        updateObj[item.fieldName] = projectToUpdate[item.fieldName].filter(
+          (itemId) => !item.itemIds.includes(itemId),
+        );
       }
       const updatedProject = await this.projectRepository.updateById(
-        project.id,
-        projectToUpdate,
+        projectToUpdate.id,
+        updateObj,
       );
       return updatedProject;
     } catch (error) {

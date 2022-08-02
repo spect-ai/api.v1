@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import { CommandBus, CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { CardsRepository } from 'src/card/cards.repository';
+import { Card } from 'src/card/model/card.model';
 import { RemoveCardsCommand } from 'src/project/commands/impl';
 import { Project } from 'src/project/model/project.model';
 import { ArchiveCardByIdCommand } from '../impl/archive-card.command';
@@ -20,20 +21,19 @@ export class ArchiveCardByIdCommandHandler
 
   async execute(
     command: ArchiveCardByIdCommand,
-  ): Promise<{ project: Project; cardIds: string[] }> {
+  ): Promise<{ project: Project; cards: Card[] }> {
     try {
-      let cardIds = [];
-      const card = await this.cardsRepository.getCardWithAllChildren(
-        command.id,
-      );
+      const cardWithChildren =
+        await this.cardsRepository.getCardWithAllChildren(command.id);
 
-      cardIds = [
-        ...card.flattenedChildren.map((c) => c._id.toString()),
-        command.id,
-      ] as string[];
+      const cards = [
+        ...cardWithChildren.flattenedChildren,
+        cardWithChildren,
+      ] as Card[];
+      const cardIds = cards.map((c) => c._id.toString());
 
       const updatedProject = await this.commandBus.execute(
-        new RemoveCardsCommand(cardIds, null, card.project),
+        new RemoveCardsCommand(cardIds, null, cardWithChildren.project),
       );
 
       /** Mongo only returns an acknowledgment on update and not the updated records itself */
@@ -62,7 +62,7 @@ export class ArchiveCardByIdCommandHandler
       }
       return {
         project: updatedProject,
-        cardIds,
+        cards,
       };
     } catch (error) {
       throw new InternalServerErrorException(error);
