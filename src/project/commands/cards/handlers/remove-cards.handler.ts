@@ -2,7 +2,7 @@ import { InternalServerErrorException } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { Project } from 'src/project/model/project.model';
 import { ProjectsRepository } from 'src/project/project.repository';
-import { AddCardsCommand, RemoveCardsCommand } from '../../impl';
+import { RemoveCardsCommand } from '../../impl';
 
 @CommandHandler(RemoveCardsCommand)
 export class RemoveCardsCommandHandler
@@ -33,14 +33,13 @@ export class RemoveCardsCommandHandler
         (cardId) => !cardIds.includes(cardId),
       );
 
-      const updatedProject =
-        await this.projectRepository.updateProjectAndReturnWithPopulatedReferences(
-          project.id,
-          {
-            columnDetails,
-            cards,
-          },
-        );
+      const updatedProject = await this.projectRepository.updateById(
+        project.id,
+        {
+          columnDetails,
+          cards,
+        },
+      );
       return updatedProject;
     } catch (error) {
       throw new InternalServerErrorException(error.message);
