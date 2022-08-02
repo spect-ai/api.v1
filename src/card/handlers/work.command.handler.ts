@@ -23,10 +23,6 @@ import {
 import { CirclesRepository } from 'src/circle/circles.repository';
 import { LoggingService } from 'src/logging/logging.service';
 
-const globalUpdate = {
-  card: {},
-  project: {},
-} as GlobalDocumentUpdate;
 @Injectable()
 export class WorkCommandHandler {
   constructor(
@@ -46,6 +42,10 @@ export class WorkCommandHandler {
 
   async handleGithubPR(createGithubPRDto: CreateGithubPRDto): Promise<boolean> {
     try {
+      const globalUpdate = {
+        card: {},
+        project: {},
+      } as GlobalDocumentUpdate;
       /** Assumes all cards are from the same project */
       const cards = await this.cardsRepository.findAll({
         slug: { $in: createGithubPRDto.slugs },
@@ -112,6 +112,10 @@ export class WorkCommandHandler {
     createWorkThread: CreateWorkThreadRequestDto,
   ): Promise<DetailedCardResponseDto> {
     try {
+      const globalUpdate = {
+        card: {},
+        project: {},
+      } as GlobalDocumentUpdate;
       const card =
         this.requestProvider.card || (await this.cardsRepository.findById(id));
       const project =
@@ -162,6 +166,10 @@ export class WorkCommandHandler {
     updateWorkThread: UpdateWorkThreadRequestDto,
   ): Promise<DetailedCardResponseDto> {
     try {
+      const globalUpdate = {
+        card: {},
+        project: {},
+      } as GlobalDocumentUpdate;
       const card =
         this.requestProvider.card || (await this.cardsRepository.findById(id));
       const project =
@@ -202,6 +210,10 @@ export class WorkCommandHandler {
     createWorkUnit: CreateWorkUnitRequestDto,
   ): Promise<DetailedCardResponseDto> {
     try {
+      const globalUpdate = {
+        card: {},
+        project: {},
+      } as GlobalDocumentUpdate;
       const card =
         this.requestProvider.card || (await this.cardsRepository.findById(id));
       const project =
@@ -257,6 +269,10 @@ export class WorkCommandHandler {
     updateWorkUnit: UpdateWorkUnitRequestDto,
   ): Promise<DetailedCardResponseDto> {
     try {
+      const globalUpdate = {
+        card: {},
+        project: {},
+      } as GlobalDocumentUpdate;
       const card =
         this.requestProvider.card || (await this.cardsRepository.findById(id));
       const project =

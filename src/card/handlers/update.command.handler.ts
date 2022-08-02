@@ -36,11 +36,6 @@ import { UserCardsService } from '../user.cards.service';
 import { CardValidationService } from '../validation.cards.service';
 import { LoggingService } from 'src/logging/logging.service';
 
-const globalUpdate = {
-  card: {},
-  project: {},
-} as GlobalDocumentUpdate;
-
 @Injectable()
 export class CardCommandHandler {
   constructor(
@@ -68,7 +63,11 @@ export class CardCommandHandler {
     updateCardDto: UpdateCardRequestDto,
   ): Promise<DetailedCardResponseDto> {
     try {
-      console.log('updateCardDto', updateCardDto);
+      const globalUpdate = {
+        card: {},
+        project: {},
+      } as GlobalDocumentUpdate;
+
       const card =
         this.requestProvider.card || (await this.cardsRepository.findById(id));
       const project =
@@ -128,6 +127,7 @@ export class CardCommandHandler {
         this.commonTools.objectify([card], 'id'),
       );
 
+      console.log(globalUpdate.card);
       const cardUpdateAcknowledgment =
         await this.cardsRepository.bundleUpdatesAndExecute(globalUpdate.card);
 
@@ -178,6 +178,11 @@ export class CardCommandHandler {
     updatePaymentInfo: UpdatePaymentInfoDto,
   ): Promise<DetailedProjectResponseDto> {
     try {
+      const globalUpdate = {
+        card: {},
+        project: {},
+      } as GlobalDocumentUpdate;
+
       if (updatePaymentInfo.cardIds.length === 0) {
         throw new HttpException(
           'Card ids cannot be empty',
@@ -270,6 +275,11 @@ export class CardCommandHandler {
     multiCardCloseDto: MultiCardCloseWithSlugDto,
   ): Promise<boolean> {
     try {
+      const globalUpdate = {
+        card: {},
+        project: {},
+      } as GlobalDocumentUpdate;
+
       const cards = await this.cardsRepository.findAll({
         slug: { $in: multiCardCloseDto.slugs },
       });

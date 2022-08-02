@@ -155,6 +155,17 @@ export class AutomationService {
       );
     }
     if (values.hasOwnProperty('from')) {
+      console.log(
+        'has to nottttttttttttttttttttttttttttttttttttttttttttttttttt',
+      );
+      console.log(
+        !this.satisfiesCondition(newCard, properties, values.from, 'is'),
+      );
+      console.log(
+        this.satisfiesCondition(prevCard, properties, values.from, 'is'),
+      );
+      console.log('has toppppppppppppppppppppppppppppppppppppp');
+
       return (
         !this.satisfiesCondition(newCard, properties, values.from, 'is') &&
         this.satisfiesCondition(prevCard, properties, values.from, 'is')
@@ -191,8 +202,8 @@ export class AutomationService {
     };
     for (const automationId of project.automationOrder) {
       const automation = project.automations[automationId];
-      // console.log('   ');
-      // console.log(automation.name);
+      console.log('   ');
+      console.log(automation.name);
       const triggerPropertyArray = automation.triggerProperty.split('.');
       if (
         !this.satisfiesValues(
