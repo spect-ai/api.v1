@@ -1,4 +1,5 @@
 import { ArchiveCardByIdCommandHandler } from '../archive/handlers/archive-card.handler';
+import { RevertArchiveCardByIdCommandHandler } from '../archive/handlers/revert-archival.handler';
 import { CreateCardCommandHandler } from './create-card.handler';
 import {
   DeleteCardByIdCommandHandler,
@@ -10,4 +11,5 @@ export const CommandHandlers = [
   DeleteCardByIdCommandHandler,
   DeleteMultipleCardsByIdHandler,
   ArchiveCardByIdCommandHandler,
+  RevertArchiveCardByIdCommandHandler,
 ];

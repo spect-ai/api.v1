@@ -12,23 +12,41 @@ export class AddCardsCommandHandler
 
   async execute(command: AddCardsCommand): Promise<Project> {
     try {
-      const { project, cards, caller } = command;
+      const { project, id, cards } = command;
+      let projectToUpdate = project;
+
+      if (!projectToUpdate) {
+        projectToUpdate = await this.projectRepository.findById(id);
+      }
+      if (!projectToUpdate) {
+        throw new InternalServerErrorException('Project not found');
+      }
 
       const cardIds = [];
-      const columnDetails = { ...project.columnDetails };
+      const columnDetails = { ...projectToUpdate.columnDetails };
+      if (Object.keys(columnDetails).length === 0) {
+        throw new Error('No columns found');
+      }
       for (const card of cards) {
         cardIds.push(card._id);
-        columnDetails[card.columnId].cards = [
-          card._id.toString(),
-          ...columnDetails[card.columnId].cards,
-        ];
+        if (card.columnId in columnDetails) {
+          columnDetails[card.columnId].cards = [
+            card._id.toString(),
+            ...columnDetails[card.columnId].cards,
+          ];
+        } else {
+          columnDetails[projectToUpdate.columnOrder[0]].cards = [
+            card._id.toString(),
+            ...columnDetails[projectToUpdate.columnOrder[0]].cards,
+          ];
+        }
       }
 
       const updatedProject =
         await this.projectRepository.updateProjectAndReturnWithPopulatedReferences(
-          project.id,
+          projectToUpdate.id,
           {
-            cards: [...cardIds, ...project.cards],
+            cards: [...cardIds, ...projectToUpdate.cards],
             columnDetails: columnDetails,
           },
         );

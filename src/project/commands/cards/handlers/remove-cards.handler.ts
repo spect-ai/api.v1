@@ -18,7 +18,6 @@ export class RemoveCardsCommandHandler
       if (!projectToUpdate) {
         projectToUpdate = await this.projectRepository.findById(id);
       }
-
       if (!projectToUpdate) {
         throw new InternalServerErrorException('Project not found');
       }

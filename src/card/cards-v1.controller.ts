@@ -49,4 +49,13 @@ export class CardsV1Controller {
   ): Promise<DetailedProjectResponseDto> {
     return await this.cardsService.archive(params.id);
   }
+
+  @SetMetadata('permissions', ['update'])
+  @UseGuards(CardAuthGuard)
+  @Patch('/:id/revertArchive')
+  async revertArchive(
+    @Param() params: ObjectIdDto,
+  ): Promise<DetailedProjectResponseDto> {
+    return await this.cardsService.revertArchival(params.id);
+  }
 }

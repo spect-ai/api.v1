@@ -8,10 +8,16 @@ import { DetailedProjectResponseDto } from 'src/project/dto/detailed-project-res
 import { GetProjectByIdQuery } from 'src/project/queries/impl';
 import { RequestProvider } from 'src/users/user.provider';
 import { ArchiveCardByIdCommand } from './commands/archive/impl/archive-card.command';
-import { CreateCardCommand } from './commands/impl';
+import {
+  CreateCardCommand,
+  RevertArchiveCardByIdCommand,
+} from './commands/impl';
 import { CreateCardRequestDto } from './dto/create-card-request.dto';
 import { DetailedCardResponseDto } from './dto/detailed-card-response-dto';
-import { CardsArchivedEvent } from './events/archive/impl/card-archived.event';
+import {
+  CardArchivalRevertedEvent,
+  CardsArchivedEvent,
+} from './events/archive/impl/card-archived.event';
 import { CardCreatedEvent } from './events/impl';
 import { Card } from './model/card.model';
 import { GetCardByIdQuery } from './queries/impl';
@@ -68,7 +74,7 @@ export class CardsV1Service {
       );
       if (!createCardDto.parent) {
         project = await this.commandBus.execute(
-          new AddCardsCommand([card], project, this.requestProvider.user.id),
+          new AddCardsCommand([card], project),
         );
       }
       this.eventBus.publish(
@@ -99,7 +105,6 @@ export class CardsV1Service {
       const { project, cardIds } = await this.commandBus.execute(
         new ArchiveCardByIdCommand(id),
       );
-      console.log(project);
       this.eventBus.publish(new CardsArchivedEvent(cardIds));
       return {
         ...project,
@@ -112,6 +117,28 @@ export class CardsV1Service {
       );
       throw new InternalServerErrorException(
         'Failed archiving card',
+        error.message,
+      );
+    }
+  }
+
+  async revertArchival(id: string): Promise<DetailedProjectResponseDto> {
+    try {
+      const { project, cardIds } = await this.commandBus.execute(
+        new RevertArchiveCardByIdCommand(id),
+      );
+      this.eventBus.publish(new CardArchivalRevertedEvent(cardIds));
+      return {
+        ...project,
+        cards: this.commonTools.objectify(project.cards, 'id'),
+      };
+    } catch (error) {
+      this.logger.logError(
+        `Failed reverting archival with error: ${error.message}`,
+        this.requestProvider,
+      );
+      throw new InternalServerErrorException(
+        'Failed reverting archival',
         error.message,
       );
     }
