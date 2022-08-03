@@ -52,6 +52,7 @@ export type UserSubmittedApplication = {
 export type ArrayField =
   | 'bookmarks'
   | 'followingCircles'
+  | 'memberOfCircles'
   | 'followingUsers'
   | 'followers'
   | 'activeApplications'

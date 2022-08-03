@@ -1,3 +1,8 @@
+import { InviteToCircleCommandHandler } from '../membership/handlers/invite-to-circle.handler';
+import {
+  JoinUsingDiscordCommandHandler,
+  JoinUsingInvitationCommandHandler,
+} from '../membership/handlers/join-circle.handler';
 import {
   RemoveProjectsCommandHandler,
   RemoveProjectsFromMultipleCirclesCommandHandler,
@@ -6,4 +11,7 @@ import {
 export const CommandHandlers = [
   RemoveProjectsCommandHandler,
   RemoveProjectsFromMultipleCirclesCommandHandler,
+  JoinUsingInvitationCommandHandler,
+  JoinUsingDiscordCommandHandler,
+  InviteToCircleCommandHandler,
 ];

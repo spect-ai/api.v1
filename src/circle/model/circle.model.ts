@@ -6,7 +6,7 @@ import { Activity } from 'src/common/types/activity.type';
 import { Project } from 'src/project/model/project.model';
 import { User } from 'src/users/model/users.model';
 import { Chain } from 'src/common/models/chain.model';
-import { ObjectId } from 'mongoose';
+import { ObjectId, Schema } from 'mongoose';
 import { MemberRoles, Roles } from 'src/common/types/role.type';
 import { Registry, TokenInfo } from 'src/registry/model/registry.model';
 import { Retro } from 'src/retro/models/retro.model';
@@ -88,7 +88,7 @@ export class Circle extends ProfileModel {
   /**
    * Members in the circle
    */
-  @prop({ ref: () => User, default: [] })
+  @prop({ ref: () => User, type: Schema.Types.String, default: [] })
   members: string[];
 
   /**
