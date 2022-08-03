@@ -52,13 +52,13 @@ export class Card extends BaseModel {
   /**
    * The project that the card belongs to
    */
-  @prop({ ref: () => Project, required: true })
+  @prop({ ref: () => Project, type: Schema.Types.String, required: true })
   project: string;
 
   /**
    * The project that the card belongs to
    */
-  @prop({ ref: () => Circle, required: true })
+  @prop({ ref: () => Circle, type: Schema.Types.String, required: true })
   circle: string;
 
   /**

@@ -8,6 +8,7 @@ import { CardsRepository } from 'src/card/cards.repository';
 import { Card } from 'src/card/model/card.model';
 import { RemoveCardsCommand } from 'src/project/commands/impl';
 import { Project } from 'src/project/model/project.model';
+import { RemoveItemsCommand } from '../../items/impl/remove-items.command';
 import { ArchiveCardByIdCommand } from '../impl/archive-card.command';
 
 @CommandHandler(ArchiveCardByIdCommand)
@@ -56,8 +57,23 @@ export class ArchiveCardByIdCommandHandler
 
       if (!updateAcknowledgment.acknowledged) {
         throw new HttpException(
-          'Something went wrong while updating payment info',
+          'Something went wrong while archving card',
           HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      }
+
+      if (cardWithChildren.parent) {
+        await this.commandBus.execute(
+          new RemoveItemsCommand(
+            [
+              {
+                fieldName: 'children',
+                itemIds: [cardWithChildren._id.toString()],
+              },
+            ],
+            null,
+            cardWithChildren.parent,
+          ),
         );
       }
       return {

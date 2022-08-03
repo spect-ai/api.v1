@@ -1,14 +1,13 @@
 import { prop } from '@typegoose/typegoose';
-import { useMongoosePlugin } from 'src/base/decorators/use-mongoose-plugins.decorator';
-import { Circle } from 'src/circle/model/circle.model';
-import { BaseModel } from 'src/base/base.model';
-import { ObjectId } from 'mongoose';
-import { ColumnDetailsDto } from '../dto/column-details.dto';
-import { Card } from 'src/card/model/card.model';
-import { MappedAutomation } from 'src/template/models/template.model';
-import { MappedView, View } from '../types/types';
-import { MappedItem } from 'src/common/interfaces';
+import { Schema } from 'mongoose';
 import { Automation } from 'src/automation/types/types';
+import { BaseModel } from 'src/base/base.model';
+import { useMongoosePlugin } from 'src/base/decorators/use-mongoose-plugins.decorator';
+import { Card } from 'src/card/model/card.model';
+import { Circle } from 'src/circle/model/circle.model';
+import { MappedItem } from 'src/common/interfaces';
+import { ColumnDetailsDto } from '../dto/column-details.dto';
+import { View } from '../types/types';
 
 @useMongoosePlugin()
 export class Project extends BaseModel {
@@ -39,7 +38,7 @@ export class Project extends BaseModel {
   /**
    * Parent Ids of the project
    */
-  @prop({ ref: () => Circle, default: [] })
+  @prop({ ref: () => Circle, type: Schema.Types.String, default: [] })
   parents: string[];
 
   /**
@@ -67,7 +66,7 @@ export class Project extends BaseModel {
    *
    * !! Important, need to store as MAP to support dynamic key to reference
    */
-  @prop({ ref: () => Card, default: [] })
+  @prop({ ref: () => Card, type: Schema.Types.String, default: [] })
   cards: string[];
 
   /**

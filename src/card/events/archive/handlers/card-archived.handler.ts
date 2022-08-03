@@ -4,7 +4,7 @@ import {
   EventsHandler,
   IEventHandler,
 } from '@nestjs/cqrs';
-import { RemoveItemsCommand } from 'src/users/commands/impl';
+import { RemoveItemsCommand as RemoveItemsFromUserCommand } from 'src/users/commands/impl';
 import { CardsArchivedEvent } from '../impl/card-archived.event';
 
 @EventsHandler(CardsArchivedEvent)
@@ -19,25 +19,34 @@ export class CardsArchivedEventHandler
   async handle(event: CardsArchivedEvent) {
     console.log('CardsArchivedEventHandler');
     const { cards } = event;
+    console.log(cards);
     for (const card of cards) {
       for (const assignee of card.assignee) {
         await this.commandBus.execute(
-          new RemoveItemsCommand([
-            {
-              fieldName: 'assignedCards',
-              itemIds: [assignee],
-            },
-          ]),
+          new RemoveItemsFromUserCommand(
+            [
+              {
+                fieldName: 'assignedCards',
+                itemIds: [card._id.toString()],
+              },
+            ],
+            null,
+            assignee,
+          ),
         );
       }
-      for (const assignee of card.reviewer) {
+      for (const reviewer of card.reviewer) {
         await this.commandBus.execute(
-          new RemoveItemsCommand([
-            {
-              fieldName: 'reviewingCards',
-              itemIds: [assignee],
-            },
-          ]),
+          new RemoveItemsFromUserCommand(
+            [
+              {
+                fieldName: 'reviewingCards',
+                itemIds: [card._id.toString()],
+              },
+            ],
+            null,
+            reviewer,
+          ),
         );
       }
     }

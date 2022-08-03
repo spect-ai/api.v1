@@ -96,3 +96,10 @@ export type PopulatedCardFields = {
   assignee?: { [fieldName: string]: 0 | 1 };
   reviewer?: { [fieldName: string]: 0 | 1 };
 };
+
+export type ArrayField = 'assignee' | 'reviewer' | 'children';
+
+export type FlattendedArrayFieldItems = {
+  fieldName: ArrayField;
+  itemIds: string[];
+};

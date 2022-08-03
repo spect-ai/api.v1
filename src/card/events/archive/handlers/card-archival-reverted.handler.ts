@@ -4,7 +4,7 @@ import {
   EventsHandler,
   IEventHandler,
 } from '@nestjs/cqrs';
-import { AddItemsCommand } from 'src/users/commands/impl';
+import { AddItemsCommand as AddItemsToUserCommand } from 'src/users/commands/impl';
 import { CardArchivalRevertedEvent } from '../impl/card-archived.event';
 
 @EventsHandler(CardArchivalRevertedEvent)
@@ -22,22 +22,30 @@ export class CardArchivalRevertedEventHandler
     for (const card of cards) {
       for (const assignee of card.assignee) {
         await this.commandBus.execute(
-          new AddItemsCommand([
-            {
-              fieldName: 'assignedCards',
-              itemIds: [assignee],
-            },
-          ]),
+          new AddItemsToUserCommand(
+            [
+              {
+                fieldName: 'assignedCards',
+                itemIds: [card._id.toString()],
+              },
+            ],
+            null,
+            assignee,
+          ),
         );
       }
-      for (const assignee of card.reviewer) {
+      for (const reviewer of card.reviewer) {
         await this.commandBus.execute(
-          new AddItemsCommand([
-            {
-              fieldName: 'reviewingCards',
-              itemIds: [assignee],
-            },
-          ]),
+          new AddItemsToUserCommand(
+            [
+              {
+                fieldName: 'reviewingCards',
+                itemIds: [card._id.toString()],
+              },
+            ],
+            null,
+            reviewer,
+          ),
         );
       }
     }

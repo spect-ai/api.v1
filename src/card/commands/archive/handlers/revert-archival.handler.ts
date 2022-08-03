@@ -8,6 +8,7 @@ import { CardsRepository } from 'src/card/cards.repository';
 import { Card } from 'src/card/model/card.model';
 import { AddCardsCommand, RemoveCardsCommand } from 'src/project/commands/impl';
 import { Project } from 'src/project/model/project.model';
+import { AddItemsCommand } from '../../items/impl/add-items.command';
 import { RevertArchiveCardByIdCommand } from '../impl/revert-archival.command';
 
 @CommandHandler(RevertArchiveCardByIdCommand)
@@ -59,6 +60,21 @@ export class RevertArchiveCardByIdCommandHandler
           HttpStatus.INTERNAL_SERVER_ERROR,
         );
       }
+      if (cardWithChildren.parent) {
+        await this.commandBus.execute(
+          new AddItemsCommand(
+            [
+              {
+                fieldName: 'children',
+                itemIds: [cardWithChildren._id.toString()],
+              },
+            ],
+            null,
+            cardWithChildren.parent,
+          ),
+        );
+      }
+
       return {
         project: updatedProject,
         cards,

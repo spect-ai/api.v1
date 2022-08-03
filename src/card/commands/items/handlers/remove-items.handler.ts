@@ -1,37 +1,38 @@
 import { InternalServerErrorException } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { User } from 'src/users/model/users.model';
-import { UsersRepository } from 'src/users/users.repository';
+import { CardsRepository } from 'src/card/cards.repository';
+import { Card } from 'src/card/model/card.model';
 import { RemoveItemsCommand } from '../impl/remove-items.command';
 
 @CommandHandler(RemoveItemsCommand)
 export class RemoveItemsCommandHandler
   implements ICommandHandler<RemoveItemsCommand>
 {
-  constructor(private readonly userRepository: UsersRepository) {}
+  constructor(private readonly cardRepository: CardsRepository) {}
 
-  async execute(command: RemoveItemsCommand): Promise<User> {
+  async execute(command: RemoveItemsCommand): Promise<Card> {
     try {
-      const { user, id, items } = command;
-      let userToUpdate = user;
-      if (!userToUpdate) {
-        userToUpdate = await this.userRepository.findById(id);
+      const { card, id, items } = command;
+      let cardToUpdate = card;
+      if (!cardToUpdate) {
+        cardToUpdate = await this.cardRepository.findById(id);
       }
-      if (!userToUpdate) {
+      if (!cardToUpdate) {
         throw new InternalServerErrorException('User not found');
       }
+      console.log(items);
 
       const updateObj = {};
       for (const item of items) {
-        updateObj[item.fieldName] = userToUpdate[item.fieldName].filter(
+        updateObj[item.fieldName] = cardToUpdate[item.fieldName].filter(
           (itemId) => !item.itemIds.includes(itemId),
         );
       }
-      const updatedUser = await this.userRepository.updateById(
-        userToUpdate.id,
+      const updatedCard = await this.cardRepository.updateById(
+        cardToUpdate.id,
         updateObj,
       );
-      return updatedUser;
+      return updatedCard;
     } catch (error) {
       throw new InternalServerErrorException(error.message);
     }

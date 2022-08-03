@@ -14,7 +14,6 @@ export class AddCardsCommandHandler
     try {
       const { project, id, cards } = command;
       let projectToUpdate = project;
-
       if (!projectToUpdate) {
         projectToUpdate = await this.projectRepository.findById(id);
       }
@@ -28,17 +27,19 @@ export class AddCardsCommandHandler
         throw new Error('No columns found');
       }
       for (const card of cards) {
-        cardIds.push(card._id);
-        if (card.columnId in columnDetails) {
-          columnDetails[card.columnId].cards = [
-            card._id.toString(),
-            ...columnDetails[card.columnId].cards,
-          ];
-        } else {
-          columnDetails[projectToUpdate.columnOrder[0]].cards = [
-            card._id.toString(),
-            ...columnDetails[projectToUpdate.columnOrder[0]].cards,
-          ];
+        if (!projectToUpdate.cards.includes(card._id.toString())) {
+          cardIds.push(card._id);
+          if (card.columnId in columnDetails) {
+            columnDetails[card.columnId].cards = [
+              card._id.toString(),
+              ...columnDetails[card.columnId].cards,
+            ];
+          } else {
+            columnDetails[projectToUpdate.columnOrder[0]].cards = [
+              card._id.toString(),
+              ...columnDetails[projectToUpdate.columnOrder[0]].cards,
+            ];
+          }
         }
       }
 
