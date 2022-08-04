@@ -4,6 +4,7 @@ import { DetailedCircleResponseDto } from 'src/circle/dto/detailed-circle-respon
 import {
   GetCircleBySlugQuery,
   GetCircleByIdQuery,
+  GetMultipleCirclesQuery,
 } from '../impl/get-circle.query';
 import { LoggingService } from 'src/logging/logging.service';
 import { InternalServerErrorException } from '@nestjs/common';
@@ -34,6 +35,39 @@ export class GetCircleByIdQueryHandler
       );
       throw new InternalServerErrorException(
         'Failed while getting circle using id',
+        error.message,
+      );
+    }
+  }
+}
+
+@QueryHandler(GetMultipleCirclesQuery)
+export class GetMultipleCirclesQueryHandler
+  implements IQueryHandler<GetMultipleCirclesQuery>
+{
+  constructor(
+    private readonly circleRepository: CirclesRepository,
+    private readonly logger: LoggingService,
+  ) {
+    logger.setContext('GetMultipleCirclesQueryHandler');
+  }
+
+  async execute(
+    query: GetMultipleCirclesQuery,
+  ): Promise<DetailedCircleResponseDto[]> {
+    try {
+      return await this.circleRepository.getCircles(
+        query.filterQuery,
+        query.customPopulate,
+        query.selectedFields,
+      );
+    } catch (error) {
+      this.logger.logError(
+        `Failed while getting circle using slug with error: ${error.message}`,
+        query,
+      );
+      throw new InternalServerErrorException(
+        'Failed while getting circle using slug',
         error.message,
       );
     }

@@ -6,7 +6,7 @@ import {
 } from '@nestjs/cqrs';
 import { CirclesRepository } from 'src/circle/circles.repository';
 import { AddItemsCommand as AddItemsToUserCommand } from 'src/users/commands/impl';
-import { CreatedCircleEvent, JoinedCircleEvent } from '../impl';
+import { CreatedCircleEvent } from '../impl';
 
 @EventsHandler(CreatedCircleEvent)
 export class CreatedCircleEventHandler

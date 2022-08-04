@@ -27,13 +27,7 @@ export class UsersController {
   @UseGuards(SessionAuthGuard)
   @Get('/me')
   findMe(@Request() req) {
-    return req.user;
-  }
-
-  @UseGuards(SessionAuthGuard)
-  @Patch('/me')
-  update(@Body() updateUserDto: UpdateUserDto) {
-    return this.usersService.update(updateUserDto);
+    return this.usersService.getUserById(req.user.id);
   }
 
   @UseGuards(PublicViewAuthGuard)
@@ -45,6 +39,12 @@ export class UsersController {
   @Get('/username/:username')
   findByUsername(@Param('username') username: string) {
     return this.usersService.getUserPublicProfileByUsername(username);
+  }
+
+  @UseGuards(SessionAuthGuard)
+  @Patch('/me')
+  update(@Body() updateUserDto: UpdateUserDto) {
+    return this.usersService.update(updateUserDto);
   }
 
   @UseGuards(SessionAuthGuard)

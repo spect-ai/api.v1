@@ -11,7 +11,7 @@ import { UsersRepository } from './users.repository';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { GetUserByIdQuery, GetUserByUsernameQuery } from './queries/impl';
 import { LoggingService } from 'src/logging/logging.service';
-import { AddItemsCommand } from './commands/impl';
+import { AddItemsCommand, RemoveItemsCommand } from './commands/impl';
 
 @Injectable()
 export class UsersService {
@@ -169,16 +169,17 @@ export class UsersService {
     userId?: string,
   ): Promise<DetailedUserPubliceResponseDto> {
     try {
-      let user = this.requestProvider.user;
-      if (userId) user = await this.usersRepository.findById(userId);
-      user[itemType] = user[itemType].filter((id) => id.toString() !== itemId);
-      return await this.usersRepository.updateAndReturnWithPopulatedFields(
-        userId || this.requestProvider.user?.id,
-        {
-          $set: {
-            [itemType]: user[itemType],
-          },
-        },
+      return await this.commandBus.execute(
+        new RemoveItemsCommand(
+          [
+            {
+              fieldName: itemType,
+              itemIds: [itemId],
+            },
+          ],
+          null,
+          userId,
+        ),
       );
     } catch (error) {
       this.logger.logError(

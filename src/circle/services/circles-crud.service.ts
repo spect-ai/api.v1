@@ -25,6 +25,7 @@ export class CirclesCrudService {
       const circle = await this.commandBus.execute(
         new CreateCircleCommand(createCircleDto, this.requestProvider.user.id),
       );
+      console.log('circle', circle.id);
       this.eventBus.publish(
         new CreatedCircleEvent(circle, this.requestProvider.user.id),
       );

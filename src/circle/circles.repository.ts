@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { ObjectId, UpdateQuery } from 'mongoose';
+import { FilterQuery, ObjectId, UpdateQuery } from 'mongoose';
 import { InjectModel } from 'nestjs-typegoose';
 import { BaseRepository } from 'src/base/base.repository';
 import { Circle } from './model/circle.model';
@@ -110,6 +110,28 @@ export class CirclesRepository extends BaseRepository<Circle> {
     });
 
     return await query.exec();
+  }
+
+  async getCircles(
+    filterQuery: FilterQuery<Circle>,
+    customPopulate?: PopulatedCircleFields,
+    selectedFields?: Record<string, unknown>,
+  ): Promise<Circle[]> {
+    const query = this.findAll(filterQuery, {
+      projection: selectedFields || {},
+    });
+    let populatedFields = defaultPopulate;
+    if (customPopulate) populatedFields = customPopulate;
+
+    Object.keys(populatedFields).forEach((key) => {
+      query.populate(key, populatedFields[key]);
+    });
+
+    try {
+      return await query.exec();
+    } catch (error) {
+      return [];
+    }
   }
 
   async getCircleBySlug(

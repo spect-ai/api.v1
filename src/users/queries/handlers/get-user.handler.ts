@@ -21,6 +21,7 @@ import {
   GetUserByIdQuery,
   GetUserByUsernameQuery,
 } from '../impl';
+import { GetMultipleCirclesQuery } from 'src/circle/queries/impl';
 
 @Injectable()
 export class UserFieldResolver {
@@ -135,6 +136,45 @@ export class UserFieldResolver {
     return this.commonTools.objectify(users, 'id');
   }
 
+  async getObjectifiedCircleDetails(user: User): Promise<MappedUser> {
+    let activityCircleIds, notifCircleIds: string[];
+    if (user.activities) {
+      activityCircleIds = this.getContentReferences(user.activities, 'circles');
+    }
+
+    if (user.notifications) {
+      notifCircleIds = this.getContentReferences(user.notifications, 'circles');
+    }
+
+    const circleIds = [
+      ...(user.circles || []),
+      ...(activityCircleIds || []),
+      ...(notifCircleIds || []),
+    ];
+    const circles = await this.queryBus.execute(
+      new GetMultipleCirclesQuery(
+        {
+          _id: { $in: circleIds },
+        },
+        {
+          parents: {
+            name: 1,
+            avatar: 1,
+            memberRoles: 1,
+          },
+        },
+        {
+          id: 1,
+          name: 1,
+          avatar: 1,
+          memberRoles: 1,
+          parents: 1,
+        },
+      ),
+    );
+    return this.commonTools.objectify(circles, 'id');
+  }
+
   populateActor(user: DetailedUserPrivateResponseDto): any {
     if (!user.notifications) return user;
     const updatedNotifs = [];
@@ -175,7 +215,9 @@ export class UserFieldResolver {
       userDetails: {
         ...(await this.getObjectifiedUserDetails(user)),
       },
-      circleDetails: {},
+      circleDetails: {
+        ...(await this.getObjectifiedCircleDetails(user)),
+      },
     };
   }
 
