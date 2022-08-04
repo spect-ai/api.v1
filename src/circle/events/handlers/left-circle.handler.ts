@@ -27,7 +27,7 @@ export class LeftCircleEventHandler implements IEventHandler<LeftCircleEvent> {
       new RemoveItemsFromUserCommand(
         [
           {
-            fieldName: 'memberOfCircles',
+            fieldName: 'circles',
             itemIds: [updatedCircle.id],
           },
         ],

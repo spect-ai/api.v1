@@ -29,7 +29,7 @@ export class JoinedCircleEventHandler
       new AddItemsToUserCommand(
         [
           {
-            fieldName: 'memberOfCircles',
+            fieldName: 'circles',
             itemIds: [updatedCircle.id],
           },
         ],

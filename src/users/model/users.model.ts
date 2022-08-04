@@ -62,8 +62,7 @@ export class User extends ProfileModel {
   githubId: string;
 
   /**
-   * List of circles this user is a member of, these will also contain circles that the user was historically a member of
-   * as removal from a circle will not be reflected in the user's circles.
+   * List of circles this user is a member of, this will contain both parent and child circles
    */
   @prop({ ref: () => Circle, type: Schema.Types.String, default: [] })
   circles: string[];

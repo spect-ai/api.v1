@@ -52,7 +52,7 @@ export type UserSubmittedApplication = {
 export type ArrayField =
   | 'bookmarks'
   | 'followingCircles'
-  | 'memberOfCircles'
+  | 'circles'
   | 'followingUsers'
   | 'followers'
   | 'activeApplications'
@@ -61,7 +61,8 @@ export type ArrayField =
   | 'assignedCards'
   | 'reviewingCards'
   | 'assignedClosedCards'
-  | 'reviewingClosedCards';
+  | 'reviewingClosedCards'
+  | 'followedCircles';
 
 export type FlattendedArrayFieldItems = {
   fieldName: ArrayField;

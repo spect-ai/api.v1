@@ -25,8 +25,7 @@ export class AddItemCommandHandler implements ICommandHandler<AddItemsCommand> {
 
       const updateObj = {};
       for (const item of items) {
-        if (!userToUpdate[item.fieldName])
-          throw new Error('Field doesnt exist');
+        if (!userToUpdate[item.fieldName]) userToUpdate[item.fieldName] = [];
         for (const itemId of item.itemIds) {
           if (!userToUpdate[item.fieldName].includes(itemId))
             updateObj[item.fieldName] = [

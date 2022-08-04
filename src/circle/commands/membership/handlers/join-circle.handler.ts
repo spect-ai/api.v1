@@ -4,7 +4,7 @@ import {
   InternalServerErrorException,
 } from '@nestjs/common';
 import { CommandBus, CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import moment from 'moment';
+import * as moment from 'moment';
 import { CircleValidationService } from 'src/circle/circle-validation.service';
 import { CirclesRepository } from 'src/circle/circles.repository';
 import {
@@ -41,7 +41,7 @@ export class JoinUsingInvitationCommandHandler
       }
 
       const invite = circle.invites[inviteIndex];
-      if (invite.uses <= 0 && moment(new Date()).isAfter(invite.expires)) {
+      if (invite.uses <= 0 || moment().isAfter(invite.expires)) {
         throw new HttpException(
           'Invalid invitation - expired or used up already',
           HttpStatus.NOT_FOUND,
@@ -54,7 +54,7 @@ export class JoinUsingInvitationCommandHandler
         await this.circlesRepository.updateCircleAndReturnWithPopulatedReferences(
           id,
           {
-            members: [...circle.members, caller],
+            members: [...circle.members, caller.id],
             memberRoles: {
               ...circle.memberRoles,
               [caller.id]: invite.roles,
