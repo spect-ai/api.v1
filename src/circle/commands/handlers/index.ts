@@ -1,9 +1,10 @@
+import { UpdateMemberRolesCommandHandler } from '../membership/handlers/update-member-roles.handler';
 import { InviteToCircleCommandHandler } from '../membership/handlers/invite-to-circle.handler';
 import {
   JoinUsingDiscordCommandHandler,
   JoinUsingInvitationCommandHandler,
 } from '../membership/handlers/join-circle.handler';
-import { RemoveFromCircleCommandHandler } from '../membership/handlers/leave-circle.handler';
+import { RemoveFromCircleCommandHandler } from '../membership/handlers/remove-from-circle.handler';
 import {
   RemoveProjectsCommandHandler,
   RemoveProjectsFromMultipleCirclesCommandHandler,
@@ -24,4 +25,5 @@ export const CommandHandlers = [
   AddRoleCommandHandler,
   RemoveRoleCommandHandler,
   UpdateRoleCommandHandler,
+  UpdateMemberRolesCommandHandler,
 ];
