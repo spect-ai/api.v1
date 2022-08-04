@@ -8,6 +8,7 @@ import {
   RemoveProjectsCommandHandler,
   RemoveProjectsFromMultipleCirclesCommandHandler,
 } from '../projects/handlers/remove-projects.handler';
+import { CreateCircleCommandHandler } from './create-circle.handler';
 
 export const CommandHandlers = [
   RemoveProjectsCommandHandler,
@@ -16,4 +17,5 @@ export const CommandHandlers = [
   JoinUsingDiscordCommandHandler,
   InviteToCircleCommandHandler,
   RemoveFromCircleCommandHandler,
+  CreateCircleCommandHandler,
 ];

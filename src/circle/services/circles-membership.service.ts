@@ -156,11 +156,11 @@ export class CircleMembershipService {
       return updatedCircle;
     } catch (error) {
       this.logger.logError(
-        `Failed removing member with error: ${error.message}`,
+        `Failed leaving circle with error: ${error.message}`,
         this.requestProvider,
       );
       throw new InternalServerErrorException(
-        'Failed removing member',
+        'Failed leaving circle',
         error.message,
       );
     }

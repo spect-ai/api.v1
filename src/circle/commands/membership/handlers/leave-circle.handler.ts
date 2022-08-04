@@ -33,8 +33,10 @@ export class RemoveFromCircleCommandHandler
         await this.circlesRepository.updateCircleAndReturnWithPopulatedReferences(
           id,
           {
-            members: circle.members.filter((m) => m.toString() !== userId),
-            memberRoles: circle.memberRoles,
+            members: circleToUpdate.members.filter(
+              (m) => m.toString() !== userId,
+            ),
+            memberRoles: circleToUpdate.memberRoles,
           },
         );
       return updatedCircle;

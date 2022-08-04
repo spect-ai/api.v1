@@ -4,26 +4,30 @@ import {
   Get,
   Param,
   Patch,
+  Post,
   Query,
   SetMetadata,
   UseGuards,
 } from '@nestjs/common';
 import { QueryBus } from '@nestjs/cqrs';
-import { CircleAuthGuard } from 'src/auth/circle.guard';
+import { CircleAuthGuard, CreateCircleAuthGuard } from 'src/auth/circle.guard';
 import { SessionAuthGuard } from 'src/auth/iron-session.guard';
 import { ObjectIdDto } from 'src/common/dtos/object-id.dto';
+import { CreateCircleRequestDto } from './dto/create-circle-request.dto';
 import { DetailedCircleResponseDto } from './dto/detailed-circle-response.dto';
 import { InviteDto } from './dto/invite.dto';
 import { JoinCircleUsingInvitationRequestDto } from './dto/join-circle.dto';
 import { MemberDto } from './dto/params.dto';
 import { Circle } from './model/circle.model';
 import { GetCircleByIdQuery } from './queries/impl';
+import { CirclesCrudService } from './services/circles-crud.service';
 import { CircleMembershipService } from './services/circles-membership.service';
 
 @Controller('circle/v1')
 export class CircleV1Controller {
   constructor(
     private readonly circleMembershipService: CircleMembershipService,
+    private readonly circleCrudService: CirclesCrudService,
     private readonly queryBus: QueryBus,
   ) {}
 
@@ -66,6 +70,14 @@ export class CircleV1Controller {
         },
       ),
     );
+  }
+
+  @UseGuards(CreateCircleAuthGuard)
+  @Post('/')
+  async create(
+    @Body() circle: CreateCircleRequestDto,
+  ): Promise<DetailedCircleResponseDto> {
+    return await this.circleCrudService.create(circle);
   }
 
   @SetMetadata('permissions', ['inviteMembers'])
