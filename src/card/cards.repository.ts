@@ -236,8 +236,11 @@ export class CardsRepository extends BaseRepository<Card> {
     Object.keys(populatedFields).forEach((key) => {
       query.populate(key, populatedFields[key]);
     });
-
-    return await query.exec();
+    try {
+      return await query.exec();
+    } catch (error) {
+      return [];
+    }
   }
 
   async getCardBySlug(
