@@ -18,8 +18,10 @@ import { DetailedCircleResponseDto } from './dto/detailed-circle-response.dto';
 import { InviteDto } from './dto/invite.dto';
 import { JoinCircleUsingInvitationRequestDto } from './dto/join-circle.dto';
 import { MemberDto } from './dto/params.dto';
+import { AddRoleDto, UpdateRoleDto } from './dto/roles-requests.dto';
 import { Circle } from './model/circle.model';
 import { GetCircleByIdQuery } from './queries/impl';
+import { CirclesRolesService } from './services/circle-roles.service';
 import { CirclesCrudService } from './services/circles-crud.service';
 import { CircleMembershipService } from './services/circles-membership.service';
 
@@ -28,6 +30,7 @@ export class CircleV1Controller {
   constructor(
     private readonly circleMembershipService: CircleMembershipService,
     private readonly circleCrudService: CirclesCrudService,
+    private readonly circleRoleServie: CirclesRolesService,
     private readonly queryBus: QueryBus,
   ) {}
 
@@ -127,5 +130,40 @@ export class CircleV1Controller {
   @Patch('/:id/leave')
   async leave(@Param() param: ObjectIdDto): Promise<DetailedCircleResponseDto> {
     return await this.circleMembershipService.leave(param.id);
+  }
+
+  @SetMetadata('permissions', ['manageRoles'])
+  @UseGuards(CircleAuthGuard)
+  @Patch('/:id/addRole')
+  async addRole(
+    @Param() param: ObjectIdDto,
+    @Body() addRoleDto: AddRoleDto,
+  ): Promise<DetailedCircleResponseDto> {
+    return await this.circleRoleServie.addRole(param.id, addRoleDto);
+  }
+
+  @SetMetadata('permissions', ['manageRoles'])
+  @UseGuards(CircleAuthGuard)
+  @Patch('/:id/updateRole')
+  async updateRole(
+    @Param() param: ObjectIdDto,
+    @Query() roleParam: string,
+    @Body() updateRoleDto: UpdateRoleDto,
+  ): Promise<DetailedCircleResponseDto> {
+    return await this.circleRoleServie.updateRole(
+      param.id,
+      roleParam,
+      updateRoleDto,
+    );
+  }
+
+  @SetMetadata('permissions', ['manageRoles'])
+  @UseGuards(CircleAuthGuard)
+  @Patch('/:id/removeRole')
+  async removeRole(
+    @Param() param: ObjectIdDto,
+    @Query() roleParam: string,
+  ): Promise<DetailedCircleResponseDto> {
+    return await this.circleRoleServie.removeRole(param.id, roleParam);
   }
 }

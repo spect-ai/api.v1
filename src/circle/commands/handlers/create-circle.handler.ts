@@ -4,6 +4,7 @@ import { CirclesRepository } from 'src/circle/circles.repository';
 import { DetailedCircleResponseDto } from 'src/circle/dto/detailed-circle-response.dto';
 import { Circle } from 'src/circle/model/circle.model';
 import { SlugService } from 'src/common/slug.service';
+import { defaultCircleCreatorRoles, defaultCircleRoles } from 'src/constants';
 import { RolesService } from 'src/roles/roles.service';
 import { CreateCircleCommand } from '../impl/create-circle.command';
 
@@ -37,9 +38,7 @@ export class CreateCircleCommandHandler
       }
       let createdCircle: Circle;
       const memberRoles = {};
-      memberRoles[caller] = [
-        this.roleService.getDefaultUserRoleOnCircleCreation(),
-      ];
+      memberRoles[caller] = defaultCircleCreatorRoles;
       if (parentCircle) {
         createdCircle = await this.circlesRepository.create({
           ...createCircleDto,
@@ -47,7 +46,7 @@ export class CreateCircleCommandHandler
           parents: [parentCircle._id],
           members: [caller],
           memberRoles: memberRoles,
-          roles: this.roleService.defaultCircleRoles(),
+          roles: defaultCircleRoles,
           localRegistry: {},
         });
         await this.circlesRepository.updateById(parentCircle.id as string, {
@@ -60,7 +59,7 @@ export class CreateCircleCommandHandler
           slug: slug,
           members: [caller],
           memberRoles: memberRoles,
-          roles: this.roleService.defaultCircleRoles(),
+          roles: defaultCircleRoles,
           localRegistry: {},
         });
       }

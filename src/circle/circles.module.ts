@@ -24,6 +24,7 @@ import { EventHandlers } from './events/handlers';
 import { CircleValidationService } from './circle-validation.service';
 import { CircleMembershipService } from './services/circles-membership.service';
 import { CirclesCrudService } from './services/circles-crud.service';
+import { CirclesRolesService } from './services/circle-roles.service';
 
 @Module({
   imports: [
@@ -52,6 +53,7 @@ import { CirclesCrudService } from './services/circles-crud.service';
     CircleValidationService,
     CircleMembershipService,
     CirclesCrudService,
+    CirclesRolesService,
   ],
   exports: [CirclesService, CirclesRepository, CirclesModule],
 })

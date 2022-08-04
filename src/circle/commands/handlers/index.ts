@@ -8,6 +8,9 @@ import {
   RemoveProjectsCommandHandler,
   RemoveProjectsFromMultipleCirclesCommandHandler,
 } from '../projects/handlers/remove-projects.handler';
+import { AddRoleCommandHandler } from '../roles/handlers/add-role.handler';
+import { RemoveRoleCommandHandler } from '../roles/handlers/remove-role.handler';
+import { UpdateRoleCommandHandler } from '../roles/handlers/update-role.handler';
 import { CreateCircleCommandHandler } from './create-circle.handler';
 
 export const CommandHandlers = [
@@ -18,4 +21,7 @@ export const CommandHandlers = [
   InviteToCircleCommandHandler,
   RemoveFromCircleCommandHandler,
   CreateCircleCommandHandler,
+  AddRoleCommandHandler,
+  RemoveRoleCommandHandler,
+  UpdateRoleCommandHandler,
 ];
