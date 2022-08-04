@@ -13,12 +13,14 @@ import { QueryBus } from '@nestjs/cqrs';
 import { CircleAuthGuard, CreateCircleAuthGuard } from 'src/auth/circle.guard';
 import { SessionAuthGuard } from 'src/auth/iron-session.guard';
 import { ObjectIdDto } from 'src/common/dtos/object-id.dto';
+import { RequiredRoleDto } from 'src/common/dtos/string.dto';
 import { CreateCircleRequestDto } from './dto/create-circle-request.dto';
 import { DetailedCircleResponseDto } from './dto/detailed-circle-response.dto';
 import { InviteDto } from './dto/invite.dto';
 import { JoinCircleUsingInvitationRequestDto } from './dto/join-circle.dto';
 import { MemberDto } from './dto/params.dto';
 import { AddRoleDto, UpdateRoleDto } from './dto/roles-requests.dto';
+import { UpdateMemberRolesDto } from './dto/update-member-role.dto';
 import { Circle } from './model/circle.model';
 import { GetCircleByIdQuery } from './queries/impl';
 import { CirclesRolesService } from './services/circle-roles.service';
@@ -115,6 +117,21 @@ export class CircleV1Controller {
 
   @SetMetadata('permissions', ['manageMembers'])
   @UseGuards(CircleAuthGuard)
+  @Patch('/:id/updateMemberRoles')
+  async updateMemberRoles(
+    @Param() param: ObjectIdDto,
+    @Query() memberDto: MemberDto,
+    @Body() updateMemberRolesDto: UpdateMemberRolesDto,
+  ): Promise<DetailedCircleResponseDto> {
+    return await this.circleMembershipService.updateMemberRoles(
+      param.id,
+      memberDto.member,
+      updateMemberRolesDto,
+    );
+  }
+
+  @SetMetadata('permissions', ['manageMembers'])
+  @UseGuards(CircleAuthGuard)
   @Patch('/:id/removeMember')
   async removeMember(
     @Param() param: ObjectIdDto,
@@ -147,12 +164,12 @@ export class CircleV1Controller {
   @Patch('/:id/updateRole')
   async updateRole(
     @Param() param: ObjectIdDto,
-    @Query() roleParam: string,
+    @Query() roleParam: RequiredRoleDto,
     @Body() updateRoleDto: UpdateRoleDto,
   ): Promise<DetailedCircleResponseDto> {
     return await this.circleRoleServie.updateRole(
       param.id,
-      roleParam,
+      roleParam.role,
       updateRoleDto,
     );
   }
@@ -162,8 +179,8 @@ export class CircleV1Controller {
   @Patch('/:id/removeRole')
   async removeRole(
     @Param() param: ObjectIdDto,
-    @Query() roleParam: string,
+    @Query() roleParam: RequiredRoleDto,
   ): Promise<DetailedCircleResponseDto> {
-    return await this.circleRoleServie.removeRole(param.id, roleParam);
+    return await this.circleRoleServie.removeRole(param.id, roleParam.role);
   }
 }

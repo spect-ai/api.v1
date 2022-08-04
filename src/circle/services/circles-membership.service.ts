@@ -15,6 +15,7 @@ import {
   JoinUsingDiscordCommand,
   JoinUsingInvitationCommand,
   RemoveFromCircleCommand,
+  UpdateMemberRolesCommand,
 } from '../commands/impl';
 import { DetailedCircleResponseDto } from '../dto/detailed-circle-response.dto';
 import { InviteDto } from '../dto/invite.dto';
@@ -101,23 +102,32 @@ export class CircleMembershipService {
     }
   }
 
-  //   async updateMemberRoles(
-  //     id: string,
-  //     member: string,
-  //     updateMemberRolesDto: UpdateMemberRolesDto,
-  //   ): Promise<DetailedCircleResponseDto> {
-  //     try {
-  //     } catch (error) {
-  //       this.logger.logError(
-  //         `Failed updating member roles with error: ${error.message}`,
-  //         this.requestProvider,
-  //       );
-  //       throw new InternalServerErrorException(
-  //         'Failed updating member roles',
-  //         error.message,
-  //       );
-  //     }
-  //   }
+  async updateMemberRoles(
+    id: string,
+    member: string,
+    updateMemberRolesDto: UpdateMemberRolesDto,
+  ): Promise<DetailedCircleResponseDto> {
+    try {
+      const circle = await this.commandBus.execute(
+        new UpdateMemberRolesCommand(
+          updateMemberRolesDto,
+          member,
+          id,
+          this.requestProvider.circle,
+        ),
+      );
+      return circle;
+    } catch (error) {
+      this.logger.logError(
+        `Failed updating member roles with error: ${error.message}`,
+        this.requestProvider,
+      );
+      throw new InternalServerErrorException(
+        'Failed updating member roles',
+        error.message,
+      );
+    }
+  }
 
   async removeMember(
     id: string,

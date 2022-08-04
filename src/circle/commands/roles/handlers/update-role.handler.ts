@@ -23,7 +23,8 @@ export class UpdateRoleCommandHandler
       if (roleId === 'applicant') {
         throw new InternalServerErrorException('Cannot update applicant role');
       }
-
+      console.log(roleDto);
+      console.log(roleId);
       const roles = {
         ...circleToUpdate.roles,
         [roleId]: roleDto,

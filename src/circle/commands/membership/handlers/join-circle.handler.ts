@@ -92,7 +92,7 @@ export class JoinUsingDiscordCommandHandler
         caller,
         circle,
       );
-      if (!role) {
+      if (!role || role.length === 0) {
         throw new HttpException(
           'Role required to join circle not found',
           HttpStatus.NOT_FOUND,

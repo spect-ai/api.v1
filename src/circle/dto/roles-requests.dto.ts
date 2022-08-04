@@ -1,9 +1,7 @@
+import { Type } from 'class-transformer';
 import {
-  IsArray,
   IsBoolean,
-  IsDate,
   IsNotEmpty,
-  IsNumber,
   IsOptional,
   IsString,
   ValidateNested,
@@ -19,35 +17,60 @@ export class CardTypeBasedPermissions {
 export class Permissions {
   @IsBoolean()
   createNewCircle: boolean;
+
   @IsBoolean()
   manageCircleSettings: boolean;
+
   @IsBoolean()
   createNewProject: boolean;
+
   @IsBoolean()
   manageProjectSettings: boolean;
+
   @IsBoolean()
   createNewRetro: boolean;
+
   @IsBoolean()
   endRetroManually: boolean;
+
   @IsBoolean()
   managePaymentOptions: boolean;
+
   @IsBoolean()
   makePayment: boolean;
+
   @IsBoolean()
   inviteMembers: boolean;
+
   @IsBoolean()
   manageRoles: boolean;
+
   @IsBoolean()
   manageMembers: boolean;
+
   @ValidateNested()
+  @Type(() => CardTypeBasedPermissions)
+  @IsNotEmpty()
   manageCardProperties: CardTypeBasedPermissions;
+
   @ValidateNested()
+  @Type(() => CardTypeBasedPermissions)
+  @IsNotEmpty()
   createNewCard: CardTypeBasedPermissions;
+
   @ValidateNested()
+  @Type(() => CardTypeBasedPermissions)
+  @IsNotEmpty()
   manageRewards: CardTypeBasedPermissions;
+
   @ValidateNested()
+  @Type(() => CardTypeBasedPermissions)
+  @IsNotEmpty()
   reviewWork: CardTypeBasedPermissions;
+
   @ValidateNested()
+  @Type(() => CardTypeBasedPermissions)
+  @IsNotEmpty()
   canClaim: CardTypeBasedPermissions;
 }
 
@@ -84,6 +107,8 @@ export class AddRoleDto {
    * Can the role be assigned to self?
    */
   @ValidateNested()
+  @Type(() => Permissions)
+  @IsNotEmpty()
   permissions: Permissions;
 }
 
