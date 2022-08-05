@@ -58,6 +58,8 @@ export class CardUpdatedEventHandler
     this.moveApplications(card as Card, diff);
 
     this.notifyUsers(users, card as Card, circleSlug, projectSlug, diff);
+    this.processClosedCard(card as Card, diff);
+    this.processReopenedCard(card as Card, diff);
   }
 
   addCardsToUser(
