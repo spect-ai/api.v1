@@ -7,7 +7,10 @@ import {
   IsString,
   ValidateNested,
 } from 'class-validator';
+import { Automation } from 'src/automation/types/types';
+import { MappedItem } from 'src/common/interfaces';
 import { MappedAutomation } from 'src/template/models/template.model';
+import { View } from '../types/types';
 
 export type MinimalCard = {
   id: string;
@@ -81,7 +84,7 @@ export class DetailedProjectResponseDto {
    */
   @IsObject()
   @IsOptional()
-  automations?: MappedAutomation;
+  automations?: MappedItem<Automation>;
 
   /**
    * Cards of the project
@@ -105,4 +108,18 @@ export class DetailedProjectResponseDto {
     id: string;
     name: string;
   };
+
+  /**
+   * Order of the views in the project
+   */
+  @IsArray()
+  @IsOptional()
+  viewOrder: string[];
+
+  /**
+   * Details of the views in the project
+   */
+  @IsObject()
+  @IsOptional()
+  viewDetails: MappedItem<View>;
 }

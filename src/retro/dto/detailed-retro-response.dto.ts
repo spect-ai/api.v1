@@ -8,7 +8,7 @@ import {
 } from 'class-validator';
 import { Date } from 'mongoose';
 import { Payment } from 'src/common/models/payment.model';
-import { Feedback, MappedStats } from '../types';
+import { Feedback, MappedFeedback, MappedStats } from '../types';
 export class DetailedRetroResponseDto {
   /**
    * The title associated with the retro period
@@ -36,6 +36,12 @@ export class DetailedRetroResponseDto {
    */
   @IsString()
   creator: string;
+
+  /**
+   * The cicle the retro belongs to
+   */
+  @IsString()
+  circle: string;
 
   /**
    * The strategy used in the retro period, ie, Quadratic or Normal Voting
@@ -80,15 +86,22 @@ export class DetailedRetroResponseDto {
   stats: MappedStats;
 
   /**
-   * The feedbacks given by user
-   */
-  @IsObject()
-  @IsOptional()
-  feedbackGiven: Feedback;
-
-  /**
    * The activity history of the retro period
    */
   @IsObject()
   members: string[];
+
+  /**
+   * The feedbacks given by user
+   */
+  @IsObject()
+  @IsOptional()
+  feedbackGiven: MappedFeedback;
+
+  /**
+   * The feedbacks received by user
+   */
+  @IsObject()
+  @IsOptional()
+  feedbackReceived?: MappedFeedback;
 }

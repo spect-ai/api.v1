@@ -18,11 +18,13 @@ import { CreateProjectRequestDto } from './dto/create-project-request.dto';
 import { DetailedProjectResponseDto } from './dto/detailed-project-response.dto';
 import { UpdateColumnRequestDto } from './dto/update-column.dto';
 import {
-  AddOrUpdateViewDto,
+  AddViewDto,
   UpdateProjectRequestDto,
+  UpdateViewDto,
 } from './dto/update-project-request.dto';
 import { Project } from './model/project.model';
 import { ProjectsRepository } from './project.repository';
+import { LoggingService } from 'src/logging/logging.service';
 
 @Injectable()
 export class ProjectService {
@@ -34,22 +36,47 @@ export class ProjectService {
     private readonly cardRepository: CardsRepository,
     private readonly cardsProjectService: CardsProjectService,
     private readonly requestProvider: RequestProvider,
-  ) {}
+    private readonly logger: LoggingService,
+  ) {
+    logger.setContext('ProjectService');
+  }
 
   async getDetailedProject(id: string): Promise<DetailedProjectResponseDto> {
-    const project =
-      await this.projectRepository.getProjectWithPopulatedReferences(id);
-    return this.cardsProjectService.projectPopulatedWithCardDetails(project);
+    try {
+      const project =
+        await this.projectRepository.getProjectWithPopulatedReferences(id);
+      return this.cardsProjectService.projectPopulatedWithCardDetails(project);
+    } catch (error) {
+      this.logger.logError(
+        `Failed while getting project by id with error: ${error.message}`,
+        this.requestProvider,
+      );
+      throw new InternalServerErrorException(
+        'Failed while getting project by id',
+        error.message,
+      );
+    }
   }
 
   async getDetailedProjectBySlug(
     slug: string,
   ): Promise<DetailedProjectResponseDto> {
-    const project =
-      await this.projectRepository.getProjectWithPopulatedReferencesBySlug(
-        slug,
+    try {
+      const project =
+        await this.projectRepository.getProjectWithPopulatedReferencesBySlug(
+          slug,
+        );
+      return this.cardsProjectService.projectPopulatedWithCardDetails(project);
+    } catch (error) {
+      this.logger.logError(
+        `Failed while getting project by slug with error: ${error.message}`,
+        this.requestProvider,
       );
-    return this.cardsProjectService.projectPopulatedWithCardDetails(project);
+      throw new InternalServerErrorException(
+        'Failed while getting project by slug',
+        error.message,
+      );
+    }
   }
 
   async getProjectIdFromSlug(slug: string): Promise<Project> {
@@ -105,6 +132,10 @@ export class ProjectService {
       }
       return createdProject;
     } catch (error) {
+      this.logger.logError(
+        `Failed project creation with error: ${error.message}`,
+        this.requestProvider,
+      );
       throw new InternalServerErrorException(
         'Failed project creation',
         error.message,
@@ -127,6 +158,10 @@ export class ProjectService {
         updatedProject,
       );
     } catch (error) {
+      this.logger.logError(
+        `Failed project update with error: ${error.message}`,
+        this.requestProvider,
+      );
       throw new InternalServerErrorException(
         'Failed project update',
         error.message,
@@ -167,8 +202,12 @@ export class ProjectService {
         udpatedProject,
       );
     } catch (error) {
+      this.logger.logError(
+        `Failed column addition with error: ${error.message}`,
+        this.requestProvider,
+      );
       throw new InternalServerErrorException(
-        'Failed column deletion',
+        'Failed column addition',
         error.message,
       );
     }
@@ -220,6 +259,10 @@ export class ProjectService {
         udpatedProject,
       );
     } catch (error) {
+      this.logger.logError(
+        `Failed column deletion with error: ${error.message}`,
+        this.requestProvider,
+      );
       throw new InternalServerErrorException(
         'Failed column deletion',
         error.message,
@@ -256,6 +299,10 @@ export class ProjectService {
         updatedProject,
       );
     } catch (error) {
+      this.logger.logError(
+        `Failed column update with error: ${error.message}`,
+        this.requestProvider,
+      );
       throw new InternalServerErrorException(
         'Failed column update',
         error.message,
@@ -265,7 +312,7 @@ export class ProjectService {
 
   async addView(
     projectId: string,
-    addViewDto: AddOrUpdateViewDto,
+    addViewDto: AddViewDto,
   ): Promise<DetailedProjectResponseDto> {
     try {
       const project =
@@ -277,6 +324,7 @@ export class ProjectService {
       const newView = {
         ...addViewDto,
         viewId: newViewId,
+        slug: `${project.slug}-view${project.viewOrder?.length}`,
       };
       const newViewDetails = {
         ...viewDetails,
@@ -297,6 +345,10 @@ export class ProjectService {
         udpatedProject,
       );
     } catch (error) {
+      this.logger.logError(
+        `Failed view addition with error: ${error.message}`,
+        this.requestProvider,
+      );
       throw new InternalServerErrorException(
         'Failed view addition',
         error.message,
@@ -307,7 +359,7 @@ export class ProjectService {
   async updateView(
     id: string,
     viewId: string,
-    updateColumnDto: AddOrUpdateViewDto,
+    updateColumnDto: UpdateViewDto,
   ): Promise<DetailedProjectResponseDto> {
     try {
       const project =
@@ -333,6 +385,10 @@ export class ProjectService {
         updatedProject,
       );
     } catch (error) {
+      this.logger.logError(
+        `Failed view update with error: ${error.message}`,
+        this.requestProvider,
+      );
       throw new InternalServerErrorException(
         'Failed view update',
         error.message,
@@ -372,6 +428,10 @@ export class ProjectService {
         udpatedProject,
       );
     } catch (error) {
+      this.logger.logError(
+        `Failed view deletion with error: ${error.message}`,
+        this.requestProvider,
+      );
       throw new InternalServerErrorException(
         'Failed view deletion',
         error.message,

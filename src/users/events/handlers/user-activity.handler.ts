@@ -30,7 +30,9 @@ export class UserActivityEventHandler
       stakeholders: [],
       ref: {},
     });
-    await this.userRepository.update(actorEntity);
+
+    // Note: User activity not supported yet
+    //await this.userRepository.update(actorEntity);
   }
 
   generateContent(

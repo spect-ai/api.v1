@@ -7,6 +7,7 @@ import { AddCommentDto, UpdateCommentDto } from './dto/comment-body.dto';
 import { DetailedCardResponseDto } from './dto/detailed-card-response-dto';
 import { ResponseBuilder } from './response.builder';
 import { CardValidationService } from './validation.cards.service';
+import { LoggingService } from 'src/logging/logging.service';
 
 @Injectable()
 export class CommentService {
@@ -15,7 +16,10 @@ export class CommentService {
     private readonly cardsRepository: CardsRepository,
     private readonly validationService: CardValidationService,
     private readonly responseBuilder: ResponseBuilder,
-  ) {}
+    private readonly logger: LoggingService,
+  ) {
+    logger.setContext('CommentService');
+  }
 
   async addComment(
     id: string,
@@ -46,6 +50,10 @@ export class CommentService {
         );
       return await this.responseBuilder.enrichResponse(updatedCard);
     } catch (error) {
+      this.logger.logError(
+        `Failed while adding comment with error: ${error.message}`,
+        this.requestProvider,
+      );
       throw new InternalServerErrorException(
         'Failed adding comment',
         error.message,
@@ -78,6 +86,10 @@ export class CommentService {
         );
       return await this.responseBuilder.enrichResponse(updatedCard);
     } catch (error) {
+      this.logger.logError(
+        `Failed while updating comment with error: ${error.message}`,
+        this.requestProvider,
+      );
       throw new InternalServerErrorException(
         'Failed updating comment',
         error.message,
@@ -109,8 +121,12 @@ export class CommentService {
         );
       return await this.responseBuilder.enrichResponse(updatedCard);
     } catch (error) {
+      this.logger.logError(
+        `Failed while deleting comment with error: ${error.message}`,
+        this.requestProvider,
+      );
       throw new InternalServerErrorException(
-        'Failed adding comment',
+        'Failed while deleting comment',
         error.message,
       );
     }

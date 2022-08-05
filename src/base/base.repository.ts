@@ -5,6 +5,7 @@ import mongodb from 'mongodb';
 import {
   Aggregate,
   AggregateOptions,
+  CallbackWithoutResult,
   FilterQuery,
   HydratedDocument,
   InsertManyResult,
@@ -157,6 +158,17 @@ export abstract class BaseRepository<TModel extends BaseModel> {
     return this.model
       .findByIdAndDelete(this.toObjectId(id))
       .setOptions(BaseRepository.getQueryOptions(options));
+  }
+
+  deleteMany(filter: FilterQuery<TModel>, options?: QueryOptions): any {
+    try {
+      return this.model
+        .deleteMany(filter)
+        .setOptions(BaseRepository.getQueryOptions(options));
+    } catch (e) {
+      BaseRepository.throwMongoError(e);
+    }
+    return null;
   }
 
   update(item: Partial<TModel>, options?: QueryOptions): QueryItem<TModel> {

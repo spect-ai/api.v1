@@ -40,6 +40,11 @@ import { UserCardsService } from './user.cards.service';
 import { EventHandlers } from './events/handlers';
 import { CardNotificationService } from 'src/users/notification/card-notification.service';
 import { CqrsModule } from '@nestjs/cqrs';
+import { QueryHandlers } from './queries/handlers';
+import { LoggingService } from 'src/logging/logging.service';
+import { CardsV1Controller } from './cards-v1.controller';
+import { CommandHandlers } from './commands/handlers';
+import { CardsV1Service } from './cards-v1.service';
 
 @Module({
   imports: [
@@ -53,7 +58,7 @@ import { CqrsModule } from '@nestjs/cqrs';
     forwardRef(() => AutomationModule),
     CqrsModule,
   ],
-  controllers: [CardsController],
+  controllers: [CardsController, CardsV1Controller],
   providers: [
     CardsService,
     CardsRepository,
@@ -84,7 +89,11 @@ import { CqrsModule } from '@nestjs/cqrs';
     CreateCardCommandHandler,
     UserCardsService,
     ...EventHandlers,
+    ...QueryHandlers,
+    ...CommandHandlers,
     CardNotificationService,
+    LoggingService,
+    CardsV1Service,
   ],
   exports: [
     CardsService,

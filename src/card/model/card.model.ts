@@ -1,10 +1,12 @@
 import { prop } from '@typegoose/typegoose';
+import { Schema } from 'mongoose';
 import { BaseModel } from 'src/base/base.model';
 import { useMongoosePlugin } from 'src/base/decorators/use-mongoose-plugins.decorator';
 import { Circle } from 'src/circle/model/circle.model';
 import { Payment } from 'src/common/models/payment.model';
 import { Activity } from 'src/common/types/activity.type';
 import { Project } from 'src/project/model/project.model';
+import { User } from 'src/users/model/users.model';
 import { Status } from '../../common/types/status.type';
 import { ApplicationDetails } from '../types/types';
 import { WorkThreads } from '../types/types';
@@ -38,25 +40,25 @@ export class Card extends BaseModel {
   /**
    * The ids of all the reviewers of the card
    */
-  @prop({ default: [] })
+  @prop({ ref: () => User, type: Schema.Types.String, default: [] })
   reviewer?: string[];
 
   /**
    * The ids of all the assignees of the card
    */
-  @prop({ default: [] })
+  @prop({ ref: () => User, type: Schema.Types.String, default: [] })
   assignee?: string[];
 
   /**
    * The project that the card belongs to
    */
-  @prop({ ref: () => Project, required: true })
+  @prop({ ref: () => Project, type: Schema.Types.String, required: true })
   project: string;
 
   /**
    * The project that the card belongs to
    */
-  @prop({ ref: () => Circle, required: true })
+  @prop({ ref: () => Circle, type: Schema.Types.String, required: true })
   circle: string;
 
   /**
@@ -97,7 +99,7 @@ export class Card extends BaseModel {
   /**
    * The column that the card belongs to
    */
-  @prop({ required: true })
+  @prop({})
   columnId: string;
 
   /**

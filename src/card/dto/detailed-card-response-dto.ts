@@ -19,6 +19,13 @@ import {
 
 export class DetailedCardResponseDto {
   /**
+   * The id of the card
+   */
+  @IsString()
+  @IsNotEmpty()
+  id: string;
+
+  /**
    * The title of the card
    */
   @IsString()

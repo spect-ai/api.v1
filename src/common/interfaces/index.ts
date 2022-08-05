@@ -7,3 +7,7 @@ export interface Diff<T> {
 export interface MappedDiff<T> {
   [id: string]: Diff<T>;
 }
+
+export interface MappedItem<T> {
+  [id: string]: Partial<T>;
+}

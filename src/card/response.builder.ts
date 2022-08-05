@@ -72,7 +72,9 @@ export class ResponseBuilder {
       ...card,
       project: {
         ...cardProject,
-        cards: this.commonTools.objectify(cardProject.cards, 'id'),
+        cards: cardProject.cards
+          ? this.commonTools.objectify(cardProject.cards, 'id')
+          : {},
       },
     } as DetailedCardResponseDto;
 

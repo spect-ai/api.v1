@@ -38,13 +38,21 @@ export class AutomationService {
       return !valueToCheck.includes(valueToCheckAgainst);
     } else if (condition === 'isEmpty') {
       return (
+        valueToCheck === undefined ||
+        valueToCheck === null ||
         valueToCheck === '' ||
         (Array.isArray(valueToCheck) && valueToCheck.length === 0) ||
         (typeof valueToCheck === 'object' &&
           Object.keys(valueToCheck).length === 0)
       );
     } else if (condition === 'isNotEmpty') {
-      return valueToCheck !== '' && valueToCheck !== [] && valueToCheck !== {};
+      return (
+        valueToCheck !== '' &&
+        valueToCheck !== [] &&
+        valueToCheck !== {} &&
+        valueToCheck !== undefined &&
+        valueToCheck !== null
+      );
     } else {
       return false;
     }
@@ -147,6 +155,17 @@ export class AutomationService {
       );
     }
     if (values.hasOwnProperty('from')) {
+      console.log(
+        'has to nottttttttttttttttttttttttttttttttttttttttttttttttttt',
+      );
+      console.log(
+        !this.satisfiesCondition(newCard, properties, values.from, 'is'),
+      );
+      console.log(
+        this.satisfiesCondition(prevCard, properties, values.from, 'is'),
+      );
+      console.log('has toppppppppppppppppppppppppppppppppppppp');
+
       return (
         !this.satisfiesCondition(newCard, properties, values.from, 'is') &&
         this.satisfiesCondition(prevCard, properties, values.from, 'is')
@@ -183,8 +202,8 @@ export class AutomationService {
     };
     for (const automationId of project.automationOrder) {
       const automation = project.automations[automationId];
-      // console.log('   ');
-      // console.log(automation.name);
+      console.log('   ');
+      console.log(automation.name);
       const triggerPropertyArray = automation.triggerProperty.split('.');
       if (
         !this.satisfiesValues(

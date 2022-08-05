@@ -1,28 +1,10 @@
 import {
-  Injectable,
   CanActivate,
   ExecutionContext,
   HttpException,
+  Injectable,
 } from '@nestjs/common';
-import { Reflector } from '@nestjs/core';
 import { ObjectId } from 'mongoose';
-import { ActionService } from 'src/card/actions.service';
-import { CardsRepository } from 'src/card/cards.repository';
-import { UpdateCardRequestDto } from 'src/card/dto/update-card-request.dto';
-import {
-  CreateWorkThreadRequestDto,
-  CreateWorkUnitRequestDto,
-  UpdateWorkThreadRequestDto,
-  UpdateWorkUnitRequestDto,
-} from 'src/card/dto/work-request.dto';
-import { Card } from 'src/card/model/card.model';
-import { CirclesRepository } from 'src/circle/circles.repository';
-import { CirclesService } from 'src/circle/circles.service';
-import { Circle } from 'src/circle/model/circle.model';
-import { CirclePermission } from 'src/common/types/role.type';
-import { ProjectsRepository } from 'src/project/project.repository';
-import { RolesService } from 'src/roles/roles.service';
-import { User } from 'src/users/model/users.model';
 import { EthAddressService } from 'src/_eth-address/_eth-address.service';
 
 @Injectable()

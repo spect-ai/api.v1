@@ -34,11 +34,7 @@ import { ResponseBuilder } from '../response.builder';
 import { MappedCard, MappedDiff } from '../types/types';
 import { UserCardsService } from '../user.cards.service';
 import { CardValidationService } from '../validation.cards.service';
-
-const globalUpdate = {
-  card: {},
-  project: {},
-} as GlobalDocumentUpdate;
+import { LoggingService } from 'src/logging/logging.service';
 
 @Injectable()
 export class CardCommandHandler {
@@ -57,13 +53,21 @@ export class CardCommandHandler {
     private readonly userCardsService: UserCardsService,
     private readonly circleRepository: CirclesRepository,
     private readonly eventBus: EventBus,
-  ) {}
+    private readonly logger: LoggingService,
+  ) {
+    logger.setContext('CardCommandHandler');
+  }
 
   async update(
     id: string,
     updateCardDto: UpdateCardRequestDto,
   ): Promise<DetailedCardResponseDto> {
     try {
+      const globalUpdate = {
+        card: {},
+        project: {},
+      } as GlobalDocumentUpdate;
+
       const card =
         this.requestProvider.card || (await this.cardsRepository.findById(id));
       const project =
@@ -72,6 +76,12 @@ export class CardCommandHandler {
       const circle =
         this.requestProvider.circle ||
         (await this.circleRepository.findById(card.circle as string));
+
+      if (updateCardDto.columnId && card.parent)
+        throw new InternalServerErrorException(
+          'Cannot update column if it is a child card',
+        );
+
       const cardUpdate = this.cardsService.update(card, project, updateCardDto);
 
       const automationUpdate = this.automationService.handleAutomation(
@@ -81,7 +91,10 @@ export class CardCommandHandler {
       );
 
       let projectUpdate = {};
-      if (updateCardDto.columnId || updateCardDto.cardIndex) {
+      if (
+        (updateCardDto.columnId && updateCardDto.columnId !== card.columnId) ||
+        updateCardDto.cardIndex
+      ) {
         projectUpdate = this.cardsProjectService.reorderCard(project, id, {
           destinationColumnId: updateCardDto.columnId
             ? updateCardDto.columnId
@@ -114,6 +127,7 @@ export class CardCommandHandler {
         this.commonTools.objectify([card], 'id'),
       );
 
+      console.log(globalUpdate.card);
       const cardUpdateAcknowledgment =
         await this.cardsRepository.bundleUpdatesAndExecute(globalUpdate.card);
 
@@ -129,11 +143,20 @@ export class CardCommandHandler {
         await this.cardsRepository.getCardWithPopulatedReferences(id);
 
       this.eventBus.publish(
-        new CardUpdatedEvent(resultingCard, diff, circle.slug, project.slug),
+        new CardUpdatedEvent(
+          resultingCard,
+          diff,
+          circle.slug,
+          project.slug,
+          this.requestProvider.user.id,
+        ),
       );
       return this.responseBuilder.enrichResponse(resultingCard);
     } catch (error) {
-      console.log(error);
+      this.logger.logError(
+        `Failed while card update with error: ${error.message}`,
+        this.requestProvider,
+      );
       throw new InternalServerErrorException(
         'Failed card update',
         error.message,
@@ -155,6 +178,11 @@ export class CardCommandHandler {
     updatePaymentInfo: UpdatePaymentInfoDto,
   ): Promise<DetailedProjectResponseDto> {
     try {
+      const globalUpdate = {
+        card: {},
+        project: {},
+      } as GlobalDocumentUpdate;
+
       if (updatePaymentInfo.cardIds.length === 0) {
         throw new HttpException(
           'Card ids cannot be empty',
@@ -232,7 +260,10 @@ export class CardCommandHandler {
 
       return await this.projectService.getDetailedProject(project.id);
     } catch (error) {
-      console.log(error);
+      this.logger.logError(
+        `Failed while updating payment info with error: ${error.message}`,
+        this.requestProvider,
+      );
       throw new InternalServerErrorException(
         'Failed updating payment info',
         error.message,
@@ -244,6 +275,11 @@ export class CardCommandHandler {
     multiCardCloseDto: MultiCardCloseWithSlugDto,
   ): Promise<boolean> {
     try {
+      const globalUpdate = {
+        card: {},
+        project: {},
+      } as GlobalDocumentUpdate;
+
       const cards = await this.cardsRepository.findAll({
         slug: { $in: multiCardCloseDto.slugs },
       });
@@ -279,7 +315,10 @@ export class CardCommandHandler {
 
       return true;
     } catch (error) {
-      console.log(error);
+      this.logger.logError(
+        `Failed while closing cards with error: ${error.message}`,
+        this.requestProvider,
+      );
       throw new InternalServerErrorException(
         'Failed closing cards',
         error.message,

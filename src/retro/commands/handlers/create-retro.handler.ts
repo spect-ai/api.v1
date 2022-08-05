@@ -1,13 +1,11 @@
-import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { DetailedRetroResponseDto } from 'src/retro/dto/detailed-retro-response.dto';
-import { CreateRetroCommand } from '../impl';
-import { QueryBus } from '@nestjs/cqrs';
-import { GetCircleByIdQuery } from 'src/circle-v1/queries/impl';
 import { InternalServerErrorException } from '@nestjs/common';
-import { MappedStats } from 'src/retro/types';
+import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { MemberStats } from 'src/retro/dto/create-retro-request.dto';
+import { DetailedRetroResponseDto } from 'src/retro/dto/detailed-retro-response.dto';
+import { Retro } from 'src/retro/models/retro.model';
 import { RetroRepository } from 'src/retro/retro.repository';
-import { RequestProvider } from 'src/users/user.provider';
+import { MappedStats } from 'src/retro/types';
+import { CreateRetroCommand } from '../impl';
 
 @CommandHandler(CreateRetroCommand)
 export class CreateRetroCommandHandler
@@ -15,13 +13,12 @@ export class CreateRetroCommandHandler
 {
   constructor(private readonly retroRepository: RetroRepository) {}
 
-  async execute(
-    command: CreateRetroCommand,
-  ): Promise<DetailedRetroResponseDto> {
+  async execute(command: CreateRetroCommand): Promise<Retro> {
     try {
       const { createRetroRequestDto, circle, caller } = command;
 
-      createRetroRequestDto.reward = { ...circle.defaultPayment, value: 0 };
+      if (!createRetroRequestDto.reward)
+        createRetroRequestDto.reward = { ...circle.defaultPayment, value: 0 };
       const stats = this.initStats(createRetroRequestDto.memberStats);
       const retroNum = await this.retroRepository.count({
         circle: createRetroRequestDto.circle,

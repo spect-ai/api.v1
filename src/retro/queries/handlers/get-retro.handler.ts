@@ -1,5 +1,6 @@
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { DetailedRetroResponseDto } from 'src/retro/dto/detailed-retro-response.dto';
+import { Retro } from 'src/retro/models/retro.model';
 import { RetroRepository } from 'src/retro/retro.repository';
 import { GetRetroByIdQuery, GetRetroBySlugQuery } from '../impl';
 
@@ -9,7 +10,7 @@ export class GetRetroByIdQueryHandler
 {
   constructor(private readonly retroRepository: RetroRepository) {}
 
-  async execute(query: GetRetroByIdQuery): Promise<DetailedRetroResponseDto> {
+  async execute(query: GetRetroByIdQuery): Promise<Retro> {
     return await this.retroRepository.getRetroById(query.id);
   }
 }
@@ -20,7 +21,7 @@ export class GetCircleBySlugQueryHandler
 {
   constructor(private readonly retroRepository: RetroRepository) {}
 
-  async execute(query: GetRetroBySlugQuery): Promise<DetailedRetroResponseDto> {
+  async execute(query: GetRetroBySlugQuery): Promise<Retro> {
     return await this.retroRepository.getRetroBySlug(query.slug);
   }
 }

@@ -105,12 +105,18 @@ export class CardsController {
   @Get('/aggregatedPaymentInfo')
   @ApiQuery({ name: 'cardIds', type: 'array' })
   @ApiQuery({ name: 'chainId', type: 'string' })
+  @ApiQuery({ name: 'payForChildren', type: 'boolean' })
   async getAggregatedPaymentInfo(
     @Query('cardIds') cardIds: string[],
     @Query('chainId') chainId: string,
+    @Query('payForChildren') payForChildren: boolean,
   ): Promise<AggregatedFlattenedPaymentInfo> {
     console.log(cardIds);
-    return await this.paymentService.aggregatePaymentInfo(cardIds, chainId);
+    return await this.paymentService.aggregatePaymentInfo(
+      cardIds,
+      chainId,
+      payForChildren || true,
+    );
   }
 
   //@SetMetadata('permissions', ['makePayment'])

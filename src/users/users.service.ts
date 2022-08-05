@@ -1,10 +1,17 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { EthAddressRepository } from 'src/_eth-address/_eth_address.repository';
-import { DetailedUserPubliceResponseDto } from './dto/detailed-user-response.dto';
+import {
+  DetailedUserPrivateResponseDto,
+  DetailedUserPubliceResponseDto,
+} from './dto/detailed-user-response.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './model/users.model';
 import { RequestProvider } from './user.provider';
 import { UsersRepository } from './users.repository';
+import { CommandBus, QueryBus } from '@nestjs/cqrs';
+import { GetUserByIdQuery, GetUserByUsernameQuery } from './queries/impl';
+import { LoggingService } from 'src/logging/logging.service';
+import { AddItemsCommand, RemoveItemsCommand } from './commands/impl';
 
 @Injectable()
 export class UsersService {
@@ -12,11 +19,52 @@ export class UsersService {
     private readonly ethAddressRepository: EthAddressRepository,
     private readonly usersRepository: UsersRepository,
     private readonly requestProvider: RequestProvider,
-  ) {}
+    private readonly queryBus: QueryBus,
+    private readonly commandBus: CommandBus,
+    private readonly logger: LoggingService,
+  ) {
+    logger.setContext('UsersService');
+  }
 
-  async getUserPublicProfile(
-    userId: string,
-  ): Promise<DetailedUserPubliceResponseDto> {
+  async getUserById(
+    id: string,
+  ): Promise<DetailedUserPubliceResponseDto | DetailedUserPrivateResponseDto> {
+    try {
+      return this.queryBus.execute(
+        new GetUserByIdQuery(id, this.requestProvider.user?.id),
+      );
+    } catch (error) {
+      this.logger.logError(
+        `Failed getting user by id with error: ${error.message}`,
+        this.requestProvider,
+      );
+      throw new InternalServerErrorException(
+        `Failed getting user by id`,
+        error.message,
+      );
+    }
+  }
+
+  async getUserByUsername(
+    username: string,
+  ): Promise<DetailedUserPubliceResponseDto | DetailedUserPrivateResponseDto> {
+    try {
+      return this.queryBus.execute(
+        new GetUserByUsernameQuery(username, this.requestProvider.user?.id),
+      );
+    } catch (error) {
+      this.logger.logError(
+        `Failed getting user by username with error: ${error.message}`,
+        this.requestProvider,
+      );
+      throw new InternalServerErrorException(
+        `Failed getting user by username`,
+        error.message,
+      );
+    }
+  }
+
+  async getUserPublicProfile(userId: string): Promise<User> {
     return await this.usersRepository.getUserDetailsByUserId(userId);
   }
 
@@ -27,23 +75,32 @@ export class UsersService {
     });
   }
 
-  async getUserPublicProfileByUsername(
-    username: string,
-  ): Promise<DetailedUserPubliceResponseDto> {
+  async getUserPublicProfileByUsername(username: string): Promise<User> {
     return await this.usersRepository.getUserDetailsByUsername(username);
   }
 
   async create(ethAddress: string) {
-    const numUsers = await this.usersRepository.count();
-    const user = await this.usersRepository.create({
-      username: `fren${numUsers}`,
-      ethAddress: ethAddress,
-    });
-    await this.ethAddressRepository.create({
-      ethAddress: ethAddress,
-      user: user._id,
-    });
-    return user;
+    try {
+      const numUsers = await this.usersRepository.count();
+      const user = await this.usersRepository.create({
+        username: `fren${numUsers}`,
+        ethAddress: ethAddress,
+      });
+      await this.ethAddressRepository.create({
+        ethAddress: ethAddress,
+        user: user._id,
+      });
+      return user;
+    } catch (error) {
+      this.logger.logError(
+        `Failed user creation with error: ${error.message}`,
+        this.requestProvider,
+      );
+      throw new InternalServerErrorException(
+        `Failed user creation`,
+        error.message,
+      );
+    }
   }
 
   async update(updateUserDto: UpdateUserDto): Promise<User> {
@@ -62,6 +119,10 @@ export class UsersService {
         updateUserDto,
       );
     } catch (error) {
+      this.logger.logError(
+        `Failed user update with error: ${error.message}`,
+        this.requestProvider,
+      );
       throw new InternalServerErrorException(
         'Failed user update',
         error.message,
@@ -75,19 +136,26 @@ export class UsersService {
     userId?: string,
   ): Promise<DetailedUserPubliceResponseDto> {
     try {
-      let user = this.requestProvider.user;
-      if (userId) user = await this.usersRepository.findById(userId);
-      if (user[itemType].includes(itemId))
-        throw new Error('Item already added');
-      return await this.usersRepository.updateAndReturnWithPopulatedFields(
-        userId || this.requestProvider.user.id,
-        {
-          $push: {
-            [itemType]: itemId,
-          },
-        },
+      if (!userId) userId = this.requestProvider.user?.id;
+      if (!userId) throw new Error('User id cannot be null');
+
+      return await this.commandBus.execute(
+        new AddItemsCommand(
+          [
+            {
+              fieldName: itemType,
+              itemIds: [itemId],
+            },
+          ],
+          null,
+          userId,
+        ),
       );
     } catch (error) {
+      this.logger.logError(
+        `Failed adding ${itemType} to user with error: ${error.message}`,
+        this.requestProvider,
+      );
       throw new InternalServerErrorException(
         `Failed adding ${itemType} to user`,
         error.message,
@@ -101,20 +169,25 @@ export class UsersService {
     userId?: string,
   ): Promise<DetailedUserPubliceResponseDto> {
     try {
-      let user = this.requestProvider.user;
-      if (userId) user = await this.usersRepository.findById(userId);
-      user[itemType] = user[itemType].filter((id) => id.toString() !== itemId);
-      return await this.usersRepository.updateAndReturnWithPopulatedFields(
-        userId || this.requestProvider.user?.id,
-        {
-          $set: {
-            [itemType]: user[itemType],
-          },
-        },
+      return await this.commandBus.execute(
+        new RemoveItemsCommand(
+          [
+            {
+              fieldName: itemType,
+              itemIds: [itemId],
+            },
+          ],
+          null,
+          userId,
+        ),
       );
     } catch (error) {
+      this.logger.logError(
+        `Failed removing ${itemType} to user with error: ${error.message}`,
+        this.requestProvider,
+      );
       throw new InternalServerErrorException(
-        `Failed adding ${itemType} to user`,
+        `Failed removing ${itemType} to user`,
         error.message,
       );
     }

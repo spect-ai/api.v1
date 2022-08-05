@@ -1,6 +1,7 @@
 import { InternalServerErrorException } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { DetailedRetroResponseDto } from 'src/retro/dto/detailed-retro-response.dto';
+import { Retro } from 'src/retro/models/retro.model';
 import { RetroRepository } from 'src/retro/retro.repository';
 import { UpdateRetroVoteCommand } from '../impl/update-retro-vote.command';
 
@@ -10,9 +11,7 @@ export class UpdateRetroVoteCommandHandler
 {
   constructor(private readonly retroRepository: RetroRepository) {}
 
-  async execute(
-    command: UpdateRetroVoteCommand,
-  ): Promise<DetailedRetroResponseDto> {
+  async execute(command: UpdateRetroVoteCommand): Promise<Retro> {
     try {
       const { caller, retro, updateRetroVoteRequestDto } = command;
 
@@ -37,12 +36,14 @@ export class UpdateRetroVoteCommandHandler
         throw new InternalServerErrorException(
           'Caller has exceeded allocated votes',
         );
-      const updatedRetro = await this.retroRepository.updateById(retro.id, {
-        stats: {
-          ...retro.stats,
-          [caller]: ownerStats,
-        },
-      });
+      const updatedRetro = await this.retroRepository
+        .updateById(retro.id, {
+          stats: {
+            ...retro.stats,
+            [caller]: ownerStats,
+          },
+        })
+        .populate('circle');
       return updatedRetro;
     } catch (error) {
       throw new InternalServerErrorException(

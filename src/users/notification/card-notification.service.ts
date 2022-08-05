@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Card } from 'src/card/model/card.model';
 import { Diff } from 'src/common/interfaces';
+import { Reference } from '../types/types';
 
 @Injectable()
 export class CardNotificationService {
@@ -10,7 +11,7 @@ export class CardNotificationService {
     diff: Diff<Card>,
     recipient: string,
     actor: string,
-  ): { content: string; ref: object } {
+  ): { content: string; ref: Reference } {
     console.log(actionType);
     switch (actionType) {
       case 'create':
@@ -34,25 +35,25 @@ export class CardNotificationService {
     user: string,
     card: Card,
     actor: string,
-  ): { content: string; ref: object } {
+  ): { content: string; ref: Reference } {
     const isAssignee = card.assignee.includes(user);
     const isReviewer = card.reviewer.includes(user);
     if (isAssignee && isReviewer) {
       return {
         content: `[actor] added you to ${card.title} as assignee and reviewer`,
-        ref: { actor },
+        ref: { users: { actor } },
       };
     }
     if (isAssignee) {
       return {
         content: `[actor] assigned you to ${card.title}`,
-        ref: { actor },
+        ref: { users: { actor } },
       };
     }
     if (isReviewer) {
       return {
         content: `[actor] added you to ${card.title} as reviewer`,
-        ref: { actor },
+        ref: { users: { actor } },
       };
     }
   }
@@ -62,25 +63,25 @@ export class CardNotificationService {
     card: Card,
     diff: Diff<Card>,
     actor: string,
-  ): { content: string; ref: object } {
+  ): { content: string; ref: Reference } {
     const isNewlyAssigned = diff.added?.assignee?.includes(user);
     const isNewlyAddedAsReviewer = diff.added?.reviewer?.includes(user);
     if (isNewlyAssigned && isNewlyAddedAsReviewer) {
       return {
         content: `[actor] added you to ${card.title} as assignee and reviewer`,
-        ref: { actor },
+        ref: { users: { actor } },
       };
     }
     if (isNewlyAssigned) {
       return {
         content: `[actor] assigned you to ${card.title}`,
-        ref: { actor },
+        ref: { users: { actor } },
       };
     }
     if (isNewlyAddedAsReviewer) {
       return {
         content: `[actor] added you to ${card.title} as reviewer`,
-        ref: { actor },
+        ref: { users: { actor } },
       };
     }
 
@@ -89,19 +90,19 @@ export class CardNotificationService {
     if (isNewlyRemovedAsAssignee && isNewlyRemovedAsReviewer) {
       return {
         content: `[actor] removed you from ${card.title} as assignee and reviewer`,
-        ref: { actor },
+        ref: { users: { actor } },
       };
     }
     if (isNewlyRemovedAsAssignee) {
       return {
         content: `[actor] unassigned you from ${card.title}`,
-        ref: { actor },
+        ref: { users: { actor } },
       };
     }
     if (isNewlyRemovedAsReviewer) {
       return {
         content: `[actor] removed you from ${card.title} as reviewer`,
-        ref: { actor },
+        ref: { users: { actor } },
       };
     }
   }
@@ -109,10 +110,10 @@ export class CardNotificationService {
   submitWorkNotification(
     card: Card,
     actor: string,
-  ): { content: string; ref: object } {
+  ): { content: string; ref: Reference } {
     return {
       content: `[actor] added a new submission on ${card.title}`,
-      ref: { actor },
+      ref: { users: { actor } },
     };
   }
 
@@ -122,7 +123,7 @@ export class CardNotificationService {
   ): { content: string; ref: object } {
     return {
       content: `[actor] added revision instructions on ${card.title}`,
-      ref: { actor },
+      ref: { users: { actor } },
     };
   }
 
@@ -132,7 +133,7 @@ export class CardNotificationService {
   ): { content: string; ref: object } {
     return {
       content: `[actor] added feedback on ${card.title}`,
-      ref: { actor },
+      ref: { users: { actor } },
     };
   }
 
@@ -142,7 +143,7 @@ export class CardNotificationService {
   ): { content: string; ref: object } {
     return {
       content: `[actor] picked your application on ${card.title}`,
-      ref: { actor },
+      ref: { users: { actor } },
     };
   }
 }

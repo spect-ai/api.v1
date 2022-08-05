@@ -23,7 +23,8 @@ import { CreateProjectRequestDto } from './dto/create-project-request.dto';
 import { DetailedProjectResponseDto } from './dto/detailed-project-response.dto';
 import { UpdateColumnRequestDto } from './dto/update-column.dto';
 import {
-  AddOrUpdateViewDto,
+  AddViewDto,
+  UpdateViewDto,
   UpdateProjectRequestDto,
 } from './dto/update-project-request.dto';
 import { Project } from './model/project.model';
@@ -106,7 +107,7 @@ export class ProjectController {
   @Patch('/:id/view/add')
   async addView(
     @Param() param: ObjectIdDto,
-    @Body() addViewDto: AddOrUpdateViewDto,
+    @Body() addViewDto: AddViewDto,
   ): Promise<DetailedProjectResponseDto> {
     return await this.projectService.addView(param.id, addViewDto);
   }
@@ -117,7 +118,7 @@ export class ProjectController {
   async updateView(
     @Param() param: ObjectIdDto,
     @Param() viewParam: RequiredViewIdDto,
-    @Body() updateViewDto: AddOrUpdateViewDto,
+    @Body() updateViewDto: UpdateViewDto,
   ): Promise<DetailedProjectResponseDto> {
     return await this.projectService.updateView(
       param.id,

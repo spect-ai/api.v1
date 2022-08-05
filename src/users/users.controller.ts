@@ -9,7 +9,10 @@ import {
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { ApiTags } from '@nestjs/swagger';
-import { SessionAuthGuard } from 'src/auth/iron-session.guard';
+import {
+  PublicViewAuthGuard,
+  SessionAuthGuard,
+} from 'src/auth/iron-session.guard';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './model/users.model';
 import { ObjectIdDto } from 'src/common/dtos/object-id.dto';
@@ -24,23 +27,24 @@ export class UsersController {
   @UseGuards(SessionAuthGuard)
   @Get('/me')
   findMe(@Request() req) {
-    return req.user;
+    return this.usersService.getUserById(req.user.id);
+  }
+
+  @UseGuards(PublicViewAuthGuard)
+  @Get('/:id')
+  findById(@Param('id') id: string) {
+    return this.usersService.getUserById(id);
+  }
+
+  @Get('/username/:username')
+  findByUsername(@Param('username') username: string) {
+    return this.usersService.getUserPublicProfileByUsername(username);
   }
 
   @UseGuards(SessionAuthGuard)
   @Patch('/me')
   update(@Body() updateUserDto: UpdateUserDto) {
     return this.usersService.update(updateUserDto);
-  }
-
-  @Get('/:id')
-  findById(@Param('id') id: string) {
-    return this.usersService.getUserPublicProfile(id);
-  }
-
-  @Get('/username/:username')
-  findByUsername(@Param('username') username: string) {
-    return this.usersService.getUserPublicProfileByUsername(username);
   }
 
   @UseGuards(SessionAuthGuard)
