@@ -120,14 +120,13 @@ export class CardCommandHandler {
       const diff = this.cardsService.getDifference(card, globalUpdate.card[id]);
 
       /** Doing it like this so it can support multiple cards, sub cards in the future */
-      const userUpdate = await this.userCardsService.updateUserCards(
-        {
-          [id]: diff,
-        } as MappedDiff,
-        this.commonTools.objectify([card], 'id'),
-      );
+      // const userUpdate = await this.userCardsService.updateUserCards(
+      //   {
+      //     [id]: diff,
+      //   } as MappedDiff,
+      //   this.commonTools.objectify([card], 'id'),
+      // );
 
-      console.log(globalUpdate.card);
       const cardUpdateAcknowledgment =
         await this.cardsRepository.bundleUpdatesAndExecute(globalUpdate.card);
 
@@ -136,8 +135,8 @@ export class CardCommandHandler {
           globalUpdate.project,
         );
 
-      const userUpdateAcknowledgment =
-        await this.userRepository.bundleUpdatesAndExecute(userUpdate);
+      // const userUpdateAcknowledgment =
+      //   await this.userRepository.bundleUpdatesAndExecute(userUpdate);
 
       const resultingCard =
         await this.cardsRepository.getCardWithPopulatedReferences(id);
