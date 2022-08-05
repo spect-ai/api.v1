@@ -86,12 +86,20 @@ export class UserFieldResolver {
             slug: 1,
           },
           assignee: {
+            id: 1,
             avatar: 1,
             username: 1,
           },
           reviewer: {
+            id: 1,
             avatar: 1,
             username: 1,
+          },
+          circle: {
+            id: 1,
+            name: 1,
+            avatar: 1,
+            slug: 1,
           },
         },
         {
@@ -103,6 +111,7 @@ export class UserFieldResolver {
           status: 1,
           priority: 1,
           deadline: 1,
+          labels: 1,
         },
       ),
     );
