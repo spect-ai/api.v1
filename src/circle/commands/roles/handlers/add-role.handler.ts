@@ -21,11 +21,10 @@ export class AddRoleCommandHandler implements ICommandHandler<AddRoleCommand> {
       if (circleToUpdate.roles[roleDto.role]) {
         throw new InternalServerErrorException('Role already exists');
       }
-      console.log(roleDto);
 
       const roles = {
         ...circleToUpdate.roles,
-        [roleDto.role]: roleDto,
+        [roleDto.role]: { ...roleDto, mutable: true },
       };
 
       const updatedCircle = await this.circlesRepository.updateById(

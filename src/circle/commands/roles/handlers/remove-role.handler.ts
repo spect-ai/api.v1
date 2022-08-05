@@ -20,8 +20,10 @@ export class RemoveRoleCommandHandler
       if (!circleToUpdate) {
         throw new InternalServerErrorException('Circle not found');
       }
-      if (roleId === 'applicant') {
-        throw new InternalServerErrorException('Cannot remove applicant role');
+      if (!circleToUpdate.roles[roleId].mutable) {
+        throw new InternalServerErrorException(
+          'Role cannot be removed as its not mutable',
+        );
       }
 
       delete circleToUpdate.roles[roleId];

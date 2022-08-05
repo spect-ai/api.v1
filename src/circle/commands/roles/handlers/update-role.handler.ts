@@ -20,11 +20,15 @@ export class UpdateRoleCommandHandler
       if (!circleToUpdate) {
         throw new InternalServerErrorException('Circle not found');
       }
-      if (roleId === 'applicant') {
-        throw new InternalServerErrorException('Cannot update applicant role');
+      if (!circleToUpdate.roles[roleId]) {
+        throw new InternalServerErrorException('Role does not exist');
       }
-      console.log(roleDto);
-      console.log(roleId);
+      if (!circleToUpdate.roles[roleId].mutable) {
+        throw new InternalServerErrorException(
+          'Role cannot be updated as its not mutable',
+        );
+      }
+
       const roles = {
         ...circleToUpdate.roles,
         [roleId]: roleDto,

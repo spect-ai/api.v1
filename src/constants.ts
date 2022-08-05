@@ -7,6 +7,7 @@ export const defaultCircleRoles = {
     name: 'steward',
     description: 'Steward role',
     selfAssignable: false,
+    mutable: true,
     permissions: {
       createNewCircle: true,
       manageCircleSettings: true,
@@ -45,6 +46,7 @@ export const defaultCircleRoles = {
     name: 'member',
     description: 'Member role',
     selfAssignable: false,
+    mutable: true,
     permissions: {
       createNewCircle: false,
       manageCircleSettings: false,
@@ -84,6 +86,7 @@ export const defaultCircleRoles = {
     name: 'applicant',
     description: 'Applicant role',
     selfAssignable: false,
+    mutable: false,
     permissions: {
       createNewCircle: false,
       manageCircleSettings: false,
