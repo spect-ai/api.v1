@@ -23,3 +23,10 @@ export class GetCardBySlugQuery {
     public readonly selectedFields?: Record<string, unknown>,
   ) {}
 }
+
+export class GetMultipleCardsWithChildrenQuery {
+  constructor(public readonly ids: string[]) {}
+}
+export class GetCardWithChildrenQuery {
+  constructor(public readonly id: string) {}
+}

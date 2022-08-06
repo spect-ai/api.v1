@@ -73,7 +73,7 @@ export class UpdateCardCommandHandler
     return objDiff;
   }
 
-  update(
+  getUpdatedCard(
     card: Card,
     project: Project,
     updateCardDto: UpdateCardRequestDto,

@@ -1,11 +1,13 @@
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { CardsRepository } from 'src/card/cards.repository';
 import { DetailedCardResponseDto } from 'src/card/dto/detailed-card-response-dto';
-import { PopulatedCardFields } from '../../types/types';
+import { ExtendedCard } from 'src/card/model/card.model';
 import {
   GetCardByIdQuery,
-  GetMultipleCardsByIdsQuery,
   GetCardBySlugQuery,
+  GetCardWithChildrenQuery,
+  GetMultipleCardsByIdsQuery,
+  GetMultipleCardsWithChildrenQuery,
 } from '../impl';
 
 @QueryHandler(GetCardByIdQuery)
@@ -54,6 +56,41 @@ export class GetCardBySlugQueryHandler
       query.customPopulate,
       query.selectedFields,
     );
+    return card;
+  }
+}
+
+@QueryHandler(GetMultipleCardsWithChildrenQuery)
+export class GetMultipleCardsWithChildrenQueryHandler
+  implements IQueryHandler<GetMultipleCardsWithChildrenQuery>
+{
+  constructor(private readonly cardRepository: CardsRepository) {}
+
+  async execute(
+    query: GetMultipleCardsWithChildrenQuery,
+  ): Promise<ExtendedCard[]> {
+    const cards =
+      await this.cardRepository.getCardWithAllChildrenForMultipleCards(
+        query.ids,
+      );
+    return cards;
+  }
+}
+
+@QueryHandler(GetCardWithChildrenQuery)
+export class GetCardWithChildrenQueryHandler
+  implements IQueryHandler<GetCardWithChildrenQuery>
+{
+  constructor(private readonly cardRepository: CardsRepository) {}
+
+  async execute(query: GetCardWithChildrenQuery): Promise<ExtendedCard> {
+    const card = await this.cardRepository.getCardWithAllChildren(query.id);
+
+    /** Aggregate query doesnt add id so adding manually */
+    for (const child of card.flattenedChildren) {
+      child.id = child._id.toString();
+    }
+
     return card;
   }
 }
