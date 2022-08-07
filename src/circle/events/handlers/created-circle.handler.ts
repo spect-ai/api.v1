@@ -5,6 +5,7 @@ import {
   IEventHandler,
 } from '@nestjs/cqrs';
 import { CirclesRepository } from 'src/circle/circles.repository';
+import { LoggingService } from 'src/logging/logging.service';
 import { AddItemsCommand as AddItemsToUserCommand } from 'src/users/commands/impl';
 import { CreatedCircleEvent } from '../impl';
 
@@ -15,24 +16,30 @@ export class CreatedCircleEventHandler
   constructor(
     private readonly eventBus: EventBus,
     private readonly commandBus: CommandBus,
-    private readonly circlesRepository: CirclesRepository,
-  ) {}
+    private readonly logger: LoggingService,
+  ) {
+    this.logger.setContext('CreatedCircleEventHandler');
+  }
 
   async handle(event: CreatedCircleEvent) {
-    console.log('CreatedCircleEvent');
-    const { caller, circle } = event;
+    try {
+      console.log('CreatedCircleEvent');
+      const { caller, circle } = event;
 
-    this.commandBus.execute(
-      new AddItemsToUserCommand(
-        [
-          {
-            fieldName: 'circles',
-            itemIds: [circle._id.toString()],
-          },
-        ],
-        null,
-        caller,
-      ),
-    );
+      this.commandBus.execute(
+        new AddItemsToUserCommand(
+          [
+            {
+              fieldName: 'circles',
+              itemIds: [circle._id.toString()],
+            },
+          ],
+          null,
+          caller,
+        ),
+      );
+    } catch (error) {
+      this.logger.error(`${error.message}`);
+    }
   }
 }

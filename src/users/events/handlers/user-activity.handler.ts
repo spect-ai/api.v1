@@ -2,6 +2,7 @@ import { EventsHandler, IEventHandler } from '@nestjs/cqrs';
 import { Card } from 'src/card/model/card.model';
 import { Circle } from 'src/circle/model/circle.model';
 import { Diff } from 'src/common/interfaces';
+import { LoggingService } from 'src/logging/logging.service';
 import { Project } from 'src/project/model/project.model';
 import { Retro } from 'src/retro/models/retro.model';
 import { UsersRepository } from 'src/users/users.repository';
@@ -12,27 +13,36 @@ import { UserActivityEvent } from '../impl';
 export class UserActivityEventHandler
   implements IEventHandler<UserActivityEvent>
 {
-  constructor(private readonly userRepository: UsersRepository) {}
+  constructor(
+    private readonly userRepository: UsersRepository,
+    private readonly logger: LoggingService,
+  ) {
+    this.logger.setContext('UserActivityEventHandler');
+  }
 
   async handle(event: UserActivityEvent) {
-    console.log('ActivityEventHandler');
-    const { actionType, itemType, item, linkPath, actor, changeLog } = event;
-    const actorEntity = await this.userRepository.findById(actor);
-    if (!actorEntity.activities) {
-      actorEntity.activities = [];
-    }
-    actorEntity.activities.push({
-      id: uuidv4(),
-      content: this.generateContent(actionType, changeLog, itemType, item),
-      linkPath,
-      timestamp: new Date(),
-      actionType,
-      stakeholders: [],
-      ref: {},
-    });
+    try {
+      console.log('ActivityEventHandler');
+      const { actionType, itemType, item, linkPath, actor, changeLog } = event;
+      const actorEntity = await this.userRepository.findById(actor);
+      if (!actorEntity.activities) {
+        actorEntity.activities = [];
+      }
+      actorEntity.activities.push({
+        id: uuidv4(),
+        content: this.generateContent(actionType, changeLog, itemType, item),
+        linkPath,
+        timestamp: new Date(),
+        actionType,
+        stakeholders: [],
+        ref: {},
+      });
 
-    // Note: User activity not supported yet
-    //await this.userRepository.update(actorEntity);
+      // Note: User activity not supported yet
+      //await this.userRepository.update(actorEntity);
+    } catch (error) {
+      this.logger.error(error);
+    }
   }
 
   generateContent(
