@@ -15,4 +15,4 @@ workflows:
           filters:
             branches:
               only:
-                - release-0.1.2
+                - release-0.1.1
