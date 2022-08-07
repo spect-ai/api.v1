@@ -8,24 +8,28 @@ export class LoggingService extends ConsoleLogger {
     level: string,
     ...optionalParams: [...any, string?]
   ): void {
-    if (process.env.ENV === 'Production') {
-      fetch(
-        `https://logsene-receiver.sematext.com/${process.env.SEMA_TOKEN}/example/`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
+    try {
+      if (process.env.ENV === 'Production') {
+        fetch(
+          `https://logsene-receiver.sematext.com/${process.env.SEMA_TOKEN}/example/`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              message,
+              optionalParams,
+              context: this.context,
+              level,
+            }),
           },
-          body: JSON.stringify({
-            message,
-            optionalParams,
-            context: this.context,
-            level,
-          }),
-        },
-      );
-    } else {
-      console.log(message);
+        );
+      } else {
+        console.log(message);
+      }
+    } catch (error) {
+      console.log(error);
     }
   }
   log(message: any, ...optionalParams: [...any, string?]): void {

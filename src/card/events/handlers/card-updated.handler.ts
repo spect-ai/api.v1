@@ -7,6 +7,7 @@ import {
 import { Card } from 'src/card/model/card.model';
 import { MappedDiff } from 'src/card/types/types';
 import { Diff } from 'src/common/interfaces';
+import { LoggingService } from 'src/logging/logging.service';
 import { CardLoc } from 'src/project/types/types';
 import {
   AddItemsCommand,
@@ -23,43 +24,50 @@ export class CardUpdatedEventHandler
   constructor(
     private readonly eventBus: EventBus,
     private readonly commandBus: CommandBus,
-  ) {}
+    private readonly logger: LoggingService,
+  ) {
+    this.logger.setContext('CardUpdatedEventHandler');
+  }
 
   async handle(event: CardUpdatedEvent) {
-    console.log('CardUpdatedEventHandler');
-    const { card, diff, circleSlug, projectSlug, caller } = event;
-    const users = [
-      ...(diff.added?.assignee || []),
-      ...(diff.added?.reviewer || []),
-      ...(diff.deleted?.assignee || []),
-      ...(diff.deleted?.reviewer || []),
-    ];
-    this.addCardsToUser(
-      card as Card,
-      diff.added?.assignee || [],
-      'assignedCards',
-    );
-    this.addCardsToUser(
-      card as Card,
-      diff.added?.reviewer || [],
-      'reviewingCards',
-    );
-    this.removeCardsFromUser(
-      card as Card,
-      diff.deleted?.assignee || [],
-      'assignedCards',
-    );
-    this.removeCardsFromUser(
-      card as Card,
-      diff.deleted?.reviewer || [],
-      'reviewingCards',
-    );
+    try {
+      console.log('CardUpdatedEventHandler');
+      const { card, diff, circleSlug, projectSlug, caller } = event;
+      const users = [
+        ...(diff.added?.assignee || []),
+        ...(diff.added?.reviewer || []),
+        ...(diff.deleted?.assignee || []),
+        ...(diff.deleted?.reviewer || []),
+      ];
+      this.addCardsToUser(
+        card as Card,
+        diff.added?.assignee || [],
+        'assignedCards',
+      );
+      this.addCardsToUser(
+        card as Card,
+        diff.added?.reviewer || [],
+        'reviewingCards',
+      );
+      this.removeCardsFromUser(
+        card as Card,
+        diff.deleted?.assignee || [],
+        'assignedCards',
+      );
+      this.removeCardsFromUser(
+        card as Card,
+        diff.deleted?.reviewer || [],
+        'reviewingCards',
+      );
 
-    this.moveApplications(card as Card, diff);
+      this.moveApplications(card as Card, diff);
 
-    this.notifyUsers(users, card as Card, circleSlug, projectSlug, diff);
-    this.processClosedCard(card as Card, diff);
-    this.processReopenedCard(card as Card, diff);
+      this.notifyUsers(users, card as Card, circleSlug, projectSlug, diff);
+      this.processClosedCard(card as Card, diff);
+      this.processReopenedCard(card as Card, diff);
+    } catch (error) {
+      this.logger.error(`${error.message}`);
+    }
   }
 
   addCardsToUser(
