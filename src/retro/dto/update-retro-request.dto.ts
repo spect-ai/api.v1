@@ -44,6 +44,7 @@ export class UpdateRetroRequestDto {
   @IsNumber()
   @IsOptional()
   duration?: number;
+
   /**
    * The reward budget of the retro period
    */

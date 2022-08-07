@@ -1,4 +1,5 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { EventBus } from '@nestjs/cqrs';
 import { CirclesRepository } from 'src/circle/circles.repository';
 import { CirclesService } from 'src/circle/circles.service';
 import { ProjectsRepository } from 'src/project/project.repository';
@@ -12,6 +13,7 @@ import {
   UpdateApplicationDto,
 } from './dto/application.dto';
 import { DetailedCardResponseDto } from './dto/detailed-card-response-dto';
+import { ApplicationPickedEvent } from './events/impl';
 import { ResponseBuilder } from './response.builder';
 import { CardValidationService } from './validation.cards.service';
 
@@ -27,6 +29,7 @@ export class ApplicationService {
     private readonly activityBuilder: ActivityBuilder,
     private readonly validationService: CardValidationService,
     private readonly responseBuilder: ResponseBuilder,
+    private readonly eventBus: EventBus,
   ) {}
 
   async createApplication(
@@ -34,8 +37,8 @@ export class ApplicationService {
     createApplicationDto: CreateApplicationDto,
   ): Promise<DetailedCardResponseDto> {
     try {
-      const card = this.requestProvider.card;
-      this.validationService.validateCardExists(card);
+      const card =
+        this.requestProvider.card || (await this.cardsRepository.findById(id));
       this.validationService.validateUserHasntSubmittedApplicaiton(card);
 
       const project =
@@ -103,7 +106,8 @@ export class ApplicationService {
     updateApplicationDto: UpdateApplicationDto,
   ): Promise<DetailedCardResponseDto> {
     try {
-      const card = this.requestProvider.card;
+      const card =
+        this.requestProvider.card || (await this.cardsRepository.findById(id));
       this.validationService.validateApplicationExists(card, applicationId);
       this.validationService.validateCallerIsOwner(card, applicationId);
 
@@ -142,7 +146,8 @@ export class ApplicationService {
     applicationId: string,
   ): Promise<DetailedCardResponseDto> {
     try {
-      const card = this.requestProvider.card;
+      const card =
+        this.requestProvider.card || (await this.cardsRepository.findById(id));
       this.validationService.validateApplicationExists(card, applicationId);
       this.validationService.validateCallerIsOwner(card, applicationId);
 
@@ -178,7 +183,14 @@ export class ApplicationService {
 
   async pickApplications(id: string, applicationIds: string[]) {
     try {
-      const card = this.requestProvider.card;
+      const card =
+        this.requestProvider.card || (await this.cardsRepository.findById(id));
+      const project =
+        this.requestProvider.project ||
+        (await this.projectRepository.findById(card.project as string));
+      const circle =
+        this.requestProvider.circle ||
+        (await this.circleRepository.findById(card.circle));
       const applicants = [];
       for (const applicationId of applicationIds) {
         this.validationService.validateApplicationExists(card, applicationId);
@@ -198,7 +210,15 @@ export class ApplicationService {
             activity: activity ? [...card.activity, activity] : card.activity,
           },
         );
-
+      this.eventBus.publish(
+        new ApplicationPickedEvent(
+          updatedCard,
+          applicationIds,
+          circle.slug,
+          project.slug,
+          this.requestProvider.user.id,
+        ),
+      );
       return await this.responseBuilder.enrichResponse(updatedCard);
     } catch (error) {
       throw new InternalServerErrorException(

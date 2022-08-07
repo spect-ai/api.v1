@@ -30,6 +30,7 @@ export class CircleAuthGuard implements CanActivate {
     const userPermissions = userRoles.map(
       (role) => circle.roles[role].permissions,
     );
+
     const collatedUserPermissions =
       this.roleService.collatePermissions(userPermissions);
     for (const permission of permissions) {

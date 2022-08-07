@@ -4,6 +4,7 @@ import {
   HttpException,
   Injectable,
 } from '@nestjs/common';
+import { Reflector } from '@nestjs/core';
 import { CirclesRepository } from 'src/circle/circles.repository';
 import { CirclesService } from 'src/circle/circles.service';
 import { ProjectsRepository } from 'src/project/project.repository';
@@ -17,6 +18,7 @@ export class ProjectAuthGuard implements CanActivate {
     private readonly projectRepository: ProjectsRepository,
     private readonly sessionAuthGuard: SessionAuthGuard,
     private readonly circlesService: CirclesService,
+    private readonly reflector: Reflector,
   ) {}
 
   async checkPermissions(
@@ -35,6 +37,10 @@ export class ProjectAuthGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
+    const permissions = this.reflector.get<string[]>(
+      'permissions',
+      context.getHandler(),
+    );
     try {
       request.user = (await this.sessionAuthGuard.validateUser(
         request.session.siwe?.address,
@@ -48,7 +54,7 @@ export class ProjectAuthGuard implements CanActivate {
       request.project = project;
 
       return await this.checkPermissions(
-        ['createNewCircle'],
+        permissions,
         request.user.id,
         project.parents,
       );

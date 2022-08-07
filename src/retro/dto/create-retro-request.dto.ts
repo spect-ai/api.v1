@@ -1,21 +1,41 @@
 import {
   IsArray,
+  IsBoolean,
   IsDate,
+  IsDateString,
   IsNotEmpty,
   IsNumber,
   IsObject,
   IsOptional,
   IsString,
 } from 'class-validator';
+import { IsObjectId } from 'class-validator-mongo-object-id';
 import { Date, ObjectId } from 'mongoose';
 import { Payment } from 'src/common/models/payment.model';
 
-export type MemberStats = {
-  member: ObjectId;
+export class MemberStats {
+  @IsString()
+  @IsNotEmpty()
+  member: string;
+
+  /**
+   * Can the member vote in the retro?
+   */
+  @IsBoolean()
   canGive: boolean;
+
+  /**
+   * Can the member receive votes in the retro?
+   */
+  @IsBoolean()
   canReceive: boolean;
+
+  /**
+   * The votes allocated to the member
+   */
+  @IsNumber()
   allocation: number;
-};
+}
 
 export class CreateRetroRequestDto {
   /**
@@ -35,8 +55,8 @@ export class CreateRetroRequestDto {
   /**
    * The circle that the retro belongs to
    */
-  @IsString()
-  circle: ObjectId;
+  @IsObjectId()
+  circle: string;
 
   /**
    * The strategy used in the retro period, ie, Quadratic or Normal Voting
@@ -48,7 +68,7 @@ export class CreateRetroRequestDto {
   /**
    * The start time of the retro period
    */
-  @IsDate()
+  @IsDateString()
   @IsOptional()
   startTime?: Date;
 

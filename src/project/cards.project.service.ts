@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { CardsRepository } from 'src/card/cards.repository';
-import { DataStructureManipulationService } from 'src/common/dataStructureManipulation.service';
+import { Card } from 'src/card/model/card.model';
+import { CommonTools } from 'src/common/common.service';
 import { DetailedProjectResponseDto } from './dto/detailed-project-response.dto';
 import { ReorderCardReqestDto } from './dto/reorder-card-request.dto';
 import { Project } from './model/project.model';
@@ -11,8 +11,7 @@ import { CardLoc, MappedProject } from './types/types';
 export class CardsProjectService {
   constructor(
     private readonly projectRepository: ProjectsRepository,
-    private readonly cardRepository: CardsRepository,
-    private readonly datastructureManipulationService: DataStructureManipulationService,
+    private readonly commonTools: CommonTools,
   ) {}
 
   projectPopulatedWithCardDetails(
@@ -20,10 +19,63 @@ export class CardsProjectService {
   ): DetailedProjectResponseDto {
     return {
       ...project,
-      cards: this.datastructureManipulationService.objectify(
-        project.cards,
-        'id',
-      ),
+      cards: this.commonTools.objectify(project.cards, 'id'),
+    };
+  }
+
+  addCardsToProject(project: Project, cards: Card[]): MappedProject {
+    const cardIds = [];
+    const columnDetails = { ...project.columnDetails };
+    for (const card of cards) {
+      cardIds.push(card._id);
+      columnDetails[card.columnId].cards = [
+        card._id.toString(),
+        ...columnDetails[card.columnId].cards,
+      ];
+    }
+
+    return {
+      [project.id]: {
+        cards: [...cardIds, ...project.cards],
+        columnDetails: columnDetails,
+      },
+    };
+  }
+
+  addCardToProjectNew(
+    project: Project,
+    columnId: string,
+    cardId: string,
+    addInFirstColumnIfColumnDoesntExist = true,
+  ): MappedProject {
+    if (
+      !project.columnDetails[columnId] ||
+      !project.columnOrder.includes(columnId)
+    ) {
+      if (addInFirstColumnIfColumnDoesntExist) {
+        if (project.columnOrder.length === 0) {
+          throw new HttpException(
+            'Project doesnt have a column',
+            HttpStatus.NOT_FOUND,
+          );
+        }
+        columnId = project.columnOrder[0];
+      } else throw new HttpException('Column not found', HttpStatus.NOT_FOUND);
+    }
+    return {
+      [project.id]: {
+        cards: [...project.cards, cardId],
+        columnDetails: {
+          ...project.columnDetails,
+          [columnId]: {
+            ...project.columnDetails[columnId],
+            cards: [
+              cardId.toString(),
+              ...project.columnDetails[columnId].cards,
+            ],
+          },
+        },
+      },
     };
   }
 
@@ -162,10 +214,7 @@ export class CardsProjectService {
     // Remove Card from column
     const columnDetails = project.columnDetails;
     for (const cardId of cardIds) {
-      console.log(cardId);
-
       const sourceCardLoc = this.findCardLocationInProject(project, cardId);
-      console.log(sourceCardLoc);
       columnDetails[sourceCardLoc.columnId].cards.splice(
         sourceCardLoc.cardIndex,
         1,

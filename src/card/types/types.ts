@@ -10,7 +10,7 @@ export type WorkUnit = {
   /**
    * The persone thats adding he subission or revision
    */
-  user: ObjectId;
+  user: string;
   /**
    * The type of submission object (e.g. submission, revision instructions)
    */
@@ -20,6 +20,11 @@ export type WorkUnit = {
    * The submission content
    */
   content: string;
+
+  /**
+   * The submission pr if any
+   */
+  pr?: string;
 
   createdAt: Date;
   updatedAt: Date;
@@ -71,4 +76,14 @@ export type ApplicationUnit = {
 
 export type ApplicationDetails = {
   [key: string]: ApplicationUnit;
+};
+
+export type Diff = {
+  added: Partial<Card>;
+  deleted: Partial<Card>;
+  updated: Partial<Card>;
+};
+
+export type MappedDiff = {
+  [id: string]: Diff;
 };

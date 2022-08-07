@@ -4,9 +4,10 @@ import {
   Injectable,
   InternalServerErrorException,
 } from '@nestjs/common';
+import { EventBus } from '@nestjs/cqrs';
 import { AutomationService } from 'src/automation/automation.service';
 import { CirclesRepository } from 'src/circle/circles.repository';
-import { DataStructureManipulationService } from 'src/common/dataStructureManipulation.service';
+import { CommonTools } from 'src/common/common.service';
 import { GlobalDocumentUpdate } from 'src/common/types/update.type';
 import { CardsProjectService } from 'src/project/cards.project.service';
 import { DetailedProjectResponseDto } from 'src/project/dto/detailed-project-response.dto';
@@ -15,33 +16,47 @@ import { ProjectsRepository } from 'src/project/project.repository';
 import { ProjectService } from 'src/project/project.service';
 import { MappedProject } from 'src/project/types/types';
 import { RequestProvider } from 'src/users/user.provider';
+import { UsersRepository } from 'src/users/users.repository';
+import { UsersService } from 'src/users/users.service';
 import { ActivityBuilder } from '../activity.builder';
 import { CardsRepository } from '../cards.repository';
 import { CardsService } from '../cards.service';
 import { DetailedCardResponseDto } from '../dto/detailed-card-response-dto';
-import { UpdateCardRequestDto } from '../dto/update-card-request.dto';
+import {
+  MultiCardCloseDto,
+  MultiCardCloseWithSlugDto,
+  UpdateCardRequestDto,
+} from '../dto/update-card-request.dto';
 import { UpdatePaymentInfoDto } from '../dto/update-payment-info.dto';
+import { CardUpdatedEvent } from '../events/impl';
 import { CardsPaymentService } from '../payment.cards.service';
 import { ResponseBuilder } from '../response.builder';
-import { MappedCard } from '../types/types';
+import { MappedCard, MappedDiff } from '../types/types';
+import { UserCardsService } from '../user.cards.service';
 import { CardValidationService } from '../validation.cards.service';
+
+const globalUpdate = {
+  card: {},
+  project: {},
+} as GlobalDocumentUpdate;
 
 @Injectable()
 export class CardCommandHandler {
   constructor(
     private readonly requestProvider: RequestProvider,
     private readonly cardsRepository: CardsRepository,
-    private readonly activityBuilder: ActivityBuilder,
-    private readonly circleRepository: CirclesRepository,
     private readonly projectService: ProjectService,
     private readonly cardsProjectService: CardsProjectService,
-    private readonly datastructureManipulationService: DataStructureManipulationService,
-    private readonly validationService: CardValidationService,
+    private readonly commonTools: CommonTools,
     private readonly responseBuilder: ResponseBuilder,
     private readonly cardsService: CardsService,
     private readonly projectRepository: ProjectsRepository,
     private readonly automationService: AutomationService,
     private readonly cardPaymentService: CardsPaymentService,
+    private readonly userRepository: UsersRepository,
+    private readonly userCardsService: UserCardsService,
+    private readonly circleRepository: CirclesRepository,
+    private readonly eventBus: EventBus,
   ) {}
 
   async update(
@@ -49,18 +64,21 @@ export class CardCommandHandler {
     updateCardDto: UpdateCardRequestDto,
   ): Promise<DetailedCardResponseDto> {
     try {
-      const card = this.requestProvider.card;
-      const project = this.requestProvider.project;
-
-      const globalUpdate = {
-        card: {},
-        project: {},
-      } as GlobalDocumentUpdate;
-
+      const card =
+        this.requestProvider.card || (await this.cardsRepository.findById(id));
+      const project =
+        this.requestProvider.project ||
+        (await this.projectRepository.findById(card.project as string));
+      const circle =
+        this.requestProvider.circle ||
+        (await this.circleRepository.findById(card.circle as string));
       const cardUpdate = this.cardsService.update(card, project, updateCardDto);
 
-      const globalUpdateAfterAutomation =
-        this.automationService.handleAutomation(card, project, cardUpdate[id]);
+      const automationUpdate = this.automationService.handleAutomation(
+        card,
+        project,
+        cardUpdate[id],
+      );
 
       let projectUpdate = {};
       if (updateCardDto.columnId || updateCardDto.cardIndex) {
@@ -74,31 +92,45 @@ export class CardCommandHandler {
         } as ReorderCardReqestDto);
       }
 
-      globalUpdate.project[project.id] =
-        this.datastructureManipulationService.mergeObjects(
-          globalUpdate.project[project.id],
-          globalUpdateAfterAutomation.project[project.id],
-          projectUpdate[project.id],
-        ) as MappedProject;
+      globalUpdate.project[project.id] = this.commonTools.mergeObjects(
+        globalUpdate.project[project.id],
+        automationUpdate.project[project.id],
+        projectUpdate[project.id],
+      ) as MappedProject;
 
-      globalUpdate.card[id] =
-        this.datastructureManipulationService.mergeObjects(
-          globalUpdate.card[id],
-          globalUpdateAfterAutomation.card[id],
-          cardUpdate[id],
-        ) as MappedCard;
+      globalUpdate.card[id] = this.commonTools.mergeObjects(
+        globalUpdate.card[id],
+        automationUpdate.card[id],
+        cardUpdate[id],
+      ) as MappedCard;
 
-      const acknowledgment = await this.cardsRepository.bundleUpdatesAndExecute(
-        globalUpdate.card,
+      const diff = this.cardsService.getDifference(card, globalUpdate.card[id]);
+
+      /** Doing it like this so it can support multiple cards, sub cards in the future */
+      const userUpdate = await this.userCardsService.updateUserCards(
+        {
+          [id]: diff,
+        } as MappedDiff,
+        this.commonTools.objectify([card], 'id'),
       );
+
+      const cardUpdateAcknowledgment =
+        await this.cardsRepository.bundleUpdatesAndExecute(globalUpdate.card);
 
       const projectUpdateAcknowledgment =
         await this.projectRepository.bundleUpdatesAndExecute(
           globalUpdate.project,
         );
 
+      const userUpdateAcknowledgment =
+        await this.userRepository.bundleUpdatesAndExecute(userUpdate);
+
       const resultingCard =
         await this.cardsRepository.getCardWithPopulatedReferences(id);
+
+      this.eventBus.publish(
+        new CardUpdatedEvent(resultingCard, diff, circle.slug, project.slug),
+      );
       return this.responseBuilder.enrichResponse(resultingCard);
     } catch (error) {
       console.log(error);
@@ -129,11 +161,6 @@ export class CardCommandHandler {
           HttpStatus.INTERNAL_SERVER_ERROR,
         );
       }
-      const globalUpdate = {
-        card: {},
-        project: {},
-      } as GlobalDocumentUpdate;
-
       /** Get all the cards with all their children */
       const cards =
         await this.cardsRepository.getCardWithAllChildrenForMultipleCards(
@@ -156,23 +183,20 @@ export class CardCommandHandler {
             child,
             updatePaymentInfo,
           );
-          const globalUpdateAfterAutomation =
-            this.automationService.handleAutomation(
-              child,
-              project,
-              childCardUpdate[child.id],
-            );
-          globalUpdate.card[child.id] =
-            this.datastructureManipulationService.mergeObjects(
-              globalUpdate.card[child.id],
-              globalUpdateAfterAutomation.card[child.id],
-              childCardUpdate[child.id],
-            );
-          globalUpdate.project[project.id] =
-            this.datastructureManipulationService.mergeObjects(
-              globalUpdate.project[project.id],
-              globalUpdateAfterAutomation.project[project.id],
-            );
+          const automationUpdate = this.automationService.handleAutomation(
+            child,
+            project,
+            childCardUpdate[child.id],
+          );
+          globalUpdate.card[child.id] = this.commonTools.mergeObjects(
+            globalUpdate.card[child.id],
+            automationUpdate.card[child.id],
+            childCardUpdate[child.id],
+          );
+          globalUpdate.project[project.id] = this.commonTools.mergeObjects(
+            globalUpdate.project[project.id],
+            automationUpdate.project[project.id],
+          );
         }
 
         const parentCardUpdate = this.cardPaymentService.updatePaymentInfo(
@@ -180,24 +204,21 @@ export class CardCommandHandler {
           updatePaymentInfo,
         );
 
-        const globalUpdateAfterAutomation =
-          this.automationService.handleAutomation(
-            card,
-            project,
-            parentCardUpdate[card.id],
-          );
-        globalUpdate.card[card.id] =
-          this.datastructureManipulationService.mergeObjects(
-            globalUpdate.card[card.id],
-            globalUpdateAfterAutomation.card[card.id],
-            parentCardUpdate[card.id],
-          );
+        const automationUpdate = this.automationService.handleAutomation(
+          card,
+          project,
+          parentCardUpdate[card.id],
+        );
+        globalUpdate.card[card.id] = this.commonTools.mergeObjects(
+          globalUpdate.card[card.id],
+          automationUpdate.card[card.id],
+          parentCardUpdate[card.id],
+        );
 
-        globalUpdate.project[project.id] =
-          this.datastructureManipulationService.mergeObjects(
-            globalUpdate.project[project.id],
-            globalUpdateAfterAutomation.project[project.id],
-          );
+        globalUpdate.project[project.id] = this.commonTools.mergeObjects(
+          globalUpdate.project[project.id],
+          automationUpdate.project[project.id],
+        );
       }
 
       // /** Mongo only returns an acknowledgment on bulk write and not the updated records itself */
@@ -214,6 +235,53 @@ export class CardCommandHandler {
       console.log(error);
       throw new InternalServerErrorException(
         'Failed updating payment info',
+        error.message,
+      );
+    }
+  }
+
+  async closeMultipleCards(
+    multiCardCloseDto: MultiCardCloseWithSlugDto,
+  ): Promise<boolean> {
+    try {
+      const cards = await this.cardsRepository.findAll({
+        slug: { $in: multiCardCloseDto.slugs },
+      });
+      const project = await this.projectRepository.findById(
+        cards[0].project as string,
+      );
+
+      for (const card of cards) {
+        const cardUpdate = this.cardsService.closeCard(card);
+        const automationUpdate = this.automationService.handleAutomation(
+          card,
+          project,
+          cardUpdate[card.id],
+        );
+        globalUpdate.card[card.id] = this.commonTools.mergeObjects(
+          globalUpdate.card[card.id],
+          automationUpdate.card[card.id],
+          cardUpdate[card.id],
+        );
+        globalUpdate.project[project.id] = this.commonTools.mergeObjects(
+          globalUpdate.project[project.id],
+          automationUpdate.project[project.id],
+        );
+      }
+
+      const cardUpdateAcknowledgment =
+        await this.cardsRepository.bundleUpdatesAndExecute(globalUpdate.card);
+
+      const projectUpdateAcknowledgment =
+        await this.projectRepository.bundleUpdatesAndExecute(
+          globalUpdate.project,
+        );
+
+      return true;
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException(
+        'Failed closing cards',
         error.message,
       );
     }

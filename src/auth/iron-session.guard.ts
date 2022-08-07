@@ -72,3 +72,42 @@ export class PublicViewAuthGuard implements CanActivate {
     }
   }
 }
+
+@Injectable()
+export class GithubBotAuthGuard implements CanActivate {
+  constructor(private readonly sessionAuthGuard: SessionAuthGuard) {}
+
+  async canActivate(context: ExecutionContext): Promise<boolean> {
+    const request = context.switchToHttp().getRequest();
+    try {
+      const githubId = request.body.githubId;
+      request.user = await this.sessionAuthGuard.validateUser(
+        request.session.siwe?.address,
+      );
+      return true;
+    } catch (error) {
+      request.session.destroy();
+      throw new HttpException({ message: error }, 422);
+    }
+  }
+}
+
+@Injectable()
+export class ConnectedGithubAuthGuard implements CanActivate {
+  constructor(private readonly sessionAuthGuard: SessionAuthGuard) {}
+
+  async canActivate(context: ExecutionContext): Promise<boolean> {
+    const request = context.switchToHttp().getRequest();
+    try {
+      const githubId = request.body.githubId;
+      request.user = await this.sessionAuthGuard.validateUser(
+        request.session.siwe?.address,
+      );
+      if (!request.user) return false;
+      return true;
+    } catch (error) {
+      request.session.destroy();
+      throw new HttpException({ message: error }, 422);
+    }
+  }
+}

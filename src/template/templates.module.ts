@@ -1,7 +1,7 @@
 import { forwardRef, Module } from '@nestjs/common';
 import { TypegooseModule } from 'nestjs-typegoose';
 import { CirclesModule } from 'src/circle/circles.module';
-import { DataStructureManipulationService } from 'src/common/dataStructureManipulation.service';
+import { CommonTools } from 'src/common/common.service';
 import { ProjectModule } from 'src/project/project.module';
 import { RequestProvider } from 'src/users/user.provider';
 import { EthAddressModule } from 'src/_eth-address/_eth-address.module';
@@ -22,7 +22,7 @@ import { TemplatesService } from './templates.service';
     TemplatesRepository,
     TemplatesService,
     RequestProvider,
-    DataStructureManipulationService,
+    CommonTools,
   ],
   exports: [TemplatesRepository, TemplatesService, TemplatesModule],
 })
