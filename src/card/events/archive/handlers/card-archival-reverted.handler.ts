@@ -4,6 +4,7 @@ import {
   EventsHandler,
   IEventHandler,
 } from '@nestjs/cqrs';
+import { LoggingService } from 'src/logging/logging.service';
 import { AddItemsCommand as AddItemsToUserCommand } from 'src/users/commands/impl';
 import { CardArchivalRevertedEvent } from '../impl/card-archived.event';
 
@@ -14,40 +15,47 @@ export class CardArchivalRevertedEventHandler
   constructor(
     private readonly eventBus: EventBus,
     private readonly commandBus: CommandBus,
-  ) {}
+    private readonly logger: LoggingService,
+  ) {
+    this.logger.setContext('CardArchivalRevertedEventHandler');
+  }
 
   async handle(event: CardArchivalRevertedEvent) {
-    console.log('CardArchivalRevertedEventHandler');
-    const { cards } = event;
-    for (const card of cards) {
-      for (const assignee of card.assignee) {
-        await this.commandBus.execute(
-          new AddItemsToUserCommand(
-            [
-              {
-                fieldName: 'assignedCards',
-                itemIds: [card._id.toString()],
-              },
-            ],
-            null,
-            assignee,
-          ),
-        );
+    try {
+      console.log('CardArchivalRevertedEventHandler');
+      const { cards } = event;
+      for (const card of cards) {
+        for (const assignee of card.assignee) {
+          await this.commandBus.execute(
+            new AddItemsToUserCommand(
+              [
+                {
+                  fieldName: 'assignedCards',
+                  itemIds: [card._id.toString()],
+                },
+              ],
+              null,
+              assignee,
+            ),
+          );
+        }
+        for (const reviewer of card.reviewer) {
+          await this.commandBus.execute(
+            new AddItemsToUserCommand(
+              [
+                {
+                  fieldName: 'reviewingCards',
+                  itemIds: [card._id.toString()],
+                },
+              ],
+              null,
+              reviewer,
+            ),
+          );
+        }
       }
-      for (const reviewer of card.reviewer) {
-        await this.commandBus.execute(
-          new AddItemsToUserCommand(
-            [
-              {
-                fieldName: 'reviewingCards',
-                itemIds: [card._id.toString()],
-              },
-            ],
-            null,
-            reviewer,
-          ),
-        );
-      }
+    } catch (error) {
+      this.logger.error(`${error.message}`);
     }
   }
 }
