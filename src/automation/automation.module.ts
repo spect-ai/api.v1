@@ -1,4 +1,5 @@
 import { forwardRef, Module } from '@nestjs/common';
+import { CqrsModule } from '@nestjs/cqrs';
 import { CardsModule } from 'src/card/cards.module';
 import { CommonTools } from 'src/common/common.service';
 import { CardsProjectService } from 'src/project/cards.project.service';
@@ -8,6 +9,8 @@ import { EthAddressModule } from 'src/_eth-address/_eth-address.module';
 import { EthAddressService } from 'src/_eth-address/_eth-address.service';
 import { AutomationController } from './automation.controller';
 import { AutomationService } from './automation.service';
+import { CommandHandlers } from './commands/handlers';
+import { QueryHandlers } from './queries/handlers';
 
 @Module({
   imports: [
@@ -15,6 +18,7 @@ import { AutomationService } from './automation.service';
     RequestProvider,
     forwardRef(() => CardsModule),
     forwardRef(() => ProjectModule),
+    CqrsModule,
   ],
   controllers: [AutomationController],
   providers: [
@@ -23,6 +27,8 @@ import { AutomationService } from './automation.service';
     CardsProjectService,
     CommonTools,
     RequestProvider,
+    ...CommandHandlers,
+    ...QueryHandlers,
   ],
 })
 export class AutomationModule {}

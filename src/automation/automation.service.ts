@@ -1,13 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import { CardsRepository } from 'src/card/cards.repository';
 import { CardsService } from 'src/card/cards.service';
-import { Card } from 'src/card/model/card.model';
+import { Card, ExtendedCard } from 'src/card/model/card.model';
 import { CardsProjectService } from 'src/project/cards.project.service';
 import { Project } from 'src/project/model/project.model';
 import { ProjectsRepository } from 'src/project/project.repository';
 import { ProjectService } from 'src/project/project.service';
 import { GlobalDocumentUpdate } from 'src/common/types/update.type';
-import { ActionValue, Condition } from './types/types';
+import {
+  OldActionValue as ActionValue,
+  OldCondition as Condition,
+} from './types/types';
 import { RequestProvider } from 'src/users/user.provider';
 import diff from 'fast-array-diff';
 import { diff as objDiff } from 'deep-object-diff';
@@ -191,6 +194,18 @@ export class AutomationService {
     return true;
   }
 
+  // satisfiesSpecialConditions(card: Card, conditions: Condition[]): boolean {
+  //   for (const condition of conditions) {
+  //     for (const [key, val] of Object.entries(condition.key)) {
+  //       if (val === 'allChildCardsClosed') {
+  //         let cardWithChildren: ExtendedCard;
+  //         return this.allChildCardsClosed(cardWithChildren, card);
+  //       }
+  //     }
+  //   }
+  //   return true;
+  // }
+
   handleAutomation(
     card: Card,
     project: Project,
@@ -201,48 +216,48 @@ export class AutomationService {
       project: {},
     };
     for (const automationId of project.automationOrder) {
-      const automation = project.automations[automationId];
-      console.log('   ');
-      console.log(automation.name);
-      const triggerPropertyArray = automation.triggerProperty.split('.');
-      if (
-        !this.satisfiesValues(
-          card,
-          update,
-          triggerPropertyArray,
-          automation.value,
-        )
-      )
-        continue;
-      console.log('satisfies values');
-      if (!this.satisfiesConditions(card, automation.conditions)) continue;
-      console.log('satisfies conditions');
-      for (const action of automation.actions) {
-        const properties = action.property.split('.');
-        const value = action.value;
-        if (properties[0] === 'columnId') {
-          globalUpdate = this.takeColumnAction(
-            globalUpdate,
-            value,
-            card,
-            project,
-          );
-        } else if (properties[0] === 'status') {
-          globalUpdate = this.takeStatusAction(
-            globalUpdate,
-            properties,
-            value,
-            card,
-          );
-        } else {
-          globalUpdate = this.takeGeneralFieldAction(
-            globalUpdate,
-            properties[0],
-            value,
-            card,
-          );
-        }
-      }
+      // const automation = project.automations[automationId];
+      // console.log('   ');
+      // console.log(automation.name);
+      // const triggerPropertyArray = automation.triggerProperty.split('.');
+      // if (
+      //   !this.satisfiesValues(
+      //     card,
+      //     update,
+      //     triggerPropertyArray,
+      //     automation.value,
+      //   )
+      // )
+      //   continue;
+      // console.log('satisfies values');
+      // if (!this.satisfiesConditions(card, automation.conditions)) continue;
+      // console.log('satisfies conditions');
+      // for (const action of automation.actions) {
+      //   const properties = action.property.split('.');
+      //   const value = action.value;
+      //   if (properties[0] === 'columnId') {
+      //     globalUpdate = this.takeColumnAction(
+      //       globalUpdate,
+      //       value,
+      //       card,
+      //       project,
+      //     );
+      //   } else if (properties[0] === 'status') {
+      //     globalUpdate = this.takeStatusAction(
+      //       globalUpdate,
+      //       properties,
+      //       value,
+      //       card,
+      //     );
+      //   } else {
+      //     globalUpdate = this.takeGeneralFieldAction(
+      //       globalUpdate,
+      //       properties[0],
+      //       value,
+      //       card,
+      //     );
+      //   }
+      //}
     }
     return globalUpdate;
   }
@@ -373,5 +388,14 @@ export class AutomationService {
       );
     }
     return value;
+  }
+
+  allChildCardsClosed(card: ExtendedCard, currCard: Card): boolean {
+    for (const childCard of card.flattenedChildren) {
+      if (childCard.status.active && childCard.id !== currCard.id) {
+        return false;
+      }
+    }
+    return true;
   }
 }

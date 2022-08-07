@@ -5,7 +5,7 @@ import { CreateCardRequestDto } from 'src/card/dto/create-card-request.dto';
 import { Card } from 'src/card/model/card.model';
 import { Circle } from 'src/circle/model/circle.model';
 import { CommonTools } from 'src/common/common.service';
-import { MappedItem } from 'src/common/interfaces';
+import { MappedItem, MappedPartialItem } from 'src/common/interfaces';
 import { Activity } from 'src/common/types/activity.type';
 import { v4 as uuidv4 } from 'uuid';
 import { CreateCardCommand } from '../impl';
@@ -140,7 +140,10 @@ export class CreateCardCommandHandler
     return cards;
   }
 
-  addToParentCard(cards: Card[] | Card, parentCard: Card): MappedItem<Card> {
+  addToParentCard(
+    cards: Card[] | Card,
+    parentCard: Card,
+  ): MappedPartialItem<Card> {
     if (!parentCard) return {};
     if (!Array.isArray(cards)) cards = [cards];
     const cardIds = cards.map((card) => card.id);

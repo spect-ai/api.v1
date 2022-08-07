@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import mongodb from 'mongodb';
-import { UpdateQuery } from 'mongoose';
+import { FilterQuery, UpdateQuery } from 'mongoose';
 import { InjectModel } from 'nestjs-typegoose';
 import { BaseRepository } from 'src/base/base.repository';
 import { Project } from './model/project.model';
@@ -151,6 +151,24 @@ export class ProjectsRepository extends BaseRepository<Project> {
     selectedFields?: Record<string, unknown>,
   ): Promise<Project> {
     const query = this.findById(id, {
+      projection: selectedFields || {},
+    });
+    let populatedFields = defaultPopulate;
+    if (customPopulate) populatedFields = customPopulate;
+
+    Object.keys(populatedFields).forEach((key) => {
+      query.populate(key, populatedFields[key]);
+    });
+
+    return await query.exec();
+  }
+
+  async getMultipleProjects(
+    filter: FilterQuery<Project>,
+    customPopulate?: PopulatedProjectFields,
+    selectedFields?: Record<string, unknown>,
+  ): Promise<Project[]> {
+    const query = this.findAll(filter, {
       projection: selectedFields || {},
     });
     let populatedFields = defaultPopulate;

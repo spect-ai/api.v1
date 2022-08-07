@@ -1,9 +1,15 @@
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { Project } from 'src/project/model/project.model';
 import { ProjectsRepository } from 'src/project/project.repository';
-import { GetProjectByIdQuery, GetProjectBySlugQuery } from '../impl';
+import {
+  GetMultipleProjectsQuery,
+  GetProjectByIdQuery,
+  GetProjectBySlugQuery,
+} from '../impl';
 import { LoggingService } from 'src/logging/logging.service';
 import { InternalServerErrorException } from '@nestjs/common';
+import { CommonTools } from 'src/common/common.service';
+import { MappedItem } from 'src/common/interfaces';
 
 @QueryHandler(GetProjectByIdQuery)
 export class GetProjectByIdQueryHandler
@@ -63,6 +69,43 @@ export class GetProjectBySlugQueryHandler
       );
       throw new InternalServerErrorException(
         'Failed while getting project using slug',
+        error.message,
+      );
+    }
+  }
+}
+
+@QueryHandler(GetMultipleProjectsQuery)
+export class GetMultipleProjectsQueryHandler
+  implements IQueryHandler<GetMultipleProjectsQuery>
+{
+  constructor(
+    private readonly projectRepository: ProjectsRepository,
+    private readonly logger: LoggingService,
+    private readonly commonTools: CommonTools,
+  ) {}
+
+  async execute(
+    query: GetMultipleProjectsQuery,
+  ): Promise<Project[] | MappedItem<Project>> {
+    try {
+      const projects = await this.projectRepository.getMultipleProjects(
+        query.filter,
+        query.customPopulate,
+        query.selectedFields,
+      );
+      if (query.objectify) {
+        return this.commonTools.objectify(projects, 'id');
+      }
+      return projects;
+    } catch (error) {
+      console.log(this.logger);
+      this.logger.error(
+        `Failed while getting multiple projects with error: ${error.message}`,
+        query,
+      );
+      throw new InternalServerErrorException(
+        'Failed while getting multiple projects',
         error.message,
       );
     }

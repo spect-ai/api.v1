@@ -69,6 +69,7 @@ export class GetMultipleCardsWithChildrenQueryHandler
   async execute(
     query: GetMultipleCardsWithChildrenQuery,
   ): Promise<ExtendedCard[]> {
+    console.log('GetMultipleCardsWithChildrenQueryHandler');
     const cards =
       await this.cardRepository.getCardWithAllChildrenForMultipleCards(
         query.ids,

@@ -1,11 +1,10 @@
-import { FilterQuery } from 'mongoose';
-import { Card } from 'src/card/model/card.model';
+import { UpdatePaymentInfoDto } from 'src/card/dto/update-payment-info.dto';
+import { ExtendedCard } from 'src/card/model/card.model';
 
 export class UpdatePaymentCommand {
   constructor(
+    public readonly updatePaymentInfoDto: UpdatePaymentInfoDto,
     public readonly commit = true,
     public readonly objectify = false,
-    public readonly filter?: FilterQuery<Card>,
-    public readonly cards?: Card[],
   ) {}
 }

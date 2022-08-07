@@ -10,7 +10,7 @@ import { UpdateCardRequestDto } from 'src/card/dto/update-card-request.dto';
 import { Card } from 'src/card/model/card.model';
 import { Diff } from 'src/card/types/types';
 import { CommonTools } from 'src/common/common.service';
-import { MappedItem } from 'src/common/interfaces';
+import { MappedItem, MappedPartialItem } from 'src/common/interfaces';
 import { Project } from 'src/project/model/project.model';
 import { UpdateCardCommand } from '../impl/update-card.command';
 @CommandHandler(UpdateCardCommand)
@@ -77,7 +77,7 @@ export class UpdateCardCommandHandler
     card: Card,
     project: Project,
     updateCardDto: UpdateCardRequestDto,
-  ): MappedItem<Card> {
+  ): MappedPartialItem<Card> {
     // const activities = this.activityBuilder.buildUpdatedCardActivity(
     //   updateCardDto,
     //   card,

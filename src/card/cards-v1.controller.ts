@@ -8,14 +8,17 @@ import {
   SetMetadata,
   UseGuards,
 } from '@nestjs/common';
-import { QueryBus } from '@nestjs/cqrs';
+import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { ApiTags } from '@nestjs/swagger';
 import { CardAuthGuard, CreateNewCardAuthGuard } from 'src/auth/card.guard';
+import { SessionAuthGuard } from 'src/auth/iron-session.guard';
 import { ObjectIdDto } from 'src/common/dtos/object-id.dto';
 import { DetailedProjectResponseDto } from 'src/project/dto/detailed-project-response.dto';
 import { CardsV1Service } from './cards-v1.service';
+import { UpdatePaymentCommand } from './commands/impl';
 import { CreateCardRequestDto } from './dto/create-card-request.dto';
 import { DetailedCardResponseDto } from './dto/detailed-card-response-dto';
+import { UpdatePaymentInfoDto } from './dto/update-payment-info.dto';
 import { GetCardByIdQuery } from './queries/impl';
 
 @Controller('card/v1')
@@ -24,6 +27,7 @@ export class CardsV1Controller {
   constructor(
     private readonly cardsService: CardsV1Service,
     private readonly queryBus: QueryBus,
+    private readonly commandBus: CommandBus,
   ) {}
 
   @Get('/:id')
@@ -57,5 +61,15 @@ export class CardsV1Controller {
     @Param() params: ObjectIdDto,
   ): Promise<DetailedProjectResponseDto> {
     return await this.cardsService.revertArchival(params.id);
+  }
+
+  // @UseGuards(SessionAuthGuard)
+  @Patch('/updatePaymentInfoAndClose')
+  async updatePaymentInfoAndClose(
+    @Body() updatePaymentInfoDto: UpdatePaymentInfoDto,
+  ): Promise<DetailedProjectResponseDto> {
+    return await this.commandBus.execute(
+      new UpdatePaymentCommand(updatePaymentInfoDto, true, true),
+    );
   }
 }

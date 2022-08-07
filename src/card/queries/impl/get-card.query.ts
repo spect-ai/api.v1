@@ -1,3 +1,5 @@
+import { FilterQuery } from 'mongoose';
+import { Card } from 'src/card/model/card.model';
 import { PopulatedCardFields } from 'src/card/types/types';
 
 export class GetCardByIdQuery {
