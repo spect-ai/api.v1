@@ -1,20 +1,16 @@
 import { InternalServerErrorException } from '@nestjs/common';
 import { CommandHandler, ICommandHandler, QueryBus } from '@nestjs/cqrs';
-import { LoggingService } from 'src/logging/logging.service';
+import { GetTriggeredAutomationForMultipleCardsQuery } from 'src/automation/queries/impl/get-triggered-automations.query';
 import { CardsRepository } from 'src/card/cards.repository';
-import { Card, ExtendedCard } from 'src/card/model/card.model';
-import { UpdatePaymentCommand } from '../impl';
-import { MappedItem, MappedPartialItem } from 'src/common/interfaces';
-import { GlobalDocumentUpdate } from 'src/common/types/update.type';
-import { Project } from 'src/project/model/project.model';
 import { UpdatePaymentInfoDto } from 'src/card/dto/update-payment-info.dto';
+import { Card, ExtendedCard } from 'src/card/model/card.model';
 import { GetMultipleCardsWithChildrenQuery } from 'src/card/queries/impl';
-import { GetMultipleProjectsQuery } from 'src/project/queries/impl';
-import {
-  GetTriggeredAutomationForMultipleCardsQuery,
-  GetTriggeredAutomationsQuery,
-} from 'src/automation/queries/impl/get-triggered-automations.query';
 import { CommonTools } from 'src/common/common.service';
+import { MappedItem, MappedPartialItem } from 'src/common/interfaces';
+import { LoggingService } from 'src/logging/logging.service';
+import { Project } from 'src/project/model/project.model';
+import { GetMultipleProjectsQuery } from 'src/project/queries/impl';
+import { UpdatePaymentCommand } from '../impl';
 
 @CommandHandler(UpdatePaymentCommand)
 export class UpdatePaymentCommandHandler

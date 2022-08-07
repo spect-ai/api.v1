@@ -7,11 +7,8 @@ import { AddCardsCommand } from 'src/project/commands/impl';
 import { DetailedProjectResponseDto } from 'src/project/dto/detailed-project-response.dto';
 import { GetProjectByIdQuery } from 'src/project/queries/impl';
 import { RequestProvider } from 'src/users/user.provider';
-import { ArchiveCardByIdCommand } from './commands/archive/impl/archive-card.command';
-import {
-  CreateCardCommand,
-  RevertArchiveCardByIdCommand,
-} from './commands/impl';
+import { ArchiveCardCommand } from './commands/archive/impl/archive-card.command';
+import { CreateCardCommand, RevertArchivedCardCommand } from './commands/impl';
 import { CreateCardRequestDto } from './dto/create-card-request.dto';
 import { DetailedCardResponseDto } from './dto/detailed-card-response-dto';
 import {
@@ -103,7 +100,7 @@ export class CardsV1Service {
   async archive(id: string): Promise<DetailedProjectResponseDto> {
     try {
       const { project, cards } = await this.commandBus.execute(
-        new ArchiveCardByIdCommand(id),
+        new ArchiveCardCommand(id, null),
       );
       this.eventBus.publish(new CardsArchivedEvent(cards));
       return {
@@ -125,7 +122,7 @@ export class CardsV1Service {
   async revertArchival(id: string): Promise<DetailedProjectResponseDto> {
     try {
       const { project, cards } = await this.commandBus.execute(
-        new RevertArchiveCardByIdCommand(id),
+        new RevertArchivedCardCommand(id),
       );
       this.eventBus.publish(new CardArchivalRevertedEvent(cards));
       return {

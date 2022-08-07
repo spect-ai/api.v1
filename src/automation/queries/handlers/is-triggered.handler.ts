@@ -1,13 +1,13 @@
 import { IQueryHandler, QueryHandler, QueryBus } from '@nestjs/cqrs';
 import {
-  ColumnChangeTrigger,
+  BasicTrigger,
   MemberChangeTrigger,
   StatusChangeTrigger,
 } from 'src/automation/types/types';
 import { CommonTools } from 'src/common/common.service';
 import {
   IsBasicChangeTriggeredQuery,
-  IsColumnChangeTriggeredQuery,
+  IsDeadlineChangeTriggeredQuery,
   IsMemberChangeTriggeredQuery,
   IsStatusChangeTriggeredQuery,
 } from '../impl/is-triggered.query';
@@ -57,10 +57,10 @@ export class IsMemberChangeTriggeredQueryHandler
     console.log('IsMemberChangeTriggeredQueryHandler');
 
     const { card, update, trigger } = query;
-    if (!update[memberType]) return false;
 
     const memberType =
       trigger.id === 'assigneeChange' ? 'assignee' : 'reviewer';
+    if (!update[memberType]) return false;
 
     const from = (trigger.item as MemberChangeTrigger).from;
     const to = (trigger.item as MemberChangeTrigger).to;
@@ -127,8 +127,8 @@ export class IsBasicChangeTriggeredQueryHandler
     console.log('IsBasicChangeTriggeredQuery');
 
     const { card, update, trigger } = query;
-    const from = (trigger.item as ColumnChangeTrigger).from;
-    const to = (trigger.item as ColumnChangeTrigger).to;
+    const from = (trigger.item as BasicTrigger).from;
+    const to = (trigger.item as BasicTrigger).to;
     if (!from && !to) return false;
     if (from && (from !== card.columnId || from === update.columnId)) {
       return false;
@@ -137,6 +137,19 @@ export class IsBasicChangeTriggeredQueryHandler
     if (to && (to !== update.columnId || to === card.columnId)) {
       return false;
     }
+
+    return true;
+  }
+}
+
+@QueryHandler(IsDeadlineChangeTriggeredQuery)
+export class IsDeadlineChangeTriggeredQueryHandler
+  implements IQueryHandler<IsDeadlineChangeTriggeredQuery>
+{
+  constructor(private readonly queryBus: QueryBus) {}
+
+  async execute(query: IsDeadlineChangeTriggeredQuery): Promise<boolean> {
+    console.log('IsDeadlineChangeTriggeredQuery');
 
     return true;
   }

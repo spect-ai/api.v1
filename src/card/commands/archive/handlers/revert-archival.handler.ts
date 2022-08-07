@@ -9,11 +9,11 @@ import { Card } from 'src/card/model/card.model';
 import { AddCardsCommand, RemoveCardsCommand } from 'src/project/commands/impl';
 import { Project } from 'src/project/model/project.model';
 import { AddItemsCommand } from '../../items/impl/add-items.command';
-import { RevertArchiveCardByIdCommand } from '../impl/revert-archival.command';
+import { RevertArchivedCardCommand } from '../impl/revert-archival.command';
 
-@CommandHandler(RevertArchiveCardByIdCommand)
-export class RevertArchiveCardByIdCommandHandler
-  implements ICommandHandler<RevertArchiveCardByIdCommand>
+@CommandHandler(RevertArchivedCardCommand)
+export class RevertArchivedCardCommandHandler
+  implements ICommandHandler<RevertArchivedCardCommand>
 {
   constructor(
     private readonly cardsRepository: CardsRepository,
@@ -21,11 +21,15 @@ export class RevertArchiveCardByIdCommandHandler
   ) {}
 
   async execute(
-    command: RevertArchiveCardByIdCommand,
+    command: RevertArchivedCardCommand,
   ): Promise<{ project: Project; cards: Card[] }> {
     try {
-      const cardWithChildren =
-        await this.cardsRepository.getCardWithAllChildren(command.id);
+      const { id, card } = command;
+      let cardWithChildren = card;
+      if (!cardWithChildren || !cardWithChildren.flattenedChildren)
+        cardWithChildren = await this.cardsRepository.getCardWithAllChildren(
+          id,
+        );
       const cards = [
         ...cardWithChildren.flattenedChildren,
         cardWithChildren,

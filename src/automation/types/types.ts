@@ -150,7 +150,7 @@ export const actionIdToName = {
 export type Action = {
   id: PossibleActionIds;
   name: string;
-  action?:
+  item?:
     | ChangeStatusAction
     | ChangeMemberAction
     | ChangeLabelAction
@@ -162,19 +162,21 @@ export type ChangeStatusAction = {
 };
 
 export type ChangeMemberAction = {
+  set?: string[];
   add?: string[];
   remove?: string[];
   clear?: boolean;
 };
 
 export type ChangeLabelAction = {
+  set?: string[];
   add?: string[];
   remove?: string[];
   clear?: boolean;
 };
 
 export type ChangeSimpleFieldAction = {
-  to: string;
+  to: string | number | boolean | 'Task' | 'Bounty';
 };
 
 export type OldTriggerValue = {
