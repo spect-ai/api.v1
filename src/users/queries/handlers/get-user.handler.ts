@@ -89,11 +89,13 @@ export class UserFieldResolver {
             id: 1,
             avatar: 1,
             username: 1,
+            ethAddress: 1,
           },
           reviewer: {
             id: 1,
             avatar: 1,
             username: 1,
+            ethAddress: 1,
           },
           circle: {
             id: 1,
