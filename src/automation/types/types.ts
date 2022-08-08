@@ -8,7 +8,7 @@ export type Automation = {
   actions: Action[];
 };
 
-export type PossibleTriggerIds =
+export type TriggerId =
   | 'statusChange'
   | 'columnChange'
   | 'priorityChange'
@@ -25,29 +25,13 @@ export type PossibleTriggerIds =
 
 export type Trigger = {
   uuid: string;
-  id: PossibleTriggerIds;
+  id: TriggerId;
   name: string;
   item:
     | StatusChangeTrigger
     | MemberChangeTrigger
     | DeadlineChangeTrigger
     | BasicTrigger;
-};
-
-export const triggerIdToName = {
-  statusChange: 'Status Changes',
-  columnChange: 'Column Changes',
-  priorityChange: 'Priority Changes',
-  deadlineChange: 'Deadline Changes',
-  assigneeChange: 'Assignee Changes',
-  reviewerChange: 'Reviewer Changes',
-  labelChange: 'Label Changes',
-  typeChange: 'Type Changes',
-  cardCreate: 'Card Created',
-  cardArchive: 'Card Archived',
-  cardUnarchive: 'Card Unarchived',
-  allSubCardsClose: 'All Subcards Closed',
-  immediateSubCardsClose: 'Immediate Subcards Closed',
 };
 
 export type StatusChangeTrigger = {
@@ -75,7 +59,23 @@ export type DeadlineChangeTrigger = {
   between?: string[];
 };
 
-export type ConditionIds =
+export const triggerIdToName = {
+  statusChange: 'Status Changes',
+  columnChange: 'Column Changes',
+  priorityChange: 'Priority Changes',
+  deadlineChange: 'Deadline Changes',
+  assigneeChange: 'Assignee Changes',
+  reviewerChange: 'Reviewer Changes',
+  labelChange: 'Label Changes',
+  typeChange: 'Type Changes',
+  cardCreate: 'Card Created',
+  cardArchive: 'Card Archived',
+  cardUnarchive: 'Card Unarchived',
+  allSubCardsClose: 'All Subcards Closed',
+  immediateSubCardsClose: 'Immediate Subcards Closed',
+};
+
+export type ConditionId =
   | 'status'
   | 'column'
   | 'assignee'
@@ -86,11 +86,12 @@ export type ConditionIds =
   | 'deadline';
 
 export type Condition = {
-  id: ConditionIds;
+  id: ConditionId;
   name: string;
+  item?: string;
 };
 
-export type PossibleActionIds =
+export type ActionId =
   | 'changeStatus'
   | 'changeColumn'
   | 'changePriority'
@@ -148,7 +149,7 @@ export const actionIdToName = {
 };
 
 export type Action = {
-  id: PossibleActionIds;
+  id: ActionId;
   name: string;
   item?:
     | ChangeStatusAction

@@ -1,4 +1,5 @@
 import { IQueryHandler, QueryBus, QueryHandler } from '@nestjs/cqrs';
+import { LoggingService } from 'src/logging/logging.service';
 import {
   GetTriggeredAutomationForMultipleCardsQuery,
   GetTriggeredAutomationsQuery,
@@ -36,22 +37,33 @@ export class GetTriggeredAutomationForMultipleCardsQueryHandler
 export class GetTriggeredAutomationsQueryHandler
   implements IQueryHandler<GetTriggeredAutomationsQuery>
 {
-  constructor(private readonly queryBus: QueryBus) {}
+  constructor(
+    private readonly queryBus: QueryBus,
+    private readonly logger: LoggingService,
+  ) {
+    this.logger.setContext('GetTriggeredAutomationsQueryHandler');
+  }
 
   async execute(query: GetTriggeredAutomationsQuery): Promise<string[]> {
-    console.log('GetTriggeredAutomationsQueryHandler');
+    try {
+      console.log('GetTriggeredAutomationsQueryHandler');
 
-    const { card, update, automations } = query;
-    const triggeredAutomationIds = [];
-    for (const automation of automations) {
-      const { trigger } = automation;
-      const query = triggerIdToQueryHandlerMap['statusChange'];
-      const res = await this.queryBus.execute(new query(card, update, trigger));
-      if (res) {
-        triggeredAutomationIds.push(automation.id);
+      const { card, update, automations } = query;
+      const triggeredAutomationIds = [];
+      for (const automation of automations) {
+        const { trigger } = automation;
+        const query = triggerIdToQueryHandlerMap['statusChange'];
+        const res = await this.queryBus.execute(
+          new query(card, update, trigger),
+        );
+        if (res) {
+          triggeredAutomationIds.push(automation.id);
+        }
       }
-    }
 
-    return triggeredAutomationIds;
+      return triggeredAutomationIds;
+    } catch (e) {
+      this.logger.error(e.message);
+    }
   }
 }

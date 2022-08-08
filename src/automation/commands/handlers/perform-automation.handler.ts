@@ -1,9 +1,16 @@
 import { InternalServerErrorException } from '@nestjs/common';
-import { CommandBus, CommandHandler, ICommandHandler } from '@nestjs/cqrs';
+import {
+  CommandBus,
+  CommandHandler,
+  ICommandHandler,
+  QueryBus,
+} from '@nestjs/cqrs';
 import {
   PerformAutomationCommand,
   PerformMultipleAutomationsCommand,
 } from 'src/automation/commands/impl';
+import { GetTriggeredAutomationsQuery } from 'src/automation/queries/impl';
+import { HasSatisfiedConditionsQuery } from 'src/automation/queries/impl/has-satisfied-conditions.query';
 import { CardsRepository } from 'src/card/cards.repository';
 import { Card, ExtendedCard } from 'src/card/model/card.model';
 import { MappedItem } from 'src/common/interfaces';
@@ -16,6 +23,7 @@ export class PerformAutomationCommandHandler
   constructor(
     private readonly cardsRepository: CardsRepository,
     private readonly commandBus: CommandBus,
+    private readonly queryBus: QueryBus,
   ) {}
 
   async execute(command: PerformAutomationCommand): Promise<{
@@ -24,11 +32,40 @@ export class PerformAutomationCommandHandler
   }> {
     try {
       const { update, card, project } = command;
+      const triggeredAutomations = await this.queryBus.execute(
+        new GetTriggeredAutomationsQuery(
+          card,
+          update,
+          Object.values(project.automations),
+        ),
+      );
+      let conditions = [];
+      let actions = [];
+      for (const automationId of triggeredAutomations) {
+        conditions = [
+          ...project.automations[automationId].conditions,
+          ...conditions,
+        ];
+        actions = [...project.automations[automationId].actions, ...actions];
+      }
 
-      return {
-        card,
-        project,
-      };
+      // Need to fetch all the required data to check / update based on the conditions and actions here
+
+      const automationIdsSatisfyingConditions = [];
+      for (const automationId of triggeredAutomations) {
+        const { conditions } = project.automations[automationId];
+        const satisfied = await this.queryBus.execute(
+          new HasSatisfiedConditionsQuery(card, conditions),
+        );
+        if (!satisfied) continue;
+        automationIdsSatisfyingConditions.push(automationId);
+      }
+
+      for (const automationId of automationIdsSatisfyingConditions) {
+        const { actions } = project.automations[automationId];
+      }
+
+      return { card, project };
     } catch (error) {
       throw new InternalServerErrorException(error);
     }

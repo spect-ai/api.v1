@@ -72,3 +72,12 @@ export class RequiredRoleDto {
   @IsString()
   role: string;
 }
+
+export class RequiredAutomationIdDto {
+  /**
+   * role Id
+   */
+  @IsNotEmpty()
+  @IsString()
+  automationId: string;
+}
