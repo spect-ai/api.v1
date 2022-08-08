@@ -9,7 +9,7 @@ export class LoggingService extends ConsoleLogger {
     ...optionalParams: [...any, string?]
   ): void {
     try {
-      if (process.env.ENV === 'Production') {
+      if (process.env.NODE_ENV === 'production') {
         fetch(
           `https://logsene-receiver.sematext.com/${process.env.SEMA_TOKEN}/example/`,
           {
