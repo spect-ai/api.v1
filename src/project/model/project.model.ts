@@ -95,4 +95,16 @@ export class Project extends BaseModel {
    */
   @prop({ default: [] })
   viewDetails: MappedItem<View>;
+
+  /**
+   * Number of views created in the project - used to generate slug in case of deleted views
+   */
+  @prop({ default: 0 })
+  viewCount: number;
+
+  /**
+   * Number of cards created in the project - used to generate slug in case of deleted cards
+   */
+  @prop({ default: 0 })
+  cardCount: number;
 }
