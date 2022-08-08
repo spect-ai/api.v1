@@ -321,10 +321,11 @@ export class ProjectService {
       const viewOrder = project.viewOrder || [];
       const viewDetails = project.viewDetails || {};
       const newViewId = uuidv4();
+      const viewCount = project.viewCount || viewOrder.length;
       const newView = {
         ...addViewDto,
         viewId: newViewId,
-        slug: `${project.slug}-view${project.viewOrder?.length}`,
+        slug: `view-${viewCount}`,
       };
       const newViewDetails = {
         ...viewDetails,
@@ -338,6 +339,7 @@ export class ProjectService {
           {
             viewOrder: newViewOrder,
             viewDetails: newViewDetails,
+            viewCount: viewCount + 1,
           },
         );
 
