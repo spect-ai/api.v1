@@ -10,6 +10,7 @@ export class ChangeStatusActionCommand {
   constructor(
     public readonly card: Card | ExtendedCard,
     public readonly action: Action,
+    public readonly extra?: any,
   ) {}
 }
 
@@ -17,6 +18,7 @@ export class ChangeMemberActionCommand {
   constructor(
     public readonly card: Card | ExtendedCard,
     public readonly action: Action,
+    public readonly extra?: any,
   ) {}
 }
 
@@ -24,6 +26,7 @@ export class ChangeLabelActionCommand {
   constructor(
     public readonly card: Card | ExtendedCard,
     public readonly action: Action,
+    public readonly extra?: any,
   ) {}
 }
 
@@ -31,14 +34,15 @@ export class ChangeSimpleFieldActionCommand {
   constructor(
     public readonly card: Card | ExtendedCard,
     public readonly action: Action,
+    public readonly extra?: any,
   ) {}
 }
 
 export class ChangeColumnActionCommand {
   constructor(
-    public readonly project: Project,
     public readonly card: Card | ExtendedCard,
     public readonly action: Action,
+    public readonly extra?: any,
   ) {}
 }
 
@@ -46,6 +50,7 @@ export class ChangeDeadlineActionCommand {
   constructor(
     public readonly card: Card | ExtendedCard,
     public readonly action: Action,
+    public readonly extra?: any,
   ) {}
 }
 

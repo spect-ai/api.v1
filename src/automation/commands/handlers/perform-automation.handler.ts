@@ -15,6 +15,7 @@ import { CardsRepository } from 'src/card/cards.repository';
 import { Card, ExtendedCard } from 'src/card/model/card.model';
 import { MappedItem } from 'src/common/interfaces';
 import { Project } from 'src/project/model/project.model';
+import { actionIdToCommandMap } from '../impl/take-action.command';
 
 @CommandHandler(PerformAutomationCommand)
 export class PerformAutomationCommandHandler
@@ -63,6 +64,14 @@ export class PerformAutomationCommandHandler
 
       for (const automationId of automationIdsSatisfyingConditions) {
         const { actions } = project.automations[automationId];
+        for (const action of actions) {
+          const actionCommand = actionIdToCommandMap[action.id];
+          this.commandBus.execute(
+            actionCommand(card, action, {
+              project,
+            }),
+          );
+        }
       }
 
       return { card, project };

@@ -51,13 +51,17 @@ export class GetTriggeredAutomationsQueryHandler
       const { card, update, automations } = query;
       const triggeredAutomationIds = [];
       for (const automation of automations) {
-        const { trigger } = automation;
-        const query = triggerIdToQueryHandlerMap['statusChange'];
-        const res = await this.queryBus.execute(
-          new query(card, update, trigger),
-        );
-        if (res) {
-          triggeredAutomationIds.push(automation.id);
+        try {
+          const { trigger } = automation;
+          const query = triggerIdToQueryHandlerMap[trigger.id];
+          const res = await this.queryBus.execute(
+            new query(card, update, trigger),
+          );
+          if (res) {
+            triggeredAutomationIds.push(automation.id);
+          }
+        } catch (error) {
+          this.logger.error(error.message);
         }
       }
 

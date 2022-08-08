@@ -169,7 +169,8 @@ export class ChangeColumnActionCommandHandler
   ): Promise<{ card: Partial<Card>; project: Partial<Project> }> {
     console.log('ChangeColumnActionCommandHandler');
 
-    const { card, project, action } = query;
+    const { card, extra, action } = query;
+    const project = extra.project;
     const item = action.item as ChangeSimpleFieldAction;
 
     const updatedProject = this.cardsProjectService.reorderCard(
