@@ -43,10 +43,6 @@ export class MoveItemCommandHandler
         `Failed move item with error: ${error.message}`,
         command,
       );
-      throw new InternalServerErrorException(
-        'Failed move item update',
-        error.message,
-      );
     }
   }
 

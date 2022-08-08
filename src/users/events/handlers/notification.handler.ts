@@ -72,10 +72,6 @@ export class NotificationEventHandler
           actor: event.actor,
         },
       );
-      throw new InternalServerErrorException(
-        'Failed adding notification',
-        error.message,
-      );
     }
   }
 
