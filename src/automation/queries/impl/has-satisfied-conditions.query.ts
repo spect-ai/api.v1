@@ -4,16 +4,44 @@ import { Card } from 'src/card/model/card.model';
 export class HasSatisfiedConditionsQuery {
   constructor(
     public readonly card: Card,
-    public readonly condition: Condition[],
+    public readonly conditions: Condition[],
   ) {}
 }
 
-export class IsSatisfiedStatusConditionQuery {
+export class HasSatisfiedStatusConditionQuery {
   constructor(
     public readonly card: Card,
-    public readonly update: Partial<Card>,
     public readonly condition: Condition,
   ) {}
 }
 
-export const conditionIdToConditionMap = {};
+export class HasSatisfiedBasicConditionQuery {
+  constructor(
+    public readonly card: Card,
+    public readonly condition: Condition,
+  ) {}
+}
+
+export class HasSatisfiedMemberConditionQuery {
+  constructor(
+    public readonly card: Card,
+    public readonly condition: Condition,
+  ) {}
+}
+
+export class HasSatisfiedDeadlineConditionQuery {
+  constructor(
+    public readonly card: Card,
+    public readonly condition: Condition,
+  ) {}
+}
+
+export const conditionIdToConditionQueryMap = {
+  checkStatus: HasSatisfiedStatusConditionQuery,
+  checkColumn: HasSatisfiedBasicConditionQuery,
+  checkParent: HasSatisfiedBasicConditionQuery,
+  checkDeadline: HasSatisfiedDeadlineConditionQuery,
+  checkAssignee: HasSatisfiedMemberConditionQuery,
+  checkReviewer: HasSatisfiedMemberConditionQuery,
+  checkLabel: HasSatisfiedBasicConditionQuery,
+};

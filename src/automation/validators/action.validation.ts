@@ -5,9 +5,21 @@ import {
   ValidatorConstraint,
   ValidatorConstraintInterface,
 } from 'class-validator';
-import { Action } from '../types/types';
+import {
+  Action,
+  ChangeLabelAction,
+  ChangeMemberAction,
+  ChangeSimpleFieldAction,
+  ChangeStatusAction,
+} from '../types/types';
 
-const actionIdToValidationMap = {};
+const actionIdToValidationMap = {
+  changeStatus: validateChangeStatusAction,
+  changeMember: validateChangeMemberAction,
+  changeSimpleField: validateChangeSimpleFieldAction,
+  changeLabel: validateChangeLabelAction,
+  changeColumn: validateChangeSimpleFieldAction,
+};
 
 @ValidatorConstraint({ name: 'validActions', async: false })
 export class IsUserAlreadyExistConstraint
@@ -43,4 +55,20 @@ export function IsValidAction(validationOptions?: ValidationOptions) {
       validator: IsUserAlreadyExistConstraint,
     });
   };
+}
+
+function validateChangeStatusAction(item: ChangeStatusAction) {
+  return true;
+}
+
+function validateChangeMemberAction(item: ChangeMemberAction) {
+  return true;
+}
+
+function validateChangeSimpleFieldAction(item: ChangeSimpleFieldAction) {
+  return true;
+}
+
+function validateChangeLabelAction(item: ChangeLabelAction) {
+  return true;
 }

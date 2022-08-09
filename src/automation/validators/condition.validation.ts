@@ -5,10 +5,21 @@ import {
   ValidatorConstraint,
   ValidatorConstraintInterface,
 } from 'class-validator';
-import { conditionIdToConditionMap } from '../queries/impl/has-satisfied-conditions.query';
-import { Condition } from '../types/types';
+import {
+  BasicCondition,
+  Condition,
+  MemberCondition,
+  DeadlineCondition,
+} from '../types/types';
 
-const conditionIdToValidationMap = {};
+const conditionIdToValidationMap = {
+  checkStatus: validateStatusCondition,
+  checkColumn: validateBasicCondition,
+  checkParent: validateBasicCondition,
+  checkDeadline: validateDeadlineCondition,
+  checkAssignee: validateMemberChangeCondition,
+  checkReviewer: validateMemberChangeCondition,
+};
 
 @ValidatorConstraint({ name: 'validConditions', async: false })
 export class IsUserAlreadyExistConstraint
@@ -44,4 +55,19 @@ export function IsValidCondition(validationOptions?: ValidationOptions) {
       validator: IsUserAlreadyExistConstraint,
     });
   };
+}
+
+function validateStatusCondition(item: BasicCondition) {
+  return true;
+}
+
+function validateBasicCondition(item: BasicCondition) {
+  return true;
+}
+
+function validateMemberChangeCondition(item: MemberCondition) {
+  return true;
+}
+function validateDeadlineCondition(item: DeadlineCondition) {
+  return true;
 }

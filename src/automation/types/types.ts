@@ -76,19 +76,50 @@ export const triggerIdToName = {
 };
 
 export type ConditionId =
-  | 'status'
-  | 'column'
-  | 'assignee'
-  | 'reviewer'
-  | 'label'
-  | 'type'
-  | 'priority'
-  | 'deadline';
+  | 'checkStatus'
+  | 'checkColumn'
+  | 'checkPriority'
+  | 'checkDeadline'
+  | 'checkAssignee'
+  | 'checkReviewer'
+  | 'checkLabel'
+  | 'checkType'
+  | 'checkParent'
+  | 'checkSubCards'
+  | 'checkImmediateSubCards'
+  | 'checkCardsOnSameLevel';
 
 export type Condition = {
   id: ConditionId;
   name: string;
-  item?: string;
+  item: BasicCondition | DeadlineCondition | MemberCondition | StatusCondition;
+};
+
+export type BasicCondition = {
+  isEmpty?: boolean;
+  is?: string;
+};
+
+export type DeadlineCondition = {
+  isEmpty?: boolean;
+  is?: string;
+  isAfter?: string;
+  isBefore?: string;
+  isBetween?: string[];
+};
+
+export type MemberCondition = {
+  isEmpty?: boolean;
+  is?: string[];
+  has?: string[];
+  doesNotHave?: string[];
+  hasCount?: number;
+  hasCountLessThan?: number;
+  hasCountGreaterThan?: number;
+};
+
+export type StatusCondition = {
+  is: Status;
 };
 
 export type ActionId =

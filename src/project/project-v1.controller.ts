@@ -14,9 +14,10 @@ import { RemoveAutomationCommand } from './commands/automation/impl/remove-autom
 import { UpdateAutomationCommand } from './commands/automation/impl/update-automation.command';
 import { DetailedProjectResponseDto } from './dto/detailed-project-response.dto';
 import { ProjectV1Service } from './project-v1.service';
+import { GetProjectByIdQuery, GetProjectBySlugQuery } from './queries/impl';
 
 @Controller('project/v1')
-export class ProjectController {
+export class ProjectV1Controller {
   constructor(
     private readonly projectService: ProjectV1Service,
     private readonly queryBus: QueryBus,
@@ -27,18 +28,18 @@ export class ProjectController {
   async findByObjectId(
     @Param() param: ObjectIdDto,
   ): Promise<DetailedProjectResponseDto> {
-    return await this.projectService.getDetailedProject(param.id);
+    return await this.queryBus.execute(new GetProjectByIdQuery(param.id));
   }
 
   @Get('/slug/:slug')
   async findBySlug(
     @Param() param: RequiredSlugDto,
   ): Promise<DetailedProjectResponseDto> {
-    return await this.projectService.getDetailedProjectBySlug(param.slug);
+    return await this.queryBus.execute(new GetProjectBySlugQuery(param.slug));
   }
 
   @Patch('/:id/automation/create')
-  async create(
+  async createAutomation(
     @Param() param: ObjectIdDto,
     @Body() createAutomationDto: CreateAutomationDto,
   ) {
@@ -48,7 +49,7 @@ export class ProjectController {
   }
 
   @Patch('/:id/automation/update')
-  async update(
+  async updateAutomation(
     @Param() param: ObjectIdDto,
     @Query() query: RequiredAutomationIdDto,
     @Body() updateAutomationDto: UpdateAutomationDto,
@@ -63,7 +64,7 @@ export class ProjectController {
   }
 
   @Patch('/:id/automation/remove')
-  async remove(
+  async removeAutomation(
     @Param() param: ObjectIdDto,
     @Query() query: RequiredAutomationIdDto,
   ) {

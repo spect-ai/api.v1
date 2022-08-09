@@ -26,7 +26,6 @@ export class UpdateCardCommandHandler
   async execute(command: UpdateCardCommand): Promise<Card> {
     try {
       const { updateCardDto, card, project, circle, caller } = command;
-      const diff = this.getDifference(card, updateCardDto);
 
       return card;
     } catch (error) {
