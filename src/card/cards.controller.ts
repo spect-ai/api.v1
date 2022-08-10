@@ -111,7 +111,9 @@ export class CardsController {
     @Query('chainId') chainId: string,
     @Query('payForChildren') payForChildren: boolean,
   ): Promise<AggregatedFlattenedPaymentInfo> {
-    console.log(cardIds);
+    if (typeof cardIds === 'string') {
+      cardIds = [cardIds];
+    }
     return await this.paymentService.aggregatePaymentInfo(
       cardIds,
       chainId,
