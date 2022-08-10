@@ -37,20 +37,20 @@ export class RetroEndedEventHandler implements IEventHandler<RetroEndedEvent> {
           );
         }
       }
-      this.eventBus.publish(
-        new UserActivityEvent(
-          'end',
-          'retro',
-          retro as Retro,
-          [],
-          retro.creator,
-          {
-            added: {},
-            deleted: {},
-            updated: {},
-          },
-        ),
-      );
+      // this.eventBus.publish(
+      //   new UserActivityEvent(
+      //     'end',
+      //     'retro',
+      //     retro as Retro,
+      //     [],
+      //     retro.creator,
+      //     {
+      //       added: {},
+      //       deleted: {},
+      //       updated: {},
+      //     },
+      //   ),
+      // );
     } catch (error) {
       this.logger.error(`${error.message}`);
     }

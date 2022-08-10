@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { FilterQuery } from 'mongoose';
 import { InjectModel } from 'nestjs-typegoose';
 import { BaseRepository } from 'src/base/base.repository';
 import { Retro } from './models/retro.model';
@@ -32,6 +33,28 @@ export class RetroRepository extends BaseRepository<Retro> {
     });
 
     return await query.exec();
+  }
+
+  async getRetros(
+    filterQuery: FilterQuery<Retro>,
+    customPopulate?: PopulatedRetroFields,
+    selectedFields?: Record<string, unknown>,
+  ): Promise<Retro[]> {
+    const query = this.findAll(filterQuery, {
+      projection: selectedFields || {},
+    });
+    let populatedFields = defaultPopulate;
+    if (customPopulate) populatedFields = customPopulate;
+
+    Object.keys(populatedFields).forEach((key) => {
+      query.populate(key, populatedFields[key]);
+    });
+
+    try {
+      return await query.exec();
+    } catch (error) {
+      return [];
+    }
   }
 
   async getRetroBySlug(

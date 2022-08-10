@@ -39,16 +39,16 @@ export class RetroUpdatedEventHandler
           );
         }
       }
-      this.eventBus.publish(
-        new UserActivityEvent(
-          'update',
-          'retro',
-          retro as Retro,
-          [],
-          retro.creator,
-          diff,
-        ),
-      );
+      // this.eventBus.publish(
+      //   new UserActivityEvent(
+      //     'update',
+      //     'retro',
+      //     retro as Retro,
+      //     [],
+      //     retro.creator,
+      //     diff,
+      //   ),
+      // );
     } catch (error) {
       this.logger.error(`${error.message}`);
     }

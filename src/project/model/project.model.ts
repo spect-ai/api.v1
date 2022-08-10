@@ -93,7 +93,7 @@ export class Project extends BaseModel {
   /**
    * Details of the views in the project
    */
-  @prop({ default: [] })
+  @prop({ default: {} })
   viewDetails: MappedItem<View>;
 
   /**
