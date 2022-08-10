@@ -10,22 +10,7 @@ import { ObjectId, Schema } from 'mongoose';
 import { MemberRoles, Roles } from 'src/common/types/role.type';
 import { Registry, TokenInfo } from 'src/registry/model/registry.model';
 import { Retro } from 'src/retro/models/retro.model';
-
-export type TokenDetails = {
-  [tokenAddress: string]: TokenInfo;
-};
-
-export type LocalRegistry = {
-  [chainId: string]: TokenDetails;
-};
-
-export type TokenBlacklisted = {
-  [tokenAddress: string]: boolean;
-};
-
-export type BlacklistRegistry = {
-  [chainId: string]: TokenBlacklisted;
-};
+import { BlacklistRegistry, LocalRegistry, SafeAddresses } from '../types';
 
 export type Invite = {
   id: string;
@@ -175,4 +160,10 @@ export class Circle extends ProfileModel {
    */
   @prop()
   gradient: string;
+
+  /**
+   * Address of safe on different networks
+   */
+  @prop()
+  safeAddresses: SafeAddresses;
 }

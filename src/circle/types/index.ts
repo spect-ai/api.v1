@@ -36,3 +36,7 @@ export type PopulatedCircleFields = {
   children?: { [fieldName: string]: 0 | 1 };
   retro?: { [fieldName: string]: 0 | 1 };
 };
+
+export type SafeAddresses = {
+  [chaninId: string]: string[];
+};
