@@ -9,17 +9,19 @@ import {
   SetMetadata,
   UseGuards,
 } from '@nestjs/common';
-import { QueryBus } from '@nestjs/cqrs';
+import { QueryBus, CommandBus } from '@nestjs/cqrs';
 import { CircleAuthGuard, CreateCircleAuthGuard } from 'src/auth/circle.guard';
 import { SessionAuthGuard } from 'src/auth/iron-session.guard';
 import { ObjectIdDto } from 'src/common/dtos/object-id.dto';
 import { RequiredRoleDto } from 'src/common/dtos/string.dto';
+import { AddSafeCommand, RemoveSafeCommand } from './commands/safe/impl';
 import { CreateCircleRequestDto } from './dto/create-circle-request.dto';
 import { DetailedCircleResponseDto } from './dto/detailed-circle-response.dto';
 import { InviteDto } from './dto/invite.dto';
 import { JoinCircleUsingInvitationRequestDto } from './dto/join-circle.dto';
 import { MemberDto } from './dto/params.dto';
 import { AddRoleDto, UpdateRoleDto } from './dto/roles-requests.dto';
+import { SafeAddress } from './dto/safe-request.dto';
 import { UpdateMemberRolesDto } from './dto/update-member-role.dto';
 import { Circle } from './model/circle.model';
 import { GetCircleByIdQuery } from './queries/impl';
@@ -34,6 +36,7 @@ export class CircleV1Controller {
     private readonly circleCrudService: CirclesCrudService,
     private readonly circleRoleServie: CirclesRolesService,
     private readonly queryBus: QueryBus,
+    private readonly commandBus: CommandBus,
   ) {}
 
   @Get('/:id')
@@ -174,7 +177,7 @@ export class CircleV1Controller {
     );
   }
 
-  @SetMetadata('permissions', ['manageRoles'])
+  @SetMetadata('permissions', ['managePaymentOptions'])
   @UseGuards(CircleAuthGuard)
   @Patch('/:id/removeRole')
   async removeRole(
@@ -182,5 +185,29 @@ export class CircleV1Controller {
     @Query() roleParam: RequiredRoleDto,
   ): Promise<DetailedCircleResponseDto> {
     return await this.circleRoleServie.removeRole(param.id, roleParam.role);
+  }
+
+  @SetMetadata('permissions', ['managePaymentOptions'])
+  @UseGuards(CircleAuthGuard)
+  @Patch('/:id/addSafe')
+  async addSafe(
+    @Param() param: ObjectIdDto,
+    @Body() safeDto: SafeAddress,
+  ): Promise<DetailedCircleResponseDto> {
+    return await this.commandBus.execute(
+      new AddSafeCommand(safeDto, null, param.id),
+    );
+  }
+
+  @SetMetadata('permissions', ['managePaymentOptions'])
+  @UseGuards(CircleAuthGuard)
+  @Patch('/:id/removeSafe')
+  async removeSafe(
+    @Param() param: ObjectIdDto,
+    @Body() safeDto: SafeAddress,
+  ): Promise<DetailedCircleResponseDto> {
+    return await this.commandBus.execute(
+      new RemoveSafeCommand(safeDto, null, param.id),
+    );
   }
 }
