@@ -5,6 +5,7 @@ import {
   Param,
   Patch,
   Post,
+  Request,
   SetMetadata,
   UseGuards,
 } from '@nestjs/common';
@@ -61,15 +62,5 @@ export class CardsV1Controller {
     @Param() params: ObjectIdDto,
   ): Promise<DetailedProjectResponseDto> {
     return await this.cardsService.revertArchival(params.id);
-  }
-
-  // @UseGuards(SessionAuthGuard)
-  @Patch('/updatePaymentInfoAndClose')
-  async updatePaymentInfoAndClose(
-    @Body() updatePaymentInfoDto: UpdatePaymentInfoDto,
-  ): Promise<DetailedProjectResponseDto> {
-    return await this.commandBus.execute(
-      new UpdatePaymentCommand(updatePaymentInfoDto, true, true),
-    );
   }
 }

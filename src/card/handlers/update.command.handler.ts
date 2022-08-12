@@ -88,6 +88,7 @@ export class CardCommandHandler {
         card,
         project,
         cardUpdate[id],
+        this.requestProvider.user.id,
       );
 
       let projectUpdate = {};
@@ -203,6 +204,7 @@ export class CardCommandHandler {
             child,
             project,
             childCardUpdate[child.id],
+            this.requestProvider.user.id,
           );
           globalUpdate.card[child.id] = this.commonTools.mergeObjects(
             globalUpdate.card[child.id],
@@ -224,6 +226,7 @@ export class CardCommandHandler {
           card,
           project,
           parentCardUpdate[card.id],
+          this.requestProvider.user.id,
         );
         globalUpdate.card[card.id] = this.commonTools.mergeObjects(
           globalUpdate.card[card.id],
@@ -281,6 +284,7 @@ export class CardCommandHandler {
           card,
           project,
           cardUpdate[card.id],
+          this.requestProvider.user.id,
         );
         globalUpdate.card[card.id] = this.commonTools.mergeObjects(
           globalUpdate.card[card.id],

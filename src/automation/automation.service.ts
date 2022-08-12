@@ -18,12 +18,7 @@ import { MappedCard } from 'src/card/types/types';
 
 @Injectable()
 export class AutomationService {
-  constructor(
-    private readonly projectService: ProjectService,
-    private readonly cardProjectService: CardsProjectService,
-    private readonly cardService: CardsService,
-    private readonly requestProvider: RequestProvider,
-  ) {}
+  constructor(private readonly cardProjectService: CardsProjectService) {}
 
   // TODO: Handle all data types
   satisfied(
@@ -210,54 +205,55 @@ export class AutomationService {
     card: Card,
     project: Project,
     update: Partial<Card>,
+    caller: string,
   ): GlobalDocumentUpdate {
     let globalUpdate: GlobalDocumentUpdate = {
       card: {},
       project: {},
     };
     for (const automationId of project.automationOrder) {
-      // const automation = project.automations[automationId];
-      // console.log('   ');
-      // console.log(automation.name);
-      // const triggerPropertyArray = automation.triggerProperty.split('.');
-      // if (
-      //   !this.satisfiesValues(
-      //     card,
-      //     update,
-      //     triggerPropertyArray,
-      //     automation.value,
-      //   )
-      // )
-      //   continue;
-      // console.log('satisfies values');
-      // if (!this.satisfiesConditions(card, automation.conditions)) continue;
-      // console.log('satisfies conditions');
-      // for (const action of automation.actions) {
-      //   const properties = action.property.split('.');
-      //   const value = action.value;
-      //   if (properties[0] === 'columnId') {
-      //     globalUpdate = this.takeColumnAction(
-      //       globalUpdate,
-      //       value,
-      //       card,
-      //       project,
-      //     );
-      //   } else if (properties[0] === 'status') {
-      //     globalUpdate = this.takeStatusAction(
-      //       globalUpdate,
-      //       properties,
-      //       value,
-      //       card,
-      //     );
-      //   } else {
-      //     globalUpdate = this.takeGeneralFieldAction(
-      //       globalUpdate,
-      //       properties[0],
-      //       value,
-      //       card,
-      //     );
-      //   }
-      //}
+      const automation = project.automations[automationId];
+      console.log('   ');
+      console.log(automation.name);
+      const triggerPropertyArray = automation.triggerProperty.split('.');
+      if (
+        !this.satisfiesValues(
+          card,
+          update,
+          triggerPropertyArray,
+          automation.value,
+        )
+      )
+        continue;
+      console.log('satisfies values');
+      if (!this.satisfiesConditions(card, automation.conditions)) continue;
+      console.log('satisfies conditions');
+      for (const action of automation.actions) {
+        const properties = action.property.split('.');
+        const value = action.value;
+        if (properties[0] === 'columnId') {
+          globalUpdate = this.takeColumnAction(
+            globalUpdate,
+            value,
+            card,
+            project,
+          );
+        } else if (properties[0] === 'status') {
+          globalUpdate = this.takeStatusAction(
+            globalUpdate,
+            properties,
+            value,
+            card,
+          );
+        } else {
+          globalUpdate = this.takeGeneralFieldAction(
+            globalUpdate,
+            properties[0],
+            value,
+            card,
+          );
+        }
+      }
     }
     return globalUpdate;
   }
@@ -327,13 +323,14 @@ export class AutomationService {
     property: string,
     value: ActionValue,
     card: Card,
+    caller: string,
   ): GlobalDocumentUpdate {
     let cardUpdate = {
       [card.id]: {},
     };
     // eslint-disable-next-line prefer-const
     for (let [key, val] of Object.entries(value)) {
-      val = this.replaceCaller(val);
+      val = this.replaceCaller(val, caller);
       if (key === 'to') {
         cardUpdate[card.id][property] = val;
       } else if (key === 'add') {
@@ -378,14 +375,12 @@ export class AutomationService {
     };
   }
 
-  replaceCaller(value: any) {
+  replaceCaller(value: any, caller: string) {
     if (value === '[caller]') {
-      value = this.requestProvider.user.id;
+      value = caller;
     }
     if (Array.isArray(value)) {
-      value = value.map((v) =>
-        v === '[caller]' ? this.requestProvider.user.id : v,
-      );
+      value = value.map((v) => (v === '[caller]' ? caller : v));
     }
     return value;
   }

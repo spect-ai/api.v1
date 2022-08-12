@@ -5,6 +5,7 @@ import {
   GetCircleBySlugQuery,
   GetCircleByIdQuery,
   GetMultipleCirclesQuery,
+  GetCircleByFilterQuery,
 } from '../impl/get-circle.query';
 import { LoggingService } from 'src/logging/logging.service';
 import { InternalServerErrorException } from '@nestjs/common';
@@ -91,6 +92,39 @@ export class GetCircleBySlugQueryHandler
     try {
       return await this.circleRepository.getCircleBySlug(
         query.slug,
+        query.customPopulate,
+        query.selectedFields,
+      );
+    } catch (error) {
+      this.logger.logError(
+        `Failed while getting circle using slug with error: ${error.message}`,
+        query,
+      );
+      throw new InternalServerErrorException(
+        'Failed while getting circle using slug',
+        error.message,
+      );
+    }
+  }
+}
+
+@QueryHandler(GetCircleByFilterQuery)
+export class GetCircleByFilterQueryHandler
+  implements IQueryHandler<GetCircleByFilterQuery>
+{
+  constructor(
+    private readonly circleRepository: CirclesRepository,
+    private readonly logger: LoggingService,
+  ) {
+    logger.setContext('GetCircleByFilterQueryHandler');
+  }
+
+  async execute(
+    query: GetCircleByFilterQuery,
+  ): Promise<DetailedCircleResponseDto> {
+    try {
+      return await this.circleRepository.getCircleByFilter(
+        query.filterQuery,
         query.customPopulate,
         query.selectedFields,
       );

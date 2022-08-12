@@ -49,7 +49,7 @@ export class WorkService {
       const workUnit = {};
 
       workUnit[workUnitId] = {
-        user: this.requestProvider.user.id,
+        user: this.requestProvider.user?.id,
         content: createWorkThread.content || '',
         workUnitId,
         createdAt: new Date(),

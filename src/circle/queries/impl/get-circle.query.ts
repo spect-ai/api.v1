@@ -25,3 +25,11 @@ export class GetCircleBySlugQuery {
     public readonly selectedFields?: Record<string, unknown>,
   ) {}
 }
+
+export class GetCircleByFilterQuery {
+  constructor(
+    public readonly filterQuery: FilterQuery<Circle>,
+    public readonly customPopulate?: PopulatedCircleFields,
+    public readonly selectedFields?: Record<string, unknown>,
+  ) {}
+}

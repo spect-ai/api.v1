@@ -71,6 +71,7 @@ export class WorkCommandHandler {
           objectifiedCards[cardId],
           project,
           cardUpdate,
+          this.requestProvider.user.id,
         );
 
         globalUpdateAfterAutomation = {
@@ -130,7 +131,12 @@ export class WorkCommandHandler {
         createWorkThread,
       );
       const globalUpdateAfterAutomation =
-        this.automationService.handleAutomation(card, project, cardUpdate[id]);
+        this.automationService.handleAutomation(
+          card,
+          project,
+          cardUpdate[id],
+          this.requestProvider.user.id,
+        );
       const resCard = await this.commonUtility.mergeExecuteAndReturn(
         id,
         project.id,
@@ -183,7 +189,12 @@ export class WorkCommandHandler {
       );
 
       const globalUpdateAfterAutomation =
-        this.automationService.handleAutomation(card, project, cardUpdate[id]);
+        this.automationService.handleAutomation(
+          card,
+          project,
+          cardUpdate[id],
+          this.requestProvider.user.id,
+        );
 
       return await this.commonUtility.mergeExecuteAndReturn(
         id,
@@ -229,7 +240,12 @@ export class WorkCommandHandler {
         createWorkUnit,
       );
       const globalUpdateAfterAutomation =
-        this.automationService.handleAutomation(card, project, cardUpdate[id]);
+        this.automationService.handleAutomation(
+          card,
+          project,
+          cardUpdate[id],
+          this.requestProvider.user.id,
+        );
 
       const resCard = await this.commonUtility.mergeExecuteAndReturn(
         id,
@@ -286,7 +302,12 @@ export class WorkCommandHandler {
         updateWorkUnit,
       );
       const globalUpdateAfterAutomation =
-        this.automationService.handleAutomation(card, project, cardUpdate[id]);
+        this.automationService.handleAutomation(
+          card,
+          project,
+          cardUpdate[id],
+          this.requestProvider.user.id,
+        );
 
       return await this.commonUtility.mergeExecuteAndReturn(
         id,

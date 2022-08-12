@@ -1,6 +1,12 @@
-import { EventBus, EventsHandler, IEventHandler } from '@nestjs/cqrs';
+import {
+  EventBus,
+  CommandBus,
+  EventsHandler,
+  IEventHandler,
+} from '@nestjs/cqrs';
 import { LoggingService } from 'src/logging/logging.service';
 import { Retro } from 'src/retro/models/retro.model';
+import { AddItemsCommand } from 'src/users/commands/impl';
 import { NotificationEvent, UserActivityEvent } from 'src/users/events/impl';
 import { RetroCreatedEvent } from '../impl';
 
@@ -10,6 +16,7 @@ export class RetroCreatedEventHandler
 {
   constructor(
     private readonly eventBus: EventBus,
+    private readonly commandBus: CommandBus,
     private readonly logger: LoggingService,
   ) {
     this.logger.setContext(`RetroCreatedEventHandler`);
@@ -34,22 +41,37 @@ export class RetroCreatedEventHandler
           );
         }
       }
-      this.eventBus.publish(
-        new UserActivityEvent(
-          'create',
-          'retro',
-          retro as Retro,
-          [],
-          retro.creator,
-          {
-            added: {
-              title: retro.title,
-            },
-            deleted: {},
-            updated: {},
-          },
-        ),
-      );
+      for (const member of retro.members) {
+        this.commandBus.execute(
+          new AddItemsCommand(
+            [
+              {
+                fieldName: 'retro',
+                itemIds: [retro.id],
+              },
+            ],
+            null,
+            member,
+          ),
+        );
+      }
+
+      // this.eventBus.publish(
+      //   new UserActivityEvent(
+      //     'create',
+      //     'retro',
+      //     retro as Retro,
+      //     [],
+      //     retro.creator,
+      //     {
+      //       added: {
+      //         title: retro.title,
+      //       },
+      //       deleted: {},
+      //       updated: {},
+      //     },
+      //   ),
+      // );
     } catch (error) {
       this.logger.error(`${error.message}`);
     }

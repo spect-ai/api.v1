@@ -8,6 +8,7 @@ import {
   IsString,
 } from 'class-validator';
 import { DiscordToCircleRoles } from '../model/circle.model';
+import { SafeAddresses } from '../types';
 import { CreateCircleRequestDto } from './create-circle-request.dto';
 
 export class UpdateCircleRequestDto extends OmitType(CreateCircleRequestDto, [
@@ -70,6 +71,13 @@ export class UpdateCircleRequestDto extends OmitType(CreateCircleRequestDto, [
   @IsString()
   @IsOptional()
   gradient?: string;
+
+  /**
+   * Gradient color of the circle
+   */
+  @IsObject()
+  @IsOptional()
+  safeAddresses?: SafeAddresses;
 }
 
 export class UpdateCircleGithubRepoRequestDto {
