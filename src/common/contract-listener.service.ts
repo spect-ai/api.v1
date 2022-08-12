@@ -10,6 +10,7 @@ import {
   GetCircleByFilterQuery,
   GetCircleByIdQuery,
 } from 'src/circle/queries/impl';
+import { LoggingService } from 'src/logging/logging.service';
 
 const abi = [
   {
@@ -36,6 +37,7 @@ export class ContractListener {
   constructor(
     private readonly commandBus: CommandBus,
     private readonly queryBus: QueryBus,
+    private readonly logger: LoggingService,
   ) {
     // Need to refactor update payment method before we can use this
     console.log('Listener listening');
@@ -102,45 +104,49 @@ export class ContractListener {
   }
 
   private async decodeTransactionAndRecord(log: any, chainId: string) {
-    const decodedEvents = this.iface.decodeEventLog(
-      'ethDistributed',
-      log.data,
-      log.topics,
-    );
+    try {
+      const decodedEvents = this.iface.decodeEventLog(
+        'ethDistributed',
+        log.data,
+        log.topics,
+      );
 
-    const d = this.decoder.decode(
-      ['string', 'string', 'string', 'string[]'],
-      decodedEvents[1],
-    );
+      const d = this.decoder.decode(
+        ['string', 'string', 'string', 'string[]'],
+        decodedEvents[1],
+      );
 
-    const transactionHash = log.transactionHash;
-    const sender = decodedEvents[0];
-    const caller = d[0];
-    const circleId = d[1];
-    const type = d[2];
-    const ids = d[3];
-    const circle = await this.queryBus.execute(
-      new GetCircleByIdQuery(circleId),
-    );
-    console.log(ids, circleId, type, caller);
-    if (
-      circle.safeAddresses &&
-      circle.safeAddresses[chainId] &&
-      circle.safeAddresses[chainId].includes(sender)
-    ) {
-      if (type === 'card') {
-        console.log('Updating card');
-        this.commandBus.execute(
-          new UpdatePaymentCommand(
-            {
-              cardIds: ids,
-              transactionHash,
-            },
-            caller,
-          ),
-        );
-      } else if (type === 'retro') {
+      const transactionHash = log.transactionHash;
+      const sender = decodedEvents[0];
+      const caller = d[0];
+      const circleId = d[1];
+      const type = d[2];
+      const ids = d[3];
+      const circle = await this.queryBus.execute(
+        new GetCircleByIdQuery(circleId),
+      );
+      console.log(ids, circleId, type, caller);
+      if (
+        circle.safeAddresses &&
+        circle.safeAddresses[chainId] &&
+        circle.safeAddresses[chainId].includes(sender)
+      ) {
+        if (type === 'card') {
+          console.log('Updating card');
+          this.commandBus.execute(
+            new UpdatePaymentCommand(
+              {
+                cardIds: ids,
+                transactionHash,
+              },
+              caller,
+            ),
+          );
+        } else if (type === 'retro') {
+        }
       }
+    } catch (e) {
+      this.logger.error(e.message);
     }
   }
 }
