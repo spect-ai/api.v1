@@ -211,50 +211,50 @@ export class AutomationService {
       card: {},
       project: {},
     };
-    for (const automationId of project.automationOrder) {
-      const automation = project.automations[automationId];
-      console.log('   ');
-      console.log(automation.name);
-      const triggerPropertyArray = automation.triggerProperty.split('.');
-      if (
-        !this.satisfiesValues(
-          card,
-          update,
-          triggerPropertyArray,
-          automation.value,
-        )
-      )
-        continue;
-      console.log('satisfies values');
-      if (!this.satisfiesConditions(card, automation.conditions)) continue;
-      console.log('satisfies conditions');
-      for (const action of automation.actions) {
-        const properties = action.property.split('.');
-        const value = action.value;
-        if (properties[0] === 'columnId') {
-          globalUpdate = this.takeColumnAction(
-            globalUpdate,
-            value,
-            card,
-            project,
-          );
-        } else if (properties[0] === 'status') {
-          globalUpdate = this.takeStatusAction(
-            globalUpdate,
-            properties,
-            value,
-            card,
-          );
-        } else {
-          globalUpdate = this.takeGeneralFieldAction(
-            globalUpdate,
-            properties[0],
-            value,
-            card,
-          );
-        }
-      }
-    }
+    // for (const automationId of project.automationOrder) {
+    //   const automation = project.automations[automationId];
+    //   console.log('   ');
+    //   console.log(automation.name);
+    //   const triggerPropertyArray = automation.triggerProperty.split('.');
+    //   if (
+    //     !this.satisfiesValues(
+    //       card,
+    //       update,
+    //       triggerPropertyArray,
+    //       automation.value,
+    //     )
+    //   )
+    //     continue;
+    //   console.log('satisfies values');
+    //   if (!this.satisfiesConditions(card, automation.conditions)) continue;
+    //   console.log('satisfies conditions');
+    //   for (const action of automation.actions) {
+    //     const properties = action.property.split('.');
+    //     const value = action.value;
+    //     if (properties[0] === 'columnId') {
+    //       globalUpdate = this.takeColumnAction(
+    //         globalUpdate,
+    //         value,
+    //         card,
+    //         project,
+    //       );
+    //     } else if (properties[0] === 'status') {
+    //       globalUpdate = this.takeStatusAction(
+    //         globalUpdate,
+    //         properties,
+    //         value,
+    //         card,
+    //       );
+    //     } else {
+    //       globalUpdate = this.takeGeneralFieldAction(
+    //         globalUpdate,
+    //         properties[0],
+    //         value,
+    //         card,
+    //       );
+    //     }
+    //   }
+    // }
     return globalUpdate;
   }
 

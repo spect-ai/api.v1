@@ -1,4 +1,5 @@
 import { FilterQuery } from 'mongoose';
+import { UpdatePaymentInfoDto } from 'src/card/dto/update-payment-info.dto';
 import { Card } from 'src/card/model/card.model';
 
 export class UpdatePaymentCommand {

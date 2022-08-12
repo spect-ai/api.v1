@@ -7,7 +7,8 @@ import {
 } from 'class-validator';
 import { Card } from 'src/card/model/card.model';
 import { Circle } from 'src/circle/model/circle.model';
-import { MappedItem } from 'src/common/interfaces';
+import { MappedItem, MappedPartialItem } from 'src/common/interfaces';
+import { Retro } from 'src/retro/models/retro.model';
 import { User } from '../model/users.model';
 import { Activity, Notification } from '../types/types';
 
@@ -126,7 +127,13 @@ export class DetailedUserPubliceResponseDto {
    * Assciated circle details
    */
   @IsObject()
-  circleDetails: MappedItem<Circle>;
+  circleDetails: MappedPartialItem<Circle>;
+
+  /**
+   * Assciated retro details
+   */
+  @IsObject()
+  retroDetails: MappedPartialItem<Retro>;
 }
 
 export class DetailedUserPrivateResponseDto extends DetailedUserPubliceResponseDto {

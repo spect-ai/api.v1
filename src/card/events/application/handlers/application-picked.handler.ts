@@ -6,7 +6,7 @@ import {
 } from '@nestjs/cqrs';
 import { Card } from 'src/card/model/card.model';
 import { LoggingService } from 'src/logging/logging.service';
-import { MoveItemCommand } from 'src/users/commands/impl';
+import { AddItemsCommand, MoveItemCommand } from 'src/users/commands/impl';
 import { NotificationEvent, UserActivityEvent } from 'src/users/events/impl';
 import { ApplicationPickedEvent } from '../impl';
 
@@ -46,6 +46,15 @@ export class ApplicationPickedEventHandler
             null,
             card.application[applicationId].user,
           ),
+        );
+
+        this.commandBus.execute(
+          new AddItemsCommand([
+            {
+              fieldName: 'assignedCards',
+              itemIds: [card.id],
+            },
+          ]),
         );
       }
 
