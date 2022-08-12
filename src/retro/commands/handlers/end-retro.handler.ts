@@ -2,6 +2,7 @@ import { InternalServerErrorException } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { CommonTools } from 'src/common/common.service';
 import { DetailedRetroResponseDto } from 'src/retro/dto/detailed-retro-response.dto';
+import { Retro } from 'src/retro/models/retro.model';
 import { RetroRepository } from 'src/retro/retro.repository';
 import { EndRetroCommand } from '../impl';
 
@@ -14,7 +15,7 @@ export class EndRetroCommandHandler
     private readonly commonTools: CommonTools,
   ) {}
 
-  async execute(command: EndRetroCommand): Promise<DetailedRetroResponseDto> {
+  async execute(command: EndRetroCommand): Promise<Retro> {
     try {
       const { retro } = command;
       let distribution = {} as { [member: string]: number };
@@ -36,13 +37,15 @@ export class EndRetroCommandHandler
         distribution[member] = allocation / total;
       }
 
-      const updatedRetro = await this.retroRepository.updateById(retro.id, {
-        distribution,
-        status: {
-          ...retro.status,
-          active: false,
-        },
-      });
+      const updatedRetro = await this.retroRepository
+        .updateById(retro.id, {
+          distribution,
+          status: {
+            ...retro.status,
+            active: false,
+          },
+        })
+        .populate('circle');
       return updatedRetro;
     } catch (error) {
       throw new InternalServerErrorException(

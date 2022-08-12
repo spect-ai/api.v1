@@ -1,6 +1,6 @@
 import { InternalServerErrorException } from '@nestjs/common';
-import { CommandHandler, ICommandHandler, QueryBus } from '@nestjs/cqrs';
-import { DetailedRetroResponseDto } from 'src/retro/dto/detailed-retro-response.dto';
+import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
+import { Retro } from 'src/retro/models/retro.model';
 import { RetroRepository } from 'src/retro/retro.repository';
 import { UpdateRetroCommand } from '../impl/update-retro.command';
 
@@ -10,15 +10,23 @@ export class UpdateRetroCommandHandler
 {
   constructor(private readonly retroRepository: RetroRepository) {}
 
-  async execute(
-    command: UpdateRetroCommand,
-  ): Promise<DetailedRetroResponseDto> {
+  async execute(command: UpdateRetroCommand): Promise<Retro> {
     try {
       const { id, updateRetroRequestDto } = command;
-      const updatedRetro = await this.retroRepository.updateById(
-        id,
-        updateRetroRequestDto,
-      );
+      const retro = await this.retroRepository.findById(id);
+      const updatedRetro = await this.retroRepository
+        .updateById(id, {
+          ...updateRetroRequestDto,
+          status: {
+            ...retro.status,
+            ...updateRetroRequestDto.status,
+          },
+          reward: {
+            ...retro.reward,
+            ...updateRetroRequestDto.reward,
+          },
+        })
+        .populate('circle');
       return updatedRetro;
     } catch (error) {
       throw new InternalServerErrorException(

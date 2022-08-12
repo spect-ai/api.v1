@@ -1,28 +1,22 @@
-import {
-  HttpException,
-  HttpStatus,
-  Injectable,
-  InternalServerErrorException,
-} from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { EventBus } from '@nestjs/cqrs';
 import { CirclesRepository } from 'src/circle/circles.repository';
+import { CommonTools } from 'src/common/common.service';
+import { LoggingService } from 'src/logging/logging.service';
 import { CardsProjectService } from 'src/project/cards.project.service';
 import { DetailedProjectResponseDto } from 'src/project/dto/detailed-project-response.dto';
+import { Project } from 'src/project/model/project.model';
+import { ProjectsRepository } from 'src/project/project.repository';
 import { RequestProvider } from 'src/users/user.provider';
-import { ActivityBuilder } from '../activity.builder';
+import { UsersRepository } from 'src/users/users.repository';
 import { CardsRepository } from '../cards.repository';
+import { CardsService } from '../cards.service';
 import { CreateCardRequestDto } from '../dto/create-card-request.dto';
 import { DetailedCardResponseDto } from '../dto/detailed-card-response-dto';
-import { Card } from '../model/card.model';
-import { CardValidationService } from '../validation.cards.service';
-import { CardsService } from '../cards.service';
-import { ProjectsRepository } from 'src/project/project.repository';
-import { CommonTools } from 'src/common/common.service';
-import { Project } from 'src/project/model/project.model';
-import { UsersService } from 'src/users/users.service';
-import { UsersRepository } from 'src/users/users.repository';
-import { UserCardsService } from '../user.cards.service';
-import { EventBus } from '@nestjs/cqrs';
 import { CardCreatedEvent } from '../events/impl';
+import { Card } from '../model/card.model';
+import { UserCardsService } from '../user.cards.service';
+import { CardValidationService } from '../validation.cards.service';
 @Injectable()
 export class CreateCardCommandHandler {
   constructor(
@@ -37,7 +31,10 @@ export class CreateCardCommandHandler {
     private readonly commonTools: CommonTools,
     private readonly userCardsService: UserCardsService,
     private readonly eventBus: EventBus,
-  ) {}
+    private readonly logger: LoggingService,
+  ) {
+    logger.setContext('CreateCardCommandHandler');
+  }
 
   async handle(createCardDto: CreateCardRequestDto): Promise<{
     card: DetailedCardResponseDto;
@@ -59,7 +56,7 @@ export class CreateCardCommandHandler {
         project: createCardDto.project,
       });
       /** In case this is a sub card, find the parent card and validate it exists */
-      let parentCard;
+      let parentCard: Card;
       if (createCardDto.parent) {
         parentCard =
           await this.cardsRepository.getCardWithUnpopulatedReferences(
@@ -69,7 +66,7 @@ export class CreateCardCommandHandler {
       }
 
       /** Get the created card object */
-      const newCard = await this.cardsService.createNew(
+      const newCard = this.cardsService.createNew(
         createCardDto,
         project.slug,
         cardNum,
@@ -89,15 +86,20 @@ export class CreateCardCommandHandler {
       const createdChildCards = await this.cardsRepository.insertMany(
         newChildCards,
       );
-      const projectWithCards = this.cardsProjectService.addCardsToProject(
-        project,
-        [createdCard, ...createdChildCards],
-      );
-      const updatedProject =
-        await this.projectRepository.updateProjectAndReturnWithPopulatedReferences(
-          project.id,
-          projectWithCards[project.id],
+
+      let updatedProject: Project;
+      if (!createCardDto.parent) {
+        const projectWithCards = this.cardsProjectService.addCardsToProject(
+          project,
+          [createdCard],
         );
+
+        updatedProject =
+          await this.projectRepository.updateProjectAndReturnWithPopulatedReferences(
+            project.id,
+            projectWithCards[project.id],
+          );
+      }
 
       /** Update parent card's children if it is a sub card and get the parent card object. */
       const updatedParentCard = await this.cardsService.addToParentCard(
@@ -120,9 +122,7 @@ export class CreateCardCommandHandler {
         await this.cardsRepository.bundleUpdatesAndExecute(updatedCards);
 
       if (updateAcknowledgment.hasWriteErrors()) {
-        throw new InternalServerErrorException(
-          'Error updating cards in database',
-        );
+        throw updateAcknowledgment.getWriteErrors();
       }
 
       /** Get parent card and return it if there is a parent */
@@ -141,16 +141,26 @@ export class CreateCardCommandHandler {
         new CardCreatedEvent(createdCard, project.slug, circle.slug),
       );
 
+      const resProject = updatedProject
+        ? {
+            ...updatedProject,
+            cards: this.commonTools.objectify(updatedProject.cards, 'id'),
+          }
+        : {
+            ...project,
+            cards: this.commonTools.objectify(project.cards, 'id'),
+          };
+
       return {
         card: Object.assign(createdCard, { children: createdChildCards }),
-        project: {
-          ...updatedProject,
-          cards: this.commonTools.objectify(updatedProject.cards, 'id'),
-        },
+        project: resProject,
         parentCard,
       };
     } catch (error) {
-      console.log(error);
+      this.logger.logError(
+        `Failed creating new card with error: ${error.message}`,
+        this.requestProvider,
+      );
       throw new InternalServerErrorException(
         'Failed creating new card',
         error.message,
@@ -195,7 +205,10 @@ export class CreateCardCommandHandler {
       }
       return true;
     } catch (error) {
-      console.log(error);
+      this.logger.logError(
+        `Failed while handling user updates with error: ${error.message}`,
+        this.requestProvider,
+      );
       throw new InternalServerErrorException(
         'Failed while handling user updates',
         error.message,

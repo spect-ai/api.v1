@@ -30,4 +30,16 @@ export type View = {
   type: 'List' | 'Board';
   hidden: boolean;
   filters: Filter;
+  slug: string;
+  name: string;
+};
+
+export type PopulatedProjectFields = {
+  cards?: { [fieldName: string]: 0 | 1 };
+  parents?: { [fieldName: string]: 0 | 1 };
+};
+
+export type FlattendedArrayFieldItems = {
+  fieldName: 'parents';
+  itemIds: string[];
 };

@@ -44,9 +44,10 @@ import { CircleAuthGuard } from './auth/circle.guard';
 import { ProjectAuthGuard } from './auth/project.guard';
 import { CreateCardCommandHandler } from './card/handlers/create.command.handler';
 import { UserCardsService } from './card/user.cards.service';
-import { CircleV1Module } from './circle-v1/circle-v1.module';
 import { CqrsModule } from '@nestjs/cqrs';
 import { CardNotificationService } from './users/notification/card-notification.service';
+import { LoggingService } from './logging/logging.service';
+import { ConfigModule } from '@nestjs/config';
 
 const databaseUrl =
   process.env.DATABASE_URL || 'mongodb://localhost:27017/nest';
@@ -55,6 +56,9 @@ console.log({ databaseUrl });
 @Module({
   imports: [
     TypegooseModule.forRoot(databaseUrl),
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
     CirclesModule,
     UsersModule,
     AuthModule,
@@ -68,7 +72,6 @@ console.log({ databaseUrl });
     IntegrationsModule,
     RegistryModule,
     AutomationModule,
-    CircleV1Module,
     CqrsModule,
   ],
   controllers: [
@@ -109,6 +112,7 @@ console.log({ databaseUrl });
     CreateCardCommandHandler,
     UserCardsService,
     CardNotificationService,
+    LoggingService,
   ],
 })
 export class AppModule {}

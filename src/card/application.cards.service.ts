@@ -1,8 +1,10 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
-import { EventBus } from '@nestjs/cqrs';
+import { CommandBus, EventBus } from '@nestjs/cqrs';
 import { CirclesRepository } from 'src/circle/circles.repository';
 import { CirclesService } from 'src/circle/circles.service';
 import { ProjectsRepository } from 'src/project/project.repository';
+import { AddItemsCommand } from 'src/users/commands/impl';
+import { UserSubmittedApplication } from 'src/users/types/types';
 import { RequestProvider } from 'src/users/user.provider';
 import { v4 as uuidv4 } from 'uuid';
 import { ActivityBuilder } from './activity.builder';
@@ -16,6 +18,7 @@ import { DetailedCardResponseDto } from './dto/detailed-card-response-dto';
 import { ApplicationPickedEvent } from './events/impl';
 import { ResponseBuilder } from './response.builder';
 import { CardValidationService } from './validation.cards.service';
+import { LoggingService } from 'src/logging/logging.service';
 
 @Injectable()
 export class ApplicationService {
@@ -30,7 +33,11 @@ export class ApplicationService {
     private readonly validationService: CardValidationService,
     private readonly responseBuilder: ResponseBuilder,
     private readonly eventBus: EventBus,
-  ) {}
+    private readonly commandBus: CommandBus,
+    private readonly logger: LoggingService,
+  ) {
+    logger.setContext('ApplicationService');
+  }
 
   async createApplication(
     id: string,
@@ -56,7 +63,7 @@ export class ApplicationService {
               members: this.requestProvider.user.id,
             },
             $set: {
-              [`memberRoles.${this.requestProvider.user.id}`]: ['visitor'],
+              [`memberRoles.${this.requestProvider.user.id}`]: ['applicant'],
             },
           },
         );
@@ -89,10 +96,29 @@ export class ApplicationService {
             activity: [...card.activity, activity],
           },
         );
+      await this.commandBus.execute(
+        new AddItemsCommand(
+          [
+            {
+              fieldName: 'activeApplications',
+              itemIds: [
+                {
+                  cardId: updatedCard.id,
+                  applicationTitle: createApplicationDto.title,
+                } as UserSubmittedApplication,
+              ],
+            },
+          ],
+          this.requestProvider.user,
+        ),
+      );
 
       return await this.responseBuilder.enrichResponse(updatedCard);
     } catch (error) {
-      console.log(error);
+      this.logger.logError(
+        `Failed while creating application with error: ${error.message}`,
+        this.requestProvider,
+      );
       throw new InternalServerErrorException(
         'Failed creating application',
         error.message,
@@ -134,6 +160,10 @@ export class ApplicationService {
 
       return await this.responseBuilder.enrichResponse(updatedCard);
     } catch (error) {
+      this.logger.logError(
+        `Failed while updating application with error: ${error.message}`,
+        this.requestProvider,
+      );
       throw new InternalServerErrorException(
         'Failed updating application',
         error.message,
@@ -174,6 +204,10 @@ export class ApplicationService {
 
       return await this.responseBuilder.enrichResponse(updatedCard);
     } catch (error) {
+      this.logger.logError(
+        `Failed while deleting application with error: ${error.message}`,
+        this.requestProvider,
+      );
       throw new InternalServerErrorException(
         'Failed while deleting application',
         error.message,
@@ -221,6 +255,10 @@ export class ApplicationService {
       );
       return await this.responseBuilder.enrichResponse(updatedCard);
     } catch (error) {
+      this.logger.logError(
+        `Failed while picking applications with error: ${error.message}`,
+        this.requestProvider,
+      );
       throw new InternalServerErrorException(
         'Failed while picking applications',
         error.message,

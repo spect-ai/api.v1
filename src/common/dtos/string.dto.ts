@@ -63,3 +63,12 @@ export class RequiredCardIdDto {
   @IsObjectId()
   cardId: string;
 }
+
+export class RequiredRoleDto {
+  /**
+   * role Id
+   */
+  @IsNotEmpty()
+  @IsString()
+  role: string;
+}

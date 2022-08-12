@@ -21,6 +21,7 @@ import { Diff, MappedCard } from './types/types';
 import { CardValidationService } from './validation.cards.service';
 import { CommonTools } from 'src/common/common.service';
 import { Circle } from 'src/circle/model/circle.model';
+import { LoggingService } from 'src/logging/logging.service';
 
 @Injectable()
 export class CardsService {
@@ -34,7 +35,10 @@ export class CardsService {
     private readonly validationService: CardValidationService,
     private readonly responseBuilder: ResponseBuilder,
     private readonly commonTools: CommonTools,
-  ) {}
+    private readonly logger: LoggingService,
+  ) {
+    logger.setContext('CardsService');
+  }
 
   getDifference(card: Card, request: UpdateCardRequestDto): Diff {
     const filteredCard = {};
@@ -82,6 +86,10 @@ export class CardsService {
       );
       return card;
     } catch (error) {
+      this.logger.logError(
+        `Failed card retrieval by id with error: ${error.message}`,
+        this.requestProvider,
+      );
       throw new InternalServerErrorException(
         'Failed card retrieval',
         error.message,
@@ -102,6 +110,10 @@ export class CardsService {
         cardSlug,
       );
     } catch (error) {
+      this.logger.logError(
+        `Failed card retrieval by slug with error: ${error.message}`,
+        this.requestProvider,
+      );
       throw new InternalServerErrorException(
         'Failed card retrieval',
         error.message,
@@ -121,7 +133,10 @@ export class CardsService {
         );
       return await this.responseBuilder.enrichResponse(card);
     } catch (error) {
-      console.log(error);
+      this.logger.logError(
+        `Failed card retrieval by project id and card slug with error: ${error.message}`,
+        this.requestProvider,
+      );
       throw new InternalServerErrorException(
         'Failed card retrieval',
         error.message,
@@ -142,6 +157,7 @@ export class CardsService {
       slug: `${projectSlug}-${slugNum.toString()}`,
       activity: [activity],
       creator: this.requestProvider.user.id,
+      columnId: createCardDto.parent ? null : createCardDto.columnId,
     };
   }
 
@@ -167,7 +183,7 @@ export class CardsService {
         circle: childCard.circle || circle.id,
         parent: parentCard.id,
         reward: createCardDto.reward || { ...circle.defaultPayment, value: 0 }, //TODO: add reward to child cards
-        columnId: childCard.columnId || createCardDto.columnId,
+        columnId: null, // Child cards dont have a column
         activity: [activity],
         slug: `${projectSlug}-${slugNum.toString()}`,
       });
@@ -256,64 +272,86 @@ export class CardsService {
   }
 
   async archive(id: string): Promise<DetailedProjectResponseDto> {
-    const card = await this.cardsRepository.getCardWithAllChildren(id);
-    this.validationService.validateCardExists(card);
-    const cardIds = [
-      ...card.flattenedChildren.map((c) => c._id.toString()),
-      id,
-    ] as string[];
+    try {
+      const card = await this.cardsRepository.getCardWithAllChildren(id);
+      this.validationService.validateCardExists(card);
+      const cardIds = [
+        ...card.flattenedChildren.map((c) => c._id.toString()),
+        id,
+      ] as string[];
 
-    const updatedProject =
-      await this.cardsProjectService.removeMultipleCardsFromProject(
-        card.project.toString(),
-        cardIds,
-      );
+      const updatedProject =
+        await this.cardsProjectService.removeMultipleCardsFromProject(
+          card.project.toString(),
+          cardIds,
+        );
 
-    /** Mongo only returns an acknowledgment on update and not the updated records itself */
-    const updateAcknowledgment = await this.cardsRepository.updateMany(
-      {
-        _id: { $in: cardIds },
-      },
-      {
-        $set: {
-          'status.archived': true,
-          'status.active': false,
+      /** Mongo only returns an acknowledgment on update and not the updated records itself */
+      const updateAcknowledgment = await this.cardsRepository.updateMany(
+        {
+          _id: { $in: cardIds },
         },
-      },
-      {
-        multi: true,
-      },
-    );
-    if (!updateAcknowledgment.acknowledged) {
-      throw new HttpException(
-        'Something went wrong while updating payment info',
-        HttpStatus.INTERNAL_SERVER_ERROR,
+        {
+          $set: {
+            'status.archived': true,
+            'status.active': false,
+          },
+        },
+        {
+          multi: true,
+        },
+      );
+      if (!updateAcknowledgment.acknowledged) {
+        throw new HttpException(
+          'Something went wrong while updating payment info',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      }
+      return updatedProject;
+    } catch (error) {
+      this.logger.logError(
+        `Failed card archival with error: ${error.message}`,
+        this.requestProvider,
+      );
+      throw new InternalServerErrorException(
+        'Failed card archival',
+        error.message,
       );
     }
-    return updatedProject;
   }
 
   async revertArchive(id: string): Promise<Card> {
-    const card = await this.cardsRepository.findById(id);
-    this.validationService.validateCardExists(card);
+    try {
+      const card = await this.cardsRepository.findById(id);
+      this.validationService.validateCardExists(card);
 
-    if (!card.status.archived)
-      throw new HttpException(
-        'Card is not in archived state',
-        HttpStatus.INTERNAL_SERVER_ERROR,
+      if (!card.status.archived)
+        throw new HttpException(
+          'Card is not in archived state',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      const updatedProject = await this.cardsProjectService.addCardToProject(
+        card.project as string,
+        card.columnId,
+        card.id,
       );
-    const updatedProject = await this.cardsProjectService.addCardToProject(
-      card.project as string,
-      card.columnId,
-      card.id,
-    );
-    return await this.cardsRepository.updateCardAndReturnWithPopulatedReferences(
-      id,
-      {
-        'status.archived': false,
-        'status.active': true,
-      },
-    );
+      return await this.cardsRepository.updateCardAndReturnWithPopulatedReferences(
+        id,
+        {
+          'status.archived': false,
+          'status.active': true,
+        },
+      );
+    } catch (error) {
+      this.logger.logError(
+        `Failed reverting card archival with error: ${error.message}`,
+        this.requestProvider,
+      );
+      throw new InternalServerErrorException(
+        'Failed reverting card archival',
+        error.message,
+      );
+    }
   }
 
   closeCard(card: Card): MappedCard {

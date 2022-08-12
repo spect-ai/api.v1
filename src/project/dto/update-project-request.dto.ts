@@ -55,7 +55,7 @@ export class UpdateProjectRequestDto {
   };
 }
 
-export class AddOrUpdateViewDto {
+export class AddViewDto {
   /**
    * The type of the view
    */
@@ -75,4 +75,41 @@ export class AddOrUpdateViewDto {
    */
   @IsBoolean()
   hidden: boolean;
+
+  /**
+   * Name of the view
+   */
+  @IsString()
+  @IsNotEmpty()
+  name: string;
+}
+
+export class UpdateViewDto {
+  /**
+   * The type of the view
+   */
+  @IsObject()
+  @IsOptional()
+  filters?: Filter;
+
+  /**
+   * The type of the view
+   */
+  @IsString()
+  @IsOptional()
+  type?: View['type'];
+
+  /**
+   * Is the view hidden?
+   */
+  @IsBoolean()
+  @IsOptional()
+  hidden?: boolean;
+
+  /**
+   * Name of the view
+   */
+  @IsString()
+  @IsOptional()
+  name?: string;
 }

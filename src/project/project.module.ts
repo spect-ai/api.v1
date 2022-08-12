@@ -19,6 +19,10 @@ import { SessionAuthGuard } from 'src/auth/iron-session.guard';
 import { CircleAuthGuard } from 'src/auth/circle.guard';
 import { RolesService } from 'src/roles/roles.service';
 import { DiscordService } from 'src/common/discord.service';
+import { LoggingService } from 'src/logging/logging.service';
+import { QueryHandlers } from './queries/handlers';
+import { CommandHandlers } from './commands/handlers';
+import { CqrsModule } from '@nestjs/cqrs';
 
 @Module({
   imports: [
@@ -28,6 +32,7 @@ import { DiscordService } from 'src/common/discord.service';
     forwardRef(() => CardsModule),
     forwardRef(() => AutomationModule),
     EthAddressModule,
+    CqrsModule,
   ],
   controllers: [ProjectController],
   providers: [
@@ -43,6 +48,9 @@ import { DiscordService } from 'src/common/discord.service';
     DiscordService,
     CircleAuthGuard,
     SessionAuthGuard,
+    LoggingService,
+    ...QueryHandlers,
+    ...CommandHandlers,
   ],
   exports: [ProjectService, ProjectsRepository, ProjectModule],
 })

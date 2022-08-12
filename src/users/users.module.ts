@@ -11,6 +11,15 @@ import { UsersController } from './users.controller';
 import { UsersRepository } from './users.repository';
 import { UsersService } from './users.service';
 import { CardNotificationService } from './notification/card-notification.service';
+import { QueryHandlers } from './queries/handlers';
+import { UserFieldResolver } from './queries/handlers/get-user.handler';
+import { RetroNotificationService } from './notification/retro-notification.service';
+import {
+  PublicViewAuthGuard,
+  SessionAuthGuard,
+} from 'src/auth/iron-session.guard';
+import { CommandHandlers } from './commands/handlers';
+import { LoggingService } from 'src/logging/logging.service';
 
 @Module({
   imports: [
@@ -26,7 +35,14 @@ import { CardNotificationService } from './notification/card-notification.servic
     RequestProvider,
     CommonTools,
     CardNotificationService,
+    RetroNotificationService,
     ...EventHandlers,
+    ...QueryHandlers,
+    ...CommandHandlers,
+    UserFieldResolver,
+    PublicViewAuthGuard,
+    SessionAuthGuard,
+    LoggingService,
   ],
   exports: [UsersService, UsersRepository, UsersModule],
 })

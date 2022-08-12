@@ -1,5 +1,5 @@
 import { prop } from '@typegoose/typegoose';
-import { Date } from 'mongoose';
+import { Date, Schema } from 'mongoose';
 import { BaseModel } from 'src/base/base.model';
 import { useMongoosePlugin } from 'src/base/decorators/use-mongoose-plugins.decorator';
 import { Circle } from 'src/circle/model/circle.model';
@@ -95,9 +95,9 @@ export class Retro extends BaseModel {
   feedbackGiven: Feedback;
 
   /**
-   * The activity history of the retro period
+   * The members part of the retro period
    */
-  @prop({ ref: () => User, required: true })
+  @prop({ ref: () => User, type: Schema.Types.String, required: true })
   members: string[];
 
   /**

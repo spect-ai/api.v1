@@ -90,6 +90,7 @@ export class CreateCardRequestDto {
    * The card's column id
    */
   @IsString()
+  @IsOptional()
   columnId: string;
 
   /**
