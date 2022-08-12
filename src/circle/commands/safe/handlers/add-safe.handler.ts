@@ -11,6 +11,7 @@ export class AddSafeCommandHandler implements ICommandHandler<AddSafeCommand> {
   async execute(command: AddSafeCommand): Promise<Circle> {
     try {
       const { circle, id, safeDto } = command;
+      console.log(safeDto);
       let circleToUpdate = circle;
       if (!circleToUpdate) {
         circleToUpdate = await this.circlesRepository.findById(id);

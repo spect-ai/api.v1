@@ -1,24 +1,23 @@
+import { HttpException, HttpStatus } from '@nestjs/common';
 import {
-  HttpException,
-  HttpStatus,
-  InternalServerErrorException,
-} from '@nestjs/common';
-import { CommandBus, CommandHandler, ICommandHandler } from '@nestjs/cqrs';
+  CommandBus,
+  CommandHandler,
+  ICommandHandler,
+  QueryBus,
+} from '@nestjs/cqrs';
 import { AutomationService } from 'src/automation/automation.service';
 import { CardsRepository } from 'src/card/cards.repository';
-import { UpdateCardRequestDto } from 'src/card/dto/update-card-request.dto';
 import { UpdatePaymentInfoDto } from 'src/card/dto/update-payment-info.dto';
-import { CardCommandHandler } from 'src/card/handlers/update.command.handler';
 import { Card } from 'src/card/model/card.model';
-import { CardsPaymentService } from 'src/card/payment.cards.service';
+import { GetMultipleCardsWithChildrenQuery } from 'src/card/queries/impl';
 import { CommonTools } from 'src/common/common.service';
 import { MappedItem } from 'src/common/interfaces';
-import { Activity } from 'src/common/types/activity.type';
 import { GlobalDocumentUpdate } from 'src/common/types/update.type';
 import { LoggingService } from 'src/logging/logging.service';
-import { Project } from 'src/project/model/project.model';
 import { ProjectsRepository } from 'src/project/project.repository';
 import { UpdatePaymentCommand } from '../impl';
+import { v4 as uuidv4 } from 'uuid';
+import { Activity } from '../../../../common/types/activity.type';
 
 @CommandHandler(UpdatePaymentCommand)
 export class UpdatePaymentCommandHandler
@@ -26,6 +25,7 @@ export class UpdatePaymentCommandHandler
 {
   constructor(
     private readonly commandBus: CommandBus,
+    private readonly queryBus: QueryBus,
     private readonly commonTools: CommonTools,
     private readonly logger: LoggingService,
     private readonly cardsRepository: CardsRepository,
@@ -39,13 +39,12 @@ export class UpdatePaymentCommandHandler
         card: {},
         project: {},
       } as GlobalDocumentUpdate;
-      const { updatePaymentDto } = command;
+      const { updatePaymentDto, caller } = command;
 
       /** Get all the cards with all their children */
-      const cards =
-        await this.cardsRepository.getCardWithAllChildrenForMultipleCards(
-          updatePaymentDto.cardIds,
-        );
+      const cards = await this.queryBus.execute(
+        new GetMultipleCardsWithChildrenQuery(updatePaymentDto.cardIds),
+      );
 
       if (cards.length === 0) {
         throw new HttpException('No cards found', HttpStatus.NOT_FOUND);
@@ -62,11 +61,13 @@ export class UpdatePaymentCommandHandler
           const childCardUpdate = this.updatePaymentInfo(
             child,
             updatePaymentDto,
+            caller,
           );
           const automationUpdate = this.automationService.handleAutomation(
             child,
             project,
             childCardUpdate[child.id],
+            command.caller,
           );
           globalUpdate.card[child.id] = this.commonTools.mergeObjects(
             globalUpdate.card[child.id],
@@ -79,12 +80,17 @@ export class UpdatePaymentCommandHandler
           );
         }
 
-        const parentCardUpdate = this.updatePaymentInfo(card, updatePaymentDto);
+        const parentCardUpdate = this.updatePaymentInfo(
+          card,
+          updatePaymentDto,
+          caller,
+        );
 
         const automationUpdate = this.automationService.handleAutomation(
           card,
           project,
           parentCardUpdate[card.id],
+          command.caller,
         );
         globalUpdate.card[card.id] = this.commonTools.mergeObjects(
           globalUpdate.card[card.id],
@@ -114,21 +120,31 @@ export class UpdatePaymentCommandHandler
   updatePaymentInfo(
     card: Card,
     updatePaymentInfoDto: UpdatePaymentInfoDto,
+    caller: string,
   ): MappedItem<Card> {
-    // const changeLog = this.buildUpdateChangeLog(
-    //   {
-    //     status: {
-    //       active: false,
-    //       paid: true,
-    //       archived: false,
-    //     },
-    //   },
-    //   card,
-    // );
-
+    const activity = {
+      activityId: 'updateStatus',
+      changeLog: {
+        prev: {
+          status: card.status,
+        },
+        next: {
+          status: {
+            active: false,
+            paid: true,
+            archived: false,
+          },
+        },
+      },
+      timestamp: new Date(),
+      actorId: caller,
+      commitId: uuidv4(),
+      comment: false,
+      content: '',
+    } as Activity;
     return {
       [card.id]: {
-        //activity: card.activity.concat(activities),
+        activity: [...card.activity, activity],
         reward: {
           ...card.reward,
           transactionHash: updatePaymentInfoDto.transactionHash,

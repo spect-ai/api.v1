@@ -14,31 +14,4 @@ export class AutomationController {
     private readonly cardsRepository: CardsRepository,
     private readonly projectRepository: ProjectsRepository,
   ) {}
-
-  @UseGuards(SessionAuthGuard)
-  @Get('/:id/automationQuery')
-  async get(
-    @Param() params: ObjectIdDto,
-    @Body() updateCardRequestDto: UpdateCardRequestDto,
-  ) {
-    const card = await this.cardsRepository.findById(params.id);
-    const project = await this.projectRepository.findById(
-      card.project as string,
-    );
-    return await this.automationService.handleAutomation(
-      card,
-      project,
-      updateCardRequestDto,
-    );
-  }
-
-  @Get('/autoVal')
-  async autoVal(@Body() bod) {
-    return this.automationService.satisfiesCondition(
-      bod.tree,
-      bod.property,
-      bod.value,
-      bod.condition,
-    );
-  }
 }

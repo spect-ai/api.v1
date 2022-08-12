@@ -156,4 +156,26 @@ export class CirclesRepository extends BaseRepository<Circle> {
 
     return await query.exec();
   }
+
+  async getCircleByFilter(
+    filterQuery: FilterQuery<Circle>,
+    customPopulate?: PopulatedCircleFields,
+    selectedFields?: Record<string, unknown>,
+  ): Promise<Circle> {
+    const query = this.findOne(filterQuery, {
+      projection: selectedFields || {},
+    });
+    let populatedFields = defaultPopulate;
+    if (customPopulate) populatedFields = customPopulate;
+
+    Object.keys(populatedFields).forEach((key) => {
+      query.populate(key, populatedFields[key]);
+    });
+
+    try {
+      return await query.exec();
+    } catch (error) {
+      return null;
+    }
+  }
 }
