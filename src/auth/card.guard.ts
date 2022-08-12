@@ -13,6 +13,7 @@ import { CirclesService } from 'src/circle/circles.service';
 import { CirclePermission } from 'src/common/types/role.type';
 import { ProjectsRepository } from 'src/project/project.repository';
 import { User } from 'src/users/model/users.model';
+import { UsersRepository } from 'src/users/users.repository';
 import { SessionAuthGuard } from './iron-session.guard';
 import { ProjectAuthGuard } from './project.guard';
 
@@ -180,6 +181,32 @@ export class CreateNewCardAuthGuard implements CanActivate {
         request.user.id,
         request.project.parents,
       );
+    } catch (error) {
+      console.log(error);
+      request.session.destroy();
+      throw new HttpException({ message: error }, 422);
+    }
+  }
+}
+
+@Injectable()
+export class CreateGithubPRAuthGuard implements CanActivate {
+  constructor(
+    private readonly sessionAuthGuard: SessionAuthGuard,
+    private readonly projectAuthGuard: ProjectAuthGuard,
+    private readonly userRepository: UsersRepository,
+  ) {}
+
+  async canActivate(context: ExecutionContext): Promise<boolean> {
+    const request = context.switchToHttp().getRequest();
+    try {
+      const githubId = request.body.githubId;
+      request.user = await this.userRepository.findOne({
+        githubId: githubId,
+      });
+
+      if (!request.user) return false;
+      return true;
     } catch (error) {
       console.log(error);
       request.session.destroy();

@@ -15,7 +15,11 @@ import {
   PublicViewAuthGuard,
   SessionAuthGuard,
 } from 'src/auth/iron-session.guard';
-import { CardAuthGuard, CreateNewCardAuthGuard } from 'src/auth/card.guard';
+import {
+  CardAuthGuard,
+  CreateGithubPRAuthGuard,
+  CreateNewCardAuthGuard,
+} from 'src/auth/card.guard';
 import { ObjectIdDto } from 'src/common/dtos/object-id.dto';
 import { DetailedProjectResponseDto } from 'src/project/dto/detailed-project-response.dto';
 import { CreateCardRequestDto } from './dto/create-card-request.dto';
@@ -195,7 +199,7 @@ export class CardsController {
   }
 
   @Patch('/createWorkThreadWithPR')
-  @UseGuards(PublicViewAuthGuard)
+  @UseGuards(CreateGithubPRAuthGuard)
   async createWorkThreadWithPR(
     @Body() createGithubPRDto: CreateGithubPRDto,
   ): Promise<boolean> {
