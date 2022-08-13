@@ -68,7 +68,6 @@ import {
   RequiredThreadIdDto,
   RequiredWorkUnitIdDto,
 } from 'src/common/dtos/string.dto';
-import { CreateCardCommandHandler } from './handlers/create.command.handler';
 
 @Controller('card')
 @ApiTags('card')
@@ -81,7 +80,6 @@ export class CardsController {
     private readonly paymentService: CardsPaymentService,
     private readonly cardCommandHandler: CardCommandHandler,
     private readonly workCommandHandler: WorkCommandHandler,
-    private readonly createCommandHandler: CreateCardCommandHandler,
   ) {}
 
   @UseGuards(PublicViewAuthGuard)
@@ -188,14 +186,6 @@ export class CardsController {
     @Param() params: ObjectIdDto,
   ): Promise<ValidCardActionResponseDto> {
     return await this.actionService.getValidActions(params.id);
-  }
-
-  @Post('/')
-  @UseGuards(CreateNewCardAuthGuard)
-  async create(@Body() card: CreateCardRequestDto): Promise<{
-    card: DetailedCardResponseDto;
-  }> {
-    return await this.createCommandHandler.handle(card);
   }
 
   @Patch('/createWorkThreadWithPR')

@@ -155,14 +155,6 @@ export class CirclesController {
     );
   }
 
-  @UseGuards(CreateCircleAuthGuard)
-  @Post('/')
-  async create(
-    @Body() circle: CreateCircleRequestDto,
-  ): Promise<DetailedCircleResponseDto> {
-    return await this.circlesService.create(circle);
-  }
-
   @SetMetadata('permissions', ['manageCircleSettings'])
   @UseGuards(CircleAuthGuard)
   @Patch('/:id')
@@ -183,35 +175,6 @@ export class CirclesController {
     return await this.circlesService.update(param.id, circle);
   }
 
-  @SetMetadata('permissions', ['inviteMembers'])
-  @UseGuards(CircleAuthGuard)
-  @Patch('/:id/invite')
-  async invite(
-    @Param() param: ObjectIdDto,
-    @Body() invitation: InviteDto,
-  ): Promise<DetailedCircleResponseDto> {
-    return await this.circlesService.invite(param.id, invitation);
-  }
-
-  @ApiParam({ name: 'id', type: 'string' })
-  @UseGuards(SessionAuthGuard)
-  @Patch('/:id/joinUsingInvitation')
-  async joinUsingInvitation(
-    @Param() param: ObjectIdDto,
-    @Body() joinDto: JoinCircleUsingInvitationRequestDto,
-  ): Promise<DetailedCircleResponseDto> {
-    return await this.circlesService.joinUsingInvitation(param.id, joinDto);
-  }
-
-  @ApiParam({ name: 'id', type: 'string' })
-  @UseGuards(SessionAuthGuard)
-  @Patch('/:id/joinUsingDiscord')
-  async joinUsingDiscord(
-    @Param() param: ObjectIdDto,
-  ): Promise<DetailedCircleResponseDto> {
-    return await this.circlesService.joinUsingDiscord(param.id);
-  }
-
   @SetMetadata('permissions', ['manageMembers'])
   @UseGuards(CircleAuthGuard)
   @Patch('/:id/updateMemberRoles')
@@ -225,16 +188,6 @@ export class CirclesController {
       memberDto.member,
       updateMemberRolesDto,
     );
-  }
-
-  @SetMetadata('permissions', ['manageMembers'])
-  @UseGuards(CircleAuthGuard)
-  @Patch('/:id/removeMember')
-  async removeMember(
-    @Param() param: ObjectIdDto,
-    @Query() memberDto: MemberDto,
-  ): Promise<DetailedCircleResponseDto> {
-    return await this.circlesService.removeMember(param.id, memberDto.member);
   }
 
   // TODO: Delete everything withing the circle

@@ -32,7 +32,6 @@ import { CardUpdatedEvent } from '../events/impl';
 import { CardsPaymentService } from '../payment.cards.service';
 import { ResponseBuilder } from '../response.builder';
 import { MappedCard, MappedDiff } from '../types/types';
-import { UserCardsService } from '../user.cards.service';
 import { CardValidationService } from '../validation.cards.service';
 import { LoggingService } from 'src/logging/logging.service';
 
@@ -50,7 +49,6 @@ export class CardCommandHandler {
     private readonly automationService: AutomationService,
     private readonly cardPaymentService: CardsPaymentService,
     private readonly userRepository: UsersRepository,
-    private readonly userCardsService: UserCardsService,
     private readonly circleRepository: CirclesRepository,
     private readonly eventBus: EventBus,
     private readonly logger: LoggingService,
