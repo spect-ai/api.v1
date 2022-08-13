@@ -4,6 +4,7 @@ import {
   Injectable,
   InternalServerErrorException,
 } from '@nestjs/common';
+import { QueryBus } from '@nestjs/cqrs';
 import { CirclesService } from 'src/circle/circles.service';
 import { CirclePermission } from 'src/common/types/role.type';
 import { DetailedProjectResponseDto } from 'src/project/dto/detailed-project-response.dto';
@@ -16,6 +17,7 @@ import {
   ValidCardActionResponseDto,
 } from './dto/card-access-response.dto';
 import { Card } from './model/card.model';
+import { GetCardByIdQuery, GetMultipleCardsByIdsQuery } from './queries/impl';
 import { CardValidationService } from './validation.cards.service';
 
 @Injectable()
@@ -27,6 +29,7 @@ export class ActionService {
     private readonly validationService: CardValidationService,
     private readonly cardsService: CardsService,
     private readonly projectRepository: ProjectsRepository,
+    private readonly queryBus: QueryBus,
   ) {}
 
   canCreateCard(
@@ -335,16 +338,27 @@ export class ActionService {
     };
   }
 
-  async getValidActions(id: string): Promise<ValidCardActionResponseDto> {
+  async getValidActions(
+    id: string,
+    card?: Card,
+  ): Promise<ValidCardActionResponseDto> {
     const userId = this.requestProvider.user.id;
-    const card = await this.cardsRepository.getCardWithPopulatedReferences(id);
-    this.validationService.validateCardExists(card);
+    const cardToQuery =
+      card ||
+      (await this.queryBus.execute(
+        new GetCardByIdQuery(id, {
+          project: {
+            parents: 1,
+          },
+        }),
+      ));
+    this.validationService.validateCardExists(cardToQuery);
     const circlePermissions =
       await this.circleService.getCollatedUserPermissions(
-        (card.project as unknown as DetailedProjectResponseDto).parents,
+        (cardToQuery.project as unknown as DetailedProjectResponseDto).parents,
         userId,
       );
-    return this.validActions(card, circlePermissions, userId);
+    return this.validActions(cardToQuery, circlePermissions, userId);
   }
 
   async getValidActionsForMultipleCards(
@@ -352,9 +366,16 @@ export class ActionService {
   ): Promise<MultipleValidCardActionResponseDto> {
     const validActions = {} as MultipleValidCardActionResponseDto;
     if (!ids) return validActions;
-    for (const id of ids) {
-      const validAction = await this.getValidActions(id);
-      validActions[id] = validAction;
+    const cards = await this.queryBus.execute(
+      new GetMultipleCardsByIdsQuery(ids, {
+        project: {
+          parents: 1,
+        },
+      }),
+    );
+    for (const card of cards) {
+      const validAction = await this.getValidActions(card.id, card);
+      validActions[card.id] = validAction;
     }
 
     return validActions;
@@ -368,10 +389,11 @@ export class ActionService {
         await this.projectRepository.getProjectWithUnpPopulatedReferencesBySlug(
           slug,
         );
+
       if (!project)
         throw new HttpException('Project not found', HttpStatus.NOT_FOUND);
-      return await this.getValidActionsForMultipleCards(project.cards);
-      return {};
+      const res = await this.getValidActionsForMultipleCards(project.cards);
+      return res;
     } catch (error) {
       console.log(error);
       throw new InternalServerErrorException(
