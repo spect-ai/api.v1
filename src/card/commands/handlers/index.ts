@@ -8,6 +8,7 @@ import {
   DeleteCardByIdCommandHandler,
   DeleteMultipleCardsByIdHandler,
 } from './delete-card.handler';
+import { UpdateCardCommandHandler } from './update-card.handler';
 
 export const CommandHandlers = [
   CreateCardCommandHandler,
@@ -18,4 +19,5 @@ export const CommandHandlers = [
   AddItemCommandHandler,
   RemoveItemsCommandHandler,
   UpdatePaymentCommandHandler,
+  UpdateCardCommandHandler,
 ];

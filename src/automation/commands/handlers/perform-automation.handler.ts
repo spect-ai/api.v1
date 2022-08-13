@@ -11,8 +11,10 @@ import {
 } from 'src/automation/commands/impl';
 import { GetTriggeredAutomationsQuery } from 'src/automation/queries/impl';
 import { HasSatisfiedConditionsQuery } from 'src/automation/queries/impl/has-satisfied-conditions.query';
+import { MultipleItemContainer } from 'src/automation/types/types';
 import { CardsRepository } from 'src/card/cards.repository';
 import { Card, ExtendedCard } from 'src/card/model/card.model';
+import { CommonTools } from 'src/common/common.service';
 import { MappedItem } from 'src/common/interfaces';
 import { Project } from 'src/project/model/project.model';
 import { actionIdToCommandMap } from '../impl/take-action.command';
@@ -22,59 +24,65 @@ export class PerformAutomationCommandHandler
   implements ICommandHandler<PerformAutomationCommand>
 {
   constructor(
-    private readonly cardsRepository: CardsRepository,
+    private readonly commonTools: CommonTools,
     private readonly commandBus: CommandBus,
     private readonly queryBus: QueryBus,
   ) {}
 
-  async execute(command: PerformAutomationCommand): Promise<{
-    card: Card | ExtendedCard;
-    project: Project;
-  }> {
+  async execute(
+    command: PerformAutomationCommand,
+  ): Promise<MultipleItemContainer> {
     try {
-      const { update, card, project } = command;
+      const { performAutomationCommandContainer, caller } = command;
+      const { card, project, update } = performAutomationCommandContainer;
       const triggeredAutomations = await this.queryBus.execute(
         new GetTriggeredAutomationsQuery(
-          card,
-          update,
-          Object.values(project.automations),
+          performAutomationCommandContainer,
+          caller,
         ),
       );
-      let conditions = [];
-      let actions = [];
-      for (const automationId of triggeredAutomations) {
-        conditions = [
-          ...project.automations[automationId].conditions,
-          ...conditions,
-        ];
-        actions = [...project.automations[automationId].actions, ...actions];
-      }
-
       // Need to fetch all the required data to check / update based on the conditions and actions here
-
+      console.log('triggeredAutomations', triggeredAutomations);
       const automationIdsSatisfyingConditions = [];
       for (const automationId of triggeredAutomations) {
         const { conditions } = project.automations[automationId];
         const satisfied = await this.queryBus.execute(
-          new HasSatisfiedConditionsQuery(card, conditions),
+          new HasSatisfiedConditionsQuery(
+            performAutomationCommandContainer,
+            caller,
+            conditions,
+          ),
         );
         if (!satisfied) continue;
         automationIdsSatisfyingConditions.push(automationId);
       }
-
+      console.log(automationIdsSatisfyingConditions);
+      const returningMultipleItemContainer = {};
       for (const automationId of automationIdsSatisfyingConditions) {
         const { actions } = project.automations[automationId];
+        console.log(actions);
+
         for (const action of actions) {
           const actionCommand = actionIdToCommandMap[action.id];
-          this.commandBus.execute(
-            actionCommand(card, action, {
-              project,
-            }),
-          );
+          const res = (await this.commandBus.execute(
+            new actionCommand(performAutomationCommandContainer, action),
+          )) as MultipleItemContainer;
+          console.log(res);
+          for (const [key, val] of Object.entries(res)) {
+            if (returningMultipleItemContainer[key]) {
+              returningMultipleItemContainer[key] =
+                this.commonTools.mergeObjects(
+                  returningMultipleItemContainer[key],
+                  val,
+                );
+            } else {
+              returningMultipleItemContainer[key] = val;
+            }
+          }
         }
       }
 
-      return { card, project };
+      return returningMultipleItemContainer;
     } catch (error) {
       throw new InternalServerErrorException(error);
     }
@@ -90,30 +98,29 @@ export class PerformMultipleAutomationsCommandHandler
     private readonly commandBus: CommandBus,
   ) {}
 
-  async execute(command: PerformMultipleAutomationsCommand): Promise<{
-    cards: MappedItem<Card>;
-    projects: MappedItem<Project>;
-  }> {
+  async execute(
+    command: PerformMultipleAutomationsCommand,
+  ): Promise<MultipleItemContainer> {
     try {
-      const { updates, cards, projects } = command;
+      const { cards, updates, cardIdToProject, cardIdToCircle, caller } =
+        command;
 
-      const updatedCards = {};
-      const updatedProjects = {};
-
-      for (const cardId of Object.keys(updates)) {
-        const { card, project } = await this.commandBus.execute(
+      let items: MultipleItemContainer = {};
+      for (const update of updates) {
+        items = await this.commandBus.execute(
           new PerformAutomationCommand(
-            updates[cardId] as Partial<Card>,
-            cards[cardId] as Card,
-            projects[cardId] as Project,
+            {
+              automations: cardIdToProject[update.id].automations,
+              update,
+              card: cards[update.id] as Card,
+              project: cardIdToProject[update.id],
+            },
+            caller,
           ),
         );
       }
 
-      return {
-        cards: updatedCards,
-        projects: updatedProjects,
-      };
+      return items;
     } catch (error) {
       throw new InternalServerErrorException(error);
     }

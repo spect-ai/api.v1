@@ -9,8 +9,10 @@ import { GetProjectByIdQuery } from 'src/project/queries/impl';
 import { RequestProvider } from 'src/users/user.provider';
 import { ArchiveCardCommand } from './commands/archive/impl/archive-card.command';
 import { CreateCardCommand, RevertArchivedCardCommand } from './commands/impl';
+import { UpdateCardCommand } from './commands/impl/update-card.command';
 import { CreateCardRequestDto } from './dto/create-card-request.dto';
 import { DetailedCardResponseDto } from './dto/detailed-card-response-dto';
+import { UpdateCardRequestDto } from './dto/update-card-request.dto';
 import {
   CardArchivalRevertedEvent,
   CardsArchivedEvent,
@@ -92,6 +94,44 @@ export class CardsV1Service {
       );
       throw new InternalServerErrorException(
         'Failed creating new card',
+        error.message,
+      );
+    }
+  }
+
+  async update(
+    id: string,
+    updateCardDto: UpdateCardRequestDto,
+  ): Promise<DetailedCardResponseDto> {
+    try {
+      const card =
+        this.requestProvider.card ||
+        (await this.queryBus.execute(new GetCardByIdQuery(id)));
+      this.validationService.validateCardExists(card);
+      const project =
+        this.requestProvider.project ||
+        (await this.queryBus.execute(new GetProjectByIdQuery(card.project)));
+      const circle =
+        this.requestProvider.circle ||
+        (await this.queryBus.execute(new GetCircleByIdQuery(card.circle)));
+      const updatedCard = await this.commandBus.execute(
+        new UpdateCardCommand(
+          updateCardDto,
+          project,
+          circle,
+          this.requestProvider.user.id,
+          card,
+        ),
+      );
+
+      return updatedCard;
+    } catch (error) {
+      this.logger.logError(
+        `Failed updating card with error: ${error.message}`,
+        this.requestProvider,
+      );
+      throw new InternalServerErrorException(
+        'Failed updating card',
         error.message,
       );
     }

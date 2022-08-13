@@ -4,6 +4,10 @@ import {
   InternalServerErrorException,
 } from '@nestjs/common';
 import { CommandBus, CommandHandler, ICommandHandler } from '@nestjs/cqrs';
+import {
+  PerformAutomationCommand,
+  PerformMultipleAutomationsCommand,
+} from 'src/automation/commands/impl';
 import { ActivityBuilder } from 'src/card/activity.builder';
 import { CardsRepository } from 'src/card/cards.repository';
 import { UpdateCardRequestDto } from 'src/card/dto/update-card-request.dto';
@@ -27,7 +31,25 @@ export class UpdateCardCommandHandler
     try {
       const { updateCardDto, card, project, circle, caller } = command;
 
-      return card;
+      const updatedCard = this.getUpdatedCard(card, project, updateCardDto);
+      console.log('updatedCard', updatedCard);
+      const objectifiedCard = this.commonTools.objectify([card], 'id');
+      const flattenedUpdate = this.commonTools.flatten(updatedCard);
+      const multipleItemContainer = await this.commandBus.execute(
+        new PerformMultipleAutomationsCommand(
+          flattenedUpdate,
+          objectifiedCard,
+          caller,
+          {
+            [card.id]: project,
+          },
+          {
+            [card.id]: circle,
+          },
+        ),
+      );
+      console.log(multipleItemContainer);
+      return multipleItemContainer;
     } catch (error) {
       throw new InternalServerErrorException(error);
     }

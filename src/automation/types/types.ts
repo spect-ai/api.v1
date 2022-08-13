@@ -1,4 +1,27 @@
+import { Card, ExtendedCard } from 'src/card/model/card.model';
+import { Circle } from 'src/circle/model/circle.model';
+import { MappedItem, MappedPartialItem } from 'src/common/interfaces';
 import { Status } from 'src/common/types/status.type';
+import { Project } from 'src/project/model/project.model';
+import { Retro } from 'src/retro/models/retro.model';
+
+export type MultipleItemContainer = {
+  updates?: MappedPartialItem<Card | Retro | Project | Circle>;
+  cards?: MappedPartialItem<Card>;
+  projects?: MappedPartialItem<Project>;
+  circles?: MappedPartialItem<Circle>;
+  retros?: MappedPartialItem<Retro>;
+};
+
+export type PerformAutomationCommandContainer = {
+  automations: MappedItem<Automation>;
+  update?: Partial<Card | Retro | Project | Circle>;
+  card?: Card | ExtendedCard;
+  project?: Project;
+  circle?: Circle;
+  retro?: Retro;
+  misc?: any;
+};
 
 export type Automation = {
   id: string;

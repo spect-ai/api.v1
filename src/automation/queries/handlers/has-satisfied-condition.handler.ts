@@ -19,11 +19,17 @@ export class HasSatisfiedConditionsQueryHandler
   async execute(query: HasSatisfiedConditionsQuery): Promise<boolean> {
     console.log('HasSatisfiedConditionsQueryHandler');
 
-    const { card, conditions } = query;
+    const { performAutomationCommandContainer, caller, conditions } = query;
+    const { card, project, circle, retro } = performAutomationCommandContainer;
 
     for (const condition of conditions) {
+      console.log(condition);
       const conditionQuery = conditionIdToConditionQueryMap[condition.id];
-      if (!(await this.queryBus.execute(new conditionQuery(card, condition)))) {
+      if (
+        !(await this.queryBus.execute(
+          new conditionQuery(performAutomationCommandContainer, condition),
+        ))
+      ) {
         return false;
       }
     }
@@ -40,7 +46,8 @@ export class HasSatisfiedBasicConditionQueryHandler
   async execute(query: HasSatisfiedBasicConditionQuery): Promise<boolean> {
     console.log('HasSatisfiedBasicConditionQueryHandler');
 
-    const { card, condition } = query;
+    const { performAutomationCommandContainer, condition } = query;
+    const { card } = performAutomationCommandContainer;
     switch (condition.id) {
       case 'checkColumn':
         return this.satisfies(
@@ -99,8 +106,8 @@ export class HasSatisfiedStatusConditionQueryHandler
   async execute(query: HasSatisfiedStatusConditionQuery): Promise<boolean> {
     console.log('HasSatisfiedStatusConditionQueryHandler');
 
-    const { card, condition } = query;
-
+    const { performAutomationCommandContainer, condition } = query;
+    const { card } = performAutomationCommandContainer;
     for (const [statusKey, status] of Object.entries(condition.item.is)) {
       if (card.status[statusKey] !== status) {
         return false;
@@ -120,8 +127,8 @@ export class HasSatisfiedMemberConditionQueryHandler
   async execute(query: HasSatisfiedMemberConditionQuery): Promise<boolean> {
     console.log('HasSatisfiedMemberConditionQueryHandler');
 
-    const { card, condition } = query;
-
+    const { performAutomationCommandContainer, condition } = query;
+    const { card } = performAutomationCommandContainer;
     return true;
   }
 }
@@ -135,8 +142,8 @@ export class HasSatisfiedDeadlineConditionQueryHandler
   async execute(query: HasSatisfiedDeadlineConditionQuery): Promise<boolean> {
     console.log('HasSatisfiedDeadlineConditionQueryHandler');
 
-    const { card, condition } = query;
-
+    const { performAutomationCommandContainer, condition } = query;
+    const { card } = performAutomationCommandContainer;
     return true;
   }
 }

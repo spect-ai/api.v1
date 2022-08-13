@@ -19,6 +19,7 @@ import { CardsV1Service } from './cards-v1.service';
 import { UpdatePaymentCommand } from './commands/impl';
 import { CreateCardRequestDto } from './dto/create-card-request.dto';
 import { DetailedCardResponseDto } from './dto/detailed-card-response-dto';
+import { UpdateCardRequestDto } from './dto/update-card-request.dto';
 import { UpdatePaymentInfoDto } from './dto/update-payment-info.dto';
 import { GetCardByIdQuery } from './queries/impl';
 
@@ -62,5 +63,15 @@ export class CardsV1Controller {
     @Param() params: ObjectIdDto,
   ): Promise<DetailedProjectResponseDto> {
     return await this.cardsService.revertArchival(params.id);
+  }
+
+  @SetMetadata('permissions', ['update'])
+  @UseGuards(CardAuthGuard)
+  @Patch('/:id/')
+  async update(
+    @Param() params: ObjectIdDto,
+    @Body() updateCardRequestDto: UpdateCardRequestDto,
+  ): Promise<DetailedCardResponseDto> {
+    return await this.cardsService.update(params.id, updateCardRequestDto);
   }
 }

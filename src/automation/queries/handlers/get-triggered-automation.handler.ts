@@ -1,37 +1,7 @@
 import { IQueryHandler, QueryBus, QueryHandler } from '@nestjs/cqrs';
 import { LoggingService } from 'src/logging/logging.service';
-import {
-  GetTriggeredAutomationForMultipleCardsQuery,
-  GetTriggeredAutomationsQuery,
-} from '../impl';
+import { GetTriggeredAutomationsQuery } from '../impl';
 import { triggerIdToQueryHandlerMap } from '../impl/is-triggered.query';
-
-@QueryHandler(GetTriggeredAutomationForMultipleCardsQuery)
-export class GetTriggeredAutomationForMultipleCardsQueryHandler
-  implements IQueryHandler<GetTriggeredAutomationForMultipleCardsQuery>
-{
-  constructor(private readonly queryBus: QueryBus) {}
-
-  async execute(
-    query: GetTriggeredAutomationForMultipleCardsQuery,
-  ): Promise<{ [id: string]: string[] }> {
-    console.log('GetTriggeredAutomationForMultipleCardsHandler');
-    const { cards, updates, projects } = query;
-
-    const cardIdToTriggeredAutomation = {};
-    for (const card of cards) {
-      cardIdToTriggeredAutomation[card.id] = this.queryBus.execute(
-        new GetTriggeredAutomationsQuery(
-          card,
-          updates[card.id],
-          Object.values(projects[card.project].automations),
-        ),
-      );
-    }
-
-    return cardIdToTriggeredAutomation;
-  }
-}
 
 @QueryHandler(GetTriggeredAutomationsQuery)
 export class GetTriggeredAutomationsQueryHandler
@@ -48,9 +18,10 @@ export class GetTriggeredAutomationsQueryHandler
     try {
       console.log('GetTriggeredAutomationsQueryHandler');
 
-      const { card, update, automations } = query;
+      const { performAutomationCommandContainer, caller } = query;
+      const { card, update, automations } = performAutomationCommandContainer;
       const triggeredAutomationIds = [];
-      for (const automation of automations) {
+      for (const automation of Object.values(automations)) {
         try {
           const { trigger } = automation;
           const query = triggerIdToQueryHandlerMap[trigger.id];

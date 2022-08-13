@@ -27,7 +27,10 @@ export class IsStatusTriggeredQueryHandler
     for (const [key, value] of Object.entries(
       (trigger.item as StatusChangeTrigger).from,
     )) {
-      if (value !== card[key]) {
+      console.log(value);
+      console.log(card.status);
+
+      if (value !== card.status[key]) {
         return false;
       }
     }
@@ -35,7 +38,9 @@ export class IsStatusTriggeredQueryHandler
     for (const [key, value] of Object.entries(
       (trigger.item as StatusChangeTrigger).to,
     )) {
-      if (value !== update[key]) {
+      console.log(value);
+      console.log(update.status);
+      if (value !== update.status[key]) {
         return false;
       }
     }

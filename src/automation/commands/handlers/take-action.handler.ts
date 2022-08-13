@@ -3,6 +3,7 @@ import {
   ChangeMemberAction,
   ChangeSimpleFieldAction,
   ChangeStatusAction,
+  MultipleItemContainer,
 } from 'src/automation/types/types';
 import { Card } from 'src/card/model/card.model';
 import { CardsProjectService } from 'src/project/cards.project.service';
@@ -14,6 +15,7 @@ import {
   ChangeMemberActionCommand,
   ChangeSimpleFieldActionCommand,
   ChangeStatusActionCommand,
+  TakeActionsCommand,
 } from '../impl/take-action.command';
 
 @CommandHandler(ChangeStatusActionCommand)
@@ -26,7 +28,8 @@ export class ChangeStatusActionCommandHandler
   async execute(query: ChangeStatusActionCommand): Promise<Card> {
     console.log('ChangeStatusActionCommandHandler');
 
-    const { card, action } = query;
+    const { performAutomationCommandContainer, action } = query;
+    const { card } = performAutomationCommandContainer;
 
     return {
       ...card,
@@ -48,8 +51,8 @@ export class ChangeMemberActionCommandHandler
   async execute(query: ChangeMemberActionCommand): Promise<Card> {
     console.log('ChangeMemberActionCommandHandler');
 
-    const { card, action } = query;
-
+    const { performAutomationCommandContainer, action } = query;
+    const { card } = performAutomationCommandContainer;
     const memberType = action.id === 'changeAssignee' ? 'assignee' : 'reviewer';
     const item = action.item as ChangeMemberAction;
     let resCard = card;
@@ -95,8 +98,8 @@ export class ChangeLabelActionCommandHandler
   async execute(query: ChangeLabelActionCommand): Promise<Card> {
     console.log('ChangeLabelActionCommandHandler');
 
-    const { card, action } = query;
-
+    const { performAutomationCommandContainer, action } = query;
+    const { card } = performAutomationCommandContainer;
     const item = action.item as ChangeMemberAction;
     let resCard = card;
 
@@ -139,7 +142,8 @@ export class ChangeSimpleFieldActionCommandHandler
   async execute(query: ChangeSimpleFieldActionCommand): Promise<Card> {
     console.log('ChangeSimpleFieldActionCommandHandler');
 
-    const { card, action } = query;
+    const { performAutomationCommandContainer, action } = query;
+    const { card } = performAutomationCommandContainer;
     const item = action.item as ChangeSimpleFieldAction;
     switch (action.id) {
       case 'changeType':
@@ -166,16 +170,16 @@ export class ChangeColumnActionCommandHandler
 
   async execute(
     query: ChangeColumnActionCommand,
-  ): Promise<{ card: Partial<Card>; project: Partial<Project> }> {
+  ): Promise<MultipleItemContainer> {
     console.log('ChangeColumnActionCommandHandler');
 
-    const { card, extra, action } = query;
-    const project = extra.project;
+    const { performAutomationCommandContainer, action } = query;
+    const { card, project } = performAutomationCommandContainer;
     const item = action.item as ChangeSimpleFieldAction;
 
-    const updatedProject = this.cardsProjectService.reorderCard(
+    const updatedProject = this.cardsProjectService.reorderCardNew(
       project,
-      card._id.toString(),
+      card.id,
       {
         destinationColumnId: item.to as string,
         destinationCardIndex: 0,
@@ -183,10 +187,12 @@ export class ChangeColumnActionCommandHandler
     );
 
     return {
-      card: {
-        columnId: item.to as string,
+      cards: {
+        [card.id]: {
+          columnId: item.to as string,
+        },
       },
-      project: updatedProject[project._id.toString()],
+      projects: updatedProject,
     };
   }
 }

@@ -1,4 +1,7 @@
-import { Action } from 'src/automation/types/types';
+import {
+  Action,
+  PerformAutomationCommandContainer,
+} from 'src/automation/types/types';
 import {
   ArchiveCardCommand,
   RevertArchivedCardCommand,
@@ -6,51 +9,53 @@ import {
 import { Card, ExtendedCard } from 'src/card/model/card.model';
 import { Project } from 'src/project/model/project.model';
 
+export class TakeActionsCommand {
+  constructor(
+    public readonly performAutomationCommandContainer: PerformAutomationCommandContainer,
+    public readonly caller: string,
+    public readonly actions: Action[],
+  ) {}
+}
+
 export class ChangeStatusActionCommand {
   constructor(
-    public readonly card: Card | ExtendedCard,
+    public readonly performAutomationCommandContainer: PerformAutomationCommandContainer,
     public readonly action: Action,
-    public readonly extra?: any,
   ) {}
 }
 
 export class ChangeMemberActionCommand {
   constructor(
-    public readonly card: Card | ExtendedCard,
+    public readonly performAutomationCommandContainer: PerformAutomationCommandContainer,
     public readonly action: Action,
-    public readonly extra?: any,
   ) {}
 }
 
 export class ChangeLabelActionCommand {
   constructor(
-    public readonly card: Card | ExtendedCard,
+    public readonly performAutomationCommandContainer: PerformAutomationCommandContainer,
     public readonly action: Action,
-    public readonly extra?: any,
   ) {}
 }
 
 export class ChangeSimpleFieldActionCommand {
   constructor(
-    public readonly card: Card | ExtendedCard,
+    public readonly performAutomationCommandContainer: PerformAutomationCommandContainer,
     public readonly action: Action,
-    public readonly extra?: any,
   ) {}
 }
 
 export class ChangeColumnActionCommand {
   constructor(
-    public readonly card: Card | ExtendedCard,
+    public readonly performAutomationCommandContainer: PerformAutomationCommandContainer,
     public readonly action: Action,
-    public readonly extra?: any,
   ) {}
 }
 
 export class ChangeDeadlineActionCommand {
   constructor(
-    public readonly card: Card | ExtendedCard,
+    public readonly performAutomationCommandContainer: PerformAutomationCommandContainer,
     public readonly action: Action,
-    public readonly extra?: any,
   ) {}
 }
 
