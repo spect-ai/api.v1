@@ -11,6 +11,7 @@ import { Reference } from 'src/users/types/types';
 import { UsersRepository } from 'src/users/users.repository';
 import { NotificationEvent } from '../impl';
 import { LoggingService } from 'src/logging/logging.service';
+import { v4 as uuidv4 } from 'uuid';
 
 @EventsHandler(NotificationEvent)
 export class NotificationEventHandler
@@ -45,11 +46,14 @@ export class NotificationEventHandler
       if (generatedContent) {
         const { content, ref } = generatedContent;
         recipientEntity.notifications.push({
+          id: uuidv4(),
           content: content,
+          type: itemType,
           ref: ref,
           linkPath,
           actor,
           timestamp: new Date(),
+          read: false,
         });
         await this.userRepository.updateById(recipientEntity.id, {
           notifications: recipientEntity.notifications,

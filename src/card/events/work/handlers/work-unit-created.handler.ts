@@ -51,7 +51,7 @@ export class WorkUnitCreatedEventHandler
             'card',
             card as Card,
             thread.workUnits[workUnitId].user,
-            [],
+            [circleSlug, projectSlug, card.slug],
             caller,
             null,
           ),
