@@ -10,6 +10,7 @@ import {
   Notification,
   UserSubmittedApplication,
 } from '../types/types';
+import { Retro } from 'src/retro/models/retro.model';
 
 @useMongoosePlugin()
 export class User extends ProfileModel {
@@ -144,4 +145,10 @@ export class User extends ProfileModel {
    */
   @prop({ ref: () => User, type: Schema.Types.String, default: [] })
   followedByUsers: string[];
+
+  /**
+   * Users following the user
+   */
+  @prop({ ref: () => Retro, type: Schema.Types.String, default: [] })
+  retro: string[];
 }

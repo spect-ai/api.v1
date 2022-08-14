@@ -46,6 +46,7 @@ export type Activity = {
     | 'updateLabels'
     | 'updatePriority'
     | 'updateCardType'
+    | 'updateStatus'
     | 'updateColumn'
     | 'createWorkThread'
     | 'updateWorkThread'

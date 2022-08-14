@@ -15,12 +15,7 @@ import { MappedCard } from 'src/card/types/types';
 
 @Injectable()
 export class AutomationService {
-  constructor(
-    private readonly projectService: ProjectService,
-    private readonly cardProjectService: CardsProjectService,
-    private readonly cardService: CardsService,
-    private readonly requestProvider: RequestProvider,
-  ) {}
+  constructor(private readonly cardProjectService: CardsProjectService) {}
 
   // TODO: Handle all data types
   satisfied(
@@ -195,6 +190,7 @@ export class AutomationService {
     card: Card,
     project: Project,
     update: Partial<Card>,
+    caller: string,
   ): GlobalDocumentUpdate {
     let globalUpdate: GlobalDocumentUpdate = {
       card: {},
@@ -240,6 +236,7 @@ export class AutomationService {
             properties[0],
             value,
             card,
+            caller,
           );
         }
       }
@@ -312,13 +309,14 @@ export class AutomationService {
     property: string,
     value: ActionValue,
     card: Card,
+    caller: string,
   ): GlobalDocumentUpdate {
     let cardUpdate = {
       [card.id]: {},
     };
     // eslint-disable-next-line prefer-const
     for (let [key, val] of Object.entries(value)) {
-      val = this.replaceCaller(val);
+      val = this.replaceCaller(val, caller);
       if (key === 'to') {
         cardUpdate[card.id][property] = val;
       } else if (key === 'add') {
@@ -363,14 +361,12 @@ export class AutomationService {
     };
   }
 
-  replaceCaller(value: any) {
+  replaceCaller(value: any, caller: string) {
     if (value === '[caller]') {
-      value = this.requestProvider.user.id;
+      value = caller;
     }
     if (Array.isArray(value)) {
-      value = value.map((v) =>
-        v === '[caller]' ? this.requestProvider.user.id : v,
-      );
+      value = value.map((v) => (v === '[caller]' ? caller : v));
     }
     return value;
   }

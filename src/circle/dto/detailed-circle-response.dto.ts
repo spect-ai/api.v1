@@ -87,4 +87,10 @@ export class DetailedCircleResponseDto {
    */
   @IsObject()
   memberDetails?: object;
+
+  /**
+   * Safe addresses of the circle
+   */
+  @IsObject()
+  safeAddress?: object;
 }

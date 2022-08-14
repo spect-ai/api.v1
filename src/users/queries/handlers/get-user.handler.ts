@@ -22,6 +22,11 @@ import {
   GetUserByUsernameQuery,
 } from '../impl';
 import { GetMultipleCirclesQuery } from 'src/circle/queries/impl';
+import { MappedItem } from 'src/common/interfaces';
+import { Circle } from 'src/circle/model/circle.model';
+import { Card } from 'src/card/model/card.model';
+import { GetMultipleRetrosQuery } from 'src/retro/queries/impl';
+import { Retro } from 'src/retro/models/retro.model';
 
 @Injectable()
 export class UserFieldResolver {
@@ -32,7 +37,7 @@ export class UserFieldResolver {
 
   getContentReferences(
     contentField: Activity[] | Notification[],
-    key: 'cards' | 'users' | 'circles' | 'projects',
+    key: 'cards' | 'users' | 'circles' | 'projects' | 'retro',
   ): string[] {
     const ids = [];
     for (const contentObject of contentField) {
@@ -47,7 +52,7 @@ export class UserFieldResolver {
     return ids;
   }
 
-  async getObjectifiedCardDetails(user: User): Promise<MappedCard> {
+  async getObjectifiedCardDetails(user: User): Promise<MappedItem<Card>> {
     let activityCardIds, notifCardIds: string[];
     if (user.activities) {
       activityCardIds = this.getContentReferences(user.activities, 'cards');
@@ -121,7 +126,7 @@ export class UserFieldResolver {
     return this.commonTools.objectify(cards, 'id');
   }
 
-  async getObjectifiedUserDetails(user: User): Promise<MappedUser> {
+  async getObjectifiedUserDetails(user: User): Promise<MappedItem<User>> {
     let activityUserIds, notifUserIds: string[];
     if (user.activities) {
       activityUserIds = this.getContentReferences(user.activities, 'users');
@@ -147,7 +152,7 @@ export class UserFieldResolver {
     return this.commonTools.objectify(users, 'id');
   }
 
-  async getObjectifiedCircleDetails(user: User): Promise<MappedUser> {
+  async getObjectifiedCircleDetails(user: User): Promise<MappedItem<Circle>> {
     let activityCircleIds, notifCircleIds: string[];
     if (user.activities) {
       activityCircleIds = this.getContentReferences(user.activities, 'circles');
@@ -179,6 +184,45 @@ export class UserFieldResolver {
           name: 1,
           avatar: 1,
           memberRoles: 1,
+          parents: 1,
+        },
+      ),
+    );
+    return this.commonTools.objectify(circles, 'id');
+  }
+
+  async getObjectifiedRetroDetails(user: User): Promise<MappedItem<Retro>> {
+    let activityCircleIds, notifCircleIds: string[];
+    if (user.activities) {
+      activityCircleIds = this.getContentReferences(user.activities, 'retro');
+    }
+
+    if (user.notifications) {
+      notifCircleIds = this.getContentReferences(user.notifications, 'retro');
+    }
+
+    const retroIds = [
+      ...(user.retro || []),
+      ...(activityCircleIds || []),
+      ...(notifCircleIds || []),
+    ];
+    const circles = await this.queryBus.execute(
+      new GetMultipleRetrosQuery(
+        {
+          _id: { $in: retroIds },
+        },
+        {
+          circle: {
+            name: 1,
+            avatar: 1,
+            memberRoles: 1,
+          },
+        },
+        {
+          id: 1,
+          title: 1,
+          slug: 1,
+          status: 1,
           parents: 1,
         },
       ),
@@ -229,6 +273,7 @@ export class UserFieldResolver {
       circleDetails: {
         ...(await this.getObjectifiedCircleDetails(user)),
       },
+      retroDetails: { ...(await this.getObjectifiedRetroDetails(user)) },
     };
   }
 
@@ -240,7 +285,19 @@ export class UserFieldResolver {
     delete user.githubId;
     delete user.discordId;
     delete user.accounts;
-    return { ...user, cardDetails: {}, userDetails: {}, circleDetails: {} };
+    return {
+      ...user,
+      cardDetails: {
+        ...(await this.getObjectifiedCardDetails(user)),
+      },
+      userDetails: {
+        ...(await this.getObjectifiedUserDetails(user)),
+      },
+      circleDetails: {
+        ...(await this.getObjectifiedCircleDetails(user)),
+      },
+      retroDetails: { ...(await this.getObjectifiedRetroDetails(user)) },
+    };
   }
 }
 

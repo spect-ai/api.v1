@@ -48,6 +48,7 @@ import { CqrsModule } from '@nestjs/cqrs';
 import { CardNotificationService } from './users/notification/card-notification.service';
 import { LoggingService } from './logging/logging.service';
 import { ConfigModule } from '@nestjs/config';
+import { ContractListener } from './common/contract-listener.service';
 
 const databaseUrl =
   process.env.DATABASE_URL || 'mongodb://localhost:27017/nest';
@@ -113,6 +114,7 @@ console.log({ databaseUrl });
     UserCardsService,
     CardNotificationService,
     LoggingService,
+    ContractListener,
   ],
 })
 export class AppModule {}
