@@ -30,6 +30,8 @@ export type WorkUnit = {
   updatedAt: Date;
 };
 
+export type WorkThreadStatus = 'accepted' | 'inRevision' | 'inReview' | 'draft';
+
 export type WorkUnits = {
   [key: string]: WorkUnit;
 };
@@ -41,7 +43,7 @@ export type WorkThread = {
   name: string;
   workUnits: WorkUnits;
   workUnitOrder: string[];
-  status: 'accepted' | 'inReview' | 'inRevision' | 'draft';
+  status: WorkThreadStatus;
   active: boolean;
   threadId: string;
   createdAt: Date;

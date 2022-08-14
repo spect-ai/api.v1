@@ -1,8 +1,10 @@
 import { IQueryHandler, QueryHandler, QueryBus } from '@nestjs/cqrs';
 import {
   BasicTrigger,
+  CardCreateTrigger,
   MemberChangeTrigger,
   StatusChangeTrigger,
+  SubmissionTrigger,
 } from 'src/automation/types/types';
 import { CommonTools } from 'src/common/common.service';
 import {
@@ -11,10 +13,12 @@ import {
   IsDeadlineChangeTriggeredQuery,
   IsMemberChangeTriggeredQuery,
   IsStatusChangeTriggeredQuery,
+  IsSubmissionTriggeredQuery,
 } from '../impl/is-triggered.query';
 import { detailedDiff as objectDiff } from 'deep-object-diff';
 import { same as arraySame } from 'fast-array-diff';
 import { Card } from 'src/card/model/card.model';
+import { CardCreatedEvent } from 'src/card/events/impl';
 
 @QueryHandler(IsStatusChangeTriggeredQuery)
 export class IsStatusTriggeredQueryHandler
@@ -173,6 +177,43 @@ export class IsDeadlineChangeTriggeredQueryHandler
   }
 }
 
+@QueryHandler(IsSubmissionTriggeredQuery)
+export class IsSubmissionTriggeredQueryHandler
+  implements IQueryHandler<IsSubmissionTriggeredQuery>
+{
+  constructor(private readonly queryBus: QueryBus) {}
+
+  async execute(query: IsSubmissionTriggeredQuery): Promise<boolean> {
+    console.log('IsSubmissionTriggeredQueryHandler');
+    const { performAutomationCommandContainer, trigger } = query;
+    const { card, update } = performAutomationCommandContainer;
+
+    const item = trigger.item as SubmissionTrigger;
+
+    if (item.currentOneHasStatus) {
+      const workThreads = Object.values(card.workThreads);
+      const currentWorkThread = workThreads[workThreads.length - 1];
+      if (!(currentWorkThread.status === item.currentOneHasStatus))
+        return false;
+    }
+
+    if (item.allHaveStatus) {
+      for (const workThread of Object.values(card.workThreads)) {
+        if (workThread.status !== item.allHaveStatus) return false;
+      }
+    }
+
+    if (item.atLeastOneHasStatus) {
+      for (const workThread of Object.values(card.workThreads)) {
+        if (workThread.status === item.atLeastOneHasStatus) return true;
+      }
+      return false;
+    }
+
+    return true;
+  }
+}
+
 @QueryHandler(IsCardCreatedTriggeredQuery)
 export class IsCardCreatedTriggeredQueryHandler
   implements IQueryHandler<IsCardCreatedTriggeredQuery>
@@ -181,7 +222,15 @@ export class IsCardCreatedTriggeredQueryHandler
 
   async execute(query: IsCardCreatedTriggeredQuery): Promise<boolean> {
     console.log('IsCardCreatedTriggeredQueryHandler');
+    const { performAutomationCommandContainer, trigger } = query;
+    const { misc, card } = performAutomationCommandContainer;
 
+    const item = trigger.item as CardCreateTrigger;
+
+    if (!misc.createCard) return false;
+    if (item.projectId !== card.project) return false;
+    if (item.columnId && item.columnId !== card.columnId) return false;
+    if (item.isParent && card.parent) return false;
     return true;
   }
 }

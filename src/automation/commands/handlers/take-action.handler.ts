@@ -3,6 +3,7 @@ import {
   ChangeMemberAction,
   ChangeSimpleFieldAction,
   ChangeStatusAction,
+  CloseCardAction,
   MultipleItemContainer,
 } from 'src/automation/types/types';
 import { Card } from 'src/card/model/card.model';
@@ -15,6 +16,8 @@ import {
   ChangeMemberActionCommand,
   ChangeSimpleFieldActionCommand,
   ChangeStatusActionCommand,
+  CloseCardActionCommand,
+  CloseParentCardActionCommand,
   TakeActionsCommand,
 } from '../impl/take-action.command';
 
@@ -56,27 +59,44 @@ export class ChangeMemberActionCommandHandler
   ): Promise<MultipleItemContainer> {
     console.log('ChangeMemberActionCommandHandler');
 
-    const { performAutomationCommandContainer, action } = query;
+    const { performAutomationCommandContainer, action, caller } = query;
     const { card } = performAutomationCommandContainer;
     const memberType = action.id === 'changeAssignee' ? 'assignee' : 'reviewer';
     const item = action.item as ChangeMemberAction;
-    let resCard = {};
+    let resCard = {
+      [memberType]: card[memberType],
+    };
+    if (item.addCaller) {
+      resCard = {
+        [memberType]: [...resCard[memberType], caller],
+      };
+    }
+    if (item.removeCaller) {
+      resCard = {
+        [memberType]: resCard[memberType].filter((member) => caller !== member),
+      };
+    }
 
+    if (item.add) {
+      resCard = {
+        [memberType]: [...resCard[memberType], ...item.add],
+      };
+    }
+    if (item.remove) {
+      resCard = {
+        [memberType]: resCard[memberType].filter(
+          (member) => !item.remove.includes(member),
+        ),
+      };
+    }
     if (item.set) {
       resCard = {
         [memberType]: item.set,
       };
     }
-    if (item.add) {
+    if (item.setToCaller) {
       resCard = {
-        [memberType]: [...card[memberType], ...item.add],
-      };
-    }
-    if (item.remove) {
-      resCard = {
-        [memberType]: card[memberType].filter(
-          (member) => !item.remove.includes(member),
-        ),
+        [memberType]: [caller],
       };
     }
     if (item.clear) {
@@ -203,6 +223,78 @@ export class ChangeColumnActionCommandHandler
       },
       projects: updatedProject,
     };
+  }
+}
+
+@CommandHandler(CloseCardActionCommand)
+export class CloseCardActionCommandHandler
+  implements ICommandHandler<CloseCardActionCommand>
+{
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  constructor() {}
+
+  async execute(query: CloseCardActionCommand): Promise<MultipleItemContainer> {
+    console.log('CloseCardActionCommandHandler');
+
+    const { performAutomationCommandContainer, action } = query;
+    const { card, project, misc } = performAutomationCommandContainer;
+    const item = action.item as CloseCardAction;
+    let res = {};
+    if (misc.subCards && misc.subCards[card.id])
+      for (const subCard of misc.subCards[card.id]) {
+        res = {
+          ...res,
+          [subCard.id]: {
+            status: {
+              ...subCard.status,
+              active: false,
+            },
+          },
+        };
+      }
+
+    return {
+      ...res,
+      [card.id]: {
+        status: {
+          ...card.status,
+          active: false,
+        },
+      },
+    };
+  }
+}
+
+@CommandHandler(CloseParentCardActionCommand)
+export class CloseParentCardActionCommandHandler
+  implements ICommandHandler<CloseParentCardActionCommand>
+{
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  constructor() {}
+
+  async execute(
+    query: CloseParentCardActionCommand,
+  ): Promise<MultipleItemContainer> {
+    console.log('CloseParentCardActionCommandHandler');
+
+    const { performAutomationCommandContainer, action } = query;
+    const { card, project, misc } = performAutomationCommandContainer;
+    const item = action.item as CloseCardAction;
+    let res = {};
+    if (misc.parentCards && misc.parentCards[card.id])
+      for (const parentCard of misc.parentCards[card.id]) {
+        res = {
+          ...res,
+          [parentCard.id]: {
+            status: {
+              ...parentCard.status,
+              active: false,
+            },
+          },
+        };
+      }
+
+    return res;
   }
 }
 

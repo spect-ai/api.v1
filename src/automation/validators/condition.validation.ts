@@ -19,6 +19,7 @@ const conditionIdToValidationMap = {
   checkDeadline: validateDeadlineCondition,
   checkAssignee: validateMemberChangeCondition,
   checkReviewer: validateMemberChangeCondition,
+  checkCardsOnSameLevel: validateBasicCondition,
 };
 
 @ValidatorConstraint({ name: 'validConditions', async: false })

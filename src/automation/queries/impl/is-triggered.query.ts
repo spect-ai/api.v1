@@ -10,8 +10,7 @@ export class IsStatusChangeTriggeredQuery {
     public readonly trigger: Trigger,
   ) {}
 }
-
-export class IsMemberChangeTriggeredQuery {
+export class IsBasicChangeTriggeredQuery {
   constructor(
     public readonly performAutomationCommandContainer: PerformAutomationCommandContainer,
     public readonly trigger: Trigger,
@@ -25,7 +24,21 @@ export class IsDeadlineChangeTriggeredQuery {
   ) {}
 }
 
-export class IsBasicChangeTriggeredQuery {
+export class IsMemberChangeTriggeredQuery {
+  constructor(
+    public readonly performAutomationCommandContainer: PerformAutomationCommandContainer,
+    public readonly trigger: Trigger,
+  ) {}
+}
+
+export class IsSubmissionTriggeredQuery {
+  constructor(
+    public readonly performAutomationCommandContainer: PerformAutomationCommandContainer,
+    public readonly trigger: Trigger,
+  ) {}
+}
+
+export class IsRevisionInstructionsTriggeredQuery {
   constructor(
     public readonly performAutomationCommandContainer: PerformAutomationCommandContainer,
     public readonly trigger: Trigger,
@@ -42,10 +55,12 @@ export class IsCardCreatedTriggeredQuery {
 export const triggerIdToQueryHandlerMap = {
   statusChange: IsStatusChangeTriggeredQuery,
   columnChange: IsBasicChangeTriggeredQuery,
+  priorityChange: IsBasicChangeTriggeredQuery,
+  deadlineChange: IsDeadlineChangeTriggeredQuery,
   assigneeChange: IsMemberChangeTriggeredQuery,
   reviewerChange: IsMemberChangeTriggeredQuery,
-  deadlineChange: IsDeadlineChangeTriggeredQuery,
   typeChange: IsBasicChangeTriggeredQuery,
-  priorityChange: IsBasicChangeTriggeredQuery,
+  submission: IsSubmissionTriggeredQuery,
+  revisionInstructions: IsRevisionInstructionsTriggeredQuery,
   cardCreate: IsCardCreatedTriggeredQuery,
 };

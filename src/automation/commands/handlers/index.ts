@@ -8,6 +8,7 @@ import {
   ChangeMemberActionCommandHandler,
   ChangeSimpleFieldActionCommandHandler,
   ChangeStatusActionCommandHandler,
+  CloseCardActionCommandHandler,
 } from './take-action.handler';
 
 export const CommandHandlers = [
@@ -18,4 +19,5 @@ export const CommandHandlers = [
   ChangeColumnActionCommandHandler,
   ChangeMemberActionCommandHandler,
   ChangeLabelActionCommandHandler,
+  CloseCardActionCommandHandler,
 ];

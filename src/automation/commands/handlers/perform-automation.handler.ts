@@ -65,7 +65,11 @@ export class PerformAutomationCommandHandler
         for (const action of actions) {
           const actionCommand = actionIdToCommandMap[action.id];
           const res = (await this.commandBus.execute(
-            new actionCommand(performAutomationCommandContainer, action),
+            new actionCommand(
+              performAutomationCommandContainer,
+              action,
+              caller,
+            ),
           )) as MultipleItemContainer;
           console.log(res);
           for (const [key, val] of Object.entries(res)) {

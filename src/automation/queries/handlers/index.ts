@@ -11,6 +11,8 @@ import {
   IsStatusTriggeredQueryHandler,
   IsDeadlineChangeTriggeredQueryHandler,
   IsMemberChangeTriggeredQueryHandler,
+  IsSubmissionTriggeredQueryHandler,
+  IsCardCreatedTriggeredQueryHandler,
 } from './is-triggered.handler';
 
 export const QueryHandlers = [
@@ -19,6 +21,8 @@ export const QueryHandlers = [
   IsBasicChangeTriggeredQueryHandler,
   IsDeadlineChangeTriggeredQueryHandler,
   IsMemberChangeTriggeredQueryHandler,
+  IsSubmissionTriggeredQueryHandler,
+  IsCardCreatedTriggeredQueryHandler,
   HasSatisfiedConditionsQueryHandler,
   HasSatisfiedBasicConditionQueryHandler,
   HasSatisfiedDeadlineConditionQueryHandler,

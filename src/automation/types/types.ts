@@ -1,4 +1,5 @@
 import { Card, ExtendedCard } from 'src/card/model/card.model';
+import { WorkThreadStatus } from 'src/card/types/types';
 import { Circle } from 'src/circle/model/circle.model';
 import { MappedItem, MappedPartialItem } from 'src/common/interfaces';
 import { Status } from 'src/common/types/status.type';
@@ -43,8 +44,9 @@ export type CardTriggerId =
   | 'cardCreate'
   | 'cardArchive'
   | 'cardUnarchive'
-  | 'allSubCardsClose'
-  | 'immediateSubCardsClose';
+  | 'submission'
+  | 'revisionInstructions'
+  | 'close';
 
 export type ProjectTriggerId =
   | 'projectCreate'
@@ -62,7 +64,10 @@ export type CardTrigger = {
     | StatusChangeTrigger
     | MemberChangeTrigger
     | DeadlineChangeTrigger
-    | BasicTrigger;
+    | BasicTrigger
+    | SubmissionTrigger
+    | RevisionInstructionsTrigger
+    | CardCreateTrigger;
 };
 
 export type StatusChangeTrigger = {
@@ -95,6 +100,15 @@ export type CardCreateTrigger = {
   columnId?: string;
   isParent?: boolean;
 };
+
+export type SubmissionTrigger = {
+  allHaveStatus?: WorkThreadStatus;
+  atLeastOneHasStatus?: WorkThreadStatus;
+  currentOneHasStatus?: WorkThreadStatus; // Always given by the last index of the array
+};
+
+// eslint-disable-next-line @typescript-eslint/ban-types
+export type RevisionInstructionsTrigger = {};
 
 export type ProjectTrigger = {
   uuid: string;
@@ -138,7 +152,12 @@ export type ConditionId =
 export type Condition = {
   id: ConditionId;
   name: string;
-  item: BasicCondition | DeadlineCondition | MemberCondition | StatusCondition;
+  item:
+    | BasicCondition
+    | DeadlineCondition
+    | MemberCondition
+    | StatusCondition
+    | CheckCardsOnSameLevelCondition;
 };
 
 export type BasicCondition = {
@@ -166,6 +185,16 @@ export type MemberCondition = {
 
 export type StatusCondition = {
   is: Status;
+};
+
+export type SubmissionCondition = {
+  atLeastOneStatus?: string;
+  allHaveStatus?: string;
+  noneHaveStatus?: string;
+};
+
+export type CheckCardsOnSameLevelCondition = {
+  status?: Status;
 };
 
 export type ActionId =
@@ -209,7 +238,8 @@ export type Action = {
     | ChangeStatusAction
     | ChangeMemberAction
     | ChangeLabelAction
-    | ChangeSimpleFieldAction;
+    | ChangeSimpleFieldAction
+    | CloseCardAction;
 };
 
 export type ChangeStatusAction = {
@@ -221,6 +251,9 @@ export type ChangeMemberAction = {
   add?: string[];
   remove?: string[];
   clear?: boolean;
+  setToCaller?: boolean;
+  addCaller?: boolean;
+  removeCaller?: boolean;
 };
 
 export type ChangeLabelAction = {
@@ -238,6 +271,15 @@ export type CreateCardAction = {
   projectId: string;
   fromCardId: string;
   columnId?: string;
+};
+
+export type CloseCardAction = {
+  onlyImmmediateSubCards?: boolean;
+  allSubCards?: boolean;
+};
+
+export type CloseParentCardAction = {
+  cascade?: boolean;
 };
 
 export type CreateMultipleCardsAction = {

@@ -6,8 +6,6 @@ import {
   ArchiveCardCommand,
   RevertArchivedCardCommand,
 } from 'src/card/commands/impl';
-import { Card, ExtendedCard } from 'src/card/model/card.model';
-import { Project } from 'src/project/model/project.model';
 
 export class TakeActionsCommand {
   constructor(
@@ -21,6 +19,7 @@ export class ChangeStatusActionCommand {
   constructor(
     public readonly performAutomationCommandContainer: PerformAutomationCommandContainer,
     public readonly action: Action,
+    public readonly caller: string,
   ) {}
 }
 
@@ -28,6 +27,7 @@ export class ChangeMemberActionCommand {
   constructor(
     public readonly performAutomationCommandContainer: PerformAutomationCommandContainer,
     public readonly action: Action,
+    public readonly caller: string,
   ) {}
 }
 
@@ -35,6 +35,7 @@ export class ChangeLabelActionCommand {
   constructor(
     public readonly performAutomationCommandContainer: PerformAutomationCommandContainer,
     public readonly action: Action,
+    public readonly caller: string,
   ) {}
 }
 
@@ -42,6 +43,7 @@ export class ChangeSimpleFieldActionCommand {
   constructor(
     public readonly performAutomationCommandContainer: PerformAutomationCommandContainer,
     public readonly action: Action,
+    public readonly caller: string,
   ) {}
 }
 
@@ -49,6 +51,7 @@ export class ChangeColumnActionCommand {
   constructor(
     public readonly performAutomationCommandContainer: PerformAutomationCommandContainer,
     public readonly action: Action,
+    public readonly caller: string,
   ) {}
 }
 
@@ -56,6 +59,23 @@ export class ChangeDeadlineActionCommand {
   constructor(
     public readonly performAutomationCommandContainer: PerformAutomationCommandContainer,
     public readonly action: Action,
+    public readonly caller: string,
+  ) {}
+}
+
+export class CloseCardActionCommand {
+  constructor(
+    public readonly performAutomationCommandContainer: PerformAutomationCommandContainer,
+    public readonly action: Action,
+    public readonly caller: string,
+  ) {}
+}
+
+export class CloseParentCardActionCommand {
+  constructor(
+    public readonly performAutomationCommandContainer: PerformAutomationCommandContainer,
+    public readonly action: Action,
+    public readonly caller: string,
   ) {}
 }
 
@@ -70,4 +90,6 @@ export const actionIdToCommandMap = {
   changeType: ChangeSimpleFieldActionCommand,
   archive: ArchiveCardCommand,
   unarchive: RevertArchivedCardCommand,
+  close: CloseCardActionCommand,
+  closeParentCard: CloseParentCardActionCommand,
 };
