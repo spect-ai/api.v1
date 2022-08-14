@@ -25,17 +25,20 @@ export class ChangeStatusActionCommandHandler
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   constructor() {}
 
-  async execute(query: ChangeStatusActionCommand): Promise<Card> {
+  async execute(
+    query: ChangeStatusActionCommand,
+  ): Promise<MultipleItemContainer> {
     console.log('ChangeStatusActionCommandHandler');
 
     const { performAutomationCommandContainer, action } = query;
     const { card } = performAutomationCommandContainer;
 
     return {
-      ...card,
-      status: {
-        ...card.status,
-        ...(action.item as ChangeStatusAction).to,
+      [card.id]: {
+        status: {
+          ...card.status,
+          ...(action.item as ChangeStatusAction).to,
+        },
       },
     };
   }
@@ -48,30 +51,29 @@ export class ChangeMemberActionCommandHandler
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   constructor() {}
 
-  async execute(query: ChangeMemberActionCommand): Promise<Card> {
+  async execute(
+    query: ChangeMemberActionCommand,
+  ): Promise<MultipleItemContainer> {
     console.log('ChangeMemberActionCommandHandler');
 
     const { performAutomationCommandContainer, action } = query;
     const { card } = performAutomationCommandContainer;
     const memberType = action.id === 'changeAssignee' ? 'assignee' : 'reviewer';
     const item = action.item as ChangeMemberAction;
-    let resCard = card;
+    let resCard = {};
 
     if (item.set) {
       resCard = {
-        ...card,
         [memberType]: item.set,
       };
     }
     if (item.add) {
       resCard = {
-        ...card,
         [memberType]: [...card[memberType], ...item.add],
       };
     }
     if (item.remove) {
       resCard = {
-        ...card,
         [memberType]: card[memberType].filter(
           (member) => !item.remove.includes(member),
         ),
@@ -79,12 +81,13 @@ export class ChangeMemberActionCommandHandler
     }
     if (item.clear) {
       resCard = {
-        ...card,
         [memberType]: [],
       };
     }
 
-    return resCard;
+    return {
+      [card.id]: resCard,
+    };
   }
 }
 
@@ -95,40 +98,40 @@ export class ChangeLabelActionCommandHandler
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   constructor() {}
 
-  async execute(query: ChangeLabelActionCommand): Promise<Card> {
+  async execute(
+    query: ChangeLabelActionCommand,
+  ): Promise<MultipleItemContainer> {
     console.log('ChangeLabelActionCommandHandler');
 
     const { performAutomationCommandContainer, action } = query;
     const { card } = performAutomationCommandContainer;
     const item = action.item as ChangeMemberAction;
-    let resCard = card;
+    let resCard = {};
 
     if (item.set) {
       resCard = {
-        ...card,
         labels: item.set,
       };
     }
     if (item.add) {
       resCard = {
-        ...card,
         labels: [...card.labels, ...item.add],
       };
     }
     if (item.remove) {
       resCard = {
-        ...card,
         labels: card.labels.filter((label) => !item.remove.includes(label)),
       };
     }
     if (item.clear) {
       resCard = {
-        ...card,
         labels: [],
       };
     }
 
-    return resCard;
+    return {
+      [card.id]: resCard,
+    };
   }
 }
 
@@ -139,7 +142,9 @@ export class ChangeSimpleFieldActionCommandHandler
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   constructor() {}
 
-  async execute(query: ChangeSimpleFieldActionCommand): Promise<Card> {
+  async execute(
+    query: ChangeSimpleFieldActionCommand,
+  ): Promise<MultipleItemContainer> {
     console.log('ChangeSimpleFieldActionCommandHandler');
 
     const { performAutomationCommandContainer, action } = query;
@@ -148,16 +153,20 @@ export class ChangeSimpleFieldActionCommandHandler
     switch (action.id) {
       case 'changeType':
         return {
-          ...card,
-          type: item.to as 'Task' | 'Bounty',
+          [card.id]: {
+            type: item.to as 'Task' | 'Bounty',
+          },
         };
       case 'changePriority':
         return {
-          ...card,
-          priority: item.to as number,
+          [card.id]: {
+            priority: item.to as number,
+          },
         };
       default:
-        return card;
+        return {
+          [card.id]: {},
+        };
     }
   }
 }

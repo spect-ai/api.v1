@@ -19,14 +19,15 @@ export class GetTriggeredAutomationsQueryHandler
       console.log('GetTriggeredAutomationsQueryHandler');
 
       const { performAutomationCommandContainer, caller } = query;
-      const { card, update, automations } = performAutomationCommandContainer;
+      const { automations } = performAutomationCommandContainer;
       const triggeredAutomationIds = [];
+      console.log('automations', automations);
       for (const automation of Object.values(automations)) {
         try {
           const { trigger } = automation;
           const query = triggerIdToQueryHandlerMap[trigger.id];
           const res = await this.queryBus.execute(
-            new query(card, update, trigger),
+            new query(performAutomationCommandContainer, trigger),
           );
           if (res) {
             triggeredAutomationIds.push(automation.id);

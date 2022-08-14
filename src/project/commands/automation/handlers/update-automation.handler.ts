@@ -12,7 +12,7 @@ export class UpdateAutomationCommandHandler
     private readonly projectRepository: ProjectsRepository,
     private readonly logger: LoggingService,
   ) {
-    this.logger.setContext('CreateAutomationCommandHandler');
+    this.logger.setContext('UpdateAutomationCommandHandler');
   }
 
   async execute(query: UpdateAutomationCommand): Promise<boolean> {

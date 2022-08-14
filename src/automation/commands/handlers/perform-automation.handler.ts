@@ -73,7 +73,7 @@ export class PerformAutomationCommandHandler
               returningMultipleItemContainer[key] =
                 this.commonTools.mergeObjects(
                   returningMultipleItemContainer[key],
-                  val,
+                  val as object,
                 );
             } else {
               returningMultipleItemContainer[key] = val;
@@ -102,8 +102,14 @@ export class PerformMultipleAutomationsCommandHandler
     command: PerformMultipleAutomationsCommand,
   ): Promise<MultipleItemContainer> {
     try {
-      const { cards, updates, cardIdToProject, cardIdToCircle, caller } =
-        command;
+      const {
+        cards,
+        updates,
+        cardIdToProject,
+        cardIdToCircle,
+        caller,
+        cardCreated,
+      } = command;
 
       let items: MultipleItemContainer = {};
       for (const update of updates) {
@@ -114,6 +120,10 @@ export class PerformMultipleAutomationsCommandHandler
               update,
               card: cards[update.id] as Card,
               project: cardIdToProject[update.id],
+              circle: cardIdToCircle[update.id],
+              misc: {
+                cardCreated: cardCreated,
+              },
             },
             caller,
           ),

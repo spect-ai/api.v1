@@ -8,8 +8,13 @@ import {
 import { triggerIdToQueryHandlerMap } from '../queries/impl/is-triggered.query';
 import {
   BasicTrigger,
+  CardCreateTrigger,
+  ColumnCreateTrigger,
+  ColumnDeleteTrigger,
+  ColumnPositionUpdateTrigger,
   DeadlineChangeTrigger,
   MemberChangeTrigger,
+  ProjectCreateTrigger,
   StatusChangeTrigger,
   Trigger,
 } from '../types/types';
@@ -23,6 +28,11 @@ const triggerIdToValidationMap = {
   assigneeChange: validateMemberChangeTrigger,
   reviewerChange: validateMemberChangeTrigger,
   typeChange: validateBasicTrigger,
+  cardCreate: validateCardCreatedTrigger,
+  projectCreate: validateProjectCreatedTrigger,
+  columnCreate: validateColumnCreatedTrigger,
+  columnDelete: validateColumnDeletedTrigger,
+  columnPositionUpdate: validateColumnPositionUpdateTrigger,
 };
 
 @ValidatorConstraint({ name: 'validTrigger', async: false })
@@ -119,5 +129,28 @@ function validateBasicTrigger(item: BasicTrigger) {
 
 function validateDeadlineTrigger(item: DeadlineChangeTrigger) {
   if (!item.before && !item.after && !item.between) return false;
+  return true;
+}
+
+function validateCardCreatedTrigger(item: CardCreateTrigger) {
+  if (!item.projectId) return false;
+  return true;
+}
+
+function validateProjectCreatedTrigger(item: ProjectCreateTrigger) {
+  return true;
+}
+
+function validateColumnCreatedTrigger(item: ColumnCreateTrigger) {
+  return true;
+}
+
+function validateColumnDeletedTrigger(item: ColumnDeleteTrigger) {
+  return true;
+}
+
+function validateColumnPositionUpdateTrigger(
+  item: ColumnPositionUpdateTrigger,
+) {
   return true;
 }

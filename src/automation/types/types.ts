@@ -31,7 +31,7 @@ export type Automation = {
   actions: Action[];
 };
 
-export type TriggerId =
+export type CardTriggerId =
   | 'statusChange'
   | 'columnChange'
   | 'priorityChange'
@@ -46,9 +46,17 @@ export type TriggerId =
   | 'allSubCardsClose'
   | 'immediateSubCardsClose';
 
-export type Trigger = {
+export type ProjectTriggerId =
+  | 'projectCreate'
+  | 'columnPositionUpdate'
+  | 'columnCreate'
+  | 'columnDelete';
+
+export type Trigger = CardTrigger | ProjectTrigger;
+
+export type CardTrigger = {
   uuid: string;
-  id: TriggerId;
+  id: CardTriggerId;
   name: string;
   item:
     | StatusChangeTrigger
@@ -82,20 +90,35 @@ export type DeadlineChangeTrigger = {
   between?: string[];
 };
 
-export const triggerIdToName = {
-  statusChange: 'Status Changes',
-  columnChange: 'Column Changes',
-  priorityChange: 'Priority Changes',
-  deadlineChange: 'Deadline Changes',
-  assigneeChange: 'Assignee Changes',
-  reviewerChange: 'Reviewer Changes',
-  labelChange: 'Label Changes',
-  typeChange: 'Type Changes',
-  cardCreate: 'Card Created',
-  cardArchive: 'Card Archived',
-  cardUnarchive: 'Card Unarchived',
-  allSubCardsClose: 'All Subcards Closed',
-  immediateSubCardsClose: 'Immediate Subcards Closed',
+export type CardCreateTrigger = {
+  projectId: string;
+  columnId?: string;
+  isParent?: boolean;
+};
+
+export type ProjectTrigger = {
+  uuid: string;
+  id: ProjectTriggerId;
+  name: string;
+  item: BasicTrigger;
+};
+
+export type ProjectCreateTrigger = {
+  parents: string[];
+};
+
+export type ColumnCreateTrigger = {
+  projectId: string;
+};
+
+export type ColumnDeleteTrigger = {
+  projectId: string;
+  columnId?: string;
+};
+
+export type ColumnPositionUpdateTrigger = {
+  from?: number;
+  to?: number;
 };
 
 export type ConditionId =
@@ -171,36 +194,13 @@ export type ActionId =
   | 'closeParentCard'
   | 'openParentCard'
   | 'closeOtherCardsOnTheSameLevel'
-  | 'openOtherCardsOnTheSameLevel';
-
-export const actionIdToName = {
-  changeStatus: 'Change Status',
-  changeColumn: 'Change Column',
-  changePriority: 'Change Priority',
-  changeDeadline: 'Change Deadline',
-  changeAssignee: 'Change Assignee',
-  changeReviewer: 'Change Reviewer',
-  changeLabels: 'Change Labels',
-  changeType: 'Change Type',
-  archive: 'Archive',
-  unarchive: 'Unarchive',
-  close: 'Close',
-  open: 'Open',
-  createSubCard: 'Create Subcard',
-  archiveAllSubCards: 'Archive All Subcards',
-  archiveImmediateSubCards: 'Archive Immediate Subcards',
-  unarchiveAllSubCards: 'Unarchive All Subcards',
-  unarchiveImmediateSubCards: 'Unarchive Immediate Subcards',
-  closeAllSubCards: 'Close All Subcards',
-  closeImmediateSubCards: 'Close Immediate Subcards',
-  openAllSubCards: 'Open All Subcards',
-  openImmediateSubCards: 'Open Immediate Subcards',
-  callWebhook: 'Call Webhook',
-  closeParentCard: 'Close Parent Card',
-  openParentCard: 'Open Parent Card',
-  closeOtherCardsOnTheSameLevel: 'Close Other Cards on the Same Level',
-  openOtherCardsOnTheSameLevel: 'Open Other Cards on the Same Level',
-};
+  | 'openOtherCardsOnTheSameLevel'
+  | 'createCard'
+  | 'createMultipleCards'
+  | 'createColumn'
+  | 'removeColumn'
+  | 'createProject'
+  | 'createCircle';
 
 export type Action = {
   id: ActionId;
@@ -232,6 +232,52 @@ export type ChangeLabelAction = {
 
 export type ChangeSimpleFieldAction = {
   to: string | number | boolean | 'Task' | 'Bounty';
+};
+
+export type CreateCardAction = {
+  projectId: string;
+  fromCardId: string;
+  columnId?: string;
+};
+
+export type CreateMultipleCardsAction = {
+  projectId: string;
+  columnId?: string;
+  fromCardIds?: string[];
+  fromImmediateSubCardsOf?: string;
+  fromSubCardsOf?: string;
+};
+
+export type CreateColumnAction = {
+  projectId: string;
+  nameFromTriggerCard?: boolean;
+  positionFromTriggerCard?: boolean;
+  referenceToTriggerCard?: boolean;
+  name?: string;
+  position?: number;
+  reference?: string;
+};
+
+export type RemoveColumnAction = {
+  projectId: string;
+  columnId?: string;
+  positionIdx?: number;
+  columnIdFromTriggerCard?: boolean;
+  relatedColumnIdFromTriggerCard?: boolean;
+};
+
+export type CreateProjectAction = {
+  circleId: string;
+  fromTemplateId: string;
+};
+
+export type CreateCircleAction = {
+  parents?: string[];
+  nameFromTriggerCard?: boolean;
+  referenceToTriggerCard?: boolean;
+  name?: string;
+  fromTemplateId?: string;
+  withProjectsFromTemplateIds?: string[];
 };
 
 export type OldTriggerValue = {

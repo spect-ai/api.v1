@@ -1,34 +1,40 @@
-import { Trigger } from 'src/automation/types/types';
+import {
+  PerformAutomationCommandContainer,
+  Trigger,
+} from 'src/automation/types/types';
 import { Card } from 'src/card/model/card.model';
 
 export class IsStatusChangeTriggeredQuery {
   constructor(
-    public readonly card: Card,
-    public readonly update: Partial<Card>,
+    public readonly performAutomationCommandContainer: PerformAutomationCommandContainer,
     public readonly trigger: Trigger,
   ) {}
 }
 
 export class IsMemberChangeTriggeredQuery {
   constructor(
-    public readonly card: Card,
-    public readonly update: Partial<Card>,
+    public readonly performAutomationCommandContainer: PerformAutomationCommandContainer,
     public readonly trigger: Trigger,
   ) {}
 }
 
 export class IsDeadlineChangeTriggeredQuery {
   constructor(
-    public readonly card: Card,
-    public readonly update: Partial<Card>,
+    public readonly performAutomationCommandContainer: PerformAutomationCommandContainer,
     public readonly trigger: Trigger,
   ) {}
 }
 
 export class IsBasicChangeTriggeredQuery {
   constructor(
-    public readonly card: Card,
-    public readonly update: Partial<Card>,
+    public readonly performAutomationCommandContainer: PerformAutomationCommandContainer,
+    public readonly trigger: Trigger,
+  ) {}
+}
+
+export class IsCardCreatedTriggeredQuery {
+  constructor(
+    public readonly performAutomationCommandContainer: PerformAutomationCommandContainer,
     public readonly trigger: Trigger,
   ) {}
 }
@@ -41,4 +47,5 @@ export const triggerIdToQueryHandlerMap = {
   deadlineChange: IsDeadlineChangeTriggeredQuery,
   typeChange: IsBasicChangeTriggeredQuery,
   priorityChange: IsBasicChangeTriggeredQuery,
+  cardCreate: IsCardCreatedTriggeredQuery,
 };

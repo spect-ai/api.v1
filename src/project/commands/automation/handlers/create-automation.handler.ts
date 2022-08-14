@@ -1,5 +1,6 @@
 import { InternalServerErrorException } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
+import { triggerIdToType } from 'src/automation/constants';
 import { LoggingService } from 'src/logging/logging.service';
 import { CreateAutomationCommand } from 'src/project/commands/automation/impl/create-automation.command';
 import { ProjectsRepository } from 'src/project/project.repository';
@@ -22,7 +23,13 @@ export class CreateAutomationCommandHandler
 
       const { id, createAutomationDto } = query;
       const project = await this.projectRepository.findById(id);
-      const automationOrder = project.automationOrder || [];
+      let automationOrderKey = 'automationOrder';
+      if (triggerIdToType[createAutomationDto.trigger.id] === 'project')
+        automationOrderKey = 'projectAutomationOrder';
+      else if (triggerIdToType[createAutomationDto.trigger.id] === 'circle')
+        automationOrderKey = 'circleAutomationOrder';
+
+      const automationOrder = project[automationOrderKey] || [];
       const automations = project.automations || {};
       const newAutomationId = uuidv4();
       const newAutomation = {
@@ -40,7 +47,7 @@ export class CreateAutomationCommandHandler
         await this.projectRepository.updateProjectAndReturnWithPopulatedReferences(
           id,
           {
-            automationOrder: newAutomationOrder,
+            [automationOrderKey]: newAutomationOrder,
             automations: newAutomations,
           },
         );

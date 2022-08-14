@@ -12,18 +12,21 @@ export class RemoveAutomationCommandHandler
     private readonly projectRepository: ProjectsRepository,
     private readonly logger: LoggingService,
   ) {
-    this.logger.setContext('CreateAutomationCommandHandler');
+    this.logger.setContext('RemoveAutomationCommandHandler');
   }
 
   async execute(query: RemoveAutomationCommand): Promise<boolean> {
     try {
-      console.log('UpdateAutomationCommandHandler');
+      console.log('RemoveAutomationCommandHandler');
 
       const { id, automationId } = query;
       const project = await this.projectRepository.findById(id);
 
       delete project.automations[automationId];
       const newAutomationOrder = project.automationOrder.filter(
+        (automationId) => automationId !== query.automationId,
+      );
+      const newProjectAutomationOrder = project.projectAutomationOrder?.filter(
         (automationId) => automationId !== query.automationId,
       );
 
@@ -33,6 +36,7 @@ export class RemoveAutomationCommandHandler
           {
             automations: project.automations[automationId],
             automationOrder: newAutomationOrder,
+            projectAutomationOrder: newProjectAutomationOrder,
           },
         );
 

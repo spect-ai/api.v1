@@ -18,5 +18,6 @@ export class PerformMultipleAutomationsCommand {
     public readonly caller: string,
     public readonly cardIdToProject: MappedItem<Project>,
     public readonly cardIdToCircle?: MappedItem<Circle>,
+    public readonly cardCreated?: boolean,
   ) {}
 }

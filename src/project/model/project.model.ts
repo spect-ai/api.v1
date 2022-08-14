@@ -57,6 +57,10 @@ export class Project extends BaseModel {
   @prop({ default: [] })
   automationOrder: string[];
 
+  /** Automation priority order */
+  @prop({ default: [] })
+  projectAutomationOrder: string[];
+
   /** Automation rule */
   @prop({ default: {} })
   automations: MappedItem<Automation>;

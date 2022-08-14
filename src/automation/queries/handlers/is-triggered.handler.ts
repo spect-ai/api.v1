@@ -7,12 +7,14 @@ import {
 import { CommonTools } from 'src/common/common.service';
 import {
   IsBasicChangeTriggeredQuery,
+  IsCardCreatedTriggeredQuery,
   IsDeadlineChangeTriggeredQuery,
   IsMemberChangeTriggeredQuery,
   IsStatusChangeTriggeredQuery,
 } from '../impl/is-triggered.query';
 import { detailedDiff as objectDiff } from 'deep-object-diff';
 import { same as arraySame } from 'fast-array-diff';
+import { Card } from 'src/card/model/card.model';
 
 @QueryHandler(IsStatusChangeTriggeredQuery)
 export class IsStatusTriggeredQueryHandler
@@ -23,7 +25,8 @@ export class IsStatusTriggeredQueryHandler
   async execute(query: IsStatusChangeTriggeredQuery): Promise<boolean> {
     console.log('IsStatusTriggeredQueryHandler');
 
-    const { card, update, trigger } = query;
+    const { performAutomationCommandContainer, trigger } = query;
+    const { card, update } = performAutomationCommandContainer;
     for (const [key, value] of Object.entries(
       (trigger.item as StatusChangeTrigger).from,
     )) {
@@ -39,8 +42,8 @@ export class IsStatusTriggeredQueryHandler
       (trigger.item as StatusChangeTrigger).to,
     )) {
       console.log(value);
-      console.log(update.status);
-      if (value !== update.status[key]) {
+      console.log((update as Partial<Card>).status);
+      if (value !== (update as Partial<Card>).status[key]) {
         return false;
       }
     }
@@ -61,8 +64,8 @@ export class IsMemberChangeTriggeredQueryHandler
   async execute(query: IsMemberChangeTriggeredQuery): Promise<boolean> {
     console.log('IsMemberChangeTriggeredQueryHandler');
 
-    const { card, update, trigger } = query;
-
+    const { performAutomationCommandContainer, trigger } = query;
+    const { card, update } = performAutomationCommandContainer;
     const memberType =
       trigger.id === 'assigneeChange' ? 'assignee' : 'reviewer';
     if (!update[memberType]) return false;
@@ -131,15 +134,22 @@ export class IsBasicChangeTriggeredQueryHandler
   async execute(query: IsBasicChangeTriggeredQuery): Promise<boolean> {
     console.log('IsBasicChangeTriggeredQuery');
 
-    const { card, update, trigger } = query;
+    const { performAutomationCommandContainer, trigger } = query;
+    const { card, update } = performAutomationCommandContainer;
     const from = (trigger.item as BasicTrigger).from;
     const to = (trigger.item as BasicTrigger).to;
     if (!from && !to) return false;
-    if (from && (from !== card.columnId || from === update.columnId)) {
+    if (
+      from &&
+      (from !== card.columnId || from === (update as Partial<Card>).columnId)
+    ) {
       return false;
     }
 
-    if (to && (to !== update.columnId || to === card.columnId)) {
+    if (
+      to &&
+      (to !== (update as Partial<Card>).columnId || to === card.columnId)
+    ) {
       return false;
     }
 
@@ -155,6 +165,22 @@ export class IsDeadlineChangeTriggeredQueryHandler
 
   async execute(query: IsDeadlineChangeTriggeredQuery): Promise<boolean> {
     console.log('IsDeadlineChangeTriggeredQuery');
+
+    const { performAutomationCommandContainer, trigger } = query;
+    const { card, update } = performAutomationCommandContainer;
+
+    return true;
+  }
+}
+
+@QueryHandler(IsCardCreatedTriggeredQuery)
+export class IsCardCreatedTriggeredQueryHandler
+  implements IQueryHandler<IsCardCreatedTriggeredQuery>
+{
+  constructor(private readonly queryBus: QueryBus) {}
+
+  async execute(query: IsCardCreatedTriggeredQuery): Promise<boolean> {
+    console.log('IsCardCreatedTriggeredQueryHandler');
 
     return true;
   }
