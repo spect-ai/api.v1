@@ -56,7 +56,7 @@ export class UpdateCardCommandHandler
 
       const objectifiedCard = this.commonTools.objectify([card], 'id');
       const flattenedUpdate = this.commonTools.flatten(updatedCard);
-      console.log('hahaha');
+
       const multipleItemContainer: MultipleItemContainer =
         await this.commandBus.execute(
           new PerformMultipleAutomationsCommand(
@@ -193,7 +193,7 @@ export class UpdateCardCommandHandler
     console.log('hello');
     console.log(itemAfterAutomation);
     console.log(updatedItem);
-    if (itemAfterAutomation) {
+    if (itemAfterAutomation && updatedItem) {
       for (const [itemId, item] of Object.entries(itemAfterAutomation)) {
         if (updatedItem.hasOwnProperty(itemId)) {
           console.log(item);
@@ -202,9 +202,13 @@ export class UpdateCardCommandHandler
             item,
             updatedItem[itemId],
           );
+        } else {
+          updatedItem[itemId] = item;
         }
       }
       return updatedItem;
-    } else return updatedItem;
+    } else if (updatedItem) return updatedItem;
+    else if (itemAfterAutomation) return itemAfterAutomation;
+    else return {};
   }
 }
