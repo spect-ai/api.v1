@@ -37,10 +37,12 @@ export class ChangeStatusActionCommandHandler
     const { card } = performAutomationCommandContainer;
 
     return {
-      [card.id]: {
-        status: {
-          ...card.status,
-          ...(action.item as ChangeStatusAction).to,
+      cards: {
+        [card.id]: {
+          status: {
+            ...card.status,
+            ...(action.item as ChangeStatusAction).to,
+          },
         },
       },
     };
@@ -106,7 +108,9 @@ export class ChangeMemberActionCommandHandler
     }
 
     return {
-      [card.id]: resCard,
+      cards: {
+        [card.id]: resCard,
+      },
     };
   }
 }
@@ -150,7 +154,9 @@ export class ChangeLabelActionCommandHandler
     }
 
     return {
-      [card.id]: resCard,
+      cards: {
+        [card.id]: resCard,
+      },
     };
   }
 }
@@ -173,19 +179,25 @@ export class ChangeSimpleFieldActionCommandHandler
     switch (action.id) {
       case 'changeType':
         return {
-          [card.id]: {
-            type: item.to as 'Task' | 'Bounty',
+          cards: {
+            [card.id]: {
+              type: item.to as 'Task' | 'Bounty',
+            },
           },
         };
       case 'changePriority':
         return {
-          [card.id]: {
-            priority: item.to as number,
+          cards: {
+            [card.id]: {
+              priority: item.to as number,
+            },
           },
         };
       default:
         return {
-          [card.id]: {},
+          cards: {
+            [card.id]: {},
+          },
         };
     }
   }
@@ -254,11 +266,13 @@ export class CloseCardActionCommandHandler
       }
 
     return {
-      ...res,
-      [card.id]: {
-        status: {
-          ...card.status,
-          active: false,
+      cards: {
+        ...res,
+        [card.id]: {
+          status: {
+            ...card.status,
+            active: false,
+          },
         },
       },
     };
@@ -294,7 +308,9 @@ export class CloseParentCardActionCommandHandler
         };
       }
 
-    return res;
+    return {
+      cards: res,
+    };
   }
 }
 

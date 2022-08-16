@@ -114,7 +114,7 @@ export class ProjectsRepository extends BaseRepository<Project> {
     if (acknowledgment.hasWriteErrors()) {
       console.log(acknowledgment.getWriteErrors());
       throw new HttpException(
-        'Something went wrong while updating payment info',
+        'Something went wrong while updating project',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }

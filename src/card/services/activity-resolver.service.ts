@@ -1,8 +1,9 @@
 import { Injectable } from '@nestjs/common';
+import { QueryBus } from '@nestjs/cqrs';
 import { diff } from 'fast-array-diff';
 import { Activity } from 'src/common/types/activity.type';
-import { UsersService } from 'src/users/users.service';
-import { Card } from './model/card.model';
+import { GetMultipleUsersByIdsQuery } from 'src/users/queries/impl';
+import { Card } from '../model/card.model';
 
 const activityIdToFieldMap = {
   updateDeadline: 'deadline',
@@ -24,7 +25,7 @@ const activityIdToFieldNameMap = {
   updateLabels: 'label',
   updatePriority: 'priority',
   updateCardType: 'type',
-  updateColumn: 'column',
+  updateColumn: 'columnId',
   updateStatus: 'status',
 };
 
@@ -49,7 +50,7 @@ const priorityMap = {
 /** TODO: This class will get out of hand, switch activity to strategy pattern */
 @Injectable()
 export class ActivityResolver {
-  constructor(private readonly userService: UsersService) {}
+  constructor(private readonly queryBus: QueryBus) {}
 
   async resolveActivities(card: Card) {
     for (const activity of card.activity) {
@@ -224,14 +225,13 @@ export class ActivityResolver {
         activity.changeLog?.prev[fieldKey],
         activity.changeLog?.next[fieldKey],
       );
-      const addedUsers = await this.userService.getPublicProfileOfMultipleUsers(
-        difference.added as string[],
+      const addedUsers = await this.queryBus.execute(
+        new GetMultipleUsersByIdsQuery(difference.added as string[]),
       );
       const addedUsernames = addedUsers.map((a) => a.username);
-      const removedUsers =
-        await this.userService.getPublicProfileOfMultipleUsers(
-          difference.removed as string[],
-        );
+      const removedUsers = await this.queryBus.execute(
+        new GetMultipleUsersByIdsQuery(difference.removed as string[]),
+      );
       const removedUsernames = removedUsers.map((a) => a.username);
 
       return this.resolveArrayTypeActivityContent(
@@ -309,8 +309,10 @@ export class ActivityResolver {
 
   private async resolvePickedApplication(activity: Activity) {
     try {
-      const assignees = await this.userService.getPublicProfileOfMultipleUsers(
-        activity.changeLog?.next.assignee,
+      const assignees = await this.queryBus.execute(
+        new GetMultipleUsersByIdsQuery(
+          activity.changeLog?.next.assignee as string[],
+        ),
       );
       const usernames = [];
       for (const assignee of assignees) usernames.push(assignee.username);

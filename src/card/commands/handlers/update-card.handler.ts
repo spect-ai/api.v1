@@ -3,18 +3,27 @@ import {
   HttpStatus,
   InternalServerErrorException,
 } from '@nestjs/common';
-import { CommandBus, CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import {
-  PerformAutomationCommand,
-  PerformMultipleAutomationsCommand,
-} from 'src/automation/commands/impl';
-import { ActivityBuilder } from 'src/card/activity.builder';
+  CommandBus,
+  CommandHandler,
+  EventBus,
+  ICommandHandler,
+} from '@nestjs/cqrs';
+import { PerformMultipleAutomationsCommand } from 'src/automation/commands/impl';
+import { MultipleItemContainer } from 'src/automation/types/types';
 import { CardsRepository } from 'src/card/cards.repository';
+import { DetailedCardResponseDto } from 'src/card/dto/detailed-card-response-dto';
 import { UpdateCardRequestDto } from 'src/card/dto/update-card-request.dto';
+import { CardUpdatedEvent } from 'src/card/events/impl';
 import { Card } from 'src/card/model/card.model';
-import { Diff } from 'src/card/types/types';
+import { ActivityBuilder } from 'src/card/services/activity-builder.service';
+import { CardsService } from 'src/card/services/cards.service';
+import { CommonUpdateService } from 'src/card/services/common-update.service';
+import { ResponseBuilder } from 'src/card/services/response.service';
 import { CommonTools } from 'src/common/common.service';
-import { MappedItem, MappedPartialItem } from 'src/common/interfaces';
+import { MappedPartialItem } from 'src/common/interfaces';
+import { CardsProjectService } from 'src/project/cards.project.service';
+import { ReorderCardReqestDto } from 'src/project/dto/reorder-card-request.dto';
 import { Project } from 'src/project/model/project.model';
 import { UpdateCardCommand } from '../impl/update-card.command';
 @CommandHandler(UpdateCardCommand)
@@ -25,86 +34,86 @@ export class UpdateCardCommandHandler
     private readonly cardsRepository: CardsRepository,
     private readonly commandBus: CommandBus,
     private readonly commonTools: CommonTools,
+    private readonly cardsProjectService: CardsProjectService,
+    private readonly eventBus: EventBus,
+    private readonly responseBuilder: ResponseBuilder,
+    private readonly cardsService: CardsService,
+    private readonly commonUpdateService: CommonUpdateService,
+    private readonly activityBuilder: ActivityBuilder,
   ) {}
 
-  async execute(command: UpdateCardCommand): Promise<Card> {
+  async execute(command: UpdateCardCommand): Promise<DetailedCardResponseDto> {
     try {
       const { updateCardDto, card, project, circle, caller } = command;
 
-      const updatedCard = this.getUpdatedCard(card, project, updateCardDto);
-      console.log('updatedCard', updatedCard);
+      let updatedCard = this.getUpdatedCard(
+        caller,
+        card,
+        project,
+        updateCardDto,
+      );
+      let updatedProject = this.getUpdatedProject(card, project, updateCardDto);
+
       const objectifiedCard = this.commonTools.objectify([card], 'id');
       const flattenedUpdate = this.commonTools.flatten(updatedCard);
-      const multipleItemContainer = await this.commandBus.execute(
-        new PerformMultipleAutomationsCommand(
-          flattenedUpdate,
-          objectifiedCard,
+      console.log('hahaha');
+      const multipleItemContainer: MultipleItemContainer =
+        await this.commandBus.execute(
+          new PerformMultipleAutomationsCommand(
+            flattenedUpdate,
+            objectifiedCard,
+            caller,
+            {
+              [card.id]: project,
+            },
+            {
+              [card.id]: circle,
+            },
+          ),
+        );
+      console.log(`multipleItemContainer`);
+
+      console.log(multipleItemContainer);
+      updatedCard = this.merge(updatedCard, multipleItemContainer.cards);
+      updatedProject = this.merge(
+        updatedProject,
+        multipleItemContainer.projects,
+      );
+
+      const diff = this.cardsService.getDifference(card, updatedCard);
+      await this.commonUpdateService.execute(updatedCard, updatedProject);
+      const resultingCard =
+        await this.cardsRepository.getCardWithPopulatedReferences(card.id);
+
+      this.eventBus.publish(
+        new CardUpdatedEvent(
+          resultingCard,
+          diff,
+          circle.slug,
+          project.slug,
           caller,
-          {
-            [card.id]: project,
-          },
-          {
-            [card.id]: circle,
-          },
         ),
       );
-      console.log(multipleItemContainer);
-      return multipleItemContainer;
+      return this.responseBuilder.enrichResponse(resultingCard);
     } catch (error) {
+      console.log(error);
       throw new InternalServerErrorException(error);
     }
   }
 
-  getDifference(card: Card, request: UpdateCardRequestDto): Diff {
-    const filteredCard = {};
-    const filteredCardArrayFields = {};
-    const filteredRequest = {};
-
-    for (const key in request) {
-      if (Array.isArray(card[key])) filteredCardArrayFields[key] = card[key];
-      else {
-        filteredCard[key] = card[key];
-        filteredRequest[key] = request[key];
-      }
-    }
-
-    const objDiff = this.commonTools.findDifference(
-      filteredCard,
-      filteredRequest,
-    ) as Diff;
-    const arrayDiff = {};
-    for (const key in filteredCardArrayFields) {
-      arrayDiff[key] = this.commonTools.findDifference(
-        filteredCardArrayFields[key],
-        request[key],
-      );
-      if (arrayDiff[key]['added'].length > 0) {
-        objDiff['added'] = {
-          ...objDiff['added'],
-          [key]: arrayDiff[key]['added'],
-        };
-      }
-      if (arrayDiff[key]['removed'].length > 0) {
-        objDiff['deleted'] = {
-          ...objDiff['deleted'],
-          [key]: arrayDiff[key]['removed'],
-        };
-      }
-    }
-    return objDiff;
-  }
-
   getUpdatedCard(
+    caller: string,
     card: Card,
     project: Project,
     updateCardDto: UpdateCardRequestDto,
   ): MappedPartialItem<Card> {
-    // const activities = this.activityBuilder.buildUpdatedCardActivity(
-    //   updateCardDto,
-    //   card,
-    //   project,
-    // );
-    // const updatedActivity = [...card.activity, ...activities];
+    const activities = this.activityBuilder.buildUpdatedCardActivity(
+      caller,
+      updateCardDto,
+      card,
+      project,
+    );
+    const updatedActivity = [...card.activity, ...activities];
 
     if (updateCardDto.columnId) {
       if (!project.columnOrder.includes(updateCardDto.columnId))
@@ -116,7 +125,7 @@ export class UpdateCardCommandHandler
     const res = {
       [card.id]: {
         ...updateCardDto,
-        //activity: updatedActivity,
+        activity: updatedActivity,
       },
     };
 
@@ -149,5 +158,53 @@ export class UpdateCardCommandHandler
     }
 
     return res;
+  }
+
+  getUpdatedProject(
+    card: Card,
+    project: Project,
+    updateCardDto: UpdateCardRequestDto,
+  ): MappedPartialItem<Project> {
+    if (
+      (updateCardDto.columnId && updateCardDto.columnId !== card.columnId) ||
+      updateCardDto.cardIndex
+    ) {
+      return this.cardsProjectService.reorderCard(
+        project,
+        card.id || card._id.toString(),
+        {
+          destinationColumnId: updateCardDto.columnId
+            ? updateCardDto.columnId
+            : card.columnId,
+          destinationCardIndex: updateCardDto.cardIndex
+            ? updateCardDto.cardIndex
+            : 0,
+        } as ReorderCardReqestDto,
+      );
+    }
+
+    return {};
+  }
+
+  merge(
+    updatedItem: MappedPartialItem<Card | Project>,
+    itemAfterAutomation: MappedPartialItem<Card | Project>,
+  ): MappedPartialItem<Card | Project> {
+    console.log('hello');
+    console.log(itemAfterAutomation);
+    console.log(updatedItem);
+    if (itemAfterAutomation) {
+      for (const [itemId, item] of Object.entries(itemAfterAutomation)) {
+        if (updatedItem.hasOwnProperty(itemId)) {
+          console.log(item);
+          console.log(updatedItem[itemId]);
+          updatedItem[itemId] = this.commonTools.mergeObjects(
+            item,
+            updatedItem[itemId],
+          );
+        }
+      }
+      return updatedItem;
+    } else return updatedItem;
   }
 }

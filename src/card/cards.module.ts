@@ -14,13 +14,16 @@ import { ActionService } from './actions.service';
 import { CardsController } from './cards.controller';
 import { CardsRepository } from './cards.repository';
 import { CardsService } from './cards.service';
+import { CardsService as CardsServiceV1 } from './services/cards.service';
 import { Card } from './model/card.model';
 import { ApplicationService } from './application.cards.service';
 import { ActivityResolver } from './activity.resolver';
+import { ActivityResolver as ActivityResolverV1 } from './services/activity-resolver.service';
 import { UsersModule } from 'src/users/users.module';
 import { WorkService } from './work.cards.service';
 import { CardValidationService } from './validation.cards.service';
 import { CommonUtility, ResponseBuilder } from './response.builder';
+import { ResponseBuilder as ResponseBuilderV1 } from './services/response.service';
 import { CommentService } from './comments.cards.service';
 import { CardsProjectService } from 'src/project/cards.project.service';
 import { CardsPaymentService } from './payment.cards.service';
@@ -44,7 +47,9 @@ import { QueryHandlers } from './queries/handlers';
 import { LoggingService } from 'src/logging/logging.service';
 import { CardsV1Controller } from './cards-v1.controller';
 import { CommandHandlers } from './commands/handlers';
-import { CardsV1Service } from './cards-v1.service';
+import { CrudOrchestrator } from './orchestrators/crud.orchestrator';
+import { CommonUpdateService } from './services/common-update.service';
+import { ActivityBuilder as ActivityBuilderV1 } from './services/activity-builder.service';
 
 @Module({
   imports: [
@@ -93,7 +98,12 @@ import { CardsV1Service } from './cards-v1.service';
     ...CommandHandlers,
     CardNotificationService,
     LoggingService,
-    CardsV1Service,
+    CrudOrchestrator,
+    CardsServiceV1,
+    ResponseBuilderV1,
+    ActivityResolverV1,
+    ActivityBuilderV1,
+    CommonUpdateService,
   ],
   exports: [
     CardsService,

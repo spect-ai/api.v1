@@ -15,7 +15,7 @@ import { CardAuthGuard, CreateNewCardAuthGuard } from 'src/auth/card.guard';
 import { SessionAuthGuard } from 'src/auth/iron-session.guard';
 import { ObjectIdDto } from 'src/common/dtos/object-id.dto';
 import { DetailedProjectResponseDto } from 'src/project/dto/detailed-project-response.dto';
-import { CardsV1Service } from './cards-v1.service';
+import { CrudOrchestrator } from './orchestrators/crud.orchestrator';
 import { UpdatePaymentCommand } from './commands/impl';
 import { CreateCardRequestDto } from './dto/create-card-request.dto';
 import { DetailedCardResponseDto } from './dto/detailed-card-response-dto';
@@ -27,7 +27,7 @@ import { GetCardByIdQuery } from './queries/impl';
 @ApiTags('cardv1')
 export class CardsV1Controller {
   constructor(
-    private readonly cardsService: CardsV1Service,
+    private readonly crudOrchestrator: CrudOrchestrator,
     private readonly queryBus: QueryBus,
     private readonly commandBus: CommandBus,
   ) {}
@@ -44,7 +44,7 @@ export class CardsV1Controller {
   async create(@Body() card: CreateCardRequestDto): Promise<{
     card: DetailedCardResponseDto;
   }> {
-    return await this.cardsService.create(card);
+    return await this.crudOrchestrator.create(card);
   }
 
   @SetMetadata('permissions', ['update'])
@@ -53,7 +53,7 @@ export class CardsV1Controller {
   async archive(
     @Param() params: ObjectIdDto,
   ): Promise<DetailedProjectResponseDto> {
-    return await this.cardsService.archive(params.id);
+    return await this.crudOrchestrator.archive(params.id);
   }
 
   @SetMetadata('permissions', ['update'])
@@ -62,7 +62,7 @@ export class CardsV1Controller {
   async revertArchive(
     @Param() params: ObjectIdDto,
   ): Promise<DetailedProjectResponseDto> {
-    return await this.cardsService.revertArchival(params.id);
+    return await this.crudOrchestrator.revertArchival(params.id);
   }
 
   @SetMetadata('permissions', ['update'])
@@ -72,6 +72,6 @@ export class CardsV1Controller {
     @Param() params: ObjectIdDto,
     @Body() updateCardRequestDto: UpdateCardRequestDto,
   ): Promise<DetailedCardResponseDto> {
-    return await this.cardsService.update(params.id, updateCardRequestDto);
+    return await this.crudOrchestrator.update(params.id, updateCardRequestDto);
   }
 }

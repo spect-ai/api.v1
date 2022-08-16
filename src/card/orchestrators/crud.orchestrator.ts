@@ -7,24 +7,24 @@ import { AddCardsCommand } from 'src/project/commands/impl';
 import { DetailedProjectResponseDto } from 'src/project/dto/detailed-project-response.dto';
 import { GetProjectByIdQuery } from 'src/project/queries/impl';
 import { RequestProvider } from 'src/users/user.provider';
-import { ArchiveCardCommand } from './commands/archive/impl/archive-card.command';
-import { CreateCardCommand, RevertArchivedCardCommand } from './commands/impl';
-import { UpdateCardCommand } from './commands/impl/update-card.command';
-import { CreateCardRequestDto } from './dto/create-card-request.dto';
-import { DetailedCardResponseDto } from './dto/detailed-card-response-dto';
-import { UpdateCardRequestDto } from './dto/update-card-request.dto';
+import { ArchiveCardCommand } from '../commands/archive/impl/archive-card.command';
+import { CreateCardCommand, RevertArchivedCardCommand } from '../commands/impl';
+import { UpdateCardCommand } from '../commands/impl/update-card.command';
+import { CreateCardRequestDto } from '../dto/create-card-request.dto';
+import { DetailedCardResponseDto } from '../dto/detailed-card-response-dto';
+import { UpdateCardRequestDto } from '../dto/update-card-request.dto';
 import {
   CardArchivalRevertedEvent,
   CardsArchivedEvent,
-} from './events/archive/impl/card-archived.event';
-import { CardCreatedEvent } from './events/impl';
-import { Card } from './model/card.model';
-import { GetCardByIdQuery } from './queries/impl';
-import { ResponseBuilder } from './response.builder';
-import { CardValidationService } from './validation.cards.service';
+} from '../events/archive/impl/card-archived.event';
+import { CardCreatedEvent, CardUpdatedEvent } from '../events/impl';
+import { Card } from '../model/card.model';
+import { GetCardByIdQuery } from '../queries/impl';
+import { ResponseBuilder } from '../response.builder';
+import { CardValidationService } from '../validation.cards.service';
 
 @Injectable()
-export class CardsV1Service {
+export class CrudOrchestrator {
   constructor(
     private readonly requestProvider: RequestProvider,
     private readonly queryBus: QueryBus,
@@ -35,7 +35,7 @@ export class CardsV1Service {
     private readonly responseBuilder: ResponseBuilder,
     private readonly eventBus: EventBus,
   ) {
-    logger.setContext('CardsV1Service');
+    logger.setContext('CrudOrchestrator');
   }
 
   async create(createCardDto: CreateCardRequestDto): Promise<{
@@ -123,7 +123,6 @@ export class CardsV1Service {
           card,
         ),
       );
-
       return updatedCard;
     } catch (error) {
       this.logger.logError(
