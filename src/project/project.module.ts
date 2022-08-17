@@ -23,6 +23,8 @@ import { LoggingService } from 'src/logging/logging.service';
 import { QueryHandlers } from './queries/handlers';
 import { CommandHandlers } from './commands/handlers';
 import { CqrsModule } from '@nestjs/cqrs';
+import { ProjectV1Controller } from './project-v1.controller';
+import { ProjectV1Service } from './project-v1.service';
 
 @Module({
   imports: [
@@ -34,7 +36,7 @@ import { CqrsModule } from '@nestjs/cqrs';
     EthAddressModule,
     CqrsModule,
   ],
-  controllers: [ProjectController],
+  controllers: [ProjectController, ProjectV1Controller],
   providers: [
     ProjectService,
     ProjectsRepository,
@@ -51,6 +53,7 @@ import { CqrsModule } from '@nestjs/cqrs';
     LoggingService,
     ...QueryHandlers,
     ...CommandHandlers,
+    ProjectV1Service,
   ],
   exports: [ProjectService, ProjectsRepository, ProjectModule],
 })

@@ -215,12 +215,4 @@ export class CirclesService {
       );
     }
   }
-
-  async delete(id: string): Promise<Circle> {
-    const circle = await this.circlesRepository.findById(id);
-    if (!circle) {
-      throw new HttpException('Circle not found', HttpStatus.NOT_FOUND);
-    }
-    return await this.circlesRepository.deleteById(id);
-  }
 }

@@ -24,6 +24,7 @@ import { JoinCircleUsingInvitationRequestDto } from './dto/join-circle.dto';
 import { MemberDto } from './dto/params.dto';
 import { AddRoleDto, UpdateRoleDto } from './dto/roles-requests.dto';
 import { SafeAddress } from './dto/safe-request.dto';
+import { UpdateCircleRequestDto } from './dto/update-circle-request.dto';
 import { UpdateMemberRolesDto } from './dto/update-member-role.dto';
 import { Circle } from './model/circle.model';
 import { GetCircleByIdQuery } from './queries/impl';
@@ -88,6 +89,19 @@ export class CircleV1Controller {
     @Body() circle: CreateCircleRequestDto,
   ): Promise<DetailedCircleResponseDto> {
     return await this.circleCrudService.create(circle);
+  }
+
+  @SetMetadata('permissions', ['manageCircleSettings'])
+  @UseGuards(CircleAuthGuard)
+  @Patch('/:id')
+  async update(
+    @Param() param: ObjectIdDto,
+    @Body() updateCircleRequestDto: UpdateCircleRequestDto,
+  ): Promise<DetailedCircleResponseDto> {
+    return await this.circleCrudService.update(
+      param.id,
+      updateCircleRequestDto,
+    );
   }
 
   @SetMetadata('permissions', ['inviteMembers'])

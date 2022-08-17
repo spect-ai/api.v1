@@ -122,9 +122,13 @@ export class RevertArchivalMultipleCardsByIdCommandHandler
   ): Promise<boolean> {
     try {
       const { ids, addToProject } = command;
+      console.log('111');
+
       const cardsWithChildren = await this.queryBus.execute(
-        new GetMultipleCardsWithChildrenQuery(command.ids),
+        new GetMultipleCardsWithChildrenQuery(ids),
       );
+      console.log('222');
+
       let cards = [] as Card[];
 
       for (const cardWithChildren of cardsWithChildren) {
@@ -135,6 +139,7 @@ export class RevertArchivalMultipleCardsByIdCommandHandler
         ];
       }
       const cardIds = cards.map((c) => c._id.toString());
+      console.log('ssoox');
 
       if (addToProject) {
         let projectIdToCards = {};
@@ -149,6 +154,7 @@ export class RevertArchivalMultipleCardsByIdCommandHandler
           new AddCardsInMultipleProjectsCommand(projectIdToCards),
         );
       }
+      console.log('qqq');
 
       /** Mongo only returns an acknowledgment on update and not the updated records itself */
       const updateAcknowledgment = await this.cardsRepository.updateMany(

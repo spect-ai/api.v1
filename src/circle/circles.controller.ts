@@ -189,14 +189,4 @@ export class CirclesController {
       updateMemberRolesDto,
     );
   }
-
-  // TODO: Delete everything withing the circle
-  @SetMetadata('permissions', ['manageCircleSettings'])
-  @UseGuards(CircleAuthGuard)
-  @Delete('/:id/delete')
-  async delete(
-    @Param() param: ObjectIdDto,
-  ): Promise<DetailedCircleResponseDto> {
-    return await this.circlesService.delete(param.id);
-  }
 }

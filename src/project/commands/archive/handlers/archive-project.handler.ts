@@ -6,6 +6,10 @@ import {
   QueryBus,
 } from '@nestjs/cqrs';
 import { ArchiveMultipleCardsByIdCommand } from 'src/card/commands/impl';
+import {
+  RemoveProjectsCommand,
+  RemoveProjectsFromMultipleCirclesCommand,
+} from 'src/circle/commands/impl';
 import { Project } from 'src/project/model/project.model';
 import { ProjectsRepository } from 'src/project/project.repository';
 import { GetProjectByIdQuery } from 'src/project/queries/impl';
@@ -27,7 +31,6 @@ export class ArchiveProjectCommandHandler
       const projectToUpdate = await this.queryBus.execute(
         new GetProjectByIdQuery(id),
       );
-      console.log(projectToUpdate);
       if (!projectToUpdate) {
         throw new InternalServerErrorException('Project not found');
       }
@@ -45,6 +48,15 @@ export class ArchiveProjectCommandHandler
           },
         },
       );
+
+      this.commandBus.execute(
+        new RemoveProjectsFromMultipleCirclesCommand(
+          [updatedProject.id],
+          null,
+          projectToUpdate.parents,
+        ),
+      );
+
       return updatedProject;
     } catch (error) {
       throw new InternalServerErrorException(error.message);

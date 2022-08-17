@@ -11,7 +11,7 @@ import { ProjectV1Service } from './project-v1.service';
 import { GetProjectByIdQuery, GetProjectBySlugQuery } from './queries/impl';
 
 @Controller('project/v1')
-export class ProjectController {
+export class ProjectV1Controller {
   constructor(
     private readonly projectService: ProjectV1Service,
     private readonly queryBus: QueryBus,
