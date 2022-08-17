@@ -92,7 +92,7 @@ export class CardCommandHandler {
       let projectUpdate = {};
       if (
         (updateCardDto.columnId && updateCardDto.columnId !== card.columnId) ||
-        updateCardDto.cardIndex
+        typeof updateCardDto.cardIndex === 'number' // Must do it this way so we support 0 index
       ) {
         projectUpdate = this.cardsProjectService.reorderCard(project, id, {
           destinationColumnId: updateCardDto.columnId
@@ -115,6 +115,9 @@ export class CardCommandHandler {
         automationUpdate.card[id],
         cardUpdate[id],
       ) as MappedCard;
+
+      console.log('globalUpdate');
+      console.log(globalUpdate.project[project.id]);
 
       const diff = this.cardsService.getDifference(card, globalUpdate.card[id]);
 
