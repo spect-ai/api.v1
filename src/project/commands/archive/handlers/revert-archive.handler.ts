@@ -45,7 +45,6 @@ export class RevertArchivedProjectCommandHandler
         {
           status: {
             ...(projectToUpdate.status || {}),
-            active: true,
             archived: false,
           },
         },

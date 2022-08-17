@@ -61,7 +61,6 @@ export class RevertArchiveCardByIdCommandHandler
         {
           $set: {
             'status.archived': false,
-            'status.active': true,
           },
         },
         {
@@ -164,7 +163,6 @@ export class RevertArchivalMultipleCardsByIdCommandHandler
         {
           $set: {
             'status.archived': false,
-            'status.active': true,
           },
         },
         {

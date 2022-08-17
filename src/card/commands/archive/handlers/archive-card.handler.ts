@@ -60,7 +60,6 @@ export class ArchiveCardByIdCommandHandler
         {
           $set: {
             'status.archived': true,
-            'status.active': false,
           },
         },
         {
@@ -152,7 +151,6 @@ export class ArchiveMultipleCardsByIdCommandHandler
         {
           $set: {
             'status.archived': true,
-            'status.active': false,
           },
         },
         {

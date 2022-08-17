@@ -43,7 +43,6 @@ export class ArchiveProjectCommandHandler
         {
           status: {
             ...(projectToUpdate.status || {}),
-            active: false,
             archived: true,
           },
         },

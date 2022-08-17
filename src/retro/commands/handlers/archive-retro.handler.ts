@@ -21,7 +21,6 @@ export class ArchiveRetroCommandHandler
       const updatedRetro = await this.retroRepository.updateById(retro.id, {
         status: {
           ...retro.status,
-          active: false,
           archived: true,
         },
       });
