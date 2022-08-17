@@ -15,6 +15,7 @@ import { UpdateRoleCommandHandler } from '../roles/handlers/update-role.handler'
 import { CreateCircleCommandHandler } from './create-circle.handler';
 import { AddSafeCommandHandler } from '../safe/handlers/add-safe.handler';
 import { RemoveSafeCommandHandler } from '../safe/handlers/remove-safe.handler';
+import { ClaimCircleCommandHandler } from '../claim/handlers/claim-circle.handler';
 
 export const CommandHandlers = [
   RemoveProjectsCommandHandler,
@@ -30,4 +31,5 @@ export const CommandHandlers = [
   UpdateMemberRolesCommandHandler,
   AddSafeCommandHandler,
   RemoveSafeCommandHandler,
+  ClaimCircleCommandHandler,
 ];
