@@ -84,8 +84,10 @@ export class RetroController {
     return await this.retroService.endRetro(param.id);
   }
 
-  @Post('/:id/delete')
-  async delete(@Param('id') id): Promise<DetailedRetroResponseDto> {
-    return await this.retroService.delete(id);
+  @SetMetadata('permissions', ['endRetroManually'])
+  @UseGuards(RetroAuthGuard)
+  @Patch('/:id/archive')
+  async archive(@Param() param: ObjectIdDto): Promise<boolean> {
+    return await this.retroService.archive(param.id);
   }
 }

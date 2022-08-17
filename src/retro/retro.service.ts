@@ -27,6 +27,7 @@ import { GetRetroByIdQuery, GetRetroBySlugQuery } from './queries/impl';
 import { RetroRepository } from './retro.repository';
 import { MappedFeedback, MappedStats } from './types';
 import { LoggingService } from 'src/logging/logging.service';
+import { ArchiveRetroCommand } from './commands/impl/archive-retro.command';
 
 @Injectable()
 export class RetroService {
@@ -244,12 +245,14 @@ export class RetroService {
     }
   }
 
-  async delete(id: string): Promise<DetailedRetroResponseDto> {
-    const retro = await this.retroRepository.findById(id);
+  async archive(id: string): Promise<boolean> {
+    const retro = await this.queryBus.execute(new GetRetroByIdQuery(id));
     if (!retro) {
       throw new HttpException('Retro not found', HttpStatus.NOT_FOUND);
     }
-    const deletedRetro = await this.retroRepository.deleteById(id);
-    return await this.enrichResponse(deletedRetro);
+    const archivedRetro = await this.commandBus.execute(
+      new ArchiveRetroCommand(retro),
+    );
+    return true;
   }
 }

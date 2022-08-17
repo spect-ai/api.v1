@@ -1,9 +1,21 @@
-import { AddCardsCommandHandler } from '../cards/handlers/add-cards.handler';
-import { RemoveCardsCommandHandler } from '../cards/handlers/remove-cards.handler';
+import { ArchiveProjectCommandHandler } from '../archive/handlers/archive-project.handler';
+import { RevertArchivedProjectCommandHandler } from '../archive/handlers/revert-archive.handler';
+import {
+  AddCardsCommandHandler,
+  AddCardsInMultipleProjectsCommandHandler,
+} from '../cards/handlers/add-cards.handler';
+import {
+  RemoveCardsCommandHandler,
+  RemoveCardsInMultipleProjectsCommandHandler,
+} from '../cards/handlers/remove-cards.handler';
 import { DeleteProjectByIdCommandHandler } from './delete-project.handler';
 
 export const CommandHandlers = [
   AddCardsCommandHandler,
   RemoveCardsCommandHandler,
   DeleteProjectByIdCommandHandler,
+  RemoveCardsInMultipleProjectsCommandHandler,
+  AddCardsInMultipleProjectsCommandHandler,
+  ArchiveProjectCommandHandler,
+  RevertArchivedProjectCommandHandler,
 ];

@@ -136,12 +136,4 @@ export class ProjectController {
   ): Promise<DetailedProjectResponseDto> {
     return await this.projectService.deleteView(param.id, viewParam.viewId);
   }
-
-  // TODO: Delete all the cards in the project aswell
-  @SetMetadata('permissions', ['manageProjectSettings'])
-  @UseGuards(ProjectAuthGuard)
-  @Delete('/:id/delete')
-  async delete(@Param() param: ObjectIdDto): Promise<Project> {
-    return await this.projectService.delete(param.id);
-  }
 }

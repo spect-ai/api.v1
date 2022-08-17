@@ -29,6 +29,7 @@ export class RetroAuthGuard implements CanActivate {
     if (permissions.length === 0) return true;
     const collatedUserPermissions =
       await this.circlesService.getCollatedUserPermissions([circleId], userId);
+    console.log(collatedUserPermissions);
     for (const permission of permissions) {
       if (!collatedUserPermissions[permission]) return false;
     }
@@ -45,6 +46,7 @@ export class RetroAuthGuard implements CanActivate {
       request.user = (await this.sessionAuthGuard.validateUser(
         request.session.siwe?.address,
       )) as unknown as User;
+      console.log(request.user);
       if (!request.user) return false;
 
       const retro = await this.retroRepository.findById(request.params.id);

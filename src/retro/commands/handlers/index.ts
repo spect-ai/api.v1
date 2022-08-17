@@ -3,6 +3,7 @@ import { UpdateRetroCommandHandler } from './update-retro.handler';
 import { UpdateRetroVoteCommandHandler } from './update-retro-vote.handler';
 import { EndRetroCommandHandler } from './end-retro.handler';
 import { AddFeedbackCommandHandler } from './add-feedback.handler';
+import { ArchiveRetroCommandHandler } from './archive-retro.handler';
 
 export const CommandHandlers = [
   CreateRetroCommandHandler,
@@ -10,4 +11,5 @@ export const CommandHandlers = [
   UpdateRetroVoteCommandHandler,
   EndRetroCommandHandler,
   AddFeedbackCommandHandler,
+  ArchiveRetroCommandHandler,
 ];
