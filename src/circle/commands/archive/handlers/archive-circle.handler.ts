@@ -27,12 +27,10 @@ export class ArchiveCircleByIdCommandHandler
 
   async execute(command: ArchiveCircleByIdCommand): Promise<boolean> {
     try {
-      console.log('asasas');
       const { id } = command;
       const circleWithRelations = await this.queryBus.execute(
         new GetCircleWithAllRelationsQuery(id, null, 1),
       );
-      console.log(circleWithRelations);
       if (!circleWithRelations || circleWithRelations.length === 0) {
         throw new InternalServerErrorException(
           `Could not find circle with id ${command.id}`,

@@ -72,6 +72,7 @@ export class RetroCreatedEventHandler
       //     },
       //   ),
       // );
+      this.logger.log(`Created Retro: ${event.retro?.title}`);
     } catch (error) {
       this.logger.error(`${error.message}`);
     }

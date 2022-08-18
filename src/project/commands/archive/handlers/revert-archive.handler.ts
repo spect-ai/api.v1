@@ -31,14 +31,12 @@ export class RevertArchivedProjectCommandHandler
       if (!projectToUpdate) {
         throw new InternalServerErrorException('Project not found');
       }
-      console.log('akaka');
       await this.commandBus.execute(
         new RevertArchivalMultipleCardsByIdCommand(
           projectToUpdate.cards,
           false,
         ),
       );
-      console.log('asasas');
 
       const updatedProject = await this.projectRepository.updateById(
         projectToUpdate.id,
@@ -49,7 +47,6 @@ export class RevertArchivedProjectCommandHandler
           },
         },
       );
-      console.log('qqq');
 
       this.commandBus.execute(
         new AddProjectsToMultipleCirclesCommand(

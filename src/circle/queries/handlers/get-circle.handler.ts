@@ -32,7 +32,6 @@ export class GetCircleByIdQueryHandler
         query.selectedFields,
       );
     } catch (error) {
-      console.log(this.logger);
       this.logger.error(
         `Failed while getting circle using id with error: ${error.message}`,
         query,

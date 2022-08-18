@@ -27,7 +27,7 @@ import { SafeAddress } from './dto/safe-request.dto';
 import { UpdateCircleRequestDto } from './dto/update-circle-request.dto';
 import { UpdateMemberRolesDto } from './dto/update-member-role.dto';
 import { Circle } from './model/circle.model';
-import { GetCircleByIdQuery } from './queries/impl';
+import { GetCircleByIdQuery, GetCircleNavigationQuery } from './queries/impl';
 import { CirclesRolesService } from './services/circle-roles.service';
 import { CirclesCrudService } from './services/circles-crud.service';
 import { CircleMembershipService } from './services/circles-membership.service';
@@ -233,7 +233,6 @@ export class CircleV1Controller {
   async archive(
     @Param() param: ObjectIdDto,
   ): Promise<DetailedCircleResponseDto> {
-    console.log('archive');
     return await this.commandBus.execute(
       new ArchiveCircleByIdCommand(param.id),
     );
@@ -247,6 +246,15 @@ export class CircleV1Controller {
   ): Promise<DetailedCircleResponseDto> {
     return await this.commandBus.execute(
       new ClaimCircleCommand(param.id, request.user),
+    );
+  }
+
+  @Get('/:id/circleNav')
+  async circleNav(
+    @Param() param: ObjectIdDto,
+  ): Promise<DetailedCircleResponseDto> {
+    return await this.commandBus.execute(
+      new GetCircleNavigationQuery(param.id),
     );
   }
 }

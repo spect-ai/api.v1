@@ -193,7 +193,6 @@ export class CardsController {
   async createWorkThreadWithPR(
     @Body() createGithubPRDto: CreateGithubPRDto,
   ): Promise<boolean> {
-    console.log(createGithubPRDto);
     return await this.workCommandHandler.handleGithubPR(createGithubPRDto);
   }
 
@@ -385,7 +384,6 @@ export class CardsController {
     @Param() params: ObjectIdDto,
     @Body() applications: PickApplicationDto,
   ): Promise<DetailedCardResponseDto> {
-    console.log(applications);
     return await this.applicationService.pickApplications(
       params.id,
       applications.applicationIds,

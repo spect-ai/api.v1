@@ -41,7 +41,6 @@ export class ResponseBuilder {
         card.application,
       )) {
         if (application.user?.toString() === this.requestProvider.user.id) {
-          console.log('adding application');
           return {
             ...card,
             application: {

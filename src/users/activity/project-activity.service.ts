@@ -8,7 +8,6 @@ export class ProjectActivityService {
     actionType: string,
     project: Project,
   ): { content: string; ref: Reference } {
-    console.log(actionType);
     switch (actionType) {
       case 'create':
         return this.createProjectActivity(project);

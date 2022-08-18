@@ -116,9 +116,6 @@ export class CardCommandHandler {
         cardUpdate[id],
       ) as MappedCard;
 
-      console.log('globalUpdate');
-      console.log(globalUpdate.project[project.id]);
-
       const diff = this.cardsService.getDifference(card, globalUpdate.card[id]);
 
       const cardUpdateAcknowledgment =

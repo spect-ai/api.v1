@@ -10,7 +10,6 @@ export class CardActivityService {
     card: Card,
     diff: Diff<Card>,
   ): { content: string; ref: Reference } {
-    console.log(actionType);
     switch (actionType) {
       case 'create':
         return this.createCardActivity(card);

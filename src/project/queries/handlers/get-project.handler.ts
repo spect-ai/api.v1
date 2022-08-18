@@ -25,7 +25,6 @@ export class GetProjectByIdQueryHandler
       );
       return project;
     } catch (error) {
-      console.log(this.logger);
       this.logger.error(
         `Failed while getting project using id with error: ${error.message}`,
         query,
@@ -56,7 +55,6 @@ export class GetProjectBySlugQueryHandler
       );
       return project;
     } catch (error) {
-      console.log(this.logger);
       this.logger.error(
         `Failed while getting project using slug with error: ${error.message}`,
         query,

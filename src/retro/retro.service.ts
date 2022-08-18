@@ -100,7 +100,6 @@ export class RetroService {
       }
       this.eventBus.publish(new RetroCreatedEvent(createdRetro, circle.slug));
       const res = await this.enrichResponse(createdRetro);
-      console.log(res);
 
       return res;
     } catch (error) {

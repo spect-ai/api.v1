@@ -12,7 +12,6 @@ export class CardNotificationService {
     recipient: string,
     actor: string,
   ): { content: string; ref: Reference } {
-    console.log(actionType);
     switch (actionType) {
       case 'create':
         return this.createCardNotification(recipient, card, actor);

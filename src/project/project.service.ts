@@ -25,6 +25,8 @@ import {
 import { Project } from './model/project.model';
 import { ProjectsRepository } from './project.repository';
 import { LoggingService } from 'src/logging/logging.service';
+import { EventBus } from '@nestjs/cqrs';
+import { CreatedProjectEvent } from './events/impl';
 
 @Injectable()
 export class ProjectService {
@@ -37,6 +39,7 @@ export class ProjectService {
     private readonly cardsProjectService: CardsProjectService,
     private readonly requestProvider: RequestProvider,
     private readonly logger: LoggingService,
+    private readonly eventBus: EventBus,
   ) {
     logger.setContext('ProjectService');
   }
@@ -130,6 +133,9 @@ export class ProjectService {
           projects: [...parentCircle.projects, createdProject],
         });
       }
+      this.eventBus.publish(
+        new CreatedProjectEvent(createdProject, this.requestProvider.user?.id),
+      );
       return createdProject;
     } catch (error) {
       this.logger.logError(

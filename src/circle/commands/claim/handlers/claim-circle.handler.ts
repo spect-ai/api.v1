@@ -32,9 +32,6 @@ export class ClaimCircleCommandHandler
       if (!circle.toBeClaimed || !circle.qualifiedClaimee) {
         throw new InternalServerErrorException('Circle cannot be claimed');
       }
-      console.log(circle.qualifiedClaimee);
-      console.log(caller.ethAddress);
-
       if (circle.qualifiedClaimee) {
         for (const member of circle.qualifiedClaimee) {
           if (member.toLowerCase() === caller.ethAddress.toLowerCase()) {
