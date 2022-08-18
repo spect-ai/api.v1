@@ -193,5 +193,5 @@ export class ExtendedCircle extends Circle {
   /**
    * All the children till the leaf circles
    */
-  flattenedChildrens: Circle[];
+  flattenedChildren: Circle[];
 }

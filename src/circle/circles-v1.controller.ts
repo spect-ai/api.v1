@@ -253,8 +253,6 @@ export class CircleV1Controller {
   async circleNav(
     @Param() param: ObjectIdDto,
   ): Promise<DetailedCircleResponseDto> {
-    return await this.commandBus.execute(
-      new GetCircleNavigationQuery(param.id),
-    );
+    return await this.queryBus.execute(new GetCircleNavigationQuery(param.id));
   }
 }
