@@ -5,6 +5,7 @@ import { Payment } from 'src/common/models/payment.model';
 import { ProfileModel } from 'src/common/models/profile.model';
 import { Activity } from 'src/common/types/activity.type';
 import { MemberRoles, Roles } from 'src/common/types/role.type';
+import { Status } from 'src/common/types/status.type';
 import { Project } from 'src/project/model/project.model';
 import { Retro } from 'src/retro/models/retro.model';
 import { User } from 'src/users/model/users.model';
@@ -165,9 +166,32 @@ export class Circle extends ProfileModel {
   @prop()
   safeAddresses: SafeAddresses;
 
+  /**
+   * The status of the circle
+   */
+  @prop({
+    default: {
+      active: true,
+      archived: false,
+    },
+  })
+  status: Status;
+
   @prop({ default: false })
   toBeClaimed: boolean;
 
   @prop()
   qualifiedClaimee: string[];
+}
+
+export class ExtendedCircle extends Circle {
+  /**
+   * All the parents till the root circle
+   */
+  flattenedParents: Circle[];
+
+  /**
+   * All the children till the leaf circles
+   */
+  flattenedChildrens: Circle[];
 }

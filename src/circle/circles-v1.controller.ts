@@ -15,7 +15,7 @@ import { CircleAuthGuard, CreateCircleAuthGuard } from 'src/auth/circle.guard';
 import { SessionAuthGuard } from 'src/auth/iron-session.guard';
 import { ObjectIdDto } from 'src/common/dtos/object-id.dto';
 import { RequiredRoleDto } from 'src/common/dtos/string.dto';
-import { ClaimCircleCommand } from './commands/impl';
+import { ArchiveCircleByIdCommand, ClaimCircleCommand } from './commands/impl';
 import { AddSafeCommand, RemoveSafeCommand } from './commands/safe/impl';
 import { CreateCircleRequestDto } from './dto/create-circle-request.dto';
 import { DetailedCircleResponseDto } from './dto/detailed-circle-response.dto';
@@ -224,6 +224,18 @@ export class CircleV1Controller {
   ): Promise<DetailedCircleResponseDto> {
     return await this.commandBus.execute(
       new RemoveSafeCommand(safeDto, null, param.id),
+    );
+  }
+
+  @SetMetadata('permissions', ['manageCircleSettings'])
+  @UseGuards(CircleAuthGuard)
+  @Patch('/:id/archive')
+  async archive(
+    @Param() param: ObjectIdDto,
+  ): Promise<DetailedCircleResponseDto> {
+    console.log('archive');
+    return await this.commandBus.execute(
+      new ArchiveCircleByIdCommand(param.id),
     );
   }
 

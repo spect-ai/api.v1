@@ -21,6 +21,7 @@ import {
   AddProjectsCommandHandler,
   AddProjectsToMultipleCirclesCommandHandler,
 } from '../projects/handlers/add-projects.handler';
+import { ArchiveCircleByIdCommandHandler } from '../archive/handlers/archive-circle.handler';
 
 export const CommandHandlers = [
   RemoveProjectsCommandHandler,
@@ -40,4 +41,5 @@ export const CommandHandlers = [
   RemoveSafeCommandHandler,
   ClaimCircleCommandHandler,
   UpdateCircleCommandHandler,
+  ArchiveCircleByIdCommandHandler,
 ];

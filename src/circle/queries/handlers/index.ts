@@ -2,6 +2,8 @@ import {
   GetCircleByFilterQueryHandler,
   GetCircleByIdQueryHandler,
   GetCircleBySlugQueryHandler,
+  GetCircleWithAllRelationsQueryHandler,
+  GetCircleWithChildrenQueryHandler,
   GetMultipleCirclesQueryHandler,
 } from './get-circle.handler';
 
@@ -10,4 +12,6 @@ export const QueryHandlers = [
   GetCircleBySlugQueryHandler,
   GetMultipleCirclesQueryHandler,
   GetCircleByFilterQueryHandler,
+  GetCircleWithChildrenQueryHandler,
+  GetCircleWithAllRelationsQueryHandler,
 ];
