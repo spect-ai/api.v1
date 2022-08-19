@@ -1,8 +1,9 @@
 import { InternalServerErrorException } from '@nestjs/common';
-import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
+import { CommandHandler, ICommandHandler, QueryBus } from '@nestjs/cqrs';
 import { CirclesRepository } from 'src/circle/circles.repository';
 import { DetailedCircleResponseDto } from 'src/circle/dto/detailed-circle-response.dto';
-import { Circle } from 'src/circle/model/circle.model';
+import { Circle, ExtendedCircle } from 'src/circle/model/circle.model';
+import { GetCircleWithChildrenQuery } from 'src/circle/queries/impl';
 import { defaultCircleCreatorRoles } from 'src/constants';
 import { LoggingService } from 'src/logging/logging.service';
 import { ClaimCircleCommand } from '../impl/claim-circle.command';
@@ -14,6 +15,7 @@ export class ClaimCircleCommandHandler
   constructor(
     private readonly circlesRepository: CirclesRepository,
     private readonly logger: LoggingService,
+    private readonly queryBus: QueryBus,
   ) {
     this.logger.setContext('ClaimCircleCommandHandler');
   }
@@ -23,8 +25,9 @@ export class ClaimCircleCommandHandler
   ): Promise<DetailedCircleResponseDto | boolean> {
     try {
       const { id, caller } = command;
-      const circle =
-        await this.circlesRepository.getCircleWithUnpopulatedReferences(id);
+      const circle = await this.queryBus.execute(
+        new GetCircleWithChildrenQuery(id),
+      );
       if (!circle) {
         throw new InternalServerErrorException('Circle not found');
       }
@@ -35,7 +38,9 @@ export class ClaimCircleCommandHandler
       if (circle.qualifiedClaimee) {
         for (const member of circle.qualifiedClaimee) {
           if (member.toLowerCase() === caller.ethAddress.toLowerCase()) {
-            return await this.performClaim(circle, caller.id);
+            const res = await this.performClaim(circle, caller.id);
+            console.log(res);
+            return res;
           }
         }
       }
@@ -48,16 +53,24 @@ export class ClaimCircleCommandHandler
   }
 
   async performClaim(
-    circle: Circle,
+    circle: ExtendedCircle,
     callerId: string,
   ): Promise<DetailedCircleResponseDto> {
     const memberRoles = {};
     memberRoles[callerId] = defaultCircleCreatorRoles;
-    return await this.circlesRepository.updateById(circle.id as string, {
-      ...circle,
-      members: [callerId],
-      memberRoles: memberRoles,
-      toBeClaimed: false,
-    });
+    const allCircles = [circle, ...circle.flattenedChildren];
+    const circleUpdate = {};
+    for (const circle of allCircles) {
+      circleUpdate[circle.id] = {
+        ...circle,
+        members: [callerId],
+        memberRoles: memberRoles,
+        toBeClaimed: false,
+      };
+    }
+    await this.circlesRepository.bundleAndExecuteUpdates(circleUpdate);
+    return await this.circlesRepository.getCircleWithPopulatedReferences(
+      circle.id,
+    );
   }
 }
