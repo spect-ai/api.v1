@@ -5,6 +5,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   Request,
   SetMetadata,
   UseGuards,
@@ -22,6 +23,22 @@ import { DetailedCardResponseDto } from './dto/detailed-card-response-dto';
 import { UpdateCardRequestDto } from './dto/update-card-request.dto';
 import { UpdatePaymentInfoDto } from './dto/update-payment-info.dto';
 import { GetCardByIdQuery } from './queries/impl';
+import {
+  CreateWorkThreadCommand,
+  CreateWorkUnitCommand,
+  UpdateWorkThreadCommand,
+  UpdateWorkUnitCommand,
+} from './commands/work/impl';
+import {
+  CreateWorkThreadRequestDto,
+  CreateWorkUnitRequestDto,
+  UpdateWorkThreadRequestDto,
+  UpdateWorkUnitRequestDto,
+} from './dto/work-request.dto';
+import {
+  RequiredThreadIdDto,
+  RequiredWorkUnitIdDto,
+} from 'src/common/dtos/string.dto';
 
 @Controller('card/v1')
 @ApiTags('cardv1')
@@ -73,5 +90,77 @@ export class CardsV1Controller {
     @Body() updateCardRequestDto: UpdateCardRequestDto,
   ): Promise<DetailedCardResponseDto> {
     return await this.crudOrchestrator.update(params.id, updateCardRequestDto);
+  }
+
+  @SetMetadata('permissions', ['submit'])
+  @UseGuards(CardAuthGuard)
+  @Patch('/:id/createWorkThread')
+  async createWorkThread(
+    @Param() params: ObjectIdDto,
+    @Body() createWorkThread: CreateWorkThreadRequestDto,
+    @Request() req,
+  ): Promise<DetailedCardResponseDto> {
+    return await this.commandBus.execute(
+      new CreateWorkThreadCommand(params.id, createWorkThread, req.user.id),
+    );
+  }
+
+  @SetMetadata('permissions', ['submit'])
+  @UseGuards(CardAuthGuard)
+  @Patch('/:id/updateWorkThread')
+  async updateWorkThread(
+    @Param() params: ObjectIdDto,
+    @Query() threadIdParam: RequiredThreadIdDto,
+    @Body() updateWorkThread: UpdateWorkThreadRequestDto,
+    @Request() req,
+  ): Promise<DetailedCardResponseDto> {
+    return await this.commandBus.execute(
+      new UpdateWorkThreadCommand(
+        params.id,
+        threadIdParam.threadId,
+        updateWorkThread,
+        req.user.id,
+      ),
+    );
+  }
+
+  @SetMetadata('permissions', ['submit'])
+  @UseGuards(CardAuthGuard)
+  @Patch('/:id/createWorkUnit')
+  async createWorkUnit(
+    @Param() params: ObjectIdDto,
+    @Query() threadIdParam: RequiredThreadIdDto,
+    @Body() createWorkUnit: CreateWorkUnitRequestDto,
+    @Request() req,
+  ): Promise<DetailedCardResponseDto> {
+    return await this.commandBus.execute(
+      new CreateWorkUnitCommand(
+        params.id,
+        threadIdParam.threadId,
+        createWorkUnit,
+        req.user.id,
+      ),
+    );
+  }
+
+  @SetMetadata('permissions', ['submit'])
+  @UseGuards(CardAuthGuard)
+  @Patch('/:id/updateWorkUnit')
+  async updateWorkUnit(
+    @Param() params: ObjectIdDto,
+    @Query() threadIdParam: RequiredThreadIdDto,
+    @Query() workUnitIdParam: RequiredWorkUnitIdDto,
+    @Body() updateWorkUnit: UpdateWorkUnitRequestDto,
+    @Request() req,
+  ): Promise<DetailedCardResponseDto> {
+    return await this.commandBus.execute(
+      new UpdateWorkUnitCommand(
+        params.id,
+        threadIdParam.threadId,
+        workUnitIdParam.workUnitId,
+        updateWorkUnit,
+        req.user.id,
+      ),
+    );
   }
 }

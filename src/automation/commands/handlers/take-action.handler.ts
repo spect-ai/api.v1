@@ -217,10 +217,9 @@ export class ChangeColumnActionCommandHandler
     const { performAutomationCommandContainer, action } = query;
     const { card, project } = performAutomationCommandContainer;
     const item = action.item as ChangeSimpleFieldAction;
-
     const updatedProject = this.cardsProjectService.reorderCardNew(
       project,
-      card.id,
+      card._id.toString(),
       {
         destinationColumnId: item.to as string,
         destinationCardIndex: 0,

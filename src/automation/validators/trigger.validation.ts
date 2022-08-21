@@ -33,6 +33,7 @@ const triggerIdToValidationMap = {
   columnCreate: validateColumnCreatedTrigger,
   columnDelete: validateColumnDeletedTrigger,
   columnPositionUpdate: validateColumnPositionUpdateTrigger,
+  submission: validateBasicTrigger,
 };
 
 @ValidatorConstraint({ name: 'validTrigger', async: false })

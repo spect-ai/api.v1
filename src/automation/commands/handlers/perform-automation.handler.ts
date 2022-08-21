@@ -56,12 +56,14 @@ export class PerformAutomationCommandHandler
         if (!satisfied) continue;
         automationIdsSatisfyingConditions.push(automationId);
       }
-      console.log(automationIdsSatisfyingConditions);
+      console.log(
+        'automationIdsSatisfyingConditions',
+        automationIdsSatisfyingConditions,
+      );
+
       const returningMultipleItemContainer = {};
       for (const automationId of automationIdsSatisfyingConditions) {
         const { actions } = project.automations[automationId];
-        console.log(actions);
-
         for (const action of actions) {
           const actionCommand = actionIdToCommandMap[action.id];
           const res = (await this.commandBus.execute(
@@ -71,7 +73,6 @@ export class PerformAutomationCommandHandler
               caller,
             ),
           )) as MultipleItemContainer;
-          console.log(res);
           for (const [key, val] of Object.entries(res)) {
             if (returningMultipleItemContainer[key]) {
               returningMultipleItemContainer[key] =

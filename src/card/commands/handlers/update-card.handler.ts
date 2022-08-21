@@ -71,15 +71,16 @@ export class UpdateCardCommandHandler
             },
           ),
         );
-      console.log(`multipleItemContainer`);
 
-      console.log(multipleItemContainer);
-      updatedCard = this.merge(updatedCard, multipleItemContainer.cards);
-      updatedProject = this.merge(
+      updatedCard = this.cardsService.merge(
+        updatedCard,
+        multipleItemContainer.cards,
+      );
+      updatedProject = this.cardsService.merge(
         updatedProject,
         multipleItemContainer.projects,
       );
-
+      console.log(updatedCard);
       const diff = this.cardsService.getDifference(card, updatedCard);
       await this.commonUpdateService.execute(updatedCard, updatedProject);
       const resultingCard =
@@ -184,31 +185,5 @@ export class UpdateCardCommandHandler
     }
 
     return {};
-  }
-
-  merge(
-    updatedItem: MappedPartialItem<Card | Project>,
-    itemAfterAutomation: MappedPartialItem<Card | Project>,
-  ): MappedPartialItem<Card | Project> {
-    console.log('hello');
-    console.log(itemAfterAutomation);
-    console.log(updatedItem);
-    if (itemAfterAutomation && updatedItem) {
-      for (const [itemId, item] of Object.entries(itemAfterAutomation)) {
-        if (updatedItem.hasOwnProperty(itemId)) {
-          console.log(item);
-          console.log(updatedItem[itemId]);
-          updatedItem[itemId] = this.commonTools.mergeObjects(
-            item,
-            updatedItem[itemId],
-          );
-        } else {
-          updatedItem[itemId] = item;
-        }
-      }
-      return updatedItem;
-    } else if (updatedItem) return updatedItem;
-    else if (itemAfterAutomation) return itemAfterAutomation;
-    else return {};
   }
 }

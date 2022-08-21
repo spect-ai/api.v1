@@ -190,11 +190,10 @@ export class IsSubmissionTriggeredQueryHandler
 
     const item = trigger.item as SubmissionTrigger;
 
-    if (item.currentOneHasStatus) {
+    if (item.lastOneHasStatus) {
       const workThreads = Object.values(card.workThreads);
       const currentWorkThread = workThreads[workThreads.length - 1];
-      if (!(currentWorkThread.status === item.currentOneHasStatus))
-        return false;
+      if (!(currentWorkThread.status === item.lastOneHasStatus)) return false;
     }
 
     if (item.allHaveStatus) {

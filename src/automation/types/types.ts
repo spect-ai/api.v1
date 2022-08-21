@@ -104,7 +104,8 @@ export type CardCreateTrigger = {
 export type SubmissionTrigger = {
   allHaveStatus?: WorkThreadStatus;
   atLeastOneHasStatus?: WorkThreadStatus;
-  currentOneHasStatus?: WorkThreadStatus; // Always given by the last index of the array
+  lastOneHasStatus?: WorkThreadStatus; // Always given by the last index of the array
+  firstOneHasStatus?: WorkThreadStatus; // Always given by the last index of the array
 };
 
 // eslint-disable-next-line @typescript-eslint/ban-types

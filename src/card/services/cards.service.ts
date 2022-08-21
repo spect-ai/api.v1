@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { CommonTools } from 'src/common/common.service';
+import { MappedPartialItem } from 'src/common/interfaces';
 import { LoggingService } from 'src/logging/logging.service';
+import { Project } from 'src/project/model/project.model';
 import { UpdateCardRequestDto } from '../dto/update-card-request.dto';
 import { Card } from '../model/card.model';
 import { Diff } from '../types/types';
@@ -51,5 +53,28 @@ export class CardsService {
       }
     }
     return objDiff;
+  }
+
+  merge(
+    updatedItem: MappedPartialItem<Card | Project>,
+    itemAfterAutomation: MappedPartialItem<Card | Project>,
+  ): MappedPartialItem<Card | Project> {
+    if (itemAfterAutomation && updatedItem) {
+      for (const [itemId, item] of Object.entries(itemAfterAutomation)) {
+        if (updatedItem.hasOwnProperty(itemId)) {
+          console.log(item);
+          console.log(updatedItem[itemId]);
+          updatedItem[itemId] = this.commonTools.mergeObjects(
+            item,
+            updatedItem[itemId],
+          );
+        } else {
+          updatedItem[itemId] = item;
+        }
+      }
+      return updatedItem;
+    } else if (updatedItem) return updatedItem;
+    else if (itemAfterAutomation) return itemAfterAutomation;
+    else return {};
   }
 }

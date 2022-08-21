@@ -22,6 +22,7 @@ const actionIdToValidationMap = {
   createColumn: validateChangeSimpleFieldAction,
   close: validateChangeSimpleFieldAction,
   closeParentCard: validateChangeSimpleFieldAction,
+  changeAssignee: validateChangeMemberAction,
 };
 
 @ValidatorConstraint({ name: 'validActions', async: false })
