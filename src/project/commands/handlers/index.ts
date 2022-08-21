@@ -19,4 +19,5 @@ export const CommandHandlers = [
   AddCardsInMultipleProjectsCommandHandler,
   ArchiveProjectCommandHandler,
   RevertArchivedProjectCommandHandler,
+  CreateAutomationCommandHandler,
 ];

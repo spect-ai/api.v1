@@ -22,7 +22,7 @@ import {
 import { Project } from 'src/project/model/project.model';
 import { RemoveItemsCommand } from '../../items/impl/remove-items.command';
 import {
-  ArchiveCardByIdCommand,
+  ArchiveCardCommand,
   ArchiveMultipleCardsByIdCommand,
 } from '../impl/archive-card.command';
 

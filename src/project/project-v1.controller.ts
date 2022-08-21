@@ -12,17 +12,19 @@ import {
 import { CreateAutomationCommand } from './commands/automation/impl/create-automation.command';
 import { RemoveAutomationCommand } from './commands/automation/impl/remove-automation.command';
 import { UpdateAutomationCommand } from './commands/automation/impl/update-automation.command';
+import {
+  ArchiveProjectCommand,
+  RevertArchivedProjectCommand,
+} from './commands/impl';
 import { DetailedProjectResponseDto } from './dto/detailed-project-response.dto';
 import { ProjectV1Service } from './project-v1.service';
 import { GetProjectByIdQuery, GetProjectBySlugQuery } from './queries/impl';
-import { GetProjectByIdQuery, GetProjectBySlugQuery } from './queries/impl';
 
 @Controller('project/v1')
-export class ProjectV1V1Controller {
+export class ProjectV1Controller {
   constructor(
     private readonly projectService: ProjectV1Service,
     private readonly queryBus: QueryBus,
-    private readonly commandBus: CommandBus,
     private readonly commandBus: CommandBus,
   ) {}
 
@@ -72,6 +74,22 @@ export class ProjectV1V1Controller {
   ) {
     return await this.commandBus.execute(
       new RemoveAutomationCommand(param.id, query.automationId),
+    );
+  }
+
+  @Patch('/:id/archive')
+  async archive(
+    @Param() param: ObjectIdDto,
+  ): Promise<DetailedProjectResponseDto> {
+    return await this.commandBus.execute(new ArchiveProjectCommand(param.id));
+  }
+
+  @Patch('/:id/revertArchive')
+  async revertArchive(
+    @Param() param: ObjectIdDto,
+  ): Promise<DetailedProjectResponseDto> {
+    return await this.commandBus.execute(
+      new RevertArchivedProjectCommand(param.id),
     );
   }
 }

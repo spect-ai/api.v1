@@ -1,10 +1,10 @@
 import {
-  ArchiveCardByIdCommandHandler,
+  ArchiveCardCommandHandler,
   ArchiveMultipleCardsByIdCommandHandler,
 } from '../archive/handlers/archive-card.handler';
 import {
   RevertArchivalMultipleCardsByIdCommandHandler,
-  RevertArchiveCardByIdCommandHandler,
+  RevertArchivedCardCommandHandler,
 } from '../archive/handlers/revert-archival.handler';
 import { AddItemCommandHandler } from '../items/handlers/add-items.handler';
 import { RemoveItemsCommandHandler } from '../items/handlers/remove-items.handler';
@@ -27,4 +27,5 @@ export const CommandHandlers = [
   UpdatePaymentCommandHandler,
   ArchiveMultipleCardsByIdCommandHandler,
   RevertArchivalMultipleCardsByIdCommandHandler,
+  UpdateCardCommandHandler,
 ];

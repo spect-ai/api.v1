@@ -25,7 +25,7 @@ import { Project } from 'src/project/model/project.model';
 import { AddItemsCommand } from '../../items/impl/add-items.command';
 import {
   RevertArchivalMultipleCardsByIdCommand,
-  RevertArchiveCardByIdCommand,
+  RevertArchivedCardCommand,
 } from '../impl/revert-archival.command';
 
 @CommandHandler(RevertArchivedCardCommand)
