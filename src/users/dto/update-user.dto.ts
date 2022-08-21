@@ -68,3 +68,12 @@ export class UpdateMetadata {
   @IsOptional()
   circles?: string[];
 }
+
+export class ReadNotificationDto {
+  /**
+   * The notification ids to mark as read.
+   */
+  @IsArray()
+  @IsNotEmpty()
+  notificationIds: string[];
+}

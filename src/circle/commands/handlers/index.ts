@@ -15,10 +15,19 @@ import { UpdateRoleCommandHandler } from '../roles/handlers/update-role.handler'
 import { CreateCircleCommandHandler } from './create-circle.handler';
 import { AddSafeCommandHandler } from '../safe/handlers/add-safe.handler';
 import { RemoveSafeCommandHandler } from '../safe/handlers/remove-safe.handler';
+import { ClaimCircleCommandHandler } from '../claim/handlers/claim-circle.handler';
+import { UpdateCircleCommandHandler } from './update-circle.handler';
+import {
+  AddProjectsCommandHandler,
+  AddProjectsToMultipleCirclesCommandHandler,
+} from '../projects/handlers/add-projects.handler';
+import { ArchiveCircleByIdCommandHandler } from '../archive/handlers/archive-circle.handler';
 
 export const CommandHandlers = [
   RemoveProjectsCommandHandler,
   RemoveProjectsFromMultipleCirclesCommandHandler,
+  AddProjectsCommandHandler,
+  AddProjectsToMultipleCirclesCommandHandler,
   JoinUsingInvitationCommandHandler,
   JoinUsingDiscordCommandHandler,
   InviteToCircleCommandHandler,
@@ -30,4 +39,7 @@ export const CommandHandlers = [
   UpdateMemberRolesCommandHandler,
   AddSafeCommandHandler,
   RemoveSafeCommandHandler,
+  ClaimCircleCommandHandler,
+  UpdateCircleCommandHandler,
+  ArchiveCircleByIdCommandHandler,
 ];

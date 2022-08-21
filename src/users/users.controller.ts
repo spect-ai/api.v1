@@ -13,16 +13,21 @@ import {
   PublicViewAuthGuard,
   SessionAuthGuard,
 } from 'src/auth/iron-session.guard';
-import { UpdateUserDto } from './dto/update-user.dto';
+import { ReadNotificationDto, UpdateUserDto } from './dto/update-user.dto';
 import { User } from './model/users.model';
 import { ObjectIdDto } from 'src/common/dtos/object-id.dto';
 import { RequiredCardIdDto } from 'src/common/dtos/string.dto';
 import { DetailedUserPubliceResponseDto } from './dto/detailed-user-response.dto';
+import { CommandBus } from '@nestjs/cqrs';
+import { ReadNotificationCommand } from './commands/notifications/impl';
 
 @Controller('user')
 @ApiTags('Users')
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(
+    private readonly usersService: UsersService,
+    private readonly commandBus: CommandBus,
+  ) {}
 
   @UseGuards(SessionAuthGuard)
   @Get('/me')
@@ -61,5 +66,16 @@ export class UsersController {
     @Param() param: RequiredCardIdDto,
   ): Promise<DetailedUserPubliceResponseDto> {
     return await this.usersService.removeItem('bookmarks', param.cardId);
+  }
+
+  @UseGuards(SessionAuthGuard)
+  @Patch('/readNotifications')
+  async readNotifications(
+    @Body() body: ReadNotificationDto,
+    @Request() req,
+  ): Promise<DetailedUserPubliceResponseDto> {
+    return await this.commandBus.execute(
+      new ReadNotificationCommand(body.notificationIds, req.user),
+    );
   }
 }

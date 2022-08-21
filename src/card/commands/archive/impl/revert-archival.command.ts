@@ -6,3 +6,10 @@ export class RevertArchivedCardCommand {
     public readonly card?: ExtendedCard,
   ) {}
 }
+
+export class RevertArchivalMultipleCardsByIdCommand {
+  constructor(
+    public readonly ids: string[],
+    public readonly addToProject?: boolean,
+  ) {}
+}

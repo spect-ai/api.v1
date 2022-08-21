@@ -6,6 +6,7 @@ import { useMongoosePlugin } from 'src/base/decorators/use-mongoose-plugins.deco
 import { Card } from 'src/card/model/card.model';
 import { Circle } from 'src/circle/model/circle.model';
 import { MappedItem } from 'src/common/interfaces';
+import { Status } from 'src/common/types/status.type';
 import { ColumnDetailsDto } from '../dto/column-details.dto';
 import { View } from '../types/types';
 
@@ -111,4 +112,16 @@ export class Project extends BaseModel {
    */
   @prop({ default: 0 })
   cardCount: number;
+
+  /**
+   * The status of the project
+   */
+  @prop({
+    default: {
+      active: true,
+      archived: false,
+      hidden: false,
+    },
+  })
+  status: Status;
 }

@@ -144,68 +144,6 @@ export class CardsService {
     }
   }
 
-  createNew(
-    createCardDto: CreateCardRequestDto,
-    projectSlug: string,
-    slugNum: number,
-  ): Partial<Card> {
-    createCardDto.type = createCardDto.type || 'Task';
-    const activity = this.activityBuilder.buildNewCardActivity(createCardDto);
-
-    return {
-      ...createCardDto,
-      slug: `${projectSlug}-${slugNum.toString()}`,
-      activity: [activity],
-      creator: this.requestProvider.user.id,
-      columnId: createCardDto.parent ? null : createCardDto.columnId,
-    };
-  }
-
-  addChildCards(
-    createCardDto: CreateCardRequestDto,
-    parentCard: Card,
-    circle: Circle,
-    projectSlug: string,
-    startSlugNum: number,
-  ): Card[] {
-    const childCards = createCardDto.childCards;
-    if (!childCards || childCards.length === 0) return [];
-
-    let slugNum = startSlugNum;
-    const cards = [];
-    for (const childCard of childCards) {
-      createCardDto.type = createCardDto.type || 'Task';
-      const activity = this.activityBuilder.buildNewCardActivity(createCardDto);
-
-      cards.push({
-        ...childCard,
-        project: childCard.project || createCardDto.project,
-        circle: childCard.circle || circle.id,
-        parent: parentCard.id,
-        reward: createCardDto.reward || { ...circle.defaultPayment, value: 0 }, //TODO: add reward to child cards
-        columnId: null, // Child cards dont have a column
-        activity: [activity],
-        slug: `${projectSlug}-${slugNum.toString()}`,
-      });
-      slugNum++;
-    }
-    return cards;
-  }
-
-  async addToParentCard(
-    cards: Card[] | Card,
-    parentCard: Card,
-  ): Promise<MappedCard> {
-    if (!parentCard) return {};
-    if (!Array.isArray(cards)) cards = [cards];
-    const cardIds = cards.map((card) => card.id);
-    return {
-      [parentCard.id]: {
-        children: [...parentCard.children, ...cardIds],
-      },
-    };
-  }
-
   update(
     card: Card,
     project: Project,

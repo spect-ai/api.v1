@@ -11,7 +11,6 @@ export class RetroActivityService {
     retro: Retro,
     diff: Diff<Retro>,
   ): { content: string; ref: Reference } {
-    console.log(actionType);
     switch (actionType) {
       case 'create':
         return this.createRetroActivity(retro);

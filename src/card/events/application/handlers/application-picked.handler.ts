@@ -49,12 +49,16 @@ export class ApplicationPickedEventHandler
         );
 
         this.commandBus.execute(
-          new AddItemsCommand([
-            {
-              fieldName: 'assignedCards',
-              itemIds: [card.id],
-            },
-          ]),
+          new AddItemsCommand(
+            [
+              {
+                fieldName: 'assignedCards',
+                itemIds: [card.id],
+              },
+            ],
+            null,
+            card.application[applicationId].user,
+          ),
         );
       }
 

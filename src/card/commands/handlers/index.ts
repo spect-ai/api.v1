@@ -1,5 +1,11 @@
-import { ArchiveCardCommandHandler } from '../archive/handlers/archive-card.handler';
-import { RevertArchivedCardCommandHandler } from '../archive/handlers/revert-archival.handler';
+import {
+  ArchiveCardByIdCommandHandler,
+  ArchiveMultipleCardsByIdCommandHandler,
+} from '../archive/handlers/archive-card.handler';
+import {
+  RevertArchivalMultipleCardsByIdCommandHandler,
+  RevertArchiveCardByIdCommandHandler,
+} from '../archive/handlers/revert-archival.handler';
 import { AddItemCommandHandler } from '../items/handlers/add-items.handler';
 import { RemoveItemsCommandHandler } from '../items/handlers/remove-items.handler';
 import { UpdatePaymentCommandHandler } from '../payment/handlers/update-payment.handler';
@@ -19,5 +25,6 @@ export const CommandHandlers = [
   AddItemCommandHandler,
   RemoveItemsCommandHandler,
   UpdatePaymentCommandHandler,
-  UpdateCardCommandHandler,
+  ArchiveMultipleCardsByIdCommandHandler,
+  RevertArchivalMultipleCardsByIdCommandHandler,
 ];

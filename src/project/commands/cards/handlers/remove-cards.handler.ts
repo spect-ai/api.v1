@@ -1,8 +1,12 @@
 import { InternalServerErrorException } from '@nestjs/common';
-import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
+import { CommandBus, CommandHandler, ICommandHandler } from '@nestjs/cqrs';
+import { LoggingService } from 'src/logging/logging.service';
 import { Project } from 'src/project/model/project.model';
 import { ProjectsRepository } from 'src/project/project.repository';
-import { RemoveCardsCommand } from '../../impl';
+import {
+  RemoveCardsCommand,
+  RemoveCardsInMultipleProjectsCommand,
+} from '../../impl';
 
 @CommandHandler(RemoveCardsCommand)
 export class RemoveCardsCommandHandler
@@ -43,6 +47,38 @@ export class RemoveCardsCommandHandler
           },
         );
       return updatedProject;
+    } catch (error) {
+      throw new InternalServerErrorException(error.message);
+    }
+  }
+}
+@CommandHandler(RemoveCardsInMultipleProjectsCommand)
+export class RemoveCardsInMultipleProjectsCommandHandler
+  implements ICommandHandler<RemoveCardsInMultipleProjectsCommand>
+{
+  constructor(
+    private readonly commandBus: CommandBus,
+    private readonly logger: LoggingService,
+  ) {
+    this.logger.setContext('RemoveCardsInMultipleProjectsCommandHandler');
+  }
+
+  async execute(
+    command: RemoveCardsInMultipleProjectsCommand,
+  ): Promise<boolean> {
+    try {
+      const { projectIdToCardIds } = command;
+
+      for (const [projectId, cardIds] of Object.entries(projectIdToCardIds)) {
+        try {
+          await this.commandBus.execute(
+            new RemoveCardsCommand(cardIds, null, projectId),
+          );
+        } catch (error) {
+          this.logger.error(error.message);
+        }
+      }
+      return true;
     } catch (error) {
       throw new InternalServerErrorException(error.message);
     }

@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { FilterQuery, ObjectId, UpdateQuery } from 'mongoose';
+import { FilterQuery, ObjectId, PipelineStage, UpdateQuery } from 'mongoose';
 import { InjectModel } from 'nestjs-typegoose';
 import { BaseRepository } from 'src/base/base.repository';
-import { Circle } from './model/circle.model';
+import { Circle, ExtendedCircle } from './model/circle.model';
 import { PopulatedCircleFields } from './types';
 
 const defaultPopulate: PopulatedCircleFields = {
@@ -177,5 +177,90 @@ export class CirclesRepository extends BaseRepository<Circle> {
     } catch (error) {
       return null;
     }
+  }
+
+  async getCircleWithAllChildren(
+    circleId: string,
+    maxDepth?: number,
+  ): Promise<ExtendedCircle> {
+    const graphLookup = {
+      from: 'circles',
+      startWith: '$children',
+      connectFromField: 'children',
+      connectToField: '_id',
+      as: 'flattenedChildren',
+    } as PipelineStage.GraphLookup['$graphLookup'];
+    if (maxDepth) graphLookup.maxDepth = maxDepth;
+    const circles = await this.aggregate([
+      {
+        $match: {
+          _id: this.toObjectId(circleId),
+        },
+      },
+      {
+        $graphLookup: graphLookup,
+      },
+    ]);
+
+    /** Aggregate query doesnt add id so adding manually */
+    for (const circle of circles) {
+      circle.id = circle._id.toString();
+      for (const child of circle.flattenedChildren) {
+        child.id = child._id.toString();
+      }
+    }
+    return circles[0];
+  }
+
+  async getCircleWithAllRelations(
+    circleId: string,
+    maxChildrenDepth?: number,
+    maxParentsDepth?: number,
+  ): Promise<ExtendedCircle> {
+    const childrenGraphLookup = {
+      from: 'circles',
+      startWith: '$children',
+      connectFromField: 'children',
+      connectToField: '_id',
+      as: 'flattenedChildren',
+    } as PipelineStage.GraphLookup['$graphLookup'];
+
+    const parentsGraphLookup = {
+      from: 'circles',
+      startWith: '$parents',
+      connectFromField: 'parents',
+      connectToField: '_id',
+      as: 'flattenedParents',
+    } as PipelineStage.GraphLookup['$graphLookup'];
+    if (maxChildrenDepth) childrenGraphLookup.maxDepth = maxChildrenDepth;
+    if (maxParentsDepth) parentsGraphLookup.maxDepth = maxParentsDepth;
+    const circles = await this.aggregate([
+      {
+        $match: {
+          _id: this.toObjectId(circleId),
+        },
+      },
+      {
+        $graphLookup: childrenGraphLookup,
+      },
+      {
+        $graphLookup: parentsGraphLookup,
+      },
+    ]);
+
+    /** Aggregate query doesnt add id so adding manually */
+    for (const circle of circles) {
+      circle.id = circle._id.toString();
+      for (const child of circle.flattenedChildren) {
+        child.id = child._id.toString();
+      }
+    }
+    for (const circle of circles) {
+      circle.id = circle._id.toString();
+      for (const child of circle.flattenedParents) {
+        child.id = child._id.toString();
+      }
+    }
+    return circles[0];
   }
 }

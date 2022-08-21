@@ -7,7 +7,7 @@ import { Retro } from 'src/retro/models/retro.model';
 export class NotificationEvent {
   constructor(
     public readonly actionType: string,
-    public readonly itemType: string,
+    public readonly itemType: 'card' | 'circle' | 'project' | 'retro',
     public readonly item: Card | Retro | Circle | Project,
     public readonly recipient: string,
     public readonly linkPath: string[],

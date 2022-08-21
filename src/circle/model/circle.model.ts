@@ -1,15 +1,14 @@
-import { prop, Ref } from '@typegoose/typegoose';
-import { ProfileModel } from 'src/common/models/profile.model';
+import { prop } from '@typegoose/typegoose';
+import { ObjectId, Schema } from 'mongoose';
 import { useMongoosePlugin } from 'src/base/decorators/use-mongoose-plugins.decorator';
 import { Payment } from 'src/common/models/payment.model';
+import { ProfileModel } from 'src/common/models/profile.model';
 import { Activity } from 'src/common/types/activity.type';
-import { Project } from 'src/project/model/project.model';
-import { User } from 'src/users/model/users.model';
-import { Chain } from 'src/common/models/chain.model';
-import { ObjectId, Schema } from 'mongoose';
 import { MemberRoles, Roles } from 'src/common/types/role.type';
-import { Registry, TokenInfo } from 'src/registry/model/registry.model';
+import { Status } from 'src/common/types/status.type';
+import { Project } from 'src/project/model/project.model';
 import { Retro } from 'src/retro/models/retro.model';
+import { User } from 'src/users/model/users.model';
 import { BlacklistRegistry, LocalRegistry, SafeAddresses } from '../types';
 
 export type Invite = {
@@ -166,4 +165,33 @@ export class Circle extends ProfileModel {
    */
   @prop()
   safeAddresses: SafeAddresses;
+
+  /**
+   * The status of the circle
+   */
+  @prop({
+    default: {
+      active: true,
+      archived: false,
+    },
+  })
+  status: Status;
+
+  @prop({ default: false })
+  toBeClaimed: boolean;
+
+  @prop()
+  qualifiedClaimee: string[];
+}
+
+export class ExtendedCircle extends Circle {
+  /**
+   * All the parents till the root circle
+   */
+  flattenedParents: Circle[];
+
+  /**
+   * All the children till the leaf circles
+   */
+  flattenedChildren: Circle[];
 }

@@ -3,7 +3,12 @@ import {
   HttpStatus,
   InternalServerErrorException,
 } from '@nestjs/common';
-import { CommandBus, CommandHandler, ICommandHandler } from '@nestjs/cqrs';
+import {
+  CommandBus,
+  CommandHandler,
+  EventBus,
+  ICommandHandler,
+} from '@nestjs/cqrs';
 import * as moment from 'moment';
 import { CircleValidationService } from 'src/circle/circle-validation.service';
 import { CirclesRepository } from 'src/circle/circles.repository';
@@ -12,6 +17,7 @@ import {
   JoinUsingInvitationCommand,
 } from 'src/circle/commands/impl';
 import { DetailedCircleResponseDto } from 'src/circle/dto/detailed-circle-response.dto';
+import { JoinedCircleEvent } from 'src/circle/events/impl';
 import { RolesService } from 'src/roles/roles.service';
 
 @CommandHandler(JoinUsingInvitationCommand)
@@ -20,7 +26,7 @@ export class JoinUsingInvitationCommandHandler
 {
   constructor(
     private readonly circlesRepository: CirclesRepository,
-    private readonly commandBus: CommandBus,
+    private readonly eventBus: EventBus,
     private readonly validationService: CircleValidationService,
   ) {}
 
@@ -62,6 +68,10 @@ export class JoinUsingInvitationCommandHandler
             invites: [...circle.invites, invite],
           },
         );
+
+      this.eventBus.publish(
+        new JoinedCircleEvent(caller.id, id, updatedCircle),
+      );
       return updatedCircle;
     } catch (error) {
       throw new InternalServerErrorException(error);
@@ -75,7 +85,7 @@ export class JoinUsingDiscordCommandHandler
 {
   constructor(
     private readonly circlesRepository: CirclesRepository,
-    private readonly commandBus: CommandBus,
+    private readonly eventBus: EventBus,
     private readonly validationService: CircleValidationService,
     private readonly roleService: RolesService,
   ) {}
@@ -109,6 +119,10 @@ export class JoinUsingDiscordCommandHandler
             },
           },
         );
+
+      this.eventBus.publish(
+        new JoinedCircleEvent(caller.id, id, updatedCircle),
+      );
       return updatedCircle;
     } catch (error) {
       throw new InternalServerErrorException(error);

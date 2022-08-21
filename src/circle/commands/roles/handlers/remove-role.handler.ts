@@ -35,13 +35,14 @@ export class RemoveRoleCommandHandler
         );
       }
 
-      const updatedCircle = await this.circlesRepository.updateById(
-        circleToUpdate.id,
-        {
-          roles: circleToUpdate.roles,
-          memberRoles: circleToUpdate.memberRoles,
-        },
-      );
+      const updatedCircle =
+        await this.circlesRepository.updateCircleAndReturnWithPopulatedReferences(
+          circleToUpdate.id,
+          {
+            roles: circleToUpdate.roles,
+            memberRoles: circleToUpdate.memberRoles,
+          },
+        );
       return updatedCircle;
     } catch (error) {
       throw new InternalServerErrorException(error.message);

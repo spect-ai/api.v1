@@ -71,6 +71,7 @@ export class CardCreatedEventHandler
           ),
         );
       }
+      this.logger.log(`Created Card: ${event.card?.title}`);
     } catch (error) {
       this.logger.error(`${error.message}`);
     }

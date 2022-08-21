@@ -15,12 +15,14 @@ import { UpdateAutomationCommand } from './commands/automation/impl/update-autom
 import { DetailedProjectResponseDto } from './dto/detailed-project-response.dto';
 import { ProjectV1Service } from './project-v1.service';
 import { GetProjectByIdQuery, GetProjectBySlugQuery } from './queries/impl';
+import { GetProjectByIdQuery, GetProjectBySlugQuery } from './queries/impl';
 
 @Controller('project/v1')
-export class ProjectV1Controller {
+export class ProjectV1V1Controller {
   constructor(
     private readonly projectService: ProjectV1Service,
     private readonly queryBus: QueryBus,
+    private readonly commandBus: CommandBus,
     private readonly commandBus: CommandBus,
   ) {}
 

@@ -6,3 +6,10 @@ export class ArchiveCardCommand {
     public readonly card?: ExtendedCard,
   ) {}
 }
+
+export class ArchiveMultipleCardsByIdCommand {
+  constructor(
+    public readonly ids: string[],
+    public readonly removeFromProject?: boolean,
+  ) {}
+}

@@ -1,9 +1,10 @@
 import { InternalServerErrorException } from '@nestjs/common';
-import { CommandBus, CommandHandler, ICommandHandler } from '@nestjs/cqrs';
+import { EventBus, CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { CircleValidationService } from 'src/circle/circle-validation.service';
 import { CirclesRepository } from 'src/circle/circles.repository';
 import { RemoveFromCircleCommand } from 'src/circle/commands/impl';
 import { DetailedCircleResponseDto } from 'src/circle/dto/detailed-circle-response.dto';
+import { LeftCircleEvent } from 'src/circle/events/impl';
 
 @CommandHandler(RemoveFromCircleCommand)
 export class RemoveFromCircleCommandHandler
@@ -11,7 +12,7 @@ export class RemoveFromCircleCommandHandler
 {
   constructor(
     private readonly circlesRepository: CirclesRepository,
-    private readonly commandBus: CommandBus,
+    private readonly eventBus: EventBus,
     private readonly validationService: CircleValidationService,
   ) {}
 
@@ -39,6 +40,8 @@ export class RemoveFromCircleCommandHandler
             memberRoles: circleToUpdate.memberRoles,
           },
         );
+      this.eventBus.publish(new LeftCircleEvent(userId, id, updatedCircle));
+
       return updatedCircle;
     } catch (error) {
       throw new InternalServerErrorException(error);
