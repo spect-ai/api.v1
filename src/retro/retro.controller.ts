@@ -15,8 +15,10 @@ import { RequiredSlugDto } from 'src/common/dtos/string.dto';
 import { AddFeedbackRequestDto } from './dto/add-feedback-request.dto';
 import { CreateRetroRequestDto } from './dto/create-retro-request.dto';
 import { DetailedRetroResponseDto } from './dto/detailed-retro-response.dto';
-import { UpdateRetroRequestDto } from './dto/update-retro-request.dto';
-import { UpdateVoteRequestDto } from './dto/update-retro-vote-request.dto';
+import {
+  UpdateRetroRequestDto,
+  UpdateVoteRequestDto,
+} from './dto/update-retro-request.dto';
 import { RetroService } from './retro.service';
 
 @Controller('retro')

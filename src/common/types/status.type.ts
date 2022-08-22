@@ -2,15 +2,15 @@ export type Status = {
   /**
    * Active
    */
-  active: boolean;
+  active?: boolean;
 
   /**
    * Paid
    */
-  paid: boolean;
+  paid?: boolean;
 
   /**
    * Archived
    */
-  archived: boolean;
+  archived?: boolean;
 };
