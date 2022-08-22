@@ -54,7 +54,6 @@ export class MoveItemCommandHandler
         'rejectedApplications',
       ].includes(itemType)
     ) {
-      console.log('findItemIndex', itemType, item, user[itemType]);
       for (const [idx, application] of user[itemType].entries()) {
         if (application.cardId === item) return idx;
       }

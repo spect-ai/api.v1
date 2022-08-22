@@ -8,7 +8,6 @@ export class CircleActivityService {
     actionType: string,
     circle: Circle,
   ): { content: string; ref: Reference } {
-    console.log(actionType);
     switch (actionType) {
       case 'create':
         return this.createCircleActivity(circle);

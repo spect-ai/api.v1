@@ -52,7 +52,6 @@ export class ContractListener {
         topics: [utils.id('ethDistributed(address,string)')],
       };
       alchemy.ws.on(filter, (log) => {
-        console.log(log);
         this.decodeTransactionAndRecord(log, '80001');
       });
     }
@@ -67,7 +66,6 @@ export class ContractListener {
         topics: [utils.id('ethDistributed(address,string)')],
       };
       alchemy.ws.on(filter, (log) => {
-        console.log(log);
         this.decodeTransactionAndRecord(log, '137');
       });
     }
@@ -82,7 +80,6 @@ export class ContractListener {
         topics: [utils.id('ethDistributed(address,string)')],
       };
       alchemy.ws.on(filter, (log) => {
-        console.log(log);
         this.decodeTransactionAndRecord(log, '420');
       });
     }
@@ -97,7 +94,6 @@ export class ContractListener {
         topics: [utils.id('ethDistributed(address,string)')],
       };
       alchemy.ws.on(filter, (log) => {
-        console.log(log);
         this.decodeTransactionAndRecord(log, '4');
       });
     }
@@ -125,7 +121,6 @@ export class ContractListener {
       const circle = await this.queryBus.execute(
         new GetCircleByIdQuery(circleId),
       );
-      console.log(ids, circleId, type, caller);
       if (
         circle.safeAddresses &&
         circle.safeAddresses[chainId] &&

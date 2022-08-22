@@ -20,7 +20,6 @@ export class RemoveItemsCommandHandler
       if (!cardToUpdate) {
         throw new InternalServerErrorException('User not found');
       }
-      console.log(items);
 
       const updateObj = {};
       for (const item of items) {

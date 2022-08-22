@@ -31,15 +31,19 @@ export class UpdateRoleCommandHandler
 
       const roles = {
         ...circleToUpdate.roles,
-        [roleId]: roleDto,
+        [roleId]: {
+          ...circleToUpdate.roles[roleId],
+          ...roleDto,
+        },
       };
 
-      const updatedCircle = await this.circlesRepository.updateById(
-        circleToUpdate.id,
-        {
-          roles,
-        },
-      );
+      const updatedCircle =
+        await this.circlesRepository.updateCircleAndReturnWithPopulatedReferences(
+          circleToUpdate.id,
+          {
+            roles,
+          },
+        );
       return updatedCircle;
     } catch (error) {
       throw new InternalServerErrorException(error.message);

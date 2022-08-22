@@ -33,10 +33,7 @@ import { DiscordService } from 'src/common/discord.service';
 import { SessionAuthGuard } from 'src/auth/iron-session.guard';
 import { CircleAuthGuard } from 'src/auth/circle.guard';
 import { ProjectAuthGuard } from 'src/auth/project.guard';
-import { UsersRepository } from 'src/users/users.repository';
 import { UsersService } from 'src/users/users.service';
-import { CreateCardCommandHandler } from './handlers/create.command.handler';
-import { UserCardsService } from './user.cards.service';
 import { EventHandlers } from './events/handlers';
 import { CardNotificationService } from 'src/users/notification/card-notification.service';
 import { CqrsModule } from '@nestjs/cqrs';
@@ -86,8 +83,6 @@ import { CardsV1Service } from './cards-v1.service';
     CircleAuthGuard,
     ProjectAuthGuard,
     UsersService,
-    CreateCardCommandHandler,
-    UserCardsService,
     ...EventHandlers,
     ...QueryHandlers,
     ...CommandHandlers,

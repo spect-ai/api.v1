@@ -1,8 +1,9 @@
 import { InternalServerErrorException } from '@nestjs/common';
-import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
+import { CommandBus, CommandHandler, ICommandHandler } from '@nestjs/cqrs';
+import { LoggingService } from 'src/logging/logging.service';
 import { Project } from 'src/project/model/project.model';
 import { ProjectsRepository } from 'src/project/project.repository';
-import { AddCardsCommand } from '../../impl';
+import { AddCardsCommand, AddCardsInMultipleProjectsCommand } from '../../impl';
 
 @CommandHandler(AddCardsCommand)
 export class AddCardsCommandHandler
@@ -52,6 +53,37 @@ export class AddCardsCommandHandler
           },
         );
       return updatedProject;
+    } catch (error) {
+      throw new InternalServerErrorException(error.message);
+    }
+  }
+}
+
+@CommandHandler(AddCardsInMultipleProjectsCommand)
+export class AddCardsInMultipleProjectsCommandHandler
+  implements ICommandHandler<AddCardsInMultipleProjectsCommand>
+{
+  constructor(
+    private readonly commandBus: CommandBus,
+    private readonly logger: LoggingService,
+  ) {
+    this.logger.setContext('AddCardsInMultipleProjectsCommandHandler');
+  }
+
+  async execute(command: AddCardsInMultipleProjectsCommand): Promise<boolean> {
+    try {
+      const { projectIdToCards } = command;
+
+      for (const [projectId, cards] of Object.entries(projectIdToCards)) {
+        try {
+          await this.commandBus.execute(
+            new AddCardsCommand(cards, null, projectId),
+          );
+        } catch (error) {
+          this.logger.error(error.message);
+        }
+      }
+      return true;
     } catch (error) {
       throw new InternalServerErrorException(error.message);
     }

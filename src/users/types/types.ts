@@ -5,11 +5,14 @@ export type MappedUser = {
 };
 
 export type Notification = {
+  id: string;
   content: string;
+  type: 'card' | 'project' | 'circle' | 'retro';
   linkPath: string[];
   actor: string;
   timestamp: Date;
   ref: Reference;
+  read: boolean;
 };
 
 export type Activity = {

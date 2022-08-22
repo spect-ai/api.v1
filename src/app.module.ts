@@ -42,8 +42,6 @@ import { WorkCommandHandler } from './card/handlers/work.command.handler';
 import { SessionAuthGuard } from './auth/iron-session.guard';
 import { CircleAuthGuard } from './auth/circle.guard';
 import { ProjectAuthGuard } from './auth/project.guard';
-import { CreateCardCommandHandler } from './card/handlers/create.command.handler';
-import { UserCardsService } from './card/user.cards.service';
 import { CqrsModule } from '@nestjs/cqrs';
 import { CardNotificationService } from './users/notification/card-notification.service';
 import { LoggingService } from './logging/logging.service';
@@ -110,8 +108,6 @@ console.log({ databaseUrl });
     SessionAuthGuard,
     CircleAuthGuard,
     ProjectAuthGuard,
-    CreateCardCommandHandler,
-    UserCardsService,
     CardNotificationService,
     LoggingService,
     ContractListener,

@@ -27,12 +27,13 @@ export class AddRoleCommandHandler implements ICommandHandler<AddRoleCommand> {
         [roleDto.role]: { ...roleDto, mutable: true },
       };
 
-      const updatedCircle = await this.circlesRepository.updateById(
-        circleToUpdate.id,
-        {
-          roles,
-        },
-      );
+      const updatedCircle =
+        await this.circlesRepository.updateCircleAndReturnWithPopulatedReferences(
+          circleToUpdate.id,
+          {
+            roles,
+          },
+        );
       return updatedCircle;
     } catch (error) {
       throw new InternalServerErrorException(error.message);

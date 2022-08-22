@@ -38,6 +38,7 @@ export class CreatedCircleEventHandler
           caller,
         ),
       );
+      this.logger.log(`Created Circle: ${event.circle?.name}`);
     } catch (error) {
       this.logger.error(`${error.message}`);
     }

@@ -1,14 +1,7 @@
-import {
-  HttpException,
-  HttpStatus,
-  Injectable,
-  InternalServerErrorException,
-} from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { CommandBus, EventBus } from '@nestjs/cqrs';
-import moment from 'moment';
 import { LoggingService } from 'src/logging/logging.service';
 import { RequestProvider } from 'src/users/user.provider';
-import { v4 as uuidv4 } from 'uuid';
 import { CirclesRepository } from '../circles.repository';
 import {
   InviteToCircleCommand,
@@ -65,9 +58,6 @@ export class CircleMembershipService {
           this.requestProvider.user,
         ),
       );
-      this.eventBus.publish(
-        new JoinedCircleEvent(this.requestProvider.user.id, id, updatedCircle),
-      );
       return updatedCircle;
     } catch (error) {
       this.logger.logError(
@@ -85,9 +75,6 @@ export class CircleMembershipService {
     try {
       const updatedCircle = await this.commandBus.execute(
         new JoinUsingDiscordCommand(id, this.requestProvider.user),
-      );
-      this.eventBus.publish(
-        new JoinedCircleEvent(this.requestProvider.user.id, id, updatedCircle),
       );
       return updatedCircle;
     } catch (error) {
@@ -137,7 +124,6 @@ export class CircleMembershipService {
       const updatedCircle = await this.commandBus.execute(
         new RemoveFromCircleCommand(member, id, this.requestProvider.circle),
       );
-      this.eventBus.publish(new LeftCircleEvent(member, id, updatedCircle));
       return updatedCircle;
     } catch (error) {
       this.logger.logError(
@@ -159,9 +145,6 @@ export class CircleMembershipService {
           id,
           this.requestProvider.circle,
         ),
-      );
-      this.eventBus.publish(
-        new LeftCircleEvent(this.requestProvider.user.id, id, updatedCircle),
       );
       return updatedCircle;
     } catch (error) {

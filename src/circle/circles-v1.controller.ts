@@ -6,6 +6,7 @@ import {
   Patch,
   Post,
   Query,
+  Request,
   SetMetadata,
   UseGuards,
 } from '@nestjs/common';
@@ -14,6 +15,7 @@ import { CircleAuthGuard, CreateCircleAuthGuard } from 'src/auth/circle.guard';
 import { SessionAuthGuard } from 'src/auth/iron-session.guard';
 import { ObjectIdDto } from 'src/common/dtos/object-id.dto';
 import { RequiredRoleDto } from 'src/common/dtos/string.dto';
+import { ArchiveCircleByIdCommand, ClaimCircleCommand } from './commands/impl';
 import { AddSafeCommand, RemoveSafeCommand } from './commands/safe/impl';
 import { CreateCircleRequestDto } from './dto/create-circle-request.dto';
 import { DetailedCircleResponseDto } from './dto/detailed-circle-response.dto';
@@ -22,9 +24,10 @@ import { JoinCircleUsingInvitationRequestDto } from './dto/join-circle.dto';
 import { MemberDto } from './dto/params.dto';
 import { AddRoleDto, UpdateRoleDto } from './dto/roles-requests.dto';
 import { SafeAddress } from './dto/safe-request.dto';
+import { UpdateCircleRequestDto } from './dto/update-circle-request.dto';
 import { UpdateMemberRolesDto } from './dto/update-member-role.dto';
 import { Circle } from './model/circle.model';
-import { GetCircleByIdQuery } from './queries/impl';
+import { GetCircleByIdQuery, GetCircleNavigationQuery } from './queries/impl';
 import { CirclesRolesService } from './services/circle-roles.service';
 import { CirclesCrudService } from './services/circles-crud.service';
 import { CircleMembershipService } from './services/circles-membership.service';
@@ -86,6 +89,19 @@ export class CircleV1Controller {
     @Body() circle: CreateCircleRequestDto,
   ): Promise<DetailedCircleResponseDto> {
     return await this.circleCrudService.create(circle);
+  }
+
+  @SetMetadata('permissions', ['manageCircleSettings'])
+  @UseGuards(CircleAuthGuard)
+  @Patch('/:id')
+  async update(
+    @Param() param: ObjectIdDto,
+    @Body() updateCircleRequestDto: UpdateCircleRequestDto,
+  ): Promise<DetailedCircleResponseDto> {
+    return await this.circleCrudService.update(
+      param.id,
+      updateCircleRequestDto,
+    );
   }
 
   @SetMetadata('permissions', ['inviteMembers'])
@@ -209,5 +225,34 @@ export class CircleV1Controller {
     return await this.commandBus.execute(
       new RemoveSafeCommand(safeDto, null, param.id),
     );
+  }
+
+  @SetMetadata('permissions', ['manageCircleSettings'])
+  @UseGuards(CircleAuthGuard)
+  @Patch('/:id/archive')
+  async archive(
+    @Param() param: ObjectIdDto,
+  ): Promise<DetailedCircleResponseDto> {
+    return await this.commandBus.execute(
+      new ArchiveCircleByIdCommand(param.id),
+    );
+  }
+
+  @UseGuards(SessionAuthGuard)
+  @Patch('/:id/claimCircle')
+  async claimCircle(
+    @Param() param: ObjectIdDto,
+    @Request() request,
+  ): Promise<DetailedCircleResponseDto> {
+    return await this.commandBus.execute(
+      new ClaimCircleCommand(param.id, request.user),
+    );
+  }
+
+  @Get('/:id/circleNav')
+  async circleNav(
+    @Param() param: ObjectIdDto,
+  ): Promise<DetailedCircleResponseDto> {
+    return await this.queryBus.execute(new GetCircleNavigationQuery(param.id));
   }
 }

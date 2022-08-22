@@ -8,10 +8,11 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './model/users.model';
 import { RequestProvider } from './user.provider';
 import { UsersRepository } from './users.repository';
-import { CommandBus, QueryBus } from '@nestjs/cqrs';
+import { CommandBus, QueryBus, EventBus } from '@nestjs/cqrs';
 import { GetUserByIdQuery, GetUserByUsernameQuery } from './queries/impl';
 import { LoggingService } from 'src/logging/logging.service';
 import { AddItemsCommand, RemoveItemsCommand } from './commands/impl';
+import { UserCreatedEvent } from './events/impl';
 
 @Injectable()
 export class UsersService {
@@ -21,6 +22,7 @@ export class UsersService {
     private readonly requestProvider: RequestProvider,
     private readonly queryBus: QueryBus,
     private readonly commandBus: CommandBus,
+    private readonly eventBus: EventBus,
     private readonly logger: LoggingService,
   ) {
     logger.setContext('UsersService');
@@ -90,6 +92,7 @@ export class UsersService {
         ethAddress: ethAddress,
         user: user._id,
       });
+      this.eventBus.publish(new UserCreatedEvent(user));
       return user;
     } catch (error) {
       this.logger.logError(

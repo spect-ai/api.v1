@@ -1,7 +1,13 @@
 import { InternalServerErrorException } from '@nestjs/common';
-import { CommandBus, CommandHandler, ICommandHandler } from '@nestjs/cqrs';
+import {
+  CommandBus,
+  CommandHandler,
+  EventBus,
+  ICommandHandler,
+} from '@nestjs/cqrs';
 import { CirclesRepository } from 'src/circle/circles.repository';
 import { DetailedCircleResponseDto } from 'src/circle/dto/detailed-circle-response.dto';
+import { CreatedCircleEvent } from 'src/circle/events/impl';
 import { Circle } from 'src/circle/model/circle.model';
 import { SlugService } from 'src/common/slug.service';
 import { defaultCircleCreatorRoles, defaultCircleRoles } from 'src/constants';
@@ -17,6 +23,7 @@ export class CreateCircleCommandHandler
     private readonly commandBus: CommandBus,
     private readonly slugService: SlugService,
     private readonly roleService: RolesService,
+    private readonly eventBus: EventBus,
   ) {}
 
   async execute(
@@ -63,6 +70,8 @@ export class CreateCircleCommandHandler
           localRegistry: {},
         });
       }
+
+      this.eventBus.publish(new CreatedCircleEvent(createdCircle, caller));
 
       return createdCircle;
     } catch (error) {

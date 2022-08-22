@@ -18,6 +18,7 @@ import {
   UpdateQuery,
   UpdateWriteOpResult,
 } from 'mongoose';
+import { MappedItem } from 'src/common/interfaces';
 import { BaseModel } from './base.model';
 
 interface QueryOptions {
@@ -314,5 +315,28 @@ export abstract class BaseRepository<TModel extends BaseModel> {
       }
     }
     return currUpdate;
+  }
+
+  async bundleAndExecuteUpdates(
+    updates: MappedItem<TModel>,
+  ): Promise<mongodb.BulkWriteResult> {
+    try {
+      const queries = [];
+      for (const [id, update] of Object.entries(updates)) {
+        queries.push(this.updateOneByIdQuery(id, update));
+      }
+      if (queries.length === 0) return;
+      const acknowledgment = await this.bulkWrite(queries);
+      if (acknowledgment.hasWriteErrors()) {
+        throw new Error(
+          `Some errors occurred: ${JSON.stringify(
+            acknowledgment.getWriteErrors(),
+          )}`,
+        );
+      }
+      return acknowledgment;
+    } catch (e) {
+      BaseRepository.throwMongoError(e);
+    }
   }
 }

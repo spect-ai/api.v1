@@ -33,3 +33,15 @@ export class GetCircleByFilterQuery {
     public readonly selectedFields?: Record<string, unknown>,
   ) {}
 }
+
+export class GetCircleWithChildrenQuery {
+  constructor(public readonly id: string, public readonly maxDepth?: number) {}
+}
+
+export class GetCircleWithAllRelationsQuery {
+  constructor(
+    public readonly id: string,
+    public readonly maxChildrenDepth?: number,
+    public readonly maxParentsDepth?: number,
+  ) {}
+}

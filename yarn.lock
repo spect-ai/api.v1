@@ -1879,9 +1879,9 @@ ajv@^8.0.0:
     uri-js "^4.2.2"
 
 alchemy-sdk@^2.0.1:
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/alchemy-sdk/-/alchemy-sdk-2.0.2.tgz#4a039624dcaaba095222505630583bb503f93293"
-  integrity sha512-btK88r28+7K6LVEqfhpjpwjzvTiHuHrGCLqu35gnh7D1eMHEhoGdtE+9uqQww821HJ6rVCxQ2mc8VcHpCr1JqA==
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/alchemy-sdk/-/alchemy-sdk-2.0.1.tgz#5b04d5ed2948e11f13cfdcd4a67fd47bfbcc8253"
+  integrity sha512-Q9tZDpe/JhFVR+VPhHqvdmynHGgtrS9ZwV9yAY66meKVFxkd5XzeszcrDEazHMnL3Vr8rHCNdTLOwXdPUcmASA==
   dependencies:
     "@ethersproject/abstract-provider" "^5.6.1"
     "@ethersproject/bignumber" "^5.6.2"
@@ -4660,6 +4660,11 @@ npm-run-path@^4.0.0, npm-run-path@^4.0.1:
   integrity sha512-S48WzZW777zhNIrn7gxOlISNAqi9ZC/uQFnRdbeIHhZhCA6UqpkOT8T1G7BvfdgP4Er8gF4sUbaS0i7QvIfCWw==
   dependencies:
     path-key "^3.0.0"
+
+object-assign-deep@^0.4.0:
+  version "0.4.0"
+  resolved "https://registry.yarnpkg.com/object-assign-deep/-/object-assign-deep-0.4.0.tgz#43505d3679abb9686ab359b97ac14cc837a9d143"
+  integrity sha512-54Uvn3s+4A/cMWx9tlRez1qtc7pN7pbQ+Yi7mjLjcBpWLlP+XbSHiHbQW6CElDiV4OvuzqnMrBdkgxI1mT8V/Q==
 
 object-assign@^4, object-assign@^4.1.1:
   version "4.1.1"

@@ -6,9 +6,12 @@ import {
   GetCircleByIdQuery,
   GetMultipleCirclesQuery,
   GetCircleByFilterQuery,
+  GetCircleWithChildrenQuery,
+  GetCircleWithAllRelationsQuery,
 } from '../impl/get-circle.query';
 import { LoggingService } from 'src/logging/logging.service';
 import { InternalServerErrorException } from '@nestjs/common';
+import { Circle, ExtendedCircle } from 'src/circle/model/circle.model';
 
 @QueryHandler(GetCircleByIdQuery)
 export class GetCircleByIdQueryHandler
@@ -29,7 +32,6 @@ export class GetCircleByIdQueryHandler
         query.selectedFields,
       );
     } catch (error) {
-      console.log(this.logger);
       this.logger.error(
         `Failed while getting circle using id with error: ${error.message}`,
         query,
@@ -138,5 +140,40 @@ export class GetCircleByFilterQueryHandler
         error.message,
       );
     }
+  }
+}
+
+@QueryHandler(GetCircleWithChildrenQuery)
+export class GetCircleWithChildrenQueryHandler
+  implements IQueryHandler<GetCircleWithChildrenQuery>
+{
+  constructor(private readonly circlesRepository: CirclesRepository) {}
+
+  async execute(query: GetCircleWithChildrenQuery): Promise<ExtendedCircle> {
+    const { id, maxDepth } = query;
+    const circles = await this.circlesRepository.getCircleWithAllChildren(
+      id,
+      maxDepth,
+    );
+    return circles;
+  }
+}
+
+@QueryHandler(GetCircleWithAllRelationsQuery)
+export class GetCircleWithAllRelationsQueryHandler
+  implements IQueryHandler<GetCircleWithAllRelationsQuery>
+{
+  constructor(private readonly circlesRepository: CirclesRepository) {}
+
+  async execute(
+    query: GetCircleWithAllRelationsQuery,
+  ): Promise<ExtendedCircle> {
+    const { id, maxChildrenDepth, maxParentsDepth } = query;
+    const circles = await this.circlesRepository.getCircleWithAllRelations(
+      id,
+      maxChildrenDepth,
+      maxParentsDepth,
+    );
+    return circles;
   }
 }
