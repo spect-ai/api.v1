@@ -56,7 +56,6 @@ export class CardsV1Service {
           project: project.id,
         }),
       );
-      console.log(card);
       return await this.responseBuilder.enrichResponse(card);
     } catch (error) {
       this.logger.logError(

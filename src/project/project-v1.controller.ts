@@ -39,11 +39,9 @@ export class ProjectV1Controller {
   async findBySlug(
     @Param() param: RequiredSlugDto,
   ): Promise<DetailedProjectResponseDto> {
-    console.log(param.slug);
     const res = await this.crudOrchestrator.getDetailedProjectBySlug(
       param.slug,
     );
-    console.log(res);
     return res;
   }
 

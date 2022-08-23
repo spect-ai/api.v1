@@ -84,10 +84,6 @@ export class CreateCircleAuthGuard implements CanActivate {
       request.user = (await this.sessionAuthGuard.validateUser(
         request.session.siwe?.address,
       )) as unknown as User;
-
-      console.log(`request.user`);
-
-      console.log(request.user);
       if (!request.user) return false;
       if (!request.body.parent) return true;
 
@@ -119,7 +115,6 @@ export class ViewCircleAuthGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
     try {
-      console.log(request.params);
       let circle;
       if (request.params.id)
         circle = await this.circlesRepository.findById(request.params.id);

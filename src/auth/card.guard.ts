@@ -237,7 +237,6 @@ export class ViewCardAuthGuard implements CanActivate {
       }
       request.card = card;
       request.projectId = card.project;
-      console.log(request.projectId);
       return await this.viewProjectAuthGuard.canActivate(context);
     } catch (error) {
       console.log(error);

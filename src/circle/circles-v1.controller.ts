@@ -123,7 +123,6 @@ export class CircleV1Controller {
   async findBySlug(
     @Param() param: RequiredSlugDto,
   ): Promise<DetailedCircleResponseDto> {
-    console.log(param.slug);
     return await this.queryBus.execute(
       new GetCircleByFilterQuery(
         {

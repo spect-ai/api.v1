@@ -50,7 +50,6 @@ export class CardsV1Controller {
   async findBySlug(
     @Param() params: RequiredSlugDto,
   ): Promise<DetailedCardResponseDto> {
-    console.log(params.slug);
     return await this.queryBus.execute(new GetCardBySlugQuery(params.slug));
   }
 
@@ -59,7 +58,6 @@ export class CardsV1Controller {
   async findByProjectSlugAndCardSlug(
     @Param() params: GetByProjectSlugAndCardSlugDto,
   ): Promise<DetailedCardResponseDto> {
-    console.log(params.cardSlug);
     return await this.cardsService.get(params.projectSlug, params.cardSlug);
   }
 

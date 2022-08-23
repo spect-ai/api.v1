@@ -87,8 +87,6 @@ export class CardsController {
   async findByProjectSlugAndCardSlug(
     @Param() params: GetByProjectSlugAndCardSlugDto,
   ): Promise<DetailedCardResponseDto> {
-    console.log('asas');
-
     return await this.cardsService.getDetailedCardByProjectSlugAndCardSlug(
       params.projectSlug,
       params.cardSlug,
@@ -100,7 +98,6 @@ export class CardsController {
   async findByProjectIdAndCardSlug(
     @Param() params: GetByProjectAndSlugDto,
   ): Promise<DetailedCardResponseDto> {
-    console.log('asxzzx');
     return await this.cardsService.getDetailedCardByProjectIdAndCardSlug(
       params.project,
       params.slug,

@@ -115,8 +115,6 @@ export class ViewProjectAuthGuard implements CanActivate {
       _id: { $in: circleIds },
     });
     for (const circle of circles) {
-      console.log(circle.members);
-      console.log(userId);
       if (circle.members.includes(userId)) return true;
     }
     return false;
