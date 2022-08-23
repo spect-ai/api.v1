@@ -66,11 +66,11 @@ export class GetMultipleCirclesQueryHandler
       );
     } catch (error) {
       this.logger.logError(
-        `Failed while getting circle using slug with error: ${error.message}`,
+        `Failed while getting multiple circles using filter with error: ${error.message}`,
         query,
       );
       throw new InternalServerErrorException(
-        'Failed while getting circle using slug',
+        'Failed while getting multiple circles using filter',
         error.message,
       );
     }
@@ -132,11 +132,11 @@ export class GetCircleByFilterQueryHandler
       );
     } catch (error) {
       this.logger.logError(
-        `Failed while getting circle using slug with error: ${error.message}`,
+        `Failed while getting circle using filter with error: ${error.message}`,
         query,
       );
       throw new InternalServerErrorException(
-        'Failed while getting circle using slug',
+        'Failed while getting circle using filter',
         error.message,
       );
     }

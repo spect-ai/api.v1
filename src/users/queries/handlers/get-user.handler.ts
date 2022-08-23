@@ -216,6 +216,7 @@ export class UserFieldResolver {
             name: 1,
             avatar: 1,
             memberRoles: 1,
+            slug: 1,
           },
         },
         {

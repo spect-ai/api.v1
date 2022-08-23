@@ -31,10 +31,10 @@ export type DiscordToCircleRoles = {
 };
 
 export type PopulatedCircleFields = {
-  projects?: { [fieldName: string]: 0 | 1 };
-  parents?: { [fieldName: string]: 0 | 1 };
-  children?: { [fieldName: string]: 0 | 1 };
-  retro?: { [fieldName: string]: 0 | 1 };
+  projects?: { [fieldName: string]: number };
+  parents?: { [fieldName: string]: number };
+  children?: { [fieldName: string]: number };
+  retro?: { [fieldName: string]: number };
 };
 
 export type SafeAddresses = {
