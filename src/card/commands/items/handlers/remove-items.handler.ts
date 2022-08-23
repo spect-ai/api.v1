@@ -24,7 +24,7 @@ export class RemoveItemsCommandHandler
       const updateObj = {};
       for (const item of items) {
         updateObj[item.fieldName] = cardToUpdate[item.fieldName].filter(
-          (itemId) => !item.itemIds.includes(itemId),
+          (itemId) => !item.itemIds.includes(itemId.toString()),
         );
       }
       const updatedCard = await this.cardRepository.updateById(
