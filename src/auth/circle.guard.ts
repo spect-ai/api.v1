@@ -119,6 +119,7 @@ export class ViewCircleAuthGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
     try {
+      console.log(request.params);
       let circle;
       if (request.params.id)
         circle = await this.circlesRepository.findById(request.params.id);

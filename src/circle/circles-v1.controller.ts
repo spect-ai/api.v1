@@ -111,7 +111,6 @@ export class CircleV1Controller {
       new GetCircleByFilterQuery(
         {
           _id: param.id,
-          'status.archived': false,
         },
         getCirclePopulatedFields,
         getCircleProjectedFields,
@@ -129,7 +128,6 @@ export class CircleV1Controller {
       new GetCircleByFilterQuery(
         {
           slug: param.slug,
-          'status.archived': false,
         },
         getCirclePopulatedFields,
         getCircleProjectedFields,

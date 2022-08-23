@@ -5,7 +5,10 @@ import { CommonTools } from 'src/common/common.service';
 import { LoggingService } from 'src/logging/logging.service';
 import { AddCardsCommand } from 'src/project/commands/impl';
 import { DetailedProjectResponseDto } from 'src/project/dto/detailed-project-response.dto';
-import { GetProjectByIdQuery } from 'src/project/queries/impl';
+import {
+  GetProjectByIdQuery,
+  GetProjectBySlugQuery,
+} from 'src/project/queries/impl';
 import { RequestProvider } from 'src/users/user.provider';
 import { ArchiveCardByIdCommand } from './commands/archive/impl/archive-card.command';
 import {
@@ -20,7 +23,7 @@ import {
 } from './events/archive/impl/card-archived.event';
 import { CardCreatedEvent } from './events/impl';
 import { Card } from './model/card.model';
-import { GetCardByIdQuery } from './queries/impl';
+import { GetCardByFilterQuery, GetCardByIdQuery } from './queries/impl';
 import { ResponseBuilder } from './response.builder';
 import { CardValidationService } from './validation.cards.service';
 
@@ -37,6 +40,34 @@ export class CardsV1Service {
     private readonly eventBus: EventBus,
   ) {
     logger.setContext('CardsV1Service');
+  }
+
+  async get(
+    projectSlug: string,
+    cardSlug: string,
+  ): Promise<DetailedCardResponseDto> {
+    try {
+      const project = await this.queryBus.execute(
+        new GetProjectBySlugQuery(projectSlug),
+      );
+      const card = await this.queryBus.execute(
+        new GetCardByFilterQuery({
+          slug: cardSlug,
+          project: project.id,
+        }),
+      );
+      console.log(card);
+      return await this.responseBuilder.enrichResponse(card);
+    } catch (error) {
+      this.logger.logError(
+        `Failed card retrieval by slug with error: ${error.message}`,
+        this.requestProvider,
+      );
+      throw new InternalServerErrorException(
+        'Failed card retrieval',
+        error.message,
+      );
+    }
   }
 
   async create(createCardDto: CreateCardRequestDto): Promise<{

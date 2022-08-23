@@ -2,7 +2,7 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from 'nestjs-typegoose';
 import { BaseRepository } from 'src/base/base.repository';
 import { Card, ExtendedCard } from './model/card.model';
-import { UpdateQuery, UpdateWriteOpResult } from 'mongoose';
+import { FilterQuery, UpdateQuery, UpdateWriteOpResult } from 'mongoose';
 import { MappedCard } from './types/types';
 import mongodb from 'mongodb';
 import { PopulatedCardFields } from './types/types';
@@ -264,5 +264,27 @@ export class CardsRepository extends BaseRepository<Card> {
     });
 
     return await query.exec();
+  }
+
+  async getCardByFilter(
+    filterQuery: FilterQuery<Card>,
+    customPopulate?: PopulatedCardFields,
+    selectedFields?: Record<string, unknown>,
+  ): Promise<Card> {
+    const query = this.findOne(filterQuery, {
+      projection: selectedFields || {},
+    });
+    let populatedFields = defaultPopulate;
+    if (customPopulate) populatedFields = customPopulate;
+
+    Object.keys(populatedFields).forEach((key) => {
+      query.populate(key, populatedFields[key]);
+    });
+
+    try {
+      return await query.exec();
+    } catch (error) {
+      return null;
+    }
   }
 }
