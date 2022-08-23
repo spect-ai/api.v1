@@ -24,6 +24,7 @@ import { CardsV1Service } from './cards-v1.service';
 import { UpdatePaymentCommand } from './commands/impl';
 import { CreateCardRequestDto } from './dto/create-card-request.dto';
 import { DetailedCardResponseDto } from './dto/detailed-card-response-dto';
+import { UpdateCardProjectDto } from './dto/update-card-project.dto';
 import { GetByProjectSlugAndCardSlugDto } from './dto/get-card-params.dto';
 import { UpdatePaymentInfoDto } from './dto/update-payment-info.dto';
 import { GetCardByIdQuery, GetCardBySlugQuery } from './queries/impl';
@@ -95,6 +96,21 @@ export class CardsV1Controller {
   ): Promise<DetailedProjectResponseDto> {
     return await this.commandBus.execute(
       new UpdatePaymentCommand(updatePaymentInfoDto, req.user.id),
+    );
+  }
+
+  @SetMetadata('permissions', ['update'])
+  @UseGuards(CardAuthGuard)
+  @Patch('/:id/updateProject')
+  async updateCardProject(
+    @Body() updateCardProjectDto: UpdateCardProjectDto,
+    @Param() params: ObjectIdDto,
+    @Request() req,
+  ): Promise<DetailedCardResponseDto> {
+    return await this.cardsService.updateCardProject(
+      params.id,
+      updateCardProjectDto.projectId,
+      req.user.id,
     );
   }
 }

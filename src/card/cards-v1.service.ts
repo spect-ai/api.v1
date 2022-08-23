@@ -15,6 +15,7 @@ import {
   CreateCardCommand,
   RevertArchiveCardByIdCommand,
 } from './commands/impl';
+import { UpdateProjectCardCommand } from './commands/updateCardProject/impl/update-card-project.command';
 import { CreateCardRequestDto } from './dto/create-card-request.dto';
 import { DetailedCardResponseDto } from './dto/detailed-card-response-dto';
 import {
@@ -169,6 +170,34 @@ export class CardsV1Service {
       );
       throw new InternalServerErrorException(
         'Failed reverting archival',
+        error.message,
+      );
+    }
+  }
+
+  async updateCardProject(
+    id: string,
+    projectId: string,
+    caller: string,
+  ): Promise<DetailedCardResponseDto> {
+    try {
+      const updatedCard = await this.commandBus.execute(
+        new UpdateProjectCardCommand(id, projectId, caller),
+      );
+      // this.eventBus.publish(new CardsArchivedEvent(cards));
+      // return {
+      //   ...project,
+      //   cards: this.commonTools.objectify(project.cards, 'id'),
+      // };
+      return updatedCard;
+    } catch (error) {
+      console.error(JSON.stringify(error));
+      this.logger.logError(
+        `Failed updating card project with error: ${error.message}`,
+        this.requestProvider,
+      );
+      throw new InternalServerErrorException(
+        'Failed updating card project',
         error.message,
       );
     }
