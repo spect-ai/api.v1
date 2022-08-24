@@ -93,7 +93,7 @@ export class UpdateProjectCardCommandHandler
       let slugNum = await this.cardsRepository.count({
         project: projectId,
       });
-
+      slugNum--;
       for (const cId of cardIds) {
         const oldCard = await this.cardsRepository.getCardById(cId);
         const newActitvity = [...oldCard.activity, activity];
