@@ -17,9 +17,20 @@ export class CardsProjectService {
   projectPopulatedWithCardDetails(
     project: Project,
   ): DetailedProjectResponseDto {
+    const cards = {};
+    for (const populatedCard of project.cards) {
+      const card = populatedCard as unknown as Card;
+      cards[card.id] = card;
+      if (!card.parent) {
+        cards[card.id].isParent = true;
+      } else {
+        cards[card.id].isParent = false;
+      }
+    }
+
     return {
       ...project,
-      cards: this.commonTools.objectify(project.cards, 'id'),
+      cards,
     };
   }
 

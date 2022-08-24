@@ -19,6 +19,7 @@ const populatedCardFields = {
   project: 1,
   creator: 1,
   status: 1,
+  parent: 1,
 };
 
 const defaultPopulate: PopulatedProjectFields = {
@@ -39,6 +40,7 @@ const defaultPopulate: PopulatedProjectFields = {
     project: 1,
     creator: 1,
     status: 1,
+    parent: 1,
   },
 };
 
@@ -60,13 +62,7 @@ export class ProjectsRepository extends BaseRepository<Project> {
   async getProjectWithPopulatedReferences(id: string): Promise<Project> {
     return await this.findById(id)
       .populate('parents')
-      .populate('cards', populatedCardFields, {
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        parent: {
-          $exists: false,
-        },
-      });
+      .populate('cards', populatedCardFields);
   }
 
   async getProjectWithPopulatedReferencesBySlug(
@@ -74,13 +70,7 @@ export class ProjectsRepository extends BaseRepository<Project> {
   ): Promise<Project> {
     return await this.findOne({ slug: slug })
       .populate('parents')
-      .populate('cards', populatedCardFields, {
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        parent: {
-          $exists: false,
-        },
-      });
+      .populate('cards', populatedCardFields);
   }
 
   async getProjectIdFromSlug(slug: string): Promise<Project> {
@@ -95,13 +85,7 @@ export class ProjectsRepository extends BaseRepository<Project> {
   ): Promise<Project> {
     return await this.updateById(id, update)
       .populate('parents')
-      .populate('cards', populatedCardFields, {
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        parent: {
-          $exists: false,
-        },
-      });
+      .populate('cards', populatedCardFields);
   }
 
   async bundleUpdatesAndExecute(
@@ -140,7 +124,6 @@ export class ProjectsRepository extends BaseRepository<Project> {
     );
     let populatedFields = defaultPopulate;
     if (customPopulate) populatedFields = customPopulate;
-
     Object.keys(populatedFields).forEach((key) => {
       query.populate(key, populatedFields[key]);
     });
@@ -156,6 +139,7 @@ export class ProjectsRepository extends BaseRepository<Project> {
     const query = this.findById(id, {
       projection: selectedFields || {},
     });
+
     let populatedFields = defaultPopulate;
     if (customPopulate) populatedFields = customPopulate;
 
