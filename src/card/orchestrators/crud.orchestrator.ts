@@ -10,13 +10,13 @@ import {
   GetProjectBySlugQuery,
 } from 'src/project/queries/impl';
 import { RequestProvider } from 'src/users/user.provider';
-import { ArchiveCardByIdCommand } from './commands/archive/impl/archive-card.command';
 import {
   CreateCardCommand,
-  RevertArchiveCardByIdCommand,
-} from './commands/impl';
-import { CreateCardRequestDto } from './dto/create-card-request.dto';
-import { DetailedCardResponseDto } from './dto/detailed-card-response-dto';
+  ArchiveCardCommand,
+  RevertArchivedCardCommand,
+} from '../commands/impl';
+import { CreateCardRequestDto } from '../dto/create-card-request.dto';
+import { DetailedCardResponseDto } from '../dto/detailed-card-response-dto';
 import {
   CardArchivalRevertedEvent,
   CardsArchivedEvent,
@@ -26,6 +26,9 @@ import { Card } from '../model/card.model';
 import { GetCardByFilterQuery, GetCardByIdQuery } from '../queries/impl';
 import { ResponseBuilder } from '../response.builder';
 import { CardValidationService } from '../validation.cards.service';
+import { UpdateProjectCardCommand } from '../commands/updateCardProject/impl/update-card-project.command';
+import { UpdateCardRequestDto } from '../dto/update-card-request.dto';
+import { UpdateCardCommand } from '../commands/impl/update-card.command';
 
 @Injectable()
 export class CrudOrchestrator {

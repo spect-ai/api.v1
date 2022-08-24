@@ -77,7 +77,7 @@ export class CardsV1Controller {
   async findByProjectSlugAndCardSlug(
     @Param() params: GetByProjectSlugAndCardSlugDto,
   ): Promise<DetailedCardResponseDto> {
-    return await this.cardsService.get(params.projectSlug, params.cardSlug);
+    return await this.crudOrchestrator.get(params.projectSlug, params.cardSlug);
   }
 
   @Post('/')
@@ -196,7 +196,7 @@ export class CardsV1Controller {
     @Param() params: ObjectIdDto,
     @Request() req,
   ): Promise<DetailedCardResponseDto> {
-    return await this.cardsService.updateCardProject(
+    return await this.crudOrchestrator.updateCardProject(
       params.id,
       updateCardProjectDto.projectId,
       req.user.id,
