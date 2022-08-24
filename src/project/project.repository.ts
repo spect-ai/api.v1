@@ -36,6 +36,9 @@ const defaultPopulate: PopulatedProjectFields = {
     deadline: 1,
     slug: 1,
     type: 1,
+    project: 1,
+    creator: 1,
+    status: 1,
   },
 };
 

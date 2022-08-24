@@ -4,6 +4,7 @@ import {
   GetCardBySlugQueryHandler,
   GetCardWithChildrenQueryHandler,
   GetMultipleCardsWithChildrenQueryHandler,
+  GetCardByFilterQueryHandler,
 } from './get-card.handler';
 
 export const QueryHandlers = [
@@ -12,4 +13,5 @@ export const QueryHandlers = [
   GetCardBySlugQueryHandler,
   GetCardWithChildrenQueryHandler,
   GetMultipleCardsWithChildrenQueryHandler,
+  GetCardByFilterQueryHandler,
 ];

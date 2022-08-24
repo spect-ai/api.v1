@@ -104,3 +104,40 @@ export class CreateCircleAuthGuard implements CanActivate {
     }
   }
 }
+
+@Injectable()
+export class ViewCircleAuthGuard implements CanActivate {
+  constructor(
+    private readonly circlesRepository: CirclesRepository,
+    private readonly sessionAuthGuard: SessionAuthGuard,
+  ) {}
+
+  async canActivate(context: ExecutionContext): Promise<boolean> {
+    const request = context.switchToHttp().getRequest();
+    try {
+      let circle;
+      if (request.params.id)
+        circle = await this.circlesRepository.findById(request.params.id);
+      else if (request.params.slug)
+        circle = await this.circlesRepository.findOne({
+          slug: request.params.slug,
+        });
+      if (!circle) {
+        throw new HttpException('Circle not found', 404);
+      }
+      if (circle.private) {
+        request.user = (await this.sessionAuthGuard.validateUser(
+          request.session.siwe?.address,
+        )) as unknown as User;
+        if (!request.user || !circle.members.includes(request.user.id))
+          return false;
+      }
+
+      return true;
+    } catch (error) {
+      console.log(error);
+      request.session.destroy();
+      throw new HttpException({ message: error }, 422);
+    }
+  }
+}

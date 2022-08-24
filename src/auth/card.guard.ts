@@ -15,7 +15,7 @@ import { ProjectsRepository } from 'src/project/project.repository';
 import { User } from 'src/users/model/users.model';
 import { UsersRepository } from 'src/users/users.repository';
 import { SessionAuthGuard } from './iron-session.guard';
-import { ProjectAuthGuard } from './project.guard';
+import { ProjectAuthGuard, ViewProjectAuthGuard } from './project.guard';
 
 @Injectable()
 export class CardAuthGuard implements CanActivate {
@@ -207,6 +207,37 @@ export class CreateGithubPRAuthGuard implements CanActivate {
 
       if (!request.user) return false;
       return true;
+    } catch (error) {
+      console.log(error);
+      request.session.destroy();
+      throw new HttpException({ message: error }, 422);
+    }
+  }
+}
+
+@Injectable()
+export class ViewCardAuthGuard implements CanActivate {
+  constructor(
+    private readonly viewProjectAuthGuard: ViewProjectAuthGuard,
+    private readonly cardsRepository: CardsRepository,
+  ) {}
+
+  async canActivate(context: ExecutionContext): Promise<boolean> {
+    const request = context.switchToHttp().getRequest();
+    try {
+      let card;
+      if (request.params.id)
+        card = await this.cardsRepository.findById(request.params.id);
+      else if (request.params.slug || request.params.cardSlug)
+        card = await this.cardsRepository.findOne({
+          slug: request.params.slug || request.params.cardSlug,
+        });
+      if (!card) {
+        throw new HttpException('Card not found', 404);
+      }
+      request.card = card;
+      request.projectId = card.project;
+      return await this.viewProjectAuthGuard.canActivate(context);
     } catch (error) {
       console.log(error);
       request.session.destroy();

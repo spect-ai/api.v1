@@ -25,6 +25,8 @@ export class CardNotificationService {
         return this.addFeedbackNotification(card, actor);
       case 'pickApplication':
         return this.pickApplicationNotification(card, actor);
+      case 'addComment':
+        return this.addCommentNotification(card, actor);
       default:
         return null;
     }
@@ -142,6 +144,16 @@ export class CardNotificationService {
   ): { content: string; ref: object } {
     return {
       content: `[actor] picked your application on ${card.title}`,
+      ref: { users: { actor } },
+    };
+  }
+
+  addCommentNotification(
+    card: Card,
+    actor: string,
+  ): { content: string; ref: object } {
+    return {
+      content: `[actor] added a comment on ${card.title}`,
       ref: { users: { actor } },
     };
   }

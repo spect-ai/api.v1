@@ -35,7 +35,7 @@ import { RolesService } from 'src/roles/roles.service';
 import { DiscordService } from 'src/common/discord.service';
 import { SessionAuthGuard } from 'src/auth/iron-session.guard';
 import { CircleAuthGuard } from 'src/auth/circle.guard';
-import { ProjectAuthGuard } from 'src/auth/project.guard';
+import { ProjectAuthGuard, ViewProjectAuthGuard } from 'src/auth/project.guard';
 import { UsersService } from 'src/users/users.service';
 import { EventHandlers } from './events/handlers';
 import { CardNotificationService } from 'src/users/notification/card-notification.service';
@@ -47,6 +47,7 @@ import { CommandHandlers } from './commands/handlers';
 import { CrudOrchestrator } from './orchestrators/crud.orchestrator';
 import { CommonUpdateService } from './services/common-update.service';
 import { ActivityBuilder as ActivityBuilderV1 } from './services/activity-builder.service';
+import { ViewCardAuthGuard } from 'src/auth/card.guard';
 
 @Module({
   imports: [
@@ -99,6 +100,7 @@ import { ActivityBuilder as ActivityBuilderV1 } from './services/activity-builde
     ActivityResolverV1,
     ActivityBuilderV1,
     CommonUpdateService,
+    ViewProjectAuthGuard,
   ],
   exports: [
     CardsService,

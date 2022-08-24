@@ -9,6 +9,7 @@ import {
 import { AddItemCommandHandler } from '../items/handlers/add-items.handler';
 import { RemoveItemsCommandHandler } from '../items/handlers/remove-items.handler';
 import { UpdatePaymentCommandHandler } from '../payment/handlers/update-payment.handler';
+import { UpdateProjectCardCommandHandler } from '../updateCardProject/handlers/update-card-project.handler';
 import {
   CreateWorkThreadCommandHandler,
   CreateWorkUnitCommandHandler,
@@ -40,4 +41,5 @@ export const CommandHandlers = [
   CreateWorkUnitCommandHandler,
   UpdateWorkThreadCommandHandler,
   UpdateWorkUnitCommandHandler,
+  UpdateProjectCardCommandHandler,
 ];

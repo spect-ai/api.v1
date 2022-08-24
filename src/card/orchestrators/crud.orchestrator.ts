@@ -5,21 +5,25 @@ import { CommonTools } from 'src/common/common.service';
 import { LoggingService } from 'src/logging/logging.service';
 import { AddCardsCommand } from 'src/project/commands/impl';
 import { DetailedProjectResponseDto } from 'src/project/dto/detailed-project-response.dto';
-import { GetProjectByIdQuery } from 'src/project/queries/impl';
+import {
+  GetProjectByIdQuery,
+  GetProjectBySlugQuery,
+} from 'src/project/queries/impl';
 import { RequestProvider } from 'src/users/user.provider';
-import { ArchiveCardCommand } from '../commands/archive/impl/archive-card.command';
-import { CreateCardCommand, RevertArchivedCardCommand } from '../commands/impl';
-import { UpdateCardCommand } from '../commands/impl/update-card.command';
-import { CreateCardRequestDto } from '../dto/create-card-request.dto';
-import { DetailedCardResponseDto } from '../dto/detailed-card-response-dto';
-import { UpdateCardRequestDto } from '../dto/update-card-request.dto';
+import { ArchiveCardByIdCommand } from './commands/archive/impl/archive-card.command';
+import {
+  CreateCardCommand,
+  RevertArchiveCardByIdCommand,
+} from './commands/impl';
+import { CreateCardRequestDto } from './dto/create-card-request.dto';
+import { DetailedCardResponseDto } from './dto/detailed-card-response-dto';
 import {
   CardArchivalRevertedEvent,
   CardsArchivedEvent,
 } from '../events/archive/impl/card-archived.event';
 import { CardCreatedEvent, CardUpdatedEvent } from '../events/impl';
 import { Card } from '../model/card.model';
-import { GetCardByIdQuery } from '../queries/impl';
+import { GetCardByFilterQuery, GetCardByIdQuery } from '../queries/impl';
 import { ResponseBuilder } from '../response.builder';
 import { CardValidationService } from '../validation.cards.service';
 
@@ -35,7 +39,34 @@ export class CrudOrchestrator {
     private readonly responseBuilder: ResponseBuilder,
     private readonly eventBus: EventBus,
   ) {
-    logger.setContext('CrudOrchestrator');
+    logger.setContext('CardsV1Service');
+  }
+
+  async get(
+    projectSlug: string,
+    cardSlug: string,
+  ): Promise<DetailedCardResponseDto> {
+    try {
+      const project = await this.queryBus.execute(
+        new GetProjectBySlugQuery(projectSlug),
+      );
+      const card = await this.queryBus.execute(
+        new GetCardByFilterQuery({
+          slug: cardSlug,
+          project: project.id,
+        }),
+      );
+      return await this.responseBuilder.enrichResponse(card);
+    } catch (error) {
+      this.logger.logError(
+        `Failed card retrieval by slug with error: ${error.message}`,
+        this.requestProvider,
+      );
+      throw new InternalServerErrorException(
+        'Failed card retrieval',
+        error.message,
+      );
+    }
   }
 
   async create(createCardDto: CreateCardRequestDto): Promise<{
@@ -175,6 +206,34 @@ export class CrudOrchestrator {
       );
       throw new InternalServerErrorException(
         'Failed reverting archival',
+        error.message,
+      );
+    }
+  }
+
+  async updateCardProject(
+    id: string,
+    projectId: string,
+    caller: string,
+  ): Promise<DetailedCardResponseDto> {
+    try {
+      const updatedCard = await this.commandBus.execute(
+        new UpdateProjectCardCommand(id, projectId, caller),
+      );
+      // this.eventBus.publish(new CardsArchivedEvent(cards));
+      // return {
+      //   ...project,
+      //   cards: this.commonTools.objectify(project.cards, 'id'),
+      // };
+      return updatedCard;
+    } catch (error) {
+      console.error(JSON.stringify(error));
+      this.logger.logError(
+        `Failed updating card project with error: ${error.message}`,
+        this.requestProvider,
+      );
+      throw new InternalServerErrorException(
+        'Failed updating card project',
         error.message,
       );
     }

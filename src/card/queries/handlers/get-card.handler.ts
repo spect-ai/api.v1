@@ -3,6 +3,7 @@ import { CardsRepository } from 'src/card/cards.repository';
 import { DetailedCardResponseDto } from 'src/card/dto/detailed-card-response-dto';
 import { ExtendedCard } from 'src/card/model/card.model';
 import {
+  GetCardByFilterQuery,
   GetCardByIdQuery,
   GetCardBySlugQuery,
   GetCardWithChildrenQuery,
@@ -53,6 +54,22 @@ export class GetCardBySlugQueryHandler
   async execute(query: GetCardBySlugQuery): Promise<DetailedCardResponseDto> {
     const card = await this.cardRepository.getCardBySlug(
       query.slug,
+      query.customPopulate,
+      query.selectedFields,
+    );
+    return card;
+  }
+}
+
+@QueryHandler(GetCardByFilterQuery)
+export class GetCardByFilterQueryHandler
+  implements IQueryHandler<GetCardByFilterQuery>
+{
+  constructor(private readonly cardRepository: CardsRepository) {}
+
+  async execute(query: GetCardByFilterQuery): Promise<DetailedCardResponseDto> {
+    const card = await this.cardRepository.getCardByFilter(
+      query.filterQuery,
       query.customPopulate,
       query.selectedFields,
     );

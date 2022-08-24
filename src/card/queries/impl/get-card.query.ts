@@ -18,6 +18,14 @@ export class GetMultipleCardsByIdsQuery {
   ) {}
 }
 
+export class GetCardByFilterQuery {
+  constructor(
+    public readonly filterQuery: FilterQuery<Card>,
+    public readonly customPopulate?: PopulatedCardFields,
+    public readonly selectedFields?: Record<string, unknown>,
+  ) {}
+}
+
 export class GetCardBySlugQuery {
   constructor(
     public readonly slug: string,

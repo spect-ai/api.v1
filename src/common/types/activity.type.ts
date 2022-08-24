@@ -55,7 +55,8 @@ export type Activity = {
     | 'createApplication'
     | 'updateApplication'
     | 'deleteApplication'
-    | 'pickApplication';
+    | 'pickApplication'
+    | 'updateProject';
 
   /**
    * The commit id of the update of the activity, it is used to group updates that took place at the same time

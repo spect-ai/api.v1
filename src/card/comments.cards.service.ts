@@ -8,6 +8,8 @@ import { DetailedCardResponseDto } from './dto/detailed-card-response-dto';
 import { ResponseBuilder } from './response.builder';
 import { CardValidationService } from './validation.cards.service';
 import { LoggingService } from 'src/logging/logging.service';
+import { EventBus } from '@nestjs/cqrs';
+import { CommentAddedEvent } from './events/comments/impl';
 
 @Injectable()
 export class CommentService {
@@ -17,6 +19,7 @@ export class CommentService {
     private readonly validationService: CardValidationService,
     private readonly responseBuilder: ResponseBuilder,
     private readonly logger: LoggingService,
+    private readonly eventBus: EventBus,
   ) {
     logger.setContext('CommentService');
   }
@@ -48,6 +51,13 @@ export class CommentService {
             activity: card.activity,
           },
         );
+      this.eventBus.publish(
+        new CommentAddedEvent(
+          card,
+          addCommentDto.comment,
+          this.requestProvider.user.id,
+        ),
+      );
       return await this.responseBuilder.enrichResponse(updatedCard);
     } catch (error) {
       this.logger.logError(

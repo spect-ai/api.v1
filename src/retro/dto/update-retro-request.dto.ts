@@ -1,6 +1,5 @@
 import {
   IsDate,
-  IsNotEmpty,
   IsNumber,
   IsObject,
   IsOptional,
@@ -8,6 +7,7 @@ import {
 } from 'class-validator';
 import { Date } from 'mongoose';
 import { Payment } from 'src/common/models/payment.model';
+import { Status } from 'src/common/types/status.type';
 
 export class UpdateRetroRequestDto {
   /**
@@ -15,7 +15,7 @@ export class UpdateRetroRequestDto {
    */
   @IsString()
   @IsOptional()
-  title: string;
+  title?: string;
 
   /**
    * The description of the retro period
@@ -57,5 +57,21 @@ export class UpdateRetroRequestDto {
    */
   @IsObject()
   @IsOptional()
-  status?: Payment;
+  status?: Status;
+}
+
+export class UpdateVoteRequestDto {
+  /**
+   * The member who's part of the retro period
+   */
+  @IsObject()
+  votes: { [key: string]: number };
+}
+
+export class UpdatePaymentRequestDto {
+  /**
+   * The member who's part of the retro period
+   */
+  @IsString()
+  transactionHash: string;
 }

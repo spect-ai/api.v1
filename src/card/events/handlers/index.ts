@@ -5,6 +5,7 @@ import { WorkUnitCreatedEventHandler } from '../work/handlers/work-unit-created.
 import { ApplicationPickedEventHandler } from '../application/handlers/application-picked.handler';
 import { CardsArchivedEventHandler } from '../archive/handlers/card-archived.handler';
 import { CardArchivalRevertedEventHandler } from '../archive/handlers/card-archival-reverted.handler';
+import { CommentAddedEventHandler } from '../comments/handlers/comment-added.handler';
 
 export const EventHandlers = [
   CardCreatedEventHandler,
@@ -14,4 +15,5 @@ export const EventHandlers = [
   ApplicationPickedEventHandler,
   CardsArchivedEventHandler,
   CardArchivalRevertedEventHandler,
+  CommentAddedEventHandler,
 ];
