@@ -22,6 +22,7 @@ import { ActivityResolver as ActivityResolverV1 } from './services/activity-reso
 import { UsersModule } from 'src/users/users.module';
 import { WorkService } from './work.cards.service';
 import { CardValidationService } from './validation.cards.service';
+import { CardValidationService as CardValidationServiceV1 } from './services/card-validation.service';
 import { CommonUtility, ResponseBuilder } from './response.builder';
 import { ResponseBuilder as ResponseBuilderV1 } from './services/response.service';
 import { CommentService } from './comments.cards.service';
@@ -101,6 +102,7 @@ import { ViewCardAuthGuard } from 'src/auth/card.guard';
     ActivityBuilderV1,
     CommonUpdateService,
     ViewProjectAuthGuard,
+    CardValidationServiceV1,
   ],
   exports: [
     CardsService,

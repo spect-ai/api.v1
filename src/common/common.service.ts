@@ -33,6 +33,10 @@ export class CommonTools {
     return res;
   }
 
+  distinctifyArray(arr: any[]) {
+    return [...new Set(arr)];
+  }
+
   distinctify(arrOfObjects: any[], uniqueKey: string) {
     const keyExists = {};
     const newArrOdObjects = [] as any[];

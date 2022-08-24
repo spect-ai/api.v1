@@ -25,7 +25,7 @@ import { CardCreatedEvent, CardUpdatedEvent } from '../events/impl';
 import { Card } from '../model/card.model';
 import { GetCardByFilterQuery, GetCardByIdQuery } from '../queries/impl';
 import { ResponseBuilder } from '../response.builder';
-import { CardValidationService } from '../validation.cards.service';
+import { CardValidationService } from '../services/card-validation.service';
 import { UpdateProjectCardCommand } from '../commands/updateCardProject/impl/update-card-project.command';
 import { UpdateCardRequestDto } from '../dto/update-card-request.dto';
 import { UpdateCardCommand } from '../commands/impl/update-card.command';
@@ -42,7 +42,7 @@ export class CrudOrchestrator {
     private readonly responseBuilder: ResponseBuilder,
     private readonly eventBus: EventBus,
   ) {
-    logger.setContext('CardsV1Service');
+    logger.setContext('CrudOrchestrator');
   }
 
   async get(

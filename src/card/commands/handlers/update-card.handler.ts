@@ -44,8 +44,8 @@ export class UpdateCardCommandHandler
 
   async execute(command: UpdateCardCommand): Promise<DetailedCardResponseDto> {
     try {
-      const { updateCardDto, card, project, circle, caller } = command;
-
+      const { card, project, circle, caller } = command;
+      const updateCardDto = this.distinctifyArrayFields(command.updateCardDto);
       let updatedCard = this.getUpdatedCard(
         caller,
         card,
@@ -80,7 +80,6 @@ export class UpdateCardCommandHandler
         updatedProject,
         multipleItemContainer.projects,
       );
-      console.log(updatedCard);
       const diff = this.cardsService.getDifference(card, updatedCard);
       await this.commonUpdateService.execute(updatedCard, updatedProject);
       const resultingCard =
@@ -185,5 +184,24 @@ export class UpdateCardCommandHandler
     }
 
     return {};
+  }
+
+  distinctifyArrayFields(
+    updateCardDto: UpdateCardRequestDto,
+  ): UpdateCardRequestDto {
+    if (updateCardDto.assignee)
+      updateCardDto.assignee = this.commonTools.distinctifyArray(
+        updateCardDto.assignee,
+      );
+    if (updateCardDto.reviewer)
+      updateCardDto.reviewer = this.commonTools.distinctifyArray(
+        updateCardDto.reviewer,
+      );
+    if (updateCardDto.labels)
+      updateCardDto.labels = this.commonTools.distinctifyArray(
+        updateCardDto.labels,
+      );
+
+    return updateCardDto;
   }
 }
