@@ -37,7 +37,7 @@ export class UpdateProjectCardCommandHandler
 
       const updatedProject = await this.commandBus.execute(
         new RemoveCardsCommand(
-          [cardWithChildren.id],
+          [cardWithChildren._id.toString()],
           null,
           cardWithChildren.project,
         ),
