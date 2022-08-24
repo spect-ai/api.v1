@@ -36,11 +36,15 @@ export class UpdateProjectCardCommandHandler
       const cardIds = cards.map((c) => c._id.toString());
 
       const updatedProject = await this.commandBus.execute(
-        new RemoveCardsCommand(cardIds, null, cardWithChildren.project),
+        new RemoveCardsCommand(
+          [cardWithChildren.id],
+          null,
+          cardWithChildren.project,
+        ),
       );
 
       const updatedNewProject: Project = await this.commandBus.execute(
-        new AddCardsCommand(cards, null, projectId),
+        new AddCardsCommand([cardWithChildren], null, projectId),
       );
 
       /** Mongo only returns an acknowledgment on update and not the updated records itself */
