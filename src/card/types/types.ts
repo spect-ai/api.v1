@@ -1,4 +1,5 @@
 import { ObjectId } from 'mongoose';
+import { PopulatedProjectFields } from 'src/project/types/types';
 import { Card } from '../model/card.model';
 
 export type MappedCard = {
@@ -90,8 +91,8 @@ export type MappedDiff = {
 
 export type PopulatedCardFields = {
   circle?: { [fieldName: string]: 0 | 1 };
-  project?: { [fieldName: string]: 0 | 1 };
-  parent?: { [fieldName: string]: 0 | 1 };
+  project?: { [fieldName: string]: 0 | 1 | PopulatedProjectFields };
+  parent?: { [fieldName: string]: 0 | 1 | PopulatedProjectFields };
   children?: { [fieldName: string]: 0 | 1 };
   assignee?: { [fieldName: string]: 0 | 1 };
   reviewer?: { [fieldName: string]: 0 | 1 };

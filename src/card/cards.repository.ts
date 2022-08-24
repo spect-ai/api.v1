@@ -2,10 +2,11 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from 'nestjs-typegoose';
 import { BaseRepository } from 'src/base/base.repository';
 import { Card, ExtendedCard } from './model/card.model';
-import { FilterQuery, UpdateQuery, UpdateWriteOpResult } from 'mongoose';
+import { FilterQuery, Query, UpdateQuery, UpdateWriteOpResult } from 'mongoose';
 import { MappedCard } from './types/types';
 import mongodb from 'mongodb';
 import { PopulatedCardFields } from './types/types';
+import { PopulatedProjectFields } from 'src/project/types/types';
 
 const populatedCardFields = {
   title: 1,
@@ -48,6 +49,10 @@ const defaultPopulate: PopulatedCardFields = {
   parent: {
     title: 1,
     slug: 1,
+    project: {
+      name: 1,
+      slug: 1,
+    } as PopulatedProjectFields,
   },
   children: {
     title: 1,
@@ -204,15 +209,13 @@ export class CardsRepository extends BaseRepository<Card> {
     customPopulate?: PopulatedCardFields,
     selectedFields?: Record<string, unknown>,
   ): Promise<Card> {
-    const query = this.findById(id, {
+    let query = this.findById(id, {
       projection: selectedFields || {},
     });
     let populatedFields = defaultPopulate;
     if (customPopulate) populatedFields = customPopulate;
 
-    Object.keys(populatedFields).forEach((key) => {
-      query.populate(key, populatedFields[key]);
-    });
+    query = this.getQueryWithPopulatedFields(populatedFields, query);
 
     return await query.exec();
   }
@@ -222,7 +225,7 @@ export class CardsRepository extends BaseRepository<Card> {
     customPopulate?: PopulatedCardFields,
     selectedFields?: Record<string, unknown>,
   ): Promise<Card[]> {
-    const query = this.findAll(
+    let query = this.findAll(
       {
         _id: { $in: ids },
       },
@@ -233,9 +236,8 @@ export class CardsRepository extends BaseRepository<Card> {
     let populatedFields = defaultPopulate;
     if (customPopulate) populatedFields = customPopulate;
 
-    Object.keys(populatedFields).forEach((key) => {
-      query.populate(key, populatedFields[key]);
-    });
+    query = this.getQueryWithPopulatedFields(populatedFields, query);
+
     try {
       return await query.exec();
     } catch (error) {
@@ -248,7 +250,7 @@ export class CardsRepository extends BaseRepository<Card> {
     customPopulate?: PopulatedCardFields,
     selectedFields?: Record<string, unknown>,
   ): Promise<Card> {
-    const query = this.findOne(
+    let query = this.findOne(
       {
         slug: slug,
       },
@@ -259,9 +261,7 @@ export class CardsRepository extends BaseRepository<Card> {
     let populatedFields = defaultPopulate;
     if (customPopulate) populatedFields = customPopulate;
 
-    Object.keys(populatedFields).forEach((key) => {
-      query.populate(key, populatedFields[key]);
-    });
+    query = this.getQueryWithPopulatedFields(populatedFields, query);
 
     return await query.exec();
   }
@@ -271,20 +271,41 @@ export class CardsRepository extends BaseRepository<Card> {
     customPopulate?: PopulatedCardFields,
     selectedFields?: Record<string, unknown>,
   ): Promise<Card> {
-    const query = this.findOne(filterQuery, {
+    let query = this.findOne(filterQuery, {
       projection: selectedFields || {},
     });
     let populatedFields = defaultPopulate;
     if (customPopulate) populatedFields = customPopulate;
-
-    Object.keys(populatedFields).forEach((key) => {
-      query.populate(key, populatedFields[key]);
-    });
-
+    query = this.getQueryWithPopulatedFields(populatedFields, query);
     try {
       return await query.exec();
     } catch (error) {
       return null;
     }
+  }
+
+  getQueryWithPopulatedFields(populatedFields: object, query: any) {
+    Object.keys(populatedFields).forEach((key) => {
+      const populatedFieldsInPopulatedFields = [];
+      const selectedFieldsInPopulatedFields = {};
+      Object.keys(populatedFields[key]).forEach((k) => {
+        if (typeof populatedFields[key][k] === 'object')
+          populatedFieldsInPopulatedFields.push({
+            path: k,
+            select: populatedFields[key][k],
+          });
+        else if (populatedFields[key][k] === 1) {
+          selectedFieldsInPopulatedFields[k] = 1;
+        }
+      });
+
+      query.populate({
+        path: key,
+        select: selectedFieldsInPopulatedFields,
+        populate: populatedFieldsInPopulatedFields,
+      });
+    });
+
+    return query;
   }
 }
