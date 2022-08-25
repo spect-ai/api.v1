@@ -125,7 +125,7 @@ export class CardsPaymentService {
           }
         }
       }
-
+      aggregatedPaymentInfo.chainId = chainId;
       return aggregatedPaymentInfo;
     } catch (error) {
       this.logger.logError(

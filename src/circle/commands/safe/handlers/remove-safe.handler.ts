@@ -34,12 +34,13 @@ export class RemoveSafeCommandHandler
         ),
       };
 
-      const updatedCircle = await this.circlesRepository.updateById(
-        circleToUpdate.id,
-        {
-          safeAddresses,
-        },
-      );
+      const updatedCircle =
+        await this.circlesRepository.updateCircleAndReturnWithPopulatedReferences(
+          circleToUpdate.id,
+          {
+            safeAddresses,
+          },
+        );
       return updatedCircle;
     } catch (error) {
       throw new InternalServerErrorException(error.message);
