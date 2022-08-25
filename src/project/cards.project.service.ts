@@ -18,6 +18,7 @@ export class CardsProjectService {
     project: Project,
   ): DetailedProjectResponseDto {
     const cards = {};
+    console.log(project.cards);
     for (const populatedCard of project.cards) {
       const card = populatedCard as unknown as Card;
       cards[card.id] = card;
