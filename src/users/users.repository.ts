@@ -5,7 +5,7 @@ import { User } from './model/users.model';
 import { MappedUser, PopulatedUserFields } from './types/types';
 import mongodb from 'mongodb';
 import { DetailedUserPubliceResponseDto } from './dto/detailed-user-response.dto';
-import { UpdateQuery } from 'mongoose';
+import { FilterQuery, UpdateQuery } from 'mongoose';
 
 const defaultPopulate: PopulatedUserFields = {
   bookmarks: {},
@@ -97,6 +97,28 @@ export class UsersRepository extends BaseRepository<User> {
     } catch (e) {
       console.log(e);
       return [];
+    }
+  }
+
+  async getUserByFilter(
+    filterQuery: FilterQuery<User>,
+    customPopulate?: PopulatedUserFields,
+    selectedFields?: Record<string, unknown>,
+  ): Promise<User> {
+    const query = this.findOne(filterQuery, {
+      projection: selectedFields || {},
+    });
+    let populatedFields = defaultPopulate;
+    if (customPopulate) populatedFields = customPopulate;
+
+    Object.keys(populatedFields).forEach((key) => {
+      query.populate(key, populatedFields[key]);
+    });
+
+    try {
+      return await query.exec();
+    } catch (error) {
+      return null;
     }
   }
 }

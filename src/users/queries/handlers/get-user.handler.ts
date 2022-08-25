@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, Injectable } from '@nestjs/common';
 import { IQueryHandler, QueryBus, QueryHandler } from '@nestjs/cqrs';
 import { GetMultipleCardsByIdsQuery } from 'src/card/queries/impl';
 import { MappedCard } from 'src/card/types/types';
@@ -18,6 +18,7 @@ import { RequestProvider } from 'src/users/user.provider';
 import { UsersRepository } from '../../users.repository';
 import {
   GetMultipleUsersByIdsQuery,
+  GetUserByFilterQuery,
   GetUserByIdQuery,
   GetUserByUsernameQuery,
 } from '../impl';
@@ -206,7 +207,7 @@ export class UserFieldResolver {
       ...(activityCircleIds || []),
       ...(notifCircleIds || []),
     ];
-    const circles = await this.queryBus.execute(
+    const retros = await this.queryBus.execute(
       new GetMultipleRetrosQuery(
         {
           _id: { $in: retroIds },
@@ -228,7 +229,7 @@ export class UserFieldResolver {
         },
       ),
     );
-    return this.commonTools.objectify(circles, 'id');
+    return this.commonTools.objectify(retros, 'id');
   }
 
   populateActor(user: DetailedUserPrivateResponseDto): any {
@@ -249,7 +250,7 @@ export class UserFieldResolver {
     user: User,
     caller: string,
   ): Promise<DetailedUserPubliceResponseDto | DetailedUserPrivateResponseDto> {
-    if (caller === user.id) {
+    if (caller === user?.id) {
       const enrichedUser = (await this.resolvePrivateFields(
         user,
       )) as DetailedUserPrivateResponseDto;
@@ -315,6 +316,7 @@ export class GetUserByIdQueryHandler
     query: GetUserByIdQuery,
   ): Promise<DetailedUserPubliceResponseDto> {
     const user = await this.userRepository.findById(query.id);
+    if (!user) throw new HttpException('User not found', 404);
     return await this.fieldResolver.resolve(user, query.caller);
   }
 }
@@ -350,6 +352,25 @@ export class GetUserByUsernameQueryHandler
     const user = await this.userRepository.findOne({
       username: query.username,
     });
+    if (!user) throw new HttpException('User not found', 404);
+    return await this.fieldResolver.resolve(user, query.caller);
+  }
+}
+
+@QueryHandler(GetUserByFilterQuery)
+export class GetUserByFilterQueryHandler
+  implements IQueryHandler<GetUserByFilterQuery>
+{
+  constructor(
+    private readonly userRepository: UsersRepository,
+    private readonly fieldResolver: UserFieldResolver,
+  ) {}
+
+  async execute(
+    query: GetUserByFilterQuery,
+  ): Promise<DetailedUserPubliceResponseDto> {
+    const user = await this.userRepository.findOne(query.filter);
+    if (!user) throw new HttpException('User not found', 404);
     return await this.fieldResolver.resolve(user, query.caller);
   }
 }
