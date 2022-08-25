@@ -1,12 +1,16 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
-import { CommandBus, EventBus } from '@nestjs/cqrs';
+import { CommandBus, EventBus, QueryBus } from '@nestjs/cqrs';
 import { LoggingService } from 'src/logging/logging.service';
 import { RequestProvider } from 'src/users/user.provider';
 import { CreateCircleCommand } from '../commands/impl';
 import { UpdateCircleCommand } from '../commands/impl/update-circle.command';
 import { CreateCircleRequestDto } from '../dto/create-circle-request.dto';
-import { DetailedCircleResponseDto } from '../dto/detailed-circle-response.dto';
+import {
+  BucketizedCircleResponseDto,
+  DetailedCircleResponseDto,
+} from '../dto/detailed-circle-response.dto';
 import { UpdateCircleRequestDto } from '../dto/update-circle-request.dto';
+import { GetMultipleCirclesQuery } from '../queries/impl';
 
 @Injectable()
 export class CirclesCrudService {
@@ -14,9 +18,46 @@ export class CirclesCrudService {
     private readonly requestProvider: RequestProvider,
     private readonly logger: LoggingService,
     private readonly commandBus: CommandBus,
-    private readonly eventBus: EventBus,
+    private readonly queryBus: QueryBus,
   ) {
     logger.setContext('CirclesCrudService');
+  }
+
+  async getPubicParentCircles(
+    getCirclePopulatedFields: object,
+    getCircleProjectedFields: any,
+  ): Promise<BucketizedCircleResponseDto> {
+    const circles = (await this.queryBus.execute(
+      new GetMultipleCirclesQuery(
+        {
+          parents: { $exists: true, $eq: [] },
+          'status.archived': false,
+        },
+        getCirclePopulatedFields,
+        getCircleProjectedFields,
+      ),
+    )) as DetailedCircleResponseDto[];
+
+    const res = {
+      memberOf: [],
+      claimable: [],
+      joinable: [],
+    };
+    for (const circle of circles) {
+      if (circle.members.includes(this.requestProvider.user?.id)) {
+        res.memberOf.push(circle);
+        continue;
+      }
+      if (circle.private) {
+        continue;
+      }
+      if (circle.toBeClaimed) {
+        res.claimable.push(circle);
+        continue;
+      }
+      res.joinable.push(circle);
+    }
+    return res;
   }
 
   async create(
