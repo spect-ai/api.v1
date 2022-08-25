@@ -1,4 +1,4 @@
-import { UpdateVoteRequestDto } from 'src/retro/dto/update-retro-vote-request.dto';
+import { UpdateVoteRequestDto } from 'src/retro/dto/update-retro-request.dto';
 import { Retro } from 'src/retro/models/retro.model';
 
 export class UpdateRetroVoteCommand {

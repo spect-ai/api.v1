@@ -81,7 +81,7 @@ export class CardCommandHandler {
         );
 
       const cardUpdate = this.cardsService.update(card, project, updateCardDto);
-
+      console.log(cardUpdate);
       const automationUpdate = this.automationService.handleAutomation(
         card,
         project,
