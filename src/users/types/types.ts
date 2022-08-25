@@ -8,6 +8,7 @@ export type Notification = {
   id: string;
   content: string;
   type: 'card' | 'project' | 'circle' | 'retro';
+  entityId: string;
   linkPath: string[];
   actor: string;
   timestamp: Date;

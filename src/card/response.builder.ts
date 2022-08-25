@@ -65,7 +65,6 @@ export class ResponseBuilder {
      */
     card = await this.enrichActivity(card);
     card = this.resolveApplicationView(card);
-
     const cardProject = card.project as unknown as Project;
     const res = {
       ...card,
