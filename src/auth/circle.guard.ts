@@ -125,10 +125,10 @@ export class ViewCircleAuthGuard implements CanActivate {
       if (!circle) {
         throw new HttpException('Circle not found', 404);
       }
+      request.user = (await this.sessionAuthGuard.validateUser(
+        request.session.siwe?.address,
+      )) as unknown as User;
       if (circle.private) {
-        request.user = (await this.sessionAuthGuard.validateUser(
-          request.session.siwe?.address,
-        )) as unknown as User;
         if (!request.user || !circle.members.includes(request.user.id))
           return false;
       }

@@ -9,6 +9,10 @@ import {
   RemoveCardsInMultipleProjectsCommandHandler,
 } from '../cards/handlers/remove-cards.handler';
 import { DeleteProjectByIdCommandHandler } from './delete-project.handler';
+import {
+  UpdateProjectByIdCommandHandler,
+  UpdateProjectCardNumByIdCommandHandler,
+} from './update-project.handler';
 import { CreateAutomationCommandHandler } from '../automation/handlers/create-automation.handler';
 
 export const CommandHandlers = [
@@ -20,4 +24,6 @@ export const CommandHandlers = [
   ArchiveProjectCommandHandler,
   RevertArchivedProjectCommandHandler,
   CreateAutomationCommandHandler,
+  UpdateProjectByIdCommandHandler,
+  UpdateProjectCardNumByIdCommandHandler,
 ];

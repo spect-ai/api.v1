@@ -49,6 +49,8 @@ import { CrudOrchestrator } from './orchestrators/crud.orchestrator';
 import { CommonUpdateService } from './services/common-update.service';
 import { ActivityBuilder as ActivityBuilderV1 } from './services/activity-builder.service';
 import { ViewCardAuthGuard } from 'src/auth/card.guard';
+import { RegistryService } from 'src/registry/registry.service';
+import { RegistryModule } from 'src/registry/registry.module';
 
 @Module({
   imports: [
@@ -61,6 +63,7 @@ import { ViewCardAuthGuard } from 'src/auth/card.guard';
     forwardRef(() => UsersModule),
     forwardRef(() => AutomationModule),
     CqrsModule,
+    RegistryModule,
   ],
   controllers: [CardsController, CardsV1Controller],
   providers: [
@@ -103,6 +106,7 @@ import { ViewCardAuthGuard } from 'src/auth/card.guard';
     CommonUpdateService,
     ViewProjectAuthGuard,
     CardValidationServiceV1,
+    RegistryService,
   ],
   exports: [
     CardsService,

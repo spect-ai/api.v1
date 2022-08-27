@@ -136,11 +136,10 @@ export class ViewProjectAuthGuard implements CanActivate {
         throw new HttpException('Project not found', 404);
       }
       request.project = project;
-
+      request.user = (await this.sessionAuthGuard.validateUser(
+        request.session.siwe?.address,
+      )) as unknown as User;
       if (project.private) {
-        request.user = (await this.sessionAuthGuard.validateUser(
-          request.session.siwe?.address,
-        )) as unknown as User;
         if (!request.user) return false;
 
         return await this.isMember(project.parents, request.user.id);

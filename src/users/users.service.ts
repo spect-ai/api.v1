@@ -9,7 +9,11 @@ import { User } from './model/users.model';
 import { RequestProvider } from './user.provider';
 import { UsersRepository } from './users.repository';
 import { CommandBus, QueryBus, EventBus } from '@nestjs/cqrs';
-import { GetUserByIdQuery, GetUserByUsernameQuery } from './queries/impl';
+import {
+  GetUserByFilterQuery,
+  GetUserByIdQuery,
+  GetUserByUsernameQuery,
+} from './queries/impl';
 import { LoggingService } from 'src/logging/logging.service';
 import { AddItemsCommand, RemoveItemsCommand } from './commands/impl';
 import { UserCreatedEvent } from './events/impl';
@@ -53,6 +57,30 @@ export class UsersService {
     try {
       return this.queryBus.execute(
         new GetUserByUsernameQuery(username, this.requestProvider.user?.id),
+      );
+    } catch (error) {
+      this.logger.logError(
+        `Failed getting user by username with error: ${error.message}`,
+        this.requestProvider,
+      );
+      throw new InternalServerErrorException(
+        `Failed getting user by username`,
+        error.message,
+      );
+    }
+  }
+
+  async getUserByEthAddress(
+    ethAddress: string,
+  ): Promise<DetailedUserPubliceResponseDto | DetailedUserPrivateResponseDto> {
+    try {
+      return this.queryBus.execute(
+        new GetUserByFilterQuery(
+          {
+            ethAddress: ethAddress.toLowerCase(),
+          },
+          this.requestProvider.user?.id,
+        ),
       );
     } catch (error) {
       this.logger.logError(

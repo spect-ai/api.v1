@@ -7,6 +7,7 @@ export class AddCardsCommand {
     public readonly cards: Card[],
     public readonly project?: Project,
     public readonly id?: string,
+    public readonly lastCardCount?: number,
   ) {}
 }
 

@@ -16,13 +16,19 @@ import {
   CreateCircleAuthGuard,
   ViewCircleAuthGuard,
 } from 'src/auth/circle.guard';
-import { SessionAuthGuard } from 'src/auth/iron-session.guard';
+import {
+  PublicViewAuthGuard,
+  SessionAuthGuard,
+} from 'src/auth/iron-session.guard';
 import { ObjectIdDto } from 'src/common/dtos/object-id.dto';
 import { RequiredRoleDto, RequiredSlugDto } from 'src/common/dtos/string.dto';
 import { ArchiveCircleByIdCommand, ClaimCircleCommand } from './commands/impl';
 import { AddSafeCommand, RemoveSafeCommand } from './commands/safe/impl';
 import { CreateCircleRequestDto } from './dto/create-circle-request.dto';
-import { DetailedCircleResponseDto } from './dto/detailed-circle-response.dto';
+import {
+  BucketizedCircleResponseDto,
+  DetailedCircleResponseDto,
+} from './dto/detailed-circle-response.dto';
 import { InviteDto } from './dto/invite.dto';
 import { JoinCircleUsingInvitationRequestDto } from './dto/join-circle.dto';
 import { MemberDto } from './dto/params.dto';
@@ -84,23 +90,17 @@ export class CircleV1Controller {
     private readonly commandBus: CommandBus,
   ) {}
 
+  @UseGuards(PublicViewAuthGuard)
   @Get('/allPublicParents')
-  async findAllParentCircles(): Promise<DetailedCircleResponseDto[]> {
+  async findAllParentCircles(): Promise<BucketizedCircleResponseDto> {
     try {
-      return await this.queryBus.execute(
-        new GetMultipleCirclesQuery(
-          {
-            parents: { $exists: true, $eq: [] },
-            private: false,
-            'status.archived': false,
-          },
-          getCirclePopulatedFields,
-          getCircleProjectedFields,
-        ),
+      return await this.circleCrudService.getPubicParentCircles(
+        getCirclePopulatedFields,
+        getCircleProjectedFields,
       );
     } catch (error) {
       console.log(error);
-      return [];
+      return {};
     }
   }
 

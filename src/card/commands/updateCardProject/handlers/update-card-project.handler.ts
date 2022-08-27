@@ -3,7 +3,12 @@ import {
   HttpStatus,
   InternalServerErrorException,
 } from '@nestjs/common';
-import { CommandBus, CommandHandler, ICommandHandler } from '@nestjs/cqrs';
+import {
+  CommandBus,
+  CommandHandler,
+  ICommandHandler,
+  QueryBus,
+} from '@nestjs/cqrs';
 import { CardsRepository } from 'src/card/cards.repository';
 import { Card } from 'src/card/model/card.model';
 import { AddCardsCommand, RemoveCardsCommand } from 'src/project/commands/impl';
@@ -12,6 +17,7 @@ import { UpdateProjectCardCommand } from '../impl/update-card-project.command';
 import { v4 as uuidv4 } from 'uuid';
 import { Activity } from 'src/common/types/activity.type';
 import { Project } from 'src/project/model/project.model';
+import { GetProjectByIdQuery } from 'src/project/queries/impl';
 
 @CommandHandler(UpdateProjectCardCommand)
 export class UpdateProjectCardCommandHandler
@@ -20,6 +26,7 @@ export class UpdateProjectCardCommandHandler
   constructor(
     private readonly cardsRepository: CardsRepository,
     private readonly commandBus: CommandBus,
+    private readonly queryBus: QueryBus,
   ) {}
 
   async execute(command: UpdateProjectCardCommand): Promise<Card> {
@@ -36,11 +43,24 @@ export class UpdateProjectCardCommandHandler
       const cardIds = cards.map((c) => c._id.toString());
 
       const updatedProject = await this.commandBus.execute(
-        new RemoveCardsCommand(cardIds, null, cardWithChildren.project),
+        new RemoveCardsCommand(
+          [cardWithChildren._id.toString()],
+          null,
+          cardWithChildren.project,
+        ),
+      );
+
+      const newProject: Project = await this.queryBus.execute(
+        new GetProjectByIdQuery(projectId),
       );
 
       const updatedNewProject: Project = await this.commandBus.execute(
-        new AddCardsCommand(cards, null, projectId),
+        new AddCardsCommand(
+          [cardWithChildren],
+          null,
+          projectId,
+          newProject.cardCount + 1 + cardWithChildren.flattenedChildren.length,
+        ),
       );
 
       /** Mongo only returns an acknowledgment on update and not the updated records itself */
@@ -90,10 +110,12 @@ export class UpdateProjectCardCommandHandler
         content: `moved card to ${updatedNewProject.name}`,
       } as Activity;
 
-      let slugNum = await this.cardsRepository.count({
-        project: projectId,
-      });
-
+      let slugNum =
+        updatedNewProject.cardCount ||
+        (await this.cardsRepository.count({
+          project: updatedNewProject._id,
+        }));
+      slugNum--;
       for (const cId of cardIds) {
         const oldCard = await this.cardsRepository.getCardById(cId);
         const newActitvity = [...oldCard.activity, activity];

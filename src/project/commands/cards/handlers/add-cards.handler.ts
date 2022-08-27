@@ -13,7 +13,7 @@ export class AddCardsCommandHandler
 
   async execute(command: AddCardsCommand): Promise<Project> {
     try {
-      const { project, id, cards } = command;
+      const { project, id, cards, lastCardCount } = command;
       let projectToUpdate = project;
       if (!projectToUpdate) {
         projectToUpdate = await this.projectRepository.findById(id);
@@ -50,6 +50,7 @@ export class AddCardsCommandHandler
           {
             cards: [...cardIds, ...projectToUpdate.cards],
             columnDetails: columnDetails,
+            cardCount: lastCardCount || projectToUpdate.cardCount,
           },
         );
       return updatedProject;

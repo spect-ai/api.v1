@@ -1,5 +1,6 @@
 import { Ref } from '@typegoose/typegoose';
 import {
+  IsArray,
   IsBoolean,
   IsNotEmpty,
   IsObject,
@@ -7,6 +8,7 @@ import {
   ValidateNested,
 } from 'class-validator';
 import { ObjectId } from 'mongoose';
+import { Circle } from '../model/circle.model';
 
 export class DetailedCircleResponseDto {
   /**
@@ -93,4 +95,22 @@ export class DetailedCircleResponseDto {
    */
   @IsObject()
   safeAddress?: object;
+
+  /**
+   * Is circle private?
+   */
+  @IsBoolean()
+  private?: boolean;
+
+  /**
+   * Is circle to be claimed?
+   */
+  @IsBoolean()
+  toBeClaimed?: boolean;
+}
+
+export class BucketizedCircleResponseDto {
+  memberOf?: Partial<Circle>[];
+  claimable?: Partial<Circle>[];
+  joinable?: Partial<Circle>[];
 }

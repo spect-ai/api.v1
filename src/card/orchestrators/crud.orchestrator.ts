@@ -77,7 +77,7 @@ export class CrudOrchestrator {
     project: DetailedProjectResponseDto;
   }> {
     try {
-      let project =
+      const project =
         this.requestProvider.project ||
         (await this.queryBus.execute(
           new GetProjectByIdQuery(createCardDto.project),
@@ -96,7 +96,7 @@ export class CrudOrchestrator {
         this.validationService.validateCardExists(parentCard);
       }
 
-      const card = await this.commandBus.execute(
+      return await this.commandBus.execute(
         new CreateCardCommand(
           createCardDto,
           project,
@@ -105,22 +105,6 @@ export class CrudOrchestrator {
           parentCard,
         ),
       );
-      if (!createCardDto.parent) {
-        project = await this.commandBus.execute(
-          new AddCardsCommand([card], project),
-        );
-      }
-      this.eventBus.publish(
-        new CardCreatedEvent(card, project.slug, circle.slug),
-      );
-
-      return {
-        card: await this.responseBuilder.enrichResponse(card),
-        project: {
-          ...project,
-          cards: this.commonTools.objectify(project.cards, 'id'),
-        },
-      };
     } catch (error) {
       this.logger.logError(
         `Failed creating new card with error: ${error.message}`,
