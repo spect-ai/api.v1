@@ -17,14 +17,13 @@ import { Activity } from 'src/common/types/activity.type';
 import { CardsProjectService } from 'src/project/cards.project.service';
 import {
   AddCardsCommand,
-  UpdateProjectByIdCommand,
   UpdateProjectCardNumByIdCommand,
 } from 'src/project/commands/impl';
 import { DetailedProjectResponseDto } from 'src/project/dto/detailed-project-response.dto';
-import { Project } from 'src/project/model/project.model';
 import { v4 as uuidv4 } from 'uuid';
 import { CreateCardCommand } from '../impl';
-
+import { RegistryService } from 'src/registry/registry.service';
+import { Payment } from 'src/common/models/payment.model';
 @CommandHandler(CreateCardCommand)
 export class CreateCardCommandHandler
   implements ICommandHandler<CreateCardCommand>
@@ -35,6 +34,7 @@ export class CreateCardCommandHandler
     private readonly commandBus: CommandBus,
     private readonly eventBus: EventBus,
     private readonly cardProjectService: CardsProjectService,
+    private readonly registryService: RegistryService,
   ) {}
 
   async execute(command: CreateCardCommand): Promise<{
@@ -50,8 +50,9 @@ export class CreateCardCommandHandler
           project: createCardDto.project,
         }));
       /** Get the created card object */
-      const newCard = this.getCreatedCard(
+      const newCard = await this.getCreatedCard(
         createCardDto,
+        circle,
         project.slug,
         cardNum,
         caller,
@@ -60,7 +61,7 @@ export class CreateCardCommandHandler
       const createdCard = await this.cardsRepository.create(newCard);
 
       /** Get the added sub card objects */
-      const newChildCards = this.getCreatedChildCards(
+      const newChildCards = await this.getCreatedChildCards(
         createCardDto,
         createdCard,
         circle,
@@ -143,15 +144,16 @@ export class CreateCardCommandHandler
     }
   }
 
-  getCreatedCard(
+  async getCreatedCard(
     createCardDto: CreateCardRequestDto,
+    circle: Circle,
     projectSlug: string,
     slugNum: number,
     caller: string,
-  ): Partial<Card> {
+  ): Promise<Partial<Card>> {
     createCardDto.type = createCardDto.type || 'Task';
+    createCardDto.reward = await this.getReward(createCardDto, circle);
     const activity = this.buildNewCardActivity(createCardDto, caller);
-
     return {
       ...createCardDto,
       slug: `${projectSlug}-${slugNum.toString()}`,
@@ -162,29 +164,29 @@ export class CreateCardCommandHandler
     };
   }
 
-  getCreatedChildCards(
+  async getCreatedChildCards(
     createCardDto: CreateCardRequestDto,
     parentCard: Card,
     circle: Circle,
     projectSlug: string,
     startSlugNum: number,
     caller: string,
-  ): Card[] {
+  ): Promise<Card[]> {
     const childCards = createCardDto.childCards;
     if (!childCards || childCards.length === 0) return [];
 
     let slugNum = startSlugNum;
     const cards = [];
+
     for (const childCard of childCards) {
       createCardDto.type = createCardDto.type || 'Task';
+      createCardDto.reward = await this.getReward(childCard, circle);
       const activity = this.buildNewCardActivity(createCardDto, caller);
-
       cards.push({
         ...childCard,
         project: childCard.project || createCardDto.project,
         circle: childCard.circle || circle.id,
         parent: parentCard.id,
-        reward: createCardDto.reward || { ...circle.defaultPayment, value: 0 }, //TODO: add reward to child cards
         columnId: null, // Child cards dont have a column
         activity: [activity],
         slug: `${projectSlug}-${slugNum.toString()}`,
@@ -219,5 +221,27 @@ export class CreateCardCommandHandler
     newCardActivity.comment = false;
 
     return newCardActivity;
+  }
+
+  async getReward(
+    createCardDto: CreateCardRequestDto,
+    circle: Circle,
+  ): Promise<Payment> {
+    if (
+      !createCardDto.reward ||
+      !createCardDto.reward.chain ||
+      !createCardDto.reward.chain.chainId
+    )
+      createCardDto.reward = { ...circle.defaultPayment, value: 0 };
+    if (
+      !createCardDto.reward.token ||
+      !createCardDto.reward.token.address ||
+      !createCardDto.reward.token.symbol
+    ) {
+      const registry = await this.registryService.getRegistry();
+      createCardDto.reward.token =
+        registry[createCardDto.reward.chain.chainId].tokenDetails['0x0'];
+    }
+    return createCardDto.reward;
   }
 }

@@ -46,16 +46,11 @@ export class CirclesCrudService {
     for (const circle of circles) {
       if (circle.members.includes(this.requestProvider.user?.id)) {
         res.memberOf.push(circle);
-        continue;
+      } else if (!circle.private) {
+        if (circle.toBeClaimed) {
+          res.claimable.push(circle);
+        } else res.joinable.push(circle);
       }
-      if (circle.private) {
-        continue;
-      }
-      if (circle.toBeClaimed) {
-        res.claimable.push(circle);
-        continue;
-      }
-      res.joinable.push(circle);
     }
     return res;
   }
