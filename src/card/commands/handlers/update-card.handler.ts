@@ -8,6 +8,7 @@ import {
   CommandHandler,
   EventBus,
   ICommandHandler,
+  QueryBus,
 } from '@nestjs/cqrs';
 import { PerformMultipleAutomationsCommand } from 'src/automation/commands/impl';
 import { MultipleItemContainer } from 'src/automation/types/types';
@@ -16,16 +17,23 @@ import { DetailedCardResponseDto } from 'src/card/dto/detailed-card-response-dto
 import { UpdateCardRequestDto } from 'src/card/dto/update-card-request.dto';
 import { CardUpdatedEvent } from 'src/card/events/impl';
 import { Card } from 'src/card/model/card.model';
+import { GetMultipleCardsByIdsQuery } from 'src/card/queries/impl';
 import { ActivityBuilder } from 'src/card/services/activity-builder.service';
 import { CardsService } from 'src/card/services/cards.service';
 import { CommonUpdateService } from 'src/card/services/common-update.service';
 import { ResponseBuilder } from 'src/card/services/response.service';
+import { Circle } from 'src/circle/model/circle.model';
+import { GetMultipleCirclesQuery } from 'src/circle/queries/impl';
 import { CommonTools } from 'src/common/common.service';
-import { MappedPartialItem } from 'src/common/interfaces';
+import { MappedItem, MappedPartialItem } from 'src/common/interfaces';
 import { CardsProjectService } from 'src/project/cards.project.service';
 import { ReorderCardReqestDto } from 'src/project/dto/reorder-card-request.dto';
 import { Project } from 'src/project/model/project.model';
-import { UpdateCardCommand } from '../impl/update-card.command';
+import { GetMultipleProjectsQuery } from 'src/project/queries/impl';
+import {
+  UpdateCardCommand,
+  UpdateMultipleCardsCommand,
+} from '../impl/update-card.command';
 @CommandHandler(UpdateCardCommand)
 export class UpdateCardCommandHandler
   implements ICommandHandler<UpdateCardCommand>
@@ -36,15 +44,18 @@ export class UpdateCardCommandHandler
     private readonly commonTools: CommonTools,
     private readonly cardsProjectService: CardsProjectService,
     private readonly eventBus: EventBus,
+    private readonly queryBus: QueryBus,
     private readonly responseBuilder: ResponseBuilder,
     private readonly cardsService: CardsService,
     private readonly commonUpdateService: CommonUpdateService,
     private readonly activityBuilder: ActivityBuilder,
   ) {}
 
-  async execute(command: UpdateCardCommand): Promise<DetailedCardResponseDto> {
+  async execute(
+    command: UpdateCardCommand,
+  ): Promise<DetailedCardResponseDto | MultipleItemContainer> {
     try {
-      const { card, project, circle, caller } = command;
+      const { card, project, circle, caller, commit } = command;
       const updateCardDto = this.distinctifyArrayFields(command.updateCardDto);
       let updatedCard = this.getUpdatedCard(
         caller,
@@ -80,21 +91,36 @@ export class UpdateCardCommandHandler
         updatedProject,
         multipleItemContainer.projects,
       );
-      const diff = this.cardsService.getDifference(card, updatedCard);
-      await this.commonUpdateService.execute(updatedCard, updatedProject);
-      const resultingCard =
-        await this.cardsRepository.getCardWithPopulatedReferences(card.id);
+      if (commit) {
+        await this.commonUpdateService.execute(updatedCard, updatedProject);
+        const resultingCard =
+          await this.cardsRepository.getCardWithPopulatedReferences(card.id);
 
-      this.eventBus.publish(
-        new CardUpdatedEvent(
-          resultingCard,
-          diff,
-          circle.slug,
-          project.slug,
-          caller,
-        ),
-      );
-      return this.responseBuilder.enrichResponse(resultingCard);
+        const cardIdsToFetch = Object.keys(updatedCard).filter(
+          (cId) => cId !== card.id,
+        );
+        let cardsUpdated = await this.queryBus.execute(
+          new GetMultipleCardsByIdsQuery(cardIdsToFetch),
+        );
+        cardsUpdated = [...(cardsUpdated || []), resultingCard];
+        for (const card of cardsUpdated) {
+          const diff = this.cardsService.getDifference(
+            card,
+            updatedCard[card.id],
+          );
+
+          this.eventBus.publish(
+            new CardUpdatedEvent(card, diff, circle.slug, project.slug, caller),
+          );
+        }
+
+        return this.responseBuilder.enrichResponse(resultingCard);
+      } else {
+        return {
+          cards: updatedCard,
+          projects: updatedProject,
+        };
+      }
     } catch (error) {
       console.log(error);
       throw new InternalServerErrorException(error);
@@ -203,5 +229,116 @@ export class UpdateCardCommandHandler
       );
 
     return updateCardDto;
+  }
+}
+
+@CommandHandler(UpdateMultipleCardsCommand)
+export class UpdateMultipleCardsCommandHandler
+  implements ICommandHandler<UpdateMultipleCardsCommand>
+{
+  constructor(
+    private readonly cardsRepository: CardsRepository,
+    private readonly commandBus: CommandBus,
+    private readonly queryBus: QueryBus,
+    private readonly eventBus: EventBus,
+    private readonly commonTools: CommonTools,
+    private readonly cardsService: CardsService,
+    private readonly commonUpdateService: CommonUpdateService,
+  ) {}
+
+  async execute(
+    command: UpdateMultipleCardsCommand,
+  ): Promise<MappedItem<DetailedCardResponseDto> | boolean> {
+    try {
+      const { cardIds, cards, caller, mappedUpdateDto, commonUpdateDto } =
+        command;
+      if (!cardIds && !cards)
+        throw `Card Ids and cards both cannot be null or undefined`;
+      const cardsToUpdate =
+        cards ||
+        (await this.cardsRepository.findAll({
+          _id: cardIds,
+        }));
+      const projectIds = cardsToUpdate.map((a) => a.project);
+      const circleIds = cardsToUpdate.map((a) => a.circle);
+      const projects = await this.queryBus.execute(
+        new GetMultipleProjectsQuery({
+          _id: projectIds,
+        }),
+      );
+      const circles = await this.queryBus.execute(
+        new GetMultipleCirclesQuery({ _id: circleIds }),
+      );
+      const mappedProjects = this.generateCardIdToItemMap(
+        cardsToUpdate,
+        projects,
+        'project',
+      );
+      const mappedCircles = this.generateCardIdToItemMap(
+        cardsToUpdate,
+        circles,
+        'circle',
+      );
+
+      let cardUpdates = {};
+      let projectUpdates = {};
+
+      for (const card of cardsToUpdate) {
+        const multipleItemContainer: MultipleItemContainer =
+          await this.commandBus.execute(
+            new UpdateCardCommand(
+              mappedUpdateDto[card.id] || commonUpdateDto || {},
+              mappedProjects[card.id] as Project,
+              mappedCircles[card.id] as Circle,
+              caller,
+              card,
+              false,
+            ),
+          );
+        cardUpdates = this.cardsService.merge(
+          cardUpdates,
+          multipleItemContainer.cards,
+        );
+        projectUpdates = this.cardsService.merge(
+          projectUpdates,
+          multipleItemContainer.projects,
+        );
+      }
+      await this.commonUpdateService.execute(cardUpdates, projectUpdates);
+
+      for (const card of cardsToUpdate) {
+        const diff = this.cardsService.getDifference(card, cardUpdates);
+
+        this.eventBus.publish(
+          new CardUpdatedEvent(
+            card,
+            diff,
+            mappedCircles[card.id].slug,
+            mappedProjects[card.id].slug,
+            caller,
+          ),
+        );
+      }
+
+      return true;
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException(error);
+    }
+  }
+
+  generateCardIdToItemMap(
+    cards: Card[],
+    items: Project[] | Circle[],
+    type: 'project' | 'circle',
+  ): MappedItem<Project | Circle> {
+    const mappedItem = this.commonTools.objectify(items, 'id');
+    const cardIdToItem = {};
+    for (const card of cards) {
+      if (type === 'project') cardIdToItem[card.id] = mappedItem[card.project];
+      else if (type === 'circle')
+        cardIdToItem[card.id] = mappedItem[card.circle];
+    }
+    return cardIdToItem;
   }
 }

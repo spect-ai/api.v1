@@ -19,7 +19,10 @@ import {
   DeleteCardByIdCommandHandler,
   DeleteMultipleCardsByIdHandler,
 } from './delete-card.handler';
-import { UpdateCardCommandHandler } from './update-card.handler';
+import {
+  UpdateCardCommandHandler,
+  UpdateMultipleCardsCommandHandler,
+} from './update-card.handler';
 import {
   UpdateWorkThreadCommandHandler,
   UpdateWorkUnitCommandHandler,
@@ -42,4 +45,5 @@ export const CommandHandlers = [
   UpdateWorkThreadCommandHandler,
   UpdateWorkUnitCommandHandler,
   UpdateProjectCardCommandHandler,
+  UpdateMultipleCardsCommandHandler,
 ];

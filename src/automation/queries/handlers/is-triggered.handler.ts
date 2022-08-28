@@ -34,9 +34,6 @@ export class IsStatusTriggeredQueryHandler
     for (const [key, value] of Object.entries(
       (trigger.item as StatusChangeTrigger).from,
     )) {
-      console.log(value);
-      console.log(card.status);
-
       if (value !== card.status[key]) {
         return false;
       }
@@ -45,8 +42,6 @@ export class IsStatusTriggeredQueryHandler
     for (const [key, value] of Object.entries(
       (trigger.item as StatusChangeTrigger).to,
     )) {
-      console.log(value);
-      console.log((update as Partial<Card>).status);
       if (value !== (update as Partial<Card>).status[key]) {
         return false;
       }
@@ -187,23 +182,27 @@ export class IsSubmissionTriggeredQueryHandler
     console.log('IsSubmissionTriggeredQueryHandler');
     const { performAutomationCommandContainer, trigger } = query;
     const { card, update } = performAutomationCommandContainer;
-
+    console.log(update);
     const item = trigger.item as SubmissionTrigger;
 
     if (item.lastOneHasStatus) {
-      const workThreads = Object.values(card.workThreads);
+      const workThreads = Object.values((update as Partial<Card>).workThreads);
       const currentWorkThread = workThreads[workThreads.length - 1];
       if (!(currentWorkThread.status === item.lastOneHasStatus)) return false;
     }
 
     if (item.allHaveStatus) {
-      for (const workThread of Object.values(card.workThreads)) {
+      for (const workThread of Object.values(
+        (update as Partial<Card>).workThreads,
+      )) {
         if (workThread.status !== item.allHaveStatus) return false;
       }
     }
 
     if (item.atLeastOneHasStatus) {
-      for (const workThread of Object.values(card.workThreads)) {
+      for (const workThread of Object.values(
+        (update as Partial<Card>).workThreads,
+      )) {
         if (workThread.status === item.atLeastOneHasStatus) return true;
       }
       return false;

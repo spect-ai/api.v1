@@ -16,6 +16,7 @@ import { CardsRepository } from 'src/card/cards.repository';
 import { Card, ExtendedCard } from 'src/card/model/card.model';
 import { CommonTools } from 'src/common/common.service';
 import { MappedItem } from 'src/common/interfaces';
+import { LoggingService } from 'src/logging/logging.service';
 import { Project } from 'src/project/model/project.model';
 import { actionIdToCommandMap } from '../impl/take-action.command';
 
@@ -35,6 +36,7 @@ export class PerformAutomationCommandHandler
     try {
       const { performAutomationCommandContainer, caller } = command;
       const { card, project, update } = performAutomationCommandContainer;
+
       const triggeredAutomations = await this.queryBus.execute(
         new GetTriggeredAutomationsQuery(
           performAutomationCommandContainer,
@@ -42,6 +44,7 @@ export class PerformAutomationCommandHandler
         ),
       );
       // Need to fetch all the required data to check / update based on the conditions and actions here
+
       console.log('triggeredAutomations', triggeredAutomations);
       const automationIdsSatisfyingConditions = [];
       for (const automationId of triggeredAutomations) {
@@ -99,9 +102,11 @@ export class PerformMultipleAutomationsCommandHandler
   implements ICommandHandler<PerformMultipleAutomationsCommand>
 {
   constructor(
-    private readonly cardsRepository: CardsRepository,
+    private readonly logger: LoggingService,
     private readonly commandBus: CommandBus,
-  ) {}
+  ) {
+    this.logger.setContext('PerformMultipleAutomationsCommandHandler');
+  }
 
   async execute(
     command: PerformMultipleAutomationsCommand,
@@ -117,11 +122,21 @@ export class PerformMultipleAutomationsCommandHandler
       } = command;
 
       let items: MultipleItemContainer = {};
+
       for (const update of updates) {
+        console.log(update);
+
+        if (!cardIdToProject[update.id]?.automations) {
+          this.logger.log(
+            `Couldn't retrieve automations for project ${
+              cardIdToProject[update.id]
+            }`,
+          );
+        }
         items = await this.commandBus.execute(
           new PerformAutomationCommand(
             {
-              automations: cardIdToProject[update.id].automations,
+              automations: cardIdToProject[update.id].automations || {},
               update,
               card: cards[update.id] as Card,
               project: cardIdToProject[update.id],

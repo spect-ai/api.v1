@@ -52,7 +52,7 @@ export class CreateWorkThreadCommandHandler
     command: CreateWorkThreadCommand,
   ): Promise<DetailedCardResponseDto> {
     try {
-      console.log('CreateWorkUnitCommandHandler');
+      console.log('CreateWorkThreadCommandHandler');
       const { id, createWorkThread, caller } = command;
 
       const card = await this.cardRepository.findById(id);
@@ -68,6 +68,7 @@ export class CreateWorkThreadCommandHandler
         card,
         caller,
       );
+
       const multipleItemContainer: MultipleItemContainer =
         await this.commandBus.execute(
           new PerformMultipleAutomationsCommand(
@@ -157,12 +158,16 @@ export class CreateWorkThreadCommandHandler
       );
       return {
         [card.id]: {
+          id: card.id,
           workThreads,
           workThreadOrder,
           activity: activity ? [...card.activity, activity] : card.activity,
         },
       };
     } catch (error) {
+      this.logger.error(
+        `Failed creating work thread with error: ${error.message}`,
+      );
       throw new InternalServerErrorException(
         'Failed creating work thread',
         error.message,
@@ -245,11 +250,10 @@ export class CreateWorkUnitCommandHandler
       return resCard;
     } catch (error) {
       this.logger.error(
-        `Failed adding item to card with error: ${error.message}`,
-        command,
+        `Failed creating work unit with error: ${error.message}`,
       );
       throw new InternalServerErrorException(
-        'Failed adding item update',
+        'Failed creating work unit',
         error.message,
       );
     }
@@ -299,6 +303,7 @@ export class CreateWorkUnitCommandHandler
 
       return {
         [card.id]: {
+          id: card.id,
           workThreads: workThreads,
           activity: activity ? [...card.activity, activity] : card.activity,
         },

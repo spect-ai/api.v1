@@ -20,10 +20,8 @@ export class CommonUpdateService {
     updatedCard: MappedPartialItem<Card>,
     updatedProject?: MappedPartialItem<Project>,
   ) {
-    const cardUpdateAcknowledgment =
-      await this.cardsRepository.bundleUpdatesAndExecute(updatedCard);
-
-    const projectUpdateAcknowledgment =
+    await this.cardsRepository.bundleUpdatesAndExecute(updatedCard);
+    if (updatedProject)
       await this.projectRepository.bundleUpdatesAndExecute(updatedProject);
   }
 

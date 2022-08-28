@@ -87,11 +87,11 @@ export class UpdateWorkThreadCommandHandler
       return resCard;
     } catch (error) {
       this.logger.error(
-        `Failed adding item to card with error: ${error.message}`,
+        `Failed updating work thread with error: ${error.message}`,
         command,
       );
       throw new InternalServerErrorException(
-        'Failed adding item update',
+        'Failed updating work thread',
         error.message,
       );
     }
@@ -122,6 +122,7 @@ export class UpdateWorkThreadCommandHandler
 
     return {
       [card.id]: {
+        id: card.id,
         workThreads: workThreads,
         activity: activity ? [...card.activity, activity] : card.activity,
       },
@@ -192,11 +193,11 @@ export class UpdateWorkUnitCommandHandler
       return resCard;
     } catch (error) {
       this.logger.error(
-        `Failed adding item to card with error: ${error.message}`,
+        `Failed updating work unit with error: ${error.message}`,
         command,
       );
       throw new InternalServerErrorException(
-        'Failed adding item update',
+        'Failed updating work unit',
         error.message,
       );
     }
@@ -242,6 +243,7 @@ export class UpdateWorkUnitCommandHandler
     );
     return {
       [card.id]: {
+        id: card.id,
         workThreads: workThreads,
         activity: activity ? [...card.activity, activity] : card.activity,
       },

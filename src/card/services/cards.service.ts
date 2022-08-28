@@ -62,8 +62,6 @@ export class CardsService {
     if (itemAfterAutomation && updatedItem) {
       for (const [itemId, item] of Object.entries(itemAfterAutomation)) {
         if (updatedItem.hasOwnProperty(itemId)) {
-          console.log(item);
-          console.log(updatedItem[itemId]);
           updatedItem[itemId] = this.commonTools.mergeObjects(
             item,
             updatedItem[itemId],

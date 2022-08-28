@@ -207,11 +207,6 @@ export class CrudOrchestrator {
       const updatedCard = await this.commandBus.execute(
         new UpdateProjectCardCommand(id, projectId, caller),
       );
-      // this.eventBus.publish(new CardsArchivedEvent(cards));
-      // return {
-      //   ...project,
-      //   cards: this.commonTools.objectify(project.cards, 'id'),
-      // };
       return updatedCard;
     } catch (error) {
       console.error(JSON.stringify(error));
