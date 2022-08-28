@@ -123,17 +123,6 @@ export class CardsController {
     );
   }
 
-  //@SetMetadata('permissions', ['makePayment'])
-  @UseGuards(SessionAuthGuard)
-  @Patch('/updatePaymentInfoAndClose')
-  async updatePaymentInfoAndClose(
-    @Body() updatePaymentInfoDto: UpdatePaymentInfoDto,
-  ): Promise<DetailedProjectResponseDto> {
-    return await this.cardCommandHandler.updatePaymentInfoAndClose(
-      updatePaymentInfoDto,
-    );
-  }
-
   @UseGuards(PublicViewAuthGuard)
   @Patch('/closeWithBot')
   async closeWithBot(
@@ -197,86 +186,6 @@ export class CardsController {
   }
 
   @ApiParam({ name: 'id', type: 'string' })
-  @SetMetadata('permissions', ['update'])
-  @UseGuards(CardAuthGuard)
-  @Patch('/:id')
-  async update(
-    @Param() params: ObjectIdDto,
-    @Body() card: UpdateCardRequestDto,
-  ): Promise<DetailedCardResponseDto> {
-    return await this.cardCommandHandler.update(params.id, card);
-  }
-
-  @Patch('/:id/updateStatusFromBot')
-  @UseGuards(PublicViewAuthGuard)
-  async updateStatusFromBot(
-    @Param() params: ObjectIdDto,
-    @Body() updateStatusDto: UpdateCardStatusRequestDto,
-  ): Promise<DetailedCardResponseDto> {
-    return await this.cardCommandHandler.update(params.id, updateStatusDto);
-  }
-
-  @SetMetadata('permissions', ['submit'])
-  @UseGuards(CardAuthGuard)
-  @Patch('/:id/createWorkThread')
-  async createWorkThread(
-    @Param() params: ObjectIdDto,
-    @Body() createWorkThread: CreateWorkThreadRequestDto,
-  ): Promise<DetailedCardResponseDto> {
-    return await this.workCommandHandler.handleCreateWorkThread(
-      params.id,
-      createWorkThread,
-    );
-  }
-
-  @SetMetadata('permissions', ['submit'])
-  @UseGuards(CardAuthGuard)
-  @Patch('/:id/updateWorkThread')
-  async updateWorkThread(
-    @Param() params: ObjectIdDto,
-    @Query() threadIdParam: RequiredThreadIdDto,
-    @Body() updateWorkThread: UpdateWorkThreadRequestDto,
-  ): Promise<DetailedCardResponseDto> {
-    return await this.workCommandHandler.handleUpdateWorkThread(
-      params.id,
-      threadIdParam.threadId,
-      updateWorkThread,
-    );
-  }
-
-  @SetMetadata('permissions', ['submit'])
-  @UseGuards(CardAuthGuard)
-  @Patch('/:id/createWorkUnit')
-  async createWorkUnit(
-    @Param() params: ObjectIdDto,
-    @Query() threadIdParam: RequiredThreadIdDto,
-    @Body() createWorkUnit: CreateWorkUnitRequestDto,
-  ): Promise<DetailedCardResponseDto> {
-    return await this.workCommandHandler.handleCreateWorkUnit(
-      params.id,
-      threadIdParam.threadId,
-      createWorkUnit,
-    );
-  }
-
-  @SetMetadata('permissions', ['submit'])
-  @UseGuards(CardAuthGuard)
-  @Patch('/:id/updateWorkUnit')
-  async updateWorkUnit(
-    @Param() params: ObjectIdDto,
-    @Query() threadIdParam: RequiredThreadIdDto,
-    @Query() workUnitIdParam: RequiredWorkUnitIdDto,
-    @Body() updateWorkUnit: UpdateWorkUnitRequestDto,
-  ): Promise<DetailedCardResponseDto> {
-    return await this.workCommandHandler.handleUpdateWorkUnit(
-      params.id,
-      threadIdParam.threadId,
-      workUnitIdParam.workUnitId,
-      updateWorkUnit,
-    );
-  }
-
-  @ApiParam({ name: 'id', type: 'string' })
   @UseGuards(SessionAuthGuard)
   @Patch('/:id/addComment')
   async addComment(
@@ -312,24 +221,6 @@ export class CardsController {
       params.id,
       commitIdParam.commitId,
     );
-  }
-
-  @SetMetadata('permissions', ['update'])
-  @UseGuards(CardAuthGuard)
-  @Patch('/:id/archive')
-  async archive(
-    @Param() params: ObjectIdDto,
-  ): Promise<DetailedProjectResponseDto> {
-    return await this.cardsService.archive(params.id);
-  }
-
-  @SetMetadata('permissions', ['update'])
-  @UseGuards(CardAuthGuard)
-  @Patch('/:id/revertArchive')
-  async revertArchive(
-    @Param() params: ObjectIdDto,
-  ): Promise<DetailedCardResponseDto> {
-    return await this.cardsService.revertArchive(params.id);
   }
 
   @ApiParam({ name: 'id' })

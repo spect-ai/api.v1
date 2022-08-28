@@ -306,7 +306,13 @@ export class UpdateMultipleCardsCommandHandler
       }
       await this.commonUpdateService.execute(cardUpdates, projectUpdates);
 
-      for (const card of cardsToUpdate) {
+      const cardIdsToFetch = Object.keys(cardUpdates).filter(
+        (cId) => !cardsToUpdate.hasOwnProperty(cId),
+      );
+      const allUpdatedCards = await this.queryBus.execute(
+        new GetMultipleCardsByIdsQuery(cardIdsToFetch),
+      );
+      for (const card of allUpdatedCards) {
         const diff = this.cardsService.getDifference(card, cardUpdates);
 
         this.eventBus.publish(

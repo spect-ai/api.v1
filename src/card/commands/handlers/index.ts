@@ -27,6 +27,7 @@ import {
   UpdateWorkThreadCommandHandler,
   UpdateWorkUnitCommandHandler,
 } from '../work/handlers/update-submission.handler';
+import { CloseCardsCommandHandler } from '../close/handlers/close-card.handler';
 
 export const CommandHandlers = [
   CreateCardCommandHandler,
@@ -46,4 +47,5 @@ export const CommandHandlers = [
   UpdateWorkUnitCommandHandler,
   UpdateProjectCardCommandHandler,
   UpdateMultipleCardsCommandHandler,
+  CloseCardsCommandHandler,
 ];

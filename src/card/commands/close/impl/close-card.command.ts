@@ -1,20 +1,10 @@
 import { FilterQuery } from 'mongoose';
-import { Card } from 'src/card/model/card.model';
-
-export class CloseCardCommand {
-  constructor(
-    public readonly commit = true,
-    public readonly objectify = false,
-    public readonly id?: string,
-    public readonly card?: Card,
-  ) {}
-}
+import { Card, ExtendedCard } from 'src/card/model/card.model';
 
 export class CloseCardsCommand {
   constructor(
-    public readonly commit = true,
-    public readonly objectify = false,
+    public readonly caller: string,
     public readonly filter?: FilterQuery<Card>,
-    public readonly cards?: Card[],
+    public readonly cards?: ExtendedCard[],
   ) {}
 }

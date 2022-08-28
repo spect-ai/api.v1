@@ -8,6 +8,7 @@ import {
   GetCardBySlugQuery,
   GetCardWithChildrenQuery,
   GetMultipleCardsByIdsQuery,
+  GetMultipleCardsWithChildrenByFilterQuery,
   GetMultipleCardsWithChildrenQuery,
 } from '../impl';
 
@@ -90,6 +91,24 @@ export class GetMultipleCardsWithChildrenQueryHandler
     const cards =
       await this.cardRepository.getCardWithAllChildrenForMultipleCards(
         query.ids,
+      );
+    return cards;
+  }
+}
+
+@QueryHandler(GetMultipleCardsWithChildrenByFilterQuery)
+export class GetMultipleCardsWithChildrenByFilterQueryHandler
+  implements IQueryHandler<GetMultipleCardsWithChildrenByFilterQuery>
+{
+  constructor(private readonly cardRepository: CardsRepository) {}
+
+  async execute(
+    query: GetMultipleCardsWithChildrenByFilterQuery,
+  ): Promise<ExtendedCard[]> {
+    console.log('GetMultipleCardsWithChildrenByFilterQueryHandler');
+    const cards =
+      await this.cardRepository.getCardWithAllChildrenByFilterForMultipleCards(
+        query.filterQuery,
       );
     return cards;
   }

@@ -17,7 +17,10 @@ import {
   CreateNewCardAuthGuard,
   ViewCardAuthGuard,
 } from 'src/auth/card.guard';
-import { SessionAuthGuard } from 'src/auth/iron-session.guard';
+import {
+  PublicViewAuthGuard,
+  SessionAuthGuard,
+} from 'src/auth/iron-session.guard';
 import { ObjectIdDto } from 'src/common/dtos/object-id.dto';
 import { RequiredRoleDto, RequiredSlugDto } from 'src/common/dtos/string.dto';
 import { DetailedProjectResponseDto } from 'src/project/dto/detailed-project-response.dto';
@@ -27,7 +30,10 @@ import { CreateCardRequestDto } from './dto/create-card-request.dto';
 import { DetailedCardResponseDto } from './dto/detailed-card-response-dto';
 import { UpdateCardProjectDto } from './dto/update-card-project.dto';
 import { GetByProjectSlugAndCardSlugDto } from './dto/get-card-params.dto';
-import { UpdateCardRequestDto } from './dto/update-card-request.dto';
+import {
+  UpdateCardRequestDto,
+  UpdateCardStatusRequestDto,
+} from './dto/update-card-request.dto';
 import { UpdatePaymentInfoDto } from './dto/update-payment-info.dto';
 import { GetCardByIdQuery, GetCardBySlugQuery } from './queries/impl';
 import {
@@ -80,6 +86,18 @@ export class CardsV1Controller {
     return await this.crudOrchestrator.get(params.projectSlug, params.cardSlug);
   }
 
+  //@SetMetadata('permissions', ['makePayment'])
+  @UseGuards(SessionAuthGuard)
+  @Patch('/updatePaymentInfoAndClose')
+  async updatePaymentInfoAndClose(
+    @Body() updatePaymentInfoDto: UpdatePaymentInfoDto,
+    @Request() req,
+  ): Promise<DetailedProjectResponseDto> {
+    return await this.commandBus.execute(
+      new UpdatePaymentCommand(updatePaymentInfoDto, req.user.id),
+    );
+  }
+
   @Post('/')
   @UseGuards(CreateNewCardAuthGuard)
   async create(@Body() card: CreateCardRequestDto): Promise<{
@@ -114,6 +132,15 @@ export class CardsV1Controller {
     @Body() updateCardRequestDto: UpdateCardRequestDto,
   ): Promise<DetailedCardResponseDto> {
     return await this.crudOrchestrator.update(params.id, updateCardRequestDto);
+  }
+
+  @Patch('/:id/updateStatusFromBot')
+  @UseGuards(PublicViewAuthGuard)
+  async updateStatusFromBot(
+    @Param() params: ObjectIdDto,
+    @Body() updateStatusDto: UpdateCardStatusRequestDto,
+  ): Promise<DetailedCardResponseDto> {
+    return await this.crudOrchestrator.update(params.id, updateStatusDto);
   }
 
   @SetMetadata('permissions', ['submit'])
