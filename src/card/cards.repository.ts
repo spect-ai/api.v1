@@ -171,9 +171,7 @@ export class CardsRepository extends BaseRepository<Card> {
   ): Promise<ExtendedCard[]> {
     const cards = await this.aggregate([
       {
-        $match: {
-          filterQuery,
-        },
+        $match: filterQuery,
       },
       {
         $graphLookup: {

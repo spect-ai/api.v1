@@ -4,10 +4,13 @@ import {
   ICommandHandler,
   QueryBus,
 } from '@nestjs/cqrs';
+import { DetailedCardResponseDto } from 'src/card/dto/detailed-card-response-dto';
 import { UpdatePaymentInfoDto } from 'src/card/dto/update-payment-info.dto';
 import { Card } from 'src/card/model/card.model';
 import { GetMultipleCardsWithChildrenQuery } from 'src/card/queries/impl';
 import { LoggingService } from 'src/logging/logging.service';
+import { DetailedProjectResponseDto } from 'src/project/dto/detailed-project-response.dto';
+import { GetDetailedProjectByIdQuery } from 'src/project/queries/impl';
 import { UpdateMultipleCardsCommand } from '../../impl/update-card.command';
 import { UpdatePaymentCommand } from '../impl';
 
@@ -23,7 +26,9 @@ export class UpdatePaymentCommandHandler
     this.logger.setContext('UpdatePaymentCommandHandler');
   }
 
-  async execute(command: UpdatePaymentCommand): Promise<boolean> {
+  async execute(
+    command: UpdatePaymentCommand,
+  ): Promise<boolean | DetailedProjectResponseDto | DetailedCardResponseDto> {
     try {
       const { updatePaymentDto, caller } = command;
       if (!updatePaymentDto.cardIds || updatePaymentDto.cardIds.length === 0)
@@ -40,15 +45,32 @@ export class UpdatePaymentCommandHandler
         );
         allChildren = [...allChildren, ...card.flattenedChildren];
       }
+      console.log(allChildren);
+
       for (const child of allChildren) {
         if (!cardUpdates[child.id]) {
           cardUpdates[child.id] = this.updateToPaidStatus(child);
         }
       }
-
-      return await this.commandBus.execute(
-        new UpdateMultipleCardsCommand(caller, cardUpdates, null, null, cards),
+      console.log(cardUpdates);
+      const res = await this.commandBus.execute(
+        new UpdateMultipleCardsCommand(caller, cardUpdates, null, null, [
+          ...cards,
+          ...allChildren,
+        ]),
       );
+
+      if (updatePaymentDto.returnWith) {
+        if (
+          updatePaymentDto.returnWith.type === 'project' &&
+          updatePaymentDto.returnWith.id
+        ) {
+          return await this.queryBus.execute(
+            new GetDetailedProjectByIdQuery(updatePaymentDto.returnWith.id),
+          );
+        }
+      }
+      return res;
     } catch (error) {
       console.log(error);
       this.logger.error(

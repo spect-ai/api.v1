@@ -28,7 +28,12 @@ import {
 } from './commands/impl';
 import { DetailedProjectResponseDto } from './dto/detailed-project-response.dto';
 import { CrudOrchestrator } from './orchestrators/crud-orchestrator.service';
-import { GetProjectByIdQuery, GetProjectBySlugQuery } from './queries/impl';
+import {
+  GetDetailedProjectByIdQuery,
+  GetDetailedProjectBySlugQuery,
+  GetProjectByIdQuery,
+  GetProjectBySlugQuery,
+} from './queries/impl';
 
 @Controller('project/v1')
 export class ProjectV1Controller {
@@ -43,7 +48,9 @@ export class ProjectV1Controller {
   async findByObjectId(
     @Param() param: ObjectIdDto,
   ): Promise<DetailedProjectResponseDto> {
-    return await this.crudOrchestrator.getDetailedProject(param.id);
+    return await this.queryBus.execute(
+      new GetDetailedProjectByIdQuery(param.id),
+    );
   }
 
   @UseGuards(ViewProjectAuthGuard)
@@ -51,7 +58,9 @@ export class ProjectV1Controller {
   async findBySlug(
     @Param() param: RequiredSlugDto,
   ): Promise<DetailedProjectResponseDto> {
-    return await this.queryBus.execute(new GetProjectBySlugQuery(param.slug));
+    return await this.queryBus.execute(
+      new GetDetailedProjectBySlugQuery(param.slug),
+    );
   }
 
   @Patch('/:id/automation/create')

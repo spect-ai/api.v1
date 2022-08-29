@@ -26,6 +26,7 @@ import { Circle } from 'src/circle/model/circle.model';
 import { GetMultipleCirclesQuery } from 'src/circle/queries/impl';
 import { CommonTools } from 'src/common/common.service';
 import { MappedItem, MappedPartialItem } from 'src/common/interfaces';
+import { LoggingService } from 'src/logging/logging.service';
 import { CardsProjectService } from 'src/project/cards.project.service';
 import { ReorderCardReqestDto } from 'src/project/dto/reorder-card-request.dto';
 import { Project } from 'src/project/model/project.model';
@@ -244,7 +245,10 @@ export class UpdateMultipleCardsCommandHandler
     private readonly commonTools: CommonTools,
     private readonly cardsService: CardsService,
     private readonly commonUpdateService: CommonUpdateService,
-  ) {}
+    private readonly logger: LoggingService,
+  ) {
+    this.logger.setContext('UpdateMultipleCardsCommandHandler');
+  }
 
   async execute(
     command: UpdateMultipleCardsCommand,
@@ -259,8 +263,10 @@ export class UpdateMultipleCardsCommandHandler
         (await this.cardsRepository.findAll({
           _id: cardIds,
         }));
+      console.log(cardsToUpdate);
       const projectIds = cardsToUpdate.map((a) => a.project);
       const circleIds = cardsToUpdate.map((a) => a.circle);
+      console.log(projectIds);
       const projects = await this.queryBus.execute(
         new GetMultipleProjectsQuery({
           _id: projectIds,
@@ -329,6 +335,7 @@ export class UpdateMultipleCardsCommandHandler
       return true;
     } catch (error) {
       console.log(error);
+      this.logger.error(error.message);
       throw new InternalServerErrorException(error);
     }
   }

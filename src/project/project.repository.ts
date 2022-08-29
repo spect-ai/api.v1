@@ -165,6 +165,11 @@ export class ProjectsRepository extends BaseRepository<Project> {
       query.populate(key, populatedFields[key]);
     });
 
-    return await query.exec();
+    try {
+      return await query.exec();
+    } catch (err) {
+      console.log(err);
+      return [];
+    }
   }
 }

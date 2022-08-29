@@ -106,6 +106,7 @@ export class GetMultipleCardsWithChildrenByFilterQueryHandler
     query: GetMultipleCardsWithChildrenByFilterQuery,
   ): Promise<ExtendedCard[]> {
     console.log('GetMultipleCardsWithChildrenByFilterQueryHandler');
+    console.log(query.filterQuery);
     const cards =
       await this.cardRepository.getCardWithAllChildrenByFilterForMultipleCards(
         query.filterQuery,

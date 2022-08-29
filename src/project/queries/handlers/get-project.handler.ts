@@ -1,7 +1,9 @@
-import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
+import { IQueryHandler, QueryBus, QueryHandler } from '@nestjs/cqrs';
 import { Project } from 'src/project/model/project.model';
 import { ProjectsRepository } from 'src/project/project.repository';
 import {
+  GetDetailedProjectByIdQuery,
+  GetDetailedProjectBySlugQuery,
   GetMultipleProjectsQuery,
   GetProjectByIdQuery,
   GetProjectBySlugQuery,
@@ -10,6 +12,8 @@ import { LoggingService } from 'src/logging/logging.service';
 import { InternalServerErrorException } from '@nestjs/common';
 import { CommonTools } from 'src/common/common.service';
 import { MappedItem } from 'src/common/interfaces';
+import { DetailedProjectResponseDto } from 'src/project/dto/detailed-project-response.dto';
+import { CardsProjectService } from 'src/project/cards.project.service';
 
 @QueryHandler(GetProjectByIdQuery)
 export class GetProjectByIdQueryHandler
@@ -97,13 +101,76 @@ export class GetMultipleProjectsQueryHandler
       }
       return projects;
     } catch (error) {
-      console.log(this.logger);
       this.logger.error(
         `Failed while getting multiple projects with error: ${error.message}`,
         query,
       );
       throw new InternalServerErrorException(
         'Failed while getting multiple projects',
+        error.message,
+      );
+    }
+  }
+}
+
+@QueryHandler(GetDetailedProjectByIdQuery)
+export class GetDetailedProjectQueryHandler
+  implements IQueryHandler<GetDetailedProjectByIdQuery>
+{
+  constructor(
+    private readonly queryBus: QueryBus,
+    private readonly logger: LoggingService,
+    private readonly cardsProjectService: CardsProjectService,
+  ) {}
+
+  async execute(
+    query: GetDetailedProjectByIdQuery,
+  ): Promise<DetailedProjectResponseDto> {
+    try {
+      const project = await this.queryBus.execute(
+        new GetProjectByIdQuery(query.id),
+      );
+
+      return this.cardsProjectService.projectPopulatedWithCardDetails(project);
+    } catch (error) {
+      this.logger.error(
+        `Failed while getting detailed project by id with error: ${error.message}`,
+        query,
+      );
+      throw new InternalServerErrorException(
+        'Failed while getting detailed project by id',
+        error.message,
+      );
+    }
+  }
+}
+
+@QueryHandler(GetDetailedProjectBySlugQuery)
+export class GetDetailedProjectBySlugQueryHandler
+  implements IQueryHandler<GetDetailedProjectBySlugQuery>
+{
+  constructor(
+    private readonly queryBus: QueryBus,
+    private readonly logger: LoggingService,
+    private readonly cardsProjectService: CardsProjectService,
+  ) {}
+
+  async execute(
+    query: GetDetailedProjectBySlugQuery,
+  ): Promise<DetailedProjectResponseDto> {
+    try {
+      const project = await this.queryBus.execute(
+        new GetProjectBySlugQuery(query.slug),
+      );
+
+      return this.cardsProjectService.projectPopulatedWithCardDetails(project);
+    } catch (error) {
+      this.logger.error(
+        `Failed while getting detailed project by id with error: ${error.message}`,
+        query,
+      );
+      throw new InternalServerErrorException(
+        'Failed while getting detailed project by id',
         error.message,
       );
     }

@@ -123,14 +123,6 @@ export class CardsController {
     );
   }
 
-  @UseGuards(PublicViewAuthGuard)
-  @Patch('/closeWithBot')
-  async closeWithBot(
-    @Body() multiCardCloseDto: MultiCardCloseWithSlugDto,
-  ): Promise<boolean> {
-    return await this.cardCommandHandler.closeMultipleCards(multiCardCloseDto);
-  }
-
   @ApiQuery({ name: 'cardIds', type: 'string' })
   @UseGuards(SessionAuthGuard)
   @Get('/myValidActions')

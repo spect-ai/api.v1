@@ -21,7 +21,6 @@ export class GetTriggeredAutomationsQueryHandler
       const { performAutomationCommandContainer, caller } = query;
       const { automations } = performAutomationCommandContainer;
       const triggeredAutomationIds = [];
-      console.log('automations', automations);
       for (const automation of Object.values(automations)) {
         try {
           const { trigger } = automation;

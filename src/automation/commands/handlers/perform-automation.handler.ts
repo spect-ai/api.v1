@@ -124,8 +124,6 @@ export class PerformMultipleAutomationsCommandHandler
       let items: MultipleItemContainer = {};
 
       for (const update of updates) {
-        console.log(update);
-
         if (!cardIdToProject[update.id]?.automations) {
           this.logger.log(
             `Couldn't retrieve automations for project ${

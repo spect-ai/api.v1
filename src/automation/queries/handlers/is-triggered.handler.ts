@@ -182,7 +182,6 @@ export class IsSubmissionTriggeredQueryHandler
     console.log('IsSubmissionTriggeredQueryHandler');
     const { performAutomationCommandContainer, trigger } = query;
     const { card, update } = performAutomationCommandContainer;
-    console.log(update);
     const item = trigger.item as SubmissionTrigger;
 
     if (item.lastOneHasStatus) {

@@ -25,12 +25,13 @@ import { ObjectIdDto } from 'src/common/dtos/object-id.dto';
 import { RequiredRoleDto, RequiredSlugDto } from 'src/common/dtos/string.dto';
 import { DetailedProjectResponseDto } from 'src/project/dto/detailed-project-response.dto';
 import { CrudOrchestrator } from './orchestrators/crud.orchestrator';
-import { UpdatePaymentCommand } from './commands/impl';
+import { CloseCardsCommand, UpdatePaymentCommand } from './commands/impl';
 import { CreateCardRequestDto } from './dto/create-card-request.dto';
 import { DetailedCardResponseDto } from './dto/detailed-card-response-dto';
 import { UpdateCardProjectDto } from './dto/update-card-project.dto';
 import { GetByProjectSlugAndCardSlugDto } from './dto/get-card-params.dto';
 import {
+  MultiCardCloseWithSlugDto,
   UpdateCardRequestDto,
   UpdateCardStatusRequestDto,
 } from './dto/update-card-request.dto';
@@ -95,6 +96,19 @@ export class CardsV1Controller {
   ): Promise<DetailedProjectResponseDto> {
     return await this.commandBus.execute(
       new UpdatePaymentCommand(updatePaymentInfoDto, req.user.id),
+    );
+  }
+
+  @UseGuards(PublicViewAuthGuard)
+  @Patch('/closeWithBot')
+  async closeWithBot(
+    @Body() multiCardCloseDto: MultiCardCloseWithSlugDto,
+    @Request() req,
+  ): Promise<boolean> {
+    return await this.commandBus.execute(
+      new CloseCardsCommand(req.user.id, {
+        slug: { $in: multiCardCloseDto.slugs },
+      }),
     );
   }
 

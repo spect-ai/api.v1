@@ -26,3 +26,19 @@ export class GetMultipleProjectsQuery {
     public readonly objectify?: boolean,
   ) {}
 }
+
+export class GetDetailedProjectByIdQuery {
+  constructor(
+    public readonly id: string,
+    public readonly customPopulate?: PopulatedProjectFields,
+    public readonly selectedFields?: Record<string, unknown>,
+  ) {}
+}
+
+export class GetDetailedProjectBySlugQuery {
+  constructor(
+    public readonly slug: string,
+    public readonly customPopulate?: PopulatedProjectFields,
+    public readonly selectedFields?: Record<string, unknown>,
+  ) {}
+}

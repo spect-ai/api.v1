@@ -29,7 +29,6 @@ export class HasSatisfiedConditionsQueryHandler
     const { card, project, circle, retro } = performAutomationCommandContainer;
 
     for (const condition of conditions) {
-      console.log(condition);
       const conditionQuery = conditionIdToConditionQueryMap[condition.id];
       if (
         !(await this.queryBus.execute(

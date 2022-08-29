@@ -35,20 +35,20 @@ export class CloseCardsCommandHandler
           new GetMultipleCardsWithChildrenByFilterQuery(filter),
         ));
       const cardUpdates = {};
+      const allChildren = [];
       for (const card of cardsToUpdate) {
         cardUpdates[card.id] = this.closeCard(card);
-        for (const child of card.flattenedChildren)
+        for (const child of card.flattenedChildren) {
           cardUpdates[child.id] = this.closeCard(child);
+          allChildren.push(child);
+        }
       }
-
+      console.log(cardUpdates);
       return await this.commandBus.execute(
-        new UpdateMultipleCardsCommand(
-          caller,
-          cardUpdates,
-          null,
-          null,
-          cardsToUpdate,
-        ),
+        new UpdateMultipleCardsCommand(caller, cardUpdates, null, null, [
+          ...cardsToUpdate,
+          ...allChildren,
+        ]),
       );
     } catch (error) {
       console.log(error);
