@@ -101,3 +101,56 @@ export class CreateNewProjectAuthGuard implements CanActivate {
     }
   }
 }
+@Injectable()
+export class ViewProjectAuthGuard implements CanActivate {
+  constructor(
+    private readonly projectRepository: ProjectsRepository,
+    private readonly circleRepository: CirclesRepository,
+    private readonly sessionAuthGuard: SessionAuthGuard,
+    private readonly circleAuthGuard: CircleAuthGuard,
+  ) {}
+
+  async isMember(circleIds: string[], userId: string) {
+    const circles = await this.circleRepository.findAll({
+      _id: { $in: circleIds },
+    });
+    for (const circle of circles) {
+      if (circle.members.includes(userId)) return true;
+    }
+    return false;
+  }
+
+  async canActivate(context: ExecutionContext): Promise<boolean> {
+    const request = context.switchToHttp().getRequest();
+    try {
+      let project;
+      if (request.params.id || request.projectId)
+        project = await this.projectRepository.findById(
+          request.params.id || request.projectId,
+        );
+      else if (request.params.slug)
+        project = await this.projectRepository.findOne({
+          slug: request.params.slug,
+        });
+      if (!project) {
+        throw new HttpException('Project not found', 404);
+      }
+      request.project = project;
+
+      if (project.private) {
+        request.user = (await this.sessionAuthGuard.validateUser(
+          request.session.siwe?.address,
+        )) as unknown as User;
+        if (!request.user) return false;
+
+        return await this.isMember(project.parents, request.user.id);
+      }
+
+      return true;
+    } catch (error) {
+      console.log(error);
+      request.session.destroy();
+      throw new HttpException({ message: error }, 422);
+    }
+  }
+}

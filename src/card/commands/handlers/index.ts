@@ -9,6 +9,7 @@ import {
 import { AddItemCommandHandler } from '../items/handlers/add-items.handler';
 import { RemoveItemsCommandHandler } from '../items/handlers/remove-items.handler';
 import { UpdatePaymentCommandHandler } from '../payment/handlers/update-payment.handler';
+import { UpdateProjectCardCommandHandler } from '../updateCardProject/handlers/update-card-project.handler';
 import { CreateCardCommandHandler } from './create-card.handler';
 import {
   DeleteCardByIdCommandHandler,
@@ -26,4 +27,5 @@ export const CommandHandlers = [
   UpdatePaymentCommandHandler,
   ArchiveMultipleCardsByIdCommandHandler,
   RevertArchivalMultipleCardsByIdCommandHandler,
+  UpdateProjectCardCommandHandler,
 ];

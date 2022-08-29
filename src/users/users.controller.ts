@@ -41,9 +41,16 @@ export class UsersController {
     return this.usersService.getUserById(id);
   }
 
+  @UseGuards(PublicViewAuthGuard)
   @Get('/username/:username')
   findByUsername(@Param('username') username: string) {
-    return this.usersService.getUserPublicProfileByUsername(username);
+    return this.usersService.getUserByUsername(username);
+  }
+
+  @UseGuards(PublicViewAuthGuard)
+  @Get('/ethAddress/:ethAddress')
+  findByEthAddress(@Param('ethAddress') ethAddress: string) {
+    return this.usersService.getUserByEthAddress(ethAddress);
   }
 
   @UseGuards(SessionAuthGuard)

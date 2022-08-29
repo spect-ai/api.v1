@@ -11,10 +11,14 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { QueryBus, CommandBus } from '@nestjs/cqrs';
-import { CircleAuthGuard, CreateCircleAuthGuard } from 'src/auth/circle.guard';
+import {
+  CircleAuthGuard,
+  CreateCircleAuthGuard,
+  ViewCircleAuthGuard,
+} from 'src/auth/circle.guard';
 import { SessionAuthGuard } from 'src/auth/iron-session.guard';
 import { ObjectIdDto } from 'src/common/dtos/object-id.dto';
-import { RequiredRoleDto } from 'src/common/dtos/string.dto';
+import { RequiredRoleDto, RequiredSlugDto } from 'src/common/dtos/string.dto';
 import { ArchiveCircleByIdCommand, ClaimCircleCommand } from './commands/impl';
 import { AddSafeCommand, RemoveSafeCommand } from './commands/safe/impl';
 import { CreateCircleRequestDto } from './dto/create-circle-request.dto';
@@ -27,11 +31,49 @@ import { SafeAddress } from './dto/safe-request.dto';
 import { UpdateCircleRequestDto } from './dto/update-circle-request.dto';
 import { UpdateMemberRolesDto } from './dto/update-member-role.dto';
 import { Circle } from './model/circle.model';
-import { GetCircleByIdQuery, GetCircleNavigationQuery } from './queries/impl';
+import {
+  GetCircleByFilterQuery,
+  GetCircleByIdQuery,
+  GetCircleNavigationQuery,
+  GetMultipleCirclesQuery,
+} from './queries/impl';
 import { CirclesRolesService } from './services/circle-roles.service';
 import { CirclesCrudService } from './services/circles-crud.service';
 import { CircleMembershipService } from './services/circles-membership.service';
 
+const getCirclePopulatedFields = {
+  projects: {
+    name: 1,
+    slug: 1,
+    description: 1,
+    id: 1,
+  },
+  retro: {
+    title: 1,
+    slug: 1,
+    id: 1,
+    status: 1,
+    reward: 1,
+    members: 1,
+  },
+  parents: {
+    name: 1,
+    slug: 1,
+    description: 1,
+    id: 1,
+  },
+  children: {
+    name: 1,
+    slug: 1,
+    description: 1,
+    id: 1,
+  },
+};
+
+const getCircleProjectedFields = {
+  invites: 0,
+  localRegistry: 0,
+};
 @Controller('circle/v1')
 export class CircleV1Controller {
   constructor(
@@ -42,43 +84,52 @@ export class CircleV1Controller {
     private readonly commandBus: CommandBus,
   ) {}
 
+  @Get('/allPublicParents')
+  async findAllParentCircles(): Promise<DetailedCircleResponseDto[]> {
+    try {
+      return await this.queryBus.execute(
+        new GetMultipleCirclesQuery(
+          {
+            parents: { $exists: true, $eq: [] },
+            private: false,
+            'status.archived': false,
+          },
+          getCirclePopulatedFields,
+          getCircleProjectedFields,
+        ),
+      );
+    } catch (error) {
+      console.log(error);
+      return [];
+    }
+  }
+
+  @UseGuards(ViewCircleAuthGuard)
   @Get('/:id')
   async findByObjectId(@Param() param: ObjectIdDto): Promise<Circle> {
     return await this.queryBus.execute(
-      new GetCircleByIdQuery(
-        param.id,
+      new GetCircleByFilterQuery(
         {
-          projects: {
-            title: 1,
-            slug: 1,
-            description: 1,
-            id: 1,
-          },
-          retro: {
-            title: 1,
-            slug: 1,
-            id: 1,
-            status: 1,
-            reward: 1,
-            members: 1,
-          },
-          parents: {
-            title: 1,
-            slug: 1,
-            description: 1,
-            id: 1,
-          },
-          children: {
-            title: 1,
-            slug: 1,
-            description: 1,
-            id: 1,
-          },
+          _id: param.id,
         },
+        getCirclePopulatedFields,
+        getCircleProjectedFields,
+      ),
+    );
+  }
+
+  @UseGuards(ViewCircleAuthGuard)
+  @Get('/slug/:slug')
+  async findBySlug(
+    @Param() param: RequiredSlugDto,
+  ): Promise<DetailedCircleResponseDto> {
+    return await this.queryBus.execute(
+      new GetCircleByFilterQuery(
         {
-          invites: 0,
-          localRegistry: 0,
+          slug: param.slug,
         },
+        getCirclePopulatedFields,
+        getCircleProjectedFields,
       ),
     );
   }

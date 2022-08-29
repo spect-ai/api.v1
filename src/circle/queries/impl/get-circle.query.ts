@@ -7,6 +7,7 @@ export class GetCircleByIdQuery {
     public readonly id: string,
     public readonly customPopulate?: PopulatedCircleFields,
     public readonly selectedFields?: Record<string, unknown>,
+    public readonly ignorePrivateCircles = true,
   ) {}
 }
 
@@ -15,6 +16,7 @@ export class GetMultipleCirclesQuery {
     public readonly filterQuery: FilterQuery<Circle>,
     public readonly customPopulate?: PopulatedCircleFields,
     public readonly selectedFields?: Record<string, unknown>,
+    public readonly ignorePrivateCircles = true,
   ) {}
 }
 
@@ -23,6 +25,7 @@ export class GetCircleBySlugQuery {
     public readonly slug: string,
     public readonly customPopulate?: PopulatedCircleFields,
     public readonly selectedFields?: Record<string, unknown>,
+    public readonly ignorePrivateCircles = true,
   ) {}
 }
 
@@ -31,6 +34,7 @@ export class GetCircleByFilterQuery {
     public readonly filterQuery: FilterQuery<Circle>,
     public readonly customPopulate?: PopulatedCircleFields,
     public readonly selectedFields?: Record<string, unknown>,
+    public readonly ignorePrivateCircles = true,
   ) {}
 }
 

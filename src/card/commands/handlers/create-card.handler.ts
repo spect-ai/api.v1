@@ -1,12 +1,27 @@
 import { InternalServerErrorException } from '@nestjs/common';
-import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
+import {
+  CommandBus,
+  CommandHandler,
+  EventBus,
+  ICommandHandler,
+} from '@nestjs/cqrs';
 import { CardsRepository } from 'src/card/cards.repository';
 import { CreateCardRequestDto } from 'src/card/dto/create-card-request.dto';
+import { DetailedCardResponseDto } from 'src/card/dto/detailed-card-response-dto';
+import { CardCreatedEvent } from 'src/card/events/impl';
 import { Card } from 'src/card/model/card.model';
 import { Circle } from 'src/circle/model/circle.model';
 import { CommonTools } from 'src/common/common.service';
 import { MappedItem } from 'src/common/interfaces';
 import { Activity } from 'src/common/types/activity.type';
+import { CardsProjectService } from 'src/project/cards.project.service';
+import {
+  AddCardsCommand,
+  UpdateProjectByIdCommand,
+  UpdateProjectCardNumByIdCommand,
+} from 'src/project/commands/impl';
+import { DetailedProjectResponseDto } from 'src/project/dto/detailed-project-response.dto';
+import { Project } from 'src/project/model/project.model';
 import { v4 as uuidv4 } from 'uuid';
 import { CreateCardCommand } from '../impl';
 
@@ -17,14 +32,23 @@ export class CreateCardCommandHandler
   constructor(
     private readonly cardsRepository: CardsRepository,
     private readonly commonTools: CommonTools,
+    private readonly commandBus: CommandBus,
+    private readonly eventBus: EventBus,
+    private readonly cardProjectService: CardsProjectService,
   ) {}
 
-  async execute(command: CreateCardCommand): Promise<Card> {
+  async execute(command: CreateCardCommand): Promise<{
+    card: DetailedCardResponseDto;
+    project: DetailedProjectResponseDto;
+  }> {
     try {
-      const { createCardDto, project, circle, caller, parentCard } = command;
-      const cardNum = await this.cardsRepository.count({
-        project: createCardDto.project,
-      });
+      const { createCardDto, circle, caller, parentCard } = command;
+      let project = command.project;
+      const cardNum =
+        project.cardCount ||
+        (await this.cardsRepository.count({
+          project: createCardDto.project,
+        }));
       /** Get the created card object */
       const newCard = this.getCreatedCard(
         createCardDto,
@@ -71,15 +95,45 @@ export class CreateCardCommandHandler
         throw updateAcknowledgment.getWriteErrors();
       }
 
+      /** If created card is not a sub card, add it to the project */
+      if (!createCardDto.parent) {
+        project = await this.commandBus.execute(
+          new AddCardsCommand(
+            [createdCard],
+            project,
+            project.id,
+            cardNum + 1 + newChildCards.length, // set last card number by adding current number with 1 (created card) + number of child cards
+          ),
+        );
+      } else {
+        project = await this.commandBus.execute(
+          new UpdateProjectCardNumByIdCommand(project.id, cardNum + 1),
+        );
+      }
+
+      for (const card of [createdCard, ...createdChildCards]) {
+        this.eventBus.publish(
+          new CardCreatedEvent(card, project.slug, circle.slug),
+        );
+      }
+
       /** Get parent card and return it if there is a parent */
       if (Object.keys(updatedParentCard)?.length > 0) {
         const res = await this.cardsRepository.getCardWithPopulatedReferences(
           parentCard.id,
         );
-        return res;
+        return {
+          card: res,
+          project:
+            this.cardProjectService.projectPopulatedWithCardDetails(project),
+        };
       }
 
-      return Object.assign(createdCard, { children: createdChildCards });
+      return {
+        card: Object.assign(createdCard, { children: createdChildCards }),
+        project:
+          this.cardProjectService.projectPopulatedWithCardDetails(project),
+      };
     } catch (error) {
       console.log(error);
       throw new InternalServerErrorException(

@@ -5,13 +5,17 @@ import { CommonTools } from 'src/common/common.service';
 import { LoggingService } from 'src/logging/logging.service';
 import { AddCardsCommand } from 'src/project/commands/impl';
 import { DetailedProjectResponseDto } from 'src/project/dto/detailed-project-response.dto';
-import { GetProjectByIdQuery } from 'src/project/queries/impl';
+import {
+  GetProjectByIdQuery,
+  GetProjectBySlugQuery,
+} from 'src/project/queries/impl';
 import { RequestProvider } from 'src/users/user.provider';
 import { ArchiveCardByIdCommand } from './commands/archive/impl/archive-card.command';
 import {
   CreateCardCommand,
   RevertArchiveCardByIdCommand,
 } from './commands/impl';
+import { UpdateProjectCardCommand } from './commands/updateCardProject/impl/update-card-project.command';
 import { CreateCardRequestDto } from './dto/create-card-request.dto';
 import { DetailedCardResponseDto } from './dto/detailed-card-response-dto';
 import {
@@ -20,7 +24,7 @@ import {
 } from './events/archive/impl/card-archived.event';
 import { CardCreatedEvent } from './events/impl';
 import { Card } from './model/card.model';
-import { GetCardByIdQuery } from './queries/impl';
+import { GetCardByFilterQuery, GetCardByIdQuery } from './queries/impl';
 import { ResponseBuilder } from './response.builder';
 import { CardValidationService } from './validation.cards.service';
 
@@ -39,12 +43,39 @@ export class CardsV1Service {
     logger.setContext('CardsV1Service');
   }
 
+  async get(
+    projectSlug: string,
+    cardSlug: string,
+  ): Promise<DetailedCardResponseDto> {
+    try {
+      const project = await this.queryBus.execute(
+        new GetProjectBySlugQuery(projectSlug),
+      );
+      const card = await this.queryBus.execute(
+        new GetCardByFilterQuery({
+          slug: cardSlug,
+          project: project.id,
+        }),
+      );
+      return await this.responseBuilder.enrichResponse(card);
+    } catch (error) {
+      this.logger.logError(
+        `Failed card retrieval by slug with error: ${error.message}`,
+        this.requestProvider,
+      );
+      throw new InternalServerErrorException(
+        'Failed card retrieval',
+        error.message,
+      );
+    }
+  }
+
   async create(createCardDto: CreateCardRequestDto): Promise<{
     card: DetailedCardResponseDto;
     project: DetailedProjectResponseDto;
   }> {
     try {
-      let project =
+      const project =
         this.requestProvider.project ||
         (await this.queryBus.execute(
           new GetProjectByIdQuery(createCardDto.project),
@@ -63,7 +94,7 @@ export class CardsV1Service {
         this.validationService.validateCardExists(parentCard);
       }
 
-      const card = await this.commandBus.execute(
+      return await this.commandBus.execute(
         new CreateCardCommand(
           createCardDto,
           project,
@@ -72,22 +103,6 @@ export class CardsV1Service {
           parentCard,
         ),
       );
-      if (!createCardDto.parent) {
-        project = await this.commandBus.execute(
-          new AddCardsCommand([card], project),
-        );
-      }
-      this.eventBus.publish(
-        new CardCreatedEvent(card, project.slug, circle.slug),
-      );
-
-      return {
-        card: await this.responseBuilder.enrichResponse(card),
-        project: {
-          ...project,
-          cards: this.commonTools.objectify(project.cards, 'id'),
-        },
-      };
     } catch (error) {
       this.logger.logError(
         `Failed creating new card with error: ${error.message}`,
@@ -139,6 +154,34 @@ export class CardsV1Service {
       );
       throw new InternalServerErrorException(
         'Failed reverting archival',
+        error.message,
+      );
+    }
+  }
+
+  async updateCardProject(
+    id: string,
+    projectId: string,
+    caller: string,
+  ): Promise<DetailedCardResponseDto> {
+    try {
+      const updatedCard = await this.commandBus.execute(
+        new UpdateProjectCardCommand(id, projectId, caller),
+      );
+      // this.eventBus.publish(new CardsArchivedEvent(cards));
+      // return {
+      //   ...project,
+      //   cards: this.commonTools.objectify(project.cards, 'id'),
+      // };
+      return updatedCard;
+    } catch (error) {
+      console.error(JSON.stringify(error));
+      this.logger.logError(
+        `Failed updating card project with error: ${error.message}`,
+        this.requestProvider,
+      );
+      throw new InternalServerErrorException(
+        'Failed updating card project',
         error.message,
       );
     }

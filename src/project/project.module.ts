@@ -24,8 +24,8 @@ import { QueryHandlers } from './queries/handlers';
 import { CommandHandlers } from './commands/handlers';
 import { CqrsModule } from '@nestjs/cqrs';
 import { ProjectV1Controller } from './project-v1.controller';
-import { ProjectV1Service } from './project-v1.service';
 import { EventHandlers } from './events/handlers';
+import { CrudOrchestrator } from './orchestrators/crud-orchestrator.service';
 
 @Module({
   imports: [
@@ -55,7 +55,7 @@ import { EventHandlers } from './events/handlers';
     ...QueryHandlers,
     ...CommandHandlers,
     ...EventHandlers,
-    ProjectV1Service,
+    CrudOrchestrator,
   ],
   exports: [ProjectService, ProjectsRepository, ProjectModule],
 })
