@@ -52,6 +52,7 @@ const getCirclePopulatedFields = {
     name: 1,
     slug: 1,
     description: 1,
+    discordDiscussionChannel: 1,
     id: 1,
   },
   retro: {
