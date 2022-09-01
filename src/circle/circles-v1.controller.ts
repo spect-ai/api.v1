@@ -39,9 +39,7 @@ import { UpdateMemberRolesDto } from './dto/update-member-role.dto';
 import { Circle } from './model/circle.model';
 import {
   GetCircleByFilterQuery,
-  GetCircleByIdQuery,
   GetCircleNavigationQuery,
-  GetMultipleCirclesQuery,
 } from './queries/impl';
 import { CirclesRolesService } from './services/circle-roles.service';
 import { CirclesCrudService } from './services/circles-crud.service';
