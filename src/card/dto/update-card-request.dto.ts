@@ -96,3 +96,16 @@ export class MultiCardCloseWithSlugDto {
   @IsNotEmpty()
   slugs: string[];
 }
+
+export class RecordKudosDto {
+  /**
+   * The status of the card (active, inreview etc) - TODO: Add custom validation
+   */
+  @IsString()
+  @IsNotEmpty()
+  for: 'assignee' | 'reviewer';
+
+  @IsString()
+  @IsNotEmpty()
+  tokenId: string;
+}

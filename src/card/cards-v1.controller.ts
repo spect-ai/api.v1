@@ -28,6 +28,12 @@ import { UpdateCardProjectDto } from './dto/update-card-project.dto';
 import { GetByProjectSlugAndCardSlugDto } from './dto/get-card-params.dto';
 import { UpdatePaymentInfoDto } from './dto/update-payment-info.dto';
 import { GetCardByIdQuery, GetCardBySlugQuery } from './queries/impl';
+import fetch from 'node-fetch';
+import { ClaimKudosDto, MintKudosDto } from '../common/dtos/mint-kudos.dto';
+import { MintKudosService } from 'src/common/mint-kudos.service';
+import { RecordKudosDto } from './dto/update-card-request.dto';
+import { AddKudosCommand } from './commands/kudos/impl';
+import { Card } from './model/card.model';
 
 @Controller('card/v1')
 @ApiTags('cardv1')
@@ -36,6 +42,7 @@ export class CardsV1Controller {
     private readonly cardsService: CardsV1Service,
     private readonly queryBus: QueryBus,
     private readonly commandBus: CommandBus,
+    private readonly kudosService: MintKudosService,
   ) {}
 
   @UseGuards(ViewCardAuthGuard)
@@ -111,6 +118,29 @@ export class CardsV1Controller {
       params.id,
       updateCardProjectDto.projectId,
       req.user.id,
+    );
+  }
+
+  @Patch('/mintKudos')
+  async mintKudos(@Body() mintKudosDto: MintKudosDto): Promise<object> {
+    // return res;
+    return { operationId: await this.kudosService.mintKudos(mintKudosDto) };
+  }
+
+  @Patch('/claimKudos')
+  async claimKudos(@Body() claimKudosDto: ClaimKudosDto): Promise<object> {
+    // return res;
+    return { operationId: await this.kudosService.claimKudos(claimKudosDto) };
+  }
+
+  @Patch('/:id/recordKudos')
+  async recordKudos(
+    @Body() recordKudosDto: RecordKudosDto,
+    @Param() params: ObjectIdDto,
+  ): Promise<Card> {
+    // return res;
+    return await this.commandBus.execute(
+      new AddKudosCommand(recordKudosDto, null, params.id),
     );
   }
 }

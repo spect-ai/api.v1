@@ -45,6 +45,7 @@ import { CardsV1Service } from './cards-v1.service';
 import { ViewCardAuthGuard } from 'src/auth/card.guard';
 import { RegistryService } from 'src/registry/registry.service';
 import { RegistryModule } from 'src/registry/registry.module';
+import { MintKudosService } from 'src/common/mint-kudos.service';
 
 @Module({
   imports: [
@@ -95,6 +96,7 @@ import { RegistryModule } from 'src/registry/registry.module';
     CardsV1Service,
     ViewProjectAuthGuard,
     RegistryService,
+    MintKudosService,
   ],
   exports: [
     CardsService,
