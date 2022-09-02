@@ -105,7 +105,24 @@ export class RecordKudosDto {
   @IsNotEmpty()
   for: 'assignee' | 'reviewer';
 
+  @IsNumber()
+  @IsNotEmpty()
+  tokenId: number;
+
+  @IsArray()
+  @IsNotEmpty()
+  contributors: string[];
+}
+
+export class RecordClaimInfoDto {
+  /**
+   * The status of the card (active, inreview etc) - TODO: Add custom validation
+   */
   @IsString()
   @IsNotEmpty()
-  tokenId: string;
+  for: 'assignee' | 'reviewer';
+
+  @IsNumber()
+  @IsNotEmpty()
+  tokenId: number;
 }

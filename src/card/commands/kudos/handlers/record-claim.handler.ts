@@ -1,52 +1,46 @@
 import { InternalServerErrorException } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { LoggingService } from 'src/logging/logging.service';
 import { CardsRepository } from 'src/card/cards.repository';
 import { Card } from 'src/card/model/card.model';
-import { AddKudosCommand } from '../impl';
-import { RecordKudosDto } from 'src/card/dto/update-card-request.dto';
+import { LoggingService } from 'src/logging/logging.service';
+import { RecordClaimCommand } from '../impl/record-claim.command';
 
-@CommandHandler(AddKudosCommand)
-export class AddKudosCommandHandler
-  implements ICommandHandler<AddKudosCommand>
+@CommandHandler(RecordClaimCommand)
+export class RecordClaimCommandHandler
+  implements ICommandHandler<RecordClaimCommand>
 {
   constructor(
     private readonly cardRepository: CardsRepository,
     private readonly logger: LoggingService,
   ) {
-    this.logger.setContext('AddKudosCommandHandler');
+    this.logger.setContext('RecordClaimCommandHandler');
   }
 
-  async execute(command: AddKudosCommand): Promise<Card> {
+  async execute(command: RecordClaimCommand): Promise<Card> {
     try {
-      console.log('AddKudosCommandHandler');
-      const { kudos, card, id } = command;
+      console.log('RecordClaimCommandHandler');
+      const { recordClaimRequestDto, caller, card, id } = command;
       let cardToUpdate = card;
       if (!cardToUpdate) cardToUpdate = await this.cardRepository.findById(id);
       if (!cardToUpdate) throw new Error('Card not found');
-      let update = {};
-      if (!cardToUpdate.kudosMinted) {
-        update = {
-          kudosMinted: {
-            [kudos.for]: kudos.tokenId,
-          },
-          eligibleToClaimKudos: {
-            [kudos.tokenId]: kudos.contributors,
-          },
+
+      const update = {};
+      if (!cardToUpdate.kudosClaimedBy) {
+        update['kudosClaimedBy'] = {
+          [recordClaimRequestDto.tokenId]: [caller],
         };
       } else {
-        update = {
-          kudosMinted: {
-            ...cardToUpdate.kudosMinted,
-            [kudos.for]: kudos.tokenId,
-          },
-          eligibleToClaimKudos: {
-            ...cardToUpdate.eligibleToClaimKudos,
-            [kudos.tokenId]: kudos.contributors,
-          },
+        update['kudosClaimedBy'] = {
+          ...cardToUpdate.kudosClaimedBy,
+          [recordClaimRequestDto.tokenId]: [
+            ...(cardToUpdate.kudosClaimedBy[recordClaimRequestDto.tokenId] ||
+              []),
+            caller,
+          ],
         };
       }
 
+      console.log(update);
       const updatedCard =
         await this.cardRepository.updateCardAndReturnWithPopulatedReferences(
           cardToUpdate.id,

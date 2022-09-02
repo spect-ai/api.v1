@@ -5,6 +5,7 @@ import {
   Param,
   Patch,
   Post,
+  Req,
   Request,
   SetMetadata,
   UseGuards,
@@ -31,9 +32,14 @@ import { GetCardByIdQuery, GetCardBySlugQuery } from './queries/impl';
 import fetch from 'node-fetch';
 import { ClaimKudosDto, MintKudosDto } from '../common/dtos/mint-kudos.dto';
 import { MintKudosService } from 'src/common/mint-kudos.service';
-import { RecordKudosDto } from './dto/update-card-request.dto';
+import {
+  RecordClaimInfoDto,
+  RecordKudosDto,
+} from './dto/update-card-request.dto';
 import { AddKudosCommand } from './commands/kudos/impl';
 import { Card } from './model/card.model';
+import { RecordClaimCommand } from './commands/kudos/impl/record-claim.command';
+import { ResponseBuilder } from './response.builder';
 
 @Controller('card/v1')
 @ApiTags('cardv1')
@@ -43,6 +49,7 @@ export class CardsV1Controller {
     private readonly queryBus: QueryBus,
     private readonly commandBus: CommandBus,
     private readonly kudosService: MintKudosService,
+    private readonly responseBuilder: ResponseBuilder,
   ) {}
 
   @UseGuards(ViewCardAuthGuard)
@@ -129,18 +136,33 @@ export class CardsV1Controller {
 
   @Patch('/claimKudos')
   async claimKudos(@Body() claimKudosDto: ClaimKudosDto): Promise<object> {
-    // return res;
     return { operationId: await this.kudosService.claimKudos(claimKudosDto) };
   }
 
+  @UseGuards(SessionAuthGuard)
   @Patch('/:id/recordKudos')
   async recordKudos(
     @Body() recordKudosDto: RecordKudosDto,
     @Param() params: ObjectIdDto,
-  ): Promise<Card> {
-    // return res;
-    return await this.commandBus.execute(
+  ): Promise<DetailedCardResponseDto> {
+    console.log(recordKudosDto);
+    const res = await this.commandBus.execute(
       new AddKudosCommand(recordKudosDto, null, params.id),
     );
+    return await this.responseBuilder.enrichResponse(res);
+  }
+
+  @UseGuards(SessionAuthGuard)
+  @Patch('/:id/recordClaimInfo')
+  async recordClaimInfo(
+    @Body() recordKudosDto: RecordClaimInfoDto,
+    @Param() params: ObjectIdDto,
+    @Request() req,
+  ): Promise<DetailedCardResponseDto> {
+    console.log(recordKudosDto);
+    const res = await this.commandBus.execute(
+      new RecordClaimCommand(recordKudosDto, req.user.id, null, params.id),
+    );
+    return await this.responseBuilder.enrichResponse(res);
   }
 }

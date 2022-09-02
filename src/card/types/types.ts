@@ -106,7 +106,11 @@ export type FlattendedArrayFieldItems = {
 };
 
 export type KudosForType = {
-  [kudosFor: string]: string;
+  [kudosFor: string]: number;
+};
+
+export type KudosClaimedType = {
+  [tokenId: string]: string[];
 };
 
 export type KudosType = {
@@ -121,10 +125,6 @@ export type KudosType = {
   createdAtTimestamp?: boolean;
   imageUrl: number;
   claimabilityAttributes: ClaimabilityAttributes;
-};
-
-export type KudosClaimedAsType = {
-  [claimedAs: string]: KudosType;
 };
 
 type ClaimabilityAttributes = {
