@@ -1,5 +1,6 @@
 import { InternalServerErrorException } from '@nestjs/common';
 import { CommandBus, CommandHandler, ICommandHandler } from '@nestjs/cqrs';
+import { CardsRepository } from 'src/card/cards.repository';
 import { LoggingService } from 'src/logging/logging.service';
 import { Project } from 'src/project/model/project.model';
 import { ProjectsRepository } from 'src/project/project.repository';
@@ -9,7 +10,10 @@ import { AddCardsCommand, AddCardsInMultipleProjectsCommand } from '../../impl';
 export class AddCardsCommandHandler
   implements ICommandHandler<AddCardsCommand>
 {
-  constructor(private readonly projectRepository: ProjectsRepository) {}
+  constructor(
+    private readonly projectRepository: ProjectsRepository,
+    private readonly cardsRepository: CardsRepository,
+  ) {}
 
   async execute(command: AddCardsCommand): Promise<Project> {
     try {
@@ -40,6 +44,9 @@ export class AddCardsCommandHandler
               card._id.toString(),
               ...columnDetails[projectToUpdate.columnOrder[0]].cards,
             ];
+            await this.cardsRepository.updateById(card._id.toString(), {
+              columnId: projectToUpdate.columnOrder[0],
+            });
           }
         }
       }
