@@ -28,6 +28,7 @@ import { CirclesRolesService } from './services/circle-roles.service';
 import { CirclePrivateController } from './circles-private.controller';
 import { CirclesPrivateRepository } from './circles-private.repository';
 import { CirclePrivate } from './model/circle-private.model';
+import { MintKudosService } from 'src/common/mint-kudos.service';
 
 @Module({
   imports: [
@@ -59,6 +60,7 @@ import { CirclePrivate } from './model/circle-private.model';
     CirclesCrudService,
     CirclesRolesService,
     CirclesPrivateRepository,
+    MintKudosService,
   ],
   exports: [CirclesService, CirclesRepository, CirclesModule],
 })
