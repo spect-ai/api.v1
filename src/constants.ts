@@ -20,6 +20,7 @@ export const defaultCircleRoles = {
       inviteMembers: true,
       manageRoles: true,
       manageMembers: true,
+      distributeCredentials: true,
       manageCardProperties: {
         Task: true,
         Bounty: true,
@@ -59,6 +60,7 @@ export const defaultCircleRoles = {
       inviteMembers: true,
       manageRoles: false,
       manageMembers: false,
+      distributeCredentials: false,
       manageCardProperties: {
         Task: true,
         Bounty: false,
@@ -99,6 +101,7 @@ export const defaultCircleRoles = {
       inviteMembers: false,
       manageRoles: false,
       manageMembers: false,
+      distributeCredentials: false,
       manageCardProperties: {
         Task: false,
         Bounty: false,

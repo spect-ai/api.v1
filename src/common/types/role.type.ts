@@ -16,6 +16,7 @@ export type CirclePermission = {
   inviteMembers: boolean;
   manageRoles: boolean;
   manageMembers: boolean;
+  distributeCredentials: boolean;
   manageRewards: CardTypeToPermissionMap;
   manageCardProperties: CardTypeToPermissionMap;
   createNewCard: CardTypeToPermissionMap;

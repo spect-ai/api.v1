@@ -25,15 +25,19 @@ import { CircleValidationService } from './circle-validation.service';
 import { CircleMembershipService } from './services/circles-membership.service';
 import { CirclesCrudService } from './services/circles-crud.service';
 import { CirclesRolesService } from './services/circle-roles.service';
+import { CirclePrivateController } from './circles-private.controller';
+import { CirclesPrivateRepository } from './circles-private.repository';
+import { CirclePrivate } from './model/circle-private.model';
 
 @Module({
   imports: [
     TypegooseModule.forFeature([Circle]),
+    TypegooseModule.forFeature([CirclePrivate]),
     EthAddressModule,
     RegistryModule,
     CqrsModule,
   ],
-  controllers: [CirclesController, CircleV1Controller],
+  controllers: [CirclesController, CircleV1Controller, CirclePrivateController],
   providers: [
     CirclesService,
     CirclesRepository,
@@ -54,6 +58,7 @@ import { CirclesRolesService } from './services/circle-roles.service';
     CircleMembershipService,
     CirclesCrudService,
     CirclesRolesService,
+    CirclesPrivateRepository,
   ],
   exports: [CirclesService, CirclesRepository, CirclesModule],
 })
