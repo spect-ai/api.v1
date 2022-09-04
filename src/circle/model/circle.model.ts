@@ -182,6 +182,12 @@ export class Circle extends ProfileModel {
 
   @prop()
   qualifiedClaimee: string[];
+
+  /**
+   * Custom labels for the circle
+   */
+  @prop({ default: [] })
+  labels: string[];
 }
 
 export class ExtendedCircle extends Circle {
