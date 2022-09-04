@@ -8,13 +8,13 @@ export class CirclePrivate extends BaseModel {
   /**
    * The api key
    */
-  @prop({ required: true })
+  @prop({ default: '' })
   mintkudosApiKey: string;
 
   /**
    * The community Id
    */
-  @prop({ required: true })
+  @prop({ default: '' })
   mintkudosCommunityId: string;
 
   /**

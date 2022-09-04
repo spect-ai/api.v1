@@ -128,7 +128,6 @@ export class CardsV1Controller {
     @Body() recordKudosDto: RecordKudosDto,
     @Param() params: ObjectIdDto,
   ): Promise<DetailedCardResponseDto> {
-    console.log(recordKudosDto);
     const res = await this.commandBus.execute(
       new AddKudosCommand(recordKudosDto, null, params.id),
     );
@@ -142,7 +141,6 @@ export class CardsV1Controller {
     @Param() params: ObjectIdDto,
     @Request() req,
   ): Promise<DetailedCardResponseDto> {
-    console.log(recordKudosDto);
     const res = await this.commandBus.execute(
       new RecordClaimCommand(recordKudosDto, req.user.id, null, params.id),
     );

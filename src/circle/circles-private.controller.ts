@@ -70,17 +70,22 @@ export class CirclePrivateController {
     @Body() updatePrivateCircleRequestDto: UpdatePrivateCircleRequestDto,
   ): Promise<boolean> {
     try {
-      const res = await this.circlesPrivateRepository.findById(param.id);
+      const res = await this.circlesPrivateRepository.findOne({
+        circleId: param.id,
+      });
       if (!res) {
         await this.circlesPrivateRepository.create({
           ...updatePrivateCircleRequestDto,
           circleId: param.id,
         });
-      } else
-        await this.circlesPrivateRepository.updateById(
-          param.id,
+      } else {
+        await this.circlesPrivateRepository.updateByFilter(
+          {
+            circleId: param.id,
+          },
           updatePrivateCircleRequestDto,
         );
+      }
       return true;
     } catch (e) {
       // TODO: Distinguish between DocumentNotFound error and other errors correctly, silent errors are not good
