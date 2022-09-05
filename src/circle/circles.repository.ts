@@ -68,6 +68,7 @@ export class CirclesRepository extends BaseRepository<Circle> {
     const circles = await this.findAll({
       parents: { $exists: true, $eq: [] },
       members: { $in: [user] },
+      'status.archived': { $ne: true },
     });
     return circles;
   }
