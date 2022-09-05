@@ -159,7 +159,3 @@ For a commit which should state that updates where made to the circles endpoint,
 ```bash
 chore: updates to the circles endpoint
 ```
-
-## License
-
-Nest is [MIT licensed](LICENSE).
