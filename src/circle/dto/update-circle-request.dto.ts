@@ -3,11 +3,15 @@ import {
   IsArray,
   IsBoolean,
   IsNotEmpty,
+  IsNumber,
   IsObject,
   IsOptional,
   IsString,
 } from 'class-validator';
-import { DiscordToCircleRoles } from '../model/circle.model';
+import {
+  DiscordToCircleRoles,
+  GuildxyzToCircleRoles,
+} from '../model/circle.model';
 import { SafeAddresses } from '../types';
 import { CreateCircleRequestDto } from './create-circle-request.dto';
 
@@ -57,6 +61,20 @@ export class UpdateCircleRequestDto extends OmitType(CreateCircleRequestDto, [
   @IsObject()
   @IsOptional()
   discordToCircleRoles?: DiscordToCircleRoles;
+
+  /**
+   * Guild.xyz guild
+   */
+  @IsNumber()
+  @IsOptional()
+  guildxyzId?: number;
+
+  /**
+   * guild xyz role mapping
+   */
+  @IsObject()
+  @IsOptional()
+  guildxyzToCircleRoles?: GuildxyzToCircleRoles;
 
   /**
    * A list of repos that the circle uses

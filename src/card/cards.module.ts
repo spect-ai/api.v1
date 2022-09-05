@@ -10,6 +10,7 @@ import { ActivityBuilder } from 'src/card/activity.builder';
 import { CirclesModule } from 'src/circle/circles.module';
 import { CommonTools } from 'src/common/common.service';
 import { DiscordService } from 'src/common/discord.service';
+import { GuildxyzService } from 'src/common/guildxyz.service';
 import { SlugService } from 'src/common/slug.service';
 import { LoggingService } from 'src/logging/logging.service';
 import { CardsProjectService } from 'src/project/cards.project.service';
@@ -81,6 +82,7 @@ import { WorkService } from './work.cards.service';
     CommonUtility,
     RolesService,
     DiscordService,
+    GuildxyzService,
     SessionAuthGuard,
     CircleAuthGuard,
     ProjectAuthGuard,

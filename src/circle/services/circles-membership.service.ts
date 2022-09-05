@@ -6,6 +6,7 @@ import { CirclesRepository } from '../circles.repository';
 import {
   InviteToCircleCommand,
   JoinUsingDiscordCommand,
+  JoinUsingGuildxyzCommand,
   JoinUsingInvitationCommand,
   RemoveFromCircleCommand,
   UpdateMemberRolesCommand,
@@ -14,7 +15,6 @@ import { DetailedCircleResponseDto } from '../dto/detailed-circle-response.dto';
 import { InviteDto } from '../dto/invite.dto';
 import { JoinCircleUsingInvitationRequestDto } from '../dto/join-circle.dto';
 import { UpdateMemberRolesDto } from '../dto/update-member-role.dto';
-import { JoinedCircleEvent, LeftCircleEvent } from '../events/impl';
 
 @Injectable()
 export class CircleMembershipService {
@@ -75,6 +75,24 @@ export class CircleMembershipService {
     try {
       const updatedCircle = await this.commandBus.execute(
         new JoinUsingDiscordCommand(id, this.requestProvider.user),
+      );
+      return updatedCircle;
+    } catch (error) {
+      this.logger.logError(
+        `Failed joining circle using discord with error: ${error.message}`,
+        this.requestProvider,
+      );
+      throw new InternalServerErrorException(
+        'Failed joining circle',
+        error.message,
+      );
+    }
+  }
+
+  async joinUsingGuildxyz(id: string): Promise<DetailedCircleResponseDto> {
+    try {
+      const updatedCircle = await this.commandBus.execute(
+        new JoinUsingGuildxyzCommand(id, this.requestProvider.user),
       );
       return updatedCircle;
     } catch (error) {
