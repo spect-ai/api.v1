@@ -6,8 +6,10 @@ import {
   Param,
   Patch,
   Post,
+  SetMetadata,
   UseGuards,
 } from '@nestjs/common';
+import { CircleAuthGuard } from 'src/auth/circle.guard';
 import { SessionAuthGuard } from 'src/auth/iron-session.guard';
 import { ObjectIdDto } from 'src/common/dtos/object-id.dto';
 import { LoggingService } from 'src/logging/logging.service';
@@ -28,25 +30,9 @@ export class CirclePrivateController {
     this.logger.setContext('CirclePrivateController');
   }
 
-  @Post('/')
-  @UseGuards(SessionAuthGuard)
-  async createPrivateCircleProperties(
-    @Body() createPrivateCircleRequestDto: CreatePrivateCircleRequestDto,
-  ): Promise<boolean> {
-    try {
-      await this.circlesPrivateRepository.create(createPrivateCircleRequestDto);
-      return true;
-    } catch (e) {
-      // TODO: Distinguish between DocumentNotFound error and other errors correctly, silent errors are not good
-      console.log(e);
-      this.logger.error(`Failed updating mint kudos`);
-      return false;
-    }
-  }
-
-  // TODO: Fix guard so only relevant permission can get info
+  @SetMetadata('permissions', ['manageCircleSettings'])
+  @UseGuards(CircleAuthGuard)
   @Get('/:id')
-  @UseGuards(SessionAuthGuard)
   async getPrivateCircleProperties(
     @Param() param: ObjectIdDto,
   ): Promise<CirclePrivate> {
@@ -63,8 +49,9 @@ export class CirclePrivateController {
     }
   }
 
+  @SetMetadata('permissions', ['manageCircleSettings'])
+  @UseGuards(CircleAuthGuard)
   @Patch('/:id')
-  @UseGuards(SessionAuthGuard)
   async updatePrivateCircleProperties(
     @Param() param: ObjectIdDto,
     @Body() updatePrivateCircleRequestDto: UpdatePrivateCircleRequestDto,
