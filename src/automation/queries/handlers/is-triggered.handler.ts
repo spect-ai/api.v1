@@ -11,6 +11,7 @@ import {
   IsBasicChangeTriggeredQuery,
   IsCardCreatedTriggeredQuery,
   IsDeadlineChangeTriggeredQuery,
+  IsStartDateChangeTriggeredQuery,
   IsMemberChangeTriggeredQuery,
   IsStatusChangeTriggeredQuery,
   IsSubmissionTriggeredQuery,
@@ -164,6 +165,22 @@ export class IsDeadlineChangeTriggeredQueryHandler
 
   async execute(query: IsDeadlineChangeTriggeredQuery): Promise<boolean> {
     console.log('IsDeadlineChangeTriggeredQuery');
+
+    const { performAutomationCommandContainer, trigger } = query;
+    const { card, update } = performAutomationCommandContainer;
+
+    return true;
+  }
+}
+
+@QueryHandler(IsStartDateChangeTriggeredQuery)
+export class IsStartDateChangeTriggeredQueryHandler
+  implements IQueryHandler<IsStartDateChangeTriggeredQuery>
+{
+  constructor(private readonly queryBus: QueryBus) {}
+
+  async execute(query: IsStartDateChangeTriggeredQuery): Promise<boolean> {
+    console.log('IsStartDateChangeTriggeredQuery');
 
     const { performAutomationCommandContainer, trigger } = query;
     const { card, update } = performAutomationCommandContainer;

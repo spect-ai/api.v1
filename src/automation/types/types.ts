@@ -37,6 +37,7 @@ export type CardTriggerId =
   | 'columnChange'
   | 'priorityChange'
   | 'deadlineChange'
+  | 'startDateChange'
   | 'assigneeChange'
   | 'reviewerChange'
   | 'labelChange'
@@ -64,6 +65,7 @@ export type CardTrigger = {
     | StatusChangeTrigger
     | MemberChangeTrigger
     | DeadlineChangeTrigger
+    | StartDateChangeTrigger
     | BasicTrigger
     | SubmissionTrigger
     | RevisionInstructionsTrigger
@@ -90,6 +92,12 @@ export type BasicTrigger = {
 };
 
 export type DeadlineChangeTrigger = {
+  before?: string;
+  after?: string;
+  between?: string[];
+};
+
+export type StartDateChangeTrigger = {
   before?: string;
   after?: string;
   between?: string[];
@@ -141,6 +149,7 @@ export type ConditionId =
   | 'checkColumn'
   | 'checkPriority'
   | 'checkDeadline'
+  | 'checkStartDate'
   | 'checkAssignee'
   | 'checkReviewer'
   | 'checkLabel'
@@ -156,6 +165,7 @@ export type Condition = {
   item:
     | BasicCondition
     | DeadlineCondition
+    | StartDateCondition
     | MemberCondition
     | StatusCondition
     | CheckCardsOnSameLevelCondition;
@@ -167,6 +177,14 @@ export type BasicCondition = {
 };
 
 export type DeadlineCondition = {
+  isEmpty?: boolean;
+  is?: string;
+  isAfter?: string;
+  isBefore?: string;
+  isBetween?: string[];
+};
+
+export type StartDateCondition = {
   isEmpty?: boolean;
   is?: string;
   isAfter?: string;
@@ -203,6 +221,7 @@ export type ActionId =
   | 'changeColumn'
   | 'changePriority'
   | 'changeDeadline'
+  | 'changeStartDate'
   | 'changeAssignee'
   | 'changeReviewer'
   | 'changeLabels'

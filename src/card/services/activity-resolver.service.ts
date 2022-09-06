@@ -7,6 +7,7 @@ import { Card } from '../model/card.model';
 
 const activityIdToFieldMap = {
   updateDeadline: 'deadline',
+  updateStartDate: 'startDate',
   updateReviewer: 'reviewer',
   updateAssignee: 'assignee',
   updateReward: 'reward',
@@ -19,6 +20,7 @@ const activityIdToFieldMap = {
 
 const activityIdToFieldNameMap = {
   updateDeadline: 'deadline',
+  updateStartDate: 'startDate',
   updateReviewer: 'reviewer',
   updateAssignee: 'assignee',
   updateReward: 'reward',
@@ -78,7 +80,9 @@ export class ActivityResolver {
           activityIdToFieldMap[activity.activityId],
           activityIdToFieldNameMap[activity.activityId],
         );
-      } else if (['updateDeadline'].includes(activity.activityId)) {
+      } else if (
+        ['updateDeadline', 'updateStartDate'].includes(activity.activityId)
+      ) {
         activity.content = this.resolveDateFields(
           activity,
           activityIdToFieldMap[activity.activityId],

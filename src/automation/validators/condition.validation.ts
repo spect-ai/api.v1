@@ -10,6 +10,7 @@ import {
   Condition,
   MemberCondition,
   DeadlineCondition,
+  StartDateCondition,
 } from '../types/types';
 
 const conditionIdToValidationMap = {
@@ -17,6 +18,7 @@ const conditionIdToValidationMap = {
   checkColumn: validateBasicCondition,
   checkParent: validateBasicCondition,
   checkDeadline: validateDeadlineCondition,
+  checkStartDate: validateStartDateCondition,
   checkAssignee: validateMemberChangeCondition,
   checkReviewer: validateMemberChangeCondition,
   checkCardsOnSameLevel: validateBasicCondition,
@@ -70,5 +72,8 @@ function validateMemberChangeCondition(item: MemberCondition) {
   return true;
 }
 function validateDeadlineCondition(item: DeadlineCondition) {
+  return true;
+}
+function validateStartDateCondition(item: StartDateCondition) {
   return true;
 }

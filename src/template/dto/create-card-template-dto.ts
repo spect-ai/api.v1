@@ -47,6 +47,13 @@ export class CardTemplateData {
   /**
    * The description of the circle
    */
+  @IsDateString()
+  @IsOptional()
+  startDate?: string;
+
+  /**
+   * The description of the circle
+   */
   @IsArray()
   @IsOptional()
   labels?: string[];

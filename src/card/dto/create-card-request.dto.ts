@@ -73,6 +73,13 @@ export class CreateCardRequestDto {
   deadline?: string;
 
   /**
+   * Card Start Date
+   */
+  @IsDateString()
+  @IsOptional()
+  startDate?: string;
+
+  /**
    * Card Labels
    */
   @IsArray()

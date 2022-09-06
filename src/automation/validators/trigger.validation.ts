@@ -13,6 +13,7 @@ import {
   ColumnDeleteTrigger,
   ColumnPositionUpdateTrigger,
   DeadlineChangeTrigger,
+  StartDateChangeTrigger,
   MemberChangeTrigger,
   ProjectCreateTrigger,
   StatusChangeTrigger,
@@ -25,6 +26,7 @@ const triggerIdToValidationMap = {
   columnChange: validateBasicTrigger,
   priorityChange: validateBasicTrigger,
   deadlineChange: validateDeadlineTrigger,
+  startDateChange: validateStartDateTrigger,
   assigneeChange: validateMemberChangeTrigger,
   reviewerChange: validateMemberChangeTrigger,
   typeChange: validateBasicTrigger,
@@ -129,6 +131,11 @@ function validateBasicTrigger(item: BasicTrigger) {
 }
 
 function validateDeadlineTrigger(item: DeadlineChangeTrigger) {
+  if (!item.before && !item.after && !item.between) return false;
+  return true;
+}
+
+function validateStartDateTrigger(item: StartDateChangeTrigger) {
   if (!item.before && !item.after && !item.between) return false;
   return true;
 }

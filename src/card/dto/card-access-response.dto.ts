@@ -31,6 +31,12 @@ export class ValidCardActionResponseDto {
   updateDeadline: ActionValidOrNotWithReason;
 
   /**
+   * Can user update startDate?
+   */
+  @IsObject()
+  updateStartDate: ActionValidOrNotWithReason;
+
+  /**
    * Can user update column?
    */
   @IsObject()

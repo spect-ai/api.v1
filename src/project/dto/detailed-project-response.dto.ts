@@ -19,6 +19,7 @@ export type MinimalCard = {
   reward: number;
   slug: string;
   deadline: string;
+  startDate: string;
   labels: string[];
 };
 

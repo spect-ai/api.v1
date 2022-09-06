@@ -20,6 +20,7 @@ export type ChangeField = {
   reward?: Payment;
   labels?: string[];
   deadline?: string;
+  startDate?: string;
   column?: string;
   priority?: number;
   type?: string;
@@ -40,6 +41,7 @@ export type Activity = {
   activityId:
     | 'createCard'
     | 'updateDeadline'
+    | 'updateStartDate'
     | 'updateReviewer'
     | 'updateAssignee'
     | 'updateReward'

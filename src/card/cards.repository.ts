@@ -16,6 +16,7 @@ const populatedCardFields = {
   reward: 1,
   priority: 1,
   deadline: 1,
+  startDate: 1,
   slug: 1,
   type: 1,
   project: 1,
@@ -33,6 +34,7 @@ const populatedCardFieldsOnProject = {
   reward: 1,
   priority: 1,
   deadline: 1,
+  startDate: 1,
   slug: 1,
   type: 1,
   project: 1,
@@ -62,6 +64,7 @@ const defaultPopulate: PopulatedCardFields = {
     reviewer: 1,
     priority: 1,
     deadline: 1,
+    startDate: 1,
     slug: 1,
   },
   project: {
