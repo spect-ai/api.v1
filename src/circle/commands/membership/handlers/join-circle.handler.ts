@@ -128,7 +128,7 @@ export class JoinUsingDiscordCommandHandler
 
 @CommandHandler(JoinUsingGuildxyzCommand)
 export class JoinUsingGuildxyzCommandHandler
-  implements ICommandHandler<JoinUsingDiscordCommand>
+  implements ICommandHandler<JoinUsingGuildxyzCommand>
 {
   constructor(
     private readonly circlesRepository: CirclesRepository,
@@ -138,7 +138,7 @@ export class JoinUsingGuildxyzCommandHandler
   ) {}
 
   async execute(
-    command: JoinUsingDiscordCommand,
+    command: JoinUsingGuildxyzCommand,
   ): Promise<DetailedCircleResponseDto> {
     try {
       const { id, caller } = command;
