@@ -1,10 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { diff } from 'fast-array-diff';
 import { Activity } from 'src/common/types/activity.type';
-import { Project } from 'src/project/model/project.model';
 import { UsersService } from 'src/users/users.service';
 import { Card } from './model/card.model';
-import moment from 'moment';
 
 const activityIdToFieldMap = {
   updateDeadline: 'deadline',
@@ -26,7 +24,7 @@ const activityIdToFieldNameMap = {
   updateLabels: 'label',
   updatePriority: 'priority',
   updateCardType: 'type',
-  updateColumn: 'columnId',
+  updateColumn: 'column',
   updateStatus: 'status',
 };
 

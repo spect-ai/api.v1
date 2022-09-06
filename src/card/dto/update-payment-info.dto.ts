@@ -1,4 +1,15 @@
-import { IsArray, IsNotEmpty, IsString } from 'class-validator';
+import {
+  IsArray,
+  IsNotEmpty,
+  IsObject,
+  IsOptional,
+  IsString,
+} from 'class-validator';
+
+export type ReturnWith = {
+  type: 'project' | 'circle' | 'card' | 'retro';
+  id: string;
+};
 
 export class UpdatePaymentInfoDto {
   /**
@@ -13,4 +24,11 @@ export class UpdatePaymentInfoDto {
   @IsString()
   @IsNotEmpty()
   transactionHash: string;
+
+  /**
+   * Return object
+   */
+  @IsObject()
+  @IsOptional()
+  returnWith?: ReturnWith;
 }

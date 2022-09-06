@@ -167,13 +167,11 @@ export class ContractListener {
       address: distributorAddress,
       topics: [utils.id('tokenDistributed(address,address,string)')],
     };
-    console.log(filterEth);
     return { filterEth, filterTokens, filterToken, alchemy };
   }
 
   private async decodeTransactionAndRecord(log: any, chainId: string) {
     try {
-      console.log(log);
       let decodedEvents;
       if (log.topics[0] === utils.id('ethDistributed(address,string)')) {
         decodedEvents = this.iface.decodeEventLog(

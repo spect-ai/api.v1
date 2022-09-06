@@ -110,9 +110,7 @@ export class ProjectService {
         if (
           Object.keys(data).length > 0 &&
           'columnOrder' in data &&
-          'columnDetails' in data &&
-          'automations' in data &&
-          'automationOrder' in data
+          'columnDetails' in data
         ) {
           createProjectDto.columnOrder = data.columnOrder;
           createProjectDto.columnDetails =

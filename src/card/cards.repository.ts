@@ -166,6 +166,34 @@ export class CardsRepository extends BaseRepository<Card> {
     return cards;
   }
 
+  async getCardWithAllChildrenByFilterForMultipleCards(
+    filterQuery: FilterQuery<Card>,
+  ): Promise<ExtendedCard[]> {
+    const cards = await this.aggregate([
+      {
+        $match: filterQuery,
+      },
+      {
+        $graphLookup: {
+          from: 'cards',
+          startWith: '$children',
+          connectFromField: 'children',
+          connectToField: '_id',
+          as: 'flattenedChildren',
+        },
+      },
+    ]);
+
+    /** Aggregate query doesnt add id so adding manually */
+    for (const card of cards) {
+      card.id = card._id.toString();
+      for (const child of card.flattenedChildren) {
+        child.id = child._id.toString();
+      }
+    }
+    return cards;
+  }
+
   async updateManyByIds(
     ids: string[],
     update: UpdateQuery<Card>,
@@ -196,7 +224,7 @@ export class CardsRepository extends BaseRepository<Card> {
     if (acknowledgment.hasWriteErrors()) {
       console.log(acknowledgment.getWriteErrors());
       throw new HttpException(
-        'Something went wrong while updating payment info',
+        'Something went wrong while updating cards',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }

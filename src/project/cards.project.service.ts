@@ -1,6 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { Card } from 'src/card/model/card.model';
 import { CommonTools } from 'src/common/common.service';
+import { MappedPartialItem } from 'src/common/interfaces';
 import { DetailedProjectResponseDto } from './dto/detailed-project-response.dto';
 import { ReorderCardReqestDto } from './dto/reorder-card-request.dto';
 import { Project } from './model/project.model';
@@ -150,6 +151,68 @@ export class CardsProjectService {
       }
     }
     return cardLoc;
+  }
+
+  reorderCardNew(
+    project: Project,
+    cardId: string,
+    destinationCardLoc: ReorderCardReqestDto,
+  ): MappedPartialItem<Project> {
+    // Find where the card is in the project now
+    const sourceCardLoc = this.findCardLocationInProject(project, cardId);
+    if (!sourceCardLoc.columnId) {
+      console.log(`Card ${cardId} not found in project`);
+      throw new HttpException('Card not found', HttpStatus.NOT_FOUND);
+    }
+
+    // Get the destination card index based on the input
+    let destinationCardIndex: number;
+    if (destinationCardLoc.destinationCardIndex === 'end') {
+      destinationCardIndex =
+        project.columnDetails[destinationCardLoc.destinationColumnId].cards
+          .length;
+    } else destinationCardIndex = destinationCardLoc.destinationCardIndex;
+
+    // In case destination card index is not valid, throw error
+    const columnDetails = project.columnDetails;
+    if (
+      destinationCardIndex < 0 ||
+      destinationCardIndex -
+        columnDetails[destinationCardLoc.destinationColumnId].cards.length >
+        0
+    ) {
+      throw new HttpException(
+        'Invalid destination card index',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    // Update the card location in the project
+    columnDetails[sourceCardLoc.columnId].cards.splice(
+      sourceCardLoc.cardIndex,
+      1,
+    );
+
+    columnDetails[destinationCardLoc.destinationColumnId].cards.splice(
+      destinationCardIndex,
+      0,
+      cardId,
+    );
+
+    columnDetails[sourceCardLoc.columnId] = {
+      ...columnDetails[sourceCardLoc.columnId],
+      cards: columnDetails[sourceCardLoc.columnId].cards,
+    };
+
+    columnDetails[destinationCardLoc.destinationColumnId] = {
+      ...columnDetails[destinationCardLoc.destinationColumnId],
+      cards: columnDetails[destinationCardLoc.destinationColumnId].cards,
+    };
+
+    return {
+      [project.id]: {
+        columnDetails,
+      },
+    };
   }
 
   reorderCard(
