@@ -48,8 +48,10 @@ export class CardsPaymentService {
             cardIds,
           );
         for (const card of cardsWithChildren) {
-          cards.push(card);
-          cards = [...cards, ...card.flattenedChildren];
+          if (card.reward.value > 0) cards.push(card);
+          for (const child of card.flattenedChildren) {
+            if (child.reward.value > 0) cards.push(child);
+          }
         }
         //cards = cards.filter((card) => card.reward.chain?.chainId === chainId);
       } else {
@@ -70,7 +72,7 @@ export class CardsPaymentService {
        */
       let aggregatedRewardValuesGroupedByToken = {};
       for (const card of cards) {
-        if (card.reward.token.address !== '0x0')
+        if (card.reward.token.address !== '0x0' && card.reward.value > 0)
           aggregatedRewardValuesGroupedByToken =
             this.commonTools.setOrAggregateObjectKey(
               aggregatedRewardValuesGroupedByToken,
@@ -125,7 +127,7 @@ export class CardsPaymentService {
           }
         }
       }
-
+      aggregatedPaymentInfo.chainId = chainId;
       return aggregatedPaymentInfo;
     } catch (error) {
       this.logger.logError(

@@ -33,15 +33,16 @@ export class AddSafeCommandHandler implements ICommandHandler<AddSafeCommand> {
         circleToUpdate.safeAddresses[safeDto.chainId] = [safeDto.address];
       }
 
-      const updatedCircle = await this.circlesRepository.updateById(
-        circleToUpdate.id,
-        {
-          safeAddresses: {
-            ...circleToUpdate.safeAddresses,
-            [safeDto.chainId]: circleToUpdate.safeAddresses[safeDto.chainId],
+      const updatedCircle =
+        await this.circlesRepository.updateCircleAndReturnWithPopulatedReferences(
+          circleToUpdate.id,
+          {
+            safeAddresses: {
+              ...circleToUpdate.safeAddresses,
+              [safeDto.chainId]: circleToUpdate.safeAddresses[safeDto.chainId],
+            },
           },
-        },
-      );
+        );
       return updatedCircle;
     } catch (error) {
       throw new InternalServerErrorException(error.message);

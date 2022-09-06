@@ -1,4 +1,4 @@
-import { IsObject } from 'class-validator';
+import { IsObject, IsString } from 'class-validator';
 
 export type FlatennedTokenPaymentInfo = {
   userIds: string[];
@@ -32,4 +32,7 @@ export class AggregatedFlattenedPaymentInfo {
 
   @IsObject()
   approval: ApprovalInfo;
+
+  @IsString()
+  chainId: string;
 }

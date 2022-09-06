@@ -49,6 +49,7 @@ export class NotificationEventHandler
           id: uuidv4(),
           content: content,
           type: itemType,
+          entityId: event.item?.id,
           ref: ref,
           linkPath,
           actor,
