@@ -26,6 +26,7 @@ import { CqrsModule } from '@nestjs/cqrs';
 import { ProjectV1Controller } from './project-v1.controller';
 import { EventHandlers } from './events/handlers';
 import { CrudOrchestrator } from './orchestrators/crud-orchestrator.service';
+import { GuildxyzService } from 'src/common/guildxyz.service';
 
 @Module({
   imports: [
@@ -49,6 +50,7 @@ import { CrudOrchestrator } from './orchestrators/crud-orchestrator.service';
     CardValidationService,
     RolesService,
     DiscordService,
+    GuildxyzService,
     CircleAuthGuard,
     SessionAuthGuard,
     LoggingService,

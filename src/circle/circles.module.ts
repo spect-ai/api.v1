@@ -29,6 +29,7 @@ import { CirclePrivateController } from './circles-private.controller';
 import { CirclesPrivateRepository } from './circles-private.repository';
 import { CirclePrivate } from './model/circle-private.model';
 import { MintKudosService } from 'src/common/mint-kudos.service';
+import { GuildxyzService } from 'src/common/guildxyz.service';
 
 @Module({
   imports: [
@@ -45,6 +46,7 @@ import { MintKudosService } from 'src/common/mint-kudos.service';
     SlugService,
     RequestProvider,
     DiscordService,
+    GuildxyzService,
     GithubService,
     RolesService,
     CommonTools,

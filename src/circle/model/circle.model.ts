@@ -25,6 +25,14 @@ export type DiscordToCircleRoles = {
   };
 };
 
+export type GuildxyzToCircleRoles = {
+  [role: number]: {
+    circleRole: string[];
+    name: string;
+    id: number;
+  };
+};
+
 @useMongoosePlugin()
 export class Circle extends ProfileModel {
   /**
@@ -147,6 +155,18 @@ export class Circle extends ProfileModel {
    */
   @prop({ default: {} })
   discordToCircleRoles: DiscordToCircleRoles;
+
+  /**
+   * Guild.xyz guild
+   */
+  @prop()
+  guildxyzId: number;
+
+  /**
+   * guild xyz role mapping
+   */
+  @prop({ default: {} })
+  guildxyzToCircleRoles: GuildxyzToCircleRoles;
 
   /**
    * A list of repos that the circle uses

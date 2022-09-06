@@ -187,6 +187,14 @@ export class CircleV1Controller {
     return await this.circleMembershipService.joinUsingDiscord(param.id);
   }
 
+  @UseGuards(SessionAuthGuard)
+  @Patch('/:id/joinUsingGuildxyz')
+  async joinUsingGuildxyz(
+    @Param() param: ObjectIdDto,
+  ): Promise<DetailedCircleResponseDto> {
+    return await this.circleMembershipService.joinUsingGuildxyz(param.id);
+  }
+
   @SetMetadata('permissions', ['manageMembers'])
   @UseGuards(CircleAuthGuard)
   @Patch('/:id/updateMemberRoles')

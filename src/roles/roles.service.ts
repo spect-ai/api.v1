@@ -1,12 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import { Circle } from 'src/circle/model/circle.model';
 import { DiscordService } from 'src/common/discord.service';
+import { GuildxyzService } from 'src/common/guildxyz.service';
 import { CirclePermission, Roles } from 'src/common/types/role.type';
 import { User } from 'src/users/model/users.model';
 
 @Injectable()
 export class RolesService {
-  constructor(private readonly discordService: DiscordService) {}
+  constructor(
+    private readonly discordService: DiscordService,
+    private readonly guildxyzService: GuildxyzService,
+  ) {}
 
   defaultCircleRoles(): Roles {
     return {
@@ -198,6 +202,29 @@ export class RolesService {
     }
     if (activeRoles.length === 0) {
       throw new Error('No roles found for user');
+    }
+    return [...new Set(activeRoles)];
+  }
+
+  async getSpectRoleFromGuildxyz(
+    user: User,
+    circle: Circle,
+  ): Promise<string[]> {
+    const guildxyzRoles = await this.guildxyzService.getGuildxyzRole(
+      circle.guildxyzId,
+      user,
+    );
+    const guildxyzToCircleRoles = circle.guildxyzToCircleRoles;
+    if (!guildxyzToCircleRoles)
+      throw new Error('Guildxyz to circle role mapping not setup');
+    const activeRoles = [];
+    for (const role of guildxyzRoles) {
+      if (role.access && guildxyzToCircleRoles[role.roleId]) {
+        activeRoles.push(...guildxyzToCircleRoles[role.roleId].circleRole);
+      }
+    }
+    if (activeRoles.length === 0) {
+      throw new Error('No guild roles found for user');
     }
     return [...new Set(activeRoles)];
   }
