@@ -20,6 +20,8 @@ export class UpdateCircleCommandHandler
     try {
       const { id, updateCircleDto, caller } = command;
 
+      console.log({ updateCircleDto });
+
       const updatedCircle =
         await this.circlesRepository.updateCircleAndReturnWithPopulatedReferences(
           id,

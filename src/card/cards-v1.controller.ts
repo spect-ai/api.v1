@@ -22,19 +22,15 @@ import {
   SessionAuthGuard,
 } from 'src/auth/iron-session.guard';
 import { ObjectIdDto } from 'src/common/dtos/object-id.dto';
-import { RequiredRoleDto, RequiredSlugDto } from 'src/common/dtos/string.dto';
+import { RequiredSlugDto } from 'src/common/dtos/string.dto';
 import { DetailedProjectResponseDto } from 'src/project/dto/detailed-project-response.dto';
 import { CrudOrchestrator } from './orchestrators/crud.orchestrator';
 import { CloseCardsCommand, UpdatePaymentCommand } from './commands/impl';
+import { AddKudosCommand } from './commands/kudos/impl';
+import { RecordClaimCommand } from './commands/kudos/impl/record-claim.command';
 import { CreateCardRequestDto } from './dto/create-card-request.dto';
 import { DetailedCardResponseDto } from './dto/detailed-card-response-dto';
-import { UpdateCardProjectDto } from './dto/update-card-project.dto';
 import { GetByProjectSlugAndCardSlugDto } from './dto/get-card-params.dto';
-import {
-  MultiCardCloseWithSlugDto,
-  UpdateCardRequestDto,
-  UpdateCardStatusRequestDto,
-} from './dto/update-card-request.dto';
 import { UpdatePaymentInfoDto } from './dto/update-payment-info.dto';
 import { GetCardByIdQuery, GetCardBySlugQuery } from './queries/impl';
 import {
@@ -53,6 +49,15 @@ import {
   RequiredThreadIdDto,
   RequiredWorkUnitIdDto,
 } from 'src/common/dtos/string.dto';
+import { ResponseBuilder } from './response.builder';
+import {
+  MultiCardCloseWithSlugDto,
+  RecordClaimInfoDto,
+  RecordKudosDto,
+  UpdateCardRequestDto,
+  UpdateCardStatusRequestDto,
+} from './dto/update-card-request.dto';
+import { UpdateCardProjectDto } from './dto/update-card-project.dto';
 
 @Controller('card/v1')
 @ApiTags('cardv1')
@@ -61,6 +66,7 @@ export class CardsV1Controller {
     private readonly crudOrchestrator: CrudOrchestrator,
     private readonly queryBus: QueryBus,
     private readonly commandBus: CommandBus,
+    private readonly responseBuilder: ResponseBuilder,
   ) {}
 
   @UseGuards(ViewCardAuthGuard)
@@ -242,5 +248,30 @@ export class CardsV1Controller {
       updateCardProjectDto.projectId,
       req.user.id,
     );
+  }
+
+  @UseGuards(SessionAuthGuard)
+  @Patch('/:id/recordKudos')
+  async recordKudos(
+    @Body() recordKudosDto: RecordKudosDto,
+    @Param() params: ObjectIdDto,
+  ): Promise<DetailedCardResponseDto> {
+    const res = await this.commandBus.execute(
+      new AddKudosCommand(recordKudosDto, null, params.id),
+    );
+    return await this.responseBuilder.enrichResponse(res);
+  }
+
+  @UseGuards(SessionAuthGuard)
+  @Patch('/:id/recordClaimInfo')
+  async recordClaimInfo(
+    @Body() recordKudosDto: RecordClaimInfoDto,
+    @Param() params: ObjectIdDto,
+    @Request() req,
+  ): Promise<DetailedCardResponseDto> {
+    const res = await this.commandBus.execute(
+      new RecordClaimCommand(recordKudosDto, req.user.id, null, params.id),
+    );
+    return await this.responseBuilder.enrichResponse(res);
   }
 }

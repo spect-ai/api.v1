@@ -106,3 +106,33 @@ export type FlattendedArrayFieldItems = {
   fieldName: ArrayField;
   itemIds: string[];
 };
+
+export type KudosForType = {
+  [kudosFor: string]: number;
+};
+
+export type KudosClaimedType = {
+  [tokenId: string]: string[];
+};
+
+export type KudosType = {
+  tokenId: number;
+  headline: string;
+  description: string;
+  startDateTimestamp?: number;
+  endDateTimestamp?: number;
+  links: string[];
+  communityId?: string;
+  createdByAddress?: boolean;
+  createdAtTimestamp?: boolean;
+  imageUrl: number;
+  claimabilityAttributes: ClaimabilityAttributes;
+};
+
+type ClaimabilityAttributes = {
+  isSignatureRequired: boolean;
+  isAllowlistRequired: boolean;
+  totalClaimCount: number;
+  remainingClaimCount?: number;
+  expirationTimestamp?: number;
+};

@@ -6,7 +6,6 @@ import { GetCircleNavigationQuery } from '../impl';
 type Node = {
   id: string;
   title: string;
-  slug: string;
 };
 
 type Edge = {
@@ -16,7 +15,7 @@ type Edge = {
 
 type NavType = {
   nodes: Partial<Circle>[];
-  edges: Edge[];
+  links: Edge[];
 };
 @QueryHandler(GetCircleNavigationQuery)
 export class GetCircleNavigationQueryHandler
@@ -40,22 +39,22 @@ export class GetCircleNavigationQueryHandler
 
     for (const circle of allCircles) {
       nodes.push({
-        id: circle.id,
+        id: circle.slug,
         title: circle.name,
-        slug: circle.slug,
       });
     }
 
-    const edges = [] as Edge[];
+    const links = [] as Edge[];
     const alreadyAdded = new Set<string>();
     for (const circle of allCircles) {
       for (const parent of circle.parents) {
         if (alreadyAdded.has(`${circle.id}${parent.toString()}`)) {
           continue;
         }
-        edges.push({
-          source: circle.id,
-          target: parent.toString(),
+        const parentCircle = allCircles.find((c) => c.id === parent.toString());
+        links.push({
+          source: circle.slug,
+          target: parentCircle.slug,
         });
         alreadyAdded.add(`${circle.id}${parent.toString()}`);
       }
@@ -63,9 +62,19 @@ export class GetCircleNavigationQueryHandler
         if (alreadyAdded.has(`${child.toString()}${circle.id}`)) {
           continue;
         }
-        edges.push({
-          source: child.toString(),
-          target: circle.id,
+        let childCircle = allCircles.find((c) => c.id === child.toString());
+        if (!childCircle) {
+          childCircle = await this.circlesRepository.getCircleById(
+            child.toString(),
+          );
+          nodes.push({
+            id: childCircle.slug,
+            title: childCircle.name,
+          });
+        }
+        links.push({
+          source: childCircle.slug,
+          target: circle.slug,
         });
         alreadyAdded.add(`${child.toString()}${circle.id}`);
       }
@@ -73,7 +82,7 @@ export class GetCircleNavigationQueryHandler
 
     return {
       nodes,
-      edges,
+      links,
     };
   }
 }

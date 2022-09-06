@@ -20,8 +20,10 @@ import {
   PublicViewAuthGuard,
   SessionAuthGuard,
 } from 'src/auth/iron-session.guard';
+import { ClaimKudosDto, MintKudosDto } from 'src/common/dtos/mint-kudos.dto';
 import { ObjectIdDto } from 'src/common/dtos/object-id.dto';
 import { RequiredRoleDto, RequiredSlugDto } from 'src/common/dtos/string.dto';
+import { MintKudosService, nftTypes } from 'src/common/mint-kudos.service';
 import { ArchiveCircleByIdCommand, ClaimCircleCommand } from './commands/impl';
 import { AddSafeCommand, RemoveSafeCommand } from './commands/safe/impl';
 import { CreateCircleRequestDto } from './dto/create-circle-request.dto';
@@ -39,9 +41,7 @@ import { UpdateMemberRolesDto } from './dto/update-member-role.dto';
 import { Circle } from './model/circle.model';
 import {
   GetCircleByFilterQuery,
-  GetCircleByIdQuery,
   GetCircleNavigationQuery,
-  GetMultipleCirclesQuery,
 } from './queries/impl';
 import { CirclesRolesService } from './services/circle-roles.service';
 import { CirclesCrudService } from './services/circles-crud.service';
@@ -89,6 +89,7 @@ export class CircleV1Controller {
     private readonly circleRoleServie: CirclesRolesService,
     private readonly queryBus: QueryBus,
     private readonly commandBus: CommandBus,
+    private readonly kudosService: MintKudosService,
   ) {}
 
   @UseGuards(PublicViewAuthGuard)
@@ -306,5 +307,32 @@ export class CircleV1Controller {
     @Param() param: ObjectIdDto,
   ): Promise<DetailedCircleResponseDto> {
     return await this.queryBus.execute(new GetCircleNavigationQuery(param.id));
+  }
+
+  @SetMetadata('permissions', ['distributeCredentials'])
+  @UseGuards(CircleAuthGuard)
+  @Patch('/:id/mintKudos')
+  async mintKudos(
+    @Param() param: ObjectIdDto,
+    @Body() mintKudosDto: MintKudosDto,
+  ): Promise<object> {
+    return {
+      operationId: await this.kudosService.mintKudos(param.id, mintKudosDto),
+    };
+  }
+
+  @Patch('/:id/claimKudos')
+  async claimKudos(
+    @Param() param: ObjectIdDto,
+    @Body() claimKudosDto: ClaimKudosDto,
+  ): Promise<object> {
+    return {
+      operationId: await this.kudosService.claimKudos(param.id, claimKudosDto),
+    };
+  }
+
+  @Get('/:id/communityKudosDesigns')
+  async communityKudosDesigns(@Param() param: ObjectIdDto): Promise<nftTypes> {
+    return await this.kudosService.getCommunityKudosDesigns(param.id);
   }
 }

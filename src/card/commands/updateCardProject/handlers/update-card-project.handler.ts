@@ -85,20 +85,20 @@ export class UpdateProjectCardCommandHandler
         );
       }
 
-      if (cardWithChildren.parent) {
-        await this.commandBus.execute(
-          new RemoveItemsCommand(
-            [
-              {
-                fieldName: 'children',
-                itemIds: [cardWithChildren._id.toString()],
-              },
-            ],
-            null,
-            cardWithChildren.parent,
-          ),
-        );
-      }
+      // if (cardWithChildren.parent) {
+      //   await this.commandBus.execute(
+      //     new RemoveItemsCommand(
+      //       [
+      //         {
+      //           fieldName: 'children',
+      //           itemIds: [cardWithChildren._id.toString()],
+      //         },
+      //       ],
+      //       null,
+      //       cardWithChildren.parent,
+      //     ),
+      //   );
+      // }
 
       const activity = {
         changeLog: {},
