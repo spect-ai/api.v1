@@ -94,6 +94,13 @@ export class DetailedCardResponseDto {
   deadline?: string;
 
   /**
+   * The start date of the card
+   */
+  @IsDateString()
+  @IsOptional()
+  startDate?: string;
+
+  /**
    * The labels of the card
    */
   @IsArray()

@@ -63,6 +63,14 @@ export class ChangeDeadlineActionCommand {
   ) {}
 }
 
+export class ChangeStartDateActionCommand {
+  constructor(
+    public readonly performAutomationCommandContainer: PerformAutomationCommandContainer,
+    public readonly action: Action,
+    public readonly caller: string,
+  ) {}
+}
+
 export class CloseCardActionCommand {
   constructor(
     public readonly performAutomationCommandContainer: PerformAutomationCommandContainer,
@@ -84,6 +92,7 @@ export const actionIdToCommandMap = {
   changeColumn: ChangeColumnActionCommand,
   changePriority: ChangeSimpleFieldActionCommand,
   changeDeadline: ChangeDeadlineActionCommand,
+  changeStartDate: ChangeStartDateActionCommand,
   changeAssignee: ChangeMemberActionCommand,
   changeReviewer: ChangeMemberActionCommand,
   changeLabels: ChangeLabelActionCommand,

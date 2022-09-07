@@ -40,6 +40,13 @@ export class HasSatisfiedDeadlineConditionQuery {
   ) {}
 }
 
+export class HasSatisfiedStartDateConditionQuery {
+  constructor(
+    public readonly performAutomationCommandContainer: PerformAutomationCommandContainer,
+    public readonly condition: Condition,
+  ) {}
+}
+
 export class HasSatisfiedCardsOnSameLevelConditionQuery {
   constructor(
     public readonly performAutomationCommandContainer: PerformAutomationCommandContainer,
@@ -52,6 +59,7 @@ export const conditionIdToConditionQueryMap = {
   checkColumn: HasSatisfiedBasicConditionQuery,
   checkParent: HasSatisfiedBasicConditionQuery,
   checkDeadline: HasSatisfiedDeadlineConditionQuery,
+  checkStartDate: HasSatisfiedStartDateConditionQuery,
   checkAssignee: HasSatisfiedMemberConditionQuery,
   checkReviewer: HasSatisfiedMemberConditionQuery,
   checkLabel: HasSatisfiedBasicConditionQuery,

@@ -82,6 +82,12 @@ export class Card extends BaseModel {
    */
   @prop({ default: null })
   deadline?: string;
+
+  /**
+   * The start adte when the card is supposed to start
+   */
+  @prop({ default: null })
+  startDate?: string;
   /**
    * The labels associated with the card
    */

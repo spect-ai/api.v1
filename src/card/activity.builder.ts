@@ -22,6 +22,7 @@ import { CommonTools } from 'src/common/common.service';
 
 const fieldUpdateToActiityIdMap = {
   deadline: 'updateDeadline',
+  startDate: 'updateStartDate',
   reviewer: 'updateReviewer',
   assignee: 'updateAssignee',
   reward: 'updateReward',
@@ -120,7 +121,9 @@ export class ActivityBuilder {
   }
 
   valueIsDifferent(req: UpdateCardRequestDto, card: Card, field: string) {
-    if (['deadline', 'priority', 'type', 'columnId'].includes(field)) {
+    if (
+      ['deadline', 'startDate', 'priority', 'type', 'columnId'].includes(field)
+    ) {
       return card[field] !== req[field];
     } else if (['assignee', 'reviewer', 'labels'].includes(field)) {
       const difference = arrayDiff(card[field], req[field]);

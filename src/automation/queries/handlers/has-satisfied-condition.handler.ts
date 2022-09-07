@@ -10,6 +10,7 @@ import {
   HasSatisfiedStatusConditionQuery,
   HasSatisfiedMemberConditionQuery,
   HasSatisfiedDeadlineConditionQuery,
+  HasSatisfiedStartDateConditionQuery,
   HasSatisfiedConditionsQuery,
   conditionIdToConditionQueryMap,
   HasSatisfiedCardsOnSameLevelConditionQuery,
@@ -196,6 +197,21 @@ export class HasSatisfiedDeadlineConditionQueryHandler
 
   async execute(query: HasSatisfiedDeadlineConditionQuery): Promise<boolean> {
     console.log('HasSatisfiedDeadlineConditionQueryHandler');
+
+    const { performAutomationCommandContainer, condition } = query;
+    const { card } = performAutomationCommandContainer;
+    return true;
+  }
+}
+
+@QueryHandler(HasSatisfiedStartDateConditionQuery)
+export class HasSatisfiedStartDateConditionQueryHandler
+  implements IQueryHandler<HasSatisfiedStartDateConditionQuery>
+{
+  constructor(private readonly queryBus: QueryBus) {}
+
+  async execute(query: HasSatisfiedStartDateConditionQuery): Promise<boolean> {
+    console.log('HasSatisfiedStartDateConditionQuery');
 
     const { performAutomationCommandContainer, condition } = query;
     const { card } = performAutomationCommandContainer;

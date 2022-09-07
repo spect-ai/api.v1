@@ -24,6 +24,13 @@ export class IsDeadlineChangeTriggeredQuery {
   ) {}
 }
 
+export class IsStartDateChangeTriggeredQuery {
+  constructor(
+    public readonly performAutomationCommandContainer: PerformAutomationCommandContainer,
+    public readonly trigger: Trigger,
+  ) {}
+}
+
 export class IsMemberChangeTriggeredQuery {
   constructor(
     public readonly performAutomationCommandContainer: PerformAutomationCommandContainer,
@@ -57,6 +64,7 @@ export const triggerIdToQueryHandlerMap = {
   columnChange: IsBasicChangeTriggeredQuery,
   priorityChange: IsBasicChangeTriggeredQuery,
   deadlineChange: IsDeadlineChangeTriggeredQuery,
+  startDateChange: IsStartDateChangeTriggeredQuery,
   assigneeChange: IsMemberChangeTriggeredQuery,
   reviewerChange: IsMemberChangeTriggeredQuery,
   typeChange: IsBasicChangeTriggeredQuery,

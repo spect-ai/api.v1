@@ -119,6 +119,7 @@ export class UserFieldResolver {
           status: 1,
           priority: 1,
           deadline: 1,
+          startDate: 1,
           labels: 1,
         },
       ),
