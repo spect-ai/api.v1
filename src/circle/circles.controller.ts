@@ -37,6 +37,7 @@ import { CircleRegistryService } from './registry.circle.service';
 import { AddNewTokenDto } from 'src/registry/dto/add-new-token.dto';
 import { UpdateBlacklistDto } from './dto/update-local-registry.dto';
 import { RequiredSlugDto } from 'src/common/dtos/string.dto';
+import { CirclePermission } from 'src/common/types/role.type';
 
 @Controller('circle')
 export class CirclesController {
@@ -71,10 +72,13 @@ export class CirclesController {
     }
   }
 
-  @Get('/:circleIds/myPermissions')
+  @Get('/myPermissions')
   @UseGuards(SessionAuthGuard)
-  @ApiQuery({ name: 'circleIds', type: 'array' })
-  async getMyRoles(@Query('circleIds') circleIds: string[]): Promise<any> {
+  async getMyPermissions(
+    @Query('circleIds') circleIds: string[],
+  ): Promise<CirclePermission> {
+    console.log(circleIds);
+
     if (circleIds.length === 0) {
       throw new HttpException('No circles provided', 400);
     }

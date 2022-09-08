@@ -8,7 +8,11 @@ import { Activity } from 'src/common/types/activity.type';
 import { Project } from 'src/project/model/project.model';
 import { User } from 'src/users/model/users.model';
 import { Status } from '../../common/types/status.type';
-import { ApplicationDetails } from '../types/types';
+import {
+  ApplicationDetails,
+  KudosClaimedType,
+  KudosForType,
+} from '../types/types';
 import { WorkThreads } from '../types/types';
 
 @useMongoosePlugin()
@@ -156,6 +160,24 @@ export class Card extends BaseModel {
    */
   @prop({ ref: () => Card })
   parent?: string;
+
+  /**
+   * The parent card associated with the card
+   */
+  @prop({})
+  kudosMinted?: KudosForType;
+
+  /**
+   * The parent card associated with the card
+   */
+  @prop({})
+  eligibleToClaimKudos?: KudosClaimedType;
+
+  /**
+   * The parent card associated with the card
+   */
+  @prop({})
+  kudosClaimedBy?: KudosClaimedType;
 }
 
 export class ExtendedCard extends Card {

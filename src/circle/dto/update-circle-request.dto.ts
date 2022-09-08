@@ -78,6 +78,13 @@ export class UpdateCircleRequestDto extends OmitType(CreateCircleRequestDto, [
   @IsObject()
   @IsOptional()
   safeAddresses?: SafeAddresses;
+
+  /**
+   * A list of labels that the circle uses
+   */
+  @IsArray()
+  @IsOptional()
+  labels?: string[];
 }
 
 export class UpdateCircleGithubRepoRequestDto {

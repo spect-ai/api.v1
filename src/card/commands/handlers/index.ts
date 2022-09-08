@@ -8,6 +8,8 @@ import {
 } from '../archive/handlers/revert-archival.handler';
 import { AddItemCommandHandler } from '../items/handlers/add-items.handler';
 import { RemoveItemsCommandHandler } from '../items/handlers/remove-items.handler';
+import { AddKudosCommandHandler } from '../kudos/handlers/add-kudos.handler';
+import { RecordClaimCommandHandler } from '../kudos/handlers/record-claim.handler';
 import { UpdatePaymentCommandHandler } from '../payment/handlers/update-payment.handler';
 import { UpdateProjectCardCommandHandler } from '../updateCardProject/handlers/update-card-project.handler';
 import { CreateCardCommandHandler } from './create-card.handler';
@@ -28,4 +30,6 @@ export const CommandHandlers = [
   ArchiveMultipleCardsByIdCommandHandler,
   RevertArchivalMultipleCardsByIdCommandHandler,
   UpdateProjectCardCommandHandler,
+  AddKudosCommandHandler,
+  RecordClaimCommandHandler,
 ];
