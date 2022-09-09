@@ -77,7 +77,7 @@ export class UpdateWorkThreadCommandHandler
       cardUpdate = this.cardsService.merge(
         cardUpdate,
         multipleItemContainer.cards,
-      );
+      ) as MappedPartialItem<Card>;
       const diff = this.cardsService.getDifference(card, cardUpdate);
       const resCard = await this.commonUpdateService.executeAndReturn(
         card.id,
@@ -183,7 +183,7 @@ export class UpdateWorkUnitCommandHandler
       cardUpdate = this.cardsService.merge(
         cardUpdate,
         multipleItemContainer.cards,
-      );
+      ) as MappedPartialItem<Card>;
       const diff = this.cardsService.getDifference(card, cardUpdate);
       const resCard = await this.commonUpdateService.executeAndReturn(
         card.id,

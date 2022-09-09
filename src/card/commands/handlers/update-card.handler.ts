@@ -87,11 +87,11 @@ export class UpdateCardCommandHandler
       updatedCard = this.cardsService.merge(
         updatedCard,
         multipleItemContainer.cards,
-      );
+      ) as MappedPartialItem<Card>;
       updatedProject = this.cardsService.merge(
         updatedProject,
         multipleItemContainer.projects,
-      );
+      ) as MappedPartialItem<Project>;
       if (commit) {
         await this.commonUpdateService.execute(updatedCard, updatedProject);
         const resultingCard =
@@ -194,7 +194,7 @@ export class UpdateCardCommandHandler
   ): MappedPartialItem<Project> {
     if (
       (updateCardDto.columnId && updateCardDto.columnId !== card.columnId) ||
-      updateCardDto.cardIndex
+      typeof updateCardDto.cardIndex === 'number' // Must do it this way so we support 0 index
     ) {
       return this.cardsProjectService.reorderCard(
         project,
