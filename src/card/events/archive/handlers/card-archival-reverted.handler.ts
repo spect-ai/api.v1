@@ -25,7 +25,7 @@ export class CardArchivalRevertedEventHandler
       console.log('CardArchivalRevertedEventHandler');
       const { cards } = event;
       for (const card of cards) {
-        for (const assignee of card.assignee) {
+        for (const assignee of card.properties['assignee'].value) {
           await this.commandBus.execute(
             new AddItemsToUserCommand(
               [
@@ -39,7 +39,7 @@ export class CardArchivalRevertedEventHandler
             ),
           );
         }
-        for (const reviewer of card.reviewer) {
+        for (const reviewer of card.properties['reviewer'].value) {
           await this.commandBus.execute(
             new AddItemsToUserCommand(
               [

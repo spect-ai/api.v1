@@ -5,8 +5,6 @@ import { CircleAuthGuard } from 'src/auth/circle.guard';
 import { SessionAuthGuard } from 'src/auth/iron-session.guard';
 import { ProjectAuthGuard, ViewProjectAuthGuard } from 'src/auth/project.guard';
 import { AutomationModule } from 'src/automation/automation.module';
-import { AutomationService } from 'src/automation/automation.service';
-import { ActivityBuilder } from 'src/card/activity.builder';
 import { CirclesModule } from 'src/circle/circles.module';
 import { CommonTools } from 'src/common/common.service';
 import { DiscordService } from 'src/common/discord.service';
@@ -26,23 +24,19 @@ import { UsersModule } from 'src/users/users.module';
 import { UsersService } from 'src/users/users.service';
 import { EthAddressModule } from 'src/_eth-address/_eth-address.module';
 import { ActionService } from './actions.service';
-import { ActivityResolver } from './activity.resolver';
 import { ApplicationService } from './application.cards.service';
 import { CardsV1Controller } from './cards-v1.controller';
 import { CardsController } from './cards.controller';
 import { CardsRepository } from './cards.repository';
-import { CardsService } from './cards.service';
 import { CardsService as CardsServiceV1 } from './services/cards.service';
 import { Card } from './model/card.model';
 import { ActivityResolver as ActivityResolverV1 } from './services/activity-resolver.service';
 import { WorkService } from './work.cards.service';
 import { CardValidationService } from './validation.cards.service';
 import { CardValidationService as CardValidationServiceV1 } from './services/card-validation.service';
-import { CommonUtility, ResponseBuilder } from './response.builder';
 import { ResponseBuilder as ResponseBuilderV1 } from './services/response.service';
 import { CommentService } from './comments.cards.service';
 import { EventHandlers } from './events/handlers';
-import { CardCommandHandler } from './handlers/update.command.handler';
 import { WorkCommandHandler } from './handlers/work.command.handler';
 import { CardsPaymentService } from './payment.cards.service';
 import { QueryHandlers } from './queries/handlers';
@@ -66,7 +60,6 @@ import { ActivityBuilder as ActivityBuilderV1 } from './services/activity-builde
   ],
   controllers: [CardsController, CardsV1Controller],
   providers: [
-    CardsService,
     CardsRepository,
     SlugService,
     RequestProvider,
@@ -74,18 +67,12 @@ import { ActivityBuilder as ActivityBuilderV1 } from './services/activity-builde
     CardsProjectService,
     CommonTools,
     ActionService,
-    ActivityBuilder,
-    ActivityResolver,
     ApplicationService,
     WorkService,
     CardValidationService,
-    ResponseBuilder,
     CommentService,
     CardsPaymentService,
-    CardCommandHandler,
-    AutomationService,
     WorkCommandHandler,
-    CommonUtility,
     RolesService,
     DiscordService,
     GuildxyzService,
@@ -108,12 +95,6 @@ import { ActivityBuilder as ActivityBuilderV1 } from './services/activity-builde
     CardValidationServiceV1,
     RegistryService,
   ],
-  exports: [
-    CardsService,
-    CardsRepository,
-    CardsModule,
-    ActionService,
-    CardCommandHandler,
-  ],
+  exports: [CardsRepository, CardsModule, ActionService],
 })
 export class CardsModule {}

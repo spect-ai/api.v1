@@ -1,4 +1,4 @@
-import { Property } from 'src/card/types/types';
+import { Properties, Property } from 'src/card/types/types';
 import { Status } from 'src/common/types/status.type';
 import { Project } from '../model/project.model';
 
@@ -49,5 +49,5 @@ export type CardTemplate = {
   name: string;
   description: string;
   propertyOrder: string[];
-  properties: { [id: string]: Property };
+  properties: Properties;
 };

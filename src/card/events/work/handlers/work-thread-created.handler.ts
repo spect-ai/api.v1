@@ -19,7 +19,7 @@ export class WorkThreadCreatedEventHandler
     try {
       console.log('WorkThreadCreatedEventHandler');
       const { card, circleSlug, projectSlug, caller } = event;
-      for (const user of card.reviewer) {
+      for (const user of card.properties['reviewer'].value) {
         if (user !== caller) {
           this.eventBus.publish(
             new NotificationEvent(

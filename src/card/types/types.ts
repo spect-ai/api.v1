@@ -139,8 +139,16 @@ type ClaimabilityAttributes = {
 };
 
 export type Properties = {
-  properties?: { [id: string]: Property };
+  properties?: Map<PropertyId, Property>;
 };
+
+export type PropertyId =
+  | 'assignee'
+  | 'reviewer'
+  | 'start-date'
+  | 'deadline'
+  | 'priority'
+  | 'reward';
 
 export type Property = {
   name: string;

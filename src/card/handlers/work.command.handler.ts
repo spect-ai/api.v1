@@ -1,36 +1,21 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
-import { AutomationService } from 'src/automation/automation.service';
+import { EventBus } from '@nestjs/cqrs';
+import { CirclesRepository } from 'src/circle/circles.repository';
+import { CommonTools } from 'src/common/common.service';
 import { GlobalDocumentUpdate } from 'src/common/types/update.type';
+import { LoggingService } from 'src/logging/logging.service';
 import { ProjectsRepository } from 'src/project/project.repository';
 import { RequestProvider } from 'src/users/user.provider';
-import { DetailedCardResponseDto } from '../dto/detailed-card-response-dto';
-import {
-  CreateGithubPRDto,
-  CreateWorkThreadRequestDto,
-  CreateWorkUnitRequestDto,
-  UpdateWorkThreadRequestDto,
-  UpdateWorkUnitRequestDto,
-} from '../dto/work-request.dto';
-import { CommonUtility } from '../response.builder';
-import { WorkService } from '../work.cards.service';
 import { CardsRepository } from '../cards.repository';
-import { CommonTools } from 'src/common/common.service';
-import { EventBus } from '@nestjs/cqrs';
-import {
-  WorkThreadCreatedEvent,
-  WorkUnitCreatedEvent,
-} from '../events/work/impl';
-import { CirclesRepository } from 'src/circle/circles.repository';
-import { LoggingService } from 'src/logging/logging.service';
+import { CreateGithubPRDto } from '../dto/work-request.dto';
+import { WorkService } from '../work.cards.service';
 
 @Injectable()
 export class WorkCommandHandler {
   constructor(
     private readonly requestProvider: RequestProvider,
     private readonly projectRepository: ProjectsRepository,
-    private readonly automationService: AutomationService,
     private readonly workService: WorkService,
-    private readonly commonUtility: CommonUtility,
     private readonly cardsRepository: CardsRepository,
     private readonly commonTool: CommonTools,
     private readonly eventBus: EventBus,
@@ -62,35 +47,35 @@ export class WorkCommandHandler {
           createGithubPRDto,
         );
 
-      let globalUpdateAfterAutomation: GlobalDocumentUpdate = {
-        card: {},
-        project: {},
-      };
-      for (const [cardId, cardUpdate] of Object.entries(cardUpdates)) {
-        const update = this.automationService.handleAutomation(
-          objectifiedCards[cardId],
-          project,
-          cardUpdate,
-          this.requestProvider.user.id,
-        );
+      // let globalUpdateAfterAutomation: GlobalDocumentUpdate = {
+      //   card: {},
+      //   project: {},
+      // };
+      // for (const [cardId, cardUpdate] of Object.entries(cardUpdates)) {
+      //   const update = this.automationService.handleAutomation(
+      //     objectifiedCards[cardId],
+      //     project,
+      //     cardUpdate,
+      //     this.requestProvider.user.id,
+      //   );
 
-        globalUpdateAfterAutomation = {
-          ...globalUpdateAfterAutomation,
-          ...update,
-        };
-      }
-      const updates = await this.commonTool.mergeObjects(
-        globalUpdateAfterAutomation.card,
+      //   globalUpdateAfterAutomation = {
+      //     ...globalUpdateAfterAutomation,
+      //     ...update,
+      //   };
+      // }
+      // const updates = await this.commonTool.mergeObjects(
+      //   globalUpdateAfterAutomation.card,
+      //   cardUpdates,
+      // );
+      const acknowledgment = await this.cardsRepository.bundleUpdatesAndExecute(
         cardUpdates,
       );
-      const acknowledgment = await this.cardsRepository.bundleUpdatesAndExecute(
-        updates,
-      );
 
-      const projectAcknowledgment =
-        await this.projectRepository.bundleUpdatesAndExecute(
-          globalUpdateAfterAutomation.project,
-        );
+      // const projectAcknowledgment =
+      //   await this.projectRepository.bundleUpdatesAndExecute(
+      //     globalUpdateAfterAutomation.project,
+      //   );
       if (acknowledgment.hasWriteErrors()) {
         console.log(acknowledgment.getWriteErrors());
         throw new InternalServerErrorException('Failed creating work thread');

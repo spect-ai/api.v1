@@ -88,6 +88,7 @@ export class UpdateCardCommandHandler
         updatedCard,
         multipleItemContainer.cards,
       ) as MappedPartialItem<Card>;
+      console.log(updatedCard);
       updatedProject = this.cardsService.merge(
         updatedProject,
         multipleItemContainer.projects,

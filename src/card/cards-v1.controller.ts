@@ -49,7 +49,7 @@ import {
   RequiredThreadIdDto,
   RequiredWorkUnitIdDto,
 } from 'src/common/dtos/string.dto';
-import { ResponseBuilder } from './response.builder';
+import { ResponseBuilder } from './services/response.service';
 import {
   MultiCardCloseWithSlugDto,
   RecordClaimInfoDto,

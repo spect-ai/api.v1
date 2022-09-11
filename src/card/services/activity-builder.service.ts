@@ -214,7 +214,7 @@ export class ActivityBuilder {
 
   buildPickApplicationUpdate(caller: string, card: Card, applicants: string[]) {
     const newCardActivity = {} as Activity;
-    const difference = arrayDiff(card.assignee, applicants);
+    const difference = arrayDiff(card.properties['assignee'].value, applicants);
     if (difference.added.length === 0 && difference.removed.length === 0)
       return;
 
@@ -222,7 +222,7 @@ export class ActivityBuilder {
 
     newCardActivity.changeLog = {
       prev: {
-        assignee: card.assignee,
+        assignee: card.properties['assignee'].value,
       },
       next: {
         assignee: applicants,

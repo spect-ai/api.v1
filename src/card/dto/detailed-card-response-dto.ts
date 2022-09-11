@@ -14,6 +14,7 @@ import { Project } from 'src/project/model/project.model';
 import {
   ApplicationDetails,
   ApplicationUnit,
+  Properties,
   WorkThreads,
 } from '../types/types';
 
@@ -149,4 +150,18 @@ export class DetailedCardResponseDto {
    */
   @IsObject()
   workThreads?: WorkThreads;
+
+  /**
+   * The card's properties
+   */
+  @IsArray()
+  @IsOptional()
+  propertyOrder?: string[];
+
+  /**
+   * The card's properties
+   */
+  @IsObject()
+  @IsOptional()
+  properties?: Properties;
 }

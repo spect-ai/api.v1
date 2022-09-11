@@ -7,16 +7,15 @@ import { AddItemsCommand } from 'src/users/commands/impl';
 import { UserSubmittedApplication } from 'src/users/types/types';
 import { RequestProvider } from 'src/users/user.provider';
 import { v4 as uuidv4 } from 'uuid';
-import { ActivityBuilder } from './activity.builder';
+import { ActivityBuilder } from './services/activity-builder.service';
 import { CardsRepository } from './cards.repository';
-import { CardsService } from './cards.service';
 import {
   CreateApplicationDto,
   UpdateApplicationDto,
 } from './dto/application.dto';
 import { DetailedCardResponseDto } from './dto/detailed-card-response-dto';
 import { ApplicationPickedEvent } from './events/impl';
-import { ResponseBuilder } from './response.builder';
+import { ResponseBuilder } from './services/response.service';
 import { CardValidationService } from './validation.cards.service';
 import { LoggingService } from 'src/logging/logging.service';
 
@@ -25,7 +24,6 @@ export class ApplicationService {
   constructor(
     private readonly requestProvider: RequestProvider,
     private readonly cardsRepository: CardsRepository,
-    private readonly cardsService: CardsService,
     private readonly circleService: CirclesService,
     private readonly projectRepository: ProjectsRepository,
     private readonly circleRepository: CirclesRepository,
@@ -83,6 +81,7 @@ export class ApplicationService {
         },
       };
       const activity = this.activityBuilder.buildApplicationActivity(
+        this.requestProvider.user.id,
         card,
         'create',
         createApplicationDto,
@@ -138,6 +137,7 @@ export class ApplicationService {
       this.validationService.validateCallerIsOwner(card, applicationId);
 
       const activity = this.activityBuilder.buildApplicationActivity(
+        this.requestProvider.user.id,
         card,
         'update',
         updateApplicationDto,
@@ -182,6 +182,7 @@ export class ApplicationService {
       this.validationService.validateCallerIsOwner(card, applicationId);
 
       const activity = this.activityBuilder.buildApplicationActivity(
+        this.requestProvider.user.id,
         card,
         'delete',
         null,
@@ -232,6 +233,7 @@ export class ApplicationService {
         card.application[applicationId].status = 'picked';
       }
       const activity = this.activityBuilder.buildPickApplicationUpdate(
+        this.requestProvider.user.id,
         card,
         applicants,
       );

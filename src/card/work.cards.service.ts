@@ -1,7 +1,7 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { RequestProvider } from 'src/users/user.provider';
 import { v4 as uuidv4 } from 'uuid';
-import { ActivityBuilder } from './activity.builder';
+import { ActivityBuilder } from './services/activity-builder.service';
 import {
   CreateGithubPRDto,
   CreateWorkThreadRequestDto,
@@ -75,6 +75,7 @@ export class WorkService {
       const workThreadOrder = [...card.workThreadOrder, threadId];
 
       const activity = this.activityBuilder.buildCreateWorkActivity(
+        this.requestProvider.user.id,
         'createWorkUnit',
         createWorkThread.name,
         createWorkThread.content,
@@ -90,147 +91,6 @@ export class WorkService {
     } catch (error) {
       throw new InternalServerErrorException(
         'Failed creating work thread',
-        error.message,
-      );
-    }
-  }
-
-  async updateWorkThread(
-    card: Card,
-    threadId: string,
-    updateWorkThread: UpdateWorkThreadRequestDto,
-  ): Promise<MappedCard> {
-    try {
-      const workThreads = {
-        ...card.workThreads,
-        [threadId]: {
-          ...card.workThreads[threadId],
-          name: updateWorkThread.name || card.workThreads[threadId].name,
-          active: updateWorkThread.active || card.workThreads[threadId].active,
-          status: updateWorkThread.status || card.workThreads[threadId].status,
-          updatedAt: new Date(),
-        },
-      };
-      const activity = this.activityBuilder.buildUpdateWorkThreadActivity(
-        card,
-        threadId,
-        updateWorkThread,
-      );
-
-      return {
-        [card.id]: {
-          workThreads: workThreads,
-          activity: activity ? [...card.activity, activity] : card.activity,
-        },
-      };
-    } catch (error) {
-      throw new InternalServerErrorException(
-        'Failed updating work thread',
-        error.message,
-      );
-    }
-  }
-
-  async createWorkUnit(
-    card: Card,
-    threadId: string,
-    createWorkUnit: CreateWorkUnitRequestDto,
-  ): Promise<MappedCard> {
-    try {
-      const workUnitId = uuidv4();
-      const workUnits = {
-        ...card.workThreads[threadId].workUnits,
-        [workUnitId]: {
-          unitId: workUnitId,
-          user: this.requestProvider.user.id,
-          content: createWorkUnit.content || '',
-          workUnitId,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-          type: createWorkUnit.type,
-          pr: createWorkUnit.pr,
-        },
-      };
-      const workThreads = {
-        ...card.workThreads,
-        [threadId]: {
-          ...card.workThreads[threadId],
-          workUnitOrder: [
-            ...card.workThreads[threadId].workUnitOrder,
-            workUnitId,
-          ],
-          status: createWorkUnit.status || card.workThreads[threadId].status,
-          workUnits: workUnits,
-          updatedAt: new Date(),
-        },
-      };
-      const activity = this.activityBuilder.buildCreateWorkActivity(
-        'createWorkUnit',
-        card.workThreads[threadId].name,
-        createWorkUnit.content,
-        createWorkUnit.type,
-      );
-
-      return {
-        [card.id]: {
-          workThreads: workThreads,
-          activity: activity ? [...card.activity, activity] : card.activity,
-        },
-      };
-    } catch (error) {
-      throw new InternalServerErrorException(
-        'Failed creating work unit',
-        error.message,
-      );
-    }
-  }
-
-  async updateWorkUnit(
-    card: Card,
-    threadId: string,
-    workUnitId: string,
-    updateWorkUnit: UpdateWorkUnitRequestDto,
-  ): Promise<MappedCard> {
-    try {
-      card.workThreads[threadId].workUnits[workUnitId] = {
-        ...card.workThreads[threadId].workUnits[workUnitId],
-        content:
-          updateWorkUnit.content ||
-          card.workThreads[threadId].workUnits[workUnitId].content ||
-          '',
-        type:
-          updateWorkUnit.type ||
-          card.workThreads[threadId].workUnits[workUnitId].type,
-        pr:
-          updateWorkUnit.pr ||
-          card.workThreads[threadId].workUnits[workUnitId].pr,
-        updatedAt: new Date(),
-      };
-
-      const workThreads = {
-        ...card.workThreads,
-        [threadId]: {
-          ...card.workThreads[threadId],
-          status: updateWorkUnit.status || card.workThreads[threadId].status,
-          updatedAt: new Date(),
-        },
-      };
-
-      const activity = this.activityBuilder.buildUpdateWorkUnitActivity(
-        card,
-        threadId,
-        workUnitId,
-        updateWorkUnit,
-      );
-      return {
-        [card.id]: {
-          workThreads: workThreads,
-          activity: activity ? [...card.activity, activity] : card.activity,
-        },
-      };
-    } catch (error) {
-      throw new InternalServerErrorException(
-        'Failed updating work unit',
         error.message,
       );
     }

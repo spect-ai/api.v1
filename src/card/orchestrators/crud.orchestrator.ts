@@ -24,7 +24,7 @@ import {
 import { CardCreatedEvent, CardUpdatedEvent } from '../events/impl';
 import { Card } from '../model/card.model';
 import { GetCardByFilterQuery, GetCardByIdQuery } from '../queries/impl';
-import { ResponseBuilder } from '../response.builder';
+import { ResponseBuilder } from '../services/response.service';
 import { CardValidationService } from '../services/card-validation.service';
 import { UpdateProjectCardCommand } from '../commands/updateCardProject/impl/update-card-project.command';
 import { UpdateCardRequestDto } from '../dto/update-card-request.dto';

@@ -26,7 +26,7 @@ export class WorkUnitCreatedEventHandler
         caller,
         workThreadId,
       } = event;
-      for (const user of card.reviewer) {
+      for (const user of card.properties['reviewer'].value) {
         if (user !== caller && createWorkUnitRequestDto.type === 'submission') {
           this.eventBus.publish(
             new NotificationEvent(
@@ -57,15 +57,6 @@ export class WorkUnitCreatedEventHandler
           ),
         );
       }
-      // this.eventBus.publish(
-      //   new UserActivityEvent('create', 'card', card as Card, [], card.creator, {
-      //     added: {
-      //       title: card.title,
-      //     },
-      //     deleted: {},
-      //     updated: {},
-      //   }),
-      // );
     } catch (error) {
       this.logger.error(`${error.message}`);
     }

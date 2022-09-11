@@ -1,5 +1,5 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
-import { ActivityBuilder } from 'src/card/activity.builder';
+import { ActivityBuilder } from 'src/card/services/activity-builder.service';
 import { CommonTools } from 'src/common/common.service';
 import { CardsRepository } from './cards.repository';
 import { AggregatedFlattenedPaymentInfo } from './dto/payment-info-response.dto';
@@ -93,7 +93,7 @@ export class CardsPaymentService {
        */
       const paymentInfo = {};
       for (const card of cards) {
-        const assignees = card.assignee;
+        const assignees = card.properties['assignee'].value;
         const reward = card.reward;
         if (reward.value > 0 && assignees.length > 0) {
           const rewardValues = this.getDividedRewards(reward.value, assignees);
@@ -146,6 +146,7 @@ export class CardsPaymentService {
     updatePaymentInfoDto: UpdatePaymentInfoDto,
   ): MappedCard {
     const activities = this.activityBuilder.buildUpdatedCardActivity(
+      this.requestProvider.user.id,
       {
         status: {
           active: false,

@@ -54,13 +54,11 @@ import {
   UpdateApplicationDto,
 } from './dto/application.dto';
 import { UpdateApplicationParamDto } from './dto/param.dto';
-import { CardsService } from './cards.service';
 import { ApplicationService } from './application.cards.service';
 import { ActionService } from './actions.service';
 import { WorkService } from './work.cards.service';
 import { CommentService } from './comments.cards.service';
 import { CardsPaymentService } from './payment.cards.service';
-import { CardCommandHandler } from './handlers/update.command.handler';
 import { WorkCommandHandler } from './handlers/work.command.handler';
 import {
   RequiredCommitIdDto,
@@ -73,36 +71,12 @@ import {
 @ApiTags('card')
 export class CardsController {
   constructor(
-    private readonly cardsService: CardsService,
     private readonly actionService: ActionService,
     private readonly applicationService: ApplicationService,
     private readonly commentService: CommentService,
     private readonly paymentService: CardsPaymentService,
-    private readonly cardCommandHandler: CardCommandHandler,
     private readonly workCommandHandler: WorkCommandHandler,
   ) {}
-
-  @UseGuards(PublicViewAuthGuard)
-  @Get('/byProjectSlugAndCardSlug/:projectSlug/:cardSlug')
-  async findByProjectSlugAndCardSlug(
-    @Param() params: GetByProjectSlugAndCardSlugDto,
-  ): Promise<DetailedCardResponseDto> {
-    return await this.cardsService.getDetailedCardByProjectSlugAndCardSlug(
-      params.projectSlug,
-      params.cardSlug,
-    );
-  }
-
-  @UseGuards(PublicViewAuthGuard)
-  @Get('/byProjectAndSlug/:project/:slug')
-  async findByProjectIdAndCardSlug(
-    @Param() params: GetByProjectAndSlugDto,
-  ): Promise<DetailedCardResponseDto> {
-    return await this.cardsService.getDetailedCardByProjectIdAndCardSlug(
-      params.project,
-      params.slug,
-    );
-  }
 
   @Get('/aggregatedPaymentInfo')
   @ApiQuery({ name: 'cardIds', type: 'array' })
@@ -151,13 +125,6 @@ export class CardsController {
       params.projectSlug,
       params.cardSlug,
     );
-  }
-
-  @Get('/:id')
-  async findByObjectId(
-    @Param() params: ObjectIdDto,
-  ): Promise<DetailedCardResponseDto> {
-    return await this.cardsService.getDetailedCard(params.id);
   }
 
   @ApiParam({ name: 'id', type: 'string' })

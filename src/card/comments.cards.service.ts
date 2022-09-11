@@ -5,7 +5,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { CardsRepository } from './cards.repository';
 import { AddCommentDto, UpdateCommentDto } from './dto/comment-body.dto';
 import { DetailedCardResponseDto } from './dto/detailed-card-response-dto';
-import { ResponseBuilder } from './response.builder';
+import { ResponseBuilder } from './services/response.service';
 import { CardValidationService } from './validation.cards.service';
 import { LoggingService } from 'src/logging/logging.service';
 import { EventBus } from '@nestjs/cqrs';
