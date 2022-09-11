@@ -1,4 +1,5 @@
 import { ObjectId } from 'mongoose';
+import { Payment } from 'src/common/models/payment.model';
 import { PopulatedProjectFields } from 'src/project/types/types';
 import { Card } from '../model/card.model';
 
@@ -135,4 +136,44 @@ type ClaimabilityAttributes = {
   totalClaimCount: number;
   remainingClaimCount?: number;
   expirationTimestamp?: number;
+};
+
+export type Properties = {
+  properties?: { [id: string]: Property };
+};
+
+export type Property = {
+  name: string;
+  type: PropertyType;
+  value: any;
+  default?: any;
+  conditions?: Conditions;
+  options?: Option[];
+};
+
+export type PropertyType =
+  | 'shortText'
+  | 'longText'
+  | 'number'
+  | 'user[]'
+  | 'user'
+  | 'reward'
+  | 'date'
+  | 'singleSelect'
+  | 'multiSelect'
+  | 'ethAddress';
+
+export type Conditions = DateConditions;
+
+export type DateConditions = {
+  propertyId: string;
+  condition: Condition;
+  feedback: string;
+};
+
+export type Condition = 'greaterThanOrEqualTo' | 'lessThanOrEqualTo';
+
+export type Option = {
+  label: string;
+  value: string | number;
 };

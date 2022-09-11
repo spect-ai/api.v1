@@ -24,6 +24,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { CreateCardCommand } from '../impl';
 import { RegistryService } from 'src/registry/registry.service';
 import { Payment } from 'src/common/models/payment.model';
+import { Project } from 'src/project/model/project.model';
 @CommandHandler(CreateCardCommand)
 export class CreateCardCommandHandler
   implements ICommandHandler<CreateCardCommand>
@@ -43,6 +44,7 @@ export class CreateCardCommandHandler
   }> {
     try {
       const { createCardDto, circle, caller, parentCard } = command;
+      console.log(createCardDto);
       let project = command.project;
       const cardNum =
         project.cardCount ||
@@ -65,7 +67,7 @@ export class CreateCardCommandHandler
         createCardDto,
         createdCard,
         circle,
-        project.slug,
+        project,
         cardNum + 1,
         caller,
       );
@@ -168,7 +170,7 @@ export class CreateCardCommandHandler
     createCardDto: CreateCardRequestDto,
     parentCard: Card,
     circle: Circle,
-    projectSlug: string,
+    project: Project,
     startSlugNum: number,
     caller: string,
   ): Promise<Card[]> {
@@ -189,7 +191,9 @@ export class CreateCardCommandHandler
         parent: parentCard.id,
         columnId: null, // Child cards dont have a column
         activity: [activity],
-        slug: `${projectSlug}-${slugNum.toString()}`,
+        slug: `${project.slug}-${slugNum.toString()}`,
+        properties: project.cardTemplates[createCardDto.type].properties,
+        propertyOrder: project.cardTemplates[createCardDto.type].propertyOrder,
       });
       slugNum++;
     }

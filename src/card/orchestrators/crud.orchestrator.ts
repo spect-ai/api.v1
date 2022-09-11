@@ -59,7 +59,10 @@ export class CrudOrchestrator {
           project: project.id,
         }),
       );
-      return await this.responseBuilder.enrichResponse(card);
+
+      // TODODO: Check if this is uniform
+      const res = await this.responseBuilder.enrichResponse(card);
+      return res;
     } catch (error) {
       this.logger.logError(
         `Failed card retrieval by slug with error: ${error.message}`,

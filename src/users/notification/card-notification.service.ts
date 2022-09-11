@@ -13,10 +13,10 @@ export class CardNotificationService {
     actor: string,
   ): { content: string; ref: Reference } {
     switch (actionType) {
-      case 'create':
-        return this.createCardNotification(recipient, card, actor);
-      case 'update':
-        return this.updateCardNotification(recipient, card, diff, actor);
+      // case 'create':
+      //   return this.createCardNotification(recipient, card, actor);
+      // case 'update':
+      //   return this.updateCardNotification(recipient, card, diff, actor);
       case 'submission':
         return this.submitWorkNotification(card, actor);
       case 'revision':
@@ -32,81 +32,81 @@ export class CardNotificationService {
     }
   }
 
-  createCardNotification(
-    user: string,
-    card: Card,
-    actor: string,
-  ): { content: string; ref: Reference } {
-    const isAssignee = card.assignee.includes(user);
-    const isReviewer = card.reviewer.includes(user);
-    if (isAssignee && isReviewer) {
-      return {
-        content: `[actor] added you to ${card.title} as assignee and reviewer`,
-        ref: { users: { actor } },
-      };
-    }
-    if (isAssignee) {
-      return {
-        content: `[actor] assigned you to ${card.title}`,
-        ref: { users: { actor } },
-      };
-    }
-    if (isReviewer) {
-      return {
-        content: `[actor] added you to ${card.title} as reviewer`,
-        ref: { users: { actor } },
-      };
-    }
-  }
+  // createCardNotification(
+  //   user: string,
+  //   card: Card,
+  //   actor: string,
+  // ): { content: string; ref: Reference } {
+  //   const isAssignee = card.assignee.includes(user);
+  //   const isReviewer = card.reviewer.includes(user);
+  //   if (isAssignee && isReviewer) {
+  //     return {
+  //       content: `[actor] added you to ${card.title} as assignee and reviewer`,
+  //       ref: { users: { actor } },
+  //     };
+  //   }
+  //   if (isAssignee) {
+  //     return {
+  //       content: `[actor] assigned you to ${card.title}`,
+  //       ref: { users: { actor } },
+  //     };
+  //   }
+  //   if (isReviewer) {
+  //     return {
+  //       content: `[actor] added you to ${card.title} as reviewer`,
+  //       ref: { users: { actor } },
+  //     };
+  //   }
+  // }
 
-  updateCardNotification(
-    user: string,
-    card: Card,
-    diff: Diff<Card>,
-    actor: string,
-  ): { content: string; ref: Reference } {
-    const isNewlyAssigned = diff.added?.assignee?.includes(user);
-    const isNewlyAddedAsReviewer = diff.added?.reviewer?.includes(user);
-    if (isNewlyAssigned && isNewlyAddedAsReviewer) {
-      return {
-        content: `[actor] added you to ${card.title} as assignee and reviewer`,
-        ref: { users: { actor } },
-      };
-    }
-    if (isNewlyAssigned) {
-      return {
-        content: `[actor] assigned you to ${card.title}`,
-        ref: { users: { actor } },
-      };
-    }
-    if (isNewlyAddedAsReviewer) {
-      return {
-        content: `[actor] added you to ${card.title} as reviewer`,
-        ref: { users: { actor } },
-      };
-    }
+  // updateCardNotification(
+  //   user: string,
+  //   card: Card,
+  //   diff: Diff<Card>,
+  //   actor: string,
+  // ): { content: string; ref: Reference } {
+  //   const isNewlyAssigned = diff.added?.assignee?.includes(user);
+  //   const isNewlyAddedAsReviewer = diff.added?.reviewer?.includes(user);
+  //   if (isNewlyAssigned && isNewlyAddedAsReviewer) {
+  //     return {
+  //       content: `[actor] added you to ${card.title} as assignee and reviewer`,
+  //       ref: { users: { actor } },
+  //     };
+  //   }
+  //   if (isNewlyAssigned) {
+  //     return {
+  //       content: `[actor] assigned you to ${card.title}`,
+  //       ref: { users: { actor } },
+  //     };
+  //   }
+  //   if (isNewlyAddedAsReviewer) {
+  //     return {
+  //       content: `[actor] added you to ${card.title} as reviewer`,
+  //       ref: { users: { actor } },
+  //     };
+  //   }
 
-    const isNewlyRemovedAsAssignee = diff.deleted?.assignee?.includes(user);
-    const isNewlyRemovedAsReviewer = diff.deleted?.reviewer?.includes(user);
-    if (isNewlyRemovedAsAssignee && isNewlyRemovedAsReviewer) {
-      return {
-        content: `[actor] removed you from ${card.title} as assignee and reviewer`,
-        ref: { users: { actor } },
-      };
-    }
-    if (isNewlyRemovedAsAssignee) {
-      return {
-        content: `[actor] unassigned you from ${card.title}`,
-        ref: { users: { actor } },
-      };
-    }
-    if (isNewlyRemovedAsReviewer) {
-      return {
-        content: `[actor] removed you from ${card.title} as reviewer`,
-        ref: { users: { actor } },
-      };
-    }
-  }
+  //   const isNewlyRemovedAsAssignee = diff.deleted?.assignee?.includes(user);
+  //   const isNewlyRemovedAsReviewer = diff.deleted?.reviewer?.includes(user);
+  //   if (isNewlyRemovedAsAssignee && isNewlyRemovedAsReviewer) {
+  //     return {
+  //       content: `[actor] removed you from ${card.title} as assignee and reviewer`,
+  //       ref: { users: { actor } },
+  //     };
+  //   }
+  //   if (isNewlyRemovedAsAssignee) {
+  //     return {
+  //       content: `[actor] unassigned you from ${card.title}`,
+  //       ref: { users: { actor } },
+  //     };
+  //   }
+  //   if (isNewlyRemovedAsReviewer) {
+  //     return {
+  //       content: `[actor] removed you from ${card.title} as reviewer`,
+  //       ref: { users: { actor } },
+  //     };
+  //   }
+  // }
 
   submitWorkNotification(
     card: Card,

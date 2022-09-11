@@ -9,6 +9,7 @@ import {
 } from 'class-validator';
 import { IsObjectId } from 'class-validator-mongo-object-id';
 import { Payment } from 'src/common/models/payment.model';
+import { Properties, Property } from '../types/types';
 
 export class CreateCardRequestDto {
   /**
@@ -106,6 +107,20 @@ export class CreateCardRequestDto {
   @IsObjectId()
   @IsOptional()
   parent?: string;
+
+  /**
+   * The card's properties
+   */
+  @IsArray()
+  @IsOptional()
+  propertyOrder?: string[];
+
+  /**
+   * The card's properties
+   */
+  @IsObject()
+  @IsOptional()
+  properties?: Properties;
 
   /**
    * The card's children

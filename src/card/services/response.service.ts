@@ -29,7 +29,7 @@ export class ResponseBuilder {
         applicationOrder: [],
       };
     else if (!card.application) return card;
-    else if (!card.reviewer?.includes(caller)) {
+    else if (!card.properties['reviewer']?.includes(caller)) {
       for (const [applicationId, application] of Object.entries(
         card.application,
       )) {

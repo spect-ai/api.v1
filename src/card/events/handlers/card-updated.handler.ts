@@ -33,38 +33,38 @@ export class CardUpdatedEventHandler
     try {
       console.log('CardUpdatedEventHandler');
       const { card, diff, circleSlug, projectSlug, caller } = event;
-      const users = [
-        ...(diff.added?.assignee || []),
-        ...(diff.added?.reviewer || []),
-        ...(diff.deleted?.assignee || []),
-        ...(diff.deleted?.reviewer || []),
-      ];
-      this.addCardsToUser(
-        card as Card,
-        diff.added?.assignee || [],
-        'assignedCards',
-      );
-      this.addCardsToUser(
-        card as Card,
-        diff.added?.reviewer || [],
-        'reviewingCards',
-      );
-      this.removeCardsFromUser(
-        card as Card,
-        diff.deleted?.assignee || [],
-        'assignedCards',
-      );
-      this.removeCardsFromUser(
-        card as Card,
-        diff.deleted?.reviewer || [],
-        'reviewingCards',
-      );
+      // const users = [
+      //   ...(diff.added?.assignee || []),
+      //   ...(diff.added?.reviewer || []),
+      //   ...(diff.deleted?.assignee || []),
+      //   ...(diff.deleted?.reviewer || []),
+      // ];
+      // this.addCardsToUser(
+      //   card as Card,
+      //   diff.added?.assignee || [],
+      //   'assignedCards',
+      // );
+      // this.addCardsToUser(
+      //   card as Card,
+      //   diff.added?.reviewer || [],
+      //   'reviewingCards',
+      // );
+      // this.removeCardsFromUser(
+      //   card as Card,
+      //   diff.deleted?.assignee || [],
+      //   'assignedCards',
+      // );
+      // this.removeCardsFromUser(
+      //   card as Card,
+      //   diff.deleted?.reviewer || [],
+      //   'reviewingCards',
+      // );
 
-      this.moveApplications(card as Card, diff);
+      // this.moveApplications(card as Card, diff);
 
-      this.notifyUsers(users, card as Card, circleSlug, projectSlug, diff);
-      this.processClosedCard(card as Card, diff);
-      this.processReopenedCard(card as Card, diff);
+      // this.notifyUsers(users, card as Card, circleSlug, projectSlug, diff);
+      // this.processClosedCard(card as Card, diff);
+      // this.processReopenedCard(card as Card, diff);
     } catch (error) {
       this.logger.error(`${error.message}`);
     }
@@ -112,36 +112,36 @@ export class CardUpdatedEventHandler
     }
   }
 
-  moveApplications(card: Card, diff: Diff<Card>) {
-    if (card.type === 'Bounty') {
-      if (diff.added?.assignee) {
-        for (const userId of diff.added?.assignee) {
-          this.commandBus.execute(
-            new MoveItemCommand(
-              'activeApplications',
-              'pickedApplications',
-              card.id,
-              null,
-              userId,
-            ),
-          );
-        }
-      }
-      if (diff.deleted?.assignee) {
-        for (const userId of diff.deleted?.assignee) {
-          this.commandBus.execute(
-            new MoveItemCommand(
-              'pickedApplications',
-              'activeApplications',
-              card.id,
-              null,
-              userId,
-            ),
-          );
-        }
-      }
-    }
-  }
+  // moveApplications(card: Card, diff: Diff<Card>) {
+  //   if (card.type === 'Bounty') {
+  //     if (diff.added?.assignee) {
+  //       for (const userId of diff.added?.assignee) {
+  //         this.commandBus.execute(
+  //           new MoveItemCommand(
+  //             'activeApplications',
+  //             'pickedApplications',
+  //             card.id,
+  //             null,
+  //             userId,
+  //           ),
+  //         );
+  //       }
+  //     }
+  //     if (diff.deleted?.assignee) {
+  //       for (const userId of diff.deleted?.assignee) {
+  //         this.commandBus.execute(
+  //           new MoveItemCommand(
+  //             'pickedApplications',
+  //             'activeApplications',
+  //             card.id,
+  //             null,
+  //             userId,
+  //           ),
+  //         );
+  //       }
+  //     }
+  //   }
+  // }
 
   notifyUsers(
     users: string[],
@@ -167,57 +167,57 @@ export class CardUpdatedEventHandler
     }
   }
 
-  processClosedCard(card: Card, diff: Diff<Card>) {
-    if (diff.updated.status?.active === false) {
-      for (const userId of card.assignee) {
-        this.commandBus.execute(
-          new MoveItemCommand(
-            'assignedCards',
-            'assignedClosedCards',
-            card.id,
-            null,
-            userId,
-          ),
-        );
-      }
-      for (const userId of card.reviewer) {
-        this.commandBus.execute(
-          new MoveItemCommand(
-            'reviewingCards',
-            'reviewingClosedCards',
-            card.id,
-            null,
-            userId,
-          ),
-        );
-      }
-    }
-  }
+  // processClosedCard(card: Card, diff: Diff<Card>) {
+  //   if (diff.updated.status?.active === false) {
+  //     for (const userId of card.assignee) {
+  //       this.commandBus.execute(
+  //         new MoveItemCommand(
+  //           'assignedCards',
+  //           'assignedClosedCards',
+  //           card.id,
+  //           null,
+  //           userId,
+  //         ),
+  //       );
+  //     }
+  //     for (const userId of card.reviewer) {
+  //       this.commandBus.execute(
+  //         new MoveItemCommand(
+  //           'reviewingCards',
+  //           'reviewingClosedCards',
+  //           card.id,
+  //           null,
+  //           userId,
+  //         ),
+  //       );
+  //     }
+  //   }
+  // }
 
-  processReopenedCard(card: Card, diff: Diff<Card>) {
-    if (diff.updated.status?.active === true) {
-      for (const userId of card.assignee) {
-        this.commandBus.execute(
-          new MoveItemCommand(
-            'assignedClosedCards',
-            'assignedCards',
-            card.id,
-            null,
-            userId,
-          ),
-        );
-      }
-      for (const userId of card.reviewer) {
-        this.commandBus.execute(
-          new MoveItemCommand(
-            'reviewingClosedCards',
-            'reviewingCards',
-            card.id,
-            null,
-            userId,
-          ),
-        );
-      }
-    }
-  }
+  // processReopenedCard(card: Card, diff: Diff<Card>) {
+  //   if (diff.updated.status?.active === true) {
+  //     for (const userId of card.assignee) {
+  //       this.commandBus.execute(
+  //         new MoveItemCommand(
+  //           'assignedClosedCards',
+  //           'assignedCards',
+  //           card.id,
+  //           null,
+  //           userId,
+  //         ),
+  //       );
+  //     }
+  //     for (const userId of card.reviewer) {
+  //       this.commandBus.execute(
+  //         new MoveItemCommand(
+  //           'reviewingClosedCards',
+  //           'reviewingCards',
+  //           card.id,
+  //           null,
+  //           userId,
+  //         ),
+  //       );
+  //     }
+  //   }
+  // }
 }

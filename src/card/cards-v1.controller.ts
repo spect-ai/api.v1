@@ -90,6 +90,7 @@ export class CardsV1Controller {
   async findByProjectSlugAndCardSlug(
     @Param() params: GetByProjectSlugAndCardSlugDto,
   ): Promise<DetailedCardResponseDto> {
+    console.log('here');
     return await this.crudOrchestrator.get(params.projectSlug, params.cardSlug);
   }
 

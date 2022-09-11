@@ -12,6 +12,8 @@ import {
   ApplicationDetails,
   KudosClaimedType,
   KudosForType,
+  Properties,
+  Property,
 } from '../types/types';
 import { WorkThreads } from '../types/types';
 
@@ -41,17 +43,17 @@ export class Card extends BaseModel {
   @prop()
   creator: string;
 
-  /**
-   * The ids of all the reviewers of the card
-   */
-  @prop({ ref: () => User, type: Schema.Types.String, default: [] })
-  reviewer?: string[];
+  // /**
+  //  * The ids of all the reviewers of the card
+  //  */
+  // @prop({ ref: () => User, type: Schema.Types.String, default: [] })
+  // reviewer?: string[];
 
-  /**
-   * The ids of all the assignees of the card
-   */
-  @prop({ ref: () => User, type: Schema.Types.String, default: [] })
-  assignee?: string[];
+  // /**
+  //  * The ids of all the assignees of the card
+  //  */
+  // @prop({ ref: () => User, type: Schema.Types.String, default: [] })
+  // assignee?: string[];
 
   /**
    * The project that the card belongs to
@@ -77,17 +79,17 @@ export class Card extends BaseModel {
   @prop({ default: 'Task' })
   type: 'Task' | 'Bounty';
 
-  /**
-   * The deadline the card is due to be completed by
-   */
-  @prop({ default: null })
-  deadline?: string;
+  // /**
+  //  * The deadline the card is due to be completed by
+  //  */
+  // @prop({ default: null })
+  // deadline?: string;
 
-  /**
-   * The start adte when the card is supposed to start
-   */
-  @prop({ default: null })
-  startDate?: string;
+  // /**
+  //  * The start adte when the card is supposed to start
+  //  */
+  // @prop({ default: null })
+  // startDate?: string;
   /**
    * The labels associated with the card
    */
@@ -99,12 +101,6 @@ export class Card extends BaseModel {
    */
   @prop({ default: 0 })
   priority?: number;
-
-  /**
-   * The votes given to the card
-   */
-  @prop()
-  votes?: number;
 
   /**
    * The column that the card belongs to
@@ -184,6 +180,15 @@ export class Card extends BaseModel {
    */
   @prop({})
   kudosClaimedBy?: KudosClaimedType;
+
+  /**
+   * The properties of the card
+   */
+  @prop({ default: [] })
+  propertyOrder: string[];
+
+  @prop({ default: {} })
+  properties?: Properties;
 }
 
 export class ExtendedCard extends Card {

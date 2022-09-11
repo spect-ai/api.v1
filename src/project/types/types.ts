@@ -1,3 +1,4 @@
+import { Property } from 'src/card/types/types';
 import { Status } from 'src/common/types/status.type';
 import { Project } from '../model/project.model';
 
@@ -42,4 +43,11 @@ export type PopulatedProjectFields = {
 export type FlattendedArrayFieldItems = {
   fieldName: 'parents';
   itemIds: string[];
+};
+
+export type CardTemplate = {
+  name: string;
+  description: string;
+  propertyOrder: string[];
+  properties: { [id: string]: Property };
 };

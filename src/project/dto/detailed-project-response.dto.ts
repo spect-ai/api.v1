@@ -10,7 +10,7 @@ import {
 import { Automation } from 'src/automation/types/types';
 import { MappedItem } from 'src/common/interfaces';
 import { MappedAutomation } from 'src/template/models/template.model';
-import { View } from '../types/types';
+import { CardTemplate, View } from '../types/types';
 
 export type MinimalCard = {
   id: string;
@@ -123,4 +123,12 @@ export class DetailedProjectResponseDto {
   @IsObject()
   @IsOptional()
   viewDetails: MappedItem<View>;
+
+  @IsArray()
+  @IsOptional()
+  cardTemplateOrder: string[];
+
+  @IsObject()
+  @IsOptional()
+  cardTemplates: { [id: string]: CardTemplate };
 }

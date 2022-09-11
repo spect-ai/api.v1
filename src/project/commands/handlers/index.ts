@@ -14,6 +14,7 @@ import {
   UpdateProjectCardNumByIdCommandHandler,
 } from './update-project.handler';
 import { CreateAutomationCommandHandler } from '../automation/handlers/create-automation.handler';
+import { CreateCardTemplateCommandHandler } from '../templates/handlers/create-template.handler';
 
 export const CommandHandlers = [
   AddCardsCommandHandler,
@@ -26,4 +27,5 @@ export const CommandHandlers = [
   CreateAutomationCommandHandler,
   UpdateProjectByIdCommandHandler,
   UpdateProjectCardNumByIdCommandHandler,
+  CreateCardTemplateCommandHandler,
 ];

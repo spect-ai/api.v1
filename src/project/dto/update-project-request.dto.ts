@@ -6,6 +6,7 @@ import {
   IsOptional,
   IsString,
 } from 'class-validator';
+import { Property } from 'src/card/types/types';
 import { Filter, View } from '../types/types';
 
 export class UpdateProjectRequestDto {
@@ -112,4 +113,22 @@ export class UpdateViewDto {
   @IsString()
   @IsOptional()
   name?: string;
+}
+
+export class CreateCardTemplateDto {
+  /**
+   * Name of the template
+   */
+  @IsString()
+  name: string;
+
+  @IsString()
+  @IsOptional()
+  description?: string;
+
+  @IsArray()
+  propertyOrder?: string[];
+
+  @IsObject()
+  properties?: { [id: string]: Property };
 }

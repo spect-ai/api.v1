@@ -26,7 +26,9 @@ import {
   ArchiveProjectCommand,
   RevertArchivedProjectCommand,
 } from './commands/impl';
+import { CreateCardTemplateCommand } from './commands/templates/impl/create-template.command';
 import { DetailedProjectResponseDto } from './dto/detailed-project-response.dto';
+import { CreateCardTemplateDto } from './dto/update-project-request.dto';
 import { CrudOrchestrator } from './orchestrators/crud-orchestrator.service';
 import {
   GetDetailedProjectByIdQuery,
@@ -113,6 +115,18 @@ export class ProjectV1Controller {
   ): Promise<DetailedProjectResponseDto> {
     return await this.commandBus.execute(
       new RevertArchivedProjectCommand(param.id),
+    );
+  }
+
+  @SetMetadata('permissions', ['manageProjectSettings'])
+  @UseGuards(ProjectAuthGuard)
+  @Patch('/:id/createCardTemplate')
+  async createCardTemplate(
+    @Param() param: ObjectIdDto,
+    @Body() createCardTemplateDto: CreateCardTemplateDto,
+  ): Promise<boolean> {
+    return await this.commandBus.execute(
+      new CreateCardTemplateCommand(param.id, createCardTemplateDto),
     );
   }
 }

@@ -66,6 +66,8 @@ const defaultPopulate: PopulatedCardFields = {
     deadline: 1,
     startDate: 1,
     slug: 1,
+    properties: 1,
+    propertyOrder: 1,
   },
   project: {
     name: 1,
