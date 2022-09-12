@@ -47,7 +47,9 @@ export type FlattendedArrayFieldItems = {
 
 export type CardTemplate = {
   name: string;
-  description: string;
+  description?: string;
   propertyOrder: string[];
   properties: Properties;
 };
+
+export type CardTemplates = { [id: string]: CardTemplate };

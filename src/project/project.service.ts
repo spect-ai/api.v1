@@ -87,66 +87,6 @@ export class ProjectService {
     return project;
   }
 
-  async create(createProjectDto: CreateProjectRequestDto): Promise<Project> {
-    try {
-      const slug = await this.slugService.generateUniqueSlug(
-        createProjectDto.name,
-        this.projectRepository,
-      );
-
-      let parentCircle: Circle;
-      if (createProjectDto.circleId) {
-        parentCircle =
-          await this.circlesRepository.getCircleWithUnpopulatedReferences(
-            createProjectDto.circleId,
-          );
-      }
-
-      if (createProjectDto.fromTemplateId) {
-        const template = await this.templateRepository.getTemplate(
-          createProjectDto.fromTemplateId,
-        );
-        const data = template.projectData;
-        if (
-          Object.keys(data).length > 0 &&
-          'columnOrder' in data &&
-          'columnDetails' in data
-        ) {
-          createProjectDto.columnOrder = data.columnOrder;
-          createProjectDto.columnDetails =
-            data?.columnDetails as ColumnDetailsDto;
-          createProjectDto.automations = data?.automations as MappedAutomation;
-          createProjectDto.automationOrder = data?.automationOrder;
-        }
-      }
-
-      const createdProject = await this.projectRepository.create({
-        ...createProjectDto,
-        slug: slug,
-        parents: [parentCircle.id],
-      });
-      if (parentCircle?.id) {
-        await this.circlesRepository.updateById(parentCircle.id as string, {
-          ...parentCircle,
-          projects: [...parentCircle.projects, createdProject],
-        });
-      }
-      this.eventBus.publish(
-        new CreatedProjectEvent(createdProject, this.requestProvider.user?.id),
-      );
-      return createdProject;
-    } catch (error) {
-      this.logger.logError(
-        `Failed project creation with error: ${error.message}`,
-        this.requestProvider,
-      );
-      throw new InternalServerErrorException(
-        'Failed project creation',
-        error.message,
-      );
-    }
-  }
-
   async update(
     id: string,
     updateProjectDto: UpdateProjectRequestDto,

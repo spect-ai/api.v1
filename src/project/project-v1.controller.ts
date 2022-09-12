@@ -4,12 +4,19 @@ import {
   Get,
   Param,
   Patch,
+  Post,
   Query,
+  Req,
+  Request,
   SetMetadata,
   UseGuards,
 } from '@nestjs/common';
 import { QueryBus, CommandBus } from '@nestjs/cqrs';
-import { ProjectAuthGuard, ViewProjectAuthGuard } from 'src/auth/project.guard';
+import {
+  CreateNewProjectAuthGuard,
+  ProjectAuthGuard,
+  ViewProjectAuthGuard,
+} from 'src/auth/project.guard';
 import {
   CreateAutomationDto,
   UpdateAutomationDto,
@@ -24,11 +31,14 @@ import { RemoveAutomationCommand } from './commands/automation/impl/remove-autom
 import { UpdateAutomationCommand } from './commands/automation/impl/update-automation.command';
 import {
   ArchiveProjectCommand,
+  CreateProjectCommand,
   RevertArchivedProjectCommand,
 } from './commands/impl';
 import { CreateCardTemplateCommand } from './commands/templates/impl/create-template.command';
+import { CreateProjectRequestDto } from './dto/create-project-request.dto';
 import { DetailedProjectResponseDto } from './dto/detailed-project-response.dto';
 import { CreateCardTemplateDto } from './dto/update-project-request.dto';
+import { Project } from './model/project.model';
 import { CrudOrchestrator } from './orchestrators/crud-orchestrator.service';
 import {
   GetDetailedProjectByIdQuery,
@@ -62,6 +72,18 @@ export class ProjectV1Controller {
   ): Promise<DetailedProjectResponseDto> {
     return await this.queryBus.execute(
       new GetDetailedProjectBySlugQuery(param.slug),
+    );
+  }
+
+  @SetMetadata('permissions', ['createNewProject'])
+  @UseGuards(CreateNewProjectAuthGuard)
+  @Post('/')
+  async create(
+    @Body() createProjectRequestDto: CreateProjectRequestDto,
+    @Request() req,
+  ): Promise<Project> {
+    return await this.commandBus.execute(
+      new CreateProjectCommand(req.user.id, createProjectRequestDto),
     );
   }
 

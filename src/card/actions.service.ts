@@ -350,7 +350,7 @@ export class ActionService {
     circlePermissions: CirclePermission,
     userId: string,
   ) {
-    return {
+    const res = {
       createCard: this.canCreateCard(circlePermissions, card.type),
       updateGeneralCardInfo: this.canUpdateGeneralInfo(
         card,
@@ -376,6 +376,8 @@ export class ActionService {
       duplicate: this.canDuplicate(card, circlePermissions),
       createDiscordThread: this.canCreateDiscordThread(card),
     };
+    console.log(res);
+    return res;
   }
 
   async getValidActions(

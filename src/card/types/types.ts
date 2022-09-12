@@ -148,7 +148,13 @@ export type PropertyId =
   | 'start-date'
   | 'deadline'
   | 'priority'
-  | 'reward';
+  | 'reward'
+  | 'grantee'
+  | 'programLiaison'
+  | 'approvedOn'
+  | 'completedOn'
+  | 'grantStatus'
+  | 'link-to-application';
 
 export type Property = {
   name: string;

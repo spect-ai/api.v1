@@ -8,6 +8,7 @@ import {
   IsOptional,
   IsString,
 } from 'class-validator';
+import { ObjectId } from 'mongoose';
 import {
   DiscordToCircleRoles,
   GuildxyzToCircleRoles,
@@ -103,6 +104,13 @@ export class UpdateCircleRequestDto extends OmitType(CreateCircleRequestDto, [
   @IsArray()
   @IsOptional()
   labels?: string[];
+
+  /**
+   * A list of labels that the circle uses
+   */
+  @IsArray()
+  @IsOptional()
+  projects?: ObjectId[];
 }
 
 export class UpdateCircleGithubRepoRequestDto {

@@ -48,13 +48,6 @@ export class ProjectController {
     return await this.projectService.getDetailedProjectBySlug(param.slug);
   }
 
-  @SetMetadata('permissions', ['createNewProject'])
-  @UseGuards(CreateNewProjectAuthGuard)
-  @Post('/')
-  async create(@Body() project: CreateProjectRequestDto): Promise<Project> {
-    return await this.projectService.create(project);
-  }
-
   @SetMetadata('permissions', ['manageProjectSettings'])
   @UseGuards(ProjectAuthGuard)
   @Patch('/:id')
