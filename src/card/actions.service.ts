@@ -55,11 +55,13 @@ export class ActionService {
     circlePermissions: CirclePermission,
     userId: string,
   ) {
+    console.log(card.properties['reviewer']);
+
     if (
-      (card.properties['reviewer'] &&
-        card.properties['reviewer'].includes(userId)) ||
       (circlePermissions.manageCardProperties &&
-        circlePermissions.manageCardProperties[card.type])
+        circlePermissions.manageCardProperties[card.type]) ||
+      (!(card.type in circlePermissions.manageCardProperties) &&
+        circlePermissions.manageCardProperties['Task'])
     )
       return { valid: true };
     else
@@ -81,12 +83,10 @@ export class ActionService {
         reason: 'Card has been closed already',
       };
     if (
-      (card.properties['reviewer'] &&
-        card.properties['reviewer'].includes(userId)) ||
-      (card.properties['assignee'] &&
-        card.properties['assignee'].includes(userId)) ||
       (circlePermissions.manageCardProperties &&
-        circlePermissions.manageCardProperties[card.type])
+        circlePermissions.manageCardProperties[card.type]) ||
+      (!(card.type in circlePermissions.manageCardProperties) &&
+        circlePermissions.manageCardProperties['Task'])
     )
       return { valid: true };
     else
@@ -108,12 +108,10 @@ export class ActionService {
         reason: 'Card has been closed already',
       };
     if (
-      (card.properties['reviewer'] &&
-        card.properties['reviewer'].includes(userId)) ||
-      (card.properties['assignee'] &&
-        card.properties['assignee'].includes(userId)) ||
       (circlePermissions.manageCardProperties &&
-        circlePermissions.manageCardProperties[card.type])
+        circlePermissions.manageCardProperties[card.type]) ||
+      (!(card.type in circlePermissions.manageCardProperties) &&
+        circlePermissions.manageCardProperties['Task'])
     )
       return { valid: true };
     else
@@ -130,12 +128,10 @@ export class ActionService {
     userId: string,
   ) {
     if (
-      (card.properties['reviewer'] &&
-        card.properties['reviewer'].includes(userId)) ||
-      (card.properties['assignee'] &&
-        card.properties['assignee'].includes(userId)) ||
       (circlePermissions.manageCardProperties &&
-        circlePermissions.manageCardProperties[card.type])
+        circlePermissions.manageCardProperties[card.type]) ||
+      (!(card.type in circlePermissions.manageCardProperties) &&
+        circlePermissions.manageCardProperties['Task'])
     )
       return { valid: true };
     else
@@ -158,10 +154,10 @@ export class ActionService {
       };
     if (card.type === 'Bounty') {
       if (
-        (card.properties['reviewer'] &&
-          card.properties['reviewer'].includes(userId)) ||
         (circlePermissions.manageCardProperties &&
-          circlePermissions.manageCardProperties[card.type])
+          circlePermissions.manageCardProperties[card.type]) ||
+        (!(card.type in circlePermissions.manageCardProperties) &&
+          circlePermissions.manageCardProperties['Task'])
       )
         return { valid: true };
       else
@@ -172,12 +168,10 @@ export class ActionService {
         };
     } else if (card.type === 'Task') {
       if (
-        (card.properties['reviewer'] &&
-          card.properties['reviewer'].includes(userId)) ||
-        (card.properties['assignee'] &&
-          card.properties['assignee'].includes(userId)) ||
         (circlePermissions.manageCardProperties &&
-          circlePermissions.manageCardProperties[card.type])
+          circlePermissions.manageCardProperties[card.type]) ||
+        (!(card.type in circlePermissions.manageCardProperties) &&
+          circlePermissions.manageCardProperties['Task'])
       )
         return { valid: true };
       else
@@ -222,7 +216,11 @@ export class ActionService {
   }
 
   canSubmit(card: Card, userId: string) {
-    if (card.properties['assignee']?.includes(userId)) return { valid: true };
+    if (
+      card.properties['assignee'] &&
+      card.properties['assignee']?.includes(userId)
+    )
+      return { valid: true };
     else
       return {
         valid: false,
@@ -277,7 +275,9 @@ export class ActionService {
       ((card.properties['reviewer'] &&
         card.properties['reviewer'].includes(userId)) ||
         (circlePermissions.manageCardProperties &&
-          circlePermissions.manageCardProperties[card.type]))
+          circlePermissions.manageCardProperties[card.type]) ||
+        (!(card.type in circlePermissions.manageCardProperties) &&
+          circlePermissions.manageCardProperties['Task']))
     )
       return { valid: true };
     else
@@ -310,7 +310,9 @@ export class ActionService {
       (card.properties['reviewer'] &&
         card.properties['reviewer'].includes(userId)) ||
       (circlePermissions.manageCardProperties &&
-        circlePermissions.manageCardProperties[card.type])
+        circlePermissions.manageCardProperties[card.type]) ||
+      (!(card.type in circlePermissions.manageCardProperties) &&
+        circlePermissions.manageCardProperties['Task'])
     )
       return { valid: true };
     else
@@ -375,7 +377,6 @@ export class ActionService {
       duplicate: this.canDuplicate(card, circlePermissions),
       createDiscordThread: this.canCreateDiscordThread(card),
     };
-    console.log(res);
     return res;
   }
 
