@@ -90,12 +90,19 @@ export class CreateProjectCommandHandler
         [predefinedBountyTemplate.name]: predefinedBountyTemplate,
         [predefinedGrantTemplate.name]: predefinedGrantTemplate,
       };
+
+      const properties = {
+        ...predefinedTaskTemplate.properties,
+        ...predefinedBountyTemplate.properties,
+        ...predefinedGrantTemplate.properties,
+      };
       const createdProject = await this.projectRepository.create({
         ...createProjectDto,
         slug: slug,
         parents: [parentCircle.id],
         cardTemplateOrder,
         cardTemplates,
+        properties,
       });
       if (parentCircle?.id) {
         await this.commandBus.execute(

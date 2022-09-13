@@ -26,8 +26,8 @@ export class CardCreatedEventHandler
     try {
       console.log('CardCreatedEventHandler');
       const { card, circleSlug, projectSlug } = event;
-      const stakeholders = card.properties['assignee'].value.concat(
-        card.properties['reviewer'].value,
+      const stakeholders = card.properties['assignee'].concat(
+        card.properties['reviewer'],
       );
       for (const userId of stakeholders) {
         if (userId !== card.creator) {
@@ -45,7 +45,7 @@ export class CardCreatedEventHandler
         }
       }
 
-      for (const userId of card.properties['assignee'].value) {
+      for (const userId of card.properties['assignee']) {
         this.commandBus.execute(
           new AddItemsCommand(
             [
@@ -59,7 +59,7 @@ export class CardCreatedEventHandler
           ),
         );
       }
-      for (const userId of card.properties['reviewer'].value) {
+      for (const userId of card.properties['reviewer']) {
         this.commandBus.execute(
           new AddItemsCommand(
             [

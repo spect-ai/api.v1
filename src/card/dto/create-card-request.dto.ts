@@ -9,7 +9,7 @@ import {
 } from 'class-validator';
 import { IsObjectId } from 'class-validator-mongo-object-id';
 import { Payment } from 'src/common/models/payment.model';
-import { Properties, Property } from '../types/types';
+import { PropertyId } from 'src/project/types/types';
 
 export class CreateCardRequestDto {
   /**
@@ -120,7 +120,7 @@ export class CreateCardRequestDto {
    */
   @IsObject()
   @IsOptional()
-  properties?: Properties;
+  properties?: Map<PropertyId, any>;
 
   /**
    * The card's children

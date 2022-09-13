@@ -11,10 +11,10 @@ import { Payment } from 'src/common/models/payment.model';
 import { Status } from 'src/common/types/status.type';
 import { DetailedProjectResponseDto } from 'src/project/dto/detailed-project-response.dto';
 import { Project } from 'src/project/model/project.model';
+import { PropertyId } from 'src/project/types/types';
 import {
   ApplicationDetails,
   ApplicationUnit,
-  Properties,
   WorkThreads,
 } from '../types/types';
 
@@ -163,5 +163,5 @@ export class DetailedCardResponseDto {
    */
   @IsObject()
   @IsOptional()
-  properties?: Properties;
+  properties?: Map<PropertyId, any>;
 }

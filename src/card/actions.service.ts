@@ -56,8 +56,8 @@ export class ActionService {
     userId: string,
   ) {
     if (
-      (card.properties['reviewer'].value &&
-        card.properties['reviewer'].value.includes(userId)) ||
+      (card.properties['reviewer'] &&
+        card.properties['reviewer'].includes(userId)) ||
       (circlePermissions.manageCardProperties &&
         circlePermissions.manageCardProperties[card.type])
     )
@@ -81,10 +81,10 @@ export class ActionService {
         reason: 'Card has been closed already',
       };
     if (
-      (card.properties['reviewer'].value &&
-        card.properties['reviewer'].value.includes(userId)) ||
-      (card.properties['assignee'].value &&
-        card.properties['assignee'].value.includes(userId)) ||
+      (card.properties['reviewer'] &&
+        card.properties['reviewer'].includes(userId)) ||
+      (card.properties['assignee'] &&
+        card.properties['assignee'].includes(userId)) ||
       (circlePermissions.manageCardProperties &&
         circlePermissions.manageCardProperties[card.type])
     )
@@ -108,10 +108,10 @@ export class ActionService {
         reason: 'Card has been closed already',
       };
     if (
-      (card.properties['reviewer'].value &&
-        card.properties['reviewer'].value.includes(userId)) ||
-      (card.properties['assignee'].value &&
-        card.properties['assignee'].value.includes(userId)) ||
+      (card.properties['reviewer'] &&
+        card.properties['reviewer'].includes(userId)) ||
+      (card.properties['assignee'] &&
+        card.properties['assignee'].includes(userId)) ||
       (circlePermissions.manageCardProperties &&
         circlePermissions.manageCardProperties[card.type])
     )
@@ -130,10 +130,10 @@ export class ActionService {
     userId: string,
   ) {
     if (
-      (card.properties['reviewer'].value &&
-        card.properties['reviewer'].value.includes(userId)) ||
-      (card.properties['assignee'].value &&
-        card.properties['assignee'].value.includes(userId)) ||
+      (card.properties['reviewer'] &&
+        card.properties['reviewer'].includes(userId)) ||
+      (card.properties['assignee'] &&
+        card.properties['assignee'].includes(userId)) ||
       (circlePermissions.manageCardProperties &&
         circlePermissions.manageCardProperties[card.type])
     )
@@ -158,8 +158,8 @@ export class ActionService {
       };
     if (card.type === 'Bounty') {
       if (
-        (card.properties['reviewer'].value &&
-          card.properties['reviewer'].value.includes(userId)) ||
+        (card.properties['reviewer'] &&
+          card.properties['reviewer'].includes(userId)) ||
         (circlePermissions.manageCardProperties &&
           circlePermissions.manageCardProperties[card.type])
       )
@@ -172,10 +172,10 @@ export class ActionService {
         };
     } else if (card.type === 'Task') {
       if (
-        (card.properties['reviewer'].value &&
-          card.properties['reviewer'].value.includes(userId)) ||
-        (card.properties['assignee'].value &&
-          card.properties['assignee'].value.includes(userId)) ||
+        (card.properties['reviewer'] &&
+          card.properties['reviewer'].includes(userId)) ||
+        (card.properties['assignee'] &&
+          card.properties['assignee'].includes(userId)) ||
         (circlePermissions.manageCardProperties &&
           circlePermissions.manageCardProperties[card.type])
       )
@@ -192,7 +192,7 @@ export class ActionService {
   canClaim(card: Card, circlePermissions: CirclePermission, userId: string) {
     if (
       card.status.active &&
-      card.properties['assignee'].value?.length === 0 &&
+      card.properties['assignee']?.length === 0 &&
       circlePermissions.canClaim &&
       circlePermissions.canClaim[card.type]
     ) {
@@ -208,9 +208,9 @@ export class ActionService {
   canApply(card: Card, userId: string) {
     if (
       card.type === 'Bounty' &&
-      card.properties['assignee'].value?.length === 0 &&
+      card.properties['assignee']?.length === 0 &&
       card.status.active &&
-      !card.properties['reviewer'].value?.includes(userId)
+      !card.properties['reviewer']?.includes(userId)
     )
       return { valid: true };
     else
@@ -222,8 +222,7 @@ export class ActionService {
   }
 
   canSubmit(card: Card, userId: string) {
-    if (card.properties['assignee'].value?.includes(userId))
-      return { valid: true };
+    if (card.properties['assignee']?.includes(userId)) return { valid: true };
     else
       return {
         valid: false,
@@ -242,7 +241,7 @@ export class ActionService {
         reason: 'Card has been closed already',
       };
     if (
-      card.properties['reviewer'].value?.includes(userId) ||
+      card.properties['reviewer']?.includes(userId) ||
       (circlePermissions.reviewWork && circlePermissions.reviewWork[card.type])
     )
       return { valid: true };
@@ -260,7 +259,7 @@ export class ActionService {
     userId: string,
   ) {
     if (
-      card.properties['reviewer'].value?.includes(userId) ||
+      card.properties['reviewer']?.includes(userId) ||
       (circlePermissions.reviewWork && circlePermissions.reviewWork[card.type])
     )
       return { valid: true };
@@ -275,8 +274,8 @@ export class ActionService {
   canClose(card: Card, circlePermissions: CirclePermission, userId: string) {
     if (
       card.status.active &&
-      ((card.properties['reviewer'].value &&
-        card.properties['reviewer'].value.includes(userId)) ||
+      ((card.properties['reviewer'] &&
+        card.properties['reviewer'].includes(userId)) ||
         (circlePermissions.manageCardProperties &&
           circlePermissions.manageCardProperties[card.type]))
     )
@@ -292,7 +291,7 @@ export class ActionService {
   canPay(card: Card, circlePermissions: CirclePermission) {
     if (
       circlePermissions.makePayment &&
-      card.properties['assignee'].value?.length > 0 &&
+      card.properties['assignee']?.length > 0 &&
       !card.status.paid &&
       card.reward?.value &&
       card.reward?.value > 0
@@ -308,8 +307,8 @@ export class ActionService {
 
   canArchive(card: Card, circlePermissions: CirclePermission, userId: string) {
     if (
-      (card.properties['reviewer'].value &&
-        card.properties['reviewer'].value.includes(userId)) ||
+      (card.properties['reviewer'] &&
+        card.properties['reviewer'].includes(userId)) ||
       (circlePermissions.manageCardProperties &&
         circlePermissions.manageCardProperties[card.type])
     )
@@ -461,7 +460,7 @@ export class ActionService {
     );
     const circlePermissions =
       await this.circleService.getCollatedUserPermissions(
-        (card.project as DetailedProjectResponseDto).parents,
+        project.parents,
         userId,
       );
     return this.validActions(card as Card, circlePermissions, userId);

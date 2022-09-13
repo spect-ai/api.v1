@@ -93,7 +93,7 @@ export class CardsPaymentService {
        */
       const paymentInfo = {};
       for (const card of cards) {
-        const assignees = card.properties['assignee'].value;
+        const assignees = card.properties['assignee'];
         const reward = card.reward;
         if (reward.value > 0 && assignees.length > 0) {
           const rewardValues = this.getDividedRewards(reward.value, assignees);

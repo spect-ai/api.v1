@@ -1,4 +1,3 @@
-import { Properties, Property } from 'src/card/types/types';
 import { Status } from 'src/common/types/status.type';
 import { Project } from '../model/project.model';
 
@@ -53,3 +52,57 @@ export type CardTemplate = {
 };
 
 export type CardTemplates = { [id: string]: CardTemplate };
+
+export type Properties = {
+  properties?: Map<PropertyId, Property>;
+};
+
+export type PropertyId =
+  | 'assignee'
+  | 'reviewer'
+  | 'start-date'
+  | 'deadline'
+  | 'priority'
+  | 'reward'
+  | 'grantee'
+  | 'programLiaison'
+  | 'approvedOn'
+  | 'completedOn'
+  | 'grantStatus'
+  | 'link-to-application';
+
+export type Property = {
+  name: string;
+  type: PropertyType;
+  value: any;
+  default?: any;
+  conditions?: Conditions;
+  options?: Option[];
+};
+
+export type PropertyType =
+  | 'shortText'
+  | 'longText'
+  | 'number'
+  | 'user[]'
+  | 'user'
+  | 'reward'
+  | 'date'
+  | 'singleSelect'
+  | 'multiSelect'
+  | 'ethAddress';
+
+export type Conditions = DateConditions;
+
+export type DateConditions = {
+  propertyId: string;
+  condition: Condition;
+  feedback: string;
+};
+
+export type Condition = 'greaterThanOrEqualTo' | 'lessThanOrEqualTo';
+
+export type Option = {
+  label: string;
+  value: string | number;
+};

@@ -25,7 +25,7 @@ export class CardsArchivedEventHandler
       console.log('CardsArchivedEventHandler');
       const { cards } = event;
       for (const card of cards) {
-        for (const assignee of card.properties['assignee'].value) {
+        for (const assignee of card.properties['assignee']) {
           await this.commandBus.execute(
             new RemoveItemsFromUserCommand(
               [
@@ -39,7 +39,7 @@ export class CardsArchivedEventHandler
             ),
           );
         }
-        for (const reviewer of card.properties['reviewer'].value) {
+        for (const reviewer of card.properties['reviewer']) {
           await this.commandBus.execute(
             new RemoveItemsFromUserCommand(
               [

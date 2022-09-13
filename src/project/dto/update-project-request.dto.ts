@@ -6,8 +6,7 @@ import {
   IsOptional,
   IsString,
 } from 'class-validator';
-import { Property } from 'src/card/types/types';
-import { Filter, View } from '../types/types';
+import { Filter, Property, View } from '../types/types';
 
 export class UpdateProjectRequestDto {
   /**

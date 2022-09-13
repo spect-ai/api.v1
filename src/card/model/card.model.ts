@@ -6,14 +6,13 @@ import { Circle } from 'src/circle/model/circle.model';
 import { Payment } from 'src/common/models/payment.model';
 import { Activity } from 'src/common/types/activity.type';
 import { Project } from 'src/project/model/project.model';
+import { PropertyId } from 'src/project/types/types';
 import { User } from 'src/users/model/users.model';
 import { Status } from '../../common/types/status.type';
 import {
   ApplicationDetails,
   KudosClaimedType,
   KudosForType,
-  Properties,
-  Property,
 } from '../types/types';
 import { WorkThreads } from '../types/types';
 
@@ -188,7 +187,7 @@ export class Card extends BaseModel {
   propertyOrder: string[];
 
   @prop({ default: {} })
-  properties?: Properties;
+  properties?: Map<PropertyId, any>;
 }
 
 export class ExtendedCard extends Card {

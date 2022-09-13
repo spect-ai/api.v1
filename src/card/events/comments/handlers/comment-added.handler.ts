@@ -28,8 +28,8 @@ export class CommentAddedEventHandler
       console.log('CommentAddedEventHandler');
       const { card, comment, caller } = event;
       let notifRecepients = [
-        ...(card.properties['assignee'].value || []),
-        ...(card.properties['reviewer'].value || []),
+        ...(card.properties['assignee'] || []),
+        ...(card.properties['reviewer'] || []),
       ];
       notifRecepients = [...new Set(notifRecepients)];
       for (const recepient of notifRecepients) {

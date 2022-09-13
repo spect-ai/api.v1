@@ -26,7 +26,7 @@ export class WorkUnitCreatedEventHandler
         caller,
         workThreadId,
       } = event;
-      for (const user of card.properties['reviewer'].value) {
+      for (const user of card.properties['reviewer']) {
         if (user !== caller && createWorkUnitRequestDto.type === 'submission') {
           this.eventBus.publish(
             new NotificationEvent(

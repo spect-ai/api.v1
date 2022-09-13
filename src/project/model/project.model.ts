@@ -8,7 +8,7 @@ import { Circle } from 'src/circle/model/circle.model';
 import { MappedItem } from 'src/common/interfaces';
 import { Status } from 'src/common/types/status.type';
 import { ColumnDetailsDto } from '../dto/column-details.dto';
-import { CardTemplate, CardTemplates, View } from '../types/types';
+import { CardTemplate, CardTemplates, Properties, View } from '../types/types';
 
 @useMongoosePlugin()
 export class Project extends BaseModel {
@@ -130,4 +130,7 @@ export class Project extends BaseModel {
 
   @prop({ default: {} })
   cardTemplates: CardTemplates;
+
+  @prop({ default: {} })
+  properties: Properties;
 }

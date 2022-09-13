@@ -65,12 +65,12 @@ export class ActivityBuilder {
     for (const [field, value] of Object.entries(req)) {
       if (
         fieldUpdateToActiityIdMap.hasOwnProperty(field) &&
-        this.valueIsDifferent(req, card, field)
+        this.valueIsDifferent(req, card, field, value)
       ) {
         let changeLog;
         if (field === 'columnId') {
           changeLog = this.buildColumnUpdateChange(req, card, field, project);
-        } else changeLog = this.buildUpdateChangeLog(req, card, field);
+        } else changeLog = this.buildUpdateChangeLog(req, card, field, value);
         newActivities.push({
           activityId: fieldUpdateToActiityIdMap[field],
           changeLog: changeLog,
@@ -89,13 +89,14 @@ export class ActivityBuilder {
     req: UpdateCardRequestDto,
     card: Card,
     field: string,
+    value: any,
   ) {
     return {
       prev: {
         [field]: card[field],
       },
       next: {
-        [field]: req[field],
+        [field]: value,
       },
     };
   }
@@ -116,26 +117,20 @@ export class ActivityBuilder {
     };
   }
 
-  valueIsDifferent(req: UpdateCardRequestDto, card: Card, field: string) {
-    if (
-      ['deadline', 'startDate', 'priority', 'type', 'columnId'].includes(field)
-    ) {
-      return card[field] !== req[field];
-    } else if (['assignee', 'reviewer', 'labels'].includes(field)) {
-      const difference = arrayDiff(card[field], req[field]);
+  valueIsDifferent(
+    req: UpdateCardRequestDto,
+    card: Card,
+    field: string,
+    value: any,
+  ) {
+    if (['type', 'columnId'].includes(field)) {
+      return card[field] !== value;
+    } else if (['labels'].includes(field)) {
+      const difference = arrayDiff(card[field], value);
       return difference.added?.length !== 0 || difference.removed?.length !== 0;
     } else if (['status'].includes(field)) {
-      const difference = objectDiff(card[field], req[field]);
+      const difference = objectDiff(card[field], value);
       return Object.keys(difference)?.length > 0;
-    } else if (['reward'].includes(field)) {
-      const difference = objectDiff(card[field], req[field]);
-
-      return (
-        Object.keys(difference).includes('value') ||
-        ((Object.keys(difference).includes('chain') ||
-          Object.keys(difference).includes('token')) &&
-          card[field].value > 0)
-      );
     } else return false;
   }
 
@@ -214,7 +209,7 @@ export class ActivityBuilder {
 
   buildPickApplicationUpdate(caller: string, card: Card, applicants: string[]) {
     const newCardActivity = {} as Activity;
-    const difference = arrayDiff(card.properties['assignee'].value, applicants);
+    const difference = arrayDiff(card.properties['assignee'], applicants);
     if (difference.added.length === 0 && difference.removed.length === 0)
       return;
 
@@ -222,7 +217,7 @@ export class ActivityBuilder {
 
     newCardActivity.changeLog = {
       prev: {
-        assignee: card.properties['assignee'].value,
+        assignee: card.properties['assignee'],
       },
       next: {
         assignee: applicants,
