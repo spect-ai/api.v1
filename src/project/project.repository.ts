@@ -43,6 +43,7 @@ const defaultPopulate: PopulatedProjectFields = {
     creator: 1,
     status: 1,
     parent: 1,
+    properties: 1,
   },
 };
 
