@@ -59,7 +59,6 @@ export class CreateCardCommandHandler
       );
       /** Commit to db */
       const createdCard = await this.cardsRepository.create(newCard);
-
       /** Get the added sub card objects */
       const newChildCards = await this.getCreatedChildCards(
         createCardDto,
@@ -101,7 +100,7 @@ export class CreateCardCommandHandler
         project = await this.commandBus.execute(
           new AddCardsCommand(
             [createdCard],
-            project,
+            undefined,
             project.id,
             cardNum + 1 + newChildCards.length, // set last card number by adding current number with 1 (created card) + number of child cards
           ),
