@@ -6,8 +6,6 @@ import { Circle } from 'src/circle/model/circle.model';
 import { Payment } from 'src/common/models/payment.model';
 import { Activity } from 'src/common/types/activity.type';
 import { Project } from 'src/project/model/project.model';
-import { PropertyId } from 'src/project/types/types';
-import { User } from 'src/users/model/users.model';
 import { Status } from '../../common/types/status.type';
 import {
   ApplicationDetails,
@@ -187,7 +185,7 @@ export class Card extends BaseModel {
   propertyOrder: string[];
 
   @prop({ default: {} })
-  properties?: Map<PropertyId, any>;
+  properties?: Map<string, any>;
 }
 
 export class ExtendedCard extends Card {

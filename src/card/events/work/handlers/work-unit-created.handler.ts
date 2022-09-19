@@ -1,7 +1,9 @@
-import { EventBus, EventsHandler, IEventHandler } from '@nestjs/cqrs';
+import { EventBus, EventsHandler, IEventHandler, QueryBus } from '@nestjs/cqrs';
 import { Card } from 'src/card/model/card.model';
 import { LoggingService } from 'src/logging/logging.service';
-import { NotificationEvent, UserActivityEvent } from 'src/users/events/impl';
+import { Project } from 'src/project/model/project.model';
+import { GetProjectBySlugQuery } from 'src/project/queries/impl';
+import { NotificationEvent } from 'src/users/events/impl';
 import { WorkUnitCreatedEvent } from '../impl';
 
 @EventsHandler(WorkUnitCreatedEvent)
@@ -11,6 +13,7 @@ export class WorkUnitCreatedEventHandler
   constructor(
     private readonly eventBus: EventBus,
     private readonly logger: LoggingService,
+    private readonly queryBus: QueryBus,
   ) {
     this.logger.setContext(`WorkUnitCreatedEventHandler`);
   }
@@ -26,7 +29,21 @@ export class WorkUnitCreatedEventHandler
         caller,
         workThreadId,
       } = event;
-      for (const user of card.properties['reviewer']) {
+      const project: Project = await this.queryBus.execute(
+        new GetProjectBySlugQuery(projectSlug),
+      );
+
+      let stakeholders = [];
+      Object.keys(project.properties).map((key) => {
+        if (
+          project.properties[key].type === 'user[]' ||
+          project.properties[key].type === 'user'
+        ) {
+          stakeholders = [...stakeholders, ...(card.properties[key] || [])];
+        }
+      });
+
+      for (const user of stakeholders) {
         if (user !== caller && createWorkUnitRequestDto.type === 'submission') {
           this.eventBus.publish(
             new NotificationEvent(

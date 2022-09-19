@@ -53,23 +53,21 @@ export type CardTemplate = {
 
 export type CardTemplates = { [id: string]: CardTemplate };
 
-export type Properties = {
-  properties?: Map<PropertyId, Property>;
-};
+export type Properties = Map<string, Property>;
 
-export type PropertyId =
-  | 'assignee'
-  | 'reviewer'
-  | 'start-date'
-  | 'deadline'
-  | 'priority'
-  | 'reward'
-  | 'grantee'
-  | 'programLiaison'
-  | 'approvedOn'
-  | 'completedOn'
-  | 'grantStatus'
-  | 'link-to-application';
+// export type PropertyId =
+//   | 'assignee'
+//   | 'reviewer'
+//   | 'start-date'
+//   | 'deadline'
+//   | 'priority'
+//   | 'reward'
+//   | 'grantee'
+//   | 'programLiaison'
+//   | 'approvedOn'
+//   | 'completedOn'
+//   | 'grantStatus'
+//   | 'link-to-application';
 
 export type Property = {
   name: string;
@@ -78,6 +76,8 @@ export type Property = {
   default?: any;
   conditions?: Conditions;
   options?: Option[];
+  roleGate: string[];
+  typeGate: string[];
 };
 
 export type PropertyType =
