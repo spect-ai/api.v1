@@ -27,7 +27,7 @@ export type Filter = {
 };
 
 export type View = {
-  type: 'List' | 'Board' | 'Gantt';
+  type: 'List' | 'Board' | 'Gantt' | 'Table';
   hidden: boolean;
   filters: Filter;
   slug: string;
