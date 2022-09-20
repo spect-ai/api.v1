@@ -18,6 +18,7 @@ import { DiscordService } from 'src/common/discord.service';
 import { EthAddressModule } from 'src/_eth-address/_eth-address.module';
 import { CommonTools } from 'src/common/common.service';
 import { LoggingService } from 'src/logging/logging.service';
+import { GuildxyzService } from 'src/common/guildxyz.service';
 
 @Module({
   imports: [
@@ -39,6 +40,7 @@ import { LoggingService } from 'src/logging/logging.service';
     RolesService,
     SessionAuthGuard,
     DiscordService,
+    GuildxyzService,
     CommonTools,
     LoggingService,
   ],

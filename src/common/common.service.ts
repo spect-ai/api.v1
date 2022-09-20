@@ -1,9 +1,21 @@
 import { Injectable } from '@nestjs/common';
 import { detailedDiff as objectDiff } from 'deep-object-diff';
 import { diff as arrayDiff } from 'fast-array-diff';
+import { MappedItem } from './interfaces';
 
 @Injectable()
 export class CommonTools {
+  flatten(mappedItem: MappedItem<any>) {
+    const res = [];
+    for (const [key, value] of Object.entries(mappedItem)) {
+      res.push({
+        ...value,
+        id: key,
+      });
+    }
+    return res;
+  }
+
   objectify(arrOfObjects: any[], key: string) {
     const res = {};
     for (const obj of arrOfObjects) {
@@ -19,6 +31,10 @@ export class CommonTools {
       res = [...res, ...obj[key]];
     }
     return res;
+  }
+
+  distinctifyArray(arr: any[]) {
+    return [...new Set(arr)];
   }
 
   distinctify(arrOfObjects: any[], uniqueKey: string) {

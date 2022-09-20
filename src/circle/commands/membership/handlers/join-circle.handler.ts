@@ -3,17 +3,13 @@ import {
   HttpStatus,
   InternalServerErrorException,
 } from '@nestjs/common';
-import {
-  CommandBus,
-  CommandHandler,
-  EventBus,
-  ICommandHandler,
-} from '@nestjs/cqrs';
+import { CommandHandler, EventBus, ICommandHandler } from '@nestjs/cqrs';
 import * as moment from 'moment';
 import { CircleValidationService } from 'src/circle/circle-validation.service';
 import { CirclesRepository } from 'src/circle/circles.repository';
 import {
   JoinUsingDiscordCommand,
+  JoinUsingGuildxyzCommand,
   JoinUsingInvitationCommand,
 } from 'src/circle/commands/impl';
 import { DetailedCircleResponseDto } from 'src/circle/dto/detailed-circle-response.dto';
@@ -99,6 +95,57 @@ export class JoinUsingDiscordCommandHandler
         await this.circlesRepository.getCircleWithUnpopulatedReferences(id);
       this.validationService.validateNewMember(circle, caller.id);
       const role = await this.roleService.getSpectRoleFromDiscord(
+        caller,
+        circle,
+      );
+      if (!role || role.length === 0) {
+        throw new HttpException(
+          'Role required to join circle not found',
+          HttpStatus.NOT_FOUND,
+        );
+      }
+      const updatedCircle =
+        await this.circlesRepository.updateCircleAndReturnWithPopulatedReferences(
+          id,
+          {
+            members: [...circle.members, caller.id],
+            memberRoles: {
+              ...circle.memberRoles,
+              [caller.id]: role,
+            },
+          },
+        );
+
+      this.eventBus.publish(
+        new JoinedCircleEvent(caller.id, id, updatedCircle),
+      );
+      return updatedCircle;
+    } catch (error) {
+      throw new InternalServerErrorException(error);
+    }
+  }
+}
+
+@CommandHandler(JoinUsingGuildxyzCommand)
+export class JoinUsingGuildxyzCommandHandler
+  implements ICommandHandler<JoinUsingGuildxyzCommand>
+{
+  constructor(
+    private readonly circlesRepository: CirclesRepository,
+    private readonly eventBus: EventBus,
+    private readonly validationService: CircleValidationService,
+    private readonly roleService: RolesService,
+  ) {}
+
+  async execute(
+    command: JoinUsingGuildxyzCommand,
+  ): Promise<DetailedCircleResponseDto> {
+    try {
+      const { id, caller } = command;
+      const circle =
+        await this.circlesRepository.getCircleWithUnpopulatedReferences(id);
+      this.validationService.validateNewMember(circle, caller.id);
+      const role = await this.roleService.getSpectRoleFromGuildxyz(
         caller,
         circle,
       );

@@ -5,6 +5,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   Request,
   SetMetadata,
   UseGuards,
@@ -16,31 +17,53 @@ import {
   CreateNewCardAuthGuard,
   ViewCardAuthGuard,
 } from 'src/auth/card.guard';
-import { SessionAuthGuard } from 'src/auth/iron-session.guard';
+import {
+  PublicViewAuthGuard,
+  SessionAuthGuard,
+} from 'src/auth/iron-session.guard';
 import { ObjectIdDto } from 'src/common/dtos/object-id.dto';
 import { RequiredSlugDto } from 'src/common/dtos/string.dto';
 import { DetailedProjectResponseDto } from 'src/project/dto/detailed-project-response.dto';
-import { CardsV1Service } from './cards-v1.service';
-import { UpdatePaymentCommand } from './commands/impl';
+import { CrudOrchestrator } from './orchestrators/crud.orchestrator';
+import { CloseCardsCommand, UpdatePaymentCommand } from './commands/impl';
 import { AddKudosCommand } from './commands/kudos/impl';
 import { RecordClaimCommand } from './commands/kudos/impl/record-claim.command';
 import { CreateCardRequestDto } from './dto/create-card-request.dto';
 import { DetailedCardResponseDto } from './dto/detailed-card-response-dto';
 import { GetByProjectSlugAndCardSlugDto } from './dto/get-card-params.dto';
-import { UpdateCardProjectDto } from './dto/update-card-project.dto';
-import {
-  RecordClaimInfoDto,
-  RecordKudosDto,
-} from './dto/update-card-request.dto';
 import { UpdatePaymentInfoDto } from './dto/update-payment-info.dto';
 import { GetCardByIdQuery, GetCardBySlugQuery } from './queries/impl';
+import {
+  CreateWorkThreadCommand,
+  CreateWorkUnitCommand,
+  UpdateWorkThreadCommand,
+  UpdateWorkUnitCommand,
+} from './commands/work/impl';
+import {
+  CreateWorkThreadRequestDto,
+  CreateWorkUnitRequestDto,
+  UpdateWorkThreadRequestDto,
+  UpdateWorkUnitRequestDto,
+} from './dto/work-request.dto';
+import {
+  RequiredThreadIdDto,
+  RequiredWorkUnitIdDto,
+} from 'src/common/dtos/string.dto';
 import { ResponseBuilder } from './response.builder';
+import {
+  MultiCardCloseWithSlugDto,
+  RecordClaimInfoDto,
+  RecordKudosDto,
+  UpdateCardRequestDto,
+  UpdateCardStatusRequestDto,
+} from './dto/update-card-request.dto';
+import { UpdateCardProjectDto } from './dto/update-card-project.dto';
 
 @Controller('card/v1')
 @ApiTags('cardv1')
 export class CardsV1Controller {
   constructor(
-    private readonly cardsService: CardsV1Service,
+    private readonly crudOrchestrator: CrudOrchestrator,
     private readonly queryBus: QueryBus,
     private readonly commandBus: CommandBus,
     private readonly responseBuilder: ResponseBuilder,
@@ -67,35 +90,10 @@ export class CardsV1Controller {
   async findByProjectSlugAndCardSlug(
     @Param() params: GetByProjectSlugAndCardSlugDto,
   ): Promise<DetailedCardResponseDto> {
-    return await this.cardsService.get(params.projectSlug, params.cardSlug);
+    return await this.crudOrchestrator.get(params.projectSlug, params.cardSlug);
   }
 
-  @Post('/')
-  @UseGuards(CreateNewCardAuthGuard)
-  async create(@Body() card: CreateCardRequestDto): Promise<{
-    card: DetailedCardResponseDto;
-  }> {
-    return await this.cardsService.create(card);
-  }
-
-  @SetMetadata('permissions', ['update'])
-  @UseGuards(CardAuthGuard)
-  @Patch('/:id/archive')
-  async archive(
-    @Param() params: ObjectIdDto,
-  ): Promise<DetailedProjectResponseDto> {
-    return await this.cardsService.archive(params.id);
-  }
-
-  @SetMetadata('permissions', ['update'])
-  @UseGuards(CardAuthGuard)
-  @Patch('/:id/revertArchive')
-  async revertArchive(
-    @Param() params: ObjectIdDto,
-  ): Promise<DetailedProjectResponseDto> {
-    return await this.cardsService.revertArchival(params.id);
-  }
-
+  //@SetMetadata('permissions', ['makePayment'])
   @UseGuards(SessionAuthGuard)
   @Patch('/updatePaymentInfoAndClose')
   async updatePaymentInfoAndClose(
@@ -107,6 +105,136 @@ export class CardsV1Controller {
     );
   }
 
+  @UseGuards(PublicViewAuthGuard)
+  @Patch('/closeWithBot')
+  async closeWithBot(
+    @Body() multiCardCloseDto: MultiCardCloseWithSlugDto,
+    @Request() req,
+  ): Promise<boolean> {
+    return await this.commandBus.execute(
+      new CloseCardsCommand(req.user.id, {
+        slug: { $in: multiCardCloseDto.slugs },
+      }),
+    );
+  }
+
+  @Post('/')
+  @UseGuards(CreateNewCardAuthGuard)
+  async create(@Body() card: CreateCardRequestDto): Promise<{
+    card: DetailedCardResponseDto;
+  }> {
+    return await this.crudOrchestrator.create(card);
+  }
+
+  @SetMetadata('permissions', ['update'])
+  @UseGuards(CardAuthGuard)
+  @Patch('/:id/archive')
+  async archive(
+    @Param() params: ObjectIdDto,
+  ): Promise<DetailedProjectResponseDto> {
+    return await this.crudOrchestrator.archive(params.id);
+  }
+
+  @SetMetadata('permissions', ['update'])
+  @UseGuards(CardAuthGuard)
+  @Patch('/:id/revertArchive')
+  async revertArchive(
+    @Param() params: ObjectIdDto,
+  ): Promise<DetailedProjectResponseDto> {
+    return await this.crudOrchestrator.revertArchival(params.id);
+  }
+
+  @SetMetadata('permissions', ['update'])
+  @UseGuards(CardAuthGuard)
+  @Patch('/:id/')
+  async update(
+    @Param() params: ObjectIdDto,
+    @Body() updateCardRequestDto: UpdateCardRequestDto,
+  ): Promise<DetailedCardResponseDto> {
+    return await this.crudOrchestrator.update(params.id, updateCardRequestDto);
+  }
+
+  @Patch('/:id/updateStatusFromBot')
+  @UseGuards(PublicViewAuthGuard)
+  async updateStatusFromBot(
+    @Param() params: ObjectIdDto,
+    @Body() updateStatusDto: UpdateCardStatusRequestDto,
+  ): Promise<DetailedCardResponseDto> {
+    return await this.crudOrchestrator.update(params.id, updateStatusDto);
+  }
+
+  @SetMetadata('permissions', ['submit'])
+  @UseGuards(CardAuthGuard)
+  @Patch('/:id/createWorkThread')
+  async createWorkThread(
+    @Param() params: ObjectIdDto,
+    @Body() createWorkThread: CreateWorkThreadRequestDto,
+    @Request() req,
+  ): Promise<DetailedCardResponseDto> {
+    return await this.commandBus.execute(
+      new CreateWorkThreadCommand(params.id, createWorkThread, req.user.id),
+    );
+  }
+
+  @SetMetadata('permissions', ['submit'])
+  @UseGuards(CardAuthGuard)
+  @Patch('/:id/updateWorkThread')
+  async updateWorkThread(
+    @Param() params: ObjectIdDto,
+    @Query() threadIdParam: RequiredThreadIdDto,
+    @Body() updateWorkThread: UpdateWorkThreadRequestDto,
+    @Request() req,
+  ): Promise<DetailedCardResponseDto> {
+    return await this.commandBus.execute(
+      new UpdateWorkThreadCommand(
+        params.id,
+        threadIdParam.threadId,
+        updateWorkThread,
+        req.user.id,
+      ),
+    );
+  }
+
+  @SetMetadata('permissions', ['submit'])
+  @UseGuards(CardAuthGuard)
+  @Patch('/:id/createWorkUnit')
+  async createWorkUnit(
+    @Param() params: ObjectIdDto,
+    @Query() threadIdParam: RequiredThreadIdDto,
+    @Body() createWorkUnit: CreateWorkUnitRequestDto,
+    @Request() req,
+  ): Promise<DetailedCardResponseDto> {
+    return await this.commandBus.execute(
+      new CreateWorkUnitCommand(
+        params.id,
+        threadIdParam.threadId,
+        createWorkUnit,
+        req.user.id,
+      ),
+    );
+  }
+
+  @SetMetadata('permissions', ['submit'])
+  @UseGuards(CardAuthGuard)
+  @Patch('/:id/updateWorkUnit')
+  async updateWorkUnit(
+    @Param() params: ObjectIdDto,
+    @Query() threadIdParam: RequiredThreadIdDto,
+    @Query() workUnitIdParam: RequiredWorkUnitIdDto,
+    @Body() updateWorkUnit: UpdateWorkUnitRequestDto,
+    @Request() req,
+  ): Promise<DetailedCardResponseDto> {
+    return await this.commandBus.execute(
+      new UpdateWorkUnitCommand(
+        params.id,
+        threadIdParam.threadId,
+        workUnitIdParam.workUnitId,
+        updateWorkUnit,
+        req.user.id,
+      ),
+    );
+  }
+
   @SetMetadata('permissions', ['update'])
   @UseGuards(CardAuthGuard)
   @Patch('/:id/updateProject')
@@ -115,7 +243,7 @@ export class CardsV1Controller {
     @Param() params: ObjectIdDto,
     @Request() req,
   ): Promise<DetailedCardResponseDto> {
-    return await this.cardsService.updateCardProject(
+    return await this.crudOrchestrator.updateCardProject(
       params.id,
       updateCardProjectDto.projectId,
       req.user.id,

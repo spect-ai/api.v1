@@ -13,6 +13,7 @@ import {
   UpdateProjectByIdCommandHandler,
   UpdateProjectCardNumByIdCommandHandler,
 } from './update-project.handler';
+import { CreateAutomationCommandHandler } from '../automation/handlers/create-automation.handler';
 
 export const CommandHandlers = [
   AddCardsCommandHandler,
@@ -22,6 +23,7 @@ export const CommandHandlers = [
   AddCardsInMultipleProjectsCommandHandler,
   ArchiveProjectCommandHandler,
   RevertArchivedProjectCommandHandler,
+  CreateAutomationCommandHandler,
   UpdateProjectByIdCommandHandler,
   UpdateProjectCardNumByIdCommandHandler,
 ];

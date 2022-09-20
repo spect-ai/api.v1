@@ -1,5 +1,5 @@
 import { forwardRef, Module } from '@nestjs/common';
-import { CqrsModule } from '@nestjs/cqrs';
+import { CommandHandler, CqrsModule } from '@nestjs/cqrs';
 import { TypegooseModule } from 'nestjs-typegoose';
 import { CircleAuthGuard } from 'src/auth/circle.guard';
 import { SessionAuthGuard } from 'src/auth/iron-session.guard';
@@ -10,6 +10,7 @@ import { ActivityBuilder } from 'src/card/activity.builder';
 import { CirclesModule } from 'src/circle/circles.module';
 import { CommonTools } from 'src/common/common.service';
 import { DiscordService } from 'src/common/discord.service';
+import { GuildxyzService } from 'src/common/guildxyz.service';
 import { SlugService } from 'src/common/slug.service';
 import { LoggingService } from 'src/logging/logging.service';
 import { CardsProjectService } from 'src/project/cards.project.service';
@@ -28,21 +29,27 @@ import { ActionService } from './actions.service';
 import { ActivityResolver } from './activity.resolver';
 import { ApplicationService } from './application.cards.service';
 import { CardsV1Controller } from './cards-v1.controller';
-import { CardsV1Service } from './cards-v1.service';
 import { CardsController } from './cards.controller';
 import { CardsRepository } from './cards.repository';
 import { CardsService } from './cards.service';
-import { CommandHandlers } from './commands/handlers';
+import { CardsService as CardsServiceV1 } from './services/cards.service';
+import { Card } from './model/card.model';
+import { ActivityResolver as ActivityResolverV1 } from './services/activity-resolver.service';
+import { WorkService } from './work.cards.service';
+import { CardValidationService } from './validation.cards.service';
+import { CardValidationService as CardValidationServiceV1 } from './services/card-validation.service';
+import { CommonUtility, ResponseBuilder } from './response.builder';
+import { ResponseBuilder as ResponseBuilderV1 } from './services/response.service';
 import { CommentService } from './comments.cards.service';
 import { EventHandlers } from './events/handlers';
 import { CardCommandHandler } from './handlers/update.command.handler';
 import { WorkCommandHandler } from './handlers/work.command.handler';
-import { Card } from './model/card.model';
 import { CardsPaymentService } from './payment.cards.service';
 import { QueryHandlers } from './queries/handlers';
-import { CommonUtility, ResponseBuilder } from './response.builder';
-import { CardValidationService } from './validation.cards.service';
-import { WorkService } from './work.cards.service';
+import { CommonUpdateService } from './services/common-update.service';
+import { CrudOrchestrator } from './orchestrators/crud.orchestrator';
+import { CommandHandlers } from './commands/handlers';
+import { ActivityBuilder as ActivityBuilderV1 } from './services/activity-builder.service';
 
 @Module({
   imports: [
@@ -81,6 +88,7 @@ import { WorkService } from './work.cards.service';
     CommonUtility,
     RolesService,
     DiscordService,
+    GuildxyzService,
     SessionAuthGuard,
     CircleAuthGuard,
     ProjectAuthGuard,
@@ -90,8 +98,14 @@ import { WorkService } from './work.cards.service';
     ...CommandHandlers,
     CardNotificationService,
     LoggingService,
-    CardsV1Service,
+    CrudOrchestrator,
+    CardsServiceV1,
+    ResponseBuilderV1,
+    ActivityResolverV1,
+    ActivityBuilderV1,
+    CommonUpdateService,
     ViewProjectAuthGuard,
+    CardValidationServiceV1,
     RegistryService,
   ],
   exports: [

@@ -1,13 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { diff } from 'fast-array-diff';
 import { Activity } from 'src/common/types/activity.type';
-import { Project } from 'src/project/model/project.model';
 import { UsersService } from 'src/users/users.service';
 import { Card } from './model/card.model';
-import moment from 'moment';
 
 const activityIdToFieldMap = {
   updateDeadline: 'deadline',
+  updateStartDate: 'startDate',
   updateReviewer: 'reviewer',
   updateAssignee: 'assignee',
   updateReward: 'reward',
@@ -20,13 +19,14 @@ const activityIdToFieldMap = {
 
 const activityIdToFieldNameMap = {
   updateDeadline: 'deadline',
+  updateStartDate: 'startDate',
   updateReviewer: 'reviewer',
   updateAssignee: 'assignee',
   updateReward: 'reward',
   updateLabels: 'label',
   updatePriority: 'priority',
   updateCardType: 'type',
-  updateColumn: 'columnId',
+  updateColumn: 'column',
   updateStatus: 'status',
 };
 
@@ -79,7 +79,9 @@ export class ActivityResolver {
           activityIdToFieldMap[activity.activityId],
           activityIdToFieldNameMap[activity.activityId],
         );
-      } else if (['updateDeadline'].includes(activity.activityId)) {
+      } else if (
+        ['updateDeadline', 'updateStartDate'].includes(activity.activityId)
+      ) {
         activity.content = this.resolveDateFields(
           activity,
           activityIdToFieldMap[activity.activityId],

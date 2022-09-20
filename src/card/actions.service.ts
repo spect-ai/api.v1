@@ -93,6 +93,31 @@ export class ActionService {
       };
   }
 
+  canUpdateStartDate(
+    card: Card,
+    circlePermissions: CirclePermission,
+    userId: string,
+  ) {
+    if (!card.status.active)
+      return {
+        valid: false,
+        reason: 'Card has been closed already',
+      };
+    if (
+      (card.reviewer && card.reviewer.includes(userId)) ||
+      (card.assignee && card.assignee.includes(userId)) ||
+      (circlePermissions.manageCardProperties &&
+        circlePermissions.manageCardProperties[card.type])
+    )
+      return { valid: true };
+    else
+      return {
+        valid: false,
+        reason:
+          'Only reviewers, assignees and circle members that have permission to manage cards can update start Date',
+      };
+  }
+
   canUpdateColumn(
     card: Card,
     circlePermissions: CirclePermission,
@@ -319,6 +344,7 @@ export class ActionService {
         userId,
       ),
       updateDeadline: this.canUpdateDeadline(card, circlePermissions, userId),
+      updateStartDate: this.canUpdateStartDate(card, circlePermissions, userId),
       updateColumn: this.canUpdateColumn(card, circlePermissions, userId),
       updateAssignee: this.canUpdateAssignee(card, circlePermissions, userId),
       claim: this.canClaim(card, circlePermissions, userId),

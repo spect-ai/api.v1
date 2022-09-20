@@ -22,13 +22,13 @@ import {
 import { Project } from 'src/project/model/project.model';
 import { RemoveItemsCommand } from '../../items/impl/remove-items.command';
 import {
-  ArchiveCardByIdCommand,
+  ArchiveCardCommand,
   ArchiveMultipleCardsByIdCommand,
 } from '../impl/archive-card.command';
 
-@CommandHandler(ArchiveCardByIdCommand)
-export class ArchiveCardByIdCommandHandler
-  implements ICommandHandler<ArchiveCardByIdCommand>
+@CommandHandler(ArchiveCardCommand)
+export class ArchiveCardCommandHandler
+  implements ICommandHandler<ArchiveCardCommand>
 {
   constructor(
     private readonly cardsRepository: CardsRepository,
@@ -36,11 +36,15 @@ export class ArchiveCardByIdCommandHandler
   ) {}
 
   async execute(
-    command: ArchiveCardByIdCommand,
+    command: ArchiveCardCommand,
   ): Promise<{ project: Project; cards: Card[] }> {
     try {
-      const cardWithChildren =
-        await this.cardsRepository.getCardWithAllChildren(command.id);
+      const { id, card } = command;
+      let cardWithChildren = card;
+      if (!cardWithChildren || !cardWithChildren.flattenedChildren)
+        cardWithChildren = await this.cardsRepository.getCardWithAllChildren(
+          id,
+        );
 
       const cards = [
         ...cardWithChildren.flattenedChildren,

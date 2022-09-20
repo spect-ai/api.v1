@@ -6,6 +6,7 @@ import {
   IsOptional,
   IsString,
 } from 'class-validator';
+import { WorkThreadStatus } from '../types/types';
 import { CreateCardRequestDto } from './create-card-request.dto';
 
 export class CreateGithubPRDto {
@@ -95,7 +96,7 @@ export class UpdateWorkThreadRequestDto {
   @IsString()
   @IsNotEmpty()
   @IsOptional()
-  status: 'accepted' | 'inRevision' | 'inReview' | 'draft';
+  status: WorkThreadStatus;
 
   /**
    * set submission to active or expired
@@ -127,7 +128,7 @@ export class CreateWorkUnitRequestDto {
   @IsString()
   @IsNotEmpty()
   @IsOptional()
-  status: 'accepted' | 'inRevision' | 'inReview' | 'draft';
+  status: WorkThreadStatus;
 
   /**
    * Submission PR if any
@@ -160,7 +161,7 @@ export class UpdateWorkUnitRequestDto {
   @IsString()
   @IsNotEmpty()
   @IsOptional()
-  status: 'accepted' | 'inRevision' | 'inReview' | 'draft';
+  status: WorkThreadStatus;
 
   /**
    * Submission PR if any

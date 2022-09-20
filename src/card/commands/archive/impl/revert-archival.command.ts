@@ -1,5 +1,10 @@
-export class RevertArchiveCardByIdCommand {
-  constructor(public readonly id: string) {}
+import { ExtendedCard } from 'src/card/model/card.model';
+
+export class RevertArchivedCardCommand {
+  constructor(
+    public readonly id?: string,
+    public readonly card?: ExtendedCard,
+  ) {}
 }
 
 export class RevertArchivalMultipleCardsByIdCommand {

@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import mongodb from 'mongodb';
-import { UpdateQuery } from 'mongoose';
+import { FilterQuery, UpdateQuery } from 'mongoose';
 import { InjectModel } from 'nestjs-typegoose';
 import { BaseRepository } from 'src/base/base.repository';
 import { Project } from './model/project.model';
@@ -14,6 +14,7 @@ const populatedCardFields = {
   reward: 1,
   priority: 1,
   deadline: 1,
+  startDate: 1,
   slug: 1,
   type: 1,
   project: 1,
@@ -35,6 +36,7 @@ const defaultPopulate: PopulatedProjectFields = {
     reward: 1,
     priority: 1,
     deadline: 1,
+    startDate: 1,
     slug: 1,
     type: 1,
     project: 1,
@@ -101,7 +103,7 @@ export class ProjectsRepository extends BaseRepository<Project> {
     if (acknowledgment.hasWriteErrors()) {
       console.log(acknowledgment.getWriteErrors());
       throw new HttpException(
-        'Something went wrong while updating payment info',
+        'Something went wrong while updating project',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
@@ -148,5 +150,28 @@ export class ProjectsRepository extends BaseRepository<Project> {
     });
 
     return await query.exec();
+  }
+
+  async getMultipleProjects(
+    filter: FilterQuery<Project>,
+    customPopulate?: PopulatedProjectFields,
+    selectedFields?: Record<string, unknown>,
+  ): Promise<Project[]> {
+    const query = this.findAll(filter, {
+      projection: selectedFields || {},
+    });
+    let populatedFields = defaultPopulate;
+    if (customPopulate) populatedFields = customPopulate;
+
+    Object.keys(populatedFields).forEach((key) => {
+      query.populate(key, populatedFields[key]);
+    });
+
+    try {
+      return await query.exec();
+    } catch (err) {
+      console.log(err);
+      return [];
+    }
   }
 }

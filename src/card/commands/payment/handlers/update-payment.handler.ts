@@ -1,23 +1,18 @@
-import { HttpException, HttpStatus } from '@nestjs/common';
 import {
   CommandBus,
   CommandHandler,
   ICommandHandler,
   QueryBus,
 } from '@nestjs/cqrs';
-import { AutomationService } from 'src/automation/automation.service';
-import { CardsRepository } from 'src/card/cards.repository';
+import { DetailedCardResponseDto } from 'src/card/dto/detailed-card-response-dto';
 import { UpdatePaymentInfoDto } from 'src/card/dto/update-payment-info.dto';
 import { Card } from 'src/card/model/card.model';
 import { GetMultipleCardsWithChildrenQuery } from 'src/card/queries/impl';
-import { CommonTools } from 'src/common/common.service';
-import { MappedItem } from 'src/common/interfaces';
-import { GlobalDocumentUpdate } from 'src/common/types/update.type';
 import { LoggingService } from 'src/logging/logging.service';
-import { ProjectsRepository } from 'src/project/project.repository';
+import { DetailedProjectResponseDto } from 'src/project/dto/detailed-project-response.dto';
+import { GetDetailedProjectByIdQuery } from 'src/project/queries/impl';
+import { UpdateMultipleCardsCommand } from '../../impl/update-card.command';
 import { UpdatePaymentCommand } from '../impl';
-import { v4 as uuidv4 } from 'uuid';
-import { Activity } from '../../../../common/types/activity.type';
 
 @CommandHandler(UpdatePaymentCommand)
 export class UpdatePaymentCommandHandler
@@ -26,134 +21,87 @@ export class UpdatePaymentCommandHandler
   constructor(
     private readonly commandBus: CommandBus,
     private readonly queryBus: QueryBus,
-    private readonly commonTools: CommonTools,
     private readonly logger: LoggingService,
-    private readonly cardsRepository: CardsRepository,
-    private readonly automationService: AutomationService,
-    private readonly projectRepository: ProjectsRepository,
-  ) {}
+  ) {
+    this.logger.setContext('UpdatePaymentCommandHandler');
+  }
 
-  async execute(command: UpdatePaymentCommand): Promise<void> {
+  async execute(
+    command: UpdatePaymentCommand,
+  ): Promise<boolean | DetailedProjectResponseDto | DetailedCardResponseDto> {
     try {
-      const globalUpdate = {
-        card: {},
-        project: {},
-      } as GlobalDocumentUpdate;
       const { updatePaymentDto, caller } = command;
-
-      /** Get all the cards with all their children */
+      if (!updatePaymentDto.cardIds || updatePaymentDto.cardIds.length === 0)
+        throw `No card Ids provided while updating payment info`;
       const cards = await this.queryBus.execute(
         new GetMultipleCardsWithChildrenQuery(updatePaymentDto.cardIds),
       );
-
-      if (cards.length === 0) {
-        throw new HttpException('No cards found', HttpStatus.NOT_FOUND);
-      }
-
-      /** Fetch the project using the first card, as we assume all cards are in the same project */
-      const project = await this.projectRepository.findById(
-        cards[0].project as string,
-      );
-
-      /** Get the payment info for all the cards */
+      const cardUpdates = {};
+      let allChildren = [];
       for (const card of cards) {
-        for (const child of card.flattenedChildren) {
-          const childCardUpdate = this.updatePaymentInfo(
-            child,
-            updatePaymentDto,
-            caller,
-          );
-          const automationUpdate = this.automationService.handleAutomation(
-            child,
-            project,
-            childCardUpdate[child.id],
-            command.caller,
-          );
-          globalUpdate.card[child.id] = this.commonTools.mergeObjects(
-            globalUpdate.card[child.id],
-            automationUpdate.card[child.id],
-            childCardUpdate[child.id],
-          );
-          globalUpdate.project[project.id] = this.commonTools.mergeObjects(
-            globalUpdate.project[project.id],
-            automationUpdate.project[project.id],
-          );
-        }
-
-        const parentCardUpdate = this.updatePaymentInfo(
+        cardUpdates[card.id] = this.updatePaymentInfoAndStatus(
           card,
           updatePaymentDto,
-          caller,
         );
-
-        const automationUpdate = this.automationService.handleAutomation(
-          card,
-          project,
-          parentCardUpdate[card.id],
-          command.caller,
-        );
-        globalUpdate.card[card.id] = this.commonTools.mergeObjects(
-          globalUpdate.card[card.id],
-          automationUpdate.card[card.id],
-          parentCardUpdate[card.id],
-        );
-
-        globalUpdate.project[project.id] = this.commonTools.mergeObjects(
-          globalUpdate.project[project.id],
-          automationUpdate.project[project.id],
-        );
+        allChildren = [...allChildren, ...card.flattenedChildren];
       }
+      console.log(allChildren);
 
-      // /** Mongo only returns an acknowledgment on bulk write and not the updated records itself */
-      const cardUpdateAcknowledgment =
-        await this.cardsRepository.bundleUpdatesAndExecute(globalUpdate.card);
+      for (const child of allChildren) {
+        if (!cardUpdates[child.id]) {
+          cardUpdates[child.id] = this.updateToPaidStatus(child);
+        }
+      }
+      console.log(cardUpdates);
+      const res = await this.commandBus.execute(
+        new UpdateMultipleCardsCommand(caller, cardUpdates, null, null, [
+          ...cards,
+          ...allChildren,
+        ]),
+      );
 
-      const projectUpdateAcknowledgment =
-        await this.projectRepository.bundleUpdatesAndExecute(
-          globalUpdate.project,
-        );
+      if (updatePaymentDto.returnWith) {
+        if (
+          updatePaymentDto.returnWith.type === 'project' &&
+          updatePaymentDto.returnWith.id
+        ) {
+          return await this.queryBus.execute(
+            new GetDetailedProjectByIdQuery(updatePaymentDto.returnWith.id),
+          );
+        }
+      }
+      return res;
     } catch (error) {
       console.log(error);
+      this.logger.error(
+        `Failed updating payment info with error ${error.message}`,
+      );
     }
   }
 
-  updatePaymentInfo(
+  updatePaymentInfoAndStatus(
     card: Card,
     updatePaymentInfoDto: UpdatePaymentInfoDto,
-    caller: string,
-  ): MappedItem<Card> {
-    const activity = {
-      activityId: 'updateStatus',
-      changeLog: {
-        prev: {
-          status: card.status,
-        },
-        next: {
-          status: {
-            active: false,
-            paid: true,
-            archived: false,
-          },
-        },
-      },
-      timestamp: new Date(),
-      actorId: caller,
-      commitId: uuidv4(),
-      comment: false,
-      content: '',
-    } as Activity;
+  ): Partial<Card> {
     return {
-      [card.id]: {
-        activity: [...card.activity, activity],
-        reward: {
-          ...card.reward,
-          transactionHash: updatePaymentInfoDto.transactionHash,
-        },
-        status: {
-          ...card.status,
-          paid: true,
-          active: false,
-        },
+      reward: {
+        ...card.reward,
+        transactionHash: updatePaymentInfoDto.transactionHash,
+      },
+      status: {
+        ...card.status,
+        paid: true,
+        active: false,
+      },
+    };
+  }
+
+  updateToPaidStatus(card: Card): Partial<Card> {
+    return {
+      status: {
+        ...card.status,
+        paid: true,
+        active: false,
       },
     };
   }

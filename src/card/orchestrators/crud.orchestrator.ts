@@ -10,26 +10,28 @@ import {
   GetProjectBySlugQuery,
 } from 'src/project/queries/impl';
 import { RequestProvider } from 'src/users/user.provider';
-import { ArchiveCardByIdCommand } from './commands/archive/impl/archive-card.command';
 import {
   CreateCardCommand,
-  RevertArchiveCardByIdCommand,
-} from './commands/impl';
-import { UpdateProjectCardCommand } from './commands/updateCardProject/impl/update-card-project.command';
-import { CreateCardRequestDto } from './dto/create-card-request.dto';
-import { DetailedCardResponseDto } from './dto/detailed-card-response-dto';
+  ArchiveCardCommand,
+  RevertArchivedCardCommand,
+} from '../commands/impl';
+import { CreateCardRequestDto } from '../dto/create-card-request.dto';
+import { DetailedCardResponseDto } from '../dto/detailed-card-response-dto';
 import {
   CardArchivalRevertedEvent,
   CardsArchivedEvent,
-} from './events/archive/impl/card-archived.event';
-import { CardCreatedEvent } from './events/impl';
-import { Card } from './model/card.model';
-import { GetCardByFilterQuery, GetCardByIdQuery } from './queries/impl';
-import { ResponseBuilder } from './response.builder';
-import { CardValidationService } from './validation.cards.service';
+} from '../events/archive/impl/card-archived.event';
+import { CardCreatedEvent, CardUpdatedEvent } from '../events/impl';
+import { Card } from '../model/card.model';
+import { GetCardByFilterQuery, GetCardByIdQuery } from '../queries/impl';
+import { ResponseBuilder } from '../response.builder';
+import { CardValidationService } from '../services/card-validation.service';
+import { UpdateProjectCardCommand } from '../commands/updateCardProject/impl/update-card-project.command';
+import { UpdateCardRequestDto } from '../dto/update-card-request.dto';
+import { UpdateCardCommand } from '../commands/impl/update-card.command';
 
 @Injectable()
-export class CardsV1Service {
+export class CrudOrchestrator {
   constructor(
     private readonly requestProvider: RequestProvider,
     private readonly queryBus: QueryBus,
@@ -40,7 +42,7 @@ export class CardsV1Service {
     private readonly responseBuilder: ResponseBuilder,
     private readonly eventBus: EventBus,
   ) {
-    logger.setContext('CardsV1Service');
+    logger.setContext('CrudOrchestrator');
   }
 
   async get(
@@ -115,10 +117,47 @@ export class CardsV1Service {
     }
   }
 
+  async update(
+    id: string,
+    updateCardDto: UpdateCardRequestDto,
+  ): Promise<DetailedCardResponseDto> {
+    try {
+      const card =
+        this.requestProvider.card ||
+        (await this.queryBus.execute(new GetCardByIdQuery(id)));
+      this.validationService.validateCardExists(card);
+      const project =
+        this.requestProvider.project ||
+        (await this.queryBus.execute(new GetProjectByIdQuery(card.project)));
+      const circle =
+        this.requestProvider.circle ||
+        (await this.queryBus.execute(new GetCircleByIdQuery(card.circle)));
+      const updatedCard = await this.commandBus.execute(
+        new UpdateCardCommand(
+          updateCardDto,
+          project,
+          circle,
+          this.requestProvider.user.id,
+          card,
+        ),
+      );
+      return updatedCard;
+    } catch (error) {
+      this.logger.logError(
+        `Failed updating card with error: ${error.message}`,
+        this.requestProvider,
+      );
+      throw new InternalServerErrorException(
+        'Failed updating card',
+        error.message,
+      );
+    }
+  }
+
   async archive(id: string): Promise<DetailedProjectResponseDto> {
     try {
       const { project, cards } = await this.commandBus.execute(
-        new ArchiveCardByIdCommand(id),
+        new ArchiveCardCommand(id, null),
       );
       this.eventBus.publish(new CardsArchivedEvent(cards));
       return {
@@ -140,7 +179,7 @@ export class CardsV1Service {
   async revertArchival(id: string): Promise<DetailedProjectResponseDto> {
     try {
       const { project, cards } = await this.commandBus.execute(
-        new RevertArchiveCardByIdCommand(id),
+        new RevertArchivedCardCommand(id),
       );
       this.eventBus.publish(new CardArchivalRevertedEvent(cards));
       return {
@@ -168,11 +207,6 @@ export class CardsV1Service {
       const updatedCard = await this.commandBus.execute(
         new UpdateProjectCardCommand(id, projectId, caller),
       );
-      // this.eventBus.publish(new CardsArchivedEvent(cards));
-      // return {
-      //   ...project,
-      //   cards: this.commonTools.objectify(project.cards, 'id'),
-      // };
       return updatedCard;
     } catch (error) {
       console.error(JSON.stringify(error));

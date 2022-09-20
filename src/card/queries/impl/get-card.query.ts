@@ -37,6 +37,10 @@ export class GetCardBySlugQuery {
 export class GetMultipleCardsWithChildrenQuery {
   constructor(public readonly ids: string[]) {}
 }
+
+export class GetMultipleCardsWithChildrenByFilterQuery {
+  constructor(public readonly filterQuery: FilterQuery<Card>) {}
+}
 export class GetCardWithChildrenQuery {
   constructor(public readonly id: string) {}
 }

@@ -12,3 +12,7 @@ export class JoinUsingInvitationCommand {
 export class JoinUsingDiscordCommand {
   constructor(public readonly id: string, public readonly caller: User) {}
 }
+
+export class JoinUsingGuildxyzCommand {
+  constructor(public readonly id: string, public readonly caller: User) {}
+}
