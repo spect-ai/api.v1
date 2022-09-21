@@ -5,7 +5,6 @@ import { CircleAuthGuard } from 'src/auth/circle.guard';
 import { SessionAuthGuard } from 'src/auth/iron-session.guard';
 import { ProjectAuthGuard, ViewProjectAuthGuard } from 'src/auth/project.guard';
 import { AutomationModule } from 'src/automation/automation.module';
-import { AutomationService } from 'src/automation/automation.service';
 import { ActivityBuilder } from 'src/card/activity.builder';
 import { CirclesModule } from 'src/circle/circles.module';
 import { CommonTools } from 'src/common/common.service';
@@ -42,7 +41,6 @@ import { CommonUtility, ResponseBuilder } from './response.builder';
 import { ResponseBuilder as ResponseBuilderV1 } from './services/response.service';
 import { CommentService } from './comments.cards.service';
 import { EventHandlers } from './events/handlers';
-import { CardCommandHandler } from './handlers/update.command.handler';
 import { WorkCommandHandler } from './handlers/work.command.handler';
 import { CardsPaymentService } from './payment.cards.service';
 import { QueryHandlers } from './queries/handlers';
@@ -82,8 +80,6 @@ import { ActivityBuilder as ActivityBuilderV1 } from './services/activity-builde
     ResponseBuilder,
     CommentService,
     CardsPaymentService,
-    CardCommandHandler,
-    AutomationService,
     WorkCommandHandler,
     CommonUtility,
     RolesService,
@@ -108,12 +104,6 @@ import { ActivityBuilder as ActivityBuilderV1 } from './services/activity-builde
     CardValidationServiceV1,
     RegistryService,
   ],
-  exports: [
-    CardsService,
-    CardsRepository,
-    CardsModule,
-    ActionService,
-    CardCommandHandler,
-  ],
+  exports: [CardsService, CardsRepository, CardsModule, ActionService],
 })
 export class CardsModule {}

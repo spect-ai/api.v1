@@ -26,18 +26,20 @@ export class CreatedCircleEventHandler
       console.log('CreatedCircleEvent');
       const { caller, circle } = event;
 
-      this.commandBus.execute(
-        new AddItemsToUserCommand(
-          [
-            {
-              fieldName: 'circles',
-              itemIds: [circle._id.toString()],
-            },
-          ],
-          null,
-          caller,
-        ),
-      );
+      if (caller) {
+        this.commandBus.execute(
+          new AddItemsToUserCommand(
+            [
+              {
+                fieldName: 'circles',
+                itemIds: [circle._id.toString()],
+              },
+            ],
+            null,
+            caller,
+          ),
+        );
+      }
       this.logger.log(`Created Circle: ${event.circle?.name}`);
     } catch (error) {
       this.logger.error(`${error.message}`);

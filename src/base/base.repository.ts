@@ -246,7 +246,7 @@ export abstract class BaseRepository<TModel extends BaseModel> {
     filter: FilterQuery<DocumentType<TModel>> = {},
   ): Promise<boolean> {
     try {
-      return (await this.model.exists(filter)) as boolean;
+      return (await this.model.exists(filter)) as unknown as boolean;
     } catch (e) {
       BaseRepository.throwMongoError(e);
     }
@@ -265,20 +265,17 @@ export abstract class BaseRepository<TModel extends BaseModel> {
   }
 
   async bulkWrite(
-    writes: Array<mongodb.AnyBulkWriteOperation>,
+    writes: any,
     options?: MongooseBulkWriteOptions,
-  ): Promise<mongodb.BulkWriteResult> {
+  ): Promise<any> {
     try {
-      return await this.model.bulkWrite(writes, options);
+      return this.model.bulkWrite(writes, options);
     } catch (e) {
       BaseRepository.throwMongoError(e);
     }
   }
 
-  updateOneByIdQuery(
-    id: string,
-    update: mongodb.UpdateFilter<TModel>,
-  ): mongodb.AnyBulkWriteOperation {
+  updateOneByIdQuery(id: string, update: mongodb.UpdateFilter<TModel>): any {
     const _id = this.toObjectId(id);
     return {
       updateOne: {
@@ -291,7 +288,7 @@ export abstract class BaseRepository<TModel extends BaseModel> {
   updateManyByIdsQuery(
     ids: string[],
     update: mongodb.UpdateFilter<TModel>,
-  ): mongodb.AnyBulkWriteOperation {
+  ): any {
     return {
       updateMany: {
         filter: { _id: { $in: ids } },

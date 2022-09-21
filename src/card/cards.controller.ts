@@ -60,7 +60,6 @@ import { ActionService } from './actions.service';
 import { WorkService } from './work.cards.service';
 import { CommentService } from './comments.cards.service';
 import { CardsPaymentService } from './payment.cards.service';
-import { CardCommandHandler } from './handlers/update.command.handler';
 import { WorkCommandHandler } from './handlers/work.command.handler';
 import {
   RequiredCommitIdDto,
@@ -78,7 +77,6 @@ export class CardsController {
     private readonly applicationService: ApplicationService,
     private readonly commentService: CommentService,
     private readonly paymentService: CardsPaymentService,
-    private readonly cardCommandHandler: CardCommandHandler,
     private readonly workCommandHandler: WorkCommandHandler,
   ) {}
 
