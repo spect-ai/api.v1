@@ -9,7 +9,12 @@ import { Status } from 'src/common/types/status.type';
 import { Project } from 'src/project/model/project.model';
 import { Retro } from 'src/retro/models/retro.model';
 import { User } from 'src/users/model/users.model';
-import { BlacklistRegistry, LocalRegistry, SafeAddresses } from '../types';
+import {
+  BlacklistRegistry,
+  LocalRegistry,
+  SafeAddresses,
+  WhitelistedMembershipAddresses,
+} from '../types';
 
 export type Invite = {
   id: string;
@@ -208,6 +213,20 @@ export class Circle extends ProfileModel {
    */
   @prop({ default: [] })
   labels: string[];
+
+  @prop()
+  questbookWorkspaceUrl?: string;
+  @prop()
+  questbookWorkspaceId?: string;
+
+  @prop()
+  grantMilestoneProject?: string;
+
+  @prop()
+  grantApplicantProject?: string;
+
+  @prop()
+  whitelistedMemberAddresses?: WhitelistedMembershipAddresses;
 }
 
 export class ExtendedCircle extends Circle {

@@ -103,6 +103,21 @@ export class UpdateCircleRequestDto extends OmitType(CreateCircleRequestDto, [
   @IsArray()
   @IsOptional()
   labels?: string[];
+
+  @IsString()
+  @IsOptional()
+  questbookWorkspaceUrl?: string;
+  @IsString()
+  @IsOptional()
+  questbookWorkspaceId?: string;
+
+  @IsString()
+  @IsOptional()
+  grantMilestoneProject?: string;
+
+  @IsString()
+  @IsOptional()
+  grantApplicantProject?: string;
 }
 
 export class UpdateCircleGithubRepoRequestDto {

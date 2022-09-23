@@ -37,9 +37,10 @@ export class MintKudosService {
 
   private async getEncodedString(id: string): Promise<string> {
     const privateProps = await this.getPrivateProps(id);
-    return Buffer.from(
-      privateProps.mintkudosCommunityId + ':' + privateProps.mintkudosApiKey,
-    ).toString('base64');
+    const stringToEncode =
+      privateProps.mintkudosCommunityId + ':' + privateProps.mintkudosApiKey;
+    console.log(stringToEncode);
+    return Buffer.from(stringToEncode).toString('base64');
   }
 
   async mintKudos(id: string, kudos: MintKudosDto): Promise<string> {
@@ -54,7 +55,7 @@ export class MintKudosService {
         method: 'POST',
         body: JSON.stringify(kudos),
       });
-
+      console.log(res);
       const operationId = res.headers.get('Location');
       return operationId;
     } catch (e) {

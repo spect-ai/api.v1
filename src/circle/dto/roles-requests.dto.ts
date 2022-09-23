@@ -106,6 +106,13 @@ export class AddRoleDto {
   /**
    * Can the role be assigned to self?
    */
+  @IsBoolean()
+  @IsOptional()
+  mutable?: boolean;
+
+  /**
+   * Can the role be assigned to self?
+   */
   @ValidateNested()
   @Type(() => Permissions)
   @IsNotEmpty()

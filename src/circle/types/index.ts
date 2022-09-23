@@ -40,3 +40,7 @@ export type PopulatedCircleFields = {
 export type SafeAddresses = {
   [chaninId: string]: string[];
 };
+
+export type WhitelistedMembershipAddresses = {
+  [address: string]: string[]; //Rokes
+};

@@ -26,6 +26,7 @@ import {
   AddProjectsToMultipleCirclesCommandHandler,
 } from '../projects/handlers/add-projects.handler';
 import { ArchiveCircleByIdCommandHandler } from '../archive/handlers/archive-circle.handler';
+import { WhitelistMemberAddressCommandHandler } from '../roles/handlers/whitelist-member-address.handler';
 
 export const CommandHandlers = [
   RemoveProjectsCommandHandler,
@@ -48,4 +49,5 @@ export const CommandHandlers = [
   ClaimCircleCommandHandler,
   UpdateCircleCommandHandler,
   ArchiveCircleByIdCommandHandler,
+  WhitelistMemberAddressCommandHandler,
 ];
