@@ -118,6 +118,13 @@ export class UpdateCircleRequestDto extends OmitType(CreateCircleRequestDto, [
   @IsString()
   @IsOptional()
   grantApplicantProject?: string;
+
+  /**
+   * Payment address of the circle
+   */
+  @IsString()
+  @IsOptional()
+  paymentAddress?: string;
 }
 
 export class UpdateCircleGithubRepoRequestDto {

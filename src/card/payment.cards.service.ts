@@ -37,6 +37,7 @@ export class CardsPaymentService {
   async aggregatePaymentInfo(
     cardIds: string[],
     chainId: string,
+    payCircle: boolean,
     payForChildren = true,
   ): Promise<AggregatedFlattenedPaymentInfo> {
     try {
@@ -64,6 +65,7 @@ export class CardsPaymentService {
         approval: { tokenAddresses: [], values: [] },
         currency: { userIds: [], values: [] },
         tokens: { tokenAddresses: [], userIds: [], values: [] },
+        payCircle,
       } as AggregatedFlattenedPaymentInfo;
 
       /*
@@ -93,7 +95,7 @@ export class CardsPaymentService {
        */
       const paymentInfo = {};
       for (const card of cards) {
-        const assignees = card.assignee;
+        const assignees = payCircle ? [card.assignedCircle] : card.assignee;
         const reward = card.reward;
         if (reward.value > 0 && assignees.length > 0) {
           const rewardValues = this.getDividedRewards(reward.value, assignees);

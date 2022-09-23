@@ -113,4 +113,11 @@ export class CreateCardRequestDto {
   @IsArray()
   @IsOptional()
   childCards?: CreateCardRequestDto[];
+
+  /**
+   * assigne circle
+   */
+  @IsObjectId()
+  @IsOptional()
+  assignedCircle?: string;
 }

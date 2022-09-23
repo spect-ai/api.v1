@@ -184,6 +184,12 @@ export class Card extends BaseModel {
    */
   @prop({})
   kudosClaimedBy?: KudosClaimedType;
+
+  /**
+   * Assigned circle
+   */
+  @prop({ ref: () => Circle, type: Schema.Types.String, required: false })
+  assignedCircle: string;
 }
 
 export class ExtendedCard extends Card {
