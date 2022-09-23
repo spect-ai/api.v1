@@ -43,6 +43,7 @@ export class CreateCardCommandHandler
   }> {
     try {
       const { createCardDto, circle, caller, parentCard } = command;
+      console.log(`creating card ${createCardDto.title}`);
       let project = command.project;
       const cardNum =
         project.cardCount ||
@@ -57,6 +58,8 @@ export class CreateCardCommandHandler
         cardNum,
         caller,
       );
+      console.log(`avd`);
+
       /** Commit to db */
       const createdCard = await this.cardsRepository.create(newCard);
       /** Get the added sub card objects */
@@ -68,6 +71,7 @@ export class CreateCardCommandHandler
         cardNum + 1,
         caller,
       );
+      console.log(`cccc`);
 
       /** Commit to db */
       const createdChildCards = await this.cardsRepository.insertMany(
@@ -81,6 +85,7 @@ export class CreateCardCommandHandler
         createdChildCards,
         createdCard,
       );
+      console.log(`123`);
 
       /** Merge all the card updates */
       const updatedCards = this.commonTools.mergeObjects(
@@ -90,6 +95,7 @@ export class CreateCardCommandHandler
 
       const updateAcknowledgment =
         await this.cardsRepository.bundleUpdatesAndExecute(updatedCards);
+      console.log(`vbb`);
 
       if (updateAcknowledgment.hasWriteErrors()) {
         throw updateAcknowledgment.getWriteErrors();
@@ -110,6 +116,7 @@ export class CreateCardCommandHandler
           new UpdateProjectCardNumByIdCommand(project.id, cardNum + 1),
         );
       }
+      console.log(`gg`);
 
       for (const card of [createdCard, ...createdChildCards]) {
         this.eventBus.publish(

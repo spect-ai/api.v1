@@ -44,3 +44,8 @@ export type SafeAddresses = {
 export type WhitelistedMembershipAddresses = {
   [address: string]: string[]; //Rokes
 };
+
+export type DiscordChannel = {
+  id: string;
+  name: string;
+};

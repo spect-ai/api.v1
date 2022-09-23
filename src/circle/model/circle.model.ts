@@ -11,6 +11,7 @@ import { Retro } from 'src/retro/models/retro.model';
 import { User } from 'src/users/model/users.model';
 import {
   BlacklistRegistry,
+  DiscordChannel,
   LocalRegistry,
   SafeAddresses,
   WhitelistedMembershipAddresses,
@@ -233,6 +234,9 @@ export class Circle extends ProfileModel {
 
   @prop()
   whitelistedMemberAddresses?: WhitelistedMembershipAddresses;
+
+  @prop()
+  grantNotificationChannel?: DiscordChannel;
 }
 
 export class ExtendedCircle extends Circle {

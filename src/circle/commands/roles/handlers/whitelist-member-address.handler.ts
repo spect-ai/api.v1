@@ -23,6 +23,7 @@ export class WhitelistMemberAddressCommandHandler
       }
       const existingRoles = roles.map((r) => {
         if (circleToUpdate.roles && circleToUpdate.roles[r]) return r;
+        else return [];
       });
       const updatedCircle =
         await this.circlesRepository.updateCircleAndReturnWithPopulatedReferences(

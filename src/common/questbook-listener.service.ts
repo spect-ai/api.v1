@@ -18,6 +18,8 @@ import { CirclePermission } from './types/role.type';
 import { WhitelistMemberAddressCommand } from 'src/circle/commands/roles/impl/whitelist-member-address.command';
 import { CreateCardCommand } from 'src/card/commands/impl';
 import { GetProjectByIdQuery } from 'src/project/queries/impl';
+import { DiscordService } from './discord.service';
+import { Card } from 'src/card/model/card.model';
 
 @Injectable()
 export class QuestbookListener {
@@ -25,14 +27,13 @@ export class QuestbookListener {
   private optimismProvider;
   private polygonProvider;
   private questbookApplicationContractOnOptimism;
-  private questbookWorkspaceContractOnOptimism;
   private questbookApplicationContractOnPolygon;
-  private questbookWorkspaceContractOnPolygon;
 
   constructor(
     private readonly commandBus: CommandBus,
     private readonly queryBus: QueryBus,
     private readonly logger: LoggingService,
+    private readonly discordService: DiscordService,
   ) {
     console.log('Questbook listener');
 
@@ -77,11 +78,6 @@ export class QuestbookListener {
         qbApplicationRegistryAbi,
         signer,
       );
-      this.questbookWorkspaceContractOnOptimism = new ethers.Contract(
-        '0x2dB223158288B2299480aF577eDF30D5a533F137',
-        qbWorkspaceRegistryAbi,
-        signer,
-      );
     }
   }
 
@@ -122,24 +118,29 @@ export class QuestbookListener {
         );
         const parsedApplication =
           this.parseApplicationMetadata(applicationMetadata);
-        console.log(parsedApplication);
         const parentCircle = await this.getParentCircle(decodedEvents[0]);
-        console.log(parentCircle);
         if (parentCircle) {
-          await this.commandBus.execute(
+          const granteeCircle = await this.commandBus.execute(
             new CreateClaimableCircleCommand({
               name: parsedApplication.projectName,
               qualifiedClaimee: [parsedApplication.applicantAddress],
               parent: parentCircle.id,
             }),
           );
-
           await this.addGranteeToParentCircle(
             parentCircle,
             parsedApplication.applicantAddress,
           );
-          await this.createMilestone(parentCircle);
-          await this.addGranteeToGranteeProject(parentCircle);
+
+          const createdGranteeCard = await this.addGranteeToGranteeProject(
+            parentCircle,
+            granteeCircle,
+            parsedApplication,
+          );
+          await this.createMilestone(parentCircle, parsedApplication);
+
+          if (createdGranteeCard)
+            await this.notify(parentCircle, createdGranteeCard);
         }
       }
     } catch (e) {
@@ -152,8 +153,6 @@ export class QuestbookListener {
       await this.questbookApplicationContractOnOptimism.applications(
         BigNumber.from(applicationId),
       );
-    console.log('application');
-    console.log(application);
 
     if (!application) return null;
     const circle = await this.queryBus.execute(
@@ -167,9 +166,9 @@ export class QuestbookListener {
   }
 
   private parseApplicationMetadata(applicationMetadata: any): any {
-    console.log(applicationMetadata);
     const applicationFields = applicationMetadata.fields;
     const res = {};
+    console.log(applicationFields);
     res['applicantName'] = applicationFields['applicantName'][0].value;
     res['applicantEmail'] =
       applicationFields['applicantEmail'] &&
@@ -219,7 +218,7 @@ export class QuestbookListener {
     circle: Circle,
     applicantAddress: string,
   ) {
-    if (!circle.roles && circle.roles['grantee']) {
+    if (!circle.roles || !circle.roles['grantee']) {
       await this.commandBus.execute(
         new AddRoleCommand(
           {
@@ -273,21 +272,24 @@ export class QuestbookListener {
   }
 
   private async createMilestone(circle: Circle, application: any) {
+    console.log(application);
     if (circle.grantApplicantProject) {
       const project = await this.queryBus.execute(
         new GetProjectByIdQuery(circle.grantMilestoneProject),
       );
-      if (!(project.columOrder.length > 0)) return;
+      console.log('milestones');
+      console.log(application.milestones);
+      if (!(project.columnOrder.length > 0)) return;
       if (application.milestones) {
         for (const milestone of application.milestones) {
           await this.commandBus.execute(
             new CreateCardCommand(
               {
-                title: milestone.title,
+                title: `${application.projectName}-${milestone.title}`,
                 project: circle.grantMilestoneProject,
                 circle: circle.id,
                 type: 'Task',
-                columnId: project.columOrder[0],
+                columnId: project.columnOrder[0],
                 reward: {
                   ...circle.defaultPayment,
                   value: milestone.amount,
@@ -312,23 +314,43 @@ export class QuestbookListener {
       const project = await this.queryBus.execute(
         new GetProjectByIdQuery(circle.grantApplicantProject),
       );
-      if (!(project.columOrder.length > 0)) return;
-      await this.commandBus.execute(
+      if (!(project.columnOrder.length > 0)) return;
+      console.log('grantee');
+      console.log(application.projectName);
+      const card = await this.commandBus.execute(
         new CreateCardCommand(
           {
             title: application.projectName,
             project: circle.grantApplicantProject,
             circle: circle.id,
             type: 'Task',
-            columnId: project.columOrder[0],
+            columnId: project.columnOrder[0],
+            assignedCircle: grantCircle.id,
           },
           project,
           circle,
           null,
         ),
       );
+      return card;
     }
+    return false;
   }
 
-  private async notify(circle: Circle) {}
+  private async notify(circle: Circle, card: Card) {
+    if (circle.discordGuildId && circle.grantNotificationChannel) {
+      const res = await this.discordService.postCardUpdate(
+        card,
+        circle.discordGuildId,
+        circle.grantNotificationChannel?.id,
+      );
+      if (!res.ok) {
+        this.logger.error(
+          `Notifying grant application acceptance failed with response ${JSON.stringify(
+            res,
+          )}`,
+        );
+      }
+    }
+  }
 }
