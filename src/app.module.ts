@@ -47,7 +47,6 @@ import { ConfigModule } from '@nestjs/config';
 import { ContractListener } from './common/contract-listener.service';
 import { QuestbookListener } from './common/questbook-listener.service';
 import { CollectionController } from './collection/collection.controller';
-import { DataController } from './data/data.controller';
 import { CollectionModule } from './collection/collection.module';
 
 const databaseUrl =
@@ -83,7 +82,6 @@ console.log({ databaseUrl });
     TemplatesController,
     RegistryController,
     CollectionController,
-    DataController,
   ],
   providers: [
     AppService,

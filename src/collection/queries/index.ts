@@ -1,15 +1,15 @@
-export * from './handlers/get-collection.handler';
+export * from './impl/get-collection.query';
 
 import {
-  GetCollectionByFilterQuery,
-  GetCollectionByIdQuery,
-  GetCollectionBySlugQuery,
-  GetMultipleCollectionsQuery,
-} from './impl/get-collection.query';
+  GetCollectionByFilterQueryHandler,
+  GetCollectionByIdQueryHandler,
+  GetCollectionBySlugQueryHandler,
+  GetMultipleCollectionsQueryHandler,
+} from './handlers/get-collection.handler';
 
 export const QueryHandlers = [
-  GetCollectionByIdQuery,
-  GetCollectionByFilterQuery,
-  GetCollectionBySlugQuery,
-  GetMultipleCollectionsQuery,
+  GetCollectionByFilterQueryHandler,
+  GetCollectionByIdQueryHandler,
+  GetCollectionBySlugQueryHandler,
+  GetMultipleCollectionsQueryHandler,
 ];

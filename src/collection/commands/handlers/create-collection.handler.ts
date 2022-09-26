@@ -1,10 +1,11 @@
 import { CommandHandler, ICommandHandler, QueryBus } from '@nestjs/cqrs';
 import { CollectionRepository } from 'src/collection/collection.repository';
 import { Collection } from 'src/collection/model/collection.model';
-import { Properties } from 'src/collection/types/types';
 import { CommonTools } from 'src/common/common.service';
 import { CreateCollectionCommand } from '../impl/create-collection.command';
 import { v4 as uuidv4 } from 'uuid';
+import { MappedItem } from 'src/common/interfaces';
+import { Property } from 'src/collection/types/types';
 
 @CommandHandler(CreateCollectionCommand)
 export class CreateCollectionCommandHandler
@@ -19,12 +20,12 @@ export class CreateCollectionCommandHandler
   async execute(command: CreateCollectionCommand): Promise<Collection> {
     const { createCollectionDto, caller } = command;
 
-    let properties = {} as Properties;
+    let properties = {} as MappedItem<Property>;
     if (createCollectionDto.properties) {
       properties = this.commonTools.objectify(
         createCollectionDto.properties,
         'name',
-      ) as Properties;
+      ) as MappedItem<Property>;
     }
 
     const createdCollection = await this.collectionRepository.create({

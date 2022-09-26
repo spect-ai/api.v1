@@ -1,4 +1,10 @@
-import { IsNotEmpty, IsObject, IsOptional, IsString } from 'class-validator';
+import {
+  IsBoolean,
+  IsNotEmpty,
+  IsObject,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 import { Property } from '../types/types';
 
 export class CreateCollectionDto {
@@ -10,10 +16,17 @@ export class CreateCollectionDto {
   name: string;
 
   /**
+   * Private collection
+   */
+  @IsBoolean()
+  @IsOptional()
+  private: boolean;
+
+  /**
    * The purpose of creating this collection
    */
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   purpose: string;
 
   /**

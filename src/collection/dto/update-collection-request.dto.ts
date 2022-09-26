@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IsBoolean, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 export class UpdateCollectionDto {
   /**
@@ -7,6 +7,12 @@ export class UpdateCollectionDto {
   @IsString()
   @IsOptional()
   name?: string;
+  /**
+   * Private collection
+   */
+  @IsBoolean()
+  @IsOptional()
+  private: boolean;
 
   /**
    * The purpose of creating this collection

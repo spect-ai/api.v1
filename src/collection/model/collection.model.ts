@@ -20,15 +20,20 @@ export class Collection extends BaseModel {
   @prop({ required: true })
   slug: string;
   /**
+   * Is collection private?
+   */
+  @prop({ default: false })
+  private: boolean;
+  /**
    * The purpose of the collection
    */
-  @prop({ required: true })
+  @prop()
   purpose: string;
 
   /**
    * Properties in the collection
    */
-  @prop({ default: false })
+  @prop()
   properties: MappedItem<Property>;
 
   /**
