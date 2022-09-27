@@ -31,7 +31,7 @@ export class DiscordService {
     url: string,
   ) {
     const res = await fetch(
-      `http://localhost:3001/api/postNotificationOnNewCircle?guildId=${guildId}`,
+      `https://spect-discord-bot.herokuapp.com/api/postNotificationOnNewCircle?guildId=${guildId}`,
       {
         headers: {
           'Content-Type': 'application/json',
