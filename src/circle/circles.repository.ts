@@ -168,6 +168,7 @@ export class CirclesRepository extends BaseRepository<Circle> {
     const query = this.findOne(filterQuery, {
       projection: selectedFields || {},
     });
+
     let populatedFields = defaultPopulate;
     if (customPopulate) populatedFields = customPopulate;
 

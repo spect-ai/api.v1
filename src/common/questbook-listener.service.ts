@@ -3,11 +3,9 @@ import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { Alchemy, Network } from 'alchemy-sdk';
 import { ethers, utils, BigNumber } from 'ethers';
 import { LoggingService } from 'src/logging/logging.service';
-// import ipfsClient from 'ipfs-http-client';
 import fetch from 'node-fetch';
 import {
   AddRoleCommand,
-  CreateCircleCommand,
   CreateClaimableCircleCommand,
 } from 'src/circle/commands/impl';
 import { qbApplicationRegistryAbi } from './abis/questbookApplicationRegistry';
@@ -20,6 +18,7 @@ import { CreateCardCommand } from 'src/card/commands/impl';
 import { GetProjectByIdQuery } from 'src/project/queries/impl';
 import { DiscordService } from './discord.service';
 import { Card } from 'src/card/model/card.model';
+import { CreateProjectCommand } from 'src/project/commands/impl';
 
 @Injectable()
 export class QuestbookListener {
@@ -49,6 +48,17 @@ export class QuestbookListener {
       this.polygonProvider = new ethers.providers.AlchemyProvider(
         'matic',
         process.env.ALCHEMY_API_KEY_POLYGON,
+      );
+
+      const signer = new ethers.Wallet(
+        process.env.PRIVATE_KEY,
+        this.polygonProvider,
+      );
+
+      this.questbookApplicationContractOnPolygon = new ethers.Contract(
+        '0xE9d6c045232b7f4C07C151f368E747EBE46209E4',
+        qbApplicationRegistryAbi,
+        signer,
       );
     }
 
@@ -113,34 +123,53 @@ export class QuestbookListener {
           log.data,
           log.topics,
         );
-        const applicationMetadata = await this.fetchMetadataFromIPFS(
-          decodedEvents[2],
-        );
-        const parsedApplication =
-          this.parseApplicationMetadata(applicationMetadata);
-        const parentCircle = await this.getParentCircle(decodedEvents[0]);
-        if (parentCircle) {
-          const granteeCircle = await this.commandBus.execute(
-            new CreateClaimableCircleCommand({
-              name: parsedApplication.projectName,
-              qualifiedClaimee: [parsedApplication.applicantAddress],
-              parent: parentCircle.id,
-            }),
-          );
-          await this.addGranteeToParentCircle(
-            parentCircle,
-            parsedApplication.applicantAddress,
+        if (
+          decodedEvents[3] &&
+          BigNumber.from(decodedEvents[3]).toNumber() === 2
+        ) {
+          let application;
+          if (chainId === '10')
+            application =
+              await this.questbookApplicationContractOnOptimism.applications(
+                BigNumber.from(decodedEvents[0]),
+              );
+          else if (chainId === '137')
+            application =
+              await this.questbookApplicationContractOnPolygon.applications(
+                BigNumber.from(decodedEvents[0]),
+              );
+          if (!application) return null;
+
+          const applicationMetadata = await this.fetchMetadataFromIPFS(
+            application.metadataHash,
           );
 
-          const createdGranteeCard = await this.addGranteeToGranteeProject(
-            parentCircle,
-            granteeCircle,
-            parsedApplication,
-          );
-          await this.createMilestone(parentCircle, parsedApplication);
+          const parsedApplication =
+            this.parseApplicationMetadata(applicationMetadata);
+          const parentCircle = await this.getParentCircle(application);
+          if (parentCircle) {
+            const granteeCircle = await this.createGranteeCircle(
+              parsedApplication,
+              parentCircle,
+            );
+            await this.addGranteeToParentCircle(
+              parentCircle,
+              parsedApplication.applicantAddress,
+            );
 
-          if (createdGranteeCard)
-            await this.notify(parentCircle, createdGranteeCard);
+            await this.addGranteeToGranteeProject(
+              parentCircle,
+              granteeCircle,
+              parsedApplication,
+            );
+            await this.createMilestone(
+              parentCircle,
+              granteeCircle,
+              parsedApplication,
+            );
+
+            if (granteeCircle) await this.notify(parentCircle, granteeCircle);
+          }
         }
       }
     } catch (e) {
@@ -148,16 +177,11 @@ export class QuestbookListener {
     }
   }
 
-  private async getParentCircle(applicationId: number) {
-    const application =
-      await this.questbookApplicationContractOnOptimism.applications(
-        BigNumber.from(applicationId),
-      );
-
-    if (!application) return null;
+  private async getParentCircle(application: any) {
+    if (!application.workspaceId) return null;
     const circle = await this.queryBus.execute(
       new GetCircleByFilterQuery({
-        questbookWorkspaceId: application.workspaceId?.toHexString(),
+        questbookWorkspaceId: application.workspaceId.toHexString(),
       }),
     );
     if (!circle) return null;
@@ -168,7 +192,6 @@ export class QuestbookListener {
   private parseApplicationMetadata(applicationMetadata: any): any {
     const applicationFields = applicationMetadata.fields;
     const res = {};
-    console.log(applicationFields);
     res['applicantName'] = applicationFields['applicantName'][0].value;
     res['applicantEmail'] =
       applicationFields['applicantEmail'] &&
@@ -188,7 +211,7 @@ export class QuestbookListener {
       applicationFields['projectGoals'].length > 0
         ? applicationFields['projectGoals'][0].value
         : null;
-    res['milestones'] = applicationFields['milestones'] || [];
+    res['milestones'] = applicationMetadata['milestones'] || [];
 
     return res;
   }
@@ -212,6 +235,35 @@ export class QuestbookListener {
       return await res.json();
     }
     return false;
+  }
+
+  private async createGranteeCircle(
+    parsedApplication: any,
+    parentCircle: Circle,
+  ): Promise<Circle> {
+    const granteeCircle = await this.commandBus.execute(
+      new CreateClaimableCircleCommand({
+        name: parsedApplication.projectName,
+        qualifiedClaimee: [parsedApplication.applicantAddress],
+        parent: parentCircle.id,
+      }),
+    );
+    try {
+      await this.commandBus.execute(
+        new CreateProjectCommand({
+          name: `${parentCircle.name} Grant`,
+          circleId: granteeCircle.id,
+          fromTemplateId: '6316cfe0013982438514cc7a', // TODO: Remove hardcoded value
+        }),
+      );
+    } catch (err) {
+      this.logger.error(
+        `Failed creating grantee project wih error ${err.message}`,
+      );
+    }
+
+    // await this.commandBus.execute;
+    return granteeCircle;
   }
 
   private async addGranteeToParentCircle(
@@ -271,14 +323,15 @@ export class QuestbookListener {
     );
   }
 
-  private async createMilestone(circle: Circle, application: any) {
-    console.log(application);
+  private async createMilestone(
+    circle: Circle,
+    grantCircle: Circle,
+    application: any,
+  ) {
     if (circle.grantApplicantProject) {
       const project = await this.queryBus.execute(
         new GetProjectByIdQuery(circle.grantMilestoneProject),
       );
-      console.log('milestones');
-      console.log(application.milestones);
       if (!(project.columnOrder.length > 0)) return;
       if (application.milestones) {
         for (const milestone of application.milestones) {
@@ -294,6 +347,7 @@ export class QuestbookListener {
                   ...circle.defaultPayment,
                   value: milestone.amount,
                 },
+                assignedCircle: grantCircle.id,
               },
               project,
               circle,
@@ -315,8 +369,6 @@ export class QuestbookListener {
         new GetProjectByIdQuery(circle.grantApplicantProject),
       );
       if (!(project.columnOrder.length > 0)) return;
-      console.log('grantee');
-      console.log(application.projectName);
       const card = await this.commandBus.execute(
         new CreateCardCommand(
           {
@@ -337,12 +389,13 @@ export class QuestbookListener {
     return false;
   }
 
-  private async notify(circle: Circle, card: Card) {
+  private async notify(circle: Circle, granteeCircle: Circle) {
     if (circle.discordGuildId && circle.grantNotificationChannel) {
-      const res = await this.discordService.postCardUpdate(
-        card,
+      const res = await this.discordService.postNotificationOnNewCircle(
+        granteeCircle,
+        [circle.grantNotificationChannel],
         circle.discordGuildId,
-        circle.grantNotificationChannel?.id,
+        `https://circles.spect.network/${granteeCircle.slug}`,
       );
       if (!res.ok) {
         this.logger.error(

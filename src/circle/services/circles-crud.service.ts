@@ -60,7 +60,7 @@ export class CirclesCrudService {
   ): Promise<DetailedCircleResponseDto> {
     try {
       const circle = await this.commandBus.execute(
-        new CreateCircleCommand(createCircleDto, this.requestProvider.user.id),
+        new CreateCircleCommand(createCircleDto, this.requestProvider.user),
       );
       return circle;
     } catch (error) {

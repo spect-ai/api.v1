@@ -115,7 +115,7 @@ export class CreateCardRequestDto {
   childCards?: CreateCardRequestDto[];
 
   /**
-   * assigne circle
+   * assigned circle
    */
   @IsObjectId()
   @IsOptional()

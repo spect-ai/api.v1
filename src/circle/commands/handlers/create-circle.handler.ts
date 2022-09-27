@@ -48,16 +48,17 @@ export class CreateCircleCommandHandler
       }
       let createdCircle: Circle;
       const memberRoles = {};
-      memberRoles[caller] = defaultCircleCreatorRoles;
+      memberRoles[caller.id] = defaultCircleCreatorRoles;
       if (parentCircle) {
         createdCircle = await this.circlesRepository.create({
           ...createCircleDto,
           slug: slug,
           parents: [parentCircle._id],
-          members: [caller],
+          members: [caller.id],
           memberRoles: memberRoles,
           roles: defaultCircleRoles,
           localRegistry: {},
+          paymentAddress: caller.ethAddress,
         });
         await this.circlesRepository.updateById(parentCircle.id as string, {
           ...parentCircle,
@@ -67,14 +68,14 @@ export class CreateCircleCommandHandler
         createdCircle = await this.circlesRepository.create({
           ...createCircleDto,
           slug: slug,
-          members: [caller],
+          members: [caller.id],
           memberRoles: memberRoles,
           roles: defaultCircleRoles,
           localRegistry: {},
         });
       }
 
-      this.eventBus.publish(new CreatedCircleEvent(createdCircle, caller));
+      this.eventBus.publish(new CreatedCircleEvent(createdCircle, caller.id));
 
       return createdCircle;
     } catch (error) {
