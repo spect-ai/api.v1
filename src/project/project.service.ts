@@ -25,8 +25,10 @@ import {
 import { Project } from './model/project.model';
 import { ProjectsRepository } from './project.repository';
 import { LoggingService } from 'src/logging/logging.service';
-import { EventBus } from '@nestjs/cqrs';
+import { CommandBus, EventBus, QueryBus } from '@nestjs/cqrs';
 import { CreatedProjectEvent } from './events/impl';
+import { ImportTrelloCommand } from './commands/import/impl';
+import { GetProjectByIdQuery } from './queries/impl';
 
 @Injectable()
 export class ProjectService {
@@ -40,6 +42,8 @@ export class ProjectService {
     private readonly requestProvider: RequestProvider,
     private readonly logger: LoggingService,
     private readonly eventBus: EventBus,
+    private readonly commandBus: CommandBus,
+    private readonly queryBus: QueryBus,
   ) {
     logger.setContext('ProjectService');
   }
@@ -134,7 +138,19 @@ export class ProjectService {
       this.eventBus.publish(
         new CreatedProjectEvent(createdProject, this.requestProvider.user?.id),
       );
-      return createdProject;
+      if (createProjectDto.trelloId) {
+        await this.commandBus.execute(
+          new ImportTrelloCommand(
+            createdProject.id,
+            createProjectDto.trelloId,
+            this.requestProvider.user?.id,
+          ),
+        );
+      }
+      const updatedProject = await this.queryBus.execute(
+        new GetProjectByIdQuery(createdProject.id),
+      );
+      return updatedProject;
     } catch (error) {
       this.logger.logError(
         `Failed project creation with error: ${error.message}`,

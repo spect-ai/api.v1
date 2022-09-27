@@ -5,6 +5,7 @@ import {
   Param,
   Patch,
   Query,
+  Request,
   SetMetadata,
   UseGuards,
 } from '@nestjs/common';
@@ -31,8 +32,6 @@ import { CrudOrchestrator } from './orchestrators/crud-orchestrator.service';
 import {
   GetDetailedProjectByIdQuery,
   GetDetailedProjectBySlugQuery,
-  GetProjectByIdQuery,
-  GetProjectBySlugQuery,
 } from './queries/impl';
 
 @Controller('project/v1')

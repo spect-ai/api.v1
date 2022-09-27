@@ -73,4 +73,11 @@ export class CreateProjectRequestDto {
   @IsString()
   @IsOptional()
   fromTemplateId?: string;
+
+  /**
+   * The views of the project
+   */
+  @IsString()
+  @IsOptional()
+  trelloId?: string;
 }

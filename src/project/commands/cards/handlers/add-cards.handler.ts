@@ -19,6 +19,7 @@ export class AddCardsCommandHandler
     try {
       const { project, id, cards, lastCardCount } = command;
       let projectToUpdate = project;
+
       if (!projectToUpdate) {
         projectToUpdate = await this.projectRepository.findById(id);
       }
@@ -28,6 +29,7 @@ export class AddCardsCommandHandler
 
       const cardIds = [];
       const columnDetails = { ...projectToUpdate.columnDetails };
+
       if (Object.keys(columnDetails).length === 0) {
         throw new Error('No columns found');
       }
@@ -50,7 +52,6 @@ export class AddCardsCommandHandler
           }
         }
       }
-
       const updatedProject =
         await this.projectRepository.updateProjectAndReturnWithPopulatedReferences(
           projectToUpdate.id,

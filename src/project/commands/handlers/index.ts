@@ -14,6 +14,7 @@ import {
   UpdateProjectCardNumByIdCommandHandler,
 } from './update-project.handler';
 import { CreateAutomationCommandHandler } from '../automation/handlers/create-automation.handler';
+import { ImportTrelloCommandHandler } from '../import/handlers/import-trello.handler';
 
 export const CommandHandlers = [
   AddCardsCommandHandler,
@@ -26,4 +27,5 @@ export const CommandHandlers = [
   CreateAutomationCommandHandler,
   UpdateProjectByIdCommandHandler,
   UpdateProjectCardNumByIdCommandHandler,
+  ImportTrelloCommandHandler,
 ];
