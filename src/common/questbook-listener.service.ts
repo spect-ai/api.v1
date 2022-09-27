@@ -6,7 +6,6 @@ import { LoggingService } from 'src/logging/logging.service';
 import fetch from 'node-fetch';
 import {
   AddRoleCommand,
-  CreateCircleCommand,
   CreateClaimableCircleCommand,
 } from 'src/circle/commands/impl';
 import { qbApplicationRegistryAbi } from './abis/questbookApplicationRegistry';
