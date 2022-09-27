@@ -49,6 +49,17 @@ export class QuestbookListener {
         'matic',
         process.env.ALCHEMY_API_KEY_POLYGON,
       );
+
+      const signer = new ethers.Wallet(
+        process.env.PRIVATE_KEY,
+        this.polygonProvider,
+      );
+
+      this.questbookApplicationContractOnPolygon = new ethers.Contract(
+        '0xE9d6c045232b7f4C07C151f368E747EBE46209E4',
+        qbApplicationRegistryAbi,
+        signer,
+      );
     }
 
     if (process.env.ALCHEMY_API_KEY_OPTIMISM) {
@@ -116,11 +127,17 @@ export class QuestbookListener {
           decodedEvents[3] &&
           BigNumber.from(decodedEvents[3]).toNumber() === 2
         ) {
-          const application =
-            await this.questbookApplicationContractOnOptimism.applications(
-              BigNumber.from(decodedEvents[0]),
-            );
-
+          let application;
+          if (chainId === '10')
+            application =
+              await this.questbookApplicationContractOnOptimism.applications(
+                BigNumber.from(decodedEvents[0]),
+              );
+          else if (chainId === '137')
+            application =
+              await this.questbookApplicationContractOnPolygon.applications(
+                BigNumber.from(decodedEvents[0]),
+              );
           if (!application) return null;
 
           const applicationMetadata = await this.fetchMetadataFromIPFS(
