@@ -132,6 +132,13 @@ export class UpdateCircleRequestDto extends OmitType(CreateCircleRequestDto, [
   @IsObject()
   @IsOptional()
   grantNotificationChannel?: DiscordChannel;
+
+  /**
+   * Projects that are part of the circle
+   */
+  @IsString()
+  @IsOptional()
+  projects?: string[];
 }
 
 export class UpdateCircleGithubRepoRequestDto {

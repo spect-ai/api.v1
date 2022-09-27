@@ -1,6 +1,8 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import fetch from 'node-fetch';
 import { Card } from 'src/card/model/card.model';
+import { Circle } from 'src/circle/model/circle.model';
+import { DiscordChannel } from 'src/circle/types';
 
 // TODO
 @Injectable()
@@ -22,17 +24,23 @@ export class DiscordService {
     throw new InternalServerErrorException();
   }
 
-  async postCardUpdate(card: Card, channelId: string, guildId: string) {
+  async postNotificationOnNewCircle(
+    circle: Circle,
+    channels: DiscordChannel[],
+    guildId: string,
+    url: string,
+  ) {
     const res = await fetch(
-      `http://localhost:3001/api/postTaskUpdate?guildId=${guildId}`,
+      `http://localhost:3001/api/postNotificationOnNewCircle?guildId=${guildId}`,
       {
         headers: {
           'Content-Type': 'application/json',
         },
         method: 'POST',
         body: JSON.stringify({
-          task: card,
-          channels: [channelId],
+          circle,
+          channels,
+          url,
         }),
       },
     );
