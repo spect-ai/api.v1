@@ -178,9 +178,10 @@ export class QuestbookListener {
   }
 
   private async getParentCircle(application: any) {
+    if (!application.workspaceId) return null;
     const circle = await this.queryBus.execute(
       new GetCircleByFilterQuery({
-        questbookWorkspaceId: application.workspaceId?.toHexString(),
+        questbookWorkspaceId: application.workspaceId.toHexString(),
       }),
     );
     if (!circle) return null;
