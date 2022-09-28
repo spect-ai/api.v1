@@ -38,13 +38,6 @@ export class CreateCollectionDto {
   description: string;
 
   /**
-   * The properties associated with the collection
-   */
-  @IsObject()
-  @IsOptional()
-  properties?: Property[];
-
-  /**
    * The default view of the collection
    */
   @IsString()

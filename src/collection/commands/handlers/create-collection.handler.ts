@@ -24,7 +24,6 @@ export class CreateCollectionCommandHandler
     private readonly collectionRepository: CollectionRepository,
     private readonly queryBus: QueryBus,
     private readonly commandBus: CommandBus,
-    private readonly commonTools: CommonTools,
     private readonly logger: LoggingService,
   ) {
     this.logger.setContext('CreateCollectionCommandHandler');
@@ -34,15 +33,30 @@ export class CreateCollectionCommandHandler
     try {
       const { createCollectionDto, caller } = command;
 
-      let properties = {} as MappedItem<Property>;
-      if (createCollectionDto.properties) {
-        properties = this.commonTools.objectify(
-          createCollectionDto.properties,
-          'name',
-        ) as MappedItem<Property>;
-      }
+      const properties = {
+        title: {
+          name: 'title',
+          type: 'shortText',
+          default: '',
+          isPartOfFormView: true,
+        },
+        description: {
+          name: 'description',
+          type: 'longText',
+          default: '',
+          isPartOfFormView: true,
+        },
+        status: {
+          name: 'status',
+          type: 'singleSelect',
+          default: '',
+          isPartOfFormView: true,
+        },
+      } as MappedItem<Property>;
+      const propertyOrder = ['title', 'description', 'status'];
+
       const parentCircle = await this.queryBus.execute(
-        new GetCircleByIdQuery(createCollectionDto.circleId),
+        new GetCircleByIdQuery(createCollectionDto.circleId, {}),
       );
 
       if (!parentCircle)
@@ -51,6 +65,7 @@ export class CreateCollectionCommandHandler
       const createdCollection = await this.collectionRepository.create({
         ...createCollectionDto,
         properties,
+        propertyOrder,
         creator: caller,
         parents: [createCollectionDto.circleId],
         slug: uuidv4(),

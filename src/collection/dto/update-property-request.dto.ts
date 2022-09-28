@@ -1,33 +1,43 @@
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsBoolean, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 export class AddPropertyDto {
-  /**
-   * The properties associated with the collection
-   */
   @IsString()
   @IsNotEmpty()
   name: string;
 
-  /**
-   * The properties associated with the collection
-   */
   @IsString()
   @IsNotEmpty()
   type: string;
 
-  /**
-   * The properties associated with the collection
-   */
   @IsString()
   @IsNotEmpty()
   default: string;
 
-  /**
-   * The properties associated with the collection
-   */
-  @IsString()
+  @IsBoolean()
   @IsNotEmpty()
-  placeholder: string;
+  isPartOfFormView: boolean;
 }
 
-export class UpdatePropertyDto extends AddPropertyDto {}
+export class UpdatePropertyDto {
+  /**
+   * The name of the property
+   */
+  @IsString()
+  @IsOptional()
+  name: string;
+
+  @IsString()
+  @IsOptional()
+  type: string;
+
+  @IsString()
+  @IsOptional()
+  default: string;
+
+  /**
+   * Is the property visible in the forms?
+   */
+  @IsBoolean()
+  @IsOptional()
+  isPartOfFormView: boolean;
+}

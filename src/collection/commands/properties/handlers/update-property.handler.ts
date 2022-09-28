@@ -31,7 +31,10 @@ export class UpdatePropertyCommandHandler
         {
           properties: {
             ...collection.properties,
-            [propertyId]: updatePropertyCommandDto,
+            [propertyId]: {
+              ...collection.properties[propertyId],
+              updatePropertyCommandDto,
+            },
           },
         },
       );

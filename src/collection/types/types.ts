@@ -3,7 +3,6 @@ import { Data } from '../model/data.model';
 export type Property = {
   name: string;
   type: PropertyType;
-  value: any;
   isPartOfFormView: boolean;
   default?: any;
   condition?: any; // Show property only when condition is met
