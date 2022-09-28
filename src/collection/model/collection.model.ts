@@ -4,7 +4,7 @@ import { BaseModel } from 'src/base/base.model';
 import { useMongoosePlugin } from 'src/base/decorators/use-mongoose-plugins.decorator';
 import { Circle } from 'src/circle/model/circle.model';
 import { MappedItem } from 'src/common/interfaces';
-import { Property } from '../types/types';
+import { DefaultViewType, Property } from '../types/types';
 import { Data } from './data.model';
 
 @useMongoosePlugin()
@@ -25,10 +25,10 @@ export class Collection extends BaseModel {
   @prop({ default: false })
   private: boolean;
   /**
-   * The purpose of the collection
+   * The description of the collection
    */
   @prop()
-  purpose: string;
+  description: string;
 
   /**
    * Properties in the collection
@@ -37,7 +37,13 @@ export class Collection extends BaseModel {
   properties: MappedItem<Property>;
 
   /**
-   * The purpose of the collection
+   * Properties in the collection
+   */
+  @prop({ default: [] })
+  propertyOrder: string[];
+
+  /**
+   * The description of the collection
    */
   @prop({ required: true })
   creator: string;
@@ -59,4 +65,10 @@ export class Collection extends BaseModel {
    */
   @prop({ default: {} })
   indexes: MappedItem<string[]>;
+
+  /**
+   * The default view of the collection
+   */
+  @prop({ default: 'table' })
+  defaultView: DefaultViewType;
 }

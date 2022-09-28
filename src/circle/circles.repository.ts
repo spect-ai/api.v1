@@ -25,6 +25,11 @@ const defaultPopulate: PopulatedCircleFields = {
     description: 1,
     slug: 1,
   },
+  collections: {
+    id: 1,
+    name: 1,
+    slug: 1,
+  },
 };
 
 @Injectable()
@@ -42,6 +47,7 @@ export class CirclesRepository extends BaseRepository<Circle> {
       .populate('parents')
       .populate('children')
       .populate('projects')
+      .populate('collections')
       .populate('retro')
       .exec();
   }
@@ -51,6 +57,7 @@ export class CirclesRepository extends BaseRepository<Circle> {
       .populate('parents')
       .populate('children')
       .populate('projects')
+      .populate('collections')
       .populate('retro')
       .exec();
   }
@@ -63,6 +70,7 @@ export class CirclesRepository extends BaseRepository<Circle> {
       .populate('parents')
       .populate('children')
       .populate('projects')
+      .populate('collections')
       .populate('retro');
   }
 

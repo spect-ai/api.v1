@@ -49,6 +49,12 @@ export class DetailedCircleResponseDto {
   projects?: ObjectId[];
 
   /**
+   * The projects in the circle
+   */
+  @ValidateNested()
+  collections?: string[];
+
+  /**
    * The members in the circle
    */
   @ValidateNested()

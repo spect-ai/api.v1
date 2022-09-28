@@ -27,11 +27,16 @@ export class RemovePropertyCommandHandler
         throw `Cannot find property with id ${propertyId}`;
 
       delete collection.properties[propertyId];
+      if (collection.propertyOrder) {
+        const idx = collection.propertyOrder.indexOf(propertyId);
+        collection.propertyOrder = collection.propertyOrder.splice(idx);
+      }
 
       const updatedCollection = await this.collectionRepository.updateById(
         collectionId,
         {
           properties: collection.properties,
+          propertyOrder: collection.propertyOrder,
         },
       );
       return updatedCollection;

@@ -73,6 +73,11 @@ const getCirclePopulatedFields = {
     description: 1,
     id: 1,
   },
+  collections: {
+    name: 1,
+    slug: 1,
+    id: 1,
+  },
   children: {
     name: 1,
     slug: 1,

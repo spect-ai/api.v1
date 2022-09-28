@@ -5,7 +5,8 @@ import {
   IsOptional,
   IsString,
 } from 'class-validator';
-import { Property } from '../types/types';
+import { IsObjectId } from 'class-validator-mongo-object-id';
+import { DefaultViewType, Property } from '../types/types';
 
 export class CreateCollectionDto {
   /**
@@ -16,6 +17,13 @@ export class CreateCollectionDto {
   name: string;
 
   /**
+   * The circle the collection belongs to
+   */
+  @IsObjectId()
+  @IsNotEmpty()
+  circleId?: string;
+
+  /**
    * Private collection
    */
   @IsBoolean()
@@ -23,11 +31,11 @@ export class CreateCollectionDto {
   private: boolean;
 
   /**
-   * The purpose of creating this collection
+   * The description of creating this collection
    */
   @IsString()
   @IsOptional()
-  purpose: string;
+  description: string;
 
   /**
    * The properties associated with the collection
@@ -37,9 +45,9 @@ export class CreateCollectionDto {
   properties?: Property[];
 
   /**
-   * The circle the collection belongs to
+   * The default view of the collection
    */
   @IsString()
   @IsOptional()
-  circleId?: string;
+  defaultView?: DefaultViewType;
 }

@@ -15,9 +15,9 @@ export class UpdateCollectionDto {
   private: boolean;
 
   /**
-   * The purpose of creating this collection
+   * The description of creating this collection
    */
   @IsString()
   @IsOptional()
-  purpose?: string;
+  description?: string;
 }

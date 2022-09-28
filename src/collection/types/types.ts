@@ -4,6 +4,7 @@ export type Property = {
   name: string;
   type: PropertyType;
   value: any;
+  isPartOfFormView: boolean;
   default?: any;
   condition?: any; // Show property only when condition is met
   options?: Option[];
@@ -41,3 +42,5 @@ export type ComparisonCondition = 'greaterThanOrEqualTo' | 'lessThanOrEqualTo';
 export type PopulatedCollectionFields = {
   parents?: { [fieldName: string]: number };
 };
+
+export type DefaultViewType = 'form' | 'table' | 'kanban' | 'list' | 'gantt';

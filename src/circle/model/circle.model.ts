@@ -1,6 +1,7 @@
 import { prop } from '@typegoose/typegoose';
 import { ObjectId, Schema } from 'mongoose';
 import { useMongoosePlugin } from 'src/base/decorators/use-mongoose-plugins.decorator';
+import { Collection } from 'src/collection/model/collection.model';
 import { Payment } from 'src/common/models/payment.model';
 import { ProfileModel } from 'src/common/models/profile.model';
 import { Activity } from 'src/common/types/activity.type';
@@ -76,6 +77,12 @@ export class Circle extends ProfileModel {
    */
   @prop({ ref: () => Project, default: [] })
   projects: ObjectId[];
+
+  /**
+   * Projects in the circle
+   */
+  @prop({ ref: () => Collection, type: Schema.Types.String, default: [] })
+  collections: string[];
 
   /**
    * Retros in the circle

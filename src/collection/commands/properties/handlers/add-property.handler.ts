@@ -35,6 +35,10 @@ export class AddPropertyCommandHandler
             ...collection.properties,
             [addPropertyCommandDto.name]: addPropertyCommandDto,
           },
+          propertyOrder: [
+            ...(collection.propertyOrder || []),
+            addPropertyCommandDto.name,
+          ],
         },
       );
       return updatedCollection;
