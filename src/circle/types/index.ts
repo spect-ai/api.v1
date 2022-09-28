@@ -50,3 +50,11 @@ export type DiscordChannel = {
   id: string;
   name: string;
 };
+
+export type Folder = {
+  name: string;
+  avatar: string;
+  projectIds: string[];
+  workstreamIds: string[];
+  retroIds: string[];
+};

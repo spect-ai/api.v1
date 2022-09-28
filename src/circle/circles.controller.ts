@@ -27,7 +27,12 @@ import {
   UpdateCircleRequestDto,
 } from './dto/update-circle-request.dto';
 import { RequestProvider } from 'src/users/user.provider';
-import { InviteDto } from './dto/invite.dto';
+import {
+  CreateFolderDto,
+  UpdateFolderDto,
+  FolderParamDto,
+  UpdateFolderOrderDto,
+} from './dto/folder.dto';
 import { JoinCircleUsingInvitationRequestDto } from './dto/join-circle.dto';
 import { ApiParam, ApiQuery } from '@nestjs/swagger';
 import { ObjectIdDto } from 'src/common/dtos/object-id.dto';
@@ -175,6 +180,57 @@ export class CirclesController {
     @Body() circle: UpdateCircleGithubRepoRequestDto,
   ): Promise<DetailedCircleResponseDto> {
     return await this.circlesService.update(param.id, circle);
+  }
+
+  @SetMetadata('permissions', ['manageCircleSettings'])
+  @UseGuards(CircleAuthGuard)
+  @Patch('/:id/folder/add')
+  async createFolder(
+    @Param() param: ObjectIdDto,
+    @Body() addFolderDto: CreateFolderDto,
+  ): Promise<DetailedCircleResponseDto> {
+    return await this.circlesService.addFolder(param.id, addFolderDto);
+  }
+
+  @SetMetadata('permissions', ['manageCircleSettings'])
+  @UseGuards(CircleAuthGuard)
+  @Patch('/:id/folder/:folderId/update')
+  async updateFolder(
+    @Param() param: ObjectIdDto,
+    @Param() folderParam: FolderParamDto,
+    @Body() updateFolderDto: UpdateFolderDto,
+  ): Promise<DetailedCircleResponseDto> {
+    return await this.circlesService.updateFolder(
+      param.id,
+      folderParam.folderId,
+      updateFolderDto,
+    );
+  }
+
+  @SetMetadata('permissions', ['manageCircleSettings'])
+  @UseGuards(CircleAuthGuard)
+  @Patch('/:id/folder/:folderId/delete')
+  async deleteFolder(
+    @Param() param: ObjectIdDto,
+    @Param() folderParam: FolderParamDto,
+  ): Promise<DetailedCircleResponseDto> {
+    return await this.circlesService.deleteFolder(
+      param.id,
+      folderParam.folderId,
+    );
+  }
+
+  @SetMetadata('permissions', ['manageCircleSettings'])
+  @UseGuards(CircleAuthGuard)
+  @Patch('/:id/folderOrder')
+  async updateFolderOrder(
+    @Param() param: ObjectIdDto,
+    @Body() updateFolderOrderDto: UpdateFolderOrderDto,
+  ): Promise<DetailedCircleResponseDto> {
+    return await this.circlesService.updateFolderOrder(
+      param.id,
+      updateFolderOrderDto,
+    );
   }
 
   @SetMetadata('permissions', ['manageMembers'])
