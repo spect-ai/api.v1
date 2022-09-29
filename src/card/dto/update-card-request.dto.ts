@@ -8,6 +8,7 @@ import {
   IsOptional,
   IsString,
 } from 'class-validator';
+import { IsObjectId } from 'class-validator-mongo-object-id';
 import { Status } from 'src/common/types/status.type';
 import { CreateCardRequestDto } from './create-card-request.dto';
 
@@ -67,6 +68,13 @@ export class UpdateCardRequestDto extends OmitType(CreateCardRequestDto, [
   @IsBoolean()
   @IsOptional()
   updateChildCards?: boolean;
+
+  /**
+   * assigned circle
+   */
+  @IsObjectId()
+  @IsOptional()
+  assignedCircle?: string;
 }
 
 export class UpdateCardStatusRequestDto {

@@ -8,7 +8,6 @@ import { ProjectModule } from 'src/project/project.module';
 import { RequestProvider } from 'src/users/user.provider';
 import { EthAddressModule } from 'src/_eth-address/_eth-address.module';
 import { EthAddressService } from 'src/_eth-address/_eth-address.service';
-import { AutomationService } from './automation.service';
 import { CommandHandlers } from './commands/handlers';
 import { QueryHandlers } from './queries/handlers';
 
@@ -23,7 +22,6 @@ import { QueryHandlers } from './queries/handlers';
   controllers: [],
   providers: [
     EthAddressService,
-    AutomationService,
     CardsProjectService,
     CommonTools,
     RequestProvider,

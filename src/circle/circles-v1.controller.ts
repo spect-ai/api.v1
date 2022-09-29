@@ -25,6 +25,7 @@ import { ObjectIdDto } from 'src/common/dtos/object-id.dto';
 import { RequiredRoleDto, RequiredSlugDto } from 'src/common/dtos/string.dto';
 import { MintKudosService, nftTypes } from 'src/common/mint-kudos.service';
 import { ArchiveCircleByIdCommand, ClaimCircleCommand } from './commands/impl';
+import { WhitelistMemberAddressCommand } from './commands/roles/impl/whitelist-member-address.command';
 import { AddSafeCommand, RemoveSafeCommand } from './commands/safe/impl';
 import { CreateCircleRequestDto } from './dto/create-circle-request.dto';
 import {
@@ -36,7 +37,10 @@ import { JoinCircleUsingInvitationRequestDto } from './dto/join-circle.dto';
 import { MemberDto } from './dto/params.dto';
 import { AddRoleDto, UpdateRoleDto } from './dto/roles-requests.dto';
 import { SafeAddress } from './dto/safe-request.dto';
-import { UpdateCircleRequestDto } from './dto/update-circle-request.dto';
+import {
+  AddWhitelistedAddressRequestDto,
+  UpdateCircleRequestDto,
+} from './dto/update-circle-request.dto';
 import { UpdateMemberRolesDto } from './dto/update-member-role.dto';
 import { Circle } from './model/circle.model';
 import {
@@ -74,6 +78,8 @@ const getCirclePopulatedFields = {
     slug: 1,
     description: 1,
     id: 1,
+    avatar: 1,
+    paymentAddress: 1,
   },
 };
 
@@ -342,5 +348,20 @@ export class CircleV1Controller {
   @Get('/:id/communityKudosDesigns')
   async communityKudosDesigns(@Param() param: ObjectIdDto): Promise<nftTypes> {
     return await this.kudosService.getCommunityKudosDesigns(param.id);
+  }
+
+  @Patch('/:id/addWhitelistedAddress')
+  async addWhitelistedAddress(
+    @Param() param: ObjectIdDto,
+    @Body() addWhitelistedAddressDto: AddWhitelistedAddressRequestDto,
+  ): Promise<Circle> {
+    return await this.commandBus.execute(
+      new WhitelistMemberAddressCommand(
+        addWhitelistedAddressDto.ethAddress,
+        addWhitelistedAddressDto.roles,
+        null,
+        param.id,
+      ),
+    );
   }
 }

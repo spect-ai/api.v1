@@ -92,3 +92,12 @@ export class CreateCircleRequestDto {
   @IsOptional()
   gradient?: string;
 }
+
+export class CreateClaimableCircleRequestDto extends CreateCircleRequestDto {
+  /**
+   * Addresses that can claim circle
+   */
+  @IsArray()
+  @IsOptional()
+  qualifiedClaimee?: string[];
+}

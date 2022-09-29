@@ -77,8 +77,6 @@ export class CirclesController {
   async getMyPermissions(
     @Query('circleIds') circleIds: string[],
   ): Promise<CirclePermission> {
-    console.log(circleIds);
-
     if (circleIds.length === 0) {
       throw new HttpException('No circles provided', 400);
     }

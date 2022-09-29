@@ -13,7 +13,10 @@ import {
 import { AddRoleCommandHandler } from '../roles/handlers/add-role.handler';
 import { RemoveRoleCommandHandler } from '../roles/handlers/remove-role.handler';
 import { UpdateRoleCommandHandler } from '../roles/handlers/update-role.handler';
-import { CreateCircleCommandHandler } from './create-circle.handler';
+import {
+  CreateCircleCommandHandler,
+  CreateClaimableCircleCommandHandler,
+} from './create-circle.handler';
 import { AddSafeCommandHandler } from '../safe/handlers/add-safe.handler';
 import { RemoveSafeCommandHandler } from '../safe/handlers/remove-safe.handler';
 import { ClaimCircleCommandHandler } from '../claim/handlers/claim-circle.handler';
@@ -23,6 +26,7 @@ import {
   AddProjectsToMultipleCirclesCommandHandler,
 } from '../projects/handlers/add-projects.handler';
 import { ArchiveCircleByIdCommandHandler } from '../archive/handlers/archive-circle.handler';
+import { WhitelistMemberAddressCommandHandler } from '../roles/handlers/whitelist-member-address.handler';
 
 export const CommandHandlers = [
   RemoveProjectsCommandHandler,
@@ -35,6 +39,7 @@ export const CommandHandlers = [
   InviteToCircleCommandHandler,
   RemoveFromCircleCommandHandler,
   CreateCircleCommandHandler,
+  CreateClaimableCircleCommandHandler,
   AddRoleCommandHandler,
   RemoveRoleCommandHandler,
   UpdateRoleCommandHandler,
@@ -44,4 +49,5 @@ export const CommandHandlers = [
   ClaimCircleCommandHandler,
   UpdateCircleCommandHandler,
   ArchiveCircleByIdCommandHandler,
+  WhitelistMemberAddressCommandHandler,
 ];

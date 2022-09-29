@@ -1,4 +1,4 @@
-import { IsObject, IsString } from 'class-validator';
+import { IsBoolean, IsObject, IsString } from 'class-validator';
 
 export type FlatennedTokenPaymentInfo = {
   userIds: string[];
@@ -35,4 +35,7 @@ export class AggregatedFlattenedPaymentInfo {
 
   @IsString()
   chainId: string;
+
+  @IsBoolean()
+  payCircle: boolean;
 }

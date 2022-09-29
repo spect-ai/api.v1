@@ -16,6 +16,8 @@ const defaultPopulate: PopulatedCircleFields = {
     name: 1,
     description: 1,
     slug: 1,
+    avatar: 1,
+    paymentAddress: 1,
   },
   projects: {
     id: 1,
@@ -166,6 +168,7 @@ export class CirclesRepository extends BaseRepository<Circle> {
     const query = this.findOne(filterQuery, {
       projection: selectedFields || {},
     });
+
     let populatedFields = defaultPopulate;
     if (customPopulate) populatedFields = customPopulate;
 

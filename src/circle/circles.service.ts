@@ -92,7 +92,7 @@ export class CirclesService {
 
     const userPermissions = [];
     for (const circle of circles) {
-      const memberRoles = circle.memberRoles[userId];
+      const memberRoles = circle.memberRoles && circle.memberRoles[userId];
       if (memberRoles) {
         for (const memberRole of memberRoles) {
           userPermissions.push(circle.roles[memberRole].permissions);

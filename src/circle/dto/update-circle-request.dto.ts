@@ -12,7 +12,7 @@ import {
   DiscordToCircleRoles,
   GuildxyzToCircleRoles,
 } from '../model/circle.model';
-import { SafeAddresses } from '../types';
+import { DiscordChannel, SafeAddresses } from '../types';
 import { CreateCircleRequestDto } from './create-circle-request.dto';
 
 export class UpdateCircleRequestDto extends OmitType(CreateCircleRequestDto, [
@@ -103,6 +103,42 @@ export class UpdateCircleRequestDto extends OmitType(CreateCircleRequestDto, [
   @IsArray()
   @IsOptional()
   labels?: string[];
+
+  @IsString()
+  @IsOptional()
+  questbookWorkspaceUrl?: string;
+  @IsString()
+  @IsOptional()
+  questbookWorkspaceId?: string;
+
+  @IsString()
+  @IsOptional()
+  grantMilestoneProject?: string;
+
+  @IsString()
+  @IsOptional()
+  grantApplicantProject?: string;
+
+  /**
+   * Payment address of the circle
+   */
+  @IsString()
+  @IsOptional()
+  paymentAddress?: string;
+
+  /**
+   * Discord Channel to get notifications on when grant is approved
+   */
+  @IsObject()
+  @IsOptional()
+  grantNotificationChannel?: DiscordChannel;
+
+  /**
+   * Projects that are part of the circle
+   */
+  @IsString()
+  @IsOptional()
+  projects?: string[];
 }
 
 export class UpdateCircleGithubRepoRequestDto {
@@ -114,4 +150,14 @@ export class UpdateCircleGithubRepoRequestDto {
 
   // @IsString()
   // githubId: string;
+}
+
+export class AddWhitelistedAddressRequestDto {
+  @IsString()
+  ethAddress: string;
+  /**
+   * A list of roles given to whitelisted address
+   */
+  @IsArray()
+  roles: string[];
 }

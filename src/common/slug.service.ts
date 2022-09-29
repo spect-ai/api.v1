@@ -7,10 +7,7 @@ import { Circle } from 'src/circle/model/circle.model';
 
 @Injectable()
 export class SlugService {
-  async generateUniqueSlug(
-    generateFrom: string,
-    repository: BaseRepository<Project | Circle>,
-  ) {
+  async generateUniqueSlug(generateFrom: string, repository: any) {
     const slug = urlSlug.convert(generateFrom, {
       separator: '-',
       transformer: urlSlug.LOWERCASE_TRANSFORMER,

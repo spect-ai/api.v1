@@ -35,9 +35,7 @@ import { CommentService } from './card/comments.cards.service';
 import { CardsProjectService } from './project/cards.project.service';
 import { CardsPaymentService } from './card/payment.cards.service';
 import { CircleRegistryService } from './circle/registry.circle.service';
-import { AutomationService } from './automation/automation.service';
 import { AutomationModule } from './automation/automation.module';
-import { CardCommandHandler } from './card/handlers/update.command.handler';
 import { WorkCommandHandler } from './card/handlers/work.command.handler';
 import { SessionAuthGuard } from './auth/iron-session.guard';
 import { CircleAuthGuard } from './auth/circle.guard';
@@ -47,6 +45,7 @@ import { CardNotificationService } from './users/notification/card-notification.
 import { LoggingService } from './logging/logging.service';
 import { ConfigModule } from '@nestjs/config';
 import { ContractListener } from './common/contract-listener.service';
+import { QuestbookListener } from './common/questbook-listener.service';
 
 const databaseUrl =
   process.env.DATABASE_URL || 'mongodb://localhost:27017/nest';
@@ -101,8 +100,6 @@ console.log({ databaseUrl });
     CommentService,
     CardsPaymentService,
     CircleRegistryService,
-    AutomationService,
-    CardCommandHandler,
     WorkCommandHandler,
     CommonUtility,
     SessionAuthGuard,
@@ -111,6 +108,7 @@ console.log({ databaseUrl });
     CardNotificationService,
     LoggingService,
     ContractListener,
+    QuestbookListener,
   ],
 })
 export class AppModule {}

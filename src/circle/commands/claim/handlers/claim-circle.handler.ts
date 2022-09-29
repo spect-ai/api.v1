@@ -28,6 +28,7 @@ export class ClaimCircleCommandHandler
       const circle = await this.queryBus.execute(
         new GetCircleWithChildrenQuery(id),
       );
+      console.log(id, caller.ethAddress);
       if (!circle) {
         throw new InternalServerErrorException('Circle not found');
       }
