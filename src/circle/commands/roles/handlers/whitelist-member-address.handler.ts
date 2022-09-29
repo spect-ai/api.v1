@@ -21,17 +21,18 @@ export class WhitelistMemberAddressCommandHandler
       if (!circleToUpdate) {
         throw new InternalServerErrorException('Circle not found');
       }
-      const existingRoles = roles.map((r) => {
-        if (circleToUpdate.roles && circleToUpdate.roles[r]) return r;
-        else return [];
-      });
+      const existingRoles = [];
+      for (const r of roles) {
+        if (circleToUpdate.roles && circleToUpdate.roles[r])
+          existingRoles.push(r);
+      }
       const updatedCircle =
         await this.circlesRepository.updateCircleAndReturnWithPopulatedReferences(
           circleToUpdate.id,
           {
             whitelistedMemberAddresses: {
               ...circleToUpdate.whitelistedMemberAddresses,
-              [address]: existingRoles,
+              [address.toLowerCase()]: existingRoles,
             },
           },
         );

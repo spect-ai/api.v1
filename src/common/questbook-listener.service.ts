@@ -271,56 +271,72 @@ export class QuestbookListener {
     applicantAddress: string,
   ) {
     if (!circle.roles || !circle.roles['grantee']) {
+      this.commandBus
+        .execute(
+          new AddRoleCommand(
+            {
+              name: 'Grantee',
+              role: 'grantee',
+              description: 'Grantees of the circle',
+              selfAssignable: false,
+              mutable: false,
+              permissions: {
+                createNewCircle: false,
+                manageCircleSettings: false,
+                createNewProject: false,
+                manageProjectSettings: false,
+                createNewRetro: false,
+                endRetroManually: false,
+                managePaymentOptions: false,
+                makePayment: false,
+                inviteMembers: false,
+                manageRoles: false,
+                manageMembers: false,
+                distributeCredentials: false,
+                manageCardProperties: {
+                  Task: false,
+                  Bounty: false,
+                },
+                createNewCard: {
+                  Task: false,
+                  Bounty: false,
+                },
+                manageRewards: {
+                  Task: false,
+                  Bounty: false,
+                },
+                reviewWork: {
+                  Task: false,
+                  Bounty: false,
+                },
+                canClaim: {
+                  Task: false,
+                  Bounty: false,
+                },
+              } as CirclePermission,
+            },
+            circle,
+          ),
+        )
+        .then((res) => {
+          console.log(res);
+          this.commandBus.execute(
+            new WhitelistMemberAddressCommand(
+              applicantAddress?.toLowerCase(),
+              ['grantee'],
+              circle,
+            ),
+          );
+        });
+    } else {
       await this.commandBus.execute(
-        new AddRoleCommand(
-          {
-            name: 'Grantee',
-            role: 'grantee',
-            description: 'Grantees of the circle',
-            selfAssignable: false,
-            mutable: false,
-            permissions: {
-              createNewCircle: false,
-              manageCircleSettings: false,
-              createNewProject: false,
-              manageProjectSettings: false,
-              createNewRetro: false,
-              endRetroManually: false,
-              managePaymentOptions: false,
-              makePayment: false,
-              inviteMembers: false,
-              manageRoles: false,
-              manageMembers: false,
-              distributeCredentials: false,
-              manageCardProperties: {
-                Task: false,
-                Bounty: false,
-              },
-              createNewCard: {
-                Task: false,
-                Bounty: false,
-              },
-              manageRewards: {
-                Task: false,
-                Bounty: false,
-              },
-              reviewWork: {
-                Task: false,
-                Bounty: false,
-              },
-              canClaim: {
-                Task: false,
-                Bounty: false,
-              },
-            } as CirclePermission,
-          },
+        new WhitelistMemberAddressCommand(
+          applicantAddress?.toLowerCase(),
+          ['grantee'],
           circle,
         ),
       );
     }
-    await this.commandBus.execute(
-      new WhitelistMemberAddressCommand(applicantAddress, ['grantee'], circle),
-    );
   }
 
   private async createMilestone(
@@ -338,7 +354,7 @@ export class QuestbookListener {
           await this.commandBus.execute(
             new CreateCardCommand(
               {
-                title: `${application.projectName}-${milestone.title}`,
+                title: `${application.projectName} - ${milestone.title}`,
                 project: circle.grantMilestoneProject,
                 circle: circle.id,
                 type: 'Task',

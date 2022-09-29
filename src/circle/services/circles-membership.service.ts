@@ -8,6 +8,7 @@ import {
   JoinUsingDiscordCommand,
   JoinUsingGuildxyzCommand,
   JoinUsingInvitationCommand,
+  JoinWithoutInvitationCommand,
   RemoveFromCircleCommand,
   UpdateMemberRolesCommand,
 } from '../commands/impl';
@@ -97,7 +98,25 @@ export class CircleMembershipService {
       return updatedCircle;
     } catch (error) {
       this.logger.logError(
-        `Failed joining circle using discord with error: ${error.message}`,
+        `Failed joining circle using guild with error: ${error.message}`,
+        this.requestProvider,
+      );
+      throw new InternalServerErrorException(
+        'Failed joining circle',
+        error.message,
+      );
+    }
+  }
+
+  async join(id: string): Promise<DetailedCircleResponseDto> {
+    try {
+      const updatedCircle = await this.commandBus.execute(
+        new JoinWithoutInvitationCommand(id, this.requestProvider.user),
+      );
+      return updatedCircle;
+    } catch (error) {
+      this.logger.logError(
+        `Failed joining circle with error: ${error.message}`,
         this.requestProvider,
       );
       throw new InternalServerErrorException(

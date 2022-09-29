@@ -16,3 +16,11 @@ export class JoinUsingDiscordCommand {
 export class JoinUsingGuildxyzCommand {
   constructor(public readonly id: string, public readonly caller: User) {}
 }
+
+export class JoinAsWhitelistedAddressCommand {
+  constructor(public readonly id: string, public readonly caller: User) {}
+}
+
+export class JoinWithoutInvitationCommand {
+  constructor(public readonly id: string, public readonly caller: User) {}
+}
