@@ -80,13 +80,17 @@ export class CirclesCrudService {
     const circles = (await this.queryBus.execute(
       new GetMultipleCirclesQuery(
         {
-          parents: { $exists: true, $eq: [] },
-          'status.archived': false,
+          $or: [
+            {
+              parents: { $exists: true, $eq: [] },
+              'status.archived': false,
+            },
+          ],
         },
         getCirclePopulatedFields,
         getCircleProjectedFields,
       ),
-    )) as DetailedCircleResponseDto[];
+    )) as Circle[];
 
     const res = {
       memberOf: [],
@@ -96,12 +100,33 @@ export class CirclesCrudService {
     for (const circle of circles) {
       if (circle.members.includes(this.requestProvider.user?.id)) {
         res.memberOf.push(circle);
-      } else if (!circle.private) {
+      } else if (!circle.private || circle.forceShowOnExplore) {
         if (circle.toBeClaimed) {
           res.claimable.push(circle);
         } else res.joinable.push(circle);
       }
     }
+    res.joinable.sort(function (a, b) {
+      if (
+        (a.projects?.length || 0 + 1) *
+          (a.children?.length || 0 + 1) *
+          (a.members?.length || 0 + 1) <
+        (b.projects?.length || 0 + 1) *
+          (b.children?.length || 0 + 1) *
+          (b.members?.length || 0 + 1)
+      )
+        return 1;
+      if (
+        (a.projects?.length || 0 + 1) *
+          (a.children?.length || 0 + 1) *
+          (a.members?.length || 0 + 1) >
+        (b.projects?.length || 0 + 1) *
+          (b.children?.length || 0 + 1) *
+          (b.members?.length || 0 + 1)
+      )
+        return -1;
+      return 0;
+    });
     return res;
   }
 
