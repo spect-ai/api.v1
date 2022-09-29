@@ -4,10 +4,8 @@ import { Alchemy, Network } from 'alchemy-sdk';
 import { utils } from 'ethers';
 import { AbiCoder } from 'ethers/lib/utils';
 import { UpdatePaymentCommand } from 'src/card/commands/impl';
-import { GetCardByIdQuery } from 'src/card/queries/impl';
 import { GetCircleByIdQuery } from 'src/circle/queries/impl';
 import { LoggingService } from 'src/logging/logging.service';
-import { GetDetailedProjectByIdQuery } from 'src/project/queries/impl';
 import { RealtimeGateway } from 'src/realtime/realtime.gateway';
 import { UpdateRetroCommand } from 'src/retro/commands/impl';
 import { distributorAbi } from './abis/distributor';
@@ -21,7 +19,6 @@ export class ContractListener {
     private readonly commandBus: CommandBus,
     private readonly queryBus: QueryBus,
     private readonly logger: LoggingService,
-    private readonly realtime: RealtimeGateway,
   ) {
     // Need to refactor update payment method before we can use this
     console.log('Listener listening');
@@ -176,18 +173,6 @@ export class ContractListener {
               caller,
             ),
           );
-          if (this.realtime.server) {
-            console.log('Emitting card update');
-            const card = await this.queryBus.execute(
-              new GetCardByIdQuery(ids[0]),
-            );
-            const project = await this.queryBus.execute(
-              new GetDetailedProjectByIdQuery(card.project.id),
-            );
-            this.realtime.server.emit('project_update', {
-              project,
-            });
-          }
         } else if (type === 'retro') {
           if (ids.length > 0) {
             console.log('Updating retro');
