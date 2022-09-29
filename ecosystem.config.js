@@ -3,7 +3,7 @@ module.exports = {
     {
       name: 'api',
       script: 'dist/main.js',
-      instances: 'max',
+      instances: 1,
       env: {
         NODE_ENV: 'development',
       },

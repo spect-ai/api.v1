@@ -64,6 +64,7 @@ const propertiesToReturnInPrivateCircle = new Set([
   '_id',
   'name',
   'description',
+  'slug',
 ]);
 @Injectable()
 export class CirclesCrudService {
