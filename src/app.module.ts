@@ -48,6 +48,7 @@ import { ContractListener } from './common/contract-listener.service';
 import { QuestbookListener } from './common/questbook-listener.service';
 import { CollectionController } from './collection/collection.controller';
 import { CollectionModule } from './collection/collection.module';
+import { RealtimeModule } from './realtime/realtime.module';
 
 const databaseUrl =
   process.env.DATABASE_URL || 'mongodb://localhost:27017/nest';
@@ -74,6 +75,7 @@ console.log({ databaseUrl });
     AutomationModule,
     CqrsModule,
     CollectionModule,
+    RealtimeModule,
   ],
   controllers: [
     AppController,
