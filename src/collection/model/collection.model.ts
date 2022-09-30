@@ -58,7 +58,7 @@ export class Collection extends BaseModel {
    * The data contained in the collection
    */
   @prop({ default: {} })
-  data: MappedItem<Data>;
+  data: MappedItem<any>;
 
   /**
    * The data indexed by different fields
