@@ -27,6 +27,10 @@ import {
 } from '../projects/handlers/add-projects.handler';
 import { ArchiveCircleByIdCommandHandler } from '../archive/handlers/archive-circle.handler';
 import { WhitelistMemberAddressCommandHandler } from '../roles/handlers/whitelist-member-address.handler';
+import { CreateFolderCommandHandler } from '../folders/handlers/create-folder.handler';
+import { UpdateFolderCommandHandler } from '../folders/handlers/update-folder.handler';
+import { UpdateFolderOrderCommandHandler } from '../folders/handlers/update-folder-order.handler';
+import { DeleteFolderCommandHandler } from '../folders/handlers/delete-folder.handler';
 
 export const CommandHandlers = [
   RemoveProjectsCommandHandler,
@@ -50,4 +54,8 @@ export const CommandHandlers = [
   UpdateCircleCommandHandler,
   ArchiveCircleByIdCommandHandler,
   WhitelistMemberAddressCommandHandler,
+  CreateFolderCommandHandler,
+  UpdateFolderCommandHandler,
+  UpdateFolderOrderCommandHandler,
+  DeleteFolderCommandHandler,
 ];
