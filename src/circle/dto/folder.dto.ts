@@ -16,25 +16,11 @@ export class CreateFolderDto {
   avatar: string;
 
   /**
-   * Projects in the folder
+   * Contents of the folder
    **/
   @IsArray()
   @IsOptional()
-  projectIds?: string[];
-
-  /**
-   * Workstreams in the folder
-   **/
-  @IsArray()
-  @IsOptional()
-  workstreamIds?: string[];
-
-  /**
-   * Retros in the folder
-   **/
-  @IsArray()
-  @IsOptional()
-  retroIds?: string[];
+  contentIds?: string[];
 }
 
 export class UpdateFolderDto {
@@ -53,25 +39,11 @@ export class UpdateFolderDto {
   avatar?: string;
 
   /**
-   * Projects in the folder
+   * Contents of the folder
    **/
   @IsArray()
   @IsOptional()
-  projectIds?: string[];
-
-  /**
-   * Workstreams in the folder
-   **/
-  @IsArray()
-  @IsOptional()
-  workstreamIds?: string[];
-
-  /**
-   * Retros in the folder
-   **/
-  @IsArray()
-  @IsOptional()
-  retroIds?: string[];
+  contentIds?: string[];
 }
 
 export class FolderParamDto {

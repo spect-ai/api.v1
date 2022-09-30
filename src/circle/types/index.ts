@@ -54,7 +54,5 @@ export type DiscordChannel = {
 export type Folder = {
   name: string;
   avatar: string;
-  projectIds: string[];
-  workstreamIds: string[];
-  retroIds: string[];
+  contentIds?: string[];
 };
