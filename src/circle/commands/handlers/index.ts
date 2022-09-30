@@ -1,9 +1,11 @@
 import { UpdateMemberRolesCommandHandler } from '../membership/handlers/update-member-roles.handler';
 import { InviteToCircleCommandHandler } from '../membership/handlers/invite-to-circle.handler';
 import {
+  JoinAsWhitelistedAddressCommandHandler,
   JoinUsingDiscordCommandHandler,
   JoinUsingGuildxyzCommandHandler,
   JoinUsingInvitationCommandHandler,
+  JoinWithoutInvitationCommandHandler,
 } from '../membership/handlers/join-circle.handler';
 import { RemoveFromCircleCommandHandler } from '../membership/handlers/remove-from-circle.handler';
 import {
@@ -58,4 +60,6 @@ export const CommandHandlers = [
   UpdateFolderCommandHandler,
   UpdateFolderOrderCommandHandler,
   DeleteFolderCommandHandler,
+  JoinAsWhitelistedAddressCommandHandler,
+  JoinWithoutInvitationCommandHandler,
 ];

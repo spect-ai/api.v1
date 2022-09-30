@@ -64,47 +64,6 @@ import {
   UpdateFolderOrderDto,
 } from './dto/folder.dto';
 
-const getCirclePopulatedFields = {
-  projects: {
-    name: 1,
-    slug: 1,
-    description: 1,
-    discordDiscussionChannel: 1,
-    id: 1,
-  },
-  retro: {
-    title: 1,
-    slug: 1,
-    id: 1,
-    status: 1,
-    reward: 1,
-    members: 1,
-  },
-  parents: {
-    name: 1,
-    slug: 1,
-    description: 1,
-    id: 1,
-  },
-  collections: {
-    name: 1,
-    slug: 1,
-    id: 1,
-  },
-  children: {
-    name: 1,
-    slug: 1,
-    description: 1,
-    id: 1,
-    avatar: 1,
-    paymentAddress: 1,
-  },
-};
-
-const getCircleProjectedFields = {
-  invites: 0,
-  localRegistry: 0,
-};
 @Controller('circle/v1')
 export class CircleV1Controller {
   constructor(
@@ -120,44 +79,27 @@ export class CircleV1Controller {
   @Get('/allPublicParents')
   async findAllParentCircles(): Promise<BucketizedCircleResponseDto> {
     try {
-      return await this.circleCrudService.getPubicParentCircles(
-        getCirclePopulatedFields,
-        getCircleProjectedFields,
-      );
+      return await this.circleCrudService.getPubicParentCircles();
     } catch (error) {
       console.log(error);
       return {};
     }
   }
 
-  @UseGuards(ViewCircleAuthGuard)
+  @UseGuards(PublicViewAuthGuard)
   @Get('/:id')
-  async findByObjectId(@Param() param: ObjectIdDto): Promise<Circle> {
-    return await this.queryBus.execute(
-      new GetCircleByFilterQuery(
-        {
-          _id: param.id,
-        },
-        getCirclePopulatedFields,
-        getCircleProjectedFields,
-      ),
-    );
+  async findByObjectId(
+    @Param() param: ObjectIdDto,
+  ): Promise<DetailedCircleResponseDto> {
+    return await this.circleCrudService.getById(param.id);
   }
 
-  @UseGuards(ViewCircleAuthGuard)
+  @UseGuards(PublicViewAuthGuard)
   @Get('/slug/:slug')
   async findBySlug(
     @Param() param: RequiredSlugDto,
   ): Promise<DetailedCircleResponseDto> {
-    return await this.queryBus.execute(
-      new GetCircleByFilterQuery(
-        {
-          slug: param.slug,
-        },
-        getCirclePopulatedFields,
-        getCircleProjectedFields,
-      ),
-    );
+    return await this.circleCrudService.getBySlug(param.slug);
   }
 
   @UseGuards(CreateCircleAuthGuard)
@@ -217,6 +159,12 @@ export class CircleV1Controller {
     @Param() param: ObjectIdDto,
   ): Promise<DetailedCircleResponseDto> {
     return await this.circleMembershipService.joinUsingGuildxyz(param.id);
+  }
+
+  @UseGuards(SessionAuthGuard)
+  @Patch('/:id/join')
+  async join(@Param() param: ObjectIdDto): Promise<DetailedCircleResponseDto> {
+    return await this.circleMembershipService.join(param.id);
   }
 
   @SetMetadata('permissions', ['manageMembers'])
@@ -417,6 +365,7 @@ export class CircleV1Controller {
     return await this.kudosService.getCommunityKudosDesigns(param.id);
   }
 
+  @SetMetadata('permissions', ['manageMembers', 'manageRoles'])
   @Patch('/:id/addWhitelistedAddress')
   async addWhitelistedAddress(
     @Param() param: ObjectIdDto,

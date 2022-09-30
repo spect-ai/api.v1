@@ -259,6 +259,9 @@ export class Circle extends ProfileModel {
 
   @prop()
   grantNotificationChannel?: DiscordChannel;
+
+  @prop({ default: false })
+  forceShowOnExplore?: boolean;
 }
 
 export class ExtendedCircle extends Circle {

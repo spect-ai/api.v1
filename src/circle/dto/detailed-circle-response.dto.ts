@@ -113,6 +113,12 @@ export class DetailedCircleResponseDto {
    */
   @IsBoolean()
   toBeClaimed?: boolean;
+
+  /**
+   * Is caller unauthorized to view private properties of circle?
+   */
+  @IsBoolean()
+  unauthorized?: boolean;
 }
 
 export class BucketizedCircleResponseDto {
