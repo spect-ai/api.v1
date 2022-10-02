@@ -49,7 +49,21 @@ export class CreateCollectionCommandHandler
         status: {
           name: 'status',
           type: 'singleSelect',
-          default: '',
+          default: {},
+          options: [
+            {
+              label: 'To Do',
+              value: 'To Do',
+            },
+            {
+              label: 'In Progress',
+              value: 'In Progress',
+            },
+            {
+              label: 'Done',
+              value: 'Done',
+            },
+          ],
           isPartOfFormView: true,
         },
       } as MappedItem<Property>;
