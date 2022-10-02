@@ -50,10 +50,7 @@ import {
 } from './dto/update-circle-request.dto';
 import { UpdateMemberRolesDto } from './dto/update-member-role.dto';
 import { Circle } from './model/circle.model';
-import {
-  GetCircleByFilterQuery,
-  GetCircleNavigationQuery,
-} from './queries/impl';
+import { GetCircleBySlugQuery, GetCircleNavigationQuery } from './queries/impl';
 import { CirclesRolesService } from './services/circle-roles.service';
 import { CirclesCrudService } from './services/circles-crud.service';
 import { CircleMembershipService } from './services/circles-membership.service';
@@ -62,6 +59,7 @@ import {
   UpdateFolderDto,
   FolderParamDto,
   UpdateFolderOrderDto,
+  CircleResponseDto,
 } from './dto/folder.dto';
 
 @Controller('circle/v1')
@@ -98,8 +96,8 @@ export class CircleV1Controller {
   @Get('/slug/:slug')
   async findBySlug(
     @Param() param: RequiredSlugDto,
-  ): Promise<DetailedCircleResponseDto> {
-    return await this.circleCrudService.getBySlug(param.slug);
+  ): Promise<CircleResponseDto> {
+    return await this.queryBus.execute(new GetCircleBySlugQuery(param.slug));
   }
 
   @UseGuards(CreateCircleAuthGuard)

@@ -1,6 +1,7 @@
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { CirclesRepository } from 'src/circle/circles.repository';
 import { DetailedCircleResponseDto } from 'src/circle/dto/detailed-circle-response.dto';
+import { CircleResponseDto } from 'src/circle/dto/folder.dto';
 import {
   GetCircleBySlugQuery,
   GetCircleByIdQuery,
@@ -88,15 +89,14 @@ export class GetCircleBySlugQueryHandler
     logger.setContext('GetCircleBySlugQueryHandler');
   }
 
-  async execute(
-    query: GetCircleBySlugQuery,
-  ): Promise<DetailedCircleResponseDto> {
+  async execute(query: GetCircleBySlugQuery): Promise<CircleResponseDto> {
     try {
-      return await this.circleRepository.getCircleBySlug(
+      const circle = await this.circleRepository.getCircleBySlug(
         query.slug,
         query.customPopulate,
         query.selectedFields,
       );
+      return await this.circleRepository.getCircleWithMinimalDetails(circle);
     } catch (error) {
       this.logger.logError(
         `Failed while getting circle using slug with error: ${error.message}`,
