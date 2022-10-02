@@ -31,6 +31,7 @@ import {
   DeleteFolderCommand,
   UpdateFolderCommand,
   UpdateFolderOrderCommand,
+  UpdateFolderDetailsCommand,
 } from './commands/impl';
 import { WhitelistMemberAddressCommand } from './commands/roles/impl/whitelist-member-address.command';
 import { AddSafeCommand, RemoveSafeCommand } from './commands/safe/impl';
@@ -59,6 +60,7 @@ import {
   UpdateFolderDto,
   FolderParamDto,
   UpdateFolderOrderDto,
+  UpdateFolderDetailsDto,
   CircleResponseDto,
 } from './dto/folder.dto';
 
@@ -256,6 +258,18 @@ export class CircleV1Controller {
   ): Promise<DetailedCircleResponseDto> {
     return await this.commandBus.execute(
       new UpdateFolderCommand(param.id, folderParam.folderId, updateFolderDto),
+    );
+  }
+
+  @SetMetadata('permissions', ['manageCircleSettings'])
+  @UseGuards(CircleAuthGuard)
+  @Patch('/:id/folderDetails')
+  async updateFolderDetails(
+    @Param() param: ObjectIdDto,
+    @Body() updateFolderDetailsDto: UpdateFolderDetailsDto,
+  ): Promise<DetailedCircleResponseDto> {
+    return await this.commandBus.execute(
+      new UpdateFolderDetailsCommand(param.id, updateFolderDetailsDto),
     );
   }
 

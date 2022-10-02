@@ -9,6 +9,8 @@ import {
 } from 'class-validator';
 import { ObjectId } from 'mongoose';
 import { Circle } from '../model/circle.model';
+import { Folder } from '../types';
+import { MappedItem } from 'src/common/interfaces';
 
 export class CreateFolderDto {
   /**
@@ -54,6 +56,19 @@ export class UpdateFolderDto {
   @IsArray()
   @IsOptional()
   contentIds?: string[];
+}
+
+type MinimalFolder = {
+  id: string;
+  contentIds: string[];
+};
+
+export class UpdateFolderDetailsDto {
+  /**
+   * FolderDetails to be updated
+   */
+  @IsArray()
+  folderDetails: MinimalFolder[];
 }
 
 export class FolderParamDto {
