@@ -389,7 +389,7 @@ export class ProjectService {
         (await this.projectRepository.findById(id));
 
       if (!project.viewDetails[viewId]) {
-        throw new HttpException('Column not found', HttpStatus.NOT_FOUND);
+        throw new HttpException('View not found', HttpStatus.NOT_FOUND);
       }
       const viewDetails = project.viewDetails;
       viewDetails[viewId] = {

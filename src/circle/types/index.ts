@@ -50,3 +50,9 @@ export type DiscordChannel = {
   id: string;
   name: string;
 };
+
+export type Folder = {
+  name: string;
+  avatar: string;
+  contentIds?: string[];
+};

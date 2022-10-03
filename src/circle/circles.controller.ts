@@ -27,8 +27,6 @@ import {
   UpdateCircleRequestDto,
 } from './dto/update-circle-request.dto';
 import { RequestProvider } from 'src/users/user.provider';
-import { InviteDto } from './dto/invite.dto';
-import { JoinCircleUsingInvitationRequestDto } from './dto/join-circle.dto';
 import { ApiParam, ApiQuery } from '@nestjs/swagger';
 import { ObjectIdDto } from 'src/common/dtos/object-id.dto';
 import { UpdateMemberRolesDto } from './dto/update-member-role.dto';

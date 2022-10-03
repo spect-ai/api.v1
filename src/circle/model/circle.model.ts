@@ -10,12 +10,14 @@ import { Status } from 'src/common/types/status.type';
 import { Project } from 'src/project/model/project.model';
 import { Retro } from 'src/retro/models/retro.model';
 import { User } from 'src/users/model/users.model';
+import { MappedItem } from 'src/common/interfaces';
 import {
   BlacklistRegistry,
   DiscordChannel,
   LocalRegistry,
   SafeAddresses,
   WhitelistedMembershipAddresses,
+  Folder,
 } from '../types';
 
 export type Invite = {
@@ -124,6 +126,19 @@ export class Circle extends ProfileModel {
     },
   })
   defaultPayment: Payment;
+
+  /**
+   * Folder order of the circle
+   */
+  @prop({ default: [] })
+  folderOrder: string[];
+
+  /**
+   * Folder Ids mapped to their respective Folder Details
+   */
+
+  @prop({ default: {} })
+  folderDetails: MappedItem<Folder>;
 
   /**
    * Circle is archived
