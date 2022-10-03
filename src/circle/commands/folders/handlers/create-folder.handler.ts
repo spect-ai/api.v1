@@ -4,6 +4,7 @@ import { CirclesRepository } from 'src/circle/circles.repository';
 import { DetailedCircleResponseDto } from 'src/circle/dto/detailed-circle-response.dto';
 import { v4 as uuidv4 } from 'uuid';
 import { CreateFolderCommand } from '../impl/create-folder.command';
+import { CircleResponseDto } from 'src/circle/dto/folder.dto';
 
 @CommandHandler(CreateFolderCommand)
 export class CreateFolderCommandHandler
@@ -13,9 +14,7 @@ export class CreateFolderCommandHandler
     private readonly eventBus: EventBus,
     private readonly circlesRepository: CirclesRepository,
   ) {}
-  async execute(
-    command: CreateFolderCommand,
-  ): Promise<DetailedCircleResponseDto> {
+  async execute(command: CreateFolderCommand): Promise<CircleResponseDto> {
     try {
       const { circleId, createFolderDto } = command;
       const circle = await this.circlesRepository.findById(circleId);
@@ -39,7 +38,9 @@ export class CreateFolderCommandHandler
             folderOrder: newFolderOrder,
           },
         );
-      return updatedCircle;
+      return await this.circlesRepository.getCircleWithMinimalDetails(
+        updatedCircle,
+      );
     } catch (error) {
       throw new InternalServerErrorException(error);
     }

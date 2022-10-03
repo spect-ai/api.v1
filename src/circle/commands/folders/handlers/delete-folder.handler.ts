@@ -7,6 +7,7 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { DeleteFolderCommand } from '../impl';
+import { CircleResponseDto } from 'src/circle/dto/folder.dto';
 
 @CommandHandler(DeleteFolderCommand)
 export class DeleteFolderCommandHandler
@@ -16,9 +17,7 @@ export class DeleteFolderCommandHandler
     private readonly eventBus: EventBus,
     private readonly circlesRepository: CirclesRepository,
   ) {}
-  async execute(
-    command: DeleteFolderCommand,
-  ): Promise<DetailedCircleResponseDto> {
+  async execute(command: DeleteFolderCommand): Promise<CircleResponseDto> {
     try {
       const { circleId, folderId } = command;
       const circle = await this.circlesRepository.findById(circleId);
@@ -44,7 +43,9 @@ export class DeleteFolderCommandHandler
             folderOrder,
           },
         );
-      return updatedCircle;
+      return await this.circlesRepository.getCircleWithMinimalDetails(
+        updatedCircle,
+      );
     } catch (error) {
       throw new InternalServerErrorException(
         'Failed to update folder Order',

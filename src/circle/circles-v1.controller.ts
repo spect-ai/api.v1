@@ -242,7 +242,7 @@ export class CircleV1Controller {
   async createFolder(
     @Param() param: ObjectIdDto,
     @Body() addFolderDto: CreateFolderDto,
-  ): Promise<DetailedCircleResponseDto> {
+  ): Promise<CircleResponseDto> {
     return await this.commandBus.execute(
       new CreateFolderCommand(param.id, addFolderDto),
     );
@@ -255,7 +255,7 @@ export class CircleV1Controller {
     @Param() param: ObjectIdDto,
     @Param() folderParam: FolderParamDto,
     @Body() updateFolderDto: UpdateFolderDto,
-  ): Promise<DetailedCircleResponseDto> {
+  ): Promise<CircleResponseDto> {
     return await this.commandBus.execute(
       new UpdateFolderCommand(param.id, folderParam.folderId, updateFolderDto),
     );
@@ -267,7 +267,7 @@ export class CircleV1Controller {
   async updateFolderDetails(
     @Param() param: ObjectIdDto,
     @Body() updateFolderDetailsDto: UpdateFolderDetailsDto,
-  ): Promise<DetailedCircleResponseDto> {
+  ): Promise<CircleResponseDto> {
     return await this.commandBus.execute(
       new UpdateFolderDetailsCommand(param.id, updateFolderDetailsDto),
     );
@@ -279,7 +279,7 @@ export class CircleV1Controller {
   async updateFolderOrder(
     @Param() param: ObjectIdDto,
     @Body() updateFolderOrderDto: UpdateFolderOrderDto,
-  ): Promise<DetailedCircleResponseDto> {
+  ): Promise<CircleResponseDto> {
     return await this.commandBus.execute(
       new UpdateFolderOrderCommand(param.id, updateFolderOrderDto),
     );
@@ -291,7 +291,7 @@ export class CircleV1Controller {
   async deleteFolder(
     @Param() param: ObjectIdDto,
     @Param() folderParam: FolderParamDto,
-  ): Promise<DetailedCircleResponseDto> {
+  ): Promise<CircleResponseDto> {
     return await this.commandBus.execute(
       new DeleteFolderCommand(param.id, folderParam.folderId),
     );

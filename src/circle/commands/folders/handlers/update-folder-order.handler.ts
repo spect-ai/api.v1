@@ -3,6 +3,7 @@ import { CirclesRepository } from 'src/circle/circles.repository';
 import { DetailedCircleResponseDto } from 'src/circle/dto/detailed-circle-response.dto';
 import { InternalServerErrorException } from '@nestjs/common';
 import { UpdateFolderOrderCommand } from '../impl';
+import { CircleResponseDto } from 'src/circle/dto/folder.dto';
 
 @CommandHandler(UpdateFolderOrderCommand)
 export class UpdateFolderOrderCommandHandler
@@ -12,9 +13,7 @@ export class UpdateFolderOrderCommandHandler
     private readonly eventBus: EventBus,
     private readonly circlesRepository: CirclesRepository,
   ) {}
-  async execute(
-    command: UpdateFolderOrderCommand,
-  ): Promise<DetailedCircleResponseDto> {
+  async execute(command: UpdateFolderOrderCommand): Promise<CircleResponseDto> {
     try {
       const { circleId, updateFolderOrderDto } = command;
       const folderOrder = updateFolderOrderDto.folderOrder;
@@ -25,7 +24,9 @@ export class UpdateFolderOrderCommandHandler
             folderOrder,
           },
         );
-      return updatedCircle;
+      return await this.circlesRepository.getCircleWithMinimalDetails(
+        updatedCircle,
+      );
     } catch (error) {
       throw new InternalServerErrorException(
         'Failed to update folder Order',

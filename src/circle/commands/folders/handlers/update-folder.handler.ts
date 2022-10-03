@@ -7,6 +7,7 @@ import {
   InternalServerErrorException,
 } from '@nestjs/common';
 import { UpdateFolderCommand } from '../impl';
+import { CircleResponseDto } from 'src/circle/dto/folder.dto';
 
 @CommandHandler(UpdateFolderCommand)
 export class UpdateFolderCommandHandler
@@ -16,9 +17,7 @@ export class UpdateFolderCommandHandler
     private readonly eventBus: EventBus,
     private readonly circlesRepository: CirclesRepository,
   ) {}
-  async execute(
-    command: UpdateFolderCommand,
-  ): Promise<DetailedCircleResponseDto> {
+  async execute(command: UpdateFolderCommand): Promise<CircleResponseDto> {
     try {
       const { circleId, folderId, updateFolderDto } = command;
       const circle = await this.circlesRepository.findById(circleId);
@@ -39,7 +38,9 @@ export class UpdateFolderCommandHandler
             folderDetails,
           },
         );
-      return updatedCircle;
+      return await this.circlesRepository.getCircleWithMinimalDetails(
+        updatedCircle,
+      );
     } catch (error) {
       throw new InternalServerErrorException(
         'Failed to update folder',
