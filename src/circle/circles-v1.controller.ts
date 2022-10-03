@@ -24,7 +24,15 @@ import { ClaimKudosDto, MintKudosDto } from 'src/common/dtos/mint-kudos.dto';
 import { ObjectIdDto } from 'src/common/dtos/object-id.dto';
 import { RequiredRoleDto, RequiredSlugDto } from 'src/common/dtos/string.dto';
 import { MintKudosService, nftTypes } from 'src/common/mint-kudos.service';
-import { ArchiveCircleByIdCommand, ClaimCircleCommand } from './commands/impl';
+import {
+  ArchiveCircleByIdCommand,
+  ClaimCircleCommand,
+  CreateFolderCommand,
+  DeleteFolderCommand,
+  UpdateFolderCommand,
+  UpdateFolderOrderCommand,
+  UpdateFolderDetailsCommand,
+} from './commands/impl';
 import { WhitelistMemberAddressCommand } from './commands/roles/impl/whitelist-member-address.command';
 import { AddSafeCommand, RemoveSafeCommand } from './commands/safe/impl';
 import { CreateCircleRequestDto } from './dto/create-circle-request.dto';
@@ -44,12 +52,21 @@ import {
 import { UpdateMemberRolesDto } from './dto/update-member-role.dto';
 import { Circle } from './model/circle.model';
 import {
+  GetCircleBySlugQuery,
   GetCircleNavigationBreadcrumbsQuery,
   GetCircleNavigationQuery,
 } from './queries/impl';
 import { CirclesRolesService } from './services/circle-roles.service';
 import { CirclesCrudService } from './services/circles-crud.service';
 import { CircleMembershipService } from './services/circles-membership.service';
+import {
+  CreateFolderDto,
+  UpdateFolderDto,
+  FolderParamDto,
+  UpdateFolderOrderDto,
+  UpdateFolderDetailsDto,
+  CircleResponseDto,
+} from './dto/folder.dto';
 
 @Controller('circle/v1')
 export class CircleV1Controller {
@@ -85,8 +102,8 @@ export class CircleV1Controller {
   @Get('/slug/:slug')
   async findBySlug(
     @Param() param: RequiredSlugDto,
-  ): Promise<DetailedCircleResponseDto> {
-    return await this.circleCrudService.getBySlug(param.slug);
+  ): Promise<CircleResponseDto> {
+    return await this.queryBus.execute(new GetCircleBySlugQuery(param.slug));
   }
 
   @UseGuards(CreateCircleAuthGuard)
@@ -221,6 +238,67 @@ export class CircleV1Controller {
     @Query() roleParam: RequiredRoleDto,
   ): Promise<DetailedCircleResponseDto> {
     return await this.circleRoleServie.removeRole(param.id, roleParam.role);
+  }
+
+  @SetMetadata('permissions', ['manageCircleSettings'])
+  @UseGuards(CircleAuthGuard)
+  @Patch('/:id/folder/add')
+  async createFolder(
+    @Param() param: ObjectIdDto,
+    @Body() addFolderDto: CreateFolderDto,
+  ): Promise<CircleResponseDto> {
+    return await this.commandBus.execute(
+      new CreateFolderCommand(param.id, addFolderDto),
+    );
+  }
+
+  @SetMetadata('permissions', ['manageCircleSettings'])
+  @UseGuards(CircleAuthGuard)
+  @Patch('/:id/folder/:folderId/update')
+  async updateFolder(
+    @Param() param: ObjectIdDto,
+    @Param() folderParam: FolderParamDto,
+    @Body() updateFolderDto: UpdateFolderDto,
+  ): Promise<CircleResponseDto> {
+    return await this.commandBus.execute(
+      new UpdateFolderCommand(param.id, folderParam.folderId, updateFolderDto),
+    );
+  }
+
+  @SetMetadata('permissions', ['manageCircleSettings'])
+  @UseGuards(CircleAuthGuard)
+  @Patch('/:id/folderDetails')
+  async updateFolderDetails(
+    @Param() param: ObjectIdDto,
+    @Body() updateFolderDetailsDto: UpdateFolderDetailsDto,
+  ): Promise<CircleResponseDto> {
+    return await this.commandBus.execute(
+      new UpdateFolderDetailsCommand(param.id, updateFolderDetailsDto),
+    );
+  }
+
+  @SetMetadata('permissions', ['manageCircleSettings'])
+  @UseGuards(CircleAuthGuard)
+  @Patch('/:id/folderOrder')
+  async updateFolderOrder(
+    @Param() param: ObjectIdDto,
+    @Body() updateFolderOrderDto: UpdateFolderOrderDto,
+  ): Promise<CircleResponseDto> {
+    return await this.commandBus.execute(
+      new UpdateFolderOrderCommand(param.id, updateFolderOrderDto),
+    );
+  }
+
+  @SetMetadata('permissions', ['manageCircleSettings'])
+  @UseGuards(CircleAuthGuard)
+  @Patch('/:id/folder/:folderId/delete')
+  async deleteFolder(
+    @Param() param: ObjectIdDto,
+    @Param() folderParam: FolderParamDto,
+  ): Promise<CircleResponseDto> {
+    return await this.commandBus.execute(
+      new DeleteFolderCommand(param.id, folderParam.folderId),
+    );
   }
 
   @SetMetadata('permissions', ['managePaymentOptions'])
