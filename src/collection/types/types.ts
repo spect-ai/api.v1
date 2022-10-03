@@ -1,5 +1,3 @@
-import { Data } from '../model/data.model';
-
 export type Property = {
   name: string;
   type: PropertyType;

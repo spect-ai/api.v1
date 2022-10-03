@@ -5,7 +5,6 @@ import { useMongoosePlugin } from 'src/base/decorators/use-mongoose-plugins.deco
 import { Circle } from 'src/circle/model/circle.model';
 import { MappedItem } from 'src/common/interfaces';
 import { DefaultViewType, Property } from '../types/types';
-import { Data } from './data.model';
 
 @useMongoosePlugin()
 export class Collection extends BaseModel {
