@@ -9,8 +9,8 @@ import {
 } from 'class-validator';
 import { ObjectId } from 'mongoose';
 import { Circle } from '../model/circle.model';
-import { Folder } from '../types';
-import { MappedItem } from 'src/common/interfaces';
+import { Payment } from 'src/common/models/payment.model';
+import { Status } from 'src/common/types/status.type';
 
 export class CreateFolderDto {
   /**
@@ -100,6 +100,17 @@ type MinimalDetails = {
   [key: string]: MinimalDetail;
 };
 
+type MinimalRetro = {
+  [key: string]: {
+    title: string;
+    slug: string;
+    id: string;
+    status: Status;
+    reward: Payment;
+    members: string[];
+  };
+};
+
 export class CircleResponseDto {
   /**
    * The name of the circle
@@ -137,6 +148,11 @@ export class CircleResponseDto {
    */
   @IsObject()
   projects?: MinimalDetails;
+  /**
+   * The retros in the circle
+   */
+  @IsObject()
+  retro?: MinimalRetro;
 
   /**
    * The projects in the circle
