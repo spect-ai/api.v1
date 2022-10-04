@@ -4,7 +4,7 @@ import { InjectModel } from 'nestjs-typegoose';
 import { BaseRepository } from 'src/base/base.repository';
 import { Circle, ExtendedCircle } from './model/circle.model';
 import { PopulatedCircleFields } from './types';
-import { CircleResponseDto } from './dto/folder.dto';
+import { CircleResponseDto } from './dto/detailed-circle-response.dto';
 import { Project } from 'src/project/model/project.model';
 import { Retro } from 'src/retro/models/retro.model';
 

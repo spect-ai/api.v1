@@ -8,13 +8,17 @@ import { CreateCircleRequestDto } from '../dto/create-circle-request.dto';
 import {
   BucketizedCircleResponseDto,
   DetailedCircleResponseDto,
+  CircleResponseDto,
 } from '../dto/detailed-circle-response.dto';
 import { UpdateCircleRequestDto } from '../dto/update-circle-request.dto';
 import { Circle } from '../model/circle.model';
 import {
   GetCircleByFilterQuery,
+  GetCircleBySlugQuery,
   GetMultipleCirclesQuery,
 } from '../queries/impl';
+import { Project } from 'src/project/model/project.model';
+import { Retro } from 'src/retro/models/retro.model';
 
 const getCirclePopulatedFields = {
   projects: {
@@ -132,19 +136,19 @@ export class CirclesCrudService {
   }
 
   private filterPrivateProperties(
-    circle: Circle,
+    circle: CircleResponseDto,
     caller?: string,
-  ): DetailedCircleResponseDto {
+  ): CircleResponseDto {
     if (circle.private && (!caller || !circle.members.includes(caller))) {
       Object.keys(circle).forEach((item) => {
         if (!propertiesToReturnInPrivateCircle.has(item)) delete circle[item];
       });
-      (circle as DetailedCircleResponseDto).unauthorized = true;
+      (circle as CircleResponseDto).unauthorized = true;
     }
     return circle;
   }
 
-  async getById(id: string): Promise<DetailedCircleResponseDto> {
+  async getById(id: string): Promise<CircleResponseDto> {
     try {
       const circle = await this.queryBus.execute(
         new GetCircleByFilterQuery(
@@ -155,9 +159,9 @@ export class CirclesCrudService {
           getCircleProjectedFields,
         ),
       );
-      console.log(circle);
+      const circleDetails = await this.getCircleWithMinimalDetails(circle);
       return this.filterPrivateProperties(
-        circle,
+        circleDetails,
         this.requestProvider.user?.id,
       );
     } catch (error) {
@@ -172,19 +176,14 @@ export class CirclesCrudService {
     }
   }
 
-  async getBySlug(slug: string): Promise<DetailedCircleResponseDto> {
+  async getBySlug(slug: string): Promise<CircleResponseDto> {
     try {
       const circle = await this.queryBus.execute(
-        new GetCircleByFilterQuery(
-          {
-            slug: slug,
-          },
-          getCirclePopulatedFields,
-          getCircleProjectedFields,
-        ),
+        new GetCircleBySlugQuery(slug),
       );
+      const circleDetails = await this.getCircleWithMinimalDetails(circle);
       return this.filterPrivateProperties(
-        circle,
+        circleDetails,
         this.requestProvider.user?.id,
       );
     } catch (error) {
@@ -242,5 +241,34 @@ export class CirclesCrudService {
         error.message,
       );
     }
+  }
+
+  async getCircleWithMinimalDetails(
+    circle: Circle,
+  ): Promise<CircleResponseDto> {
+    const projects = {};
+    for (const populatedProject of circle?.projects) {
+      const project = populatedProject as unknown as Project;
+      projects[project.id] = project;
+    }
+
+    const children = {};
+    for (const populatedchild of circle?.children) {
+      const child = populatedchild as unknown as Circle;
+      children[child.id] = child;
+    }
+
+    const retro = {};
+    for (const populatedRetro of circle?.retro) {
+      const ret = populatedRetro as unknown as Retro;
+      retro[ret.id] = ret;
+    }
+
+    return {
+      ...circle,
+      projects,
+      children,
+      retro,
+    };
   }
 }
