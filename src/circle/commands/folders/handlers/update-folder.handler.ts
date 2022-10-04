@@ -1,13 +1,12 @@
 import { CommandHandler, EventBus, ICommandHandler } from '@nestjs/cqrs';
 import { CirclesRepository } from 'src/circle/circles.repository';
-import { DetailedCircleResponseDto } from 'src/circle/dto/detailed-circle-response.dto';
+import { CircleResponseDto } from 'src/circle/dto/detailed-circle-response.dto';
 import {
   HttpException,
   HttpStatus,
   InternalServerErrorException,
 } from '@nestjs/common';
 import { UpdateFolderCommand } from '../impl';
-import { CircleResponseDto } from 'src/circle/dto/folder.dto';
 
 @CommandHandler(UpdateFolderCommand)
 export class UpdateFolderCommandHandler

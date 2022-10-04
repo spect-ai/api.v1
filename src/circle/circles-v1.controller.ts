@@ -39,6 +39,7 @@ import { CreateCircleRequestDto } from './dto/create-circle-request.dto';
 import {
   BucketizedCircleResponseDto,
   DetailedCircleResponseDto,
+  CircleResponseDto,
 } from './dto/detailed-circle-response.dto';
 import { InviteDto } from './dto/invite.dto';
 import { JoinCircleUsingInvitationRequestDto } from './dto/join-circle.dto';
@@ -65,7 +66,6 @@ import {
   FolderParamDto,
   UpdateFolderOrderDto,
   UpdateFolderDetailsDto,
-  CircleResponseDto,
 } from './dto/folder.dto';
 
 @Controller('circle/v1')
@@ -94,7 +94,7 @@ export class CircleV1Controller {
   @Get('/:id')
   async findByObjectId(
     @Param() param: ObjectIdDto,
-  ): Promise<DetailedCircleResponseDto> {
+  ): Promise<CircleResponseDto> {
     return await this.circleCrudService.getById(param.id);
   }
 
@@ -103,7 +103,7 @@ export class CircleV1Controller {
   async findBySlug(
     @Param() param: RequiredSlugDto,
   ): Promise<CircleResponseDto> {
-    return await this.queryBus.execute(new GetCircleBySlugQuery(param.slug));
+    return await this.circleCrudService.getBySlug(param.slug);
   }
 
   @UseGuards(CreateCircleAuthGuard)

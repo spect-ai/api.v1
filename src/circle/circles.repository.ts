@@ -4,7 +4,7 @@ import { InjectModel } from 'nestjs-typegoose';
 import { BaseRepository } from 'src/base/base.repository';
 import { Circle, ExtendedCircle } from './model/circle.model';
 import { PopulatedCircleFields } from './types';
-import { CircleResponseDto } from './dto/folder.dto';
+import { CircleResponseDto } from './dto/detailed-circle-response.dto';
 import { Project } from 'src/project/model/project.model';
 import { Retro } from 'src/retro/models/retro.model';
 
@@ -291,19 +291,19 @@ export class CirclesRepository extends BaseRepository<Circle> {
     circle: Circle,
   ): Promise<CircleResponseDto> {
     const projects = {};
-    for (const populatedProject of circle.projects) {
+    for (const populatedProject of circle?.projects) {
       const project = populatedProject as unknown as Project;
       projects[project.id] = project;
     }
 
     const children = {};
-    for (const populatedchild of circle.children) {
+    for (const populatedchild of circle?.children) {
       const child = populatedchild as unknown as Circle;
       children[child.id] = child;
     }
 
     const retro = {};
-    for (const populatedRetro of circle.retro) {
+    for (const populatedRetro of circle?.retro) {
       const ret = populatedRetro as unknown as Retro;
       retro[ret.id] = ret;
     }

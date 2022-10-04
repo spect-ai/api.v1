@@ -1,10 +1,9 @@
 import { InternalServerErrorException } from '@nestjs/common';
 import { CommandHandler, EventBus, ICommandHandler } from '@nestjs/cqrs';
 import { CirclesRepository } from 'src/circle/circles.repository';
-import { DetailedCircleResponseDto } from 'src/circle/dto/detailed-circle-response.dto';
+import { CircleResponseDto } from 'src/circle/dto/detailed-circle-response.dto';
 import { v4 as uuidv4 } from 'uuid';
 import { CreateFolderCommand } from '../impl/create-folder.command';
-import { CircleResponseDto } from 'src/circle/dto/folder.dto';
 
 @CommandHandler(CreateFolderCommand)
 export class CreateFolderCommandHandler
