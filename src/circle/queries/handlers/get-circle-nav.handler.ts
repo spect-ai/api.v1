@@ -98,6 +98,36 @@ export class GetCircleNavigationBreadcrumbsQueryHandler
 
   async execute(query: GetCircleNavigationBreadcrumbsQuery): Promise<any> {
     const { id } = query;
-    return await this.circlesRepository.getCircleWithParents(id);
+    let circle: any = await this.circlesRepository.getCircleById(id);
+    const relations = [];
+    relations.unshift({
+      name: circle.name,
+      href: `/${circle.slug}`,
+    });
+    while (circle.parents.length > 0) {
+      const parent: any = await this.circlesRepository.getCircleById(
+        circle.parents[0].id,
+      );
+      const children = [];
+      for (const child of parent.children) {
+        // check if it exists in relation
+        if (relations.find((r) => r.name === child.name)) {
+          continue;
+        }
+        children.push({
+          name: child.name,
+          href: `/${child.slug}`,
+        });
+      }
+      relations.unshift({
+        name: circle.parents[0].name,
+        href: `/${circle.parents[0].slug}`,
+        children: children,
+      });
+      circle = await this.circlesRepository.getCircleById(
+        (circle.parents[0] as any).id,
+      );
+    }
+    return relations;
   }
 }
