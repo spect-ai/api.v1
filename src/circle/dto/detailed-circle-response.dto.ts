@@ -49,6 +49,12 @@ export class DetailedCircleResponseDto {
   projects?: ObjectId[];
 
   /**
+   * The projects in the circle
+   */
+  @ValidateNested()
+  collections?: string[];
+
+  /**
    * The members in the circle
    */
   @ValidateNested()
@@ -107,6 +113,12 @@ export class DetailedCircleResponseDto {
    */
   @IsBoolean()
   toBeClaimed?: boolean;
+
+  /**
+   * Is caller unauthorized to view private properties of circle?
+   */
+  @IsBoolean()
+  unauthorized?: boolean;
 }
 
 export class BucketizedCircleResponseDto {

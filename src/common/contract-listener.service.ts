@@ -7,71 +7,11 @@ import { UpdatePaymentCommand } from 'src/card/commands/impl';
 import { GetCircleByIdQuery } from 'src/circle/queries/impl';
 import { LoggingService } from 'src/logging/logging.service';
 import { UpdateRetroCommand } from 'src/retro/commands/impl';
-
-const abi = [
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: true,
-        internalType: 'address',
-        name: 'sender',
-        type: 'address',
-      },
-      { indexed: false, internalType: 'string', name: 'id', type: 'string' },
-    ],
-    name: 'ethDistributed',
-    type: 'event',
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: true,
-        internalType: 'address',
-        name: 'sender',
-        type: 'address',
-      },
-      {
-        indexed: true,
-        internalType: 'address',
-        name: 'token',
-        type: 'address',
-      },
-      {
-        indexed: false,
-        internalType: 'string',
-        name: 'id',
-        type: 'string',
-      },
-    ],
-    name: 'tokenDistributed',
-    type: 'event',
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: true,
-        internalType: 'address',
-        name: 'sender',
-        type: 'address',
-      },
-      {
-        indexed: false,
-        internalType: 'string',
-        name: 'id',
-        type: 'string',
-      },
-    ],
-    name: 'tokensDistributed',
-    type: 'event',
-  },
-];
+import { distributorAbi } from './abis/distributor';
 
 @Injectable()
 export class ContractListener {
-  private iface = new utils.Interface(abi);
+  private iface = new utils.Interface(distributorAbi);
   private decoder = new AbiCoder();
 
   constructor(
@@ -85,13 +25,26 @@ export class ContractListener {
       const { filterEth, filterTokens, filterToken, alchemy } = this.getWS(
         process.env.ALCHEMY_API_KEY_POLYGON,
         Network.MATIC_MAINNET,
-        '0xB8352eb1A4C93EDA96eB4faEBe1aAF5ad8fBa06f',
+        '0xD38028814eC0AAD592c97dE015B6F7ee5c019B48',
       );
       alchemy.ws.on(filterEth, (log) => {
         this.decodeTransactionAndRecord(log, '137');
       });
       alchemy.ws.on(filterTokens, (log) => {
         this.decodeTransactionAndRecord(log, '137');
+      });
+    }
+    if (process.env.ALCHEMY_API_KEY_MUMBAI) {
+      const { filterEth, filterTokens, filterToken, alchemy } = this.getWS(
+        process.env.ALCHEMY_API_KEY_MUMBAI,
+        Network.MATIC_MUMBAI,
+        '0x2De899142D9B74273EE1e70Ca7AD31A6EF7fCAaE',
+      );
+      alchemy.ws.on(filterEth, (log) => {
+        this.decodeTransactionAndRecord(log, '80001');
+      });
+      alchemy.ws.on(filterTokens, (log) => {
+        this.decodeTransactionAndRecord(log, '80001');
       });
     }
     if (process.env.ALCHEMY_API_KEY_RINKEBY) {
@@ -187,7 +140,6 @@ export class ContractListener {
           log.topics,
         );
       }
-      console.log(decodedEvents);
       const d = this.decoder.decode(
         ['string', 'string', 'string', 'string[]'],
         decodedEvents[1],
@@ -203,9 +155,11 @@ export class ContractListener {
         new GetCircleByIdQuery(circleId),
       );
       if (
-        circle.safeAddresses &&
-        circle.safeAddresses[chainId] &&
-        circle.safeAddresses[chainId].includes(sender)
+        (circle.safeAddresses &&
+          circle.safeAddresses[chainId] &&
+          circle.safeAddresses[chainId].includes(sender)) ||
+        chainId === '137' ||
+        chainId === '80001'
       ) {
         if (type === 'card') {
           console.log('Updating card');

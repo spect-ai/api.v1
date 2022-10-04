@@ -46,6 +46,8 @@ import { LoggingService } from './logging/logging.service';
 import { ConfigModule } from '@nestjs/config';
 import { ContractListener } from './common/contract-listener.service';
 import { QuestbookListener } from './common/questbook-listener.service';
+import { CollectionController } from './collection/collection.controller';
+import { CollectionModule } from './collection/collection.module';
 
 const databaseUrl =
   process.env.DATABASE_URL || 'mongodb://localhost:27017/nest';
@@ -71,6 +73,7 @@ console.log({ databaseUrl });
     RegistryModule,
     AutomationModule,
     CqrsModule,
+    CollectionModule,
   ],
   controllers: [
     AppController,
@@ -78,6 +81,7 @@ console.log({ databaseUrl });
     CardsController,
     TemplatesController,
     RegistryController,
+    CollectionController,
   ],
   providers: [
     AppService,

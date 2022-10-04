@@ -139,6 +139,13 @@ export class UpdateCircleRequestDto extends OmitType(CreateCircleRequestDto, [
   @IsString()
   @IsOptional()
   projects?: string[];
+
+  /**
+   * Collections that are part of the circle
+   */
+  @IsString()
+  @IsOptional()
+  collections?: string[];
 }
 
 export class UpdateCircleGithubRepoRequestDto {
