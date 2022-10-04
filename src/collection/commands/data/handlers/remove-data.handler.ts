@@ -9,47 +9,41 @@ import { CollectionRepository } from 'src/collection/collection.repository';
 import { LoggingService } from 'src/logging/logging.service';
 import { AddDataCommand } from '../impl/add-data.command';
 import { v4 as uuidv4 } from 'uuid';
+import { UpdateDataCommand } from '../impl/update-data.command';
+import { RemoveDataCommand } from '../impl/remove-data.command';
 
-@CommandHandler(AddDataCommand)
-export class AddDataCommandHandler implements ICommandHandler<AddDataCommand> {
+@CommandHandler(RemoveDataCommand)
+export class RemoveDataCommandHandler
+  implements ICommandHandler<RemoveDataCommand>
+{
   constructor(
     private readonly collectionRepository: CollectionRepository,
     private readonly queryBus: QueryBus,
     private readonly commandBus: CommandBus,
     private readonly logger: LoggingService,
   ) {
-    this.logger.setContext('AddDataCommandHandler');
+    this.logger.setContext('RemoveDataCommandHandler');
   }
 
-  async execute(command: AddDataCommand) {
-    const { addDataDto, caller, collectionId } = command;
+  async execute(command: RemoveDataCommand) {
+    const { caller, collectionId, dataSlug } = command;
     try {
       const collection = await this.collectionRepository.findById(collectionId);
       if (!collection) throw 'Collection does not exist';
-      for (const [propertyId, property] of Object.entries(
-        collection.properties,
-      )) {
-        if (property.default && !addDataDto[propertyId]) {
-          addDataDto[propertyId] = property.default;
-        }
-      }
-      addDataDto['slug'] = uuidv4();
+      delete collection.data[dataSlug];
       const updatedCollection = await this.collectionRepository.updateById(
         collectionId,
         {
-          data: {
-            ...collection.data,
-            [addDataDto['slug']]: addDataDto,
-          },
+          data: collection.data,
         },
       );
       return updatedCollection;
     } catch (err) {
       this.logger.error(
-        `Failed adding collection to collection Id ${collectionId} with error ${err.message}`,
+        `Failed removing data from collection Id ${collectionId} with error ${err.message}`,
       );
       throw new InternalServerErrorException(
-        `Failed adding collection to collection Id ${collectionId} with error ${err.message}`,
+        `Failed removing data from collection Id ${collectionId} with error ${err.message}`,
       );
     }
   }

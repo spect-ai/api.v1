@@ -5,16 +5,35 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   Request,
   UseGuards,
 } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { SessionAuthGuard } from 'src/auth/iron-session.guard';
 import { ObjectIdDto } from 'src/common/dtos/object-id.dto';
-import { RequiredSlugDto } from 'src/common/dtos/string.dto';
-import { CreateCollectionCommand, UpdateCollectionCommand } from './commands';
+import {
+  RequiredPropertyIdDto,
+  RequiredSlugDto,
+  RequiredUUIDDto,
+} from 'src/common/dtos/string.dto';
+import {
+  AddPropertyCommand,
+  CreateCollectionCommand,
+  RemovePropertyCommand,
+  UpdateCollectionCommand,
+  UpdatePropertyCommand,
+} from './commands';
+import { AddDataCommand } from './commands/data/impl/add-data.command';
+import { RemoveDataCommand } from './commands/data/impl/remove-data.command';
+import { UpdateDataCommand } from './commands/data/impl/update-data.command';
 import { CreateCollectionDto } from './dto/create-collection-request.dto';
 import { UpdateCollectionDto } from './dto/update-collection-request.dto';
+import { AddDataDto, UpdateDataDto } from './dto/update-data-request.dto';
+import {
+  AddPropertyDto,
+  UpdatePropertyDto,
+} from './dto/update-property-request.dto';
 import { Collection } from './model/collection.model';
 import { GetCollectionBySlugQuery } from './queries/impl/get-collection.query';
 
@@ -57,6 +76,94 @@ export class CollectionController {
   ): Promise<Collection> {
     return await this.commandBus.execute(
       new UpdateCollectionCommand(updateCollectionDto, req.user.id, param.id),
+    );
+  }
+
+  @UseGuards(SessionAuthGuard)
+  @Patch('/:id/addProperty')
+  async addProperty(
+    @Param() param: ObjectIdDto,
+    @Body() addPropertyDto: AddPropertyDto,
+    @Request() req,
+  ): Promise<Collection> {
+    return await this.commandBus.execute(
+      new AddPropertyCommand(addPropertyDto, req.user.id, param.id),
+    );
+  }
+
+  @UseGuards(SessionAuthGuard)
+  @Patch('/:id/updateProperty')
+  async updateProperty(
+    @Param() param: ObjectIdDto,
+    @Query() propertyParam: RequiredPropertyIdDto,
+    @Body() updatePropertyDto: UpdatePropertyDto,
+    @Request() req,
+  ): Promise<Collection> {
+    return await this.commandBus.execute(
+      new UpdatePropertyCommand(
+        updatePropertyDto,
+        req.user.id,
+        param.id,
+        propertyParam.propertyId,
+      ),
+    );
+  }
+
+  @UseGuards(SessionAuthGuard)
+  @Patch('/:id/removeProperty/:propertyId')
+  async removeProperty(
+    @Param() param: ObjectIdDto,
+    @Query() propertyParam: RequiredPropertyIdDto,
+    @Request() req,
+  ): Promise<Collection> {
+    return await this.commandBus.execute(
+      new RemovePropertyCommand(
+        req.user.id,
+        param.id,
+        propertyParam.propertyId,
+      ),
+    );
+  }
+
+  @UseGuards(SessionAuthGuard)
+  @Patch('/:id/addData')
+  async addData(
+    @Param() param: ObjectIdDto,
+    @Body() addDataDto: AddDataDto,
+    @Request() req,
+  ): Promise<Collection> {
+    return await this.commandBus.execute(
+      new AddDataCommand(addDataDto.data, req.user.id, param.id),
+    );
+  }
+
+  @UseGuards(SessionAuthGuard)
+  @Patch('/:id/updateData')
+  async updateData(
+    @Param() param: ObjectIdDto,
+    @Query() dataIdParam: RequiredUUIDDto,
+    @Body() updateDataDto: UpdateDataDto,
+    @Request() req,
+  ): Promise<Collection> {
+    return await this.commandBus.execute(
+      new UpdateDataCommand(
+        updateDataDto.data,
+        req.user.id,
+        param.id,
+        dataIdParam.id,
+      ),
+    );
+  }
+
+  @UseGuards(SessionAuthGuard)
+  @Patch('/:id/removeData')
+  async removeData(
+    @Param() param: ObjectIdDto,
+    @Query() dataIdParam: RequiredUUIDDto,
+    @Request() req,
+  ): Promise<Collection> {
+    return await this.commandBus.execute(
+      new RemoveDataCommand(req.user.id, param.id, dataIdParam.id),
     );
   }
 }

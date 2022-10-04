@@ -1,6 +1,11 @@
 import { IsBoolean, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { PropertyType } from '../types/types';
 
 export class AddPropertyDto {
+  @IsString()
+  @IsNotEmpty()
+  id: string;
+
   @IsString()
   @IsNotEmpty()
   name: string;
@@ -9,12 +14,11 @@ export class AddPropertyDto {
   @IsNotEmpty()
   type: string;
 
-  @IsString()
-  @IsNotEmpty()
-  default: string;
+  @IsOptional()
+  default: any;
 
   @IsBoolean()
-  @IsNotEmpty()
+  @IsOptional()
   isPartOfFormView: boolean;
 }
 
@@ -28,11 +32,11 @@ export class UpdatePropertyDto {
 
   @IsString()
   @IsOptional()
-  type: string;
+  type: PropertyType;
 
   @IsString()
   @IsOptional()
-  default: string;
+  default: any;
 
   /**
    * Is the property visible in the forms?
