@@ -287,6 +287,32 @@ export class CirclesRepository extends BaseRepository<Circle> {
     return circles[0];
   }
 
+  async getCircleWithParents(circleId: string): Promise<Circle[]> {
+    let circle: any = await this.getCircleById(circleId);
+    const relations = [];
+    relations.unshift({
+      name: circle.name,
+      href: `/${circle.slug}`,
+    });
+    while (circle.parents.length > 0) {
+      const parent: any = await this.getCircleById(circle.parents[0].id);
+      const children = [];
+      for (const child of parent.children) {
+        children.push({
+          name: child.name,
+          href: `/${child.slug}`,
+        });
+      }
+      relations.unshift({
+        name: circle.parents[0].name,
+        href: `/${circle.parents[0].slug}`,
+        children: children,
+      });
+      circle = await this.getCircleById((circle.parents[0] as any).id);
+    }
+    return relations;
+  }
+
   async getCircleWithMinimalDetails(
     circle: Circle,
   ): Promise<CircleResponseDto> {

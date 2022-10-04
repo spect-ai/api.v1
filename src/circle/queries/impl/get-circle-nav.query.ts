@@ -5,3 +5,7 @@ export class GetCircleNavigationQuery {
     public readonly maxParentsDepth?: number,
   ) {}
 }
+
+export class GetCircleNavigationBreadcrumbsQuery {
+  constructor(public readonly id: string) {}
+}

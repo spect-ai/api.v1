@@ -1,7 +1,10 @@
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { CirclesRepository } from 'src/circle/circles.repository';
 import { Circle } from 'src/circle/model/circle.model';
-import { GetCircleNavigationQuery } from '../impl';
+import {
+  GetCircleNavigationBreadcrumbsQuery,
+  GetCircleNavigationQuery,
+} from '../impl';
 
 type Node = {
   id: string;
@@ -84,5 +87,17 @@ export class GetCircleNavigationQueryHandler
       nodes,
       links,
     };
+  }
+}
+
+@QueryHandler(GetCircleNavigationBreadcrumbsQuery)
+export class GetCircleNavigationBreadcrumbsQueryHandler
+  implements IQueryHandler<GetCircleNavigationBreadcrumbsQuery>
+{
+  constructor(private readonly circlesRepository: CirclesRepository) {}
+
+  async execute(query: GetCircleNavigationBreadcrumbsQuery): Promise<any> {
+    const { id } = query;
+    return await this.circlesRepository.getCircleWithParents(id);
   }
 }

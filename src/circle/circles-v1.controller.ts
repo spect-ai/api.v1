@@ -51,7 +51,11 @@ import {
 } from './dto/update-circle-request.dto';
 import { UpdateMemberRolesDto } from './dto/update-member-role.dto';
 import { Circle } from './model/circle.model';
-import { GetCircleBySlugQuery, GetCircleNavigationQuery } from './queries/impl';
+import {
+  GetCircleBySlugQuery,
+  GetCircleNavigationBreadcrumbsQuery,
+  GetCircleNavigationQuery,
+} from './queries/impl';
 import { CirclesRolesService } from './services/circle-roles.service';
 import { CirclesCrudService } from './services/circles-crud.service';
 import { CircleMembershipService } from './services/circles-membership.service';
@@ -348,6 +352,15 @@ export class CircleV1Controller {
     @Param() param: ObjectIdDto,
   ): Promise<DetailedCircleResponseDto> {
     return await this.queryBus.execute(new GetCircleNavigationQuery(param.id));
+  }
+
+  @Get('/:id/circleNavBreadcrumbs')
+  async circleNavBreadcumbs(
+    @Param() param: ObjectIdDto,
+  ): Promise<DetailedCircleResponseDto> {
+    return await this.queryBus.execute(
+      new GetCircleNavigationBreadcrumbsQuery(param.id),
+    );
   }
 
   @SetMetadata('permissions', ['distributeCredentials'])
