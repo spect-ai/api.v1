@@ -12,7 +12,10 @@ import {
   RemoveFromCircleCommand,
   UpdateMemberRolesCommand,
 } from '../commands/impl';
-import { DetailedCircleResponseDto } from '../dto/detailed-circle-response.dto';
+import {
+  DetailedCircleResponseDto,
+  CircleResponseDto,
+} from '../dto/detailed-circle-response.dto';
 import { InviteDto } from '../dto/invite.dto';
 import { JoinCircleUsingInvitationRequestDto } from '../dto/join-circle.dto';
 import { UpdateMemberRolesDto } from '../dto/update-member-role.dto';
@@ -50,7 +53,7 @@ export class CircleMembershipService {
   async joinUsingInvitation(
     id: string,
     joinCircleDto: JoinCircleUsingInvitationRequestDto,
-  ): Promise<DetailedCircleResponseDto> {
+  ): Promise<CircleResponseDto> {
     try {
       const updatedCircle = await this.commandBus.execute(
         new JoinUsingInvitationCommand(
@@ -59,7 +62,10 @@ export class CircleMembershipService {
           this.requestProvider.user,
         ),
       );
-      return updatedCircle;
+      const circle = await this.circlesRepository.getCircleWithMinimalDetails(
+        updatedCircle,
+      );
+      return circle;
     } catch (error) {
       this.logger.logError(
         `Failed joining circle using invite link with error: ${error.message}`,
@@ -72,12 +78,15 @@ export class CircleMembershipService {
     }
   }
 
-  async joinUsingDiscord(id: string): Promise<DetailedCircleResponseDto> {
+  async joinUsingDiscord(id: string): Promise<CircleResponseDto> {
     try {
       const updatedCircle = await this.commandBus.execute(
         new JoinUsingDiscordCommand(id, this.requestProvider.user),
       );
-      return updatedCircle;
+      const circle = await this.circlesRepository.getCircleWithMinimalDetails(
+        updatedCircle,
+      );
+      return circle;
     } catch (error) {
       this.logger.logError(
         `Failed joining circle using discord with error: ${error.message}`,
@@ -90,12 +99,15 @@ export class CircleMembershipService {
     }
   }
 
-  async joinUsingGuildxyz(id: string): Promise<DetailedCircleResponseDto> {
+  async joinUsingGuildxyz(id: string): Promise<CircleResponseDto> {
     try {
       const updatedCircle = await this.commandBus.execute(
         new JoinUsingGuildxyzCommand(id, this.requestProvider.user),
       );
-      return updatedCircle;
+      const circle = await this.circlesRepository.getCircleWithMinimalDetails(
+        updatedCircle,
+      );
+      return circle;
     } catch (error) {
       this.logger.logError(
         `Failed joining circle using guild with error: ${error.message}`,
@@ -108,12 +120,15 @@ export class CircleMembershipService {
     }
   }
 
-  async join(id: string): Promise<DetailedCircleResponseDto> {
+  async join(id: string): Promise<CircleResponseDto> {
     try {
       const updatedCircle = await this.commandBus.execute(
         new JoinWithoutInvitationCommand(id, this.requestProvider.user),
       );
-      return updatedCircle;
+      const circle = await this.circlesRepository.getCircleWithMinimalDetails(
+        updatedCircle,
+      );
+      return circle;
     } catch (error) {
       this.logger.logError(
         `Failed joining circle with error: ${error.message}`,
@@ -130,7 +145,7 @@ export class CircleMembershipService {
     id: string,
     member: string,
     updateMemberRolesDto: UpdateMemberRolesDto,
-  ): Promise<DetailedCircleResponseDto> {
+  ): Promise<CircleResponseDto> {
     try {
       const circle = await this.commandBus.execute(
         new UpdateMemberRolesCommand(
@@ -140,7 +155,7 @@ export class CircleMembershipService {
           this.requestProvider.circle,
         ),
       );
-      return circle;
+      return await this.circlesRepository.getCircleWithMinimalDetails(circle);
     } catch (error) {
       this.logger.logError(
         `Failed updating member roles with error: ${error.message}`,
@@ -153,15 +168,14 @@ export class CircleMembershipService {
     }
   }
 
-  async removeMember(
-    id: string,
-    member: string,
-  ): Promise<DetailedCircleResponseDto> {
+  async removeMember(id: string, member: string): Promise<CircleResponseDto> {
     try {
       const updatedCircle = await this.commandBus.execute(
         new RemoveFromCircleCommand(member, id, this.requestProvider.circle),
       );
-      return updatedCircle;
+      return await this.circlesRepository.getCircleWithMinimalDetails(
+        updatedCircle,
+      );
     } catch (error) {
       this.logger.logError(
         `Failed removing member with error: ${error.message}`,
@@ -174,7 +188,7 @@ export class CircleMembershipService {
     }
   }
 
-  async leave(id: string): Promise<DetailedCircleResponseDto> {
+  async leave(id: string): Promise<CircleResponseDto> {
     try {
       const updatedCircle = await this.commandBus.execute(
         new RemoveFromCircleCommand(
@@ -183,7 +197,9 @@ export class CircleMembershipService {
           this.requestProvider.circle,
         ),
       );
-      return updatedCircle;
+      return await this.circlesRepository.getCircleWithMinimalDetails(
+        updatedCircle,
+      );
     } catch (error) {
       this.logger.logError(
         `Failed leaving circle with error: ${error.message}`,
