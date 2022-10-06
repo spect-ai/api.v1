@@ -32,9 +32,10 @@ export class RemovePropertyCommandHandler
         collection.propertyOrder = collection.propertyOrder.splice(idx);
       }
 
-      for (const [id, data] of Object.entries(collection.data)) {
-        delete data[propertyId];
-      }
+      if (collection.data)
+        for (const [id, data] of Object.entries(collection.data)) {
+          delete data[propertyId];
+        }
 
       const updatedCollection = await this.collectionRepository.updateById(
         collectionId,

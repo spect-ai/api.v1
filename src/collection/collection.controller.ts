@@ -110,7 +110,7 @@ export class CollectionController {
   }
 
   @UseGuards(SessionAuthGuard)
-  @Patch('/:id/removeProperty/:propertyId')
+  @Patch('/:id/removeProperty')
   async removeProperty(
     @Param() param: ObjectIdDto,
     @Query() propertyParam: RequiredPropertyIdDto,
