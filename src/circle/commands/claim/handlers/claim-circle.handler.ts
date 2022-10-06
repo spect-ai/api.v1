@@ -1,7 +1,7 @@
 import { InternalServerErrorException } from '@nestjs/common';
 import { CommandHandler, ICommandHandler, QueryBus } from '@nestjs/cqrs';
 import { CirclesRepository } from 'src/circle/circles.repository';
-import { DetailedCircleResponseDto } from 'src/circle/dto/detailed-circle-response.dto';
+import { CircleResponseDto } from 'src/circle/dto/detailed-circle-response.dto';
 import { Circle, ExtendedCircle } from 'src/circle/model/circle.model';
 import { GetCircleWithChildrenQuery } from 'src/circle/queries/impl';
 import { defaultCircleCreatorRoles } from 'src/constants';
@@ -22,7 +22,7 @@ export class ClaimCircleCommandHandler
 
   async execute(
     command: ClaimCircleCommand,
-  ): Promise<DetailedCircleResponseDto | boolean> {
+  ): Promise<CircleResponseDto | boolean> {
     try {
       const { id, caller } = command;
       const circle = await this.queryBus.execute(
@@ -56,7 +56,7 @@ export class ClaimCircleCommandHandler
   async performClaim(
     circle: ExtendedCircle,
     callerId: string,
-  ): Promise<DetailedCircleResponseDto> {
+  ): Promise<CircleResponseDto> {
     const memberRoles = {};
     memberRoles[callerId] = defaultCircleCreatorRoles;
     const allCircles = [circle, ...circle.flattenedChildren];
@@ -70,8 +70,10 @@ export class ClaimCircleCommandHandler
       };
     }
     await this.circlesRepository.bundleAndExecuteUpdates(circleUpdate);
-    return await this.circlesRepository.getCircleWithPopulatedReferences(
-      circle.id,
+    const updatedcircle =
+      await this.circlesRepository.getCircleWithPopulatedReferences(circle.id);
+    return await this.circlesRepository.getCircleWithMinimalDetails(
+      updatedcircle,
     );
   }
 }

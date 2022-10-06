@@ -7,13 +7,15 @@ import {
   RemoveRoleCommand,
   UpdateRoleCommand,
 } from '../commands/impl';
-import { DetailedCircleResponseDto } from '../dto/detailed-circle-response.dto';
+import { CircleResponseDto } from '../dto/detailed-circle-response.dto';
 import { AddRoleDto } from '../dto/roles-requests.dto';
+import { CirclesRepository } from 'src/circle/circles.repository';
 
 @Injectable()
 export class CirclesRolesService {
   constructor(
     private readonly requestProvider: RequestProvider,
+    private readonly circleRepository: CirclesRepository,
     private readonly logger: LoggingService,
     private readonly commandBus: CommandBus,
     private readonly eventBus: EventBus,
@@ -21,15 +23,12 @@ export class CirclesRolesService {
     logger.setContext('CirclesRolesService');
   }
 
-  async addRole(
-    id: string,
-    roleDto: AddRoleDto,
-  ): Promise<DetailedCircleResponseDto> {
+  async addRole(id: string, roleDto: AddRoleDto): Promise<CircleResponseDto> {
     try {
       const circle = await this.commandBus.execute(
         new AddRoleCommand(roleDto, this.requestProvider.circle, id),
       );
-      return circle;
+      return await this.circleRepository.getCircleWithMinimalDetails(circle);
     } catch (error) {
       this.logger.logError(
         `Failed adding circle role with error: ${error.message}`,
@@ -46,12 +45,12 @@ export class CirclesRolesService {
     id: string,
     roleId: string,
     roleDto: AddRoleDto,
-  ): Promise<DetailedCircleResponseDto> {
+  ): Promise<CircleResponseDto> {
     try {
       const circle = await this.commandBus.execute(
         new UpdateRoleCommand(roleId, roleDto, this.requestProvider.circle, id),
       );
-      return circle;
+      return await this.circleRepository.getCircleWithMinimalDetails(circle);
     } catch (error) {
       this.logger.logError(
         `Failed updating circle role with error: ${error.message}`,
@@ -64,15 +63,12 @@ export class CirclesRolesService {
     }
   }
 
-  async removeRole(
-    id: string,
-    roleId: string,
-  ): Promise<DetailedCircleResponseDto> {
+  async removeRole(id: string, roleId: string): Promise<CircleResponseDto> {
     try {
       const circle = await this.commandBus.execute(
         new RemoveRoleCommand(roleId, this.requestProvider.circle, id),
       );
-      return circle;
+      return await this.circleRepository.getCircleWithMinimalDetails(circle);
     } catch (error) {
       this.logger.logError(
         `Failed removing circle role with error: ${error.message}`,
