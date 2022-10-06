@@ -26,47 +26,44 @@ export class UpdatePropertyCommandHandler
       if (!collection.properties || !collection.properties[propertyId])
         throw `Cannot find property with id ${propertyId}`;
 
-      let updatedCollection: Collection;
       if (updatePropertyCommandDto.name) {
-        for (const [id, data] of Object.entries(collection.data)) {
-          data[updatePropertyCommandDto.name] = data[propertyId];
-          delete data[propertyId];
-        }
+        if (collection.data)
+          for (const [id, data] of Object.entries(collection.data)) {
+            data[updatePropertyCommandDto.name] = data[propertyId];
+            delete data[propertyId];
+          }
         collection.properties[updatePropertyCommandDto.name] = {
           ...collection.properties[propertyId],
           ...updatePropertyCommandDto,
         };
         delete collection.properties[propertyId];
         const idx = collection.propertyOrder.indexOf(propertyId);
-        console.log(idx);
-        const propertyOrder = collection.propertyOrder.splice(
-          idx,
-          1,
-          updatePropertyCommandDto.name,
-        );
-
-        updatedCollection = await this.collectionRepository.updateById(
-          collectionId,
-          {
-            properties: collection.properties,
-            propertyOrder,
-            data: collection.data,
-          },
-        );
-      } else {
-        updatedCollection = await this.collectionRepository.updateById(
-          collectionId,
-          {
-            properties: {
-              ...collection.properties,
-              [propertyId]: {
-                ...collection.properties[propertyId],
-                ...updatePropertyCommandDto,
-              },
-            },
-          },
-        );
+        collection.propertyOrder.splice(idx, 1, updatePropertyCommandDto.name);
       }
+
+      if (updatePropertyCommandDto.options) {
+        const optionValueSet = new Set([
+          ...updatePropertyCommandDto.options.map((a) => a.value),
+        ]);
+        if (collection.data)
+          for (const [id, data] of Object.entries(collection.data)) {
+            if (data[propertyId] && !optionValueSet.has(data[propertyId].value))
+              delete data[propertyId];
+          }
+        collection.properties[propertyId] = {
+          ...collection.properties[propertyId],
+          ...updatePropertyCommandDto,
+        };
+      }
+
+      const updatedCollection = await this.collectionRepository.updateById(
+        collectionId,
+        {
+          properties: collection.properties,
+          propertyOrder: collection.propertyOrder,
+          data: collection.data,
+        },
+      );
 
       return updatedCollection;
     } catch (error) {

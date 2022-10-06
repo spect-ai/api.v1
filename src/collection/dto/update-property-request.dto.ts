@@ -1,3 +1,4 @@
+import { Type } from 'class-transformer';
 import {
   IsArray,
   IsBoolean,
@@ -5,9 +6,18 @@ import {
   IsNotEmpty,
   IsOptional,
   IsString,
+  ValidateIf,
+  ValidateNested,
 } from 'class-validator';
 import { PropertyType } from '../types/types';
 
+export class OptionModel {
+  @IsString()
+  label: string;
+
+  @IsString()
+  value: string;
+}
 export class AddPropertyDto {
   @IsString()
   @IsNotEmpty()
@@ -33,6 +43,8 @@ export class AddPropertyDto {
 
   @IsOptional()
   @IsArray()
+  @ValidateNested()
+  @Type(() => OptionModel)
   options: any;
 
   @IsBoolean()
@@ -69,6 +81,7 @@ export class UpdatePropertyDto {
 
   @IsOptional()
   @IsArray()
+  @Type(() => OptionModel)
   options: any;
 
   /**

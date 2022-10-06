@@ -33,7 +33,10 @@ export class AddPropertyCommandHandler
         {
           properties: {
             ...collection.properties,
-            [addPropertyCommandDto.name]: addPropertyCommandDto,
+            [addPropertyCommandDto.name]: {
+              ...addPropertyCommandDto,
+              isPartOfFormView: addPropertyCommandDto.isPartOfFormView || true,
+            },
           },
           propertyOrder: [
             ...(collection.propertyOrder || []),
