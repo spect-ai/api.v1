@@ -9,6 +9,7 @@ import { CollectionRepository } from './collection.repository';
 import { CommandHandlers } from './commands';
 import { Collection } from './model/collection.model';
 import { QueryHandlers } from './queries';
+import { DataValidationService } from './validations/data-validation.service';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { QueryHandlers } from './queries';
     CollectionRepository,
     CommonTools,
     LoggingService,
+    DataValidationService,
   ],
   exports: [CollectionModule],
 })

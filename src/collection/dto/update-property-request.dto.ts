@@ -1,21 +1,39 @@
-import { IsBoolean, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import {
+  IsArray,
+  IsBoolean,
+  IsEnum,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 import { PropertyType } from '../types/types';
 
 export class AddPropertyDto {
   @IsString()
   @IsNotEmpty()
-  id: string;
-
-  @IsString()
-  @IsNotEmpty()
   name: string;
 
-  @IsString()
+  @IsEnum([
+    'shortText',
+    'longText',
+    'number',
+    'user[]',
+    'user',
+    'reward',
+    'date',
+    'singleSelect',
+    'multiSelect',
+    'ethAddress',
+  ])
   @IsNotEmpty()
-  type: string;
+  type: PropertyType;
 
   @IsOptional()
   default: any;
+
+  @IsOptional()
+  @IsArray()
+  options: any;
 
   @IsBoolean()
   @IsOptional()
@@ -30,13 +48,28 @@ export class UpdatePropertyDto {
   @IsOptional()
   name: string;
 
-  @IsString()
+  @IsEnum([
+    'shortText',
+    'longText',
+    'number',
+    'user[]',
+    'user',
+    'reward',
+    'date',
+    'singleSelect',
+    'multiSelect',
+    'ethAddress',
+  ])
   @IsOptional()
   type: PropertyType;
 
   @IsString()
   @IsOptional()
   default: any;
+
+  @IsOptional()
+  @IsArray()
+  options: any;
 
   /**
    * Is the property visible in the forms?
