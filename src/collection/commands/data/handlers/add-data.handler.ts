@@ -2,6 +2,7 @@ import { InternalServerErrorException } from '@nestjs/common';
 import {
   CommandBus,
   CommandHandler,
+  EventBus,
   ICommandHandler,
   QueryBus,
 } from '@nestjs/cqrs';
@@ -10,13 +11,14 @@ import { LoggingService } from 'src/logging/logging.service';
 import { AddDataCommand } from '../impl/add-data.command';
 import { v4 as uuidv4 } from 'uuid';
 import { DataValidationService } from 'src/collection/validations/data-validation.service';
+import { DataAddedEvent } from 'src/collection/events';
 
 @CommandHandler(AddDataCommand)
 export class AddDataCommandHandler implements ICommandHandler<AddDataCommand> {
   constructor(
     private readonly collectionRepository: CollectionRepository,
     private readonly queryBus: QueryBus,
-    private readonly commandBus: CommandBus,
+    private readonly eventBus: EventBus,
     private readonly logger: LoggingService,
     private readonly validationService: DataValidationService,
   ) {
@@ -49,6 +51,7 @@ export class AddDataCommandHandler implements ICommandHandler<AddDataCommand> {
           },
         },
       );
+      this.eventBus.publish(new DataAddedEvent(collection, data, caller));
       return updatedCollection;
     } catch (err) {
       this.logger.error(

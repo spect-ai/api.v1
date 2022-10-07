@@ -8,6 +8,7 @@ import { Project } from 'src/project/model/project.model';
 import {
   Activity,
   Notification,
+  NotificationV2,
   UserSubmittedApplication,
 } from '../types/types';
 import { Retro } from 'src/retro/models/retro.model';
@@ -103,6 +104,12 @@ export class User extends ProfileModel {
    */
   @prop({ default: [] })
   notifications: Notification[];
+
+  /**
+   * Notifications for the user
+   */
+  @prop({ default: [] })
+  notificationsV2: NotificationV2[];
 
   /**
    * Applications submitted by the user

@@ -26,16 +26,21 @@ export class UpdatePropertyCommandHandler
       if (!collection.properties || !collection.properties[propertyId])
         throw `Cannot find property with id ${propertyId}`;
 
+      if (collection.properties[propertyId].immutable)
+        throw 'Property is immutable and cannot be updated';
+
+      const propId = updatePropertyCommandDto.name
+        ? updatePropertyCommandDto.name
+        : propertyId;
       if (updatePropertyCommandDto.name) {
+        if (collection.properties[updatePropertyCommandDto.name])
+          throw `Property already existss`;
         if (collection.data)
           for (const [id, data] of Object.entries(collection.data)) {
             data[updatePropertyCommandDto.name] = data[propertyId];
             delete data[propertyId];
           }
-        collection.properties[updatePropertyCommandDto.name] = {
-          ...collection.properties[propertyId],
-          ...updatePropertyCommandDto,
-        };
+
         delete collection.properties[propertyId];
         const idx = collection.propertyOrder.indexOf(propertyId);
         collection.propertyOrder.splice(idx, 1, updatePropertyCommandDto.name);
@@ -50,12 +55,11 @@ export class UpdatePropertyCommandHandler
             if (data[propertyId] && !optionValueSet.has(data[propertyId].value))
               delete data[propertyId];
           }
-        collection.properties[propertyId] = {
-          ...collection.properties[propertyId],
-          ...updatePropertyCommandDto,
-        };
       }
-
+      collection.properties[propId] = {
+        ...collection.properties[propertyId],
+        ...updatePropertyCommandDto,
+      };
       const updatedCollection = await this.collectionRepository.updateById(
         collectionId,
         {

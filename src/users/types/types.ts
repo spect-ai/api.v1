@@ -16,6 +16,13 @@ export type Notification = {
   read: boolean;
 };
 
+export type NotificationV2 = {
+  id: string;
+  content: string;
+  ref?: Reference;
+  read: boolean;
+};
+
 export type Activity = {
   id: string;
   actionType: string;

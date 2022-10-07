@@ -9,7 +9,7 @@ import {
   ValidateIf,
   ValidateNested,
 } from 'class-validator';
-import { PropertyType } from '../types/types';
+import { PropertyType, UserType } from '../types/types';
 
 export class OptionModel {
   @IsString()
@@ -50,6 +50,20 @@ export class AddPropertyDto {
   @IsBoolean()
   @IsOptional()
   isPartOfFormView: boolean;
+
+  /**
+   * User type of user fields
+   */
+  @IsString()
+  @IsOptional()
+  userType: UserType;
+
+  /**
+   * User types to notify upon update
+   */
+  @IsArray()
+  @IsOptional()
+  onUpdateNotifyUserTypes: UserType[];
 }
 
 export class UpdatePropertyDto {
@@ -90,4 +104,18 @@ export class UpdatePropertyDto {
   @IsBoolean()
   @IsOptional()
   isPartOfFormView: boolean;
+
+  /**
+   * User type of user fields
+   */
+  @IsString()
+  @IsOptional()
+  userType: UserType;
+
+  /**
+   * User types to notify upon update
+   */
+  @IsArray()
+  @IsOptional()
+  onUpdateNotifyUserTypes: UserType[];
 }

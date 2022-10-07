@@ -7,6 +7,7 @@ import { EthAddressModule } from 'src/_eth-address/_eth-address.module';
 import { CollectionController } from './collection.controller';
 import { CollectionRepository } from './collection.repository';
 import { CommandHandlers } from './commands';
+import { EventHandlers } from './events';
 import { Collection } from './model/collection.model';
 import { QueryHandlers } from './queries';
 import { DataValidationService } from './validations/data-validation.service';
@@ -21,6 +22,7 @@ import { DataValidationService } from './validations/data-validation.service';
   providers: [
     ...QueryHandlers,
     ...CommandHandlers,
+    ...EventHandlers,
     CollectionRepository,
     CommonTools,
     LoggingService,

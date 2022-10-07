@@ -4,6 +4,8 @@ import { LoggingService } from 'src/logging/logging.service';
 import { CollectionRepository } from '../collection.repository';
 import { Collection } from '../model/collection.model';
 import { Property } from '../types/types';
+import { ethers } from 'ethers';
+import mongoose from 'mongoose';
 
 @Injectable()
 export class DataValidationService {
@@ -34,6 +36,13 @@ export class DataValidationService {
       console.log(propertyValidationPassed);
       if (!propertyValidationPassed) return false;
 
+      const typeValidationPassed = this.validateType(
+        dataObj,
+        collectionToValidate.properties,
+      );
+      if (!typeValidationPassed) return false;
+      console.log(typeValidationPassed);
+
       const valueValidationPassed = this.validateValue(
         dataObj,
         collectionToValidate.properties,
@@ -63,7 +72,7 @@ export class DataValidationService {
     return true;
   }
 
-  private validateValue(
+  private validateType(
     dataObj: object,
     properties: MappedItem<Property>,
   ): boolean {
@@ -71,7 +80,6 @@ export class DataValidationService {
       if (['shortText', 'longText'].includes(properties[propertyId].type)) {
         if (typeof data !== 'string') return false;
       } else if (['singleSelect'].includes(properties[propertyId].type)) {
-        console.log(data);
         if (typeof data !== 'object') return false;
         if (!data['value'] || !data['label']) return false;
       } else if (['multiSelect'].includes(properties[propertyId].type)) {
@@ -81,8 +89,33 @@ export class DataValidationService {
         }
       } else if (['number'].includes(properties[propertyId].type)) {
         if (typeof data !== 'number') return false;
+      } else if (['reward'].includes(properties[propertyId].type)) {
+        if (
+          typeof data['token'] !== 'object' ||
+          typeof data['chain'] !== 'object' ||
+          typeof data['value'] !== 'number' ||
+          typeof data['chain']['chainId'] !== 'string' ||
+          typeof data['chain']['name'] !== 'string' ||
+          typeof data['token']['symbol'] !== 'string' ||
+          typeof data['token']['address'] !== 'string'
+        )
+          return false;
+      } else if (['ethAddress'].includes(properties[propertyId].type)) {
+        if (!ethers.utils.isAddress(data)) return false;
+      } else if (['user'].includes(properties[propertyId].type)) {
+        if (!mongoose.isValidObjectId(data)) return false;
+      } else if (['user[]'].includes(properties[propertyId].type)) {
+        for (const user of data)
+          if (!mongoose.isValidObjectId(user)) return false;
       }
     }
+    return true;
+  }
+
+  private validateValue(
+    dataObj: object,
+    properties: MappedItem<Property>,
+  ): boolean {
     return true;
   }
 }

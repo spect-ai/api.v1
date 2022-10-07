@@ -4,6 +4,11 @@ import { Diff } from 'src/common/interfaces';
 import { Project } from 'src/project/model/project.model';
 import { Retro } from 'src/retro/models/retro.model';
 
+export type NotifRef = {
+  id: string;
+  refType: 'user' | 'circle' | 'collection';
+};
+
 export class NotificationEvent {
   constructor(
     public readonly actionType: string,
@@ -13,5 +18,13 @@ export class NotificationEvent {
     public readonly linkPath: string[],
     public readonly actor: string,
     public readonly diff?: Diff<Card | Retro | Circle | Project>,
+  ) {}
+}
+
+export class NotificationEventV2 {
+  constructor(
+    public readonly content: string,
+    public readonly recipients: string[],
+    public readonly ref?: NotifRef,
   ) {}
 }

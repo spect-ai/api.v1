@@ -4,7 +4,11 @@ import { BaseModel } from 'src/base/base.model';
 import { useMongoosePlugin } from 'src/base/decorators/use-mongoose-plugins.decorator';
 import { Circle } from 'src/circle/model/circle.model';
 import { MappedItem } from 'src/common/interfaces';
-import { DefaultViewType, Property } from '../types/types';
+import {
+  DefaultViewType,
+  NotificationSettings,
+  Property,
+} from '../types/types';
 
 @useMongoosePlugin()
 export class Collection extends BaseModel {
@@ -70,4 +74,10 @@ export class Collection extends BaseModel {
    */
   @prop({ default: 'table' })
   defaultView: DefaultViewType;
+
+  /**
+   * Notification settings for different actions
+   */
+  @prop()
+  notificationSettings: NotificationSettings;
 }

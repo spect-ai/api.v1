@@ -1,10 +1,15 @@
+export type UserType = 'assignee' | 'reviewer' | 'grantee' | 'applicant';
+
 export type Property = {
   name: string;
   type: PropertyType;
   isPartOfFormView: boolean;
+  immutable?: boolean;
   default?: any;
   condition?: any; // Show property only when condition is met
   options?: Option[];
+  userType?: UserType; // user type only relevant when type is user or user[]
+  onUpdateNotifyUserTypes?: UserType[];
 };
 
 export type PropertyType =
@@ -41,3 +46,9 @@ export type PopulatedCollectionFields = {
 };
 
 export type DefaultViewType = 'form' | 'table' | 'kanban' | 'list' | 'gantt';
+
+export type NotificationSettings = {
+  userRecipientsOnCollectionSettingsUpdate: string[];
+  userRecipientsOnPropertyUpdates: string[];
+  userRecipientsOnNewData: string[];
+};

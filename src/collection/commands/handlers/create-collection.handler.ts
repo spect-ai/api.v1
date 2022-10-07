@@ -38,6 +38,7 @@ export class CreateCollectionCommandHandler
           type: 'shortText',
           default: '',
           isPartOfFormView: true,
+          immutable: true,
         },
         description: {
           name: 'description',

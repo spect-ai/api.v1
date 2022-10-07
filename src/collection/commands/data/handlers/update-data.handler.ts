@@ -2,6 +2,7 @@ import { InternalServerErrorException } from '@nestjs/common';
 import {
   CommandBus,
   CommandHandler,
+  EventBus,
   ICommandHandler,
   QueryBus,
 } from '@nestjs/cqrs';
@@ -11,6 +12,7 @@ import { AddDataCommand } from '../impl/add-data.command';
 import { v4 as uuidv4 } from 'uuid';
 import { UpdateDataCommand } from '../impl/update-data.command';
 import { DataValidationService } from 'src/collection/validations/data-validation.service';
+import { DataUpatedEvent } from 'src/collection/events';
 
 @CommandHandler(UpdateDataCommand)
 export class UpdateDataCommandHandler
@@ -19,7 +21,7 @@ export class UpdateDataCommandHandler
   constructor(
     private readonly collectionRepository: CollectionRepository,
     private readonly queryBus: QueryBus,
-    private readonly commandBus: CommandBus,
+    private readonly eventBus: EventBus,
     private readonly logger: LoggingService,
     private readonly validationService: DataValidationService,
   ) {
@@ -46,6 +48,14 @@ export class UpdateDataCommandHandler
             },
           },
         },
+      );
+      this.eventBus.publish(
+        new DataUpatedEvent(
+          collection,
+          data,
+          caller,
+          collection.data[dataSlug],
+        ),
       );
       return updatedCollection;
     } catch (err) {

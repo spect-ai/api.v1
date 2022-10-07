@@ -9,7 +9,7 @@ import { CardNotificationService } from 'src/users/notification/card-notificatio
 import { RetroNotificationService } from 'src/users/notification/retro-notification.service';
 import { Reference } from 'src/users/types/types';
 import { UsersRepository } from 'src/users/users.repository';
-import { NotificationEvent } from '../impl';
+import { NotificationEvent, NotificationEventV2 } from '../impl';
 import { LoggingService } from 'src/logging/logging.service';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -107,6 +107,44 @@ export class NotificationEventHandler
         );
       default:
         return null;
+    }
+  }
+}
+
+@EventsHandler(NotificationEventV2)
+export class NotificationEventV2Handler
+  implements IEventHandler<NotificationEventV2>
+{
+  constructor(
+    private readonly userRepository: UsersRepository,
+    private readonly logger: LoggingService,
+  ) {
+    this.logger.setContext('NotificationEventV2Handler');
+  }
+
+  async handle(event: NotificationEventV2) {
+    try {
+      console.log('NotificationEventHandler');
+      const { recipients, content, ref } = event;
+
+      for (const recipient of recipients) {
+        const recipientEntity = await this.userRepository.findById(recipient);
+
+        await this.userRepository.updateById(recipient, {
+          notificationsV2: [
+            ...(recipientEntity.notificationsV2 || []),
+            {
+              content: content,
+              ref,
+            },
+          ],
+        });
+      }
+    } catch (error) {
+      // Make sure to not send a large object to the logger
+      this.logger.error(
+        `Failed adding notification to user with error: ${error.message}`,
+      );
     }
   }
 }
