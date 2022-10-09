@@ -10,6 +10,8 @@ import { CommandHandlers } from './commands';
 import { EventHandlers } from './events';
 import { Collection } from './model/collection.model';
 import { QueryHandlers } from './queries';
+import { ActivityBuilder, ActivityResolver } from './services/activity.service';
+import { CrudService } from './services/crud.service';
 import { DataValidationService } from './validations/data-validation.service';
 
 @Module({
@@ -27,6 +29,9 @@ import { DataValidationService } from './validations/data-validation.service';
     CommonTools,
     LoggingService,
     DataValidationService,
+    ActivityBuilder,
+    CrudService,
+    ActivityResolver,
   ],
   exports: [CollectionModule],
 })

@@ -1,3 +1,5 @@
+import { MappedItem } from 'src/common/interfaces';
+
 export type UserType = 'assignee' | 'reviewer' | 'grantee' | 'applicant';
 
 export type Property = {
@@ -51,4 +53,16 @@ export type NotificationSettings = {
   userRecipientsOnCollectionSettingsUpdate: string[];
   userRecipientsOnPropertyUpdates: string[];
   userRecipientsOnNewData: string[];
+};
+
+export type Ref = {
+  id: string;
+  refType: 'user' | 'circle' | 'collection';
+};
+
+export type Activity = {
+  content: string;
+  ref: MappedItem<Ref>;
+  timestamp: Date;
+  comment: boolean;
 };

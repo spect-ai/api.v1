@@ -36,19 +36,19 @@ import {
 } from './dto/update-property-request.dto';
 import { Collection } from './model/collection.model';
 import { GetCollectionBySlugQuery } from './queries/impl/get-collection.query';
+import { CrudService } from './services/crud.service';
 
 @Controller('collection/v1')
 export class CollectionController {
   constructor(
     private readonly commandBus: CommandBus,
     private readonly queryBus: QueryBus,
+    private readonly crudService: CrudService,
   ) {}
 
   @Get('/slug/:slug')
   async findBySlug(@Param() param: RequiredSlugDto): Promise<Collection> {
-    return await this.queryBus.execute(
-      new GetCollectionBySlugQuery(param.slug),
-    );
+    return await this.crudService.getCollectionBySlug(param.slug);
   }
 
   @Get('/:id')

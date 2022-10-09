@@ -13,6 +13,8 @@ import { v4 as uuidv4 } from 'uuid';
 import { UpdateDataCommand } from '../impl/update-data.command';
 import { DataValidationService } from 'src/collection/validations/data-validation.service';
 import { DataUpatedEvent } from 'src/collection/events';
+import { Collection } from 'src/collection/model/collection.model';
+import { ActivityBuilder } from 'src/collection/services/activity.service';
 
 @CommandHandler(UpdateDataCommand)
 export class UpdateDataCommandHandler
@@ -24,6 +26,7 @@ export class UpdateDataCommandHandler
     private readonly eventBus: EventBus,
     private readonly logger: LoggingService,
     private readonly validationService: DataValidationService,
+    private readonly activityBuilder: ActivityBuilder,
   ) {
     this.logger.setContext('UpdateDataCommandHandler');
   }
@@ -37,6 +40,12 @@ export class UpdateDataCommandHandler
       if (!validData) {
         throw new Error(`Data invalid`);
       }
+      const { dataActivities, dataActivityOrder } = this.activityBuilder.build(
+        data,
+        collection,
+        dataSlug,
+        caller?.id,
+      );
       const updatedCollection = await this.collectionRepository.updateById(
         collectionId,
         {
@@ -47,14 +56,16 @@ export class UpdateDataCommandHandler
               ...data,
             },
           },
+          dataActivities,
+          dataActivityOrder,
         },
       );
       this.eventBus.publish(
         new DataUpatedEvent(
           collection,
           data,
-          caller,
           collection.data[dataSlug],
+          caller,
         ),
       );
       return updatedCollection;

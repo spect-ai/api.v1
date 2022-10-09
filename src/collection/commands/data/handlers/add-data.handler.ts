@@ -12,6 +12,9 @@ import { AddDataCommand } from '../impl/add-data.command';
 import { v4 as uuidv4 } from 'uuid';
 import { DataValidationService } from 'src/collection/validations/data-validation.service';
 import { DataAddedEvent } from 'src/collection/events';
+import { Collection } from 'src/collection/model/collection.model';
+import { MappedItem } from 'src/common/interfaces';
+import { Activity } from 'src/collection/types/types';
 
 @CommandHandler(AddDataCommand)
 export class AddDataCommandHandler implements ICommandHandler<AddDataCommand> {
@@ -42,6 +45,11 @@ export class AddDataCommandHandler implements ICommandHandler<AddDataCommand> {
         }
       }
       data['slug'] = uuidv4();
+      const { dataActivities, dataActivityOrder } = this.getActivity(
+        collection,
+        data,
+        caller?.id,
+      );
       const updatedCollection = await this.collectionRepository.updateById(
         collectionId,
         {
@@ -49,6 +57,8 @@ export class AddDataCommandHandler implements ICommandHandler<AddDataCommand> {
             ...collection.data,
             [data['slug']]: data,
           },
+          dataActivities,
+          dataActivityOrder,
         },
       );
       this.eventBus.publish(new DataAddedEvent(collection, data, caller));
@@ -61,5 +71,51 @@ export class AddDataCommandHandler implements ICommandHandler<AddDataCommand> {
         `Failed adding collection to collection Id ${collectionId} with error ${err}`,
       );
     }
+  }
+
+  getActivity(
+    collection: Collection,
+    data: object,
+    caller: string,
+  ): {
+    dataActivities: MappedItem<MappedItem<Activity>>;
+    dataActivityOrder: MappedItem<string[]>;
+  } {
+    const activityId = uuidv4();
+    let content, ref;
+    const dataType =
+      collection.defaultView === 'form'
+        ? 'response'
+        : collection.defaultView === 'table'
+        ? 'row'
+        : 'card';
+    if (caller) {
+      content = `{{actor}} added new ${dataType}`;
+      ref = {
+        actor: {
+          id: caller,
+          type: 'user',
+        },
+      };
+    } else {
+      content = `New ${dataType} was added`;
+    }
+    return {
+      dataActivities: {
+        ...(collection.dataActivities || {}),
+        [data['slug']]: {
+          [activityId]: {
+            content,
+            ref,
+            timestamp: new Date(),
+            comment: false,
+          },
+        },
+      },
+      dataActivityOrder: {
+        ...(collection.dataActivityOrder || {}),
+        [data['slug']]: [activityId],
+      },
+    };
   }
 }

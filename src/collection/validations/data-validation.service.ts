@@ -77,6 +77,7 @@ export class DataValidationService {
     properties: MappedItem<Property>,
   ): boolean {
     for (const [propertyId, data] of Object.entries(dataObj)) {
+      if (data === null) continue;
       if (['shortText', 'longText'].includes(properties[propertyId].type)) {
         if (typeof data !== 'string') return false;
       } else if (['singleSelect'].includes(properties[propertyId].type)) {

@@ -49,6 +49,8 @@ import { QuestbookListener } from './common/questbook-listener.service';
 import { CollectionController } from './collection/collection.controller';
 import { CollectionModule } from './collection/collection.module';
 import { RealtimeModule } from './realtime/realtime.module';
+import { CrudService } from './collection/services/crud.service';
+import { ActivityResolver as CollectionDataActivityResolver } from './collection/services/activity.service';
 
 const databaseUrl =
   process.env.DATABASE_URL || 'mongodb://localhost:27017/nest';
@@ -115,6 +117,8 @@ console.log({ databaseUrl });
     LoggingService,
     ContractListener,
     QuestbookListener,
+    CrudService,
+    CollectionDataActivityResolver,
   ],
 })
 export class AppModule {}
