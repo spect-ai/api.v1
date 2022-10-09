@@ -1,6 +1,4 @@
-import { Ref } from '@typegoose/typegoose';
 import {
-  IsArray,
   IsBoolean,
   IsNotEmpty,
   IsObject,
@@ -60,7 +58,7 @@ export class DetailedCircleResponseDto {
    * The projects in the circle
    */
   @ValidateNested()
-  collections?: string[];
+  collections?: ObjectId[];
 
   /**
    * The members in the circle
@@ -204,7 +202,7 @@ export class CircleResponseDto {
    * The projects in the circle
    */
   @ValidateNested()
-  collections?: string[];
+  collections?: MinimalDetails;
 
   /**
    * The members in the circle
