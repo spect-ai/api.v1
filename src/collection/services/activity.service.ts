@@ -75,8 +75,6 @@ export class ActivityResolver {
     const mappedCircles = this.commonTools.objectify(circles, 'id');
     const mappedUsers = this.commonTools.objectify(users, 'id');
     const mappedCollection = this.commonTools.objectify(collections, 'id');
-
-    console.log({ mappedUsers });
     for (const [activityId, keys] of Object.entries(keysToLookup)) {
       for (const k of keys) {
         const refType = activityObj[activityId].ref[k].refType;
@@ -184,6 +182,121 @@ export class ActivityBuilder {
             comment: false,
           });
       }
+      if (['longText'].includes(collection.properties[propertyId].type)) {
+        const { content, ref } = this.longTextActivity(
+          propertyId,
+          data,
+          collection,
+          diff,
+          caller,
+        );
+        if (content)
+          activities.push({
+            content,
+            ref,
+            timestamp,
+            comment: false,
+          });
+      }
+
+      if (['date'].includes(collection.properties[propertyId].type)) {
+        const { content, ref } = this.dateFieldActivity(
+          propertyId,
+          data,
+          collection,
+          diff,
+          caller,
+        );
+        if (content)
+          activities.push({
+            content,
+            ref,
+            timestamp,
+            comment: false,
+          });
+      }
+
+      if (['user'].includes(collection.properties[propertyId].type)) {
+        const { content, ref } = this.singleUserFieldActivity(
+          propertyId,
+          data,
+          collection,
+          diff,
+          caller,
+        );
+        if (content)
+          activities.push({
+            content,
+            ref,
+            timestamp,
+            comment: false,
+          });
+      }
+
+      if (collection.properties[propertyId].type === 'user[]') {
+        const { content, ref } = this.multiUserFieldActivity(
+          propertyId,
+          data,
+          collection,
+          diff,
+          caller,
+        );
+        if (content)
+          activities.push({
+            content,
+            ref,
+            timestamp,
+            comment: false,
+          });
+      }
+      if (['singleSelect'].includes(collection.properties[propertyId].type)) {
+        const { content, ref } = this.singleSelectFieldActivity(
+          propertyId,
+          data,
+          collection,
+          diff,
+          caller,
+        );
+        if (content)
+          activities.push({
+            content,
+            ref,
+            timestamp,
+            comment: false,
+          });
+      }
+      if (['multiSelect'].includes(collection.properties[propertyId].type)) {
+        const { content, ref } = this.multiSelectFieldActivity(
+          propertyId,
+          data,
+          collection,
+          diff,
+          caller,
+        );
+        if (content)
+          activities.push({
+            content,
+            ref,
+            timestamp,
+            comment: false,
+          });
+      }
+      if (['reward'].includes(collection.properties[propertyId].type)) {
+        const { content, ref } = this.rewardFieldActivity(
+          propertyId,
+          data,
+          collection,
+          diff,
+          caller,
+        );
+        if (content)
+          activities.push({
+            content,
+            ref,
+            timestamp,
+            comment: false,
+          });
+      }
     }
     return activities;
   }
@@ -263,6 +376,432 @@ export class ActivityBuilder {
           content: `Property ${collection.properties[propertyId].name} was updated to ${data}`,
           ref: {},
         };
+    }
+    return { content: null, ref: {} };
+  }
+
+  longTextActivity(
+    propertyId: string,
+    data: any,
+    collection: Collection,
+    diff: Diff<any>,
+    caller: string,
+  ): { content: string; ref: MappedItem<Ref> } {
+    const { added, deleted, updated } = diff;
+    if (propertyId in added) {
+      if (caller)
+        return {
+          content: `{{actor}} set ${collection.properties[propertyId].name}`,
+          ref: {
+            actor: {
+              id: caller,
+              refType: 'user',
+            },
+          },
+        };
+      else
+        return {
+          content: `Property ${collection.properties[propertyId].name} was set`,
+          ref: {},
+        };
+    } else if (propertyId in deleted) {
+      if (caller)
+        return {
+          content: `{{actor}} cleared ${collection.properties[propertyId].name}`,
+          ref: {
+            actor: {
+              id: caller,
+              refType: 'user',
+            },
+          },
+        };
+      else {
+        return {
+          content: `Property ${collection.properties[propertyId].name} was cleared`,
+          ref: {},
+        };
+      }
+    } else if (propertyId in updated) {
+      if (data === '' || data === null) {
+        if (caller)
+          return {
+            content: `{{actor}} cleared ${collection.properties[propertyId].name}`,
+            ref: {
+              actor: {
+                id: caller,
+                refType: 'user',
+              },
+            },
+          };
+        else {
+          return {
+            content: `Property ${collection.properties[propertyId].name} was cleared`,
+            ref: {},
+          };
+        }
+      }
+      if (caller)
+        return {
+          content: `{{actor}} updated ${collection.properties[propertyId].name}`,
+          ref: {
+            actor: {
+              id: caller,
+              refType: 'user',
+            },
+          },
+        };
+      else
+        return {
+          content: `Property ${collection.properties[propertyId].name} was updated`,
+          ref: {},
+        };
+    }
+    return { content: null, ref: {} };
+  }
+  dateFieldActivity(
+    propertyId: string,
+    data: any,
+    collection: Collection,
+    diff: Diff<any>,
+    caller: string,
+  ): { content: string; ref: MappedItem<Ref> } {
+    const { added, deleted, updated } = diff;
+    if (propertyId in added) {
+      if (caller)
+        return {
+          content: `{{actor}} set ${
+            collection.properties[propertyId].name
+          } to ${data.slice(0, -1).split('T')[0]}`,
+          ref: {
+            actor: {
+              id: caller,
+              refType: 'user',
+            },
+          },
+        };
+      else
+        return {
+          content: `Property ${
+            collection.properties[propertyId].name
+          } was set to ${data.slice(0, -1).split('T')[0]}`,
+          ref: {},
+        };
+    } else if (propertyId in deleted) {
+      if (caller)
+        return {
+          content: `{{actor}} cleared ${collection.properties[propertyId].name}`,
+          ref: {
+            actor: {
+              id: caller,
+              refType: 'user',
+            },
+          },
+        };
+      else {
+        return {
+          content: `Property ${collection.properties[propertyId].name} was cleared`,
+          ref: {},
+        };
+      }
+    } else if (propertyId in updated) {
+      if (data === '' || data === null) {
+        if (caller)
+          return {
+            content: `{{actor}} cleared ${collection.properties[propertyId].name}`,
+            ref: {
+              actor: {
+                id: caller,
+                refType: 'user',
+              },
+            },
+          };
+        else {
+          return {
+            content: `Property ${collection.properties[propertyId].name} was cleared`,
+            ref: {},
+          };
+        }
+      }
+      if (caller)
+        return {
+          content: `{{actor}} updated ${
+            collection.properties[propertyId].name
+          } to ${data.slice(0, -1).split('T')[0]}`,
+          ref: {
+            actor: {
+              id: caller,
+              refType: 'user',
+            },
+          },
+        };
+      else
+        return {
+          content: `Property ${
+            collection.properties[propertyId].name
+          } was updated to ${data.slice(0, -1).split('T')[0]}`,
+          ref: {},
+        };
+    }
+    return { content: null, ref: {} };
+  }
+
+  singleUserFieldActivity(
+    propertyId: string,
+    data: any,
+    collection: Collection,
+    diff: Diff<any>,
+    caller: string,
+  ): { content: string; ref: MappedItem<Ref> } {
+    const { added, deleted, updated } = diff;
+    if (propertyId in added || propertyId in updated || propertyId in deleted) {
+      if (data && data.length > 0) {
+        if (caller)
+          return {
+            content: `{{actor}} set ${collection.properties[propertyId].name} to {{user}}`,
+            ref: {
+              actor: {
+                id: caller,
+                refType: 'user',
+              },
+              user: {
+                id: data,
+                refType: 'user',
+              },
+            },
+          };
+        else
+          return {
+            content: `Property ${collection.properties[propertyId].name} was set to {{user}}`,
+            ref: {
+              user: {
+                id: data,
+                refType: 'user',
+              },
+            },
+          };
+      } else {
+        if (caller)
+          return {
+            content: `{{actor}} cleared ${collection.properties[propertyId].name}`,
+            ref: {
+              actor: {
+                id: caller,
+                refType: 'user',
+              },
+            },
+          };
+        else {
+          return {
+            content: `Property ${collection.properties[propertyId].name} was cleared`,
+            ref: {},
+          };
+        }
+      }
+    }
+    return { content: null, ref: {} };
+  }
+
+  multiUserFieldActivity(
+    propertyId: string,
+    data: any,
+    collection: Collection,
+    diff: Diff<any>,
+    caller: string,
+  ): { content: string; ref: MappedItem<Ref> } {
+    const { added, deleted, updated } = diff;
+    if (propertyId in added || propertyId in updated || propertyId in deleted) {
+      if (data && data.length > 0) {
+        let dynamicData = '';
+        const dynamicRef = {};
+        for (let i = 0; i < data.length; i++) {
+          if (i !== data.length - 1) dynamicData += `{{user${i}}}, `;
+          else dynamicData += `{{user${i}}}`;
+          dynamicRef[`user${i}`] = {
+            id: data[i],
+            refType: 'user',
+          };
+        }
+        if (caller)
+          return {
+            content: `{{actor}} set ${collection.properties[propertyId].name} to ${dynamicData}`,
+            ref: {
+              ...dynamicRef,
+              actor: {
+                id: caller,
+                refType: 'user',
+              },
+            },
+          };
+        else
+          return {
+            content: `Property ${collection.properties[propertyId].name} was set to ${dynamicData}`,
+            ref: {
+              ...dynamicRef,
+            },
+          };
+      } else {
+        if (caller)
+          return {
+            content: `{{actor}} cleared ${collection.properties[propertyId].name}`,
+            ref: {
+              actor: {
+                id: caller,
+                refType: 'user',
+              },
+            },
+          };
+        else
+          return {
+            content: `Property ${collection.properties[propertyId].name} was cleared`,
+            ref: {},
+          };
+      }
+    }
+    return { content: null, ref: {} };
+  }
+
+  rewardFieldActivity(
+    propertyId: string,
+    data: any,
+    collection: Collection,
+    diff: Diff<any>,
+    caller: string,
+  ): { content: string; ref: MappedItem<Ref> } {
+    const { added, deleted, updated } = diff;
+    if (propertyId in added || propertyId in deleted || propertyId in updated) {
+      if (data && data.value) {
+        if (caller)
+          return {
+            content: `{{actor}} set ${collection.properties[propertyId].name} to ${data.value} ${data.token?.name}`,
+            ref: {
+              actor: {
+                id: caller,
+                refType: 'user',
+              },
+            },
+          };
+        else
+          return {
+            content: `Property ${collection.properties[propertyId].name} was set to ${data.value} ${data.token?.name}`,
+            ref: {},
+          };
+      } else {
+        if (caller)
+          return {
+            content: `{{actor}} cleared ${collection.properties[propertyId].name}`,
+            ref: {
+              actor: {
+                id: caller,
+                refType: 'user',
+              },
+            },
+          };
+        else {
+          return {
+            content: `Property ${collection.properties[propertyId].name} was cleared`,
+            ref: {},
+          };
+        }
+      }
+    }
+
+    return { content: null, ref: {} };
+  }
+
+  singleSelectFieldActivity(
+    propertyId: string,
+    data: any,
+    collection: Collection,
+    diff: Diff<any>,
+    caller: string,
+  ): { content: string; ref: MappedItem<Ref> } {
+    const { added, deleted, updated } = diff;
+    if (propertyId in added || propertyId in deleted || propertyId in updated) {
+      if (data && data.label) {
+        if (caller)
+          return {
+            content: `{{actor}} set ${collection.properties[propertyId].name} to ${data.label}`,
+            ref: {
+              actor: {
+                id: caller,
+                refType: 'user',
+              },
+            },
+          };
+        else
+          return {
+            content: `Property ${collection.properties[propertyId].name} was set to ${data.label}`,
+            ref: {},
+          };
+      } else {
+        if (caller)
+          return {
+            content: `{{actor}} cleared ${collection.properties[propertyId].name}`,
+            ref: {
+              actor: {
+                id: caller,
+                refType: 'user',
+              },
+            },
+          };
+        else {
+          return {
+            content: `Property ${collection.properties[propertyId].name} was cleared`,
+            ref: {},
+          };
+        }
+      }
+    }
+    return { content: null, ref: {} };
+  }
+
+  multiSelectFieldActivity(
+    propertyId: string,
+    data: any,
+    collection: Collection,
+    diff: Diff<any>,
+    caller: string,
+  ): { content: string; ref: MappedItem<Ref> } {
+    const { added, deleted, updated } = diff;
+    if (propertyId in added || propertyId in deleted || propertyId in updated) {
+      if (data && data.length > 0) {
+        if (caller)
+          return {
+            content: `{{actor}} set ${
+              collection.properties[propertyId].name
+            } to ${data.map((d) => d.label).join(',')}`,
+            ref: {
+              actor: {
+                id: caller,
+                refType: 'user',
+              },
+            },
+          };
+        else
+          return {
+            content: `Property ${
+              collection.properties[propertyId].name
+            } was set to ${data.map((d) => d.label).join(',')}`,
+            ref: {},
+          };
+      } else {
+        if (caller)
+          return {
+            content: `{{actor}} cleared ${collection.properties[propertyId].name}`,
+            ref: {
+              actor: {
+                id: caller,
+                refType: 'user',
+              },
+            },
+          };
+        else {
+          return {
+            content: `Property ${collection.properties[propertyId].name} was cleared`,
+            ref: {},
+          };
+        }
+      }
     }
     return { content: null, ref: {} };
   }
