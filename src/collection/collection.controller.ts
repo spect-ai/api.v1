@@ -125,7 +125,7 @@ export class CollectionController {
     );
   }
 
-  @UseGuards(SessionAuthGuard)
+  // @UseGuards(SessionAuthGuard) data can be added by anyone
   @Patch('/:id/addData')
   async addData(
     @Param() param: ObjectIdDto,

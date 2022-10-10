@@ -1,4 +1,3 @@
-import { AddDataDto } from 'src/collection/dto/update-data-request.dto';
 import { User } from 'src/users/model/users.model';
 
 export class AddDataCommand {

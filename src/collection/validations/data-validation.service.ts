@@ -33,7 +33,7 @@ export class DataValidationService {
         dataObj,
         collectionToValidate.properties,
       );
-      console.log(propertyValidationPassed);
+      console.log({ propertyValidationPassed });
       if (!propertyValidationPassed) return false;
 
       const typeValidationPassed = this.validateType(
@@ -85,7 +85,7 @@ export class DataValidationService {
       } else if (['multiSelect'].includes(properties[propertyId].type)) {
         if (!Array.isArray(data)) return false;
         for (const elem of data) {
-          if (!data['value'] || !data['label']) return false;
+          if (!elem['value'] || !elem['label']) return false;
         }
       } else if (['number'].includes(properties[propertyId].type)) {
         if (typeof data !== 'number') return false;
