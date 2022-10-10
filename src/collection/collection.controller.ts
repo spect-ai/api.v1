@@ -13,15 +13,19 @@ import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { SessionAuthGuard } from 'src/auth/iron-session.guard';
 import { ObjectIdDto } from 'src/common/dtos/object-id.dto';
 import {
+  RequiredActivityUUIDDto,
   RequiredPropertyIdDto,
   RequiredSlugDto,
   RequiredUUIDDto,
 } from 'src/common/dtos/string.dto';
 import {
+  AddCommentCommand,
   AddPropertyCommand,
   CreateCollectionCommand,
+  RemoveCommentCommand,
   RemovePropertyCommand,
   UpdateCollectionCommand,
+  UpdateCommentCommand,
   UpdatePropertyCommand,
 } from './commands';
 import { AddDataCommand } from './commands/data/impl/add-data.command';
@@ -29,6 +33,10 @@ import { RemoveDataCommand } from './commands/data/impl/remove-data.command';
 import { UpdateDataCommand } from './commands/data/impl/update-data.command';
 import { CreateCollectionDto } from './dto/create-collection-request.dto';
 import { UpdateCollectionDto } from './dto/update-collection-request.dto';
+import {
+  AddCommentDto,
+  UpdateCommentDto,
+} from './dto/update-comments-request.dto';
 import { AddDataDto, UpdateDataDto } from './dto/update-data-request.dto';
 import {
   AddPropertyDto,
@@ -36,19 +44,19 @@ import {
 } from './dto/update-property-request.dto';
 import { Collection } from './model/collection.model';
 import { GetCollectionBySlugQuery } from './queries/impl/get-collection.query';
+import { CrudService } from './services/crud.service';
 
 @Controller('collection/v1')
 export class CollectionController {
   constructor(
     private readonly commandBus: CommandBus,
     private readonly queryBus: QueryBus,
+    private readonly crudService: CrudService,
   ) {}
 
   @Get('/slug/:slug')
   async findBySlug(@Param() param: RequiredSlugDto): Promise<Collection> {
-    return await this.queryBus.execute(
-      new GetCollectionBySlugQuery(param.slug),
-    );
+    return await this.crudService.getCollectionBySlug(param.slug);
   }
 
   @Get('/:id')
@@ -164,6 +172,64 @@ export class CollectionController {
   ): Promise<Collection> {
     return await this.commandBus.execute(
       new RemoveDataCommand(req.user, param.id, dataIdParam.id),
+    );
+  }
+
+  @UseGuards(SessionAuthGuard)
+  @Patch('/:id/addComment')
+  async addComment(
+    @Param() param: ObjectIdDto,
+    @Query() dataIdParam: RequiredUUIDDto,
+    @Body() addCommentDto: AddCommentDto,
+    @Request() req,
+  ): Promise<Collection> {
+    return await this.commandBus.execute(
+      new AddCommentCommand(
+        param.id,
+        dataIdParam.id,
+        addCommentDto.content,
+        addCommentDto.ref,
+        req.user,
+      ),
+    );
+  }
+
+  @UseGuards(SessionAuthGuard)
+  @Patch('/:id/updateComment')
+  async updateComment(
+    @Param() param: ObjectIdDto,
+    @Query() dataIdParam: RequiredUUIDDto,
+    @Query() activityIdParam: RequiredActivityUUIDDto,
+    @Body() updateCommentDto: UpdateCommentDto,
+    @Request() req,
+  ): Promise<Collection> {
+    return await this.commandBus.execute(
+      new UpdateCommentCommand(
+        param.id,
+        dataIdParam.id,
+        activityIdParam.activityId,
+        updateCommentDto.content,
+        updateCommentDto.ref,
+        req.user,
+      ),
+    );
+  }
+
+  @UseGuards(SessionAuthGuard)
+  @Patch('/:id/removeComment')
+  async removeComment(
+    @Param() param: ObjectIdDto,
+    @Query() dataIdParam: RequiredUUIDDto,
+    @Query() activityIdParam: RequiredActivityUUIDDto,
+    @Request() req,
+  ): Promise<Collection> {
+    return await this.commandBus.execute(
+      new RemoveCommentCommand(
+        param.id,
+        dataIdParam.id,
+        activityIdParam.activityId,
+        req.user,
+      ),
     );
   }
 }

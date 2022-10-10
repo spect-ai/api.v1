@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { detailedDiff as objectDiff } from 'deep-object-diff';
 import { diff as arrayDiff } from 'fast-array-diff';
+import { PropertyType } from 'src/collection/types/types';
 import { MappedItem } from './interfaces';
 
 @Injectable()
@@ -110,6 +111,39 @@ export class CommonTools {
       return objectDiff(obj1, obj2);
     } else {
       throw new Error('Invalid input to findDifference');
+    }
+  }
+
+  isDifferent(elem1: any, elem2: any, type: PropertyType) {
+    switch (type) {
+      case 'number':
+      case 'shortText':
+      case 'longText':
+      case 'user':
+      case 'ethAddress':
+      case 'date':
+        return elem1 !== elem2;
+      case 'user[]':
+        const difference = arrayDiff(elem1, elem2);
+        return (
+          difference.added?.length !== 0 || difference.removed?.length !== 0
+        );
+      case 'singleSelect':
+        return elem1.value !== elem2.value;
+      case 'multiSelect':
+        const elem1ValueSet = new Set([...elem1.map((e) => e.value)]);
+        const elem2ValueSet = new Set([...elem2.map((e) => e.value)]);
+
+        const eqSet = (xs, ys) =>
+          xs.size === ys.size && [...xs].every((x) => ys.has(x));
+
+        return !eqSet(elem1ValueSet, elem2ValueSet);
+      case 'reward':
+        return (
+          elem1.value !== elem2.value ||
+          elem1.chain.chainId !== elem2.chain.chainId ||
+          elem1.token.address !== elem2.token.address
+        );
     }
   }
 }

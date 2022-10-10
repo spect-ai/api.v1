@@ -5,6 +5,7 @@ import { useMongoosePlugin } from 'src/base/decorators/use-mongoose-plugins.deco
 import { Circle } from 'src/circle/model/circle.model';
 import { MappedItem } from 'src/common/interfaces';
 import {
+  Activity,
   DefaultViewType,
   NotificationSettings,
   Property,
@@ -61,7 +62,19 @@ export class Collection extends BaseModel {
    * The data contained in the collection
    */
   @prop({ default: {} })
-  data: MappedItem<any>;
+  data: MappedItem<object>;
+
+  /**
+   * All the activities in all the data streams - { dataSlug : { activityId: ActivityObject  } }
+   */
+  @prop({ default: {} })
+  dataActivities: MappedItem<MappedItem<Activity>>;
+
+  /**
+   * All the activity orders in all the data streams
+   */
+  @prop({ default: {} })
+  dataActivityOrder: MappedItem<string[]>;
 
   /**
    * The data indexed by different fields

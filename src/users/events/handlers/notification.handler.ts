@@ -126,7 +126,7 @@ export class NotificationEventV2Handler
     try {
       console.log('NotificationEventHandler');
       const { recipients, content, ref } = event;
-
+      console.log(recipients);
       for (const recipient of recipients) {
         const recipientEntity = await this.userRepository.findById(recipient);
 

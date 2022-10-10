@@ -6,7 +6,14 @@ export * from './properties/impl/remove-property.command';
 export * from './data/impl/add-data.command';
 export * from './data/impl/update-data.command';
 export * from './data/impl/remove-data.command';
+export * from './comments/impl/add-comment.command';
+export * from './comments/impl/update-comment.command';
+export * from './comments/impl/remove-comment.command';
 
+import { AddCommentCommandHandler } from './comments/handlers/add-comment.handler';
+import { RemoveCommentCommandHandler } from './comments/handlers/remove-comment.handler';
+import { UpdateCommentCommandHandler } from './comments/handlers/update-comment.handler';
+import { AddCommentCommand } from './comments/impl/add-comment.command';
 import { AddDataCommandHandler } from './data/handlers/add-data.handler';
 import { RemoveDataCommandHandler } from './data/handlers/remove-data.handler';
 import { UpdateDataCommandHandler } from './data/handlers/update-data.handler';
@@ -25,4 +32,7 @@ export const CommandHandlers = [
   AddDataCommandHandler,
   UpdateDataCommandHandler,
   RemoveDataCommandHandler,
+  AddCommentCommandHandler,
+  UpdateCommentCommandHandler,
+  RemoveCommentCommandHandler,
 ];

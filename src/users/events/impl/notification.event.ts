@@ -1,6 +1,6 @@
 import { Card } from 'src/card/model/card.model';
 import { Circle } from 'src/circle/model/circle.model';
-import { Diff } from 'src/common/interfaces';
+import { Diff, MappedItem } from 'src/common/interfaces';
 import { Project } from 'src/project/model/project.model';
 import { Retro } from 'src/retro/models/retro.model';
 
@@ -25,6 +25,6 @@ export class NotificationEventV2 {
   constructor(
     public readonly content: string,
     public readonly recipients: string[],
-    public readonly ref?: NotifRef,
+    public readonly ref?: MappedItem<NotifRef>,
   ) {}
 }
