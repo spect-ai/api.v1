@@ -87,9 +87,17 @@ export class ActivityResolver {
             ? mappedCircles[id].name
             : mappedCollection[id].name;
 
+        const imageRef =
+          refType === 'user'
+            ? mappedUsers[id].avatar
+            : refType === 'circle'
+            ? mappedCircles[id].avatar
+            : null;
+
         activityObj[activityId].content = activityObj[
           activityId
         ].content?.replace(`{{${k}}}`, val);
+        if (imageRef) activityObj[activityId].imageRef = imageRef;
       }
     }
 
@@ -180,6 +188,7 @@ export class ActivityBuilder {
             ref,
             timestamp,
             comment: false,
+            imageRef: `${collection.properties[propertyId].type}Update`,
           });
       }
       if (['longText'].includes(collection.properties[propertyId].type)) {
@@ -196,6 +205,7 @@ export class ActivityBuilder {
             ref,
             timestamp,
             comment: false,
+            imageRef: `${collection.properties[propertyId].type}Update`,
           });
       }
 
@@ -213,6 +223,7 @@ export class ActivityBuilder {
             ref,
             timestamp,
             comment: false,
+            imageRef: `${collection.properties[propertyId].type}Update`,
           });
       }
 
@@ -230,6 +241,7 @@ export class ActivityBuilder {
             ref,
             timestamp,
             comment: false,
+            imageRef: `${collection.properties[propertyId].type}Update`,
           });
       }
 
@@ -247,6 +259,7 @@ export class ActivityBuilder {
             ref,
             timestamp,
             comment: false,
+            imageRef: `${collection.properties[propertyId].type}Update`,
           });
       }
       if (['singleSelect'].includes(collection.properties[propertyId].type)) {
@@ -263,6 +276,7 @@ export class ActivityBuilder {
             ref,
             timestamp,
             comment: false,
+            imageRef: `${collection.properties[propertyId].type}Update`,
           });
       }
       if (['multiSelect'].includes(collection.properties[propertyId].type)) {
@@ -279,6 +293,7 @@ export class ActivityBuilder {
             ref,
             timestamp,
             comment: false,
+            imageRef: `${collection.properties[propertyId].type}Update`,
           });
       }
       if (['reward'].includes(collection.properties[propertyId].type)) {
@@ -295,6 +310,7 @@ export class ActivityBuilder {
             ref,
             timestamp,
             comment: false,
+            imageRef: `${collection.properties[propertyId].type}Update`,
           });
       }
     }

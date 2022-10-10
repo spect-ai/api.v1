@@ -65,4 +65,6 @@ export type Activity = {
   ref: MappedItem<Ref>;
   timestamp: Date;
   comment: boolean;
+  owner?: string;
+  imageRef: string;
 };

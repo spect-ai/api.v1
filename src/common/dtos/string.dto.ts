@@ -74,28 +74,25 @@ export class RequiredRoleDto {
 }
 
 export class RequiredAutomationIdDto {
-  /**
-   * role Id
-   */
   @IsNotEmpty()
   @IsString()
   automationId: string;
 }
 
 export class RequiredPropertyIdDto {
-  /**
-   * role Id
-   */
   @IsNotEmpty()
   @IsString()
   propertyId: string;
 }
 
 export class RequiredUUIDDto {
-  /**
-   * role Id
-   */
   @IsNotEmpty()
   @IsUUID()
   id: string;
+}
+
+export class RequiredActivityUUIDDto {
+  @IsNotEmpty()
+  @IsUUID()
+  activityId: string;
 }
