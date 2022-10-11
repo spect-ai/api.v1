@@ -65,6 +65,7 @@ const getCircleProjectedFields = {
 
 const propertiesToReturnInPrivateCircle = new Set([
   'roles',
+  'memberRoles',
   'id',
   '_id',
   'name',
