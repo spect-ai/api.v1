@@ -5,5 +5,6 @@ export class AddDataCommand {
     public readonly data: object,
     public readonly caller: User,
     public readonly collectionId: string,
+    public readonly onlyIfForm?: boolean,
   ) {}
 }

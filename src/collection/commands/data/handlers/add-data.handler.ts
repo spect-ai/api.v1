@@ -29,10 +29,12 @@ export class AddDataCommandHandler implements ICommandHandler<AddDataCommand> {
   }
 
   async execute(command: AddDataCommand) {
-    const { data, caller, collectionId } = command;
+    const { data, caller, collectionId, onlyIfForm } = command;
     try {
       const collection = await this.collectionRepository.findById(collectionId);
       if (!collection) throw 'Collection does not exist';
+      if (onlyIfForm && collection.defaultView !== 'form')
+        throw 'Cannot add data as it is not a form';
       const validData = await this.validationService.validate(data, collection);
       if (!validData) {
         throw new Error(`Data invalid`);

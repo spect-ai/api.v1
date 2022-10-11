@@ -10,7 +10,10 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
-import { SessionAuthGuard } from 'src/auth/iron-session.guard';
+import {
+  PublicViewAuthGuard,
+  SessionAuthGuard,
+} from 'src/auth/iron-session.guard';
 import { ObjectIdDto } from 'src/common/dtos/object-id.dto';
 import {
   RequiredActivityUUIDDto,
@@ -133,8 +136,20 @@ export class CollectionController {
     );
   }
 
-  // @UseGuards(SessionAuthGuard) data can be added by anyone
+  @UseGuards(PublicViewAuthGuard)
   @Patch('/:id/addData')
+  async addDataInForm(
+    @Param() param: ObjectIdDto,
+    @Body() addDataDto: AddDataDto,
+    @Request() req,
+  ): Promise<Collection> {
+    return await this.commandBus.execute(
+      new AddDataCommand(addDataDto.data, req.user, param.id, true),
+    );
+  }
+
+  @UseGuards(SessionAuthGuard)
+  @Patch('/:id/addDataGuarded')
   async addData(
     @Param() param: ObjectIdDto,
     @Body() addDataDto: AddDataDto,
