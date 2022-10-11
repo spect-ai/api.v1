@@ -16,7 +16,6 @@ export class RolesService {
     return {
       steward: {
         name: 'steward',
-        role: 'steward',
         description: 'Steward role',
         selfAssignable: false,
         permissions: {
@@ -55,7 +54,6 @@ export class RolesService {
       },
       contributor: {
         name: 'contributor',
-        role: 'contributor',
         description: 'Contributor role',
         selfAssignable: false,
         permissions: {
@@ -94,7 +92,6 @@ export class RolesService {
       },
       member: {
         name: 'member',
-        role: 'member',
         description: 'Member role',
         selfAssignable: false,
         permissions: {
@@ -134,7 +131,6 @@ export class RolesService {
       /** TODO: We need to reserve this keyword and not let users set this as role */
       visitor: {
         name: 'visitor',
-        role: 'visitor',
         description: 'Visitor role',
         selfAssignable: false,
         permissions: {
