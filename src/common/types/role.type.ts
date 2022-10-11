@@ -30,6 +30,8 @@ export type RoleProvider = {
 };
 
 export type Role = {
+  role: string;
+
   name?: string;
 
   description?: string;
