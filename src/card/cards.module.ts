@@ -48,6 +48,7 @@ import { CommonUpdateService } from './services/common-update.service';
 import { CrudOrchestrator } from './orchestrators/crud.orchestrator';
 import { CommandHandlers } from './commands/handlers';
 import { ActivityBuilder as ActivityBuilderV1 } from './services/activity-builder.service';
+import { RealtimeModule } from 'src/realtime/realtime.module';
 
 @Module({
   imports: [
@@ -61,6 +62,7 @@ import { ActivityBuilder as ActivityBuilderV1 } from './services/activity-builde
     forwardRef(() => AutomationModule),
     CqrsModule,
     RegistryModule,
+    RealtimeModule,
   ],
   controllers: [CardsController, CardsV1Controller],
   providers: [

@@ -3,12 +3,13 @@ import {
   EventBus,
   EventsHandler,
   IEventHandler,
+  QueryBus,
 } from '@nestjs/cqrs';
 import { Card } from 'src/card/model/card.model';
-import { MappedDiff } from 'src/card/types/types';
 import { Diff } from 'src/common/interfaces';
 import { LoggingService } from 'src/logging/logging.service';
-import { CardLoc } from 'src/project/types/types';
+import { GetDetailedProjectByIdQuery } from 'src/project/queries/impl';
+import { RealtimeGateway } from 'src/realtime/realtime.gateway';
 import {
   AddItemsCommand,
   MoveItemCommand,
@@ -24,7 +25,9 @@ export class CardUpdatedEventHandler
   constructor(
     private readonly eventBus: EventBus,
     private readonly commandBus: CommandBus,
+    private readonly queryBus: QueryBus,
     private readonly logger: LoggingService,
+    private readonly realtime: RealtimeGateway,
   ) {
     this.logger.setContext('CardUpdatedEventHandler');
   }
@@ -65,6 +68,11 @@ export class CardUpdatedEventHandler
       this.notifyUsers(users, card as Card, circleSlug, projectSlug, diff);
       this.processClosedCard(card as Card, diff);
       this.processReopenedCard(card as Card, diff);
+
+      const project = await this.queryBus.execute(
+        new GetDetailedProjectByIdQuery((card as any).project.id),
+      );
+      this.realtime.server.emit('projectUpdate', project);
     } catch (error) {
       this.logger.error(`${error.message}`);
     }

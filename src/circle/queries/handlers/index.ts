@@ -1,4 +1,7 @@
-import { GetCircleNavigationQueryHandler } from './get-circle-nav.handler';
+import {
+  GetCircleNavigationBreadcrumbsQueryHandler,
+  GetCircleNavigationQueryHandler,
+} from './get-circle-nav.handler';
 import {
   GetCircleByFilterQueryHandler,
   GetCircleByIdQueryHandler,
@@ -16,4 +19,5 @@ export const QueryHandlers = [
   GetCircleWithChildrenQueryHandler,
   GetCircleWithAllRelationsQueryHandler,
   GetCircleNavigationQueryHandler,
+  GetCircleNavigationBreadcrumbsQueryHandler,
 ];

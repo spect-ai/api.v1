@@ -12,12 +12,9 @@ import {
 import { GetTriggeredAutomationsQuery } from 'src/automation/queries/impl';
 import { HasSatisfiedConditionsQuery } from 'src/automation/queries/impl/has-satisfied-conditions.query';
 import { MultipleItemContainer } from 'src/automation/types/types';
-import { CardsRepository } from 'src/card/cards.repository';
-import { Card, ExtendedCard } from 'src/card/model/card.model';
+import { Card } from 'src/card/model/card.model';
 import { CommonTools } from 'src/common/common.service';
-import { MappedItem } from 'src/common/interfaces';
 import { LoggingService } from 'src/logging/logging.service';
-import { Project } from 'src/project/model/project.model';
 import { actionIdToCommandMap } from '../impl/take-action.command';
 
 @CommandHandler(PerformAutomationCommand)

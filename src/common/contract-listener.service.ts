@@ -6,6 +6,7 @@ import { AbiCoder } from 'ethers/lib/utils';
 import { UpdatePaymentCommand } from 'src/card/commands/impl';
 import { GetCircleByIdQuery } from 'src/circle/queries/impl';
 import { LoggingService } from 'src/logging/logging.service';
+import { RealtimeGateway } from 'src/realtime/realtime.gateway';
 import { UpdateRetroCommand } from 'src/retro/commands/impl';
 import { distributorAbi } from './abis/distributor';
 
@@ -163,7 +164,7 @@ export class ContractListener {
       ) {
         if (type === 'card') {
           console.log('Updating card');
-          this.commandBus.execute(
+          await this.commandBus.execute(
             new UpdatePaymentCommand(
               {
                 cardIds: ids,

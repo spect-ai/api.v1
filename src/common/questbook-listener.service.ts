@@ -9,7 +9,6 @@ import {
   CreateClaimableCircleCommand,
 } from 'src/circle/commands/impl';
 import { qbApplicationRegistryAbi } from './abis/questbookApplicationRegistry';
-import { qbWorkspaceRegistryAbi } from './abis/questbookWorkspaceRegistry';
 import { GetCircleByFilterQuery } from 'src/circle/queries/impl';
 import { Circle } from 'src/circle/model/circle.model';
 import { CirclePermission } from './types/role.type';
@@ -17,7 +16,6 @@ import { WhitelistMemberAddressCommand } from 'src/circle/commands/roles/impl/wh
 import { CreateCardCommand } from 'src/card/commands/impl';
 import { GetProjectByIdQuery } from 'src/project/queries/impl';
 import { DiscordService } from './discord.service';
-import { Card } from 'src/card/model/card.model';
 import { CreateProjectCommand } from 'src/project/commands/impl';
 
 @Injectable()

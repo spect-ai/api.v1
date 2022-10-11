@@ -1,12 +1,6 @@
-import {
-  IsBoolean,
-  IsNotEmpty,
-  IsObject,
-  IsOptional,
-  IsString,
-} from 'class-validator';
+import { IsBoolean, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 import { IsObjectId } from 'class-validator-mongo-object-id';
-import { DefaultViewType, Property } from '../types/types';
+import { DefaultViewType } from '../types/types';
 
 export class CreateCollectionDto {
   /**

@@ -6,7 +6,6 @@ import {
 } from '@nestjs/cqrs';
 import { CollectionRepository } from 'src/collection/collection.repository';
 import { Collection } from 'src/collection/model/collection.model';
-import { CommonTools } from 'src/common/common.service';
 import { CreateCollectionCommand } from '../impl/create-collection.command';
 import { v4 as uuidv4 } from 'uuid';
 import { MappedItem } from 'src/common/interfaces';
@@ -49,7 +48,21 @@ export class CreateCollectionCommandHandler
         status: {
           name: 'status',
           type: 'singleSelect',
-          default: '',
+          default: {},
+          options: [
+            {
+              label: 'To Do',
+              value: 'To Do',
+            },
+            {
+              label: 'In Progress',
+              value: 'In Progress',
+            },
+            {
+              label: 'Done',
+              value: 'Done',
+            },
+          ],
           isPartOfFormView: true,
         },
       } as MappedItem<Property>;

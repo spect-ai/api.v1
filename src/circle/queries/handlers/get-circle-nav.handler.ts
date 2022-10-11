@@ -1,7 +1,10 @@
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { CirclesRepository } from 'src/circle/circles.repository';
 import { Circle } from 'src/circle/model/circle.model';
-import { GetCircleNavigationQuery } from '../impl';
+import {
+  GetCircleNavigationBreadcrumbsQuery,
+  GetCircleNavigationQuery,
+} from '../impl';
 
 type Node = {
   id: string;
@@ -84,5 +87,47 @@ export class GetCircleNavigationQueryHandler
       nodes,
       links,
     };
+  }
+}
+
+@QueryHandler(GetCircleNavigationBreadcrumbsQuery)
+export class GetCircleNavigationBreadcrumbsQueryHandler
+  implements IQueryHandler<GetCircleNavigationBreadcrumbsQuery>
+{
+  constructor(private readonly circlesRepository: CirclesRepository) {}
+
+  async execute(query: GetCircleNavigationBreadcrumbsQuery): Promise<any> {
+    const { id } = query;
+    let circle: any = await this.circlesRepository.getCircleById(id);
+    const relations = [];
+    relations.unshift({
+      name: circle.name,
+      href: `/${circle.slug}`,
+    });
+    while (circle.parents.length > 0) {
+      const parent: any = await this.circlesRepository.getCircleById(
+        circle.parents[0].id,
+      );
+      const children = [];
+      for (const child of parent.children) {
+        // check if it exists in relation
+        if (relations.find((r) => r.name === child.name)) {
+          continue;
+        }
+        children.push({
+          name: child.name,
+          href: `/${child.slug}`,
+        });
+      }
+      relations.unshift({
+        name: circle.parents[0].name,
+        href: `/${circle.parents[0].slug}`,
+        children: children,
+      });
+      circle = await this.circlesRepository.getCircleById(
+        (circle.parents[0] as any).id,
+      );
+    }
+    return relations;
   }
 }
