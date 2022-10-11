@@ -5,7 +5,6 @@ export const defaultCircleCreatorRoles = ['steward'];
 export const defaultCircleRoles = {
   steward: {
     name: 'steward',
-    role: 'steward',
     description: 'Steward role',
     selfAssignable: false,
     mutable: true,
@@ -46,7 +45,6 @@ export const defaultCircleRoles = {
   },
   member: {
     name: 'member',
-    role: 'member',
     description: 'Member role',
     selfAssignable: false,
     mutable: true,
@@ -88,7 +86,6 @@ export const defaultCircleRoles = {
   /** TODO: We need to reserve this keyword and not let users set this as role */
   applicant: {
     name: 'applicant',
-    role: 'applicant',
     description: 'Applicant role',
     selfAssignable: false,
     mutable: false,
