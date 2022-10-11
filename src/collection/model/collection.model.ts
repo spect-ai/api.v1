@@ -93,4 +93,10 @@ export class Collection extends BaseModel {
    */
   @prop()
   notificationSettings: NotificationSettings;
+
+  /**
+   * The guild.xyz roles that a person needs to hold to fill up form
+   */
+  @prop({ default: [] })
+  formRoleGating: string[];
 }

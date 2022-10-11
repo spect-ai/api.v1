@@ -1,4 +1,10 @@
-import { IsBoolean, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import {
+  IsArray,
+  IsBoolean,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 
 export class UpdateCollectionDto {
   /**
@@ -20,4 +26,11 @@ export class UpdateCollectionDto {
   @IsString()
   @IsOptional()
   description?: string;
+
+  /**
+   * The guild.xyz roles that a person needs to hold to fill up form
+   */
+  @IsArray()
+  @IsOptional()
+  formRoleGating: string[];
 }
