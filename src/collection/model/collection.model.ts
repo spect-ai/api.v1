@@ -98,5 +98,5 @@ export class Collection extends BaseModel {
    * The guild.xyz roles that a person needs to hold to fill up form
    */
   @prop({ default: [] })
-  formRoleGating: string[];
+  formRoleGating: number[];
 }

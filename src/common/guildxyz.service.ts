@@ -15,6 +15,7 @@ export class GuildxyzService {
     }[]
   > {
     console.log({ guildId });
+    console.log(user.ethAddress);
     try {
       const res = await guild.getUserAccess(guildId || 0, user.ethAddress);
       console.log({ res });

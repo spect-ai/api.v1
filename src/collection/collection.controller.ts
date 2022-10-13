@@ -34,6 +34,7 @@ import {
 import { AddDataCommand } from './commands/data/impl/add-data.command';
 import { RemoveDataCommand } from './commands/data/impl/remove-data.command';
 import { UpdateDataCommand } from './commands/data/impl/update-data.command';
+import { CollectionResponseDto } from './dto/collection-response.dto';
 import { CreateCollectionDto } from './dto/create-collection-request.dto';
 import { UpdateCollectionDto } from './dto/update-collection-request.dto';
 import {
@@ -57,11 +58,15 @@ export class CollectionController {
     private readonly crudService: CrudService,
   ) {}
 
+  @UseGuards(PublicViewAuthGuard)
   @Get('/slug/:slug')
-  async findBySlug(@Param() param: RequiredSlugDto): Promise<Collection> {
+  async findBySlug(
+    @Param() param: RequiredSlugDto,
+  ): Promise<CollectionResponseDto> {
     return await this.crudService.getCollectionBySlug(param.slug);
   }
 
+  @UseGuards(PublicViewAuthGuard)
   @Get('/:id')
   async findByObjectId(@Param() param: ObjectIdDto): Promise<Collection> {
     return await this.queryBus.execute(new GetCollectionBySlugQuery(param.id));

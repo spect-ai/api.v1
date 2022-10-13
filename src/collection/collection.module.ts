@@ -3,7 +3,9 @@ import { CqrsModule } from '@nestjs/cqrs';
 import { TypegooseModule } from 'nestjs-typegoose';
 import { SessionAuthGuard } from 'src/auth/iron-session.guard';
 import { CommonTools } from 'src/common/common.service';
+import { GuildxyzService } from 'src/common/guildxyz.service';
 import { LoggingService } from 'src/logging/logging.service';
+import { RequestProvider } from 'src/users/user.provider';
 import { EthAddressModule } from 'src/_eth-address/_eth-address.module';
 import { CollectionController } from './collection.controller';
 import { CollectionRepository } from './collection.repository';
@@ -34,6 +36,8 @@ import { DataValidationService } from './validations/data-validation.service';
     CrudService,
     ActivityResolver,
     SessionAuthGuard,
+    RequestProvider,
+    GuildxyzService,
   ],
   exports: [CollectionModule],
 })

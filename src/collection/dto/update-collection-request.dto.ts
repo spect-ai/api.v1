@@ -32,5 +32,5 @@ export class UpdateCollectionDto {
    */
   @IsArray()
   @IsOptional()
-  formRoleGating: string[];
+  formRoleGating: number[];
 }
