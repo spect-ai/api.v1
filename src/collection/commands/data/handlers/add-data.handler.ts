@@ -35,7 +35,11 @@ export class AddDataCommandHandler implements ICommandHandler<AddDataCommand> {
       if (!collection) throw 'Collection does not exist';
       if (onlyIfForm && collection.defaultView !== 'form')
         throw 'Cannot add data as it is not a form';
-      const validData = await this.validationService.validate(data, collection);
+      const validData = await this.validationService.validate(
+        data,
+        'add',
+        collection,
+      );
       if (!validData) {
         throw new Error(`Data invalid`);
       }
@@ -44,6 +48,12 @@ export class AddDataCommandHandler implements ICommandHandler<AddDataCommand> {
       )) {
         if (property.default && !data[propertyId]) {
           data[propertyId] = property.default;
+        }
+        if (
+          collection.properties[propertyId]?.type === 'date' &&
+          data[propertyId]
+        ) {
+          data[propertyId] = new Date(data[propertyId]);
         }
       }
       data['slug'] = uuidv4();

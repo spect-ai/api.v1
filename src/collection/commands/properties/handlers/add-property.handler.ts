@@ -47,11 +47,11 @@ export class AddPropertyCommandHandler
       return updatedCollection;
     } catch (error) {
       this.logger.error(
-        `Failed adding property to collection with error: ${error.message}`,
+        `Failed adding property to collection with error: ${error}`,
         command,
       );
       throw new InternalServerErrorException(
-        'Failed adding property to collection with error: ${error.message}',
+        'Failed adding property to collection with error: ${error}',
         error.message,
       );
     }

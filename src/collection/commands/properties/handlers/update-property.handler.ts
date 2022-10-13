@@ -26,13 +26,15 @@ export class UpdatePropertyCommandHandler
       if (!collection.properties || !collection.properties[propertyId])
         throw `Cannot find property with id ${propertyId}`;
 
-      if (collection.properties[propertyId].immutable)
-        throw 'Property is immutable and cannot be updated';
-
       const propId = updatePropertyCommandDto.name
         ? updatePropertyCommandDto.name
         : propertyId;
-      if (updatePropertyCommandDto.name) {
+      if (
+        updatePropertyCommandDto.name &&
+        updatePropertyCommandDto.name !== propertyId
+      ) {
+        if (collection.properties[propertyId].immutable)
+          throw 'Property is immutable and cannot be updated';
         if (collection.properties[updatePropertyCommandDto.name])
           throw `Property already existss`;
         if (collection.data)
@@ -43,7 +45,7 @@ export class UpdatePropertyCommandHandler
 
         delete collection.properties[propertyId];
         const idx = collection.propertyOrder.indexOf(propertyId);
-        collection.propertyOrder.splice(idx, 1, updatePropertyCommandDto.name);
+        collection.propertyOrder[idx] = updatePropertyCommandDto.name;
       }
 
       if (updatePropertyCommandDto.options) {
@@ -72,11 +74,11 @@ export class UpdatePropertyCommandHandler
       return updatedCollection;
     } catch (error) {
       this.logger.error(
-        `Failed updating property to collection with error: ${error.message}`,
+        `Failed updating property to collection with error: ${error}`,
         command,
       );
       throw new InternalServerErrorException(
-        'Failed updating property to collection with error: ${error.message}',
+        'Failed updating property to collection with error: ${error}',
         error.message,
       );
     }

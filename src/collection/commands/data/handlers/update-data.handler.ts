@@ -32,7 +32,11 @@ export class UpdateDataCommandHandler
     try {
       const collection = await this.collectionRepository.findById(collectionId);
       if (!collection) throw 'Collection does not exist';
-      const validData = await this.validationService.validate(data, collection);
+      const validData = await this.validationService.validate(
+        data,
+        'update',
+        collection,
+      );
       if (!validData) {
         throw new Error(`Data invalid`);
       }

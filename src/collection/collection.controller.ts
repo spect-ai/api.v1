@@ -103,11 +103,11 @@ export class CollectionController {
     @Request() req,
   ): Promise<Collection> {
     return await this.commandBus.execute(
-      new AddPropertyCommand(addPropertyDto, req.user.id, param.id),
+      new AddPropertyCommand(addPropertyDto, req.user?.id, param.id),
     );
   }
 
-  @UseGuards(SessionAuthGuard)
+  // @UseGuards(SessionAuthGuard)
   @Patch('/:id/updateProperty')
   async updateProperty(
     @Param() param: ObjectIdDto,
@@ -118,7 +118,7 @@ export class CollectionController {
     return await this.commandBus.execute(
       new UpdatePropertyCommand(
         updatePropertyDto,
-        req.user.id,
+        req.user?.id,
         param.id,
         propertyParam.propertyId,
       ),

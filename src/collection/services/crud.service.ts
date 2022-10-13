@@ -27,7 +27,13 @@ export class CrudService {
         circle.guildxyzId,
         this.requestProvider.user,
       );
-      const roleIds = new Set([...guildxyzRoles.map((r) => r.roleId)]);
+      console.log({ guildxyzRoles });
+      const roleIds = new Set();
+      for (const role of guildxyzRoles) {
+        if (role.access) {
+          roleIds.add(role.roleId);
+        }
+      }
       console.log({ roleIds });
       console.log({ roles: collection.formRoleGating });
 

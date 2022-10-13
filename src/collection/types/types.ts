@@ -12,6 +12,7 @@ export type Property = {
   options?: Option[];
   userType?: UserType; // user type only relevant when type is user or user[]
   onUpdateNotifyUserTypes?: UserType[];
+  required?: boolean; // user type only relevant when type is user or user[]
 };
 
 export type PropertyType =

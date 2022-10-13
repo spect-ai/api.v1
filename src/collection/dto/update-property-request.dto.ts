@@ -63,6 +63,13 @@ export class AddPropertyDto {
   @IsArray()
   @IsOptional()
   onUpdateNotifyUserTypes: UserType[];
+
+  /**
+   * Is this a required field
+   */
+  @IsBoolean()
+  @IsOptional()
+  required: boolean;
 }
 
 export class UpdatePropertyDto {
@@ -117,4 +124,11 @@ export class UpdatePropertyDto {
   @IsArray()
   @IsOptional()
   onUpdateNotifyUserTypes: UserType[];
+
+  /**
+   * Is this a required field
+   */
+  @IsBoolean()
+  @IsOptional()
+  required: boolean;
 }

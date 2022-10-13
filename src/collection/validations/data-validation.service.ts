@@ -18,6 +18,7 @@ export class DataValidationService {
 
   async validate(
     dataObj: object,
+    operation: 'update' | 'add',
     collection?: Collection,
     collectionId?: string,
   ) {
@@ -48,6 +49,14 @@ export class DataValidationService {
         collectionToValidate.properties,
       );
       if (!valueValidationPassed) return false;
+      console.log(valueValidationPassed);
+
+      const requiredValidationPassed = this.validateRequriedFields(
+        dataObj,
+        collectionToValidate.properties,
+        operation,
+      );
+      if (!requiredValidationPassed) return false;
       console.log(valueValidationPassed);
 
       return true;
@@ -116,6 +125,25 @@ export class DataValidationService {
     dataObj: object,
     properties: MappedItem<Property>,
   ): boolean {
+    return true;
+  }
+
+  private validateRequriedFields(
+    dataObj: object,
+    properties: MappedItem<Property>,
+    operation: 'update' | 'add',
+  ): boolean {
+    for (const [propertyId, property] of Object.entries(properties)) {
+      if (property.required) {
+        if (
+          operation === 'update' &&
+          propertyId in dataObj &&
+          !dataObj[propertyId]
+        ) {
+          return false;
+        } else if (operation === 'add' && !dataObj[propertyId]) return false;
+      }
+    }
     return true;
   }
 }
