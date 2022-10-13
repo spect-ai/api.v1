@@ -178,7 +178,7 @@ export class CollectionController {
         updateDataDto.data,
         req.user,
         param.id,
-        dataIdParam.id,
+        dataIdParam.dataId,
       ),
     );
   }
@@ -191,7 +191,7 @@ export class CollectionController {
     @Request() req,
   ): Promise<Collection> {
     return await this.commandBus.execute(
-      new RemoveDataCommand(req.user, param.id, dataIdParam.id),
+      new RemoveDataCommand(req.user, param.id, dataIdParam.dataId),
     );
   }
 
@@ -206,7 +206,7 @@ export class CollectionController {
     return await this.commandBus.execute(
       new AddCommentCommand(
         param.id,
-        dataIdParam.id,
+        dataIdParam.dataId,
         addCommentDto.content,
         addCommentDto.ref,
         req.user,
@@ -226,7 +226,7 @@ export class CollectionController {
     return await this.commandBus.execute(
       new UpdateCommentCommand(
         param.id,
-        dataIdParam.id,
+        dataIdParam.dataId,
         activityIdParam.activityId,
         updateCommentDto.content,
         updateCommentDto.ref,
@@ -246,7 +246,7 @@ export class CollectionController {
     return await this.commandBus.execute(
       new RemoveCommentCommand(
         param.id,
-        dataIdParam.id,
+        dataIdParam.dataId,
         activityIdParam.activityId,
         req.user,
       ),

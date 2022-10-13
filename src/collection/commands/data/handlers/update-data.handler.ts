@@ -1,6 +1,5 @@
 import { InternalServerErrorException } from '@nestjs/common';
 import {
-  CommandBus,
   CommandHandler,
   EventBus,
   ICommandHandler,
@@ -8,12 +7,9 @@ import {
 } from '@nestjs/cqrs';
 import { CollectionRepository } from 'src/collection/collection.repository';
 import { LoggingService } from 'src/logging/logging.service';
-import { AddDataCommand } from '../impl/add-data.command';
-import { v4 as uuidv4 } from 'uuid';
 import { UpdateDataCommand } from '../impl/update-data.command';
 import { DataValidationService } from 'src/collection/validations/data-validation.service';
 import { DataUpatedEvent } from 'src/collection/events';
-import { Collection } from 'src/collection/model/collection.model';
 import { ActivityBuilder } from 'src/collection/services/activity.service';
 
 @CommandHandler(UpdateDataCommand)

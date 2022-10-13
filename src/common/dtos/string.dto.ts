@@ -88,7 +88,7 @@ export class RequiredPropertyIdDto {
 export class RequiredUUIDDto {
   @IsNotEmpty()
   @IsUUID()
-  id: string;
+  dataId: string;
 }
 
 export class RequiredActivityUUIDDto {

@@ -65,7 +65,6 @@ export class DataValidationService {
     dataObj: object,
     properties: MappedItem<Property>,
   ): boolean {
-    console.log({ dataObj, properties });
     for (const [propertyId, data] of Object.entries(dataObj)) {
       if (!properties[propertyId]) return false;
     }
@@ -104,10 +103,10 @@ export class DataValidationService {
       } else if (['ethAddress'].includes(properties[propertyId].type)) {
         if (!ethers.utils.isAddress(data)) return false;
       } else if (['user'].includes(properties[propertyId].type)) {
-        if (!mongoose.isValidObjectId(data)) return false;
+        if (!mongoose.isValidObjectId(data.value)) return false;
       } else if (['user[]'].includes(properties[propertyId].type)) {
         for (const user of data)
-          if (!mongoose.isValidObjectId(user)) return false;
+          if (!mongoose.isValidObjectId(user.value)) return false;
       }
     }
     return true;
