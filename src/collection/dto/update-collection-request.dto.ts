@@ -2,6 +2,7 @@ import {
   IsArray,
   IsBoolean,
   IsNotEmpty,
+  IsNumber,
   IsOptional,
   IsString,
 } from 'class-validator';
@@ -33,4 +34,11 @@ export class UpdateCollectionDto {
   @IsArray()
   @IsOptional()
   formRoleGating: number[];
+
+  /**
+   * The mintkudos token id to distribute when a person fills the form
+   */
+  @IsNumber()
+  @IsOptional()
+  mintkudosTokenId: number;
 }

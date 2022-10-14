@@ -4,6 +4,7 @@ import { TypegooseModule } from 'nestjs-typegoose';
 import { SessionAuthGuard } from 'src/auth/iron-session.guard';
 import { CommonTools } from 'src/common/common.service';
 import { GuildxyzService } from 'src/common/guildxyz.service';
+import { MintKudosService } from 'src/common/mint-kudos.service';
 import { LoggingService } from 'src/logging/logging.service';
 import { RequestProvider } from 'src/users/user.provider';
 import { EthAddressModule } from 'src/_eth-address/_eth-address.module';
@@ -38,6 +39,7 @@ import { DataValidationService } from './validations/data-validation.service';
     SessionAuthGuard,
     RequestProvider,
     GuildxyzService,
+    MintKudosService,
   ],
   exports: [CollectionModule],
 })

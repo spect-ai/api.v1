@@ -18,13 +18,13 @@ export class MintKudosDto {
    * Kudos headline
    */
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   headline: string;
   /**
    * Kudos headline
    */
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   description: string;
   /**
    * Kudos headline
@@ -42,7 +42,7 @@ export class MintKudosDto {
    * Kudos headline
    */
   @IsArray()
-  @IsNotEmpty()
+  @IsOptional()
   links: string[];
   /**
    * Kudos headline
@@ -75,7 +75,7 @@ export class MintKudosDto {
    * Array of contributors receiving kudos
    */
   @IsArray()
-  @IsNotEmpty()
+  @IsOptional()
   contributors: string[];
 
   /**
@@ -88,8 +88,15 @@ export class MintKudosDto {
    * Kudos expiration time
    */
   @IsNumber()
-  @IsNotEmpty()
+  @IsOptional()
   expirationTimestamp?: number;
+  /**
+   * Array of contributors receiving kudos
+   */
+  @IsArray()
+  @IsOptional()
+  customAttributes: object[];
+
   /**
    * Signature of person giving out kudos
    */

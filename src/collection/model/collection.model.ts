@@ -99,4 +99,10 @@ export class Collection extends BaseModel {
    */
   @prop({ default: [] })
   formRoleGating: number[];
+
+  /**
+   * The mintkudos token id to distribute when a person fills the form
+   */
+  @prop()
+  mintkudosTokenId: number;
 }

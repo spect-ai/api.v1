@@ -33,8 +33,6 @@ export class UpdatePropertyCommandHandler
         updatePropertyCommandDto.name &&
         updatePropertyCommandDto.name !== propertyId
       ) {
-        if (collection.properties[propertyId].immutable)
-          throw 'Property is immutable and cannot be updated';
         if (collection.properties[updatePropertyCommandDto.name])
           throw `Property already existss`;
         if (collection.data)

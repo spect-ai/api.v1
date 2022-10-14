@@ -364,7 +364,7 @@ export class CircleV1Controller {
   }
 
   @SetMetadata('permissions', ['distributeCredentials'])
-  @UseGuards(CircleAuthGuard)
+  //@UseGuards(CircleAuthGuard)
   @Patch('/:id/mintKudos')
   async mintKudos(
     @Param() param: ObjectIdDto,

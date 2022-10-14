@@ -33,21 +33,21 @@ export class CreateCollectionCommandHandler
       const { createCollectionDto, caller } = command;
 
       const properties = {
-        title: {
-          name: 'title',
+        Title: {
+          name: 'Title',
           type: 'shortText',
           default: '',
           isPartOfFormView: true,
           immutable: true,
         },
-        description: {
-          name: 'description',
+        Description: {
+          name: 'Description',
           type: 'longText',
           default: '',
           isPartOfFormView: true,
         },
-        status: {
-          name: 'status',
+        Status: {
+          name: 'Status',
           type: 'singleSelect',
           default: {},
           options: [

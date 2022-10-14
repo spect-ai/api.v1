@@ -1,7 +1,9 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { QueryBus } from '@nestjs/cqrs';
 import fetch from 'node-fetch';
 import { CirclesPrivateRepository } from 'src/circle/circles-private.repository';
 import { CirclesRepository } from 'src/circle/circles.repository';
+import { GetPrivateCircleByCircleIdQuery } from 'src/circle/queries/impl';
 import { LoggingService } from 'src/logging/logging.service';
 import {
   ClaimKudosDto,
@@ -20,15 +22,16 @@ export type nftTypes = {
 export class MintKudosService {
   constructor(
     private readonly logger: LoggingService,
-    private readonly circlePrivateRepository: CirclesPrivateRepository,
+    private readonly queryBus: QueryBus,
   ) {
     this.logger.setContext('MintKudosService');
   }
 
   private async getPrivateProps(id: string): Promise<any> {
-    const privateProps = await this.circlePrivateRepository.findOne({
-      circleId: id,
-    });
+    const privateProps = await this.queryBus.execute(
+      new GetPrivateCircleByCircleIdQuery(id),
+    );
+    console.log(privateProps);
     if (!privateProps) {
       throw 'Circle doesnt have Mintkudos credentials setup';
     }
@@ -39,13 +42,13 @@ export class MintKudosService {
     const privateProps = await this.getPrivateProps(id);
     const stringToEncode =
       privateProps.mintkudosCommunityId + ':' + privateProps.mintkudosApiKey;
-    console.log(stringToEncode);
     return Buffer.from(stringToEncode).toString('base64');
   }
 
   async mintKudos(id: string, kudos: MintKudosDto): Promise<string> {
     try {
       const encodedString = await this.getEncodedString(id);
+      console.log(kudos);
       const res = await fetch(`${process.env.MINTKUDOS_URL}/v1/tokens`, {
         headers: {
           Accept: 'application/json',
@@ -56,6 +59,8 @@ export class MintKudosService {
         body: JSON.stringify(kudos),
       });
       console.log(res);
+      const data = await res.json();
+      console.log(data);
       const operationId = res.headers.get('Location');
       return operationId;
     } catch (e) {
@@ -94,6 +99,35 @@ export class MintKudosService {
       console.log({ e });
       return e;
     }
+  }
+
+  async airdropKudos(
+    circleId: string,
+    tokenId: string,
+    ethAddress: string,
+  ): Promise<KudosResponseDto> {
+    console.log(circleId);
+    const privateProps = await this.getPrivateProps(circleId);
+    const encodedString = Buffer.from(
+      privateProps.mintkudosCommunityId + ':' + privateProps.mintkudosApiKey,
+    ).toString('base64');
+    const res = await fetch(
+      `${process.env.MINTKUDOS_URL}/v1/tokens/${tokenId}/airdrop`,
+      {
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+          Authorization: `Basic ${encodedString}`,
+        },
+        method: 'POST',
+        body: JSON.stringify({
+          address: ethAddress,
+        }),
+      },
+    );
+    console.log(res);
+    const operationId = res.headers.get('Location');
+    return operationId;
   }
 
   async getCommunityKudosDesigns(id: string): Promise<nftTypes> {

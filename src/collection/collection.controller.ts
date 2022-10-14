@@ -21,6 +21,7 @@ import {
   RequiredSlugDto,
   RequiredUUIDDto,
 } from 'src/common/dtos/string.dto';
+import { MintKudosService } from 'src/common/mint-kudos.service';
 import {
   AddCommentCommand,
   AddPropertyCommand,
@@ -47,7 +48,10 @@ import {
   UpdatePropertyDto,
 } from './dto/update-property-request.dto';
 import { Collection } from './model/collection.model';
-import { GetCollectionBySlugQuery } from './queries/impl/get-collection.query';
+import {
+  GetCollectionByIdQuery,
+  GetCollectionBySlugQuery,
+} from './queries/impl/get-collection.query';
 import { CrudService } from './services/crud.service';
 
 @Controller('collection/v1')
@@ -56,6 +60,7 @@ export class CollectionController {
     private readonly commandBus: CommandBus,
     private readonly queryBus: QueryBus,
     private readonly crudService: CrudService,
+    private readonly kudosService: MintKudosService,
   ) {}
 
   @UseGuards(PublicViewAuthGuard)
@@ -91,7 +96,7 @@ export class CollectionController {
     @Request() req,
   ): Promise<Collection> {
     return await this.commandBus.execute(
-      new UpdateCollectionCommand(updateCollectionDto, req.user.id, param.id),
+      new UpdateCollectionCommand(updateCollectionDto, req.user?.id, param.id),
     );
   }
 
@@ -107,7 +112,7 @@ export class CollectionController {
     );
   }
 
-  // @UseGuards(SessionAuthGuard)
+  @UseGuards(SessionAuthGuard)
   @Patch('/:id/updateProperty')
   async updateProperty(
     @Param() param: ObjectIdDto,
@@ -250,6 +255,23 @@ export class CollectionController {
         activityIdParam.activityId,
         req.user,
       ),
+    );
+  }
+
+  @UseGuards(SessionAuthGuard)
+  @Patch('/:id/airdropKudos')
+  async airdropKudos(
+    @Param() param: ObjectIdDto,
+    @Request() req,
+  ): Promise<object> {
+    const collection = await this.queryBus.execute(
+      new GetCollectionByIdQuery(param.id),
+    );
+    console.log(collection);
+    return await this.kudosService.airdropKudos(
+      collection?.parents[0].id,
+      collection.mintkudosTokenId,
+      req.user.ethAddress,
     );
   }
 }
