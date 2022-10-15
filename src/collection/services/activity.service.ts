@@ -82,14 +82,14 @@ export class ActivityResolver {
 
         const val =
           refType === 'user'
-            ? mappedUsers[id].username
+            ? mappedUsers[id]?.username
             : refType === 'circle'
             ? mappedCircles[id].name
             : mappedCollection[id]?.name;
 
         const imageRef =
           refType === 'user'
-            ? mappedUsers[id].avatar
+            ? mappedUsers[id]?.avatar
             : refType === 'circle'
             ? mappedCircles[id].avatar
             : null;

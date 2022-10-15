@@ -7,3 +7,11 @@ export class RemoveDataCommand {
     public readonly dataSlug: string,
   ) {}
 }
+
+export class RemoveMultipleDataCommand {
+  constructor(
+    public readonly caller: User,
+    public readonly collectionId: string,
+    public readonly dataIds: string[],
+  ) {}
+}
