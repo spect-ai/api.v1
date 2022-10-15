@@ -26,8 +26,8 @@ export class Collection extends BaseModel {
   /**
    * Is collection private?
    */
-  @prop({ default: false })
-  private: boolean;
+  @prop({ default: true })
+  privateResponses: boolean;
   /**
    * The description of the collection
    */
@@ -105,4 +105,10 @@ export class Collection extends BaseModel {
    */
   @prop()
   mintkudosTokenId: number;
+
+  /**
+   * The message to show when the form is submitted
+   */
+  @prop({ default: 'Thanks for your response!' })
+  messageOnSubmission: string;
 }

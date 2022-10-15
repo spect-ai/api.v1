@@ -67,7 +67,7 @@ export class CreateCollectionCommandHandler
           isPartOfFormView: true,
         },
       } as MappedItem<Property>;
-      const propertyOrder = ['title', 'description', 'status'];
+      const propertyOrder = ['Title', 'Description', 'Status'];
 
       const parentCircle = await this.queryBus.execute(
         new GetCircleByIdQuery(createCollectionDto.circleId, {}),

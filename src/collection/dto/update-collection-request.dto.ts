@@ -19,7 +19,7 @@ export class UpdateCollectionDto {
    */
   @IsBoolean()
   @IsOptional()
-  private: boolean;
+  privateResponses: boolean;
 
   /**
    * The description of creating this collection
@@ -41,4 +41,11 @@ export class UpdateCollectionDto {
   @IsNumber()
   @IsOptional()
   mintkudosTokenId: number;
+
+  /**
+   * The message to show when the form is submitted
+   */
+  @IsString()
+  @IsOptional()
+  messageOnSubmission: string;
 }

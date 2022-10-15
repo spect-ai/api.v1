@@ -50,4 +50,8 @@ export class CollectionResponseDto {
   formRoleGating: number[];
 
   canFillForm: boolean;
+
+  mintkudosTokenId: number;
+
+  messageOnSubmission: string;
 }
