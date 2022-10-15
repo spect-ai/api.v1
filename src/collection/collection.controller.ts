@@ -33,10 +33,14 @@ import {
   UpdatePropertyCommand,
 } from './commands';
 import { AddDataCommand } from './commands/data/impl/add-data.command';
-import { RemoveDataCommand } from './commands/data/impl/remove-data.command';
+import {
+  RemoveDataCommand,
+  RemoveMultipleDataCommand,
+} from './commands/data/impl/remove-data.command';
 import { UpdateDataCommand } from './commands/data/impl/update-data.command';
 import { CollectionResponseDto } from './dto/collection-response.dto';
 import { CreateCollectionDto } from './dto/create-collection-request.dto';
+import { RemoveDataDto } from './dto/remove.data-request.dto';
 import { UpdateCollectionDto } from './dto/update-collection-request.dto';
 import {
   AddCommentDto,
@@ -197,6 +201,18 @@ export class CollectionController {
   ): Promise<Collection> {
     return await this.commandBus.execute(
       new RemoveDataCommand(req.user, param.id, dataIdParam.dataId),
+    );
+  }
+
+  @UseGuards(SessionAuthGuard)
+  @Patch('/:id/removeMultipleData')
+  async removeMultipleData(
+    @Param() param: ObjectIdDto,
+    @Body() removeDataDto: RemoveDataDto,
+    @Request() req,
+  ): Promise<Collection> {
+    return await this.commandBus.execute(
+      new RemoveMultipleDataCommand(req.user, param.id, removeDataDto.dataIds),
     );
   }
 

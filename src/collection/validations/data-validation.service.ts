@@ -75,7 +75,10 @@ export class DataValidationService {
     properties: MappedItem<Property>,
   ): boolean {
     for (const [propertyId, data] of Object.entries(dataObj)) {
-      if (!properties[propertyId]) return false;
+      if (!properties[propertyId]) {
+        console.log({ propertyId, data });
+        return false;
+      }
     }
     return true;
   }
