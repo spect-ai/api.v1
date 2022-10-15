@@ -6,6 +6,7 @@ import {
   IsOptional,
   IsString,
 } from 'class-validator';
+import { GuildRole } from 'src/common/types/role.type';
 
 export class UpdateCollectionDto {
   /**
@@ -33,7 +34,7 @@ export class UpdateCollectionDto {
    */
   @IsArray()
   @IsOptional()
-  formRoleGating: number[];
+  formRoleGating: GuildRole[];
 
   /**
    * The mintkudos token id to distribute when a person fills the form

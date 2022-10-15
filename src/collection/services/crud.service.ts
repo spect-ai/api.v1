@@ -38,7 +38,7 @@ export class CrudService {
       console.log({ roles: collection.formRoleGating });
 
       for (const role of collection.formRoleGating) {
-        if (roleIds.has(role)) {
+        if (roleIds.has(role.id)) {
           return true;
         }
       }

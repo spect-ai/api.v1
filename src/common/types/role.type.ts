@@ -46,3 +46,8 @@ export type Roles = {
 export type MemberRoles = {
   [key: string]: string[]; // MemberId -> role names
 };
+
+export type GuildRole = {
+  name: string;
+  id: number;
+};

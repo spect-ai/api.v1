@@ -4,6 +4,7 @@ import { BaseModel } from 'src/base/base.model';
 import { useMongoosePlugin } from 'src/base/decorators/use-mongoose-plugins.decorator';
 import { Circle } from 'src/circle/model/circle.model';
 import { MappedItem } from 'src/common/interfaces';
+import { GuildRole } from 'src/common/types/role.type';
 import {
   Activity,
   DefaultViewType,
@@ -98,7 +99,7 @@ export class Collection extends BaseModel {
    * The guild.xyz roles that a person needs to hold to fill up form
    */
   @prop({ default: [] })
-  formRoleGating: number[];
+  formRoleGating: GuildRole[];
 
   /**
    * The mintkudos token id to distribute when a person fills the form
