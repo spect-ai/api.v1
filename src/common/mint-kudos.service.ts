@@ -10,6 +10,10 @@ import {
   KudosResponseDto,
   MintKudosDto,
 } from './dtos/mint-kudos.dto';
+import { v4 as uuidv4 } from 'uuid';
+import * as FormData from 'form-data';
+import { Express } from 'express';
+import { Multer } from 'multer';
 
 export type nftTypes = {
   name: string;
@@ -17,6 +21,14 @@ export type nftTypes = {
   previewAssetUrl: string;
   isUserAdded: boolean;
 };
+
+export type AddedNFTTypeResponse = {
+  name: string;
+  nftTypeId: string;
+  assetUrl: string;
+};
+import { Readable } from 'stream';
+
 // TODO
 @Injectable()
 export class MintKudosService {
@@ -31,7 +43,6 @@ export class MintKudosService {
     const privateProps = await this.queryBus.execute(
       new GetPrivateCircleByCircleIdQuery(id),
     );
-    console.log(privateProps);
     if (!privateProps) {
       throw 'Circle doesnt have Mintkudos credentials setup';
     }
@@ -136,11 +147,11 @@ export class MintKudosService {
       privateProps.mintkudosCommunityId + ':' + privateProps.mintkudosApiKey,
     ).toString('base64');
     const res = await fetch(
-      `${process.env.MINTKUDOS_URL}/v1/communities/${privateProps}/nftTypes`,
+      `${process.env.MINTKUDOS_URL}/v1/communities/${privateProps.mintkudosCommunityId}/nftTypes`,
       {
         headers: {
-          Accept: 'application/json',
-          'Content-Type': 'application/json',
+          Accept: 'application/form-data',
+          'Content-Type': 'application/form-data',
           Authorization: `Basic ${encodedString}`,
         },
       },
@@ -149,5 +160,45 @@ export class MintKudosService {
       const nftTypes = await res.json();
       return nftTypes?.data;
     }
+  }
+
+  async addNewCommunityDesign(
+    circleId: string,
+    asset: Express.Multer.File,
+  ): Promise<AddedNFTTypeResponse> {
+    const privateProps = await this.getPrivateProps(circleId);
+    const encodedString = Buffer.from(
+      privateProps.mintkudosCommunityId + ':' + privateProps.mintkudosApiKey,
+    ).toString('base64');
+
+    const nftTypeId = uuidv4();
+    console.log('here1');
+
+    const formData = new FormData();
+
+    // formData.append('nftTypeId', nftTypeId);
+    // formData.append('assetFile', asset);
+    // formData.append('name', 'test123.png');
+    formData.append('assetFile', Readable.from(asset.buffer), {
+      filename: asset.originalname,
+    });
+    formData.append('name', asset.originalname);
+    formData.append('nftTypeId', nftTypeId);
+    console.log('here2');
+    console.log(privateProps);
+
+    const res = await (
+      await fetch(
+        `${process.env.MINTKUDOS_URL}/v1/communities/${privateProps.mintkudosCommunityId}/nftTypes`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Basic ${encodedString}`,
+          },
+          body: formData,
+        },
+      )
+    ).json();
+    return { ...res, nftTypeId, name: asset.originalname };
   }
 }

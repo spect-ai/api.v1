@@ -6,6 +6,7 @@ import {
   IsOptional,
   IsString,
 } from 'class-validator';
+import { HasMimeType, IsFile } from 'nestjs-form-data';
 
 export class MintKudosDto {
   /**
@@ -117,6 +118,23 @@ export class ClaimKudosDto {
   @IsNumber()
   @IsNotEmpty()
   tokenId: number;
+}
+
+export class AddCustomImageDto {
+  @IsString()
+  @IsNotEmpty()
+  name: string;
+
+  @IsFile()
+  @IsNotEmpty()
+  @HasMimeType([
+    'image/jpeg',
+    'image/png',
+    'image/jpg',
+    'image/gif',
+    'video/mp4',
+  ])
+  assetFile: any;
 }
 
 export class KudosResponseDto {
