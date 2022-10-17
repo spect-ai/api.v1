@@ -274,7 +274,6 @@ export class QuestbookListener {
           new AddRoleCommand(
             {
               name: 'Grantee',
-              role: 'grantee',
               description: 'Grantees of the circle',
               selfAssignable: false,
               mutable: false,
