@@ -62,6 +62,7 @@ export class AddDataCommandHandler implements ICommandHandler<AddDataCommand> {
         data,
         caller?.id,
       );
+      console.log(caller?.id);
       const updatedCollection = await this.collectionRepository.updateById(
         collectionId,
         {
@@ -71,6 +72,10 @@ export class AddDataCommandHandler implements ICommandHandler<AddDataCommand> {
           },
           dataActivities,
           dataActivityOrder,
+          dataOwner: {
+            ...(collection.dataOwner || {}),
+            [data['slug']]: caller?.id,
+          },
         },
       );
       this.eventBus.publish(new DataAddedEvent(collection, data, caller));

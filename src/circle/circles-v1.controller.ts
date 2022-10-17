@@ -407,7 +407,6 @@ export class CircleV1Controller {
   @Patch('/:id/addKudosDesign')
   @UseInterceptors(FileInterceptor('file'))
   async addKudosDesign(@Param() param: ObjectIdDto, @UploadedFile() file) {
-    console.log('ppwppwwp');
     return await this.kudosService.addNewCommunityDesign(param.id, file);
   }
 

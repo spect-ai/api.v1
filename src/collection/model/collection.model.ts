@@ -78,6 +78,12 @@ export class Collection extends BaseModel {
   dataActivityOrder: MappedItem<string[]>;
 
   /**
+   * The owner of the data
+   */
+  @prop({ default: {} })
+  dataOwner: MappedItem<string>;
+
+  /**
    * The data indexed by different fields
    */
   @prop({ default: {} })
@@ -106,6 +112,12 @@ export class Collection extends BaseModel {
    */
   @prop()
   mintkudosTokenId: number;
+
+  /**
+   * The addresses that have already claimed mintkudos for submitting form
+   */
+  @prop({ default: [] })
+  mintkudosClaimedBy: string[];
 
   /**
    * The message to show when the form is submitted

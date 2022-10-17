@@ -7,6 +7,7 @@ import { Card } from 'src/card/model/card.model';
 import { Project } from 'src/project/model/project.model';
 import {
   Activity,
+  FormResponses,
   Notification,
   NotificationV2,
   UserSubmittedApplication,
@@ -158,4 +159,10 @@ export class User extends ProfileModel {
    */
   @prop({ ref: () => Retro, type: Schema.Types.String, default: [] })
   retro: string[];
+
+  /**
+   * Data created in forms indexed by users
+   */
+  @prop({ default: {} })
+  formResponses: FormResponses;
 }

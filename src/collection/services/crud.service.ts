@@ -17,7 +17,7 @@ export class CrudService {
     private readonly guildxyzService: GuildxyzService,
   ) {}
 
-  async canFillForm(collection: Collection) {
+  async hasRoleToAccessForm(collection: Collection) {
     if (collection.formRoleGating && collection.formRoleGating.length > 0) {
       if (!this.requestProvider.user) return false;
       const circle = await this.queryBus.execute(
@@ -27,21 +27,19 @@ export class CrudService {
         circle.guildxyzId,
         this.requestProvider.user,
       );
-      console.log({ guildxyzRoles });
       const roleIds = new Set();
       for (const role of guildxyzRoles) {
         if (role.access) {
           roleIds.add(role.roleId);
         }
       }
-      console.log({ roleIds });
-      console.log({ roles: collection.formRoleGating });
 
       for (const role of collection.formRoleGating) {
         if (roleIds.has(role.id)) {
           return true;
         }
       }
+
       return false;
     }
     return true;
@@ -54,8 +52,18 @@ export class CrudService {
     collection.dataActivities = await this.activityResolver.resolveAll(
       collection.dataActivities,
     );
+    const hasRole = await this.hasRoleToAccessForm(collection);
+    const formHasCredentialsButUserIsntConnected =
+      collection.mintkudosTokenId &&
+      collection.mintkudosTokenId > 0 &&
+      !this.requestProvider.user;
     console.log(this.requestProvider.user?.id);
-    collection.canFillForm = await this.canFillForm(collection);
+    collection.canFillForm = hasRole && !formHasCredentialsButUserIsntConnected;
+    console.log('collection.canFillForm', collection.canFillForm);
+    console.log(
+      'formHasCredentialsButUserIsntConnected',
+      formHasCredentialsButUserIsntConnected,
+    );
     return collection;
   }
 }

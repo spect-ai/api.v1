@@ -52,6 +52,8 @@ import { RealtimeModule } from './realtime/realtime.module';
 import { CrudService } from './collection/services/crud.service';
 import { ActivityResolver as CollectionDataActivityResolver } from './collection/services/activity.service';
 import { MintKudosService } from './common/mint-kudos.service';
+import { ResponseCredentialingService } from './collection/services/response-credentialing.service';
+import { CollectionRepository } from './collection/collection.repository';
 
 const databaseUrl =
   process.env.DATABASE_URL || 'mongodb://localhost:27017/nest';
@@ -121,6 +123,7 @@ console.log({ databaseUrl });
     CrudService,
     CollectionDataActivityResolver,
     MintKudosService,
+    ResponseCredentialingService,
   ],
 })
 export class AppModule {}

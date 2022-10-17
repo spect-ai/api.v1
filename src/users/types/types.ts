@@ -80,3 +80,8 @@ export type FlattendedArrayFieldItems = {
   fieldName: ArrayField;
   itemIds: string[] | UserSubmittedApplication[];
 };
+
+// Map collection slug to data slug
+export type FormResponses = {
+  [collectionSlug: string]: string[];
+};

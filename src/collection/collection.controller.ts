@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Get,
+  InternalServerErrorException,
   Param,
   Patch,
   Post,
@@ -57,6 +58,7 @@ import {
   GetCollectionBySlugQuery,
 } from './queries/impl/get-collection.query';
 import { CrudService } from './services/crud.service';
+import { ResponseCredentialingService } from './services/response-credentialing.service';
 
 @Controller('collection/v1')
 export class CollectionController {
@@ -64,7 +66,7 @@ export class CollectionController {
     private readonly commandBus: CommandBus,
     private readonly queryBus: QueryBus,
     private readonly crudService: CrudService,
-    private readonly kudosService: MintKudosService,
+    private readonly credentialingService: ResponseCredentialingService,
   ) {}
 
   @UseGuards(PublicViewAuthGuard)
@@ -276,18 +278,7 @@ export class CollectionController {
 
   @UseGuards(SessionAuthGuard)
   @Patch('/:id/airdropKudos')
-  async airdropKudos(
-    @Param() param: ObjectIdDto,
-    @Request() req,
-  ): Promise<object> {
-    const collection = await this.queryBus.execute(
-      new GetCollectionByIdQuery(param.id),
-    );
-    console.log(collection);
-    return await this.kudosService.airdropKudos(
-      collection?.parents[0].id,
-      collection.mintkudosTokenId,
-      req.user.ethAddress,
-    );
+  async airdropKudos(@Param() param: ObjectIdDto): Promise<object> {
+    return await this.credentialingService.airdropMintkudosToken(param.id);
   }
 }

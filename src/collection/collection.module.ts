@@ -16,6 +16,7 @@ import { Collection } from './model/collection.model';
 import { QueryHandlers } from './queries';
 import { ActivityBuilder, ActivityResolver } from './services/activity.service';
 import { CrudService } from './services/crud.service';
+import { ResponseCredentialingService } from './services/response-credentialing.service';
 import { DataValidationService } from './validations/data-validation.service';
 
 @Module({
@@ -40,7 +41,8 @@ import { DataValidationService } from './validations/data-validation.service';
     RequestProvider,
     GuildxyzService,
     MintKudosService,
+    ResponseCredentialingService,
   ],
-  exports: [CollectionModule],
+  exports: [CollectionModule, CollectionRepository],
 })
 export class CollectionModule {}

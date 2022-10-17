@@ -117,7 +117,6 @@ export class MintKudosService {
     tokenId: string,
     ethAddress: string,
   ): Promise<KudosResponseDto> {
-    console.log(circleId);
     const privateProps = await this.getPrivateProps(circleId);
     const encodedString = Buffer.from(
       privateProps.mintkudosCommunityId + ':' + privateProps.mintkudosApiKey,
@@ -136,7 +135,6 @@ export class MintKudosService {
         }),
       },
     );
-    console.log(res);
     const operationId = res.headers.get('Location');
     return operationId;
   }
@@ -150,8 +148,8 @@ export class MintKudosService {
       `${process.env.MINTKUDOS_URL}/v1/communities/${privateProps.mintkudosCommunityId}/nftTypes`,
       {
         headers: {
-          Accept: 'application/form-data',
-          'Content-Type': 'application/form-data',
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
           Authorization: `Basic ${encodedString}`,
         },
       },
@@ -172,20 +170,13 @@ export class MintKudosService {
     ).toString('base64');
 
     const nftTypeId = uuidv4();
-    console.log('here1');
 
     const formData = new FormData();
-
-    // formData.append('nftTypeId', nftTypeId);
-    // formData.append('assetFile', asset);
-    // formData.append('name', 'test123.png');
     formData.append('assetFile', Readable.from(asset.buffer), {
       filename: asset.originalname,
     });
     formData.append('name', asset.originalname);
     formData.append('nftTypeId', nftTypeId);
-    console.log('here2');
-    console.log(privateProps);
 
     const res = await (
       await fetch(

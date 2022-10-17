@@ -15,59 +15,38 @@ export class MintKudosDto {
   @IsString()
   @IsNotEmpty()
   creator: string;
-  /**
-   * Kudos headline
-   */
+
   @IsString()
   @IsOptional()
   headline: string;
-  /**
-   * Kudos headline
-   */
+
   @IsString()
   @IsOptional()
   description: string;
-  /**
-   * Kudos headline
-   */
+
   @IsNumber()
   @IsOptional()
   startDateTimestamp?: number;
-  /**
-   * Kudos headline
-   */
+
   @IsNumber()
   @IsOptional()
   endDateTimestamp?: number;
-  /**
-   * Kudos headline
-   */
+
   @IsArray()
   @IsOptional()
   links: string[];
-  /**
-   * Kudos headline
-   */
+
   @IsString()
   @IsNotEmpty()
   communityId: string;
 
-  /**
-   * Kudos headline
-   */
   @IsString()
-  @IsOptional()
   nftTypeId?: string;
-  /**
-   * Kudos headline
-   */
+
   @IsBoolean()
   @IsOptional()
   isSignatureRequired: boolean;
 
-  /**
-   * Kudos headline
-   */
   @IsBoolean()
   @IsOptional()
   isAllowlistRequired?: boolean;
@@ -144,46 +123,31 @@ export class KudosResponseDto {
   @IsNumber()
   @IsNotEmpty()
   tokenId: number;
-  /**
-   * Kudos headline
-   */
+
   @IsString()
   @IsNotEmpty()
   headline: string;
-  /**
-   * Kudos headline
-   */
+
   @IsString()
   @IsNotEmpty()
   description: string;
-  /**
-   * Kudos headline
-   */
+
   @IsNumber()
   @IsOptional()
   startDateTimestamp?: number;
-  /**
-   * Kudos headline
-   */
+
   @IsNumber()
   @IsOptional()
   endDateTimestamp?: number;
-  /**
-   * Kudos headline
-   */
+
   @IsArray()
   @IsNotEmpty()
   links: string[];
-  /**
-   * Kudos headline
-   */
+
   @IsString()
   @IsNotEmpty()
   communityId: string;
 
-  /**
-   * Kudos headline
-   */
   @IsString()
   @IsNotEmpty()
   imageUrl: string;
