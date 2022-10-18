@@ -96,6 +96,7 @@ export class CrudService {
         }
       }
     collection.kudosClaimedByUser =
+      collection.mintkudosTokenId &&
       collection.mintkudosClaimedBy &&
       collection.mintkudosClaimedBy.includes(this.requestProvider.user?.id);
 
