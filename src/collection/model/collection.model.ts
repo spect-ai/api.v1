@@ -124,4 +124,16 @@ export class Collection extends BaseModel {
    */
   @prop({ default: 'Thanks for your response!' })
   messageOnSubmission: string;
+
+  /**
+   * Multiple responses by same user allowed?
+   */
+  @prop({ default: true })
+  multipleResponsesAllowed: boolean;
+
+  /**
+   * Updating responses allowed?
+   */
+  @prop({ default: true })
+  updatingResponseAllowed: boolean;
 }

@@ -39,7 +39,10 @@ import {
   RemoveMultipleDataCommand,
 } from './commands/data/impl/remove-data.command';
 import { UpdateDataCommand } from './commands/data/impl/update-data.command';
-import { CollectionResponseDto } from './dto/collection-response.dto';
+import {
+  CollectionPublicResponseDto,
+  CollectionResponseDto,
+} from './dto/collection-response.dto';
 import { CreateCollectionDto } from './dto/create-collection-request.dto';
 import { RemoveDataDto } from './dto/remove.data-request.dto';
 import { UpdateCollectionDto } from './dto/update-collection-request.dto';
@@ -69,12 +72,20 @@ export class CollectionController {
     private readonly credentialingService: ResponseCredentialingService,
   ) {}
 
-  @UseGuards(PublicViewAuthGuard)
+  @UseGuards(SessionAuthGuard)
   @Get('/slug/:slug')
   async findBySlug(
     @Param() param: RequiredSlugDto,
   ): Promise<CollectionResponseDto> {
     return await this.crudService.getCollectionBySlug(param.slug);
+  }
+
+  @UseGuards(PublicViewAuthGuard)
+  @Get('/public/slug/:slug')
+  async findBySlugPublic(
+    @Param() param: RequiredSlugDto,
+  ): Promise<CollectionPublicResponseDto> {
+    return await this.crudService.getCollectionPublicViewBySlug(param.slug);
   }
 
   @UseGuards(PublicViewAuthGuard)

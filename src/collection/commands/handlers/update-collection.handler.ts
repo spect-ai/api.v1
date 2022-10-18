@@ -16,7 +16,7 @@ export class UpdateCollectionCommandHandler
 
   async execute(command: UpdateCollectionCommand): Promise<Collection> {
     const { updateCollectionDto, caller, collectionId } = command;
-
+    console.log({ updateCollectionDto });
     const updatedCollection = await this.collectionRepository.updateById(
       collectionId,
       updateCollectionDto,

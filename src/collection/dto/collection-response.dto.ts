@@ -9,7 +9,6 @@ import {
 export class CollectionPublicResponseDto {
   name: string;
   slug: string;
-  private: boolean;
   description: string;
 
   properties: MappedItem<Property>;
@@ -20,12 +19,22 @@ export class CollectionPublicResponseDto {
   formRoleGating: number[];
 
   canFillForm: boolean;
+
+  messageOnSubmission: string;
+
+  mintkudosTokenId: number;
+
+  kudosClaimedByUser: boolean;
+
+  multipleResponsesAllowed: boolean;
+  updatingResponseAllowed: boolean;
+
+  previousResponses: MappedItem<object>;
 }
 
 export class CollectionResponseDto {
   name: string;
   slug: string;
-  private: boolean;
   description: string;
 
   properties: MappedItem<Property>;

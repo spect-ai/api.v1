@@ -3,7 +3,10 @@ import { QueryBus } from '@nestjs/cqrs';
 import { GetCircleByIdQuery } from 'src/circle/queries/impl';
 import { GuildxyzService } from 'src/common/guildxyz.service';
 import { RequestProvider } from 'src/users/user.provider';
-import { CollectionResponseDto } from '../dto/collection-response.dto';
+import {
+  CollectionPublicResponseDto,
+  CollectionResponseDto,
+} from '../dto/collection-response.dto';
 import { Collection } from '../model/collection.model';
 import { GetCollectionBySlugQuery } from '../queries';
 import { ActivityResolver } from './activity.service';
@@ -57,13 +60,46 @@ export class CrudService {
       collection.mintkudosTokenId &&
       collection.mintkudosTokenId > 0 &&
       !this.requestProvider.user;
-    console.log(this.requestProvider.user?.id);
     collection.canFillForm = hasRole && !formHasCredentialsButUserIsntConnected;
-    console.log('collection.canFillForm', collection.canFillForm);
-    console.log(
-      'formHasCredentialsButUserIsntConnected',
-      formHasCredentialsButUserIsntConnected,
-    );
+
     return collection;
+  }
+
+  removePrivateFields(collection: Collection): any {
+    delete collection.dataOwner;
+    delete collection.data;
+    delete collection.dataActivities;
+    delete collection.dataActivityOrder;
+    delete collection.mintkudosClaimedBy;
+
+    return collection;
+  }
+
+  async getCollectionPublicViewBySlug(
+    slug: string,
+  ): Promise<CollectionPublicResponseDto> {
+    const collection = await this.queryBus.execute(
+      new GetCollectionBySlugQuery(slug),
+    );
+
+    const hasRole = await this.hasRoleToAccessForm(collection);
+    const formHasCredentialsButUserIsntConnected =
+      collection.mintkudosTokenId &&
+      collection.mintkudosTokenId > 0 &&
+      !this.requestProvider.user;
+    collection.canFillForm = hasRole && !formHasCredentialsButUserIsntConnected;
+    collection.previousResponses = [];
+    if (collection.dataOwner)
+      for (const [dataSlug, owner] of Object.entries(collection.dataOwner)) {
+        if (owner === this.requestProvider.user?.id) {
+          collection.previousResponses.push(collection.data[dataSlug]);
+        }
+      }
+    collection.kudosClaimedByUser =
+      collection.mintkudosClaimedBy &&
+      collection.mintkudosClaimedBy.includes(this.requestProvider.user?.id);
+
+    const res = this.removePrivateFields(collection);
+    return res;
   }
 }

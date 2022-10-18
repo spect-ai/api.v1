@@ -33,8 +33,14 @@ export class AddDataCommandHandler implements ICommandHandler<AddDataCommand> {
     try {
       const collection = await this.collectionRepository.findById(collectionId);
       if (!collection) throw 'Collection does not exist';
-      if (onlyIfForm && collection.defaultView !== 'form')
-        throw 'Cannot add data as it is not a form';
+      if (
+        !collection.multipleResponsesAllowed &&
+        collection.dataOwner &&
+        Object.values(collection.dataOwner)?.includes(caller?.id)
+      ) {
+        throw 'User has already submitted a response';
+      }
+      console.log({ data });
       const validData = await this.validationService.validate(
         data,
         'add',

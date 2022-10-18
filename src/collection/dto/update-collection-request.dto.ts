@@ -49,4 +49,18 @@ export class UpdateCollectionDto {
   @IsString()
   @IsOptional()
   messageOnSubmission: string;
+
+  /**
+   * Multiple responses by same user allowed?
+   */
+  @IsBoolean()
+  @IsOptional()
+  multipleResponsesAllowed: boolean;
+
+  /**
+   * Updating responses allowed?
+   */
+  @IsBoolean()
+  @IsOptional()
+  updatingResponseAllowed: boolean;
 }
