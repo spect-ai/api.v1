@@ -76,12 +76,12 @@ export class UpdateCollectionDto {
    */
   @IsArray()
   @IsOptional()
-  circleRolesToEmailUponNewResponse: string[];
+  circleRolesToNotifyUponNewResponse: string[];
 
   /**
    * Send email to circle members upon updated response
    */
   @IsArray()
   @IsOptional()
-  circleRolesToEmailUponUpdatedResponse: string[];
+  circleRolesToNotifyUponUpdatedResponse: string[];
 }

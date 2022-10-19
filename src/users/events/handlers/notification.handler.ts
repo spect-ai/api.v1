@@ -9,9 +9,14 @@ import { CardNotificationService } from 'src/users/notification/card-notificatio
 import { RetroNotificationService } from 'src/users/notification/retro-notification.service';
 import { Reference } from 'src/users/types/types';
 import { UsersRepository } from 'src/users/users.repository';
-import { NotificationEvent, NotificationEventV2 } from '../impl';
+import {
+  NotificationEvent,
+  NotificationEventV2,
+  SingleNotificationEvent,
+} from '../impl';
 import { LoggingService } from 'src/logging/logging.service';
 import { v4 as uuidv4 } from 'uuid';
+import { MailService } from 'src/mail/mail.service';
 
 @EventsHandler(NotificationEvent)
 export class NotificationEventHandler
@@ -139,6 +144,85 @@ export class NotificationEventV2Handler
             },
           ],
         });
+      }
+    } catch (error) {
+      // Make sure to not send a large object to the logger
+      this.logger.error(
+        `Failed adding notification to user with error: ${error.message}`,
+      );
+    }
+  }
+}
+
+@EventsHandler(SingleNotificationEvent)
+export class SingleNotificationEventHandler
+  implements IEventHandler<SingleNotificationEvent>
+{
+  constructor(
+    private readonly userRepository: UsersRepository,
+    private readonly logger: LoggingService,
+  ) {
+    this.logger.setContext('SingleNotificationEventHandler');
+  }
+
+  async handle(event: SingleNotificationEvent) {
+    try {
+      console.log('NotificationEventHandler');
+      const { recipient, content, ref } = event;
+      const recipientEntity = await this.userRepository.findById(recipient);
+
+      await this.userRepository.updateById(recipient, {
+        notificationsV2: [
+          ...(recipientEntity.notificationsV2 || []),
+          {
+            content: content,
+            ref,
+          },
+        ],
+      });
+    } catch (error) {
+      // Make sure to not send a large object to the logger
+      this.logger.error(
+        `Failed adding notification to user with error: ${error.message}`,
+      );
+    }
+  }
+}
+
+@EventsHandler(SingleNotificationEvent)
+export class SingleEmailNotificationEventHandler
+  implements IEventHandler<SingleNotificationEvent>
+{
+  constructor(
+    private readonly userRepository: UsersRepository,
+    private readonly logger: LoggingService,
+    private readonly mailService: MailService,
+  ) {
+    this.logger.setContext('SingleEmailNotificationEventHandler');
+  }
+
+  async handle(event: SingleNotificationEvent) {
+    try {
+      console.log('NotificationEventHandler');
+      const { recipient, content, ref, subject, redirectUrl } = event;
+      const recipientEntity = await this.userRepository.findById(recipient);
+      if (recipientEntity.email) {
+        const mail = {
+          to: `${recipientEntity.email}`,
+          from: {
+            name: 'Spect Notifications',
+            email: process.env.NOTIFICATION_EMAIL,
+          }, // Fill it with your validated email on SendGrid account
+          html: '<h1>Hello</h1>',
+          template_id: 'd-29167d84858a4bbebd669512def5ee29',
+          dynamic_template_data: {
+            title: content,
+            link: redirectUrl,
+            subject: subject,
+          },
+        };
+
+        return await this.mailService.send(mail);
       }
     } catch (error) {
       // Make sure to not send a large object to the logger

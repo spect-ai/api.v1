@@ -28,3 +28,13 @@ export class NotificationEventV2 {
     public readonly ref?: MappedItem<NotifRef>,
   ) {}
 }
+
+export class SingleNotificationEvent {
+  constructor(
+    public readonly content: string,
+    public readonly recipient: string,
+    public readonly subject?: string,
+    public readonly redirectUrl?: string,
+    public readonly ref?: MappedItem<NotifRef>,
+  ) {}
+}

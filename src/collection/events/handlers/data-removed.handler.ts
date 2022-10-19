@@ -36,13 +36,13 @@ export class DataRemovedEventHandler
         notifContent = `Card was removed on ${collection.name}`;
       }
 
-      if (collection.notificationSettings?.userRecipientsOnNewData)
-        this.eventBus.publish(
-          new NotificationEventV2(
-            notifContent,
-            collection.notificationSettings.userRecipientsOnNewData,
-          ),
-        );
+      // if (collection.notificationSettings?.userRecipientsOnNewData)
+      //   this.eventBus.publish(
+      //     new NotificationEventV2(
+      //       notifContent,
+      //       collection.notificationSettings.userRecipientsOnNewData,
+      //     ),
+      //   );
     } catch (error) {
       this.logger.error(`${error.message}`);
     }

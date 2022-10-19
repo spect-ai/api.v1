@@ -5,12 +5,7 @@ import { useMongoosePlugin } from 'src/base/decorators/use-mongoose-plugins.deco
 import { Circle } from 'src/circle/model/circle.model';
 import { MappedItem } from 'src/common/interfaces';
 import { GuildRole } from 'src/common/types/role.type';
-import {
-  Activity,
-  DefaultViewType,
-  NotificationSettings,
-  Property,
-} from '../types/types';
+import { Activity, DefaultViewType, Property } from '../types/types';
 
 @useMongoosePlugin()
 export class Collection extends BaseModel {
@@ -96,12 +91,6 @@ export class Collection extends BaseModel {
   defaultView: DefaultViewType;
 
   /**
-   * Notification settings for different actions
-   */
-  @prop()
-  notificationSettings: NotificationSettings;
-
-  /**
    * The guild.xyz roles that a person needs to hold to fill up form
    */
   @prop({ default: [] })
@@ -147,11 +136,11 @@ export class Collection extends BaseModel {
    * Send email to circle members upon new response
    */
   @prop({ default: [] })
-  circleRolesToEmailUponNewResponse: string[];
+  circleRolesToNotifyUponNewResponse: string[];
 
   /**
    * Send email to circle members upon updated response
    */
   @prop({ default: [] })
-  circleRolesToEmailUponUpdatedResponse: string[];
+  circleRolesToNotifyUponUpdatedResponse: string[];
 }

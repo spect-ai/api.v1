@@ -51,12 +51,6 @@ export type PopulatedCollectionFields = {
 
 export type DefaultViewType = 'form' | 'table' | 'kanban' | 'list' | 'gantt';
 
-export type NotificationSettings = {
-  userRecipientsOnCollectionSettingsUpdate: string[];
-  userRecipientsOnPropertyUpdates: string[];
-  userRecipientsOnNewData: string[];
-};
-
 export type Ref = {
   id: string;
   refType: 'user' | 'circle' | 'collection';

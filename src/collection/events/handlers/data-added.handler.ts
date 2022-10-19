@@ -3,14 +3,21 @@ import {
   EventBus,
   EventsHandler,
   IEventHandler,
+  QueryBus,
 } from '@nestjs/cqrs';
+import { Circle } from 'src/circle/model/circle.model';
+import { GetCircleByIdQuery } from 'src/circle/queries/impl';
 import { LoggingService } from 'src/logging/logging.service';
-import { NotificationEventV2 } from 'src/users/events/impl';
+import {
+  NotificationEventV2,
+  SingleNotificationEvent,
+} from 'src/users/events/impl';
 import { DataAddedEvent } from '../impl/data-added.event';
 
 @EventsHandler(DataAddedEvent)
 export class DataAddedEventHandler implements IEventHandler<DataAddedEvent> {
   constructor(
+    private readonly queryBus: QueryBus,
     private readonly eventBus: EventBus,
     private readonly commandBus: CommandBus,
     private readonly logger: LoggingService,
@@ -23,23 +30,30 @@ export class DataAddedEventHandler implements IEventHandler<DataAddedEvent> {
       console.log('DataAddedEventHandler');
       const { caller, collection } = event;
 
-      let notifContent;
-      if (collection.defaultView === 'form') {
-        notifContent = `A new response was received on ${collection.name}`;
-      } else if (collection.defaultView === 'table') {
-        notifContent = `A new row was added on ${collection.name}`;
-      } else {
-        notifContent = `A new card was added on ${collection.name}`;
-      }
-
-      if (collection.notificationSettings?.userRecipientsOnNewData) {
-        const recipients =
-          collection.notificationSettings.userRecipientsOnNewData.filter(
-            (a) => a !== caller.id,
-          );
-        this.eventBus.publish(
-          new NotificationEventV2(notifContent, recipients),
-        );
+      const notifContent = `A new response was received on ${collection.name}`;
+      const subject = `New response on ${collection.name}`;
+      const redirectUrl = `https://circles.spect.network/collection/${collection.slug}`;
+      if (
+        collection.circleRolesToNotifyUponNewResponse &&
+        collection.circleRolesToNotifyUponNewResponse.length > 0
+      ) {
+        const circle = (await this.queryBus.execute(
+          new GetCircleByIdQuery(collection.parents[0]),
+        )) as Circle;
+        const roleSet = new Set(collection.circleRolesToNotifyUponNewResponse);
+        for (const [memberId, roles] of Object.entries(circle.memberRoles)) {
+          const hasRole = roles.some((role) => roleSet.has(role));
+          if (hasRole) {
+            this.eventBus.publish(
+              new SingleNotificationEvent(
+                notifContent,
+                memberId,
+                subject,
+                redirectUrl,
+              ),
+            );
+          }
+        }
       }
       this.logger.log(
         `Created New Data in collection ${event.collection?.name}`,

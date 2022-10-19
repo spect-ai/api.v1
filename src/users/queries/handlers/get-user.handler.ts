@@ -289,6 +289,7 @@ export class UserFieldResolver {
     delete user.githubId;
     delete user.discordId;
     delete user.accounts;
+    delete user.email;
     return {
       ...user,
       cardDetails: {

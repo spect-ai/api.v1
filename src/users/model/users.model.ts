@@ -59,6 +59,12 @@ export class User extends ProfileModel {
   discordId: string;
 
   /**
+   * Email of user
+   */
+  @prop()
+  email: string;
+
+  /**
    * Github Integration user id
    */
   @prop()

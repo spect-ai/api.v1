@@ -1,10 +1,5 @@
 import { MappedItem } from 'src/common/interfaces';
-import {
-  Activity,
-  DefaultViewType,
-  NotificationSettings,
-  Property,
-} from '../types/types';
+import { Activity, DefaultViewType, Property } from '../types/types';
 
 export class CollectionPublicResponseDto {
   name: string;
@@ -54,7 +49,6 @@ export class CollectionResponseDto {
   indexes: MappedItem<string[]>;
 
   defaultView: DefaultViewType;
-  notificationSettings: NotificationSettings;
 
   formRoleGating: number[];
 
@@ -63,4 +57,7 @@ export class CollectionResponseDto {
   mintkudosTokenId: number;
 
   messageOnSubmission: string;
+  circleRolesToNotifyUponNewResponse: string[];
+
+  circleRolesToNotifyUponUpdatedResponse: string[];
 }
