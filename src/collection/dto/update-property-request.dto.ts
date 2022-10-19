@@ -43,6 +43,7 @@ export class AddPropertyDto {
 
   @IsEnum([
     'shortText',
+    'email',
     'longText',
     'number',
     'user[]',
@@ -107,6 +108,7 @@ export class UpdatePropertyDto {
     'shortText',
     'longText',
     'number',
+    'email',
     'user[]',
     'user',
     'reward',

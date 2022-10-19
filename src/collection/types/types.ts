@@ -25,7 +25,8 @@ export type PropertyType =
   | 'date'
   | 'singleSelect'
   | 'multiSelect'
-  | 'ethAddress';
+  | 'ethAddress'
+  | 'email';
 
 export type Option = {
   label: string;

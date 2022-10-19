@@ -166,7 +166,7 @@ export class ActivityBuilder {
     const timestamp = new Date();
     for (const [propertyId, data] of Object.entries(dataUpdateObj)) {
       if (
-        ['shortText', 'ethAddress', 'number'].includes(
+        ['shortText', 'ethAddress', 'number', 'email'].includes(
           collection.properties[propertyId].type,
         )
       ) {

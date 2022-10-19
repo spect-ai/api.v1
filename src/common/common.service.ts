@@ -122,6 +122,7 @@ export class CommonTools {
       case 'user':
       case 'ethAddress':
       case 'date':
+      case 'email':
         return elem1 !== elem2;
       case 'user[]':
         const difference = arrayDiff(elem1, elem2);

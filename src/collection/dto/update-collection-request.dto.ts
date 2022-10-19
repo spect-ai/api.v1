@@ -63,4 +63,25 @@ export class UpdateCollectionDto {
   @IsBoolean()
   @IsOptional()
   updatingResponseAllowed: boolean;
+
+  /**
+   * Send confirmation email upon submission?
+   */
+  @IsBoolean()
+  @IsOptional()
+  sendConfirmationEmail: boolean;
+
+  /**
+   * Send email to circle members upon new response
+   */
+  @IsArray()
+  @IsOptional()
+  circleRolesToEmailUponNewResponse: string[];
+
+  /**
+   * Send email to circle members upon updated response
+   */
+  @IsArray()
+  @IsOptional()
+  circleRolesToEmailUponUpdatedResponse: string[];
 }

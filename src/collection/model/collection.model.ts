@@ -136,4 +136,22 @@ export class Collection extends BaseModel {
    */
   @prop({ default: true })
   updatingResponseAllowed: boolean;
+
+  /**
+   * Send confirmation email upon submission?
+   */
+  @prop({ default: false })
+  sendConfirmationEmail: boolean;
+
+  /**
+   * Send email to circle members upon new response
+   */
+  @prop({ default: [] })
+  circleRolesToEmailUponNewResponse: string[];
+
+  /**
+   * Send email to circle members upon updated response
+   */
+  @prop({ default: [] })
+  circleRolesToEmailUponUpdatedResponse: string[];
 }
