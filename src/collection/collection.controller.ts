@@ -23,6 +23,7 @@ import {
   RequiredUUIDDto,
 } from 'src/common/dtos/string.dto';
 import { MintKudosService } from 'src/common/mint-kudos.service';
+import { MailService } from 'src/mail/mail.service';
 import {
   AddCommentCommand,
   AddPropertyCommand,
@@ -70,6 +71,7 @@ export class CollectionController {
     private readonly queryBus: QueryBus,
     private readonly crudService: CrudService,
     private readonly credentialingService: ResponseCredentialingService,
+    private readonly mailService: MailService,
   ) {}
 
   @UseGuards(SessionAuthGuard)
@@ -291,5 +293,18 @@ export class CollectionController {
   @Patch('/:id/airdropKudos')
   async airdropKudos(@Param() param: ObjectIdDto): Promise<object> {
     return await this.credentialingService.airdropMintkudosToken(param.id);
+  }
+
+  @Patch('/:id/sendMail')
+  async sendMail(@Param() param: ObjectIdDto, @Request() req) {
+    const mail = {
+      to: 'adityach4u@gmail.com',
+      subject: 'Hello from sendgrid',
+      from: 'notifications@spect.network', // Fill it with your validated email on SendGrid account
+      text: 'Hello',
+      html: '<h1>Hello</h1>',
+    };
+
+    return await this.mailService.send(mail);
   }
 }

@@ -54,6 +54,7 @@ import { ActivityResolver as CollectionDataActivityResolver } from './collection
 import { MintKudosService } from './common/mint-kudos.service';
 import { ResponseCredentialingService } from './collection/services/response-credentialing.service';
 import { CollectionRepository } from './collection/collection.repository';
+import { MailModule } from './mail/mail.module';
 
 const databaseUrl =
   process.env.DATABASE_URL || 'mongodb://localhost:27017/nest';
@@ -81,6 +82,7 @@ console.log({ databaseUrl });
     CqrsModule,
     CollectionModule,
     RealtimeModule,
+    MailModule,
   ],
   controllers: [
     AppController,
