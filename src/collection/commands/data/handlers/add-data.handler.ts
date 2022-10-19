@@ -68,7 +68,6 @@ export class AddDataCommandHandler implements ICommandHandler<AddDataCommand> {
         data,
         caller?.id,
       );
-      console.log(caller?.id);
       const updatedCollection = await this.collectionRepository.updateById(
         collectionId,
         {

@@ -140,6 +140,7 @@ export class MintKudosService {
   }
 
   async getCommunityKudosDesigns(id: string): Promise<nftTypes> {
+    console.log(id);
     const privateProps = await this.getPrivateProps(id);
     const encodedString = Buffer.from(
       privateProps.mintkudosCommunityId + ':' + privateProps.mintkudosApiKey,

@@ -4,11 +4,13 @@ import {
   IsBoolean,
   IsEnum,
   IsNotEmpty,
+  IsObject,
   IsOptional,
   IsString,
   ValidateNested,
 } from 'class-validator';
 import { PropertyType, UserType } from '../types/types';
+import { IsValidRewardOptions } from '../validations/reward-validations.service';
 
 export class OptionModel {
   @IsString()
@@ -17,6 +19,23 @@ export class OptionModel {
   @IsString()
   value: string;
 }
+
+export type TokenModel = {
+  symbol: string;
+
+  name: string;
+
+  address: string;
+};
+
+export type NetworkModel = {
+  name: string;
+
+  chainId: string;
+
+  tokens: TokenModel[];
+};
+
 export class AddPropertyDto {
   @IsString()
   @IsNotEmpty()
@@ -45,6 +64,10 @@ export class AddPropertyDto {
   @ValidateNested()
   @Type(() => OptionModel)
   options: any;
+
+  @IsOptional()
+  @IsValidRewardOptions()
+  rewardOptions: Map<string, NetworkModel>;
 
   @IsBoolean()
   @IsOptional()
@@ -103,6 +126,10 @@ export class UpdatePropertyDto {
   @IsArray()
   @Type(() => OptionModel)
   options: any;
+
+  @IsOptional()
+  @IsValidRewardOptions()
+  rewardOptions: Map<string, NetworkModel>;
 
   /**
    * Is the property visible in the forms?

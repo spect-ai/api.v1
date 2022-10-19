@@ -37,7 +37,6 @@ export class ActivityResolver {
 
       const newContentTxt = activity.content?.split('{{');
       for (let i = 1; i < newContentTxt.length; i++) {
-        console.log(newContentTxt[i].split('}}')[0]);
         keysToLookup[activityId] = [
           ...(keysToLookup[activityId] || []),
           newContentTxt[i].split('}}')[0],
@@ -45,7 +44,6 @@ export class ActivityResolver {
       }
     }
 
-    console.log({ keysToLookup });
     const idsGroupedByRefType = {} as { [refType: string]: string[] };
     for (const [activityId, keys] of Object.entries(keysToLookup)) {
       for (const k of keys)
@@ -56,7 +54,6 @@ export class ActivityResolver {
             activityObj[activityId].ref[k].id,
           ];
     }
-    console.log({ idsGroupedByRefType });
 
     const circles = await this.queryBus.execute(
       new GetMultipleCirclesQuery({
@@ -127,7 +124,6 @@ export class ActivityBuilder {
       }
     }
     const diff = objectDiff(existingData, dataUpdateObj);
-    console.log(diff);
 
     const activities = this.getActivities(
       dataUpdateObj,
@@ -135,7 +131,6 @@ export class ActivityBuilder {
       diff as Diff<any>,
       caller,
     );
-    console.log(activities);
     const dataActivities = {};
     const dataActivityOrder = [];
     for (const activity of activities) {

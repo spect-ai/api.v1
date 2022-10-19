@@ -129,7 +129,7 @@ export class CollectionController {
     );
   }
 
-  @UseGuards(SessionAuthGuard)
+  // @UseGuards(SessionAuthGuard)
   @Patch('/:id/updateProperty')
   async updateProperty(
     @Param() param: ObjectIdDto,
