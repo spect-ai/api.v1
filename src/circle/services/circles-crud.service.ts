@@ -135,7 +135,7 @@ export class CirclesCrudService {
         return -1;
       return 0;
     });
-    return res;
+    if (this.requestProvider.user?.id) return res;
   }
 
   private filterPrivateProperties(
