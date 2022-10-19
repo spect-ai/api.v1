@@ -51,6 +51,12 @@ export class DetailedCircleResponseDto {
   projects?: ObjectId[];
 
   /**
+   * The retros in the circle
+   */
+  @ValidateNested()
+  retro?: ObjectId[];
+
+  /**
    * The projects in the circle
    */
   @ValidateNested()

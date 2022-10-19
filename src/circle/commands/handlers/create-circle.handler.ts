@@ -120,6 +120,7 @@ export class CreateClaimableCircleCommandHandler
           roles: defaultCircleRoles,
           localRegistry: {},
           toBeClaimed: true,
+          paymentAddress: createCircleDto.qualifiedClaimee[0],
         });
         await this.circlesRepository.updateById(parentCircle.id as string, {
           ...parentCircle,
@@ -132,6 +133,7 @@ export class CreateClaimableCircleCommandHandler
           roles: defaultCircleRoles,
           localRegistry: {},
           toBeClaimed: true,
+          paymentAddress: createCircleDto.qualifiedClaimee[0],
         });
       }
 
