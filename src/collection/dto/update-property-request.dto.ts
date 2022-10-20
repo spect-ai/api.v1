@@ -9,7 +9,7 @@ import {
   IsString,
   ValidateNested,
 } from 'class-validator';
-import { PropertyType, UserType } from '../types/types';
+import { NetworkModel, PropertyType, UserType } from '../types/types';
 import { IsValidRewardOptions } from '../validations/reward-validations.service';
 
 export class OptionModel {
@@ -19,22 +19,6 @@ export class OptionModel {
   @IsString()
   value: string;
 }
-
-export type TokenModel = {
-  symbol: string;
-
-  name: string;
-
-  address: string;
-};
-
-export type NetworkModel = {
-  name: string;
-
-  chainId: string;
-
-  tokens: TokenModel[];
-};
 
 export class AddPropertyDto {
   @IsString()
@@ -53,6 +37,7 @@ export class AddPropertyDto {
     'singleSelect',
     'multiSelect',
     'ethAddress',
+    'milestone',
   ])
   @IsNotEmpty()
   type: PropertyType;
@@ -116,6 +101,7 @@ export class UpdatePropertyDto {
     'singleSelect',
     'multiSelect',
     'ethAddress',
+    'milestone',
   ])
   @IsOptional()
   type: PropertyType;

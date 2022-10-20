@@ -1,4 +1,40 @@
 import { MappedItem } from 'src/common/interfaces';
+import { Registry } from 'src/registry/model/registry.model';
+
+export type TokenModel = {
+  symbol: string;
+
+  name: string;
+
+  address: string;
+};
+
+export type NetworkModel = {
+  name: string;
+
+  chainId: string;
+
+  tokens: TokenModel[];
+};
+
+export type Milestone = {
+  id: string;
+  title: string;
+  description: string;
+  dueDate: Date;
+  reward: {
+    chain: {
+      name: string;
+      chainId: string;
+    };
+    token: {
+      name: string;
+      symbol: string;
+      address: string;
+    };
+    value: number;
+  };
+};
 
 export type UserType = 'assignee' | 'reviewer' | 'grantee' | 'applicant';
 
@@ -12,7 +48,9 @@ export type Property = {
   options?: Option[];
   userType?: UserType; // user type only relevant when type is user or user[]
   onUpdateNotifyUserTypes?: UserType[];
-  required?: boolean; // user type only relevant when type is user or user[]
+  rewardOptions?: Map<string, NetworkModel>; // only relevant when type is reward
+  required?: boolean;
+  description?: string;
 };
 
 export type PropertyType =
@@ -26,7 +64,8 @@ export type PropertyType =
   | 'singleSelect'
   | 'multiSelect'
   | 'ethAddress'
-  | 'email';
+  | 'email'
+  | 'milestone';
 
 export type Option = {
   label: string;

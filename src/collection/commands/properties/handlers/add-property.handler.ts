@@ -21,7 +21,7 @@ export class AddPropertyCommandHandler
       console.log('AddPropertyCommandHandler');
       const { addPropertyCommandDto, caller, collectionId } = command;
       const collection = await this.collectionRepository.findById(collectionId);
-
+      console.log(addPropertyCommandDto);
       if (
         collection.properties &&
         collection.properties[addPropertyCommandDto.name]

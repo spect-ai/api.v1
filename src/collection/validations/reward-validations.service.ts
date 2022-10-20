@@ -5,7 +5,7 @@ import {
   ValidatorConstraint,
   ValidatorConstraintInterface,
 } from 'class-validator';
-import { NetworkModel, TokenModel } from '../dto/update-property-request.dto';
+import { NetworkModel, TokenModel } from '../types/types';
 
 const supportedNetworks = ['1', '137', '43114', '42161', '10', '100', '56'];
 
