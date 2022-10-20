@@ -55,6 +55,19 @@ export class DataAddedEventHandler implements IEventHandler<DataAddedEvent> {
           }
         }
       }
+
+      const notifResponderContent = `Your response on ${collection.name} was received.`;
+      const responderSubject = `Response received!`;
+      const responderRedirectUrl = `https://circles.spect.network/`;
+      this.eventBus.publish(
+        new SingleNotificationEvent(
+          notifResponderContent,
+          caller?.id,
+          responderSubject,
+          responderRedirectUrl,
+        ),
+      );
+
       this.logger.log(
         `Created New Data in collection ${event.collection?.name}`,
       );
