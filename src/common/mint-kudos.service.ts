@@ -178,7 +178,7 @@ export class MintKudosService {
     });
     formData.append('name', asset.originalname);
     formData.append('nftTypeId', nftTypeId);
-
+    console.log({ formData });
     const res = await (
       await fetch(
         `${process.env.MINTKUDOS_URL}/v1/communities/${privateProps.mintkudosCommunityId}/nftTypes`,
