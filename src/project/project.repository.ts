@@ -21,7 +21,6 @@ const populatedCardFields = {
   creator: 1,
   status: 1,
   parent: 1,
-  children: 1,
   assignedCircle: 1,
 };
 
@@ -45,7 +44,6 @@ const defaultPopulate: PopulatedProjectFields = {
     creator: 1,
     status: 1,
     parent: 1,
-    children: 1,
     assignedCircle: 1,
   },
 };
