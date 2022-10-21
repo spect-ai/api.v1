@@ -22,7 +22,6 @@ import {
   RequiredSlugDto,
   RequiredUUIDDto,
 } from 'src/common/dtos/string.dto';
-import { MintKudosService } from 'src/common/mint-kudos.service';
 import { MailService } from 'src/mail/mail.service';
 import {
   AddCommentCommand,
@@ -57,10 +56,7 @@ import {
   UpdatePropertyDto,
 } from './dto/update-property-request.dto';
 import { Collection } from './model/collection.model';
-import {
-  GetCollectionByIdQuery,
-  GetCollectionBySlugQuery,
-} from './queries/impl/get-collection.query';
+import { GetCollectionBySlugQuery } from './queries/impl/get-collection.query';
 import { CrudService } from './services/crud.service';
 import { ResponseCredentialingService } from './services/response-credentialing.service';
 
@@ -296,7 +292,7 @@ export class CollectionController {
   }
 
   @Patch('/:id/sendMail')
-  async sendMail(@Param() param: ObjectIdDto, @Request() req) {
+  async sendMail() {
     const mail = {
       to: 'adityach4u@gmail.com',
       subject: 'Hello from sendgrid',

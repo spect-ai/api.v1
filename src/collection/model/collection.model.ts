@@ -143,4 +143,16 @@ export class Collection extends BaseModel {
    */
   @prop({ default: [] })
   circleRolesToNotifyUponUpdatedResponse: string[];
+
+  /**
+   * The message to show when the form is submitted
+   */
+  @prop({ default: '' })
+  logo: string;
+
+  /**
+   * The message to show when the form is submitted
+   */
+  @prop({ default: '' })
+  cover: string;
 }

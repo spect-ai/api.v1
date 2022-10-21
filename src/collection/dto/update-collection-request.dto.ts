@@ -84,4 +84,18 @@ export class UpdateCollectionDto {
   @IsArray()
   @IsOptional()
   circleRolesToNotifyUponUpdatedResponse: string[];
+
+  /**
+   * The message to show when the form is submitted
+   */
+  @IsString()
+  @IsOptional()
+  logo: string;
+
+  /**
+   * The message to show when the form is submitted
+   */
+  @IsString()
+  @IsOptional()
+  cover: string;
 }
