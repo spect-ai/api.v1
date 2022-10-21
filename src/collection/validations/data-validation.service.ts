@@ -88,6 +88,7 @@ export class DataValidationService {
     properties: MappedItem<Property>,
   ): boolean {
     for (const [propertyId, data] of Object.entries(dataObj)) {
+      console.log(propertyId);
       if (data === null) continue;
       if (['shortText', 'longText'].includes(properties[propertyId].type)) {
         if (typeof data !== 'string') return false;
@@ -102,16 +103,18 @@ export class DataValidationService {
       } else if (['number'].includes(properties[propertyId].type)) {
         if (typeof data !== 'number') return false;
       } else if (['reward'].includes(properties[propertyId].type)) {
-        if (
-          typeof data['token'] !== 'object' ||
-          typeof data['chain'] !== 'object' ||
-          typeof data['value'] !== 'number' ||
-          typeof data['chain']['chainId'] !== 'string' ||
-          typeof data['chain']['name'] !== 'string' ||
-          typeof data['token']['symbol'] !== 'string' ||
-          typeof data['token']['address'] !== 'string'
-        )
-          return false;
+        if (data['value']) {
+          if (
+            typeof data['token'] !== 'object' ||
+            typeof data['chain'] !== 'object' ||
+            typeof data['value'] !== 'number' ||
+            typeof data['chain']['label'] !== 'string' ||
+            typeof data['chain']['value'] !== 'string' ||
+            typeof data['token']['label'] !== 'string' ||
+            typeof data['token']['value'] !== 'string'
+          )
+            return false;
+        }
       } else if (['ethAddress'].includes(properties[propertyId].type)) {
         if (!ethers.utils.isAddress(data)) return false;
       } else if (['user'].includes(properties[propertyId].type)) {
@@ -128,6 +131,23 @@ export class DataValidationService {
             )
         )
           return false;
+      } else if (['milestone'].includes(properties[propertyId].type)) {
+        for (const milestone of data) {
+          if (!milestone['title']) return false;
+          const reward = milestone['reward'];
+          if (reward && reward['value']) {
+            if (
+              typeof reward['token'] !== 'object' ||
+              typeof reward['chain'] !== 'object' ||
+              typeof reward['value'] !== 'number' ||
+              typeof reward['chain']['label'] !== 'string' ||
+              typeof reward['chain']['value'] !== 'string' ||
+              typeof reward['token']['label'] !== 'string' ||
+              typeof reward['token']['value'] !== 'string'
+            )
+              return false;
+          }
+        }
       }
     }
     return true;

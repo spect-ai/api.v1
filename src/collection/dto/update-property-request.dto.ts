@@ -79,6 +79,13 @@ export class AddPropertyDto {
   @IsBoolean()
   @IsOptional()
   required: boolean;
+
+  /**
+   * Fields in milestone
+   */
+  @IsArray()
+  @IsOptional()
+  milestoneFields: string[];
 }
 
 export class UpdatePropertyDto {
@@ -146,4 +153,11 @@ export class UpdatePropertyDto {
   @IsBoolean()
   @IsOptional()
   required: boolean;
+
+  /**
+   * Fields in milestone
+   */
+  @IsArray()
+  @IsOptional()
+  milestoneFields: string[];
 }
