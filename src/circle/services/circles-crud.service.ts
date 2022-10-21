@@ -19,7 +19,6 @@ import {
 } from '../queries/impl';
 import { Project } from 'src/project/model/project.model';
 import { Retro } from 'src/retro/models/retro.model';
-import { CirclesRepository } from 'src/circle/circles.repository';
 
 const getCirclePopulatedFields = {
   projects: {
@@ -65,7 +64,6 @@ const getCircleProjectedFields = {
 
 const propertiesToReturnInPrivateCircle = new Set([
   'roles',
-  'memberRoles',
   'id',
   '_id',
   'name',
@@ -75,7 +73,6 @@ const propertiesToReturnInPrivateCircle = new Set([
 @Injectable()
 export class CirclesCrudService {
   constructor(
-    private readonly circlesRepository: CirclesRepository,
     private readonly requestProvider: RequestProvider,
     private readonly logger: LoggingService,
     private readonly commandBus: CommandBus,
@@ -135,7 +132,7 @@ export class CirclesCrudService {
         return -1;
       return 0;
     });
-    if (this.requestProvider.user?.id) return res;
+    return res;
   }
 
   private filterPrivateProperties(
@@ -162,8 +159,7 @@ export class CirclesCrudService {
           getCircleProjectedFields,
         ),
       );
-      const circleDetails =
-        await this.circlesRepository.getCircleWithMinimalDetails(circle);
+      const circleDetails = await this.getCircleWithMinimalDetails(circle);
       return this.filterPrivateProperties(
         circleDetails,
         this.requestProvider.user?.id,
@@ -185,8 +181,7 @@ export class CirclesCrudService {
       const circle = await this.queryBus.execute(
         new GetCircleBySlugQuery(slug),
       );
-      const circleDetails =
-        await this.circlesRepository.getCircleWithMinimalDetails(circle);
+      const circleDetails = await this.getCircleWithMinimalDetails(circle);
       return this.filterPrivateProperties(
         circleDetails,
         this.requestProvider.user?.id,
@@ -226,7 +221,7 @@ export class CirclesCrudService {
   async update(
     id: string,
     createCircleDto: UpdateCircleRequestDto,
-  ): Promise<CircleResponseDto> {
+  ): Promise<DetailedCircleResponseDto> {
     try {
       const circle = await this.commandBus.execute(
         new UpdateCircleCommand(
@@ -235,9 +230,7 @@ export class CirclesCrudService {
           this.requestProvider.user.id,
         ),
       );
-      const circleDetails =
-        await this.circlesRepository.getCircleWithMinimalDetails(circle);
-      return circleDetails;
+      return circle;
     } catch (error) {
       this.logger.logError(
         `Failed circle creation with error: ${error.message}`,
@@ -248,5 +241,34 @@ export class CirclesCrudService {
         error.message,
       );
     }
+  }
+
+  async getCircleWithMinimalDetails(
+    circle: Circle,
+  ): Promise<CircleResponseDto> {
+    const projects = {};
+    for (const populatedProject of circle?.projects) {
+      const project = populatedProject as unknown as Project;
+      projects[project.id] = project;
+    }
+
+    const children = {};
+    for (const populatedchild of circle?.children) {
+      const child = populatedchild as unknown as Circle;
+      children[child.id] = child;
+    }
+
+    const retro = {};
+    for (const populatedRetro of circle?.retro) {
+      const ret = populatedRetro as unknown as Retro;
+      retro[ret.id] = ret;
+    }
+
+    return {
+      ...circle,
+      projects,
+      children,
+      retro,
+    };
   }
 }
