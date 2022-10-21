@@ -25,10 +25,10 @@ export class CreateFolderCommandHandler
         id: newFolderId,
       };
       const newFolderDetails = {
-        [newFolderId]: newFolder,
         ...folderDetails,
+        [newFolderId]: newFolder,
       };
-      const newFolderOrder = [newFolderId, ...folderOrder];
+      const newFolderOrder = [...folderOrder, newFolderId];
       const updatedCircle =
         await this.circlesRepository.updateCircleAndReturnWithPopulatedReferences(
           circleId,
