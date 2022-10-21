@@ -1,12 +1,17 @@
 import { Module } from '@nestjs/common';
 import { CqrsModule } from '@nestjs/cqrs';
 import { TypegooseModule } from 'nestjs-typegoose';
+import { CircleAuthGuard } from 'src/auth/circle.guard';
 import { SessionAuthGuard } from 'src/auth/iron-session.guard';
+import { CirclesModule } from 'src/circle/circles.module';
+import { CirclesRepository } from 'src/circle/circles.repository';
 import { CommonTools } from 'src/common/common.service';
+import { DiscordService } from 'src/common/discord.service';
 import { GuildxyzService } from 'src/common/guildxyz.service';
 import { MintKudosService } from 'src/common/mint-kudos.service';
 import { LoggingService } from 'src/logging/logging.service';
 import { MailModule } from 'src/mail/mail.module';
+import { RolesService } from 'src/roles/roles.service';
 import { RequestProvider } from 'src/users/user.provider';
 import { EthAddressModule } from 'src/_eth-address/_eth-address.module';
 import { CollectionController } from './collection.controller';
@@ -26,6 +31,7 @@ import { DataValidationService } from './validations/data-validation.service';
     CqrsModule,
     EthAddressModule,
     MailModule,
+    CirclesModule,
   ],
   controllers: [CollectionController],
   providers: [
@@ -44,6 +50,9 @@ import { DataValidationService } from './validations/data-validation.service';
     GuildxyzService,
     MintKudosService,
     ResponseCredentialingService,
+    CircleAuthGuard,
+    RolesService,
+    DiscordService,
   ],
   exports: [CollectionModule, CollectionRepository],
 })

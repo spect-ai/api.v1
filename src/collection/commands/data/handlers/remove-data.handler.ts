@@ -30,6 +30,8 @@ export class RemoveDataCommandHandler
     try {
       const collection = await this.collectionRepository.findById(collectionId);
       if (!collection) throw 'Collection does not exist';
+      if (collection.dataOwner[dataSlug] !== caller?.id)
+        throw 'You are not the owner of this data';
       delete collection.data[dataSlug];
       const updatedCollection = await this.collectionRepository.updateById(
         collectionId,
@@ -63,11 +65,14 @@ export class RemoveMultipleDataCommandHandler
   }
 
   async execute(command: RemoveMultipleDataCommand) {
-    const { collectionId, dataIds } = command;
+    const { collectionId, dataIds, caller } = command;
     try {
       const collection = await this.collectionRepository.findById(collectionId);
       if (!collection) throw 'Collection does not exist';
       for (const dataId of dataIds) {
+        if (collection.dataOwner[dataId] !== caller?.id)
+          throw 'You are not the owner of this data';
+
         delete collection.data[dataId];
       }
 

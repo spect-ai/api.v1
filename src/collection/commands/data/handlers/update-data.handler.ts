@@ -35,6 +35,9 @@ export class UpdateDataCommandHandler
       if (!collection.updatingResponseAllowed) {
         throw 'Updating response is not allowed';
       }
+      if (!collection.dataOwner[dataSlug]) {
+        throw 'You are not the owner of this data';
+      }
       const validData = await this.validationService.validate(
         data,
         'update',

@@ -124,7 +124,8 @@ export class DataValidationService {
           if (!mongoose.isValidObjectId(user.value)) return false;
       } else if (['email'].includes(properties[propertyId].type)) {
         if (
-          String(data)
+          data &&
+          !String(data)
             .toLowerCase()
             .match(
               /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,

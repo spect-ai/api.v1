@@ -7,6 +7,7 @@ import {
   IsOptional,
   IsString,
 } from 'class-validator';
+import { IsNullableEmail } from 'src/common/validators/isNullableEmail.validator';
 
 export class UpdateUserDto extends PartialType(User) {
   /**
@@ -54,7 +55,7 @@ export class UpdateUserDto extends PartialType(User) {
   /**
    * EMail of user
    */
-  @IsEmail()
+  @IsNullableEmail()
   @IsOptional()
   email?: string;
 }

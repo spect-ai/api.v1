@@ -8,9 +8,15 @@ import {
   Post,
   Query,
   Request,
+  SetMetadata,
   UseGuards,
 } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
+import {
+  CollectionAuthGuard,
+  CreateNewCollectionAuthGuard,
+  ViewCollectionAuthGuard,
+} from 'src/auth/collection.guard';
 import {
   PublicViewAuthGuard,
   SessionAuthGuard,
@@ -74,7 +80,7 @@ export class CollectionController {
     private readonly mailService: MailService,
   ) {}
 
-  @UseGuards(SessionAuthGuard)
+  @UseGuards(ViewCollectionAuthGuard)
   @Get('/slug/:slug')
   async findBySlug(
     @Param() param: RequiredSlugDto,
@@ -96,7 +102,7 @@ export class CollectionController {
     return await this.queryBus.execute(new GetCollectionBySlugQuery(param.id));
   }
 
-  @UseGuards(SessionAuthGuard)
+  @UseGuards(CreateNewCollectionAuthGuard)
   @Post('/')
   async create(
     @Body() createCollectionDto: CreateCollectionDto,
@@ -107,7 +113,8 @@ export class CollectionController {
     );
   }
 
-  @UseGuards(SessionAuthGuard)
+  @SetMetadata('permissions', ['manageFormSettings'])
+  @UseGuards(CollectionAuthGuard)
   @Patch('/:id')
   async update(
     @Param() param: ObjectIdDto,
@@ -119,7 +126,8 @@ export class CollectionController {
     );
   }
 
-  @UseGuards(SessionAuthGuard)
+  @SetMetadata('permissions', ['manageFormSettings'])
+  @UseGuards(CollectionAuthGuard)
   @Patch('/:id/addProperty')
   async addProperty(
     @Param() param: ObjectIdDto,
@@ -131,7 +139,8 @@ export class CollectionController {
     );
   }
 
-  // @UseGuards(SessionAuthGuard)
+  @SetMetadata('permissions', ['manageFormSettings'])
+  @UseGuards(CollectionAuthGuard)
   @Patch('/:id/updateProperty')
   async updateProperty(
     @Param() param: ObjectIdDto,
@@ -149,7 +158,8 @@ export class CollectionController {
     );
   }
 
-  @UseGuards(SessionAuthGuard)
+  @SetMetadata('permissions', ['manageFormSettings'])
+  @UseGuards(CollectionAuthGuard)
   @Patch('/:id/removeProperty')
   async removeProperty(
     @Param() param: ObjectIdDto,
@@ -177,7 +187,8 @@ export class CollectionController {
     );
   }
 
-  @UseGuards(SessionAuthGuard)
+  @SetMetadata('permissions', ['updateFormResponsesManually'])
+  @UseGuards(CollectionAuthGuard)
   @Patch('/:id/addDataGuarded')
   async addData(
     @Param() param: ObjectIdDto,
@@ -207,6 +218,25 @@ export class CollectionController {
     );
   }
 
+  @SetMetadata('permissions', ['updateFormResponsesManually'])
+  @UseGuards(CollectionAuthGuard)
+  @Patch('/:id/updateDataGuarded')
+  async updateDataGuarded(
+    @Param() param: ObjectIdDto,
+    @Query() dataIdParam: RequiredUUIDDto,
+    @Body() updateDataDto: UpdateDataDto,
+    @Request() req,
+  ): Promise<Collection> {
+    return await this.commandBus.execute(
+      new UpdateDataCommand(
+        updateDataDto.data,
+        req.user,
+        param.id,
+        dataIdParam.dataId,
+      ),
+    );
+  }
+
   @UseGuards(SessionAuthGuard)
   @Patch('/:id/removeData')
   async removeData(
@@ -219,9 +249,36 @@ export class CollectionController {
     );
   }
 
-  @UseGuards(SessionAuthGuard)
+  @SetMetadata('permissions', ['updateFormResponsesManually'])
+  @UseGuards(CollectionAuthGuard)
   @Patch('/:id/removeMultipleData')
   async removeMultipleData(
+    @Param() param: ObjectIdDto,
+    @Body() removeDataDto: RemoveDataDto,
+    @Request() req,
+  ): Promise<Collection> {
+    return await this.commandBus.execute(
+      new RemoveMultipleDataCommand(req.user, param.id, removeDataDto.dataIds),
+    );
+  }
+
+  @SetMetadata('permissions', ['updateFormResponsesManually'])
+  @UseGuards(CollectionAuthGuard)
+  @Patch('/:id/removeDataGuarded')
+  async removeDataGuarded(
+    @Param() param: ObjectIdDto,
+    @Query() dataIdParam: RequiredUUIDDto,
+    @Request() req,
+  ): Promise<Collection> {
+    return await this.commandBus.execute(
+      new RemoveDataCommand(req.user, param.id, dataIdParam.dataId),
+    );
+  }
+
+  @SetMetadata('permissions', ['updateFormResponsesManually'])
+  @UseGuards(CollectionAuthGuard)
+  @Patch('/:id/removeMultipleDataGuarded')
+  async removeMultipleDataGuarded(
     @Param() param: ObjectIdDto,
     @Body() removeDataDto: RemoveDataDto,
     @Request() req,
@@ -293,18 +350,5 @@ export class CollectionController {
   @Patch('/:id/airdropKudos')
   async airdropKudos(@Param() param: ObjectIdDto): Promise<object> {
     return await this.credentialingService.airdropMintkudosToken(param.id);
-  }
-
-  @Patch('/:id/sendMail')
-  async sendMail(@Param() param: ObjectIdDto, @Request() req) {
-    const mail = {
-      to: 'adityach4u@gmail.com',
-      subject: 'Hello from sendgrid',
-      from: 'notifications@spect.network', // Fill it with your validated email on SendGrid account
-      text: 'Hello',
-      html: '<h1>Hello</h1>',
-    };
-
-    return await this.mailService.send(mail);
   }
 }
