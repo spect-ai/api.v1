@@ -98,4 +98,11 @@ export class UpdateCollectionDto {
   @IsString()
   @IsOptional()
   cover: string;
+
+  /**
+   * The updated property order
+   */
+  @IsArray()
+  @IsOptional()
+  propertyOrder: string[];
 }
