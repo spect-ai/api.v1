@@ -116,9 +116,9 @@ export class DataValidationService {
             return false;
         }
       } else if (['ethAddress'].includes(properties[propertyId].type)) {
-        if (!ethers.utils.isAddress(data)) return false;
+        if (data && !ethers.utils.isAddress(data)) return false;
       } else if (['user'].includes(properties[propertyId].type)) {
-        if (!mongoose.isValidObjectId(data.value)) return false;
+        if (data.value && !mongoose.isValidObjectId(data.value)) return false;
       } else if (['user[]'].includes(properties[propertyId].type)) {
         for (const user of data)
           if (!mongoose.isValidObjectId(user.value)) return false;
