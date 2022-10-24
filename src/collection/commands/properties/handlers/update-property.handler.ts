@@ -42,16 +42,30 @@ export class UpdatePropertyCommandHandler
         ]);
         if (
           collection.data &&
-          ['singleSelect', 'multiselect', 'user', 'user[]'].includes(
+          ['singleSelect', 'multiSelect'].includes(
             collection.properties[propertyId].type,
           ) &&
-          collection.properties[propertyId].type !==
-            updatePropertyCommandDto.type
-        )
+          ['singleSelect', 'multiSelect'].includes(
+            updatePropertyCommandDto.type,
+          )
+        ) {
           for (const [id, data] of Object.entries(collection.data)) {
-            if (data[propertyId] && !optionValueSet.has(data[propertyId].value))
-              delete data[propertyId];
+            {
+              if (collection.properties[propertyId].type === 'singleSelect') {
+                if (
+                  data[propertyId] &&
+                  !optionValueSet.has(data[propertyId].value)
+                )
+                  delete data[propertyId];
+              } else {
+                data[propertyId] = data[propertyId]?.filter((a) =>
+                  optionValueSet.has(a.value),
+                );
+                console.log({ d2: data[propertyId] });
+              }
+            }
           }
+        }
       }
 
       collection.data = this.handleClearance(
