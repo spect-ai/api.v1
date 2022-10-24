@@ -30,6 +30,7 @@ import { CirclesPrivateRepository } from './circles-private.repository';
 import { CirclePrivate } from './model/circle-private.model';
 import { MintKudosService } from 'src/common/mint-kudos.service';
 import { GuildxyzService } from 'src/common/guildxyz.service';
+import { CircleExternalController } from './circle-external.controller';
 
 @Module({
   imports: [
@@ -39,7 +40,12 @@ import { GuildxyzService } from 'src/common/guildxyz.service';
     RegistryModule,
     CqrsModule,
   ],
-  controllers: [CirclesController, CircleV1Controller, CirclePrivateController],
+  controllers: [
+    CirclesController,
+    CircleV1Controller,
+    CirclePrivateController,
+    CircleExternalController,
+  ],
   providers: [
     CirclesService,
     CirclesRepository,
