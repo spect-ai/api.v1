@@ -21,7 +21,10 @@ const populatedCardFields = {
   creator: 1,
   status: 1,
   parent: 1,
-  children: 1,
+  children: {
+    title: 1,
+    slug: 1,
+  },
   assignedCircle: 1,
 };
 
@@ -45,7 +48,10 @@ const defaultPopulate: PopulatedProjectFields = {
     creator: 1,
     status: 1,
     parent: 1,
-    children: 1,
+    children: {
+      title: 1,
+      slug: 1,
+    },
     assignedCircle: 1,
   },
 };
@@ -120,7 +126,7 @@ export class ProjectsRepository extends BaseRepository<Project> {
     customPopulate?: PopulatedProjectFields,
     selectedFields?: Record<string, unknown>,
   ): Promise<Project> {
-    const query = this.findOne(
+    let query = this.findOne(
       {
         slug: slug,
       },
@@ -130,9 +136,7 @@ export class ProjectsRepository extends BaseRepository<Project> {
     );
     let populatedFields = defaultPopulate;
     if (customPopulate) populatedFields = customPopulate;
-    Object.keys(populatedFields).forEach((key) => {
-      query.populate(key, populatedFields[key]);
-    });
+    query = this.getQueryWithPopulatedFields(populatedFields, query);
 
     return await query.exec();
   }
@@ -177,5 +181,30 @@ export class ProjectsRepository extends BaseRepository<Project> {
       console.log(err);
       return [];
     }
+  }
+
+  getQueryWithPopulatedFields(populatedFields: object, query: any) {
+    Object.keys(populatedFields).forEach((key) => {
+      const populatedFieldsInPopulatedFields = [];
+      const selectedFieldsInPopulatedFields = {};
+      Object.keys(populatedFields[key]).forEach((k) => {
+        if (typeof populatedFields[key][k] === 'object')
+          populatedFieldsInPopulatedFields.push({
+            path: k,
+            select: populatedFields[key][k],
+          });
+        else if (populatedFields[key][k] === 1) {
+          selectedFieldsInPopulatedFields[k] = 1;
+        }
+      });
+
+      query.populate({
+        path: key,
+        select: selectedFieldsInPopulatedFields,
+        populate: populatedFieldsInPopulatedFields,
+      });
+    });
+
+    return query;
   }
 }
