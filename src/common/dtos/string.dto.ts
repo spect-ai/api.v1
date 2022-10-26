@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsNotEmpty, IsString, IsUUID } from 'class-validator';
 import { IsObjectId } from 'class-validator-mongo-object-id';
 
 export class RequiredSlugDto {
@@ -74,10 +74,25 @@ export class RequiredRoleDto {
 }
 
 export class RequiredAutomationIdDto {
-  /**
-   * role Id
-   */
   @IsNotEmpty()
   @IsString()
   automationId: string;
+}
+
+export class RequiredPropertyIdDto {
+  @IsNotEmpty()
+  @IsString()
+  propertyId: string;
+}
+
+export class RequiredUUIDDto {
+  @IsNotEmpty()
+  @IsUUID()
+  dataId: string;
+}
+
+export class RequiredActivityUUIDDto {
+  @IsNotEmpty()
+  @IsUUID()
+  activityId: string;
 }

@@ -1,8 +1,13 @@
 import { Card } from 'src/card/model/card.model';
 import { Circle } from 'src/circle/model/circle.model';
-import { Diff } from 'src/common/interfaces';
+import { Diff, MappedItem } from 'src/common/interfaces';
 import { Project } from 'src/project/model/project.model';
 import { Retro } from 'src/retro/models/retro.model';
+
+export type NotifRef = {
+  id: string;
+  refType: 'user' | 'circle' | 'collection';
+};
 
 export class NotificationEvent {
   constructor(
@@ -13,5 +18,23 @@ export class NotificationEvent {
     public readonly linkPath: string[],
     public readonly actor: string,
     public readonly diff?: Diff<Card | Retro | Circle | Project>,
+  ) {}
+}
+
+export class NotificationEventV2 {
+  constructor(
+    public readonly content: string,
+    public readonly recipients: string[],
+    public readonly ref?: MappedItem<NotifRef>,
+  ) {}
+}
+
+export class SingleNotificationEvent {
+  constructor(
+    public readonly content: string,
+    public readonly recipient: string,
+    public readonly subject?: string,
+    public readonly redirectUrl?: string,
+    public readonly ref?: MappedItem<NotifRef>,
   ) {}
 }

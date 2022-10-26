@@ -38,6 +38,30 @@ export class SessionAuthGuard implements CanActivate {
 }
 
 @Injectable()
+export class AdminAuthGuard implements CanActivate {
+  constructor(private readonly ethAddressService: EthAddressService) {}
+
+  async validateUser(address: string): Promise<ObjectId | boolean> {
+    return ['0x55b23ed53fe13060183b92979c737a8ef9a73b73'].includes(address);
+  }
+
+  async canActivate(context: ExecutionContext): Promise<boolean> {
+    const request = context.switchToHttp().getRequest();
+    console.log(request.session.siwe);
+    try {
+      request.user = await this.validateUser(
+        request.session.siwe?.address?.toLowerCase(),
+      );
+      if (!request.user) return false;
+      return true;
+    } catch (error) {
+      request.session.destroy();
+      throw new HttpException({ message: error }, 422);
+    }
+  }
+}
+
+@Injectable()
 export class PublicViewAuthGuard implements CanActivate {
   constructor(private readonly sessionAuthGuard: SessionAuthGuard) {}
 

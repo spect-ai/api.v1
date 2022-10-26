@@ -83,8 +83,8 @@ export class Circle extends ProfileModel {
   /**
    * Projects in the circle
    */
-  @prop({ ref: () => Collection, type: Schema.Types.String, default: [] })
-  collections: string[];
+  @prop({ ref: () => Collection, default: [] })
+  collections: ObjectId[];
 
   /**
    * Retros in the circle

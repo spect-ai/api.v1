@@ -17,6 +17,9 @@ export type CirclePermission = {
   manageRoles: boolean;
   manageMembers: boolean;
   distributeCredentials: boolean;
+  createNewForm: boolean;
+  manageFormSettings: boolean;
+  updateFormResponsesManually: boolean;
   manageRewards: CardTypeToPermissionMap;
   manageCardProperties: CardTypeToPermissionMap;
   createNewCard: CardTypeToPermissionMap;
@@ -45,4 +48,9 @@ export type Roles = {
 
 export type MemberRoles = {
   [key: string]: string[]; // MemberId -> role names
+};
+
+export type GuildRole = {
+  name: string;
+  id: number;
 };

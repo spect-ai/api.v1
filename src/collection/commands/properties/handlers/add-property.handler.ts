@@ -21,7 +21,7 @@ export class AddPropertyCommandHandler
       console.log('AddPropertyCommandHandler');
       const { addPropertyCommandDto, caller, collectionId } = command;
       const collection = await this.collectionRepository.findById(collectionId);
-
+      console.log(addPropertyCommandDto);
       if (
         collection.properties &&
         collection.properties[addPropertyCommandDto.name]
@@ -33,7 +33,10 @@ export class AddPropertyCommandHandler
         {
           properties: {
             ...collection.properties,
-            [addPropertyCommandDto.name]: addPropertyCommandDto,
+            [addPropertyCommandDto.name]: {
+              ...addPropertyCommandDto,
+              isPartOfFormView: addPropertyCommandDto.isPartOfFormView || true,
+            },
           },
           propertyOrder: [
             ...(collection.propertyOrder || []),
@@ -44,11 +47,11 @@ export class AddPropertyCommandHandler
       return updatedCollection;
     } catch (error) {
       this.logger.error(
-        `Failed adding property to collection with error: ${error.message}`,
+        `Failed adding property to collection with error: ${error}`,
         command,
       );
       throw new InternalServerErrorException(
-        'Failed adding property to collection with error: ${error.message}',
+        'Failed adding property to collection with error: ${error}',
         error.message,
       );
     }

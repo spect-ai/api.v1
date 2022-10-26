@@ -95,7 +95,6 @@ export class UsersRepository extends BaseRepository<User> {
     try {
       return await query.exec();
     } catch (e) {
-      console.log(e);
       return [];
     }
   }

@@ -21,6 +21,9 @@ export const defaultCircleRoles = {
       manageRoles: true,
       manageMembers: true,
       distributeCredentials: true,
+      createNewForm: true,
+      manageFormSettings: true,
+      updateFormResponsesManually: true,
       manageCardProperties: {
         Task: true,
         Bounty: true,
@@ -61,6 +64,9 @@ export const defaultCircleRoles = {
       manageRoles: false,
       manageMembers: false,
       distributeCredentials: false,
+      createNewForm: false,
+      manageFormSettings: false,
+      updateFormResponsesManually: false,
       manageCardProperties: {
         Task: true,
         Bounty: false,
@@ -102,6 +108,9 @@ export const defaultCircleRoles = {
       manageRoles: false,
       manageMembers: false,
       distributeCredentials: false,
+      createNewForm: false,
+      manageFormSettings: false,
+      updateFormResponsesManually: false,
       manageCardProperties: {
         Task: false,
         Bounty: false,
@@ -125,3 +134,26 @@ export const defaultCircleRoles = {
     } as CirclePermission,
   },
 } as Roles;
+
+export const permissionToPermissionNameMap = {
+  createNewCircle: 'Create New Circle',
+  manageCircleSettings: 'Manage Circle Settings',
+  createNewProject: 'Create New Project',
+  manageProjectSettings: 'Manage Project Settings',
+  createNewRetro: 'Create New Retro',
+  endRetroManually: 'End Retro Manually',
+  managePaymentOptions: 'Manage Payment Options',
+  makePayment: 'Make Payment',
+  inviteMembers: 'Invite Members',
+  manageRoles: 'Manage Roles',
+  manageMembers: 'Manage Members',
+  distributeCredentials: 'Distribute Credentials',
+  createNewForm: 'Create New Form',
+  manageFormSettings: 'Manage Form Settings',
+  updateFormResponsesManually: 'Update Form Responses Manually',
+  manageCardProperties: 'Manage Card Properties',
+  createNewCard: 'Create New Card',
+  manageRewards: 'Manage Rewards',
+  reviewWork: 'Review Work',
+  canClaim: 'Can Claim',
+} as const;
