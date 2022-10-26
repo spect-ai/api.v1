@@ -7,6 +7,7 @@ import { PopulatedCircleFields } from './types';
 import { CircleResponseDto } from './dto/detailed-circle-response.dto';
 import { Project } from 'src/project/model/project.model';
 import { Retro } from 'src/retro/models/retro.model';
+import { Collection } from 'src/collection/model/collection.model';
 
 const defaultPopulate: PopulatedCircleFields = {
   parents: {
@@ -32,6 +33,7 @@ const defaultPopulate: PopulatedCircleFields = {
     id: 1,
     name: 1,
     slug: 1,
+    description: 1,
   },
   retro: {
     title: 1,
@@ -314,11 +316,20 @@ export class CirclesRepository extends BaseRepository<Circle> {
       }
     }
 
+    const collections = {};
+    if (circle?.collections) {
+      for (const populatedCollection of circle?.collections) {
+        const collection = populatedCollection as unknown as Collection;
+        collections[collection.id] = collection;
+      }
+    }
+
     return {
       ...circle,
       projects,
       children,
       retro,
+      collections,
     };
   }
 }

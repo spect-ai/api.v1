@@ -1,4 +1,3 @@
-import { Circle } from 'src/circle/model/circle.model';
 import { UpdateCollectionDto } from 'src/collection/dto/update-collection-request.dto';
 
 export class UpdateCollectionCommand {

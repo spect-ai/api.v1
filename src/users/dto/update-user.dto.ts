@@ -1,6 +1,13 @@
 import { PartialType } from '@nestjs/swagger';
 import { User } from '../model/users.model';
-import { IsArray, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import {
+  IsArray,
+  IsEmail,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+} from 'class-validator';
+import { IsNullableEmail } from 'src/common/validators/isNullableEmail.validator';
 
 export class UpdateUserDto extends PartialType(User) {
   /**
@@ -44,6 +51,13 @@ export class UpdateUserDto extends PartialType(User) {
   @IsString()
   @IsOptional()
   githubId?: string;
+
+  /**
+   * EMail of user
+   */
+  @IsNullableEmail()
+  @IsOptional()
+  email?: string;
 }
 
 export class UpdateMetadata {

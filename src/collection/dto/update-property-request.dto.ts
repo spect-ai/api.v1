@@ -1,21 +1,91 @@
-import { IsBoolean, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { Type } from 'class-transformer';
+import {
+  IsArray,
+  IsBoolean,
+  IsEnum,
+  IsNotEmpty,
+  IsObject,
+  IsOptional,
+  IsString,
+  ValidateNested,
+} from 'class-validator';
+import { NetworkModel, PropertyType, UserType } from '../types/types';
+import { IsValidRewardOptions } from '../validations/reward-validations.service';
+
+export class OptionModel {
+  @IsString()
+  label: string;
+
+  @IsString()
+  value: string;
+}
 
 export class AddPropertyDto {
   @IsString()
   @IsNotEmpty()
   name: string;
 
-  @IsString()
+  @IsEnum([
+    'shortText',
+    'email',
+    'longText',
+    'number',
+    'user[]',
+    'user',
+    'reward',
+    'date',
+    'singleSelect',
+    'multiSelect',
+    'ethAddress',
+    'milestone',
+  ])
   @IsNotEmpty()
-  type: string;
+  type: PropertyType;
 
-  @IsString()
-  @IsNotEmpty()
-  default: string;
+  @IsOptional()
+  default: any;
+
+  @IsOptional()
+  @IsArray()
+  @ValidateNested()
+  @Type(() => OptionModel)
+  options: any;
+
+  @IsOptional()
+  @IsValidRewardOptions()
+  rewardOptions: Map<string, NetworkModel>;
 
   @IsBoolean()
-  @IsNotEmpty()
+  @IsOptional()
   isPartOfFormView: boolean;
+
+  /**
+   * User type of user fields
+   */
+  @IsString()
+  @IsOptional()
+  userType: UserType;
+
+  /**
+   * User types to notify upon update
+   */
+  @IsArray()
+  @IsOptional()
+  onUpdateNotifyUserTypes: UserType[];
+
+  /**
+   * Is this a required field
+   */
+  @IsBoolean()
+  @IsOptional()
+  required: boolean;
+
+  /**
+   * Fields in milestone
+   */
+  @IsArray()
+  @IsOptional()
+  milestoneFields: string[];
 }
 
 export class UpdatePropertyDto {
@@ -26,13 +96,35 @@ export class UpdatePropertyDto {
   @IsOptional()
   name: string;
 
-  @IsString()
+  @IsEnum([
+    'shortText',
+    'longText',
+    'number',
+    'email',
+    'user[]',
+    'user',
+    'reward',
+    'date',
+    'singleSelect',
+    'multiSelect',
+    'ethAddress',
+    'milestone',
+  ])
   @IsOptional()
-  type: string;
+  type: PropertyType;
 
   @IsString()
   @IsOptional()
-  default: string;
+  default: any;
+
+  @IsOptional()
+  @IsArray()
+  @Type(() => OptionModel)
+  options: any;
+
+  @IsOptional()
+  @IsValidRewardOptions()
+  rewardOptions: Map<string, NetworkModel>;
 
   /**
    * Is the property visible in the forms?
@@ -40,4 +132,32 @@ export class UpdatePropertyDto {
   @IsBoolean()
   @IsOptional()
   isPartOfFormView: boolean;
+
+  /**
+   * User type of user fields
+   */
+  @IsString()
+  @IsOptional()
+  userType: UserType;
+
+  /**
+   * User types to notify upon update
+   */
+  @IsArray()
+  @IsOptional()
+  onUpdateNotifyUserTypes: UserType[];
+
+  /**
+   * Is this a required field
+   */
+  @IsBoolean()
+  @IsOptional()
+  required: boolean;
+
+  /**
+   * Fields in milestone
+   */
+  @IsArray()
+  @IsOptional()
+  milestoneFields: string[];
 }

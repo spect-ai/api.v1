@@ -20,6 +20,7 @@ import {
 } from 'src/auth/iron-session.guard';
 import { CommandHandlers } from './commands/handlers';
 import { LoggingService } from 'src/logging/logging.service';
+import { MailService } from 'src/mail/mail.service';
 
 @Module({
   imports: [
@@ -43,6 +44,7 @@ import { LoggingService } from 'src/logging/logging.service';
     PublicViewAuthGuard,
     SessionAuthGuard,
     LoggingService,
+    MailService,
   ],
   exports: [UsersService, UsersRepository, UsersModule],
 })

@@ -6,6 +6,7 @@ import {
   IsOptional,
   IsString,
 } from 'class-validator';
+import { HasMimeType, IsFile } from 'nestjs-form-data';
 
 export class MintKudosDto {
   /**
@@ -14,59 +15,38 @@ export class MintKudosDto {
   @IsString()
   @IsNotEmpty()
   creator: string;
-  /**
-   * Kudos headline
-   */
+
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   headline: string;
-  /**
-   * Kudos headline
-   */
+
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   description: string;
-  /**
-   * Kudos headline
-   */
+
   @IsNumber()
   @IsOptional()
   startDateTimestamp?: number;
-  /**
-   * Kudos headline
-   */
+
   @IsNumber()
   @IsOptional()
   endDateTimestamp?: number;
-  /**
-   * Kudos headline
-   */
+
   @IsArray()
-  @IsNotEmpty()
+  @IsOptional()
   links: string[];
-  /**
-   * Kudos headline
-   */
+
   @IsString()
   @IsNotEmpty()
   communityId: string;
 
-  /**
-   * Kudos headline
-   */
   @IsString()
-  @IsOptional()
   nftTypeId?: string;
-  /**
-   * Kudos headline
-   */
+
   @IsBoolean()
   @IsOptional()
   isSignatureRequired: boolean;
 
-  /**
-   * Kudos headline
-   */
   @IsBoolean()
   @IsOptional()
   isAllowlistRequired?: boolean;
@@ -75,7 +55,7 @@ export class MintKudosDto {
    * Array of contributors receiving kudos
    */
   @IsArray()
-  @IsNotEmpty()
+  @IsOptional()
   contributors: string[];
 
   /**
@@ -88,8 +68,15 @@ export class MintKudosDto {
    * Kudos expiration time
    */
   @IsNumber()
-  @IsNotEmpty()
+  @IsOptional()
   expirationTimestamp?: number;
+  /**
+   * Array of contributors receiving kudos
+   */
+  @IsArray()
+  @IsOptional()
+  customAttributes: object[];
+
   /**
    * Signature of person giving out kudos
    */
@@ -112,6 +99,23 @@ export class ClaimKudosDto {
   tokenId: number;
 }
 
+export class AddCustomImageDto {
+  @IsString()
+  @IsNotEmpty()
+  name: string;
+
+  @IsFile()
+  @IsNotEmpty()
+  @HasMimeType([
+    'image/jpeg',
+    'image/png',
+    'image/jpg',
+    'image/gif',
+    'video/mp4',
+  ])
+  assetFile: any;
+}
+
 export class KudosResponseDto {
   /**
    * Creator of Kudos
@@ -119,46 +123,31 @@ export class KudosResponseDto {
   @IsNumber()
   @IsNotEmpty()
   tokenId: number;
-  /**
-   * Kudos headline
-   */
+
   @IsString()
   @IsNotEmpty()
   headline: string;
-  /**
-   * Kudos headline
-   */
+
   @IsString()
   @IsNotEmpty()
   description: string;
-  /**
-   * Kudos headline
-   */
+
   @IsNumber()
   @IsOptional()
   startDateTimestamp?: number;
-  /**
-   * Kudos headline
-   */
+
   @IsNumber()
   @IsOptional()
   endDateTimestamp?: number;
-  /**
-   * Kudos headline
-   */
+
   @IsArray()
   @IsNotEmpty()
   links: string[];
-  /**
-   * Kudos headline
-   */
+
   @IsString()
   @IsNotEmpty()
   communityId: string;
 
-  /**
-   * Kudos headline
-   */
   @IsString()
   @IsNotEmpty()
   imageUrl: string;

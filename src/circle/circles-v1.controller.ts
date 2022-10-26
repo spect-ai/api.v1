@@ -8,7 +8,9 @@ import {
   Query,
   Request,
   SetMetadata,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { QueryBus, CommandBus } from '@nestjs/cqrs';
 import {
@@ -17,13 +19,22 @@ import {
   ViewCircleAuthGuard,
 } from 'src/auth/circle.guard';
 import {
+  AdminAuthGuard,
   PublicViewAuthGuard,
   SessionAuthGuard,
 } from 'src/auth/iron-session.guard';
-import { ClaimKudosDto, MintKudosDto } from 'src/common/dtos/mint-kudos.dto';
+import {
+  AddCustomImageDto,
+  ClaimKudosDto,
+  MintKudosDto,
+} from 'src/common/dtos/mint-kudos.dto';
 import { ObjectIdDto } from 'src/common/dtos/object-id.dto';
 import { RequiredRoleDto, RequiredSlugDto } from 'src/common/dtos/string.dto';
-import { MintKudosService, nftTypes } from 'src/common/mint-kudos.service';
+import {
+  AddedNFTTypeResponse,
+  MintKudosService,
+  nftTypes,
+} from 'src/common/mint-kudos.service';
 import {
   ArchiveCircleByIdCommand,
   ClaimCircleCommand,
@@ -67,6 +78,9 @@ import {
   UpdateFolderOrderDto,
   UpdateFolderDetailsDto,
 } from './dto/folder.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { Express } from 'express';
+import { CirclesRepository } from './circles.repository';
 
 @Controller('circle/v1')
 export class CircleV1Controller {
@@ -77,8 +91,46 @@ export class CircleV1Controller {
     private readonly queryBus: QueryBus,
     private readonly commandBus: CommandBus,
     private readonly kudosService: MintKudosService,
+    private readonly circleRepository: CirclesRepository,
   ) {}
 
+  @Patch('/syncAll')
+  async syncAll() {
+    const circles = await this.circleRepository.findAll();
+    for (const circle of circles) {
+      for (const [roleId, role] of Object.entries(circle.roles)) {
+        role.permissions = {
+          ...role.permissions,
+          createNewForm: role.permissions.createNewProject,
+          manageFormSettings: role.permissions.manageProjectSettings,
+          updateFormResponsesManually: role.permissions.createNewProject,
+        };
+      }
+
+      await this.circleRepository.updateById(circle.id, {
+        roles: circle.roles,
+      });
+    }
+    return true;
+  }
+
+  @Patch('/syncOne')
+  async syncOne() {
+    const circle = await this.circleRepository.findOne({ slug: '0-1' });
+    for (const [roleId, role] of Object.entries(circle.roles)) {
+      role.permissions = {
+        ...role.permissions,
+        createNewForm: role.permissions.createNewProject,
+        manageFormSettings: role.permissions.manageProjectSettings,
+        updateFormResponsesManually: role.permissions.createNewProject,
+      };
+    }
+    await this.circleRepository.updateById(circle.id, {
+      roles: circle.roles,
+    });
+
+    return true;
+  }
   @UseGuards(PublicViewAuthGuard)
   @Get('/allPublicParents')
   async findAllParentCircles(): Promise<BucketizedCircleResponseDto> {
@@ -387,7 +439,16 @@ export class CircleV1Controller {
 
   @Get('/:id/communityKudosDesigns')
   async communityKudosDesigns(@Param() param: ObjectIdDto): Promise<nftTypes> {
+    console.log({ param });
     return await this.kudosService.getCommunityKudosDesigns(param.id);
+  }
+
+  @SetMetadata('permissions', ['distributeCredentials'])
+  @UseGuards(CircleAuthGuard)
+  @Patch('/:id/addKudosDesign')
+  @UseInterceptors(FileInterceptor('file'))
+  async addKudosDesign(@Param() param: ObjectIdDto, @UploadedFile() file) {
+    return await this.kudosService.addNewCommunityDesign(param.id, file);
   }
 
   @SetMetadata('permissions', ['manageMembers', 'manageRoles'])
