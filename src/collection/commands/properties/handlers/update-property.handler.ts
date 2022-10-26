@@ -126,7 +126,7 @@ export class UpdatePropertyCommandHandler
     dataObj: MappedItem<object>,
   ) {
     console.log({ prevProperty }, { newProperty });
-    if (prevProperty.type === newProperty.type) {
+    if (prevProperty.type === newProperty.type || !newProperty.type) {
       return dataObj;
     }
     switch (prevProperty.type) {
@@ -196,6 +196,7 @@ export class UpdatePropertyCommandHandler
         return this.clearAllData(prevProperty, dataObj);
 
       default:
+        console.log({ dataObj });
         return dataObj;
     }
   }
