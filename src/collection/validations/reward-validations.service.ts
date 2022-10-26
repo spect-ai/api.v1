@@ -7,7 +7,16 @@ import {
 } from 'class-validator';
 import { NetworkModel, TokenModel } from '../types/types';
 
-const supportedNetworks = ['1', '137', '43114', '42161', '10', '100', '56'];
+const supportedNetworks = [
+  '1',
+  '137',
+  '43114',
+  '42161',
+  '10',
+  '100',
+  '56',
+  '80001',
+];
 
 @ValidatorConstraint({ name: 'validConditions', async: false })
 export class IsRewardValidConstraint implements ValidatorConstraintInterface {

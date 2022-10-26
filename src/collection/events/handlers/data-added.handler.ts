@@ -7,11 +7,10 @@ import {
 } from '@nestjs/cqrs';
 import { Circle } from 'src/circle/model/circle.model';
 import { GetCircleByIdQuery } from 'src/circle/queries/impl';
+import { GetCollectionBySlugQuery } from 'src/collection/queries';
 import { LoggingService } from 'src/logging/logging.service';
-import {
-  NotificationEventV2,
-  SingleNotificationEvent,
-} from 'src/users/events/impl';
+import { RealtimeGateway } from 'src/realtime/realtime.gateway';
+import { SingleNotificationEvent } from 'src/users/events/impl';
 import { DataAddedEvent } from '../impl/data-added.event';
 
 @EventsHandler(DataAddedEvent)
@@ -21,6 +20,7 @@ export class DataAddedEventHandler implements IEventHandler<DataAddedEvent> {
     private readonly eventBus: EventBus,
     private readonly commandBus: CommandBus,
     private readonly logger: LoggingService,
+    private readonly realtime: RealtimeGateway,
   ) {
     this.logger.setContext('DataAddedEventHandler');
   }
@@ -70,6 +70,14 @@ export class DataAddedEventHandler implements IEventHandler<DataAddedEvent> {
 
       this.logger.log(
         `Created New Data in collection ${event.collection?.name}`,
+      );
+      const updatedCollection = await this.queryBus.execute(
+        new GetCollectionBySlugQuery(collection.slug),
+      );
+      console.log('event', `${collection.slug}:dataAdded`);
+      this.realtime.server.emit(
+        `${collection.slug}:dataAdded`,
+        updatedCollection,
       );
     } catch (error) {
       this.logger.error(`${error.message}`);
