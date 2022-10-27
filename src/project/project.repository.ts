@@ -21,10 +21,6 @@ const populatedCardFields = {
   creator: 1,
   status: 1,
   parent: 1,
-  children: {
-    title: 1,
-    slug: 1,
-  },
   assignedCircle: 1,
 };
 
@@ -74,7 +70,17 @@ export class ProjectsRepository extends BaseRepository<Project> {
   async getProjectWithPopulatedReferences(id: string): Promise<Project> {
     return await this.findById(id)
       .populate('parents')
-      .populate('cards', populatedCardFields);
+      .populate({
+        path: 'cards',
+        select: populatedCardFields,
+        populate: {
+          path: 'children',
+          select: {
+            title: 1,
+            slug: 1,
+          },
+        },
+      });
   }
 
   async getProjectWithPopulatedReferencesBySlug(
@@ -82,7 +88,17 @@ export class ProjectsRepository extends BaseRepository<Project> {
   ): Promise<Project> {
     return await this.findOne({ slug: slug })
       .populate('parents')
-      .populate('cards', populatedCardFields);
+      .populate({
+        path: 'cards',
+        select: populatedCardFields,
+        populate: {
+          path: 'children',
+          select: {
+            title: 1,
+            slug: 1,
+          },
+        },
+      });
   }
 
   async getProjectIdFromSlug(slug: string): Promise<Project> {
@@ -97,7 +113,17 @@ export class ProjectsRepository extends BaseRepository<Project> {
   ): Promise<Project> {
     return await this.updateById(id, update)
       .populate('parents')
-      .populate('cards', populatedCardFields);
+      .populate({
+        path: 'cards',
+        select: populatedCardFields,
+        populate: {
+          path: 'children',
+          select: {
+            title: 1,
+            slug: 1,
+          },
+        },
+      });
   }
 
   async bundleUpdatesAndExecute(
@@ -146,16 +172,15 @@ export class ProjectsRepository extends BaseRepository<Project> {
     customPopulate?: PopulatedProjectFields,
     selectedFields?: Record<string, unknown>,
   ): Promise<Project> {
-    const query = this.findById(id, {
+    let query = this.findById(id, {
       projection: selectedFields || {},
     });
 
     let populatedFields = defaultPopulate;
     if (customPopulate) populatedFields = customPopulate;
 
-    Object.keys(populatedFields).forEach((key) => {
-      query.populate(key, populatedFields[key]);
-    });
+    if (customPopulate) populatedFields = customPopulate;
+    query = this.getQueryWithPopulatedFields(populatedFields, query);
 
     return await query.exec();
   }
