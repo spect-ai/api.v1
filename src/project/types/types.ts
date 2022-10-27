@@ -35,7 +35,7 @@ export type View = {
 };
 
 export type PopulatedProjectFields = {
-  cards?: { [fieldName: string]: 0 | 1 };
+  cards?: { [fieldName: string]: 0 | 1 | { [fieldName: string]: 0 | 1 } };
   parents?: { [fieldName: string]: 0 | 1 };
 };
 
