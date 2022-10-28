@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { QueryBus } from '@nestjs/cqrs';
 import { GetCircleByIdQuery } from 'src/circle/queries/impl';
 import { GuildxyzService } from 'src/common/guildxyz.service';
+import { CredentialsService } from 'src/credentials/credentials.service';
 import { RequestProvider } from 'src/users/user.provider';
 import {
   CollectionPublicResponseDto,
@@ -18,6 +19,7 @@ export class CrudService {
     private readonly activityResolver: ActivityResolver,
     private readonly requestProvider: RequestProvider,
     private readonly guildxyzService: GuildxyzService,
+    private readonly credentialService: CredentialsService,
   ) {}
 
   async hasRoleToAccessForm(collection: Collection) {
@@ -46,6 +48,17 @@ export class CrudService {
       return false;
     }
     return true;
+  }
+
+  async hasPassedSybilProtection(collection: Collection): Promise<boolean> {
+    if (!collection.sybilProtectionEnabled) return true;
+
+    if (!this.requestProvider.user) return false;
+
+    return await this.credentialService.hasPassedSybilCheck(
+      this.requestProvider.user.ethAddress,
+      collection.sybilProtectionScores,
+    );
   }
 
   async getCollectionBySlug(slug: string): Promise<CollectionResponseDto> {
@@ -99,7 +112,9 @@ export class CrudService {
       collection.mintkudosTokenId &&
       collection.mintkudosClaimedBy &&
       collection.mintkudosClaimedBy.includes(this.requestProvider.user?.id);
-
+    collection.hasPassedSybilCheck = await this.hasPassedSybilProtection(
+      collection,
+    );
     const res = this.removePrivateFields(collection);
     return res;
   }
