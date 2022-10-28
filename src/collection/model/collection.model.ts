@@ -155,4 +155,10 @@ export class Collection extends BaseModel {
    */
   @prop({ default: '' })
   cover: string;
+
+  @prop({ default: false })
+  sybilProtectionEnabled: boolean;
+
+  @prop()
+  sybilProtectionScores: { [id: string]: number };
 }

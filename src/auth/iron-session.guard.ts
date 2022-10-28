@@ -42,7 +42,9 @@ export class AdminAuthGuard implements CanActivate {
   constructor(private readonly ethAddressService: EthAddressService) {}
 
   async validateUser(address: string): Promise<ObjectId | boolean> {
-    return ['0x55b23ed53fe13060183b92979c737a8ef9a73b73'].includes(address);
+    return ['0x55b23ed53fe13060183b92979c737a8ef9a73b73'].includes(
+      address.toLowerCase(),
+    );
   }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {

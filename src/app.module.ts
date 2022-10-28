@@ -55,6 +55,7 @@ import { MintKudosService } from './common/mint-kudos.service';
 import { ResponseCredentialingService } from './collection/services/response-credentialing.service';
 import { CollectionRepository } from './collection/collection.repository';
 import { MailModule } from './mail/mail.module';
+import { CredentialsModule } from './credentials/credentials.module';
 
 const databaseUrl =
   process.env.DATABASE_URL || 'mongodb://localhost:27017/nest';
@@ -83,6 +84,7 @@ console.log({ databaseUrl });
     CollectionModule,
     RealtimeModule,
     MailModule,
+    CredentialsModule,
   ],
   controllers: [
     AppController,

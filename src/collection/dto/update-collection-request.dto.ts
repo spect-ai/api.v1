@@ -3,6 +3,7 @@ import {
   IsBoolean,
   IsNotEmpty,
   IsNumber,
+  IsObject,
   IsOptional,
   IsString,
 } from 'class-validator';
@@ -105,4 +106,12 @@ export class UpdateCollectionDto {
   @IsArray()
   @IsOptional()
   propertyOrder: string[];
+
+  @IsBoolean()
+  @IsOptional()
+  sybilProtectionEnabled: boolean;
+
+  @IsObject()
+  @IsOptional()
+  sybilProtectionScores: { [id: string]: number };
 }
