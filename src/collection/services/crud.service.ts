@@ -73,6 +73,7 @@ export class CrudService {
       collection.mintkudosTokenId &&
       collection.mintkudosTokenId > 0 &&
       !this.requestProvider.user;
+
     collection.canFillForm = hasRole && !formHasCredentialsButUserIsntConnected;
 
     return collection;
@@ -96,11 +97,17 @@ export class CrudService {
     );
 
     const hasRole = await this.hasRoleToAccessForm(collection);
+    collection.hasPassedSybilCheck = await this.hasPassedSybilProtection(
+      collection,
+    );
     const formHasCredentialsButUserIsntConnected =
       collection.mintkudosTokenId &&
       collection.mintkudosTokenId > 0 &&
       !this.requestProvider.user;
-    collection.canFillForm = hasRole && !formHasCredentialsButUserIsntConnected;
+    collection.canFillForm =
+      hasRole &&
+      !formHasCredentialsButUserIsntConnected &&
+      collection.hasPassedSybilCheck;
     collection.previousResponses = [];
     if (collection.dataOwner)
       for (const [dataSlug, owner] of Object.entries(collection.dataOwner)) {
@@ -112,9 +119,7 @@ export class CrudService {
       collection.mintkudosTokenId &&
       collection.mintkudosClaimedBy &&
       collection.mintkudosClaimedBy.includes(this.requestProvider.user?.id);
-    collection.hasPassedSybilCheck = await this.hasPassedSybilProtection(
-      collection,
-    );
+
     const res = this.removePrivateFields(collection);
     return res;
   }

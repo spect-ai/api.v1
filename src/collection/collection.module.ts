@@ -8,6 +8,8 @@ import { CommonTools } from 'src/common/common.service';
 import { DiscordService } from 'src/common/discord.service';
 import { GuildxyzService } from 'src/common/guildxyz.service';
 import { MintKudosService } from 'src/common/mint-kudos.service';
+import { CredentialsModule } from 'src/credentials/credentials.module';
+import { CredentialsService } from 'src/credentials/credentials.service';
 import { LoggingService } from 'src/logging/logging.service';
 import { MailModule } from 'src/mail/mail.module';
 import { RealtimeModule } from 'src/realtime/realtime.module';
@@ -33,6 +35,7 @@ import { DataValidationService } from './validations/data-validation.service';
     MailModule,
     CirclesModule,
     RealtimeModule,
+    CredentialsModule,
   ],
   controllers: [CollectionController],
   providers: [
