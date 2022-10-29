@@ -119,7 +119,10 @@ export class CrudService {
       collection.mintkudosTokenId &&
       collection.mintkudosClaimedBy &&
       collection.mintkudosClaimedBy.includes(this.requestProvider.user?.id);
-
+    collection.canClaimKudos =
+      collection.mintkudosTokenId &&
+      !collection.kudosClaimedByUser &&
+      collection.numOfKudos > collection.mintkudosClaimedBy?.length;
     const res = this.removePrivateFields(collection);
     return res;
   }

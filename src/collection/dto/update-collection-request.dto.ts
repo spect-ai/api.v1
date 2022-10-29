@@ -114,4 +114,8 @@ export class UpdateCollectionDto {
   @IsObject()
   @IsOptional()
   sybilProtectionScores: { [id: string]: number };
+
+  @IsNumber()
+  @IsOptional()
+  numOfKudos: number;
 }

@@ -43,6 +43,7 @@ export class CredentialsService {
     });
     const scorer = new PassportScorer(passportScores);
     const score = await scorer.getScore(address);
-    return score >= 1;
+    console.log(score);
+    return score >= 100;
   }
 }

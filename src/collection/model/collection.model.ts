@@ -161,4 +161,7 @@ export class Collection extends BaseModel {
 
   @prop()
   sybilProtectionScores: { [id: string]: number };
+
+  @prop()
+  numOfKudos: number;
 }
