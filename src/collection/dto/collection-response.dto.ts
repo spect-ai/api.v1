@@ -1,4 +1,5 @@
 import { MappedItem } from 'src/common/interfaces';
+import { User } from 'src/users/model/users.model';
 import { Activity, DefaultViewType, Property } from '../types/types';
 
 export class CollectionPublicResponseDto {
@@ -60,4 +61,5 @@ export class CollectionResponseDto {
   circleRolesToNotifyUponNewResponse: string[];
 
   circleRolesToNotifyUponUpdatedResponse: string[];
+  profiles: { [key: string]: User };
 }

@@ -1,9 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { QueryBus } from '@nestjs/cqrs';
 import { GetCircleByIdQuery } from 'src/circle/queries/impl';
+import { CommonTools } from 'src/common/common.service';
 import { GuildxyzService } from 'src/common/guildxyz.service';
 import { CredentialsService } from 'src/credentials/credentials.service';
 import { User } from 'src/users/model/users.model';
+import {
+  GetMultipleUsersByIdsQuery,
+  GetUserByFilterQuery,
+} from 'src/users/queries/impl';
 import { RequestProvider } from 'src/users/user.provider';
 import {
   CollectionPublicResponseDto,
@@ -20,6 +25,7 @@ export class CrudService {
     private readonly activityResolver: ActivityResolver,
     private readonly guildxyzService: GuildxyzService,
     private readonly credentialService: CredentialsService,
+    private readonly commonTools: CommonTools,
   ) {}
 
   async hasRoleToAccessForm(collection: Collection, caller?: User) {
@@ -71,6 +77,20 @@ export class CrudService {
     collection.dataActivities = await this.activityResolver.resolveAll(
       collection.dataActivities,
     );
+
+    const profiles = [];
+    for (const [dataSlug, owner] of Object.entries(collection.dataOwner)) {
+      profiles.push(owner);
+    }
+    const profileInfo = await this.queryBus.execute(
+      new GetMultipleUsersByIdsQuery(profiles, null, {
+        username: 1,
+        avatar: 1,
+        ethAddress: 1,
+      }),
+    );
+    collection.profiles = this.commonTools.objectify(profileInfo, 'id');
+    console.log({ profiles: collection.profiles });
     return collection;
   }
 
