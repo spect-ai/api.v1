@@ -63,7 +63,7 @@ export class CrudService {
     if (!collection.sybilProtectionEnabled) return true;
 
     if (!caller) return false;
-
+    console.log({ caller: caller.ethAddress });
     return await this.credentialService.hasPassedSybilCheck(
       caller.ethAddress,
       collection.sybilProtectionScores,
@@ -115,6 +115,7 @@ export class CrudService {
     const hasRole = await this.hasRoleToAccessForm(collection);
     collection.hasPassedSybilCheck = await this.hasPassedSybilProtection(
       collection,
+      caller,
     );
     const formHasCredentialsButUserIsntConnected =
       collection.mintkudosTokenId && collection.mintkudosTokenId > 0 && !caller;
