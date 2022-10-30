@@ -118,4 +118,8 @@ export class UpdateCollectionDto {
   @IsNumber()
   @IsOptional()
   numOfKudos: number;
+
+  @IsBoolean()
+  @IsOptional()
+  credentialCurationEnabled: boolean;
 }

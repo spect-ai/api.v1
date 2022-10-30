@@ -164,4 +164,7 @@ export class Collection extends BaseModel {
 
   @prop()
   numOfKudos: number;
+
+  @prop({ default: false })
+  credentialCurationEnabled: boolean;
 }
