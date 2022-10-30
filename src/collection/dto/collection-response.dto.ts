@@ -1,4 +1,5 @@
 import { MappedItem } from 'src/common/interfaces';
+import { GuildRole } from 'src/common/types/role.type';
 import { User } from 'src/users/model/users.model';
 import { Activity, DefaultViewType, Property } from '../types/types';
 
@@ -51,9 +52,7 @@ export class CollectionResponseDto {
 
   defaultView: DefaultViewType;
 
-  formRoleGating: number[];
-
-  canFillForm: boolean;
+  formRoleGating: GuildRole[];
 
   mintkudosTokenId: number;
 

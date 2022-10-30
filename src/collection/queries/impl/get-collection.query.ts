@@ -1,6 +1,7 @@
 import { FilterQuery } from 'mongoose';
 import { Collection } from 'src/collection/model/collection.model';
 import { PopulatedCollectionFields } from 'src/collection/types/types';
+import { User } from 'src/users/model/users.model';
 
 export class GetCollectionByIdQuery {
   constructor(
@@ -16,7 +17,6 @@ export class GetMultipleCollectionsQuery {
     public readonly filterQuery: FilterQuery<Collection>,
     public readonly customPopulate?: PopulatedCollectionFields,
     public readonly selectedFields?: Record<string, unknown>,
-    public readonly ignorePrivateCollections = true,
   ) {}
 }
 
@@ -25,7 +25,6 @@ export class GetCollectionBySlugQuery {
     public readonly slug: string,
     public readonly customPopulate?: PopulatedCollectionFields,
     public readonly selectedFields?: Record<string, unknown>,
-    public readonly ignorePrivateCollections = true,
   ) {}
 }
 
@@ -34,6 +33,20 @@ export class GetCollectionByFilterQuery {
     public readonly filterQuery: FilterQuery<Collection>,
     public readonly customPopulate?: PopulatedCollectionFields,
     public readonly selectedFields?: Record<string, unknown>,
-    public readonly ignorePrivateCollections = true,
+  ) {}
+}
+
+export class GetPublicViewCollectionQuery {
+  constructor(
+    public readonly caller?: User,
+    public readonly slug?: string,
+    public readonly collection?: Collection,
+  ) {}
+}
+
+export class GetPrivateViewCollectionQuery {
+  constructor(
+    public readonly slug?: string,
+    public readonly collection?: Collection,
   ) {}
 }

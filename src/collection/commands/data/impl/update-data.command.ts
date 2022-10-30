@@ -6,5 +6,6 @@ export class UpdateDataCommand {
     public readonly caller: User,
     public readonly collectionId: string,
     public readonly dataSlug: string,
+    public readonly view: 'public' | 'private',
   ) {}
 }

@@ -23,7 +23,7 @@ import { EventHandlers } from './events';
 import { Collection } from './model/collection.model';
 import { QueryHandlers } from './queries';
 import { ActivityBuilder, ActivityResolver } from './services/activity.service';
-import { CrudService } from './services/crud.service';
+import { AdvancedAccessService } from './services/advanced-access.service';
 import { ResponseCredentialingService } from './services/response-credentialing.service';
 import { DataValidationService } from './validations/data-validation.service';
 
@@ -47,7 +47,7 @@ import { DataValidationService } from './validations/data-validation.service';
     LoggingService,
     DataValidationService,
     ActivityBuilder,
-    CrudService,
+    AdvancedAccessService,
     ActivityResolver,
     SessionAuthGuard,
     RequestProvider,

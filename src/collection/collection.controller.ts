@@ -62,8 +62,11 @@ import {
   UpdatePropertyDto,
 } from './dto/update-property-request.dto';
 import { Collection } from './model/collection.model';
-import { GetCollectionBySlugQuery } from './queries/impl/get-collection.query';
-import { CrudService } from './services/crud.service';
+import {
+  GetCollectionBySlugQuery,
+  GetPrivateViewCollectionQuery,
+  GetPublicViewCollectionQuery,
+} from './queries/impl/get-collection.query';
 import { ResponseCredentialingService } from './services/response-credentialing.service';
 
 @Controller('collection/v1')
@@ -71,7 +74,6 @@ export class CollectionController {
   constructor(
     private readonly commandBus: CommandBus,
     private readonly queryBus: QueryBus,
-    private readonly crudService: CrudService,
     private readonly credentialingService: ResponseCredentialingService,
     private readonly mailService: MailService,
   ) {}
@@ -81,7 +83,9 @@ export class CollectionController {
   async findBySlug(
     @Param() param: RequiredSlugDto,
   ): Promise<CollectionResponseDto> {
-    return await this.crudService.getCollectionBySlug(param.slug);
+    return await this.queryBus.execute(
+      new GetPrivateViewCollectionQuery(param.slug),
+    );
   }
 
   @UseGuards(PublicViewAuthGuard)
@@ -90,9 +94,8 @@ export class CollectionController {
     @Param() param: RequiredSlugDto,
     @Request() req,
   ): Promise<CollectionPublicResponseDto> {
-    return await this.crudService.getCollectionPublicViewBySlug(
-      param.slug,
-      req.user,
+    return await this.queryBus.execute(
+      new GetPublicViewCollectionQuery(req.user, param.slug),
     );
   }
 
@@ -208,6 +211,7 @@ export class CollectionController {
         req.user,
         param.id,
         dataIdParam.dataId,
+        'public',
       ),
     );
   }
@@ -227,6 +231,7 @@ export class CollectionController {
         req.user,
         param.id,
         dataIdParam.dataId,
+        'private',
       ),
     );
   }
