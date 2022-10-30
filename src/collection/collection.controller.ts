@@ -88,14 +88,12 @@ export class CollectionController {
   @Get('/public/slug/:slug')
   async findBySlugPublic(
     @Param() param: RequiredSlugDto,
+    @Request() req,
   ): Promise<CollectionPublicResponseDto> {
-    return await this.crudService.getCollectionPublicViewBySlug(param.slug);
-  }
-
-  @UseGuards(PublicViewAuthGuard)
-  @Get('/:id')
-  async findByObjectId(@Param() param: ObjectIdDto): Promise<Collection> {
-    return await this.queryBus.execute(new GetCollectionBySlugQuery(param.id));
+    return await this.crudService.getCollectionPublicViewBySlug(
+      param.slug,
+      req.user,
+    );
   }
 
   @UseGuards(CreateNewCollectionAuthGuard)

@@ -3,6 +3,7 @@ import { QueryBus } from '@nestjs/cqrs';
 import { GetCircleByIdQuery } from 'src/circle/queries/impl';
 import { GuildxyzService } from 'src/common/guildxyz.service';
 import { CredentialsService } from 'src/credentials/credentials.service';
+import { User } from 'src/users/model/users.model';
 import { RequestProvider } from 'src/users/user.provider';
 import {
   CollectionPublicResponseDto,
@@ -17,20 +18,19 @@ export class CrudService {
   constructor(
     private readonly queryBus: QueryBus,
     private readonly activityResolver: ActivityResolver,
-    private readonly requestProvider: RequestProvider,
     private readonly guildxyzService: GuildxyzService,
     private readonly credentialService: CredentialsService,
   ) {}
 
-  async hasRoleToAccessForm(collection: Collection) {
+  async hasRoleToAccessForm(collection: Collection, caller?: User) {
     if (collection.formRoleGating && collection.formRoleGating.length > 0) {
-      if (!this.requestProvider.user) return false;
+      if (!caller) return false;
       const circle = await this.queryBus.execute(
         new GetCircleByIdQuery(collection.parents[0]),
       );
       const guildxyzRoles = await this.guildxyzService.getGuildxyzRole(
         circle.guildxyzId,
-        this.requestProvider.user,
+        caller,
       );
       const roleIds = new Set();
       for (const role of guildxyzRoles) {
@@ -50,13 +50,16 @@ export class CrudService {
     return true;
   }
 
-  async hasPassedSybilProtection(collection: Collection): Promise<boolean> {
+  async hasPassedSybilProtection(
+    collection: Collection,
+    caller?: User,
+  ): Promise<boolean> {
     if (!collection.sybilProtectionEnabled) return true;
 
-    if (!this.requestProvider.user) return false;
+    if (!caller) return false;
 
     return await this.credentialService.hasPassedSybilCheck(
-      this.requestProvider.user.ethAddress,
+      caller.ethAddress,
       collection.sybilProtectionScores,
     );
   }
@@ -68,14 +71,6 @@ export class CrudService {
     collection.dataActivities = await this.activityResolver.resolveAll(
       collection.dataActivities,
     );
-    const hasRole = await this.hasRoleToAccessForm(collection);
-    const formHasCredentialsButUserIsntConnected =
-      collection.mintkudosTokenId &&
-      collection.mintkudosTokenId > 0 &&
-      !this.requestProvider.user;
-
-    collection.canFillForm = hasRole && !formHasCredentialsButUserIsntConnected;
-
     return collection;
   }
 
@@ -91,6 +86,7 @@ export class CrudService {
 
   async getCollectionPublicViewBySlug(
     slug: string,
+    caller?: User,
   ): Promise<CollectionPublicResponseDto> {
     const collection = await this.queryBus.execute(
       new GetCollectionBySlugQuery(slug),
@@ -101,9 +97,7 @@ export class CrudService {
       collection,
     );
     const formHasCredentialsButUserIsntConnected =
-      collection.mintkudosTokenId &&
-      collection.mintkudosTokenId > 0 &&
-      !this.requestProvider.user;
+      collection.mintkudosTokenId && collection.mintkudosTokenId > 0 && !caller;
     collection.canFillForm =
       hasRole &&
       !formHasCredentialsButUserIsntConnected &&
@@ -111,14 +105,14 @@ export class CrudService {
     collection.previousResponses = [];
     if (collection.dataOwner)
       for (const [dataSlug, owner] of Object.entries(collection.dataOwner)) {
-        if (owner === this.requestProvider.user?.id) {
+        if (owner === caller?.id) {
           collection.previousResponses.push(collection.data[dataSlug]);
         }
       }
     collection.kudosClaimedByUser =
       collection.mintkudosTokenId &&
       collection.mintkudosClaimedBy &&
-      collection.mintkudosClaimedBy.includes(this.requestProvider.user?.id);
+      collection.mintkudosClaimedBy.includes(caller?.id);
     collection.canClaimKudos =
       collection.mintkudosTokenId &&
       !collection.kudosClaimedByUser &&

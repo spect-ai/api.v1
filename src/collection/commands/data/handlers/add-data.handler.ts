@@ -15,6 +15,7 @@ import { DataAddedEvent } from 'src/collection/events';
 import { Collection } from 'src/collection/model/collection.model';
 import { MappedItem } from 'src/common/interfaces';
 import { Activity } from 'src/collection/types/types';
+import { CrudService } from 'src/collection/services/crud.service';
 
 @CommandHandler(AddDataCommand)
 export class AddDataCommandHandler implements ICommandHandler<AddDataCommand> {
@@ -24,6 +25,7 @@ export class AddDataCommandHandler implements ICommandHandler<AddDataCommand> {
     private readonly eventBus: EventBus,
     private readonly logger: LoggingService,
     private readonly validationService: DataValidationService,
+    private readonly collectionCrudService: CrudService,
   ) {
     this.logger.setContext('AddDataCommandHandler');
   }
@@ -40,7 +42,20 @@ export class AddDataCommandHandler implements ICommandHandler<AddDataCommand> {
       ) {
         throw 'User has already submitted a response';
       }
-      console.log({ data });
+      const hasRole = await this.collectionCrudService.hasRoleToAccessForm(
+        collection,
+        caller,
+      );
+      if (!hasRole)
+        throw 'User does not have access to add data this collection';
+
+      const hasPassedSybilCheck =
+        await this.collectionCrudService.hasPassedSybilProtection(
+          collection,
+          caller,
+        );
+      if (!hasPassedSybilCheck) throw 'User has not passed sybil check';
+
       const validData = await this.validationService.validate(
         data,
         'add',
