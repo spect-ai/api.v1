@@ -13,7 +13,7 @@ export class Credentials extends BaseModel {
   @prop({ required: true })
   providerImage: string;
 
-  @prop({ required: true })
+  @prop({})
   providerUrl: string;
 
   @prop({ required: true })

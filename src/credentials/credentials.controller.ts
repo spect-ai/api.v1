@@ -1,5 +1,6 @@
 import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
 import { AdminAuthGuard } from 'src/auth/iron-session.guard';
+import { CommonTools } from 'src/common/common.service';
 import { ObjectIdDto } from 'src/common/dtos/object-id.dto';
 import { CredentialsService } from './credentials.service';
 import { CreateCredentialRequestDto } from './dto/create-credential.dto';
@@ -25,5 +26,11 @@ export class CredentialsController {
     @Body() circle: CreateCredentialRequestDto,
   ): Promise<Credentials> {
     return await this.credentialService.create(circle);
+  }
+
+  @UseGuards(AdminAuthGuard)
+  @Post('/addAllCredentials')
+  async addAllCredentials(): Promise<boolean> {
+    return await this.credentialService.addAllCredentials();
   }
 }
