@@ -236,18 +236,6 @@ export class CollectionController {
     );
   }
 
-  @UseGuards(SessionAuthGuard)
-  @Patch('/:id/removeData')
-  async removeData(
-    @Param() param: ObjectIdDto,
-    @Query() dataIdParam: RequiredUUIDDto,
-    @Request() req,
-  ): Promise<Collection> {
-    return await this.commandBus.execute(
-      new RemoveDataCommand(req.user, param.id, dataIdParam.dataId),
-    );
-  }
-
   @SetMetadata('permissions', ['updateFormResponsesManually'])
   @UseGuards(CollectionAuthGuard)
   @Patch('/:id/removeMultipleData')
