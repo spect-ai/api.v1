@@ -133,6 +133,7 @@ export class UpdatePropertyCommandHandler
     if (prevProperty.type === newProperty.type || !newProperty.type) {
       return dataObj;
     }
+    if (!dataObj) return dataObj;
     switch (prevProperty.type) {
       case 'shortText':
       case 'longText':
