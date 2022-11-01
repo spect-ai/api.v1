@@ -97,6 +97,8 @@ export class ProjectV1Controller {
     );
   }
 
+  @SetMetadata('permissions', ['manageProjectSettings'])
+  @UseGuards(ProjectAuthGuard)
   @Patch('/:id/archive')
   async archive(
     @Param() param: ObjectIdDto,

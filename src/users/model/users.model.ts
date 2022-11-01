@@ -7,7 +7,9 @@ import { Card } from 'src/card/model/card.model';
 import { Project } from 'src/project/model/project.model';
 import {
   Activity,
+  FormResponses,
   Notification,
+  NotificationV2,
   UserSubmittedApplication,
 } from '../types/types';
 import { Retro } from 'src/retro/models/retro.model';
@@ -55,6 +57,12 @@ export class User extends ProfileModel {
    */
   @prop()
   discordId: string;
+
+  /**
+   * Email of user
+   */
+  @prop()
+  email: string;
 
   /**
    * Github Integration user id
@@ -105,6 +113,12 @@ export class User extends ProfileModel {
   notifications: Notification[];
 
   /**
+   * Notifications for the user
+   */
+  @prop({ default: [] })
+  notificationsV2: NotificationV2[];
+
+  /**
    * Applications submitted by the user
    */
   @prop({ default: [] })
@@ -151,4 +165,10 @@ export class User extends ProfileModel {
    */
   @prop({ ref: () => Retro, type: Schema.Types.String, default: [] })
   retro: string[];
+
+  /**
+   * Data created in forms indexed by users
+   */
+  @prop({ default: {} })
+  formResponses: FormResponses;
 }

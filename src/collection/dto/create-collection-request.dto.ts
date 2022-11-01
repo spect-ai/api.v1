@@ -16,13 +16,12 @@ export class CreateCollectionDto {
   @IsObjectId()
   @IsNotEmpty()
   circleId?: string;
-
   /**
    * Private collection
    */
   @IsBoolean()
   @IsOptional()
-  private: boolean;
+  privateResponses: boolean;
 
   /**
    * The description of creating this collection

@@ -1,18 +1,15 @@
-import { IsMongoId, IsNotEmpty, IsString } from 'class-validator';
+import { IsNotEmpty, IsObject } from 'class-validator';
 
 export class AddDataDto {
-  @IsString()
+  @IsObject()
   @IsNotEmpty()
-  @IsMongoId()
-  readonly collectionId: string;
-
-  @IsString()
-  @IsNotEmpty()
-  readonly data: any;
+  readonly data: object;
 }
 
-export class UpdateDataDto {}
-
-export class RemoveDataDto {}
+export class UpdateDataDto {
+  @IsObject()
+  @IsNotEmpty()
+  readonly data: object;
+}
 
 export class ArchiveDataDto {}

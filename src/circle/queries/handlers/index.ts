@@ -1,3 +1,4 @@
+import { GetPrivateCircleByCircleIdQuery } from '../impl';
 import {
   GetCircleNavigationBreadcrumbsQueryHandler,
   GetCircleNavigationQueryHandler,
@@ -10,6 +11,7 @@ import {
   GetCircleWithChildrenQueryHandler,
   GetMultipleCirclesQueryHandler,
 } from './get-circle.handler';
+import { GetPrivateCircleByCircleIdQueryHandler } from './get-private-circle.handler';
 
 export const QueryHandlers = [
   GetCircleByIdQueryHandler,
@@ -20,4 +22,5 @@ export const QueryHandlers = [
   GetCircleWithAllRelationsQueryHandler,
   GetCircleNavigationQueryHandler,
   GetCircleNavigationBreadcrumbsQueryHandler,
+  GetPrivateCircleByCircleIdQueryHandler,
 ];
