@@ -172,6 +172,7 @@ export class GetPublicViewCollectionQueryHandler
 
       const hasRole = await this.advancedAccessService.hasRoleToAccessForm(
         collectionToGet,
+        caller,
       );
       const hasPassedSybilCheck =
         await this.advancedAccessService.hasPassedSybilProtection(
@@ -209,7 +210,9 @@ export class GetPublicViewCollectionQueryHandler
       return {
         ...res,
         canFillForm,
+        hasRole,
         canClaimKudos,
+        hasPassedSybilCheck,
         previousResponses,
       };
     } catch (error) {

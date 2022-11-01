@@ -71,12 +71,6 @@ export class AddDataCommandHandler implements ICommandHandler<AddDataCommand> {
         if (property.default && !data[propertyId]) {
           data[propertyId] = property.default;
         }
-        if (
-          collection.properties[propertyId]?.type === 'date' &&
-          data[propertyId]
-        ) {
-          data[propertyId] = new Date(data[propertyId]);
-        }
       }
       data['slug'] = uuidv4();
 

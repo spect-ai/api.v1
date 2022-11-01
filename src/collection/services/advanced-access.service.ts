@@ -6,19 +6,18 @@ import { GuildxyzService } from 'src/common/guildxyz.service';
 import { CredentialsService } from 'src/credentials/credentials.service';
 import { User } from 'src/users/model/users.model';
 import { Collection } from '../model/collection.model';
-import { ActivityResolver } from './activity.service';
 
 @Injectable()
 export class AdvancedAccessService {
   constructor(
     private readonly queryBus: QueryBus,
-    private readonly activityResolver: ActivityResolver,
     private readonly guildxyzService: GuildxyzService,
     private readonly credentialService: CredentialsService,
     private readonly commonTools: CommonTools,
   ) {}
 
   async hasRoleToAccessForm(collection: Collection, caller?: User) {
+    console.log({ caller: caller?.id });
     if (collection.formRoleGating && collection.formRoleGating.length > 0) {
       if (!caller) return false;
       const circle = await this.queryBus.execute(

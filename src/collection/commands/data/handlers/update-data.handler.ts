@@ -50,12 +50,12 @@ export class UpdateDataCommandHandler
       if (!validData) {
         throw new Error(`Data invalid`);
       }
-      const { dataActivities, dataActivityOrder } = this.activityBuilder.build(
-        data,
-        collection,
-        dataSlug,
-        caller?.id,
-      );
+      // const { dataActivities, dataActivityOrder } = this.activityBuilder.build(
+      //   data,
+      //   collection,
+      //   dataSlug,
+      //   caller?.id,
+      // );
       const updatedCollection = await this.collectionRepository.updateById(
         collectionId,
         {
@@ -66,8 +66,8 @@ export class UpdateDataCommandHandler
               ...data,
             },
           },
-          dataActivities,
-          dataActivityOrder,
+          // dataActivities,
+          // dataActivityOrder,
         },
       );
       this.eventBus.publish(

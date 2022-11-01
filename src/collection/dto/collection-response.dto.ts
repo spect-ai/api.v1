@@ -27,6 +27,8 @@ export class CollectionPublicResponseDto {
   updatingResponseAllowed: boolean;
 
   previousResponses: MappedItem<object>;
+  hasRole: boolean;
+  hasPassedSybilCheck: boolean;
 }
 
 export class CollectionResponseDto {
