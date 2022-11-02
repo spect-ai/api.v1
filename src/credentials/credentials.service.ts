@@ -3,7 +3,6 @@ import { FilterQuery } from 'mongoose';
 import { CredentialsRepository } from './credentials.repository';
 import { CreateCredentialRequestDto } from './dto/create-credential.dto';
 import { Credentials } from './model/credentials.model';
-import { PassportScorer } from '@gitcoinco/passport-sdk-scorer';
 import { CommonTools } from 'src/common/common.service';
 import { PLATFORMS } from 'src/config/platforms';
 import { STAMP_PROVIDERS } from 'src/config/providers';
@@ -73,9 +72,11 @@ export class CredentialsService {
         issuer: stamp.issuer,
       };
     });
-    const scorer = new PassportScorer(passportScores);
+    const scorerModule = await import('@gitcoinco/passport-sdk-scorer');
+    const scorer = new scorerModule.PassportScorer(passportScores);
+
     const score = await scorer.getScore(address);
-    console.log(score);
+    console.log({ score });
     return score >= 100;
   }
 }
