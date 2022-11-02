@@ -6,6 +6,8 @@ import { Credentials } from './model/credentials.model';
 import { CommonTools } from 'src/common/common.service';
 import { PLATFORMS } from 'src/config/platforms';
 import { STAMP_PROVIDERS } from 'src/config/providers';
+// import { PassportScorer} from '@gitcoinco/passport-sdk-scorer';
+import { PassportReader } from '@gitcoinco/passport-sdk-reader';
 
 @Injectable()
 export class CredentialsService {
@@ -72,10 +74,27 @@ export class CredentialsService {
         issuer: stamp.issuer,
       };
     });
-    const scorerModule = await import('@gitcoinco/passport-sdk-scorer');
-    const scorer = new scorerModule.PassportScorer(passportScores);
+    const reader = new PassportReader('https://gateway.ceramic.network', '1');
 
-    const score = await scorer.getScore(address);
+    const passport = await reader.getPassport(address);
+    const PassportScorer = (await import('@gitcoinco/passport-sdk-scorer'))
+      .PassportScorer;
+    const stampsWithCredentials = [];
+    for (const stamp of passport.stamps) {
+      if (!stamp.credential) {
+        console.log({ stamp });
+        continue;
+      }
+      stampsWithCredentials.push(stamp);
+    }
+    const scorer = new PassportScorer(
+      passportScores,
+      'https://gateway.ceramic.network',
+    );
+    const score = await scorer.getScore(address, {
+      ...passport,
+      stamps: stampsWithCredentials,
+    });
     console.log({ score });
     return score >= 100;
   }
