@@ -1,13 +1,13 @@
 import {
   IsArray,
   IsBoolean,
-  IsNotEmpty,
   IsNumber,
   IsObject,
   IsOptional,
   IsString,
 } from 'class-validator';
 import { GuildRole } from 'src/common/types/role.type';
+import { Voting } from '../types/types';
 
 export class UpdateCollectionDto {
   /**
@@ -122,4 +122,8 @@ export class UpdateCollectionDto {
   @IsBoolean()
   @IsOptional()
   credentialCurationEnabled: boolean;
+
+  @IsObject()
+  @IsOptional()
+  voting: Voting;
 }
