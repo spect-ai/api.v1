@@ -28,7 +28,6 @@ import {
   RequiredSlugDto,
   RequiredUUIDDto,
 } from 'src/common/dtos/string.dto';
-import { MailService } from 'src/mail/mail.service';
 import {
   AddCommentCommand,
   AddPropertyCommand,
@@ -63,7 +62,6 @@ import {
 } from './dto/update-property-request.dto';
 import { Collection } from './model/collection.model';
 import {
-  GetCollectionBySlugQuery,
   GetPrivateViewCollectionQuery,
   GetPublicViewCollectionQuery,
 } from './queries/impl/get-collection.query';
@@ -75,7 +73,6 @@ export class CollectionController {
     private readonly commandBus: CommandBus,
     private readonly queryBus: QueryBus,
     private readonly credentialingService: ResponseCredentialingService,
-    private readonly mailService: MailService,
   ) {}
 
   @UseGuards(ViewCollectionAuthGuard)

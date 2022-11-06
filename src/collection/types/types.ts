@@ -1,5 +1,4 @@
 import { MappedItem } from 'src/common/interfaces';
-import { Registry } from 'src/registry/model/registry.model';
 
 export type TokenModel = {
   symbol: string;
@@ -109,4 +108,9 @@ export type OpportunityInfo = {
   experience: string;
   skills: string[];
   tags: string[];
+};
+export type Voting = {
+  enabled: boolean;
+  message: string;
+  options: Option[];
 };

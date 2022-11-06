@@ -8,8 +8,9 @@ import { GuildRole } from 'src/common/types/role.type';
 import {
   Activity,
   DefaultViewType,
-  OpportunityInfo,
   Property,
+  Voting,
+  OpportunityInfo,
 } from '../types/types';
 
 @useMongoosePlugin()
@@ -178,4 +179,11 @@ export class Collection extends BaseModel {
 
   @prop()
   opportunityInfo: OpportunityInfo;
+
+  @prop({
+    default: {
+      enabled: false,
+    },
+  })
+  voting: Voting;
 }

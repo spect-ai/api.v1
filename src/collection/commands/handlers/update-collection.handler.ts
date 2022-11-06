@@ -1,7 +1,6 @@
 import { CommandHandler, ICommandHandler, QueryBus } from '@nestjs/cqrs';
 import { CollectionRepository } from 'src/collection/collection.repository';
 import { CollectionResponseDto } from 'src/collection/dto/collection-response.dto';
-import { Collection } from 'src/collection/model/collection.model';
 import { GetPrivateViewCollectionQuery } from 'src/collection/queries';
 import { CommonTools } from 'src/common/common.service';
 import { UpdateCollectionCommand } from '../impl/update-collection.command';
@@ -19,7 +18,7 @@ export class UpdateCollectionCommandHandler
   async execute(
     command: UpdateCollectionCommand,
   ): Promise<CollectionResponseDto> {
-    const { updateCollectionDto, caller, collectionId } = command;
+    const { updateCollectionDto, collectionId } = command;
     const updatedCollection = await this.collectionRepository.updateById(
       collectionId,
       updateCollectionDto,

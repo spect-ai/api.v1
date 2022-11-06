@@ -1,7 +1,6 @@
 import {
   IsArray,
   IsBoolean,
-  IsNotEmpty,
   IsNumber,
   IsObject,
   IsOptional,
@@ -9,6 +8,7 @@ import {
 } from 'class-validator';
 import { GuildRole } from 'src/common/types/role.type';
 import { OpportunityInfo } from '../types/types';
+import { Voting } from '../types/types';
 
 export class UpdateCollectionDto {
   /**
@@ -131,4 +131,7 @@ export class UpdateCollectionDto {
   @IsObject()
   @IsOptional()
   opportunityInfo: OpportunityInfo;
+  @IsObject()
+  @IsOptional()
+  voting: Voting;
 }
