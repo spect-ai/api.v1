@@ -44,6 +44,7 @@ import {
   RemoveMultipleDataCommand,
 } from './commands/data/impl/remove-data.command';
 import { UpdateDataCommand } from './commands/data/impl/update-data.command';
+import { VoteDataCommand } from './commands/data/impl/vote-data.command';
 import {
   CollectionPublicResponseDto,
   CollectionResponseDto,
@@ -55,7 +56,11 @@ import {
   AddCommentDto,
   UpdateCommentDto,
 } from './dto/update-comments-request.dto';
-import { AddDataDto, UpdateDataDto } from './dto/update-data-request.dto';
+import {
+  AddDataDto,
+  UpdateDataDto,
+  VoteDataDto,
+} from './dto/update-data-request.dto';
 import {
   AddPropertyDto,
   UpdatePropertyDto,
@@ -334,5 +339,23 @@ export class CollectionController {
   @Patch('/:id/airdropKudos')
   async airdropKudos(@Param() param: ObjectIdDto): Promise<object> {
     return await this.credentialingService.airdropMintkudosToken(param.id);
+  }
+
+  @UseGuards(SessionAuthGuard)
+  @Patch('/:id/voteOnData')
+  async voteOnData(
+    @Param() param: ObjectIdDto,
+    @Query() dataIdParam: RequiredUUIDDto,
+    @Body() voteDataDto: VoteDataDto,
+    @Request() req,
+  ): Promise<Collection> {
+    return await this.commandBus.execute(
+      new VoteDataCommand(
+        dataIdParam.dataId,
+        req.user,
+        param.id,
+        voteDataDto.vote,
+      ),
+    );
   }
 }
