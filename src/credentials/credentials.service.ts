@@ -81,8 +81,9 @@ export class CredentialsService {
       .PassportScorer;
     const stampsWithCredentials = [];
     for (const stamp of passport.stamps) {
+      console.log({ stamp });
+
       if (!stamp.credential) {
-        console.log({ stamp });
         continue;
       }
       stampsWithCredentials.push(stamp);
@@ -97,5 +98,28 @@ export class CredentialsService {
     });
     console.log({ score });
     return score >= 100;
+  }
+
+  async getNumberOfSimilarStamps(
+    address1: string,
+    address2: string,
+  ): Promise<number> {
+    const reader = new PassportReader(
+      'https://ceramic.passport-iam.gitcoin.co',
+      '1',
+    );
+
+    const passport1 = await reader.getPassport(address1);
+    const passport2 = await reader.getPassport(address2);
+
+    const stamps1 = passport1.stamps.map((stamp) => stamp.provider);
+    const stamps2 = new Set(passport2.stamps.map((stamp) => stamp.provider));
+    let numSimilarStamps = 0;
+    for (const stamp of stamps1) {
+      if (stamps2.has(stamp)) {
+        numSimilarStamps++;
+      }
+    }
+    return numSimilarStamps;
   }
 }

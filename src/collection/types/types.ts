@@ -103,3 +103,10 @@ export type Activity = {
   owner?: string;
   imageRef: string;
 };
+
+export type OpportunityInfo = {
+  type: string;
+  experience: string;
+  skills: string[];
+  tags: string[];
+};

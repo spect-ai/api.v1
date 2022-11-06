@@ -5,7 +5,12 @@ import { useMongoosePlugin } from 'src/base/decorators/use-mongoose-plugins.deco
 import { Circle } from 'src/circle/model/circle.model';
 import { MappedItem } from 'src/common/interfaces';
 import { GuildRole } from 'src/common/types/role.type';
-import { Activity, DefaultViewType, Property } from '../types/types';
+import {
+  Activity,
+  DefaultViewType,
+  OpportunityInfo,
+  Property,
+} from '../types/types';
 
 @useMongoosePlugin()
 export class Collection extends BaseModel {
@@ -167,4 +172,10 @@ export class Collection extends BaseModel {
 
   @prop({ default: false })
   credentialCurationEnabled: boolean;
+
+  @prop({ default: false })
+  isAnOpportunity: boolean;
+
+  @prop()
+  opportunityInfo: OpportunityInfo;
 }

@@ -8,6 +8,7 @@ import {
   IsString,
 } from 'class-validator';
 import { GuildRole } from 'src/common/types/role.type';
+import { OpportunityInfo } from '../types/types';
 
 export class UpdateCollectionDto {
   /**
@@ -122,4 +123,12 @@ export class UpdateCollectionDto {
   @IsBoolean()
   @IsOptional()
   credentialCurationEnabled: boolean;
+
+  @IsBoolean()
+  @IsOptional()
+  isAnOpportunity: boolean;
+
+  @IsObject()
+  @IsOptional()
+  opportunityInfo: OpportunityInfo;
 }
