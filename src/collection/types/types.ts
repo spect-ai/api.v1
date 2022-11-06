@@ -105,6 +105,7 @@ export type Activity = {
 
 export type Voting = {
   enabled: boolean;
-  message: string;
-  options: Option[];
+  message?: string;
+  options?: Option[];
+  votes?: MappedItem<MappedItem<number>>;
 };
