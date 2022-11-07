@@ -26,6 +26,8 @@ export type Filter = {
   deadline: string;
 };
 
+export type ViewType = 'List' | 'Board' | 'Gantt' | 'Table';
+
 export type View = {
   type: 'List' | 'Board' | 'Gantt' | 'Table';
   hidden: boolean;

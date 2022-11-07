@@ -8,7 +8,7 @@ import { Circle } from 'src/circle/model/circle.model';
 import { MappedItem } from 'src/common/interfaces';
 import { Status } from 'src/common/types/status.type';
 import { ColumnDetailsDto } from '../dto/column-details.dto';
-import { View } from '../types/types';
+import { View, ViewType } from '../types/types';
 
 @useMongoosePlugin()
 export class Project extends BaseModel {
@@ -65,6 +65,10 @@ export class Project extends BaseModel {
   /** Automation rule */
   @prop({ default: {} })
   automations: MappedItem<Automation>;
+
+  /** View Type for Project */
+  @prop({ default: 'Board' })
+  defaultView: ViewType;
 
   /**
    * Cards of the project

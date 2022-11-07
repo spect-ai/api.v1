@@ -111,6 +111,7 @@ export type OpportunityInfo = {
 };
 export type Voting = {
   enabled: boolean;
-  message: string;
-  options: Option[];
+  message?: string;
+  options?: Option[];
+  votes?: MappedItem<MappedItem<number>>;
 };
