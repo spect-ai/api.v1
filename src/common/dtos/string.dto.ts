@@ -1,4 +1,10 @@
-import { IsNotEmpty, IsString, IsUUID } from 'class-validator';
+import {
+  IsArray,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  IsUUID,
+} from 'class-validator';
 import { IsObjectId } from 'class-validator-mongo-object-id';
 
 export class RequiredSlugDto {
@@ -95,4 +101,10 @@ export class RequiredActivityUUIDDto {
   @IsNotEmpty()
   @IsUUID()
   activityId: string;
+}
+
+export class OptionalArrayOfTags {
+  @IsOptional()
+  @IsString()
+  term: string;
 }

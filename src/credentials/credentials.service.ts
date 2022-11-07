@@ -81,8 +81,6 @@ export class CredentialsService {
       .PassportScorer;
     const stampsWithCredentials = [];
     for (const stamp of passport.stamps) {
-      console.log({ stamp });
-
       if (!stamp.credential) {
         continue;
       }
@@ -96,7 +94,6 @@ export class CredentialsService {
       ...passport,
       stamps: stampsWithCredentials,
     });
-    console.log({ score });
     return score >= 100;
   }
 
