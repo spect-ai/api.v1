@@ -85,3 +85,17 @@ export type FlattendedArrayFieldItems = {
 export type FormResponses = {
   [collectionSlug: string]: string[];
 };
+
+export type Experience = {
+  idOnLens: string;
+  hidden: boolean;
+  content: string;
+  id: string;
+};
+
+export type Education = {
+  idOnLens: string;
+  hidden: boolean;
+  content: string;
+  id: string;
+};

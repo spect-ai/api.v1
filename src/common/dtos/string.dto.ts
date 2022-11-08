@@ -108,3 +108,9 @@ export class OptionalArrayOfTags {
   @IsString()
   term: string;
 }
+
+export class RequiredHandle {
+  @IsNotEmpty()
+  @IsString()
+  handle: string;
+}

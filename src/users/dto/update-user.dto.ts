@@ -4,10 +4,12 @@ import {
   IsArray,
   IsEmail,
   IsNotEmpty,
+  IsObject,
   IsOptional,
   IsString,
 } from 'class-validator';
 import { IsNullableEmail } from 'src/common/validators/isNullableEmail.validator';
+import { Education, Experience } from '../types/types';
 
 export class UpdateUserDto extends PartialType(User) {
   /**
@@ -58,6 +60,34 @@ export class UpdateUserDto extends PartialType(User) {
   @IsNullableEmail()
   @IsOptional()
   email?: string;
+
+  /**
+   * Experiences of user
+   */
+  @IsObject()
+  @IsOptional()
+  experiences?: { [key: string]: Experience };
+
+  /**
+   * Experience order of user
+   */
+  @IsArray()
+  @IsOptional()
+  experienceOrder?: string[];
+
+  /**
+   * Educations of user
+   */
+  @IsObject()
+  @IsOptional()
+  education?: { [key: string]: Education };
+
+  /**
+   * Education order of user
+   */
+  @IsArray()
+  @IsOptional()
+  educationOrder?: string[];
 }
 
 export class UpdateMetadata {

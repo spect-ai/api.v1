@@ -7,6 +7,8 @@ import { Card } from 'src/card/model/card.model';
 import { Project } from 'src/project/model/project.model';
 import {
   Activity,
+  Education,
+  Experience,
   FormResponses,
   Notification,
   NotificationV2,
@@ -171,4 +173,25 @@ export class User extends ProfileModel {
    */
   @prop({ default: {} })
   formResponses: FormResponses;
+
+  @prop({ default: {} })
+  experiences?: { [key: string]: Experience };
+
+  /**
+   * Experience order of user
+   */
+  @prop({ default: [] })
+  experienceOrder?: string[];
+
+  /**
+   * Educations of user
+   */
+  @prop({ default: {} })
+  education?: { [key: string]: Education };
+
+  /**
+   * Education order of user
+   */
+  @prop({ default: [] })
+  educationOrder?: string[];
 }

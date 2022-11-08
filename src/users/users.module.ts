@@ -21,6 +21,7 @@ import {
 import { CommandHandlers } from './commands/handlers';
 import { LoggingService } from 'src/logging/logging.service';
 import { MailService } from 'src/mail/mail.service';
+import { LensService } from './external/lens.service';
 
 @Module({
   imports: [
@@ -45,6 +46,7 @@ import { MailService } from 'src/mail/mail.service';
     SessionAuthGuard,
     LoggingService,
     MailService,
+    LensService,
   ],
   exports: [UsersService, UsersRepository, UsersModule],
 })

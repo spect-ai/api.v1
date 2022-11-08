@@ -6,6 +6,7 @@ import {
   Patch,
   Body,
   Param,
+  Query,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { ApiTags } from '@nestjs/swagger';
@@ -16,10 +17,11 @@ import {
 import { ReadNotificationDto, UpdateUserDto } from './dto/update-user.dto';
 import { User } from './model/users.model';
 import { ObjectIdDto } from 'src/common/dtos/object-id.dto';
-import { RequiredCardIdDto } from 'src/common/dtos/string.dto';
+import { RequiredCardIdDto, RequiredHandle } from 'src/common/dtos/string.dto';
 import { DetailedUserPubliceResponseDto } from './dto/detailed-user-response.dto';
 import { CommandBus } from '@nestjs/cqrs';
 import { ReadNotificationCommand } from './commands/notifications/impl';
+import { LensService } from './external/lens.service';
 
 @Controller('user')
 @ApiTags('Users')
@@ -27,12 +29,30 @@ export class UsersController {
   constructor(
     private readonly usersService: UsersService,
     private readonly commandBus: CommandBus,
+    private readonly lensService: LensService,
   ) {}
 
   @UseGuards(SessionAuthGuard)
   @Get('/me')
   findMe(@Request() req) {
     return this.usersService.getUserById(req.user.id);
+  }
+
+  @UseGuards(SessionAuthGuard)
+  @Get('/lensHandles')
+  async lensHandles(@Request() req): Promise<DetailedUserPubliceResponseDto> {
+    console.log(req.user?.ethAddress);
+    return await this.lensService.getLensProfilesByAddress(
+      req.user?.ethAddress,
+    );
+  }
+
+  @UseGuards(SessionAuthGuard)
+  @Get('/lensProfile')
+  async lensProfile(
+    @Query() handleQuery: RequiredHandle,
+  ): Promise<DetailedUserPubliceResponseDto> {
+    return await this.lensService.getLensProfile(handleQuery.handle);
   }
 
   @UseGuards(PublicViewAuthGuard)
