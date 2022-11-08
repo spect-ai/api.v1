@@ -86,16 +86,39 @@ export type FormResponses = {
   [collectionSlug: string]: string[];
 };
 
+export type Credential = {
+  id: string;
+  platform: string;
+  credentialId: string;
+};
+
 export type Experience = {
-  idOnLens: string;
-  hidden: boolean;
-  content: string;
+  role: string;
+  organization: string;
+  description: string;
+  startDate: string;
+  endDate: string;
+  verifiableCredentials: Credential[];
+  id: string;
+};
+
+export type LensExperience = {
+  lensHandle: string;
+  index: number;
   id: string;
 };
 
 export type Education = {
-  idOnLens: string;
-  hidden: boolean;
-  content: string;
+  title: string;
+  description: string;
+  startDate: string;
+  endDate: string;
+  verifiableCredentials: Credential[];
+  id: string;
+};
+
+export type LensEducation = {
+  lensHandle: string;
+  index: number;
   id: string;
 };

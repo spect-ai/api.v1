@@ -62,25 +62,11 @@ export class UpdateUserDto extends PartialType(User) {
   email?: string;
 
   /**
-   * Experiences of user
-   */
-  @IsObject()
-  @IsOptional()
-  experiences?: { [key: string]: Experience };
-
-  /**
    * Experience order of user
    */
   @IsArray()
   @IsOptional()
   experienceOrder?: string[];
-
-  /**
-   * Educations of user
-   */
-  @IsObject()
-  @IsOptional()
-  education?: { [key: string]: Education };
 
   /**
    * Education order of user
