@@ -151,7 +151,7 @@ export class ViewCollectionAuthGuard implements CanActivate {
       return true;
     } catch (error) {
       console.log(error);
-      request.session.destroy();
+      // request.session.destroy();
       throw new HttpException({ message: error }, 422);
     }
   }
