@@ -1,10 +1,5 @@
 import { InternalServerErrorException } from '@nestjs/common';
-import {
-  CommandHandler,
-  EventBus,
-  ICommandHandler,
-  QueryBus,
-} from '@nestjs/cqrs';
+import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { CollectionRepository } from 'src/collection/collection.repository';
 import { LoggingService } from 'src/logging/logging.service';
 import { v4 as uuidv4 } from 'uuid';
@@ -27,6 +22,7 @@ export class AddCommentCommandHandler
       const collection = await this.collectionRepository.findById(collectionId);
       if (!collection) throw 'Collection does not exist';
       const activityId = uuidv4();
+      console.log(collection.dataActivities);
       const dataActivities = {
         ...collection.dataActivities,
         [dataSlug]: {

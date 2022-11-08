@@ -75,11 +75,11 @@ export class AddDataCommandHandler implements ICommandHandler<AddDataCommand> {
       data['slug'] = uuidv4();
 
       /** Disabling activity for forms as it doesnt quite make sense yet */
-      // const { dataActivities, dataActivityOrder } = this.getActivity(
-      //   collection,
-      //   data,
-      //   caller?.id,
-      // );
+      const { dataActivities, dataActivityOrder } = this.getActivity(
+        collection,
+        data,
+        caller?.id,
+      );
       const updatedCollection = await this.collectionRepository.updateById(
         collectionId,
         {
@@ -87,8 +87,8 @@ export class AddDataCommandHandler implements ICommandHandler<AddDataCommand> {
             ...collection.data,
             [data['slug']]: data,
           },
-          // dataActivities,
-          // dataActivityOrder,
+          dataActivities,
+          dataActivityOrder,
           dataOwner: {
             ...(collection.dataOwner || {}),
             [data['slug']]: caller?.id,
@@ -130,7 +130,7 @@ export class AddDataCommandHandler implements ICommandHandler<AddDataCommand> {
         ? 'row'
         : 'card';
     if (caller) {
-      content = `{{actor}} added new ${dataType}`;
+      content = `created new ${dataType}`;
       ref = {
         actor: {
           id: caller,

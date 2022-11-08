@@ -27,8 +27,8 @@ async function bootstrap() {
   });
   app.use(
     ironSession({
-      cookieName: 'spect_circles_siwe',
-      password: 'x>5#nyYdUkC?C>m>*msNZ2Hkwbb(%.<3',
+      cookieName: 'spect_circle',
+      password: process.env.IRON_SESSION_COOKIE_PASSWORD,
       cookieOptions: {
         secure: process.env.NODE_ENV === 'production',
       },
