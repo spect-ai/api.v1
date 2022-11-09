@@ -17,11 +17,28 @@ import {
 import { ReadNotificationDto, UpdateUserDto } from './dto/update-user.dto';
 import { User } from './model/users.model';
 import { ObjectIdDto } from 'src/common/dtos/object-id.dto';
-import { RequiredCardIdDto, RequiredHandle } from 'src/common/dtos/string.dto';
+import {
+  RequiredCardIdDto,
+  RequiredEducationId,
+  RequiredExperienceId,
+  RequiredHandle,
+} from 'src/common/dtos/string.dto';
 import { DetailedUserPubliceResponseDto } from './dto/detailed-user-response.dto';
 import { CommandBus } from '@nestjs/cqrs';
 import { ReadNotificationCommand } from './commands/notifications/impl';
 import { LensService } from './external/lens.service';
+import { AddExperienceDto, UpdateExperienceDto } from './dto/experience.dto';
+import {
+  AddExperienceCommand,
+  RemoveExperienceCommand,
+  UpdateExperienceCommand,
+} from './commands/experience';
+import {
+  AddEducationCommand,
+  RemoveEducationCommand,
+  UpdateEducationCommand,
+} from './commands/education';
+import { AddEducationDto, UpdateEducationDto } from './dto/education.dto';
 
 @Controller('user')
 @ApiTags('Users')
@@ -103,6 +120,79 @@ export class UsersController {
   ): Promise<DetailedUserPubliceResponseDto> {
     return await this.commandBus.execute(
       new ReadNotificationCommand(body.notificationIds, req.user),
+    );
+  }
+
+  @UseGuards(SessionAuthGuard)
+  @Patch('/me/addExperience')
+  async addExperience(
+    @Body() addExperienceDto: AddExperienceDto,
+    @Request() req,
+  ) {
+    return await this.commandBus.execute(
+      new AddExperienceCommand(addExperienceDto, req.user),
+    );
+  }
+
+  @UseGuards(SessionAuthGuard)
+  @Patch('/me/updateExperience')
+  async updateExperience(
+    @Query() experience: RequiredExperienceId,
+    @Body() updateExperienceDto: UpdateExperienceDto,
+    @Request() req,
+  ) {
+    return await this.commandBus.execute(
+      new UpdateExperienceCommand(
+        experience.experienceId,
+        updateExperienceDto,
+        req.user,
+      ),
+    );
+  }
+
+  @UseGuards(SessionAuthGuard)
+  @Patch('/me/removeExperience')
+  async removeExperience(
+    @Query() experience: RequiredExperienceId,
+    @Request() req,
+  ) {
+    return await this.commandBus.execute(
+      new RemoveExperienceCommand(experience.experienceId, req.user),
+    );
+  }
+
+  @UseGuards(SessionAuthGuard)
+  @Patch('/me/addEducation')
+  async addEducation(@Body() addEducationDto: AddEducationDto, @Request() req) {
+    return await this.commandBus.execute(
+      new AddEducationCommand(addEducationDto, req.user),
+    );
+  }
+
+  @UseGuards(SessionAuthGuard)
+  @Patch('/me/updateEducation')
+  async updateEducation(
+    @Query() education: RequiredEducationId,
+    @Body() updateEducationDto: UpdateEducationDto,
+    @Request() req,
+  ) {
+    return await this.commandBus.execute(
+      new UpdateEducationCommand(
+        education.educationId,
+        updateEducationDto,
+        req.user,
+      ),
+    );
+  }
+
+  @UseGuards(SessionAuthGuard)
+  @Patch('/me/removeEducation')
+  async removeEducation(
+    @Query() education: RequiredEducationId,
+    @Request() req,
+  ) {
+    return await this.commandBus.execute(
+      new RemoveEducationCommand(education.educationId, req.user),
     );
   }
 }

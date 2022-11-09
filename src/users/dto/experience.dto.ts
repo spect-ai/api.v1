@@ -31,7 +31,7 @@ export class AddExperienceDto {
 
   @IsString()
   @IsOptional()
-  idOnLens: string;
+  lensExperienceId: string;
 }
 
 export class UpdateExperienceDto extends AddExperienceDto {}

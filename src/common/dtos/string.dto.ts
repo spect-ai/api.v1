@@ -114,3 +114,15 @@ export class RequiredHandle {
   @IsString()
   handle: string;
 }
+
+export class RequiredExperienceId {
+  @IsNotEmpty()
+  @IsString()
+  experienceId: string;
+}
+
+export class RequiredEducationId {
+  @IsNotEmpty()
+  @IsString()
+  educationId: string;
+}

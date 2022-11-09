@@ -27,7 +27,7 @@ export class AddEducationDto {
 
   @IsString()
   @IsOptional()
-  idOnLens: string;
+  lensEducationId: string;
 }
 
 export class UpdateEducationDto extends AddEducationDto {}

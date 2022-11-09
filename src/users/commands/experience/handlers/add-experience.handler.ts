@@ -20,14 +20,14 @@ export class AddExperienceCommandHandler
     const { user, experience } = command;
     try {
       const experienceId = uuidv4();
-      const updatedCollection = await this.userRepository.updateById(user.id, {
+      const updatedUser = await this.userRepository.updateById(user.id, {
         experiences: {
           ...(user.experiences || {}),
           [experienceId]: experience,
         },
         experienceOrder: [...(user.experienceOrder || []), experienceId],
       });
-      return updatedCollection;
+      return updatedUser;
     } catch (err) {
       this.logger.error(`Failed adding experience to user with error ${err}`);
       throw new InternalServerErrorException(
