@@ -245,6 +245,7 @@ export class Circle extends ProfileModel {
 
   @prop()
   questbookWorkspaceUrl?: string;
+
   @prop()
   questbookWorkspaceId?: string;
 
@@ -262,6 +263,9 @@ export class Circle extends ProfileModel {
 
   @prop({ default: false })
   forceShowOnExplore?: boolean;
+
+  @prop({ default: false })
+  verified?: boolean;
 }
 
 export class ExtendedCircle extends Circle {

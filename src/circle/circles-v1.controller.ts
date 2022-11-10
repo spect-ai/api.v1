@@ -13,28 +13,15 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { QueryBus, CommandBus } from '@nestjs/cqrs';
+import { CircleAuthGuard, CreateCircleAuthGuard } from 'src/auth/circle.guard';
 import {
-  CircleAuthGuard,
-  CreateCircleAuthGuard,
-  ViewCircleAuthGuard,
-} from 'src/auth/circle.guard';
-import {
-  AdminAuthGuard,
   PublicViewAuthGuard,
   SessionAuthGuard,
 } from 'src/auth/iron-session.guard';
-import {
-  AddCustomImageDto,
-  ClaimKudosDto,
-  MintKudosDto,
-} from 'src/common/dtos/mint-kudos.dto';
+import { ClaimKudosDto, MintKudosDto } from 'src/common/dtos/mint-kudos.dto';
 import { ObjectIdDto } from 'src/common/dtos/object-id.dto';
 import { RequiredRoleDto, RequiredSlugDto } from 'src/common/dtos/string.dto';
-import {
-  AddedNFTTypeResponse,
-  MintKudosService,
-  nftTypes,
-} from 'src/common/mint-kudos.service';
+import { MintKudosService, nftTypes } from 'src/common/mint-kudos.service';
 import {
   ArchiveCircleByIdCommand,
   ClaimCircleCommand,
@@ -64,7 +51,6 @@ import {
 import { UpdateMemberRolesDto } from './dto/update-member-role.dto';
 import { Circle } from './model/circle.model';
 import {
-  GetCircleBySlugQuery,
   GetCircleNavigationBreadcrumbsQuery,
   GetCircleNavigationQuery,
 } from './queries/impl';
@@ -79,7 +65,6 @@ import {
   UpdateFolderDetailsDto,
 } from './dto/folder.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { Express } from 'express';
 import { CirclesRepository } from './circles.repository';
 
 @Controller('circle/v1')

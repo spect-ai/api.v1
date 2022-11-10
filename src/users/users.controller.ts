@@ -14,8 +14,6 @@ import {
   SessionAuthGuard,
 } from 'src/auth/iron-session.guard';
 import { ReadNotificationDto, UpdateUserDto } from './dto/update-user.dto';
-import { User } from './model/users.model';
-import { ObjectIdDto } from 'src/common/dtos/object-id.dto';
 import { RequiredCardIdDto } from 'src/common/dtos/string.dto';
 import { DetailedUserPubliceResponseDto } from './dto/detailed-user-response.dto';
 import { CommandBus } from '@nestjs/cqrs';
@@ -33,6 +31,12 @@ export class UsersController {
   @Get('/me')
   findMe(@Request() req) {
     return this.usersService.getUserById(req.user.id);
+  }
+
+  // @UseGuards(SessionAuthGuard)
+  @Get('/verifiedCircles/:id')
+  async getMyVerifiedCircles(@Param('id') id: string) {
+    return await this.usersService.getVerifiedCircles(id);
   }
 
   @UseGuards(PublicViewAuthGuard)
