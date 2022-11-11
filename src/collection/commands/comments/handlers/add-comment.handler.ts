@@ -1,6 +1,10 @@
 import { InternalServerErrorException } from '@nestjs/common';
-import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
+import { CommandHandler, ICommandHandler, QueryBus } from '@nestjs/cqrs';
 import { CollectionRepository } from 'src/collection/collection.repository';
+import {
+  GetPrivateViewCollectionQuery,
+  GetPublicViewCollectionQuery,
+} from 'src/collection/queries';
 import { LoggingService } from 'src/logging/logging.service';
 import { v4 as uuidv4 } from 'uuid';
 import { AddCommentCommand } from '../impl/add-comment.command';
@@ -11,18 +15,18 @@ export class AddCommentCommandHandler
 {
   constructor(
     private readonly collectionRepository: CollectionRepository,
+    private readonly queryBus: QueryBus,
     private readonly logger: LoggingService,
   ) {
     this.logger.setContext('AddCommentCommandHandler');
   }
 
   async execute(command: AddCommentCommand) {
-    const { caller, collectionId, dataSlug, content, ref } = command;
+    const { caller, collectionId, dataSlug, content, ref, isPublic } = command;
     try {
       const collection = await this.collectionRepository.findById(collectionId);
       if (!collection) throw 'Collection does not exist';
       const activityId = uuidv4();
-      console.log(collection.dataActivities);
       const dataActivities = {
         ...collection.dataActivities,
         [dataSlug]: {
@@ -51,7 +55,14 @@ export class AddCommentCommandHandler
           dataActivityOrder,
         },
       );
-      return updatedCollection;
+      if (isPublic)
+        return await this.queryBus.execute(
+          new GetPublicViewCollectionQuery(caller, updatedCollection.slug),
+        );
+      else
+        return await this.queryBus.execute(
+          new GetPrivateViewCollectionQuery(null, updatedCollection),
+        );
     } catch (err) {
       this.logger.error(
         `Failed adding comment to collection Id ${collectionId} with error ${err}`,

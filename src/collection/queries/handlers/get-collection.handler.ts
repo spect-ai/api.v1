@@ -169,7 +169,6 @@ export class GetPublicViewCollectionQueryHandler
       if (!collectionToGet) {
         throw new Error('Collection not found');
       }
-
       const hasRole = await this.advancedAccessService.hasRoleToAccessForm(
         collectionToGet,
         caller,
@@ -205,8 +204,15 @@ export class GetPublicViewCollectionQueryHandler
         collectionToGet.mintkudosTokenId &&
         !kudosClaimedByUser &&
         collectionToGet.numOfKudos > collectionToGet.mintkudosClaimedBy?.length;
+      let activityOrder, activity;
+      if (previousResponses.length > 0) {
+        const prevSlug = previousResponses[previousResponses.length - 1].slug;
+        activityOrder = collectionToGet.dataActivityOrder[prevSlug];
+        activity = collectionToGet.dataActivities[prevSlug];
+      }
       const res =
         this.advancedAccessService.removePrivateFields(collectionToGet);
+
       return {
         ...res,
         canFillForm,
@@ -214,6 +220,8 @@ export class GetPublicViewCollectionQueryHandler
         canClaimKudos,
         hasPassedSybilCheck,
         previousResponses,
+        activity,
+        activityOrder,
       };
     } catch (error) {
       this.logger.logError(
