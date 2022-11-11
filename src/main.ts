@@ -31,7 +31,7 @@ async function bootstrap() {
       password: process.env.IRON_SESSION_COOKIE_PASSWORD,
       cookieOptions: {
         secure: process.env.NODE_ENV === 'production',
-        sameSite: 'none',
+        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
       },
     }),
   );

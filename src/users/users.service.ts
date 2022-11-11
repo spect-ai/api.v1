@@ -18,6 +18,7 @@ import { LoggingService } from 'src/logging/logging.service';
 import { AddItemsCommand, RemoveItemsCommand } from './commands/impl';
 import { UserCreatedEvent } from './events/impl';
 import { LensService } from './external/lens.service';
+import { GetCircleByIdQuery } from 'src/circle/queries/impl';
 
 @Injectable()
 export class UsersService {
@@ -232,6 +233,33 @@ export class UsersService {
       );
       throw new InternalServerErrorException(
         `Failed removing ${itemType} to user`,
+        error.message,
+      );
+    }
+  }
+
+  async getVerifiedCircles(id: string): Promise<string[]> {
+    try {
+      console.log({ id });
+      const user: User = await this.queryBus.execute(
+        new GetUserByIdQuery(id, this.requestProvider.user?.id),
+      );
+      const circles = await Promise.all(
+        user.circles.map(async (circleId) => {
+          const circle = await this.queryBus.execute(
+            new GetCircleByIdQuery(circleId),
+          );
+          if (circle.verified) return circleId;
+        }),
+      );
+      return circles.filter((circle) => circle !== undefined);
+    } catch (error) {
+      this.logger.logError(
+        `Failed getting user by id with error: ${error.message}`,
+        this.requestProvider,
+      );
+      throw new InternalServerErrorException(
+        `Failed getting user by id`,
         error.message,
       );
     }
