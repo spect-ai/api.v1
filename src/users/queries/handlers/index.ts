@@ -1,3 +1,4 @@
+import { GetProfileByIdQueryHandler } from './get-profile.handler';
 import {
   GetUserByIdQueryHandler,
   GetUserByUsernameQueryHandler,
@@ -10,4 +11,5 @@ export const QueryHandlers = [
   GetUserByUsernameQueryHandler,
   GetMultipleUsersByIdsQueryHandler,
   GetUserByFilterQueryHandler,
+  GetProfileByIdQueryHandler,
 ];

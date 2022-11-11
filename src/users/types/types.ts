@@ -99,12 +99,10 @@ export type Experience = {
   startDate: string;
   endDate: string;
   verifiableCredentials: Credential[];
-  id: string;
 };
-
-export type LensExperience = {
-  lensHandle: string;
-  index: number;
+export type Skill = {
+  name: string;
+  verifiableCredentials: Credential[];
   id: string;
 };
 
@@ -117,8 +115,51 @@ export type Education = {
   id: string;
 };
 
-export type LensEducation = {
-  lensHandle: string;
-  index: number;
+export type LensProfile = {
   id: string;
+  name: string;
+  bio: string;
+  handle: string;
+  attributes: LensAttribute[];
+};
+
+export type LensAttribute = {
+  id: string;
+  key: string;
+  value: string;
+  type: string;
+};
+
+export type LensSkills = {
+  title: string;
+  icon: string;
+  nfts: string[];
+  poaps: string[];
+  verifiableCredentials: Credential[];
+};
+
+export type LensExperience = {
+  jobTitle: string;
+  company: number;
+  companyLogo: string;
+  description: string;
+  start_date: string;
+  end_date: string;
+  verifiableCredentials: Credential[];
+  currentlyWorking: boolean;
+  nfts: string[];
+  poaps: string[];
+};
+
+export type LensEducation = {
+  courseDegree: string;
+  school: string;
+  schoolLogo: string;
+  description: string;
+  start_date: string;
+  end_date: string;
+  currentlyStudying: boolean;
+  nfts: string[];
+  poaps: string[];
+  verifiableCredentials: Credential[];
 };

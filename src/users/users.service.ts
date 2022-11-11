@@ -17,6 +17,7 @@ import {
 import { LoggingService } from 'src/logging/logging.service';
 import { AddItemsCommand, RemoveItemsCommand } from './commands/impl';
 import { UserCreatedEvent } from './events/impl';
+import { LensService } from './external/lens.service';
 
 @Injectable()
 export class UsersService {
@@ -28,6 +29,7 @@ export class UsersService {
     private readonly commandBus: CommandBus,
     private readonly eventBus: EventBus,
     private readonly logger: LoggingService,
+    private readonly lensService: LensService,
   ) {
     logger.setContext('UsersService');
   }
@@ -112,14 +114,25 @@ export class UsersService {
   async create(ethAddress: string) {
     try {
       const numUsers = await this.usersRepository.count();
+      let lensProfile;
+      try {
+        lensProfile = await this.lensService.getLensDefaultProfile(ethAddress);
+      } catch (error) {
+        this.logger.logError(
+          `Failed to get lens profile with error: ${error.message}`,
+          this.requestProvider,
+        );
+      }
       const user = await this.usersRepository.create({
         username: `fren${numUsers}`,
         ethAddress: ethAddress,
+        lensHandle: lensProfile?.handle,
       });
       await this.ethAddressRepository.create({
         ethAddress: ethAddress,
         user: user._id,
       });
+
       this.eventBus.publish(new UserCreatedEvent(user));
       return user;
     } catch (error) {

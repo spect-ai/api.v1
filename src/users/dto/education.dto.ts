@@ -3,7 +3,15 @@ import { IsNotEmpty, IsString, IsOptional, IsArray } from 'class-validator';
 export class AddEducationDto {
   @IsString()
   @IsOptional()
-  title: string;
+  courseDegree: string;
+
+  @IsString()
+  @IsOptional()
+  school: string;
+
+  @IsString()
+  @IsOptional()
+  schoolLogo: string;
 
   @IsString()
   @IsOptional()
@@ -11,23 +19,27 @@ export class AddEducationDto {
 
   @IsString()
   @IsOptional()
-  startDate: string;
+  start_date: string;
 
   @IsString()
   @IsOptional()
-  endDate: string;
+  end_date: string;
+
+  @IsString()
+  @IsOptional()
+  currentlyStudying: string;
+
+  @IsString()
+  @IsOptional()
+  nfts: string[];
+
+  @IsString()
+  @IsOptional()
+  poaps: string[];
 
   @IsArray()
   @IsOptional()
-  credentials: Credential[];
-
-  @IsString()
-  @IsOptional()
-  lensHandle: string;
-
-  @IsString()
-  @IsOptional()
-  lensEducationId: string;
+  verifiableCredentials: Credential[];
 }
 
 export class UpdateEducationDto extends AddEducationDto {}

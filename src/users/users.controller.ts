@@ -24,7 +24,7 @@ import {
   RequiredHandle,
 } from 'src/common/dtos/string.dto';
 import { DetailedUserPubliceResponseDto } from './dto/detailed-user-response.dto';
-import { CommandBus } from '@nestjs/cqrs';
+import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { ReadNotificationCommand } from './commands/notifications/impl';
 import { LensService } from './external/lens.service';
 import { AddExperienceDto, UpdateExperienceDto } from './dto/experience.dto';
@@ -39,6 +39,11 @@ import {
   UpdateEducationCommand,
 } from './commands/education';
 import { AddEducationDto, UpdateEducationDto } from './dto/education.dto';
+import {
+  PrivateProfileResponseDto,
+  PublicProfileResponseDto,
+} from './dto/profile-response.dto';
+import { GetProfileByIdQuery } from './queries/impl';
 
 @Controller('user')
 @ApiTags('Users')
@@ -46,30 +51,23 @@ export class UsersController {
   constructor(
     private readonly usersService: UsersService,
     private readonly commandBus: CommandBus,
-    private readonly lensService: LensService,
+    private readonly queryBus: QueryBus,
   ) {}
 
+  @UseGuards(PublicViewAuthGuard)
+  @Get('/profile/:id')
+  getProfile(
+    @Param() param: ObjectIdDto,
+    @Request() req,
+  ): Promise<PublicProfileResponseDto | PrivateProfileResponseDto> {
+    return this.queryBus.execute(
+      new GetProfileByIdQuery(param.id, req.user?.id),
+    );
+  }
   @UseGuards(SessionAuthGuard)
   @Get('/me')
   findMe(@Request() req) {
     return this.usersService.getUserById(req.user.id);
-  }
-
-  @UseGuards(SessionAuthGuard)
-  @Get('/lensHandles')
-  async lensHandles(@Request() req): Promise<DetailedUserPubliceResponseDto> {
-    console.log(req.user?.ethAddress);
-    return await this.lensService.getLensProfilesByAddress(
-      req.user?.ethAddress,
-    );
-  }
-
-  @UseGuards(SessionAuthGuard)
-  @Get('/lensProfile')
-  async lensProfile(
-    @Query() handleQuery: RequiredHandle,
-  ): Promise<DetailedUserPubliceResponseDto> {
-    return await this.lensService.getLensProfile(handleQuery.handle);
   }
 
   @UseGuards(PublicViewAuthGuard)
@@ -164,6 +162,7 @@ export class UsersController {
   @UseGuards(SessionAuthGuard)
   @Patch('/me/addEducation')
   async addEducation(@Body() addEducationDto: AddEducationDto, @Request() req) {
+    console.log(addEducationDto);
     return await this.commandBus.execute(
       new AddEducationCommand(addEducationDto, req.user),
     );

@@ -18,16 +18,11 @@ export class RemoveEducationCommandHandler
   async execute(command: RemoveEducationCommand) {
     const { user, educationId } = command;
     try {
-      const education = user.education || {};
-      delete education[educationId];
-      const educationOrder = user.educationOrder || [];
-      if (educationOrder.includes(educationId)) {
-        educationOrder.splice(educationOrder.indexOf(educationId), 1);
-      }
+      const education = user.education || [];
+      education.splice(parseInt(educationId), 1);
 
       const updatedCollection = await this.userRepository.updateById(user.id, {
         education,
-        educationOrder,
       });
       return updatedCollection;
     } catch (err) {

@@ -18,19 +18,8 @@ export class UpdateEducationCommandHandler
   async execute(command: UpdateEducationCommand) {
     const { user, education, educationId } = command;
     try {
-      const newEducation = user.education || {};
-      newEducation[educationId] = {
-        ...newEducation[educationId],
-        ...education,
-      };
-      const educationOrder = user.educationOrder || [];
-      if (!educationOrder.includes(educationId)) {
-        educationOrder.push(educationId);
-      }
-
       const updatedCollection = await this.userRepository.updateById(user.id, {
-        education: newEducation,
-        educationOrder,
+        education: [...(user.education || []), education],
       });
       return updatedCollection;
     } catch (err) {

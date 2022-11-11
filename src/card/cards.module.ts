@@ -49,6 +49,7 @@ import { CrudOrchestrator } from './orchestrators/crud.orchestrator';
 import { CommandHandlers } from './commands/handlers';
 import { ActivityBuilder as ActivityBuilderV1 } from './services/activity-builder.service';
 import { RealtimeModule } from 'src/realtime/realtime.module';
+import { LensService } from 'src/users/external/lens.service';
 
 @Module({
   imports: [
@@ -105,6 +106,7 @@ import { RealtimeModule } from 'src/realtime/realtime.module';
     ViewProjectAuthGuard,
     CardValidationServiceV1,
     RegistryService,
+    LensService,
   ],
   exports: [CardsService, CardsRepository, CardsModule, ActionService],
 })

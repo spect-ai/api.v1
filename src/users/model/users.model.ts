@@ -10,8 +10,12 @@ import {
   Education,
   Experience,
   FormResponses,
+  LensEducation,
+  LensExperience,
+  LensSkills,
   Notification,
   NotificationV2,
+  Skill,
   UserSubmittedApplication,
 } from '../types/types';
 import { Retro } from 'src/retro/models/retro.model';
@@ -175,23 +179,20 @@ export class User extends ProfileModel {
   formResponses: FormResponses;
 
   @prop({ default: {} })
-  experiences?: { [key: string]: Experience };
-
-  /**
-   * Experience order of user
-   */
-  @prop({ default: [] })
-  experienceOrder?: string[];
+  experiences?: LensExperience[];
 
   /**
    * Educations of user
    */
   @prop({ default: {} })
-  education?: { [key: string]: Education };
+  education?: LensEducation[];
 
   /**
-   * Education order of user
+   * The skills of the profile
    */
   @prop({ default: [] })
-  educationOrder?: string[];
+  skillsV2: LensSkills[];
+
+  @prop()
+  lensHandle?: string;
 }

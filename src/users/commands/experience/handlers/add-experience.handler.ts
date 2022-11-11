@@ -19,13 +19,8 @@ export class AddExperienceCommandHandler
   async execute(command: AddExperienceCommand) {
     const { user, experience } = command;
     try {
-      const experienceId = uuidv4();
       const updatedUser = await this.userRepository.updateById(user.id, {
-        experiences: {
-          ...(user.experiences || {}),
-          [experienceId]: experience,
-        },
-        experienceOrder: [...(user.experienceOrder || []), experienceId],
+        experiences: [...(user.experiences || []), experience],
       });
       return updatedUser;
     } catch (err) {

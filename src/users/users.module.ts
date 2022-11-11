@@ -22,6 +22,7 @@ import { CommandHandlers } from './commands/handlers';
 import { LoggingService } from 'src/logging/logging.service';
 import { MailService } from 'src/mail/mail.service';
 import { LensService } from './external/lens.service';
+import { UsersControllerV1 } from './users-v1.controller';
 
 @Module({
   imports: [
@@ -30,7 +31,7 @@ import { LensService } from './external/lens.service';
     forwardRef(() => CardsModule),
     CqrsModule,
   ],
-  controllers: [UsersController],
+  controllers: [UsersController, UsersControllerV1],
   providers: [
     UsersService,
     UsersRepository,

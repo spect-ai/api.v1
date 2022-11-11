@@ -3,11 +3,15 @@ import { IsNotEmpty, IsString, IsOptional, IsArray } from 'class-validator';
 export class AddExperienceDto {
   @IsString()
   @IsOptional()
-  role: string;
+  jobTitle: string;
 
   @IsString()
   @IsOptional()
-  organization: string;
+  company: string;
+
+  @IsString()
+  @IsOptional()
+  companyLogo: string;
 
   @IsString()
   @IsOptional()
@@ -15,23 +19,23 @@ export class AddExperienceDto {
 
   @IsString()
   @IsOptional()
-  startDate: string;
+  start_date: string;
 
   @IsString()
   @IsOptional()
-  endDate: string;
+  end_date: string;
 
   @IsArray()
   @IsOptional()
-  credentials: Credential[];
+  verifiableCredentials: Credential[];
 
   @IsString()
   @IsOptional()
-  lensHandle: string;
+  currentlyWorking: string;
 
   @IsString()
   @IsOptional()
-  lensExperienceId: string;
+  nfts: string;
 }
 
 export class UpdateExperienceDto extends AddExperienceDto {}

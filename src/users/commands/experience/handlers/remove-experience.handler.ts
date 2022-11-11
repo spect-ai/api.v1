@@ -18,16 +18,11 @@ export class RemoveExperienceCommandHandler
   async execute(command: RemoveExperienceCommand) {
     const { user, experienceId } = command;
     try {
-      const experiences = user.experiences || {};
-      delete experiences[experienceId];
-      const experienceOrder = user.experienceOrder || [];
-      if (experienceOrder.includes(experienceId)) {
-        experienceOrder.splice(experienceOrder.indexOf(experienceId), 1);
-      }
+      const experiences = user.experiences || [];
+      experiences.splice(parseInt(experienceId), 1);
 
       const updatedCollection = await this.userRepository.updateById(user.id, {
         experiences,
-        experienceOrder,
       });
       return updatedCollection;
     } catch (err) {

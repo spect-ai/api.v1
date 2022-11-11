@@ -23,14 +23,8 @@ export class UpdateExperienceCommandHandler
         ...newExperiences[experienceId],
         ...experience,
       };
-      const experienceOrder = user.experienceOrder || [];
-      if (!experienceOrder.includes(experienceId)) {
-        experienceOrder.push(experienceId);
-      }
-
       const updatedCollection = await this.userRepository.updateById(user.id, {
         experiences: newExperiences,
-        experienceOrder,
       });
       return updatedCollection;
     } catch (err) {
