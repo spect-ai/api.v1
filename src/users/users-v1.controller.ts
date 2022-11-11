@@ -3,6 +3,7 @@ import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { ApiTags } from '@nestjs/swagger';
 import { PublicViewAuthGuard } from 'src/auth/iron-session.guard';
 import { ObjectIdDto } from 'src/common/dtos/object-id.dto';
+import { RequiredUsernameDto } from 'src/common/dtos/string.dto';
 import {
   PrivateProfileResponseDto,
   PublicProfileResponseDto,
@@ -26,7 +27,29 @@ export class UsersControllerV1 {
     @Request() req,
   ): Promise<PublicProfileResponseDto | PrivateProfileResponseDto> {
     return this.queryBus.execute(
-      new GetProfileByIdQuery(param.id, req.user?.id),
+      new GetProfileByIdQuery(
+        {
+          _id: param.id,
+        },
+        req.user?.id,
+      ),
+    );
+  }
+
+  @UseGuards(PublicViewAuthGuard)
+  @Get('/username/:username/profile')
+  getProfileWithUsername(
+    @Param() param: RequiredUsernameDto,
+    @Request() req,
+  ): Promise<PublicProfileResponseDto | PrivateProfileResponseDto> {
+    console.log('lalla');
+    return this.queryBus.execute(
+      new GetProfileByIdQuery(
+        {
+          username: param.username,
+        },
+        req.user?.id,
+      ),
     );
   }
 }

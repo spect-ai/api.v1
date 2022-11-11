@@ -37,14 +37,12 @@ export class GetProfileByIdQueryHandler
   async execute(query: GetProfileByIdQuery): Promise<PublicProfileResponseDto> {
     try {
       const user = await this.userRepository.getUserByFilter(
-        {
-          _id: query.id,
-        },
+        query.filterQuery,
         null,
         publicProfileFields,
       );
       if (!user) {
-        throw `User with id ${query.id} not found`;
+        throw `User with filter ${query.filterQuery} not found`;
       }
       if (!user.lensHandle) {
         return user;

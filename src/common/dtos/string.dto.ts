@@ -126,3 +126,9 @@ export class RequiredEducationId {
   @IsString()
   educationId: string;
 }
+
+export class RequiredUsernameDto {
+  @IsNotEmpty()
+  @IsString()
+  username: string;
+}

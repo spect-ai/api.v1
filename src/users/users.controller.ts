@@ -54,16 +54,6 @@ export class UsersController {
     private readonly queryBus: QueryBus,
   ) {}
 
-  @UseGuards(PublicViewAuthGuard)
-  @Get('/profile/:id')
-  getProfile(
-    @Param() param: ObjectIdDto,
-    @Request() req,
-  ): Promise<PublicProfileResponseDto | PrivateProfileResponseDto> {
-    return this.queryBus.execute(
-      new GetProfileByIdQuery(param.id, req.user?.id),
-    );
-  }
   @UseGuards(SessionAuthGuard)
   @Get('/me')
   findMe(@Request() req) {
@@ -79,6 +69,7 @@ export class UsersController {
   @UseGuards(PublicViewAuthGuard)
   @Get('/username/:username')
   findByUsername(@Param('username') username: string) {
+    console.log('papap');
     return this.usersService.getUserByUsername(username);
   }
 
