@@ -19,8 +19,9 @@ export class AddExperienceCommandHandler
   async execute(command: AddExperienceCommand) {
     const { user, experience } = command;
     try {
+      console.log({ experience });
       const updatedUser = await this.userRepository.updateById(user.id, {
-        experiences: [...(user.experiences || []), experience],
+        experiences: [experience, ...(user.experiences || [])],
       });
       return updatedUser;
     } catch (err) {

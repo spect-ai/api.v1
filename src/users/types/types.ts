@@ -133,9 +133,9 @@ export type LensAttribute = {
 export type LensSkills = {
   title: string;
   icon: string;
-  nfts: string[];
+  nfts: NFT[];
   poaps: string[];
-  verifiableCredentials: Credential[];
+  verifiableCredentials: VerifiableCredential[];
 };
 
 export type LensExperience = {
@@ -143,11 +143,11 @@ export type LensExperience = {
   company: number;
   companyLogo: string;
   description: string;
-  start_date: string;
-  end_date: string;
-  verifiableCredentials: Credential[];
+  start_date: LensDate;
+  end_date: LensDate;
+  verifiableCredentials: VerifiableCredential[];
   currentlyWorking: boolean;
-  nfts: string[];
+  nfts: NFT[];
   poaps: string[];
 };
 
@@ -156,10 +156,42 @@ export type LensEducation = {
   school: string;
   schoolLogo: string;
   description: string;
-  start_date: string;
-  end_date: string;
+  start_date: LensDate;
+  end_date: LensDate;
   currentlyStudying: boolean;
-  nfts: string[];
+  nfts: NFT[];
   poaps: string[];
-  verifiableCredentials: Credential[];
+  verifiableCredentials: VerifiableCredential[];
+};
+
+export type NFT = {
+  contractName: string;
+  contractAddress: string;
+  tokenId: string;
+  symbol: string;
+  name: string;
+  description: string;
+  contentURI: string;
+  chainId: string;
+  collectionName: string;
+  ercType: string;
+  originalContent: {
+    uri: string;
+    metaType: string;
+  };
+};
+
+export type VerifiableCredential = {
+  id: string;
+  platform: string;
+  provider: string;
+  credentialId: string;
+  credentialType: string;
+  imageURI: string;
+};
+
+export type LensDate = {
+  day: number;
+  month: number;
+  year: number;
 };

@@ -1,4 +1,12 @@
-import { IsNotEmpty, IsString, IsOptional, IsArray } from 'class-validator';
+import {
+  IsNotEmpty,
+  IsString,
+  IsOptional,
+  IsArray,
+  IsObject,
+  IsBoolean,
+} from 'class-validator';
+import { LensDate, LensEducation, VerifiableCredential } from '../types/types';
 
 export class AddExperienceDto {
   @IsString()
@@ -17,23 +25,23 @@ export class AddExperienceDto {
   @IsOptional()
   description: string;
 
-  @IsString()
+  @IsObject()
   @IsOptional()
-  start_date: string;
+  start_date: LensDate | null;
 
-  @IsString()
+  @IsObject()
   @IsOptional()
-  end_date: string;
+  end_date: LensDate | null;
 
   @IsArray()
   @IsOptional()
-  verifiableCredentials: Credential[];
+  verifiableCredentials: VerifiableCredential[];
 
-  @IsString()
+  @IsBoolean()
   @IsOptional()
   currentlyWorking: string;
 
-  @IsString()
+  @IsArray()
   @IsOptional()
   nfts: string;
 }

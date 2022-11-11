@@ -1,4 +1,12 @@
-import { IsNotEmpty, IsString, IsOptional, IsArray } from 'class-validator';
+import {
+  IsNotEmpty,
+  IsString,
+  IsOptional,
+  IsArray,
+  IsBoolean,
+  IsObject,
+} from 'class-validator';
+import { VerifiableCredential } from '../types/types';
 
 export class AddEducationDto {
   @IsString()
@@ -17,29 +25,29 @@ export class AddEducationDto {
   @IsOptional()
   description: string;
 
-  @IsString()
+  @IsObject()
   @IsOptional()
   start_date: string;
 
-  @IsString()
+  @IsObject()
   @IsOptional()
   end_date: string;
 
-  @IsString()
+  @IsBoolean()
   @IsOptional()
-  currentlyStudying: string;
+  currentlyStudying: boolean;
 
-  @IsString()
+  @IsArray()
   @IsOptional()
   nfts: string[];
 
-  @IsString()
+  @IsArray()
   @IsOptional()
   poaps: string[];
 
   @IsArray()
   @IsOptional()
-  verifiableCredentials: Credential[];
+  verifiableCredentials: VerifiableCredential[];
 }
 
 export class UpdateEducationDto extends AddEducationDto {}

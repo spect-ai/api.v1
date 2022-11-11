@@ -21,7 +21,7 @@ export class AddEducationCommandHandler
     try {
       const educationId = uuidv4();
       const updatedCollection = await this.userRepository.updateById(user.id, {
-        education: [...user.education, education],
+        education: [education, ...(user.education || [])],
       });
       return updatedCollection;
     } catch (err) {
