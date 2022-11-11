@@ -10,6 +10,7 @@ import { GuildxyzService } from 'src/common/guildxyz.service';
 import { MintKudosService } from 'src/common/mint-kudos.service';
 import { CredentialsModule } from 'src/credentials/credentials.module';
 import { CredentialsService } from 'src/credentials/credentials.service';
+import { GitcoinPassportService } from 'src/credentials/services/gitcoin-passport.service';
 import { LoggingService } from 'src/logging/logging.service';
 import { MailModule } from 'src/mail/mail.module';
 import { RealtimeModule } from 'src/realtime/realtime.module';

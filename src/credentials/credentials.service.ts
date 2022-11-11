@@ -8,10 +8,18 @@ import { PLATFORMS } from 'src/config/platforms';
 import { STAMP_PROVIDERS } from 'src/config/providers';
 // import { PassportScorer} from '@gitcoinco/passport-sdk-scorer';
 import { PassportReader } from '@gitcoinco/passport-sdk-reader';
+import { GitcoinPassportService } from './services/gitcoin-passport.service';
+import { MazuryService } from './services/mazury.service';
+import { Credential, VerifiableCredential } from 'src/users/types/types';
+import { MazuryCredentialType } from './types/types';
 
 @Injectable()
 export class CredentialsService {
-  constructor(private readonly credentialRepository: CredentialsRepository) {}
+  constructor(
+    private readonly credentialRepository: CredentialsRepository,
+    private readonly gitcoinService: GitcoinPassportService,
+    private readonly mazuryService: MazuryService,
+  ) {}
 
   async getAll(): Promise<Credentials[]> {
     return await this.credentialRepository.findAll();
@@ -62,61 +70,60 @@ export class CredentialsService {
     return true;
   }
 
-  async hasPassedSybilCheck(
+  async getAllByAddress(
     address: string,
-    scores: { [key: string]: number },
-  ): Promise<boolean> {
-    const stamps = await this.getAll();
-    const passportScores = stamps.map((stamp) => {
-      return {
-        score: scores[stamp.id] ? scores[stamp.id] : 0,
-        provider: stamp.provider,
-        issuer: stamp.issuer,
-      };
-    });
-    const reader = new PassportReader('https://gateway.ceramic.network', '1');
-
-    const passport = await reader.getPassport(address);
-    const PassportScorer = (await import('@gitcoinco/passport-sdk-scorer'))
-      .PassportScorer;
-    const stampsWithCredentials = [];
-    for (const stamp of passport.stamps) {
-      if (!stamp.credential) {
-        continue;
-      }
-      stampsWithCredentials.push(stamp);
-    }
-    const scorer = new PassportScorer(
-      passportScores,
-      'https://gateway.ceramic.network',
+  ): Promise<{ [key: string]: Credential[] }> {
+    const res = {};
+    const promises = [];
+    res['gitcoinPassport'] = promises.push(
+      this.gitcoinService.getByEthAddress(address),
     );
-    const score = await scorer.getScore(address, {
-      ...passport,
-      stamps: stampsWithCredentials,
-    });
-    return score >= 100;
+    const issuers = ['kudos', 'poap', 'gitpoap', 'sismo', 'buildspace'];
+    for (const issuer of issuers) {
+      promises.push(this.mazuryService.getCredentials(address, issuer));
+    }
+    [
+      res['gitcoinPassport'],
+      res['kudos'],
+      res['poap'],
+      res['gitpoap'],
+      res['sismo'],
+      res['buildspace'],
+    ] = await Promise.all(promises);
+
+    const mappingPromises = [];
+    for (const issuer of issuers) {
+      mappingPromises.push(
+        this.mazuryService.mapToCredentials(res[issuer].results),
+      );
+    }
+    [
+      res['kudos'],
+      res['poap'],
+      res['gitpoap'],
+      res['sismo'],
+      res['buildspace'],
+    ] = await Promise.all(mappingPromises);
+
+    return res;
   }
 
-  async getNumberOfSimilarStamps(
-    address1: string,
-    address2: string,
-  ): Promise<number> {
-    const reader = new PassportReader(
-      'https://ceramic.passport-iam.gitcoin.co',
-      '1',
-    );
-
-    const passport1 = await reader.getPassport(address1);
-    const passport2 = await reader.getPassport(address2);
-
-    const stamps1 = passport1.stamps.map((stamp) => stamp.provider);
-    const stamps2 = new Set(passport2.stamps.map((stamp) => stamp.provider));
-    let numSimilarStamps = 0;
-    for (const stamp of stamps1) {
-      if (stamps2.has(stamp)) {
-        numSimilarStamps++;
-      }
+  async getByAddressAndIssuer(
+    address: string,
+    issuer: string,
+    offset?: number,
+    limit?: number,
+  ): Promise<Credential[]> {
+    if (issuer === 'gitcoinPassport') {
+      return await this.gitcoinService.getByEthAddress(address);
+    } else {
+      const credentials = await this.mazuryService.getCredentials(
+        address,
+        issuer,
+        offset,
+        limit,
+      );
+      return await this.mazuryService.mapToCredentials(credentials.results);
     }
-    return numSimilarStamps;
   }
 }

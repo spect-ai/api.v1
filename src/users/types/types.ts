@@ -88,8 +88,12 @@ export type FormResponses = {
 
 export type Credential = {
   id: string;
-  platform: string;
-  credentialId: string;
+  name: string;
+  description: string;
+  imageUri: string;
+  type: 'vc' | 'soulbound';
+  service: string;
+  metadata?: VerifiableCredential | SoulboundCredential;
 };
 
 export type Experience = {
@@ -182,12 +186,14 @@ export type NFT = {
 };
 
 export type VerifiableCredential = {
-  id: string;
-  platform: string;
-  provider: string;
-  credentialId: string;
-  credentialType: string;
-  imageURI: string;
+  ceramicStreamId?: string;
+};
+
+export type SoulboundCredential = {
+  contractAddress?: string;
+  tokenId?: string;
+  chainId?: string;
+  type?: 'erc721' | 'erc1155';
 };
 
 export type LensDate = {

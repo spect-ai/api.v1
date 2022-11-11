@@ -36,6 +36,7 @@ export class GetProfileByIdQueryHandler
 
   async execute(query: GetProfileByIdQuery): Promise<PublicProfileResponseDto> {
     try {
+      console.log({ query });
       const user = await this.userRepository.getUserByFilter(
         query.filterQuery,
         null,
@@ -59,6 +60,10 @@ export class GetProfileByIdQueryHandler
         if (attribute.key in localAttributes) {
           localAttributes[attribute.key] = JSON.parse(attribute.value);
         }
+        if (attribute.key === 'avatar') {
+          console.log({ attribute });
+          user.avatar = attribute.value;
+        }
       }
 
       return {
@@ -69,10 +74,7 @@ export class GetProfileByIdQueryHandler
         bio: lensProfile.bio,
       };
     } catch (error) {
-      this.logger.error(
-        `Failed getting user with error: ${error.message}`,
-        query,
-      );
+      this.logger.error(`Failed getting user with error: ${error}`);
       throw new InternalServerErrorException(`Failed getting user`, error);
     }
   }

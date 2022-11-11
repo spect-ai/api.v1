@@ -1,49 +1,40 @@
 import {
+  Body,
   Controller,
   Get,
-  UseGuards,
-  Request,
-  Patch,
-  Body,
   Param,
+  Patch,
   Query,
+  Request,
+  UseGuards,
 } from '@nestjs/common';
-import { UsersService } from './users.service';
+import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { ApiTags } from '@nestjs/swagger';
 import {
   PublicViewAuthGuard,
   SessionAuthGuard,
 } from 'src/auth/iron-session.guard';
-import { ReadNotificationDto, UpdateUserDto } from './dto/update-user.dto';
-import { User } from './model/users.model';
-import { ObjectIdDto } from 'src/common/dtos/object-id.dto';
 import {
   RequiredCardIdDto,
   RequiredEducationId,
   RequiredExperienceId,
-  RequiredHandle,
 } from 'src/common/dtos/string.dto';
-import { DetailedUserPubliceResponseDto } from './dto/detailed-user-response.dto';
-import { CommandBus, QueryBus } from '@nestjs/cqrs';
-import { ReadNotificationCommand } from './commands/notifications/impl';
-import { LensService } from './external/lens.service';
-import { AddExperienceDto, UpdateExperienceDto } from './dto/experience.dto';
-import {
-  AddExperienceCommand,
-  RemoveExperienceCommand,
-  UpdateExperienceCommand,
-} from './commands/experience';
 import {
   AddEducationCommand,
   RemoveEducationCommand,
   UpdateEducationCommand,
 } from './commands/education';
-import { AddEducationDto, UpdateEducationDto } from './dto/education.dto';
 import {
-  PrivateProfileResponseDto,
-  PublicProfileResponseDto,
-} from './dto/profile-response.dto';
-import { GetProfileByIdQuery } from './queries/impl';
+  AddExperienceCommand,
+  RemoveExperienceCommand,
+  UpdateExperienceCommand,
+} from './commands/experience';
+import { ReadNotificationCommand } from './commands/notifications/impl';
+import { DetailedUserPubliceResponseDto } from './dto/detailed-user-response.dto';
+import { AddEducationDto, UpdateEducationDto } from './dto/education.dto';
+import { AddExperienceDto, UpdateExperienceDto } from './dto/experience.dto';
+import { ReadNotificationDto, UpdateUserDto } from './dto/update-user.dto';
+import { UsersService } from './users.service';
 
 @Controller('user')
 @ApiTags('Users')
@@ -75,7 +66,6 @@ export class UsersController {
   @UseGuards(PublicViewAuthGuard)
   @Get('/username/:username')
   findByUsername(@Param('username') username: string) {
-    console.log('papap');
     return this.usersService.getUserByUsername(username);
   }
 

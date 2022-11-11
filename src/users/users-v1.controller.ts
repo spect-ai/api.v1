@@ -1,13 +1,17 @@
 import { Controller, Get, Param, Request, UseGuards } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { ApiTags } from '@nestjs/swagger';
-import { PublicViewAuthGuard } from 'src/auth/iron-session.guard';
+import {
+  PublicViewAuthGuard,
+  SessionAuthGuard,
+} from 'src/auth/iron-session.guard';
 import { ObjectIdDto } from 'src/common/dtos/object-id.dto';
 import { RequiredUsernameDto } from 'src/common/dtos/string.dto';
 import {
   PrivateProfileResponseDto,
   PublicProfileResponseDto,
 } from './dto/profile-response.dto';
+import { LensService } from './external/lens.service';
 import { GetProfileByIdQuery } from './queries/impl';
 import { UsersService } from './users.service';
 
@@ -18,6 +22,7 @@ export class UsersControllerV1 {
     private readonly usersService: UsersService,
     private readonly commandBus: CommandBus,
     private readonly queryBus: QueryBus,
+    private readonly lensService: LensService,
   ) {}
 
   @UseGuards(PublicViewAuthGuard)
@@ -42,7 +47,6 @@ export class UsersControllerV1 {
     @Param() param: RequiredUsernameDto,
     @Request() req,
   ): Promise<PublicProfileResponseDto | PrivateProfileResponseDto> {
-    console.log('lalla');
     return this.queryBus.execute(
       new GetProfileByIdQuery(
         {
@@ -51,5 +55,13 @@ export class UsersControllerV1 {
         req.user?.id,
       ),
     );
+  }
+
+  @UseGuards(SessionAuthGuard)
+  @Get('/lensHandles')
+  getLensHandles(
+    @Request() req,
+  ): Promise<PublicProfileResponseDto | PrivateProfileResponseDto> {
+    return this.lensService.getLensProfilesByAddress(req.user.ethAddress);
   }
 }

@@ -4,6 +4,7 @@ import { GetCircleByIdQuery } from 'src/circle/queries/impl';
 import { CommonTools } from 'src/common/common.service';
 import { GuildxyzService } from 'src/common/guildxyz.service';
 import { CredentialsService } from 'src/credentials/credentials.service';
+import { GitcoinPassportService } from 'src/credentials/services/gitcoin-passport.service';
 import { User } from 'src/users/model/users.model';
 import { Collection } from '../model/collection.model';
 
@@ -12,7 +13,7 @@ export class AdvancedAccessService {
   constructor(
     private readonly queryBus: QueryBus,
     private readonly guildxyzService: GuildxyzService,
-    private readonly credentialService: CredentialsService,
+    private readonly credentialService: GitcoinPassportService,
     private readonly commonTools: CommonTools,
   ) {}
 

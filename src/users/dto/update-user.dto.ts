@@ -74,6 +74,10 @@ export class UpdateUserDto extends PartialType(User) {
   @IsArray()
   @IsOptional()
   educationOrder?: string[];
+
+  @IsString()
+  @IsOptional()
+  lensHandle?: string;
 }
 
 export class UpdateMetadata {

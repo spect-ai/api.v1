@@ -1,6 +1,7 @@
 import {
   IsArray,
   IsNotEmpty,
+  IsNumber,
   IsOptional,
   IsString,
   IsUUID,
@@ -131,4 +132,27 @@ export class RequiredUsernameDto {
   @IsNotEmpty()
   @IsString()
   username: string;
+}
+
+export class RequiredEthAddressDto {
+  @IsNotEmpty()
+  @IsString()
+  ethAddress: string;
+}
+
+export class RequiredIssuerDto {
+  @IsNotEmpty()
+  @IsString()
+  issuer: string;
+}
+export class OptionalOffsetDto {
+  @IsNumber()
+  @IsOptional()
+  offset: number;
+}
+
+export class OptionalLimitDto {
+  @IsNumber()
+  @IsOptional()
+  limit: number;
 }
