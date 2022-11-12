@@ -1,6 +1,12 @@
 import { InternalServerErrorException } from '@nestjs/common';
-import { CommandHandler, ICommandHandler, QueryBus } from '@nestjs/cqrs';
+import {
+  CommandHandler,
+  EventBus,
+  ICommandHandler,
+  QueryBus,
+} from '@nestjs/cqrs';
 import { CollectionRepository } from 'src/collection/collection.repository';
+import { DataUpatedEvent } from 'src/collection/events';
 import {
   GetPrivateViewCollectionQuery,
   GetPublicViewCollectionQuery,
@@ -17,6 +23,7 @@ export class AddCommentCommandHandler
     private readonly collectionRepository: CollectionRepository,
     private readonly queryBus: QueryBus,
     private readonly logger: LoggingService,
+    private readonly eventBus: EventBus,
   ) {
     this.logger.setContext('AddCommentCommandHandler');
   }
@@ -54,6 +61,14 @@ export class AddCommentCommandHandler
           dataActivities,
           dataActivityOrder,
         },
+      );
+      this.eventBus.publish(
+        new DataUpatedEvent(
+          collection,
+          collection.data[dataSlug],
+          collection.data[dataSlug],
+          caller,
+        ),
       );
       if (isPublic)
         return await this.queryBus.execute(
