@@ -323,7 +323,7 @@ export class ActivityBuilder {
     if (propertyId in added) {
       if (caller)
         return {
-          content: `{{actor}} set ${collection.properties[propertyId].name} to ${data}`,
+          content: `set ${collection.properties[propertyId].name} to ${data}`,
           ref: {
             actor: {
               id: caller,
@@ -339,7 +339,7 @@ export class ActivityBuilder {
     } else if (propertyId in deleted) {
       if (caller)
         return {
-          content: `{{actor}} cleared ${collection.properties[propertyId].name}`,
+          content: `cleared ${collection.properties[propertyId].name}`,
           ref: {
             actor: {
               id: caller,
@@ -357,7 +357,7 @@ export class ActivityBuilder {
       if (data === '' || data === null) {
         if (caller)
           return {
-            content: `{{actor}} cleared ${collection.properties[propertyId].name}`,
+            content: `cleared ${collection.properties[propertyId].name}`,
             ref: {
               actor: {
                 id: caller,
@@ -374,7 +374,7 @@ export class ActivityBuilder {
       }
       if (caller)
         return {
-          content: `{{actor}} updated ${collection.properties[propertyId].name} to ${data}`,
+          content: `updated ${collection.properties[propertyId].name}`,
           ref: {
             actor: {
               id: caller,
@@ -384,7 +384,7 @@ export class ActivityBuilder {
         };
       else
         return {
-          content: `Property ${collection.properties[propertyId].name} was updated to ${data}`,
+          content: `Property ${collection.properties[propertyId].name} was updated`,
           ref: {},
         };
     }
@@ -402,7 +402,7 @@ export class ActivityBuilder {
     if (propertyId in added) {
       if (caller)
         return {
-          content: `{{actor}} set ${collection.properties[propertyId].name}`,
+          content: `set ${collection.properties[propertyId].name}`,
           ref: {
             actor: {
               id: caller,
@@ -418,7 +418,7 @@ export class ActivityBuilder {
     } else if (propertyId in deleted) {
       if (caller)
         return {
-          content: `{{actor}} cleared ${collection.properties[propertyId].name}`,
+          content: `cleared ${collection.properties[propertyId].name}`,
           ref: {
             actor: {
               id: caller,
@@ -436,7 +436,7 @@ export class ActivityBuilder {
       if (data === '' || data === null) {
         if (caller)
           return {
-            content: `{{actor}} cleared ${collection.properties[propertyId].name}`,
+            content: `cleared ${collection.properties[propertyId].name}`,
             ref: {
               actor: {
                 id: caller,
@@ -453,7 +453,7 @@ export class ActivityBuilder {
       }
       if (caller)
         return {
-          content: `{{actor}} updated ${collection.properties[propertyId].name}`,
+          content: `updated ${collection.properties[propertyId].name}`,
           ref: {
             actor: {
               id: caller,
@@ -480,9 +480,9 @@ export class ActivityBuilder {
     if (propertyId in added) {
       if (caller)
         return {
-          content: `{{actor}} set ${
-            collection.properties[propertyId].name
-          } to ${data.slice(0, -1).split('T')[0]}`,
+          content: `set ${collection.properties[propertyId].name} to ${
+            data.slice(0, -1).split('T')[0]
+          }`,
           ref: {
             actor: {
               id: caller,
@@ -500,7 +500,7 @@ export class ActivityBuilder {
     } else if (propertyId in deleted) {
       if (caller)
         return {
-          content: `{{actor}} cleared ${collection.properties[propertyId].name}`,
+          content: `cleared ${collection.properties[propertyId].name}`,
           ref: {
             actor: {
               id: caller,
@@ -518,7 +518,7 @@ export class ActivityBuilder {
       if (data === '' || data === null) {
         if (caller)
           return {
-            content: `{{actor}} cleared ${collection.properties[propertyId].name}`,
+            content: `cleared ${collection.properties[propertyId].name}`,
             ref: {
               actor: {
                 id: caller,
@@ -535,9 +535,9 @@ export class ActivityBuilder {
       }
       if (caller)
         return {
-          content: `{{actor}} updated ${
-            collection.properties[propertyId].name
-          } to ${data.slice(0, -1).split('T')[0]}`,
+          content: `updated ${collection.properties[propertyId].name} to ${
+            data.slice(0, -1).split('T')[0]
+          }`,
           ref: {
             actor: {
               id: caller,
@@ -568,7 +568,7 @@ export class ActivityBuilder {
       if (data && data.length > 0) {
         if (caller)
           return {
-            content: `{{actor}} set ${collection.properties[propertyId].name} to {{user}}`,
+            content: `set ${collection.properties[propertyId].name} to {{user}}`,
             ref: {
               actor: {
                 id: caller,
@@ -593,7 +593,7 @@ export class ActivityBuilder {
       } else {
         if (caller)
           return {
-            content: `{{actor}} cleared ${collection.properties[propertyId].name}`,
+            content: `cleared ${collection.properties[propertyId].name}`,
             ref: {
               actor: {
                 id: caller,
@@ -634,7 +634,7 @@ export class ActivityBuilder {
         }
         if (caller)
           return {
-            content: `{{actor}} set ${collection.properties[propertyId].name} to ${dynamicData}`,
+            content: `set ${collection.properties[propertyId].name} to ${dynamicData}`,
             ref: {
               ...dynamicRef,
               actor: {
@@ -653,7 +653,7 @@ export class ActivityBuilder {
       } else {
         if (caller)
           return {
-            content: `{{actor}} cleared ${collection.properties[propertyId].name}`,
+            content: `cleared ${collection.properties[propertyId].name}`,
             ref: {
               actor: {
                 id: caller,
@@ -683,7 +683,7 @@ export class ActivityBuilder {
       if (data && data.value) {
         if (caller)
           return {
-            content: `{{actor}} set ${collection.properties[propertyId].name} to ${data.value} ${data.token?.name}`,
+            content: `set ${collection.properties[propertyId].name} to ${data.value} ${data.token?.name}`,
             ref: {
               actor: {
                 id: caller,
@@ -699,7 +699,7 @@ export class ActivityBuilder {
       } else {
         if (caller)
           return {
-            content: `{{actor}} cleared ${collection.properties[propertyId].name}`,
+            content: `cleared ${collection.properties[propertyId].name}`,
             ref: {
               actor: {
                 id: caller,
@@ -731,7 +731,7 @@ export class ActivityBuilder {
       if (data && data.label) {
         if (caller)
           return {
-            content: `{{actor}} set ${collection.properties[propertyId].name} to ${data.label}`,
+            content: `set ${collection.properties[propertyId].name} to ${data.label}`,
             ref: {
               actor: {
                 id: caller,
@@ -747,7 +747,7 @@ export class ActivityBuilder {
       } else {
         if (caller)
           return {
-            content: `{{actor}} cleared ${collection.properties[propertyId].name}`,
+            content: `cleared ${collection.properties[propertyId].name}`,
             ref: {
               actor: {
                 id: caller,
@@ -778,9 +778,9 @@ export class ActivityBuilder {
       if (data && data.length > 0) {
         if (caller)
           return {
-            content: `{{actor}} set ${
-              collection.properties[propertyId].name
-            } to ${data.map((d) => d.label).join(',')}`,
+            content: `set ${collection.properties[propertyId].name} to ${data
+              .map((d) => d.label)
+              .join(',')}`,
             ref: {
               actor: {
                 id: caller,
@@ -798,7 +798,7 @@ export class ActivityBuilder {
       } else {
         if (caller)
           return {
-            content: `{{actor}} cleared ${collection.properties[propertyId].name}`,
+            content: `cleared ${collection.properties[propertyId].name}`,
             ref: {
               actor: {
                 id: caller,

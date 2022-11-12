@@ -1,27 +1,21 @@
 import {
   CommandBus,
-  EventBus,
   EventsHandler,
   IEventHandler,
   QueryBus,
 } from '@nestjs/cqrs';
-import { Circle } from 'src/circle/model/circle.model';
-import { GetCircleByIdQuery } from 'src/circle/queries/impl';
+import { GetPrivateViewCollectionQuery } from 'src/collection/queries';
 import { LoggingService } from 'src/logging/logging.service';
-import {
-  NotificationEventV2,
-  SingleNotificationEvent,
-} from 'src/users/events/impl';
-import { DataAddedEvent } from '../impl/data-added.event';
+import { RealtimeGateway } from 'src/realtime/realtime.gateway';
 import { DataUpatedEvent } from '../impl/data-updated.event';
 
 @EventsHandler(DataUpatedEvent)
 export class DataUpatedEventHandler implements IEventHandler<DataUpatedEvent> {
   constructor(
     private readonly queryBus: QueryBus,
-    private readonly eventBus: EventBus,
     private readonly commandBus: CommandBus,
     private readonly logger: LoggingService,
+    private readonly realtime: RealtimeGateway,
   ) {
     this.logger.setContext('DataUpatedEventHandler');
   }
@@ -30,6 +24,15 @@ export class DataUpatedEventHandler implements IEventHandler<DataUpatedEvent> {
     try {
       console.log('DataUpatedEventHandler');
       const { caller, collection, update, existingData } = event;
+      this.logger.log(`Update Data in collection ${event.collection?.name}`);
+      const updatedCollection = await this.queryBus.execute(
+        new GetPrivateViewCollectionQuery(collection.slug),
+      );
+      console.log('event', `${collection.slug}:newActivity`);
+      this.realtime.server.emit(`${collection.slug}:newActivity`, {
+        data: updatedCollection,
+        user: caller.id,
+      });
     } catch (error) {
       this.logger.error(`${error.message}`);
     }
