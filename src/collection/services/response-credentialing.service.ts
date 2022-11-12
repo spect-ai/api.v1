@@ -2,7 +2,7 @@ import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { QueryBus } from '@nestjs/cqrs';
 import { GetCircleByIdQuery } from 'src/circle/queries/impl';
 import { GuildxyzService } from 'src/common/guildxyz.service';
-import { MintKudosService } from 'src/common/mint-kudos.service';
+import { MintKudosService } from 'src/credentials/services/mintkudos.service';
 import { RequestProvider } from 'src/users/user.provider';
 import { CollectionRepository } from '../collection.repository';
 import { CollectionResponseDto } from '../dto/collection-response.dto';

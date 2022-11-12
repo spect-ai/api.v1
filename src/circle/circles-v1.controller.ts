@@ -18,10 +18,8 @@ import {
   PublicViewAuthGuard,
   SessionAuthGuard,
 } from 'src/auth/iron-session.guard';
-import { ClaimKudosDto, MintKudosDto } from 'src/common/dtos/mint-kudos.dto';
 import { ObjectIdDto } from 'src/common/dtos/object-id.dto';
 import { RequiredRoleDto, RequiredSlugDto } from 'src/common/dtos/string.dto';
-import { MintKudosService, nftTypes } from 'src/common/mint-kudos.service';
 import {
   ArchiveCircleByIdCommand,
   ClaimCircleCommand,
@@ -66,6 +64,14 @@ import {
 } from './dto/folder.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { CirclesRepository } from './circles.repository';
+import {
+  MintKudosService,
+  nftTypes,
+} from 'src/credentials/services/mintkudos.service';
+import {
+  ClaimKudosDto,
+  MintKudosDto,
+} from 'src/credentials/dto/mint-kudos.dto';
 
 @Controller('circle/v1')
 export class CircleV1Controller {

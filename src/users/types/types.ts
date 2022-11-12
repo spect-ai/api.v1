@@ -187,6 +187,7 @@ export type NFT = {
 
 export type VerifiableCredential = {
   ceramicStreamId?: string;
+  providerName?: string; // relevant for gtc passport
 };
 
 export type SoulboundCredential = {

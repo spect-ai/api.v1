@@ -28,9 +28,9 @@ import { CirclesRolesService } from './services/circle-roles.service';
 import { CirclePrivateController } from './circles-private.controller';
 import { CirclesPrivateRepository } from './circles-private.repository';
 import { CirclePrivate } from './model/circle-private.model';
-import { MintKudosService } from 'src/common/mint-kudos.service';
 import { GuildxyzService } from 'src/common/guildxyz.service';
 import { CircleExternalController } from './circle-external.controller';
+import { MintKudosService } from 'src/credentials/services/mintkudos.service';
 
 @Module({
   imports: [

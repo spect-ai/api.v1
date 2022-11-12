@@ -26,3 +26,12 @@ export type MazuryCredentialType = {
     username: string;
   };
 };
+
+export type KudosType = {
+  kudosTokenId: number;
+  headline: string;
+  createdAt: string;
+  assetUrl: string;
+  claimStatus: string;
+  communityId: string;
+};

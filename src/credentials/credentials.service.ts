@@ -11,7 +11,8 @@ import { PassportReader } from '@gitcoinco/passport-sdk-reader';
 import { GitcoinPassportService } from './services/gitcoin-passport.service';
 import { MazuryService } from './services/mazury.service';
 import { Credential, VerifiableCredential } from 'src/users/types/types';
-import { MazuryCredentialType } from './types/types';
+import { KudosType, MazuryCredentialType } from './types/types';
+import { MintKudosService } from './services/mintkudos.service';
 
 @Injectable()
 export class CredentialsService {
@@ -19,6 +20,7 @@ export class CredentialsService {
     private readonly credentialRepository: CredentialsRepository,
     private readonly gitcoinService: GitcoinPassportService,
     private readonly mazuryService: MazuryService,
+    private readonly kudosService: MintKudosService,
   ) {}
 
   async getAll(): Promise<Credentials[]> {
@@ -116,6 +118,13 @@ export class CredentialsService {
   ): Promise<Credential[]> {
     if (issuer === 'gitcoinPassport') {
       return await this.gitcoinService.getByEthAddress(address);
+    } else if (issuer === 'kudos') {
+      const credentials = await this.kudosService.getKudosByAddress(
+        address,
+        offset,
+        limit,
+      );
+      return this.kudosService.mapToCredentials(credentials);
     } else {
       const credentials = await this.mazuryService.getCredentials(
         address,

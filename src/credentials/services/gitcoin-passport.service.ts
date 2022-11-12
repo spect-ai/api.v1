@@ -90,6 +90,9 @@ export class GitcoinPassportService {
           imageUri: stamp.providerImage,
           type: 'vc',
           service: 'GitcoinPassport',
+          metadata: {
+            providerName: stamp.providerName,
+          },
         });
       }
     }
