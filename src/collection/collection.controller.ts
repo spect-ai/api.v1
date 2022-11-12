@@ -336,6 +336,65 @@ export class CollectionController {
   }
 
   @UseGuards(SessionAuthGuard)
+  @Patch('/:id/addCommentPublic')
+  async addCommentPublic(
+    @Param() param: ObjectIdDto,
+    @Query() dataIdParam: RequiredUUIDDto,
+    @Body() addCommentDto: AddCommentDto,
+    @Request() req,
+  ): Promise<Collection> {
+    return await this.commandBus.execute(
+      new AddCommentCommand(
+        param.id,
+        dataIdParam.dataId,
+        addCommentDto.content,
+        addCommentDto.ref,
+        req.user,
+        true,
+      ),
+    );
+  }
+
+  @UseGuards(CollectionAuthGuard)
+  @Patch('/:id/updateCommentPublic')
+  async updateCommentPublic(
+    @Param() param: ObjectIdDto,
+    @Query() dataIdParam: RequiredUUIDDto,
+    @Query() activityIdParam: RequiredActivityUUIDDto,
+    @Body() updateCommentDto: UpdateCommentDto,
+    @Request() req,
+  ): Promise<Collection> {
+    return await this.commandBus.execute(
+      new UpdateCommentCommand(
+        param.id,
+        dataIdParam.dataId,
+        activityIdParam.activityId,
+        updateCommentDto.content,
+        updateCommentDto.ref,
+        req.user,
+      ),
+    );
+  }
+
+  @UseGuards(CollectionAuthGuard)
+  @Patch('/:id/removeCommentPublic')
+  async removeCommentPublic(
+    @Param() param: ObjectIdDto,
+    @Query() dataIdParam: RequiredUUIDDto,
+    @Query() activityIdParam: RequiredActivityUUIDDto,
+    @Request() req,
+  ): Promise<Collection> {
+    return await this.commandBus.execute(
+      new RemoveCommentCommand(
+        param.id,
+        dataIdParam.dataId,
+        activityIdParam.activityId,
+        req.user,
+      ),
+    );
+  }
+
+  @UseGuards(SessionAuthGuard)
   @Patch('/:id/airdropKudos')
   async airdropKudos(@Param() param: ObjectIdDto): Promise<object> {
     return await this.credentialingService.airdropMintkudosToken(param.id);
