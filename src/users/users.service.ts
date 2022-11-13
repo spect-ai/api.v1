@@ -116,14 +116,14 @@ export class UsersService {
     try {
       const numUsers = await this.usersRepository.count();
       let lensProfile;
-      try {
-        lensProfile = await this.lensService.getLensDefaultProfile(ethAddress);
-      } catch (error) {
-        this.logger.logError(
-          `Failed to get lens profile with error: ${error.message}`,
-          this.requestProvider,
-        );
-      }
+      // try {
+      //   lensProfile = await this.lensService.getLensDefaultProfile(ethAddress);
+      // } catch (error) {
+      //   this.logger.logError(
+      //     `Failed to get lens profile with error: ${error.message}`,
+      //     this.requestProvider,
+      //   );
+      // }
       const user = await this.usersRepository.create({
         username: `fren${numUsers}`,
         ethAddress: ethAddress,

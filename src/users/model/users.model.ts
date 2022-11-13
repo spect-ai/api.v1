@@ -7,15 +7,12 @@ import { Card } from 'src/card/model/card.model';
 import { Project } from 'src/project/model/project.model';
 import {
   Activity,
-  Education,
-  Experience,
   FormResponses,
   LensEducation,
   LensExperience,
   LensSkills,
   Notification,
   NotificationV2,
-  Skill,
   UserSubmittedApplication,
 } from '../types/types';
 import { Retro } from 'src/retro/models/retro.model';

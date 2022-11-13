@@ -35,7 +35,7 @@ export class AddExperienceDto {
 
   @IsArray()
   @IsOptional()
-  verifiableCredentials: VerifiableCredential[];
+  linkedCredentials: VerifiableCredential[];
 
   @IsBoolean()
   @IsOptional()

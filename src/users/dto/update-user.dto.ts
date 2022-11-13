@@ -9,7 +9,6 @@ import {
   IsString,
 } from 'class-validator';
 import { IsNullableEmail } from 'src/common/validators/isNullableEmail.validator';
-import { Education, Experience } from '../types/types';
 
 export class UpdateUserDto extends PartialType(User) {
   /**

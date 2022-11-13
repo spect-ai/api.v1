@@ -47,7 +47,7 @@ export class AddEducationDto {
 
   @IsArray()
   @IsOptional()
-  verifiableCredentials: VerifiableCredential[];
+  linkedCredentials: VerifiableCredential[];
 }
 
 export class UpdateEducationDto extends AddEducationDto {}

@@ -96,29 +96,6 @@ export type Credential = {
   metadata?: VerifiableCredential | SoulboundCredential;
 };
 
-export type Experience = {
-  role: string;
-  organization: string;
-  description: string;
-  startDate: string;
-  endDate: string;
-  verifiableCredentials: Credential[];
-};
-export type Skill = {
-  name: string;
-  verifiableCredentials: Credential[];
-  id: string;
-};
-
-export type Education = {
-  title: string;
-  description: string;
-  startDate: string;
-  endDate: string;
-  verifiableCredentials: Credential[];
-  id: string;
-};
-
 export type LensProfile = {
   id: string;
   name: string;
@@ -139,7 +116,7 @@ export type LensSkills = {
   icon: string;
   nfts: NFT[];
   poaps: string[];
-  verifiableCredentials: VerifiableCredential[];
+  linkedCredentials: Credential[];
 };
 
 export type LensExperience = {
@@ -149,7 +126,7 @@ export type LensExperience = {
   description: string;
   start_date: LensDate;
   end_date: LensDate;
-  verifiableCredentials: VerifiableCredential[];
+  linkedCredentials: Credential[];
   currentlyWorking: boolean;
   nfts: NFT[];
   poaps: string[];
@@ -165,7 +142,7 @@ export type LensEducation = {
   currentlyStudying: boolean;
   nfts: NFT[];
   poaps: string[];
-  verifiableCredentials: VerifiableCredential[];
+  linkedCredentials: Credential[];
 };
 
 export type NFT = {

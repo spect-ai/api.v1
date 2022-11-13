@@ -84,12 +84,12 @@ export class GitcoinPassportService {
     for (const stamp of stamps) {
       if (mappedStampsWithCredentials[stamp.provider]) {
         res.push({
-          id: stamp.id,
+          id: stamp.provider,
           name: stamp.stampName,
           description: stamp.stampDescription,
           imageUri: stamp.providerImage,
           type: 'vc',
-          service: 'GitcoinPassport',
+          service: 'gitcoinPassport',
           metadata: {
             providerName: stamp.providerName,
           },

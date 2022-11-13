@@ -5,14 +5,7 @@ import {
   IsOptional,
   IsString,
 } from 'class-validator';
-import {
-  Education,
-  Experience,
-  LensEducation,
-  LensExperience,
-  LensSkills,
-  Skill,
-} from '../types/types';
+import { LensEducation, LensExperience, LensSkills } from '../types/types';
 
 export class PublicProfileResponseDto {
   @IsString()
@@ -69,23 +62,15 @@ export class PrivateProfileResponseDto {
 
   @IsArray()
   @IsOptional()
-  skillsV2?: Skill[];
+  skillsV2?: LensSkills[];
 
   @IsObject()
   @IsOptional()
-  experiences?: { [key: string]: Experience };
-
-  @IsArray()
-  @IsOptional()
-  experienceOrder?: string[];
+  experiences?: LensExperience[];
 
   @IsObject()
   @IsOptional()
-  education?: { [key: string]: Education };
-
-  @IsArray()
-  @IsOptional()
-  educationOrder?: string[];
+  education?: LensEducation[];
 
   @IsString()
   @IsNotEmpty()
