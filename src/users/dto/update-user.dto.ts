@@ -9,6 +9,7 @@ import {
   IsString,
 } from 'class-validator';
 import { IsNullableEmail } from 'src/common/validators/isNullableEmail.validator';
+import { LensSkills } from '../types/types';
 
 export class UpdateUserDto extends PartialType(User) {
   /**
@@ -77,6 +78,10 @@ export class UpdateUserDto extends PartialType(User) {
   @IsString()
   @IsOptional()
   lensHandle?: string;
+
+  @IsArray()
+  @IsOptional()
+  skillsV2?: LensSkills[];
 }
 
 export class UpdateMetadata {

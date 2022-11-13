@@ -34,6 +34,7 @@ import { DetailedUserPubliceResponseDto } from './dto/detailed-user-response.dto
 import { AddEducationDto, UpdateEducationDto } from './dto/education.dto';
 import { AddExperienceDto, UpdateExperienceDto } from './dto/experience.dto';
 import { ReadNotificationDto, UpdateUserDto } from './dto/update-user.dto';
+import { UsersRepository } from './users.repository';
 import { UsersService } from './users.service';
 
 @Controller('user')
@@ -43,6 +44,7 @@ export class UsersController {
     private readonly usersService: UsersService,
     private readonly commandBus: CommandBus,
     private readonly queryBus: QueryBus,
+    private readonly userRepository: UsersRepository,
   ) {}
 
   @UseGuards(SessionAuthGuard)
@@ -180,5 +182,27 @@ export class UsersController {
     return await this.commandBus.execute(
       new RemoveEducationCommand(education.educationId, req.user),
     );
+  }
+
+  @Patch('/migrateSkills')
+  async migrateSkills() {
+    const users = await this.userRepository.findAll();
+    let i = 0;
+    for (const user of users) {
+      if (user.skills) {
+        const skills = user.skills.map((skill) => {
+          return {
+            title: skill,
+            icon: '',
+            linkedCredentials: [],
+            nfts: [],
+            poaps: [],
+          };
+        });
+        await this.userRepository.updateById(user.id, { skillsV2: skills });
+        i++;
+      }
+    }
+    return i;
   }
 }

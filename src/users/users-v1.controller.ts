@@ -1,18 +1,28 @@
-import { Controller, Get, Param, Request, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Param,
+  Query,
+  Request,
+  UseGuards,
+} from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { ApiTags } from '@nestjs/swagger';
 import {
   PublicViewAuthGuard,
   SessionAuthGuard,
 } from 'src/auth/iron-session.guard';
+import { GetMultipleCirclesQuery } from 'src/circle/queries/impl';
 import { ObjectIdDto } from 'src/common/dtos/object-id.dto';
 import { RequiredUsernameDto } from 'src/common/dtos/string.dto';
+import { CirclesOfUserDto } from './dto/metadata-of-user.dto';
 import {
   PrivateProfileResponseDto,
   PublicProfileResponseDto,
 } from './dto/profile-response.dto';
 import { LensService } from './external/lens.service';
 import { GetProfileByIdQuery } from './queries/impl';
+import { UserMetadataService } from './services/user-metadata.service';
 import { UsersService } from './users.service';
 
 @Controller('user/v1')
@@ -23,6 +33,7 @@ export class UsersControllerV1 {
     private readonly commandBus: CommandBus,
     private readonly queryBus: QueryBus,
     private readonly lensService: LensService,
+    private readonly userMetadataService: UserMetadataService,
   ) {}
 
   @UseGuards(PublicViewAuthGuard)
@@ -63,5 +74,11 @@ export class UsersControllerV1 {
     @Request() req,
   ): Promise<PublicProfileResponseDto | PrivateProfileResponseDto> {
     return this.lensService.getLensProfilesByAddress(req.user.ethAddress);
+  }
+
+  @UseGuards(PublicViewAuthGuard)
+  @Get('/:id/circles')
+  getCircles(@Param() param: ObjectIdDto): Promise<CirclesOfUserDto> {
+    return this.userMetadataService.getCirclesByUserId(param.id);
   }
 }
