@@ -76,10 +76,17 @@ export class Permissions {
 
 export class AddRoleDto {
   /**
-   * The alias for the role
+   * The role identifier
    */
   @IsString()
   @IsNotEmpty()
+  role: string;
+
+  /**
+   * The alias for the role
+   */
+  @IsString()
+  @IsOptional()
   name: string;
 
   /**

@@ -135,7 +135,7 @@ export class CircleV1Controller {
   async update(
     @Param() param: ObjectIdDto,
     @Body() updateCircleRequestDto: UpdateCircleRequestDto,
-  ): Promise<CircleResponseDto> {
+  ): Promise<DetailedCircleResponseDto> {
     return await this.circleCrudService.update(
       param.id,
       updateCircleRequestDto,
@@ -157,7 +157,7 @@ export class CircleV1Controller {
   async joinUsingInvitation(
     @Param() param: ObjectIdDto,
     @Body() joinDto: JoinCircleUsingInvitationRequestDto,
-  ): Promise<CircleResponseDto> {
+  ): Promise<DetailedCircleResponseDto> {
     return await this.circleMembershipService.joinUsingInvitation(
       param.id,
       joinDto,
@@ -168,7 +168,7 @@ export class CircleV1Controller {
   @Patch('/:id/joinUsingDiscord')
   async joinUsingDiscord(
     @Param() param: ObjectIdDto,
-  ): Promise<CircleResponseDto> {
+  ): Promise<DetailedCircleResponseDto> {
     return await this.circleMembershipService.joinUsingDiscord(param.id);
   }
 
@@ -176,13 +176,13 @@ export class CircleV1Controller {
   @Patch('/:id/joinUsingGuildxyz')
   async joinUsingGuildxyz(
     @Param() param: ObjectIdDto,
-  ): Promise<CircleResponseDto> {
+  ): Promise<DetailedCircleResponseDto> {
     return await this.circleMembershipService.joinUsingGuildxyz(param.id);
   }
 
   @UseGuards(SessionAuthGuard)
   @Patch('/:id/join')
-  async join(@Param() param: ObjectIdDto): Promise<CircleResponseDto> {
+  async join(@Param() param: ObjectIdDto): Promise<DetailedCircleResponseDto> {
     return await this.circleMembershipService.join(param.id);
   }
 
@@ -193,7 +193,7 @@ export class CircleV1Controller {
     @Param() param: ObjectIdDto,
     @Query() memberDto: MemberDto,
     @Body() updateMemberRolesDto: UpdateMemberRolesDto,
-  ): Promise<CircleResponseDto> {
+  ): Promise<DetailedCircleResponseDto> {
     return await this.circleMembershipService.updateMemberRoles(
       param.id,
       memberDto.member,
@@ -207,7 +207,7 @@ export class CircleV1Controller {
   async removeMember(
     @Param() param: ObjectIdDto,
     @Query() memberDto: MemberDto,
-  ): Promise<CircleResponseDto> {
+  ): Promise<DetailedCircleResponseDto> {
     return await this.circleMembershipService.removeMember(
       param.id,
       memberDto.member,
@@ -216,7 +216,7 @@ export class CircleV1Controller {
 
   @UseGuards(SessionAuthGuard)
   @Patch('/:id/leave')
-  async leave(@Param() param: ObjectIdDto): Promise<CircleResponseDto> {
+  async leave(@Param() param: ObjectIdDto): Promise<DetailedCircleResponseDto> {
     return await this.circleMembershipService.leave(param.id);
   }
 
@@ -226,7 +226,7 @@ export class CircleV1Controller {
   async addRole(
     @Param() param: ObjectIdDto,
     @Body() addRoleDto: AddRoleDto,
-  ): Promise<CircleResponseDto> {
+  ): Promise<DetailedCircleResponseDto> {
     return await this.circleRoleServie.addRole(param.id, addRoleDto);
   }
 
@@ -237,7 +237,7 @@ export class CircleV1Controller {
     @Param() param: ObjectIdDto,
     @Query() roleParam: RequiredRoleDto,
     @Body() updateRoleDto: UpdateRoleDto,
-  ): Promise<CircleResponseDto> {
+  ): Promise<DetailedCircleResponseDto> {
     return await this.circleRoleServie.updateRole(
       param.id,
       roleParam.role,
@@ -251,7 +251,7 @@ export class CircleV1Controller {
   async removeRole(
     @Param() param: ObjectIdDto,
     @Query() roleParam: RequiredRoleDto,
-  ): Promise<CircleResponseDto> {
+  ): Promise<DetailedCircleResponseDto> {
     return await this.circleRoleServie.removeRole(param.id, roleParam.role);
   }
 
@@ -356,7 +356,7 @@ export class CircleV1Controller {
   async claimCircle(
     @Param() param: ObjectIdDto,
     @Request() request,
-  ): Promise<CircleResponseDto> {
+  ): Promise<DetailedCircleResponseDto> {
     return await this.commandBus.execute(
       new ClaimCircleCommand(param.id, request.user),
     );

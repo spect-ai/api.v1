@@ -11,7 +11,6 @@ export class AddRoleCommandHandler implements ICommandHandler<AddRoleCommand> {
   async execute(command: AddRoleCommand): Promise<Circle> {
     try {
       const { circle, id, roleDto } = command;
-      const role = roleDto.name.toLowerCase().replace(/\s/g, '');
       let circleToUpdate = circle;
       if (!circleToUpdate) {
         circleToUpdate = await this.circlesRepository.findById(id);
@@ -19,13 +18,13 @@ export class AddRoleCommandHandler implements ICommandHandler<AddRoleCommand> {
       if (!circleToUpdate) {
         throw new InternalServerErrorException('Circle not found');
       }
-      if (circleToUpdate.roles[role]) {
+      if (circleToUpdate.roles[roleDto.role]) {
         throw new InternalServerErrorException('Role already exists');
       }
 
       const roles = {
         ...circleToUpdate.roles,
-        [role]: { ...roleDto, mutable: roleDto.mutable || true },
+        [roleDto.role]: { ...roleDto, mutable: roleDto.mutable || true },
       };
 
       const updatedCircle =
