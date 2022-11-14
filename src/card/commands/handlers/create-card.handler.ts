@@ -120,7 +120,7 @@ export class CreateCardCommandHandler
 
       for (const card of [createdCard, ...createdChildCards]) {
         this.eventBus.publish(
-          new CardCreatedEvent(card, project.slug, circle.slug),
+          new CardCreatedEvent(card, project.slug, circle.slug, caller),
         );
       }
 

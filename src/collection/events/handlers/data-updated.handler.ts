@@ -25,12 +25,14 @@ export class DataUpatedEventHandler implements IEventHandler<DataUpatedEvent> {
       console.log('DataUpatedEventHandler');
       const { caller, collection, update, existingData } = event;
       this.logger.log(`Update Data in collection ${event.collection?.name}`);
-      const updatedCollection = await this.queryBus.execute(
+      const pvtCollection = await this.queryBus.execute(
         new GetPrivateViewCollectionQuery(collection.slug),
       );
-      console.log('event', `${collection.slug}:newActivity`);
-      this.realtime.server.emit(`${collection.slug}:newActivity`, {
-        data: updatedCollection,
+      this.realtime.server.emit(`${collection.slug}:newActivityPrivate`, {
+        data: pvtCollection,
+        user: caller.id,
+      });
+      this.realtime.server.emit(`${collection.slug}:newActivityPublic`, {
         user: caller.id,
       });
     } catch (error) {

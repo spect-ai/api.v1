@@ -308,6 +308,23 @@ export class ActivityBuilder {
             imageRef: `${collection.properties[propertyId].type}Update`,
           });
       }
+      if (['milestone'].includes(collection.properties[propertyId].type)) {
+        const { content, ref } = this.milestoneFieldActivity(
+          propertyId,
+          data,
+          collection,
+          diff,
+          caller,
+        );
+        if (content)
+          activities.push({
+            content,
+            ref,
+            timestamp,
+            comment: false,
+            imageRef: `${collection.properties[propertyId].type}Update`,
+          });
+      }
     }
     return activities;
   }
@@ -683,7 +700,7 @@ export class ActivityBuilder {
       if (data && data.value) {
         if (caller)
           return {
-            content: `set ${collection.properties[propertyId].name} to ${data.value} ${data.token?.name}`,
+            content: `set ${collection.properties[propertyId].name} to ${data.value} ${data.token?.label}`,
             ref: {
               actor: {
                 id: caller,
@@ -693,7 +710,7 @@ export class ActivityBuilder {
           };
         else
           return {
-            content: `Property ${collection.properties[propertyId].name} was set to ${data.value} ${data.token?.name}`,
+            content: `Property ${collection.properties[propertyId].name} was set to ${data.value} ${data.token?.label}`,
             ref: {},
           };
       } else {
@@ -714,6 +731,52 @@ export class ActivityBuilder {
           };
         }
       }
+    }
+
+    return { content: null, ref: {} };
+  }
+
+  milestoneFieldActivity(
+    propertyId: string,
+    data: any,
+    collection: Collection,
+    diff: Diff<any>,
+    caller: string,
+  ): { content: string; ref: MappedItem<Ref> } {
+    const { added, deleted, updated } = diff;
+
+    if (propertyId in added) {
+      return {
+        content: `added milestone to ${collection.properties[propertyId].name}`,
+        ref: {
+          actor: {
+            id: caller,
+            refType: 'user',
+          },
+        },
+      };
+    }
+    if (propertyId in deleted) {
+      return {
+        content: `removed milestone from ${collection.properties[propertyId].name}`,
+        ref: {
+          actor: {
+            id: caller,
+            refType: 'user',
+          },
+        },
+      };
+    }
+    if (propertyId in updated) {
+      return {
+        content: `updated milestone in ${collection.properties[propertyId].name}`,
+        ref: {
+          actor: {
+            id: caller,
+            refType: 'user',
+          },
+        },
+      };
     }
 
     return { content: null, ref: {} };

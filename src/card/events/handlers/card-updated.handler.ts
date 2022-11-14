@@ -72,7 +72,10 @@ export class CardUpdatedEventHandler
       const project = await this.queryBus.execute(
         new GetDetailedProjectByIdQuery((card as any).project.id),
       );
-      this.realtime.server.emit('projectUpdate', project);
+      this.realtime.server.emit(`${projectSlug}:projectUpdate`, {
+        data: project,
+        user: caller,
+      });
     } catch (error) {
       this.logger.error(`${error.message}`);
     }

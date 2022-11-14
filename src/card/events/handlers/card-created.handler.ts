@@ -30,7 +30,7 @@ export class CardCreatedEventHandler
   async handle(event: CardCreatedEvent) {
     try {
       console.log('CardCreatedEventHandler');
-      const { card, circleSlug, projectSlug } = event;
+      const { card, circleSlug, projectSlug, caller } = event;
       const stakeholders = card.assignee.concat(card.reviewer);
       for (const userId of stakeholders) {
         if (userId !== card.creator) {
@@ -79,7 +79,10 @@ export class CardCreatedEventHandler
       const project = await this.queryBus.execute(
         new GetDetailedProjectByIdQuery((card as any).project),
       );
-      this.realtime.server.emit('projectUpdate', project);
+      this.realtime.server.emit(`${projectSlug}:projectUpdate`, {
+        data: project,
+        user: caller,
+      });
       this.logger.log(`Created Card: ${event.card?.title}`);
     } catch (error) {
       this.logger.error(`${error.message}`);
