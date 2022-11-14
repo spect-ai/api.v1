@@ -25,6 +25,13 @@ export class UpdateProjectRequestDto {
   description?: string;
 
   /**
+   * The default view of the project
+   */
+  @IsString()
+  @IsOptional()
+  defaultView?: string;
+
+  /**
    * Project is private or public
    */
   @IsBoolean()

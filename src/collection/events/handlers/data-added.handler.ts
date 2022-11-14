@@ -7,7 +7,10 @@ import {
 } from '@nestjs/cqrs';
 import { Circle } from 'src/circle/model/circle.model';
 import { GetCircleByIdQuery } from 'src/circle/queries/impl';
-import { GetCollectionBySlugQuery } from 'src/collection/queries';
+import {
+  GetCollectionBySlugQuery,
+  GetPrivateViewCollectionQuery,
+} from 'src/collection/queries';
 import { LoggingService } from 'src/logging/logging.service';
 import { RealtimeGateway } from 'src/realtime/realtime.gateway';
 import { SingleNotificationEvent } from 'src/users/events/impl';
@@ -72,7 +75,7 @@ export class DataAddedEventHandler implements IEventHandler<DataAddedEvent> {
         `Created New Data in collection ${event.collection?.name}`,
       );
       const updatedCollection = await this.queryBus.execute(
-        new GetCollectionBySlugQuery(collection.slug),
+        new GetPrivateViewCollectionQuery(collection.slug),
       );
       console.log('event', `${collection.slug}:dataAdded`);
       this.realtime.server.emit(

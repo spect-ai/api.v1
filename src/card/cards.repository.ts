@@ -83,7 +83,17 @@ export class CardsRepository extends BaseRepository<Card> {
     return await this.findById(id)
       .populate({
         path: 'project',
-        populate: { path: 'cards', select: populatedCardFieldsOnProject },
+        populate: {
+          path: 'cards',
+          select: populatedCardFieldsOnProject,
+          populate: {
+            path: 'children',
+            select: {
+              title: 1,
+              slug: 1,
+            },
+          },
+        },
       })
       .populate('children', populatedCardFields)
       .populate('parent', populatedCardFields);
@@ -99,7 +109,17 @@ export class CardsRepository extends BaseRepository<Card> {
     })
       .populate({
         path: 'project',
-        populate: { path: 'cards', select: populatedCardFieldsOnProject },
+        populate: {
+          path: 'cards',
+          select: populatedCardFieldsOnProject,
+          populate: {
+            path: 'children',
+            select: {
+              title: 1,
+              slug: 1,
+            },
+          },
+        },
       })
       .populate('children', populatedCardFields)
       .populate('parent', populatedCardFields);

@@ -1,13 +1,22 @@
 import { InternalServerErrorException } from '@nestjs/common';
-import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
+import { IQueryHandler, QueryBus, QueryHandler } from '@nestjs/cqrs';
 import { CollectionRepository } from 'src/collection/collection.repository';
+import {
+  CollectionPublicResponseDto,
+  CollectionResponseDto,
+} from 'src/collection/dto/collection-response.dto';
 import { Collection } from 'src/collection/model/collection.model';
+import { AdvancedAccessService } from 'src/collection/services/advanced-access.service';
+import { CommonTools } from 'src/common/common.service';
 import { LoggingService } from 'src/logging/logging.service';
+import { GetMultipleUsersByIdsQuery } from 'src/users/queries/impl';
 import {
   GetCollectionByFilterQuery,
   GetCollectionByIdQuery,
   GetCollectionBySlugQuery,
   GetMultipleCollectionsQuery,
+  GetPrivateViewCollectionQuery,
+  GetPublicViewCollectionQuery,
 } from '../impl/get-collection.query';
 
 @QueryHandler(GetCollectionByIdQuery)
@@ -128,6 +137,153 @@ export class GetCollectionByFilterQueryHandler
       );
       throw new InternalServerErrorException(
         'Failed while getting collection using filter',
+        error.message,
+      );
+    }
+  }
+}
+
+@QueryHandler(GetPublicViewCollectionQuery)
+export class GetPublicViewCollectionQueryHandler
+  implements IQueryHandler<GetPublicViewCollectionQuery>
+{
+  constructor(
+    private readonly queryBus: QueryBus,
+    private readonly advancedAccessService: AdvancedAccessService,
+    private readonly logger: LoggingService,
+  ) {
+    logger.setContext('GetPublicViewCollectionQueryHandler');
+  }
+
+  async execute(
+    query: GetPublicViewCollectionQuery,
+  ): Promise<CollectionPublicResponseDto> {
+    try {
+      const { caller, slug, collection } = query;
+      let collectionToGet = collection;
+      if (!collectionToGet) {
+        collectionToGet = await this.queryBus.execute(
+          new GetCollectionBySlugQuery(slug),
+        );
+      }
+      if (!collectionToGet) {
+        throw new Error('Collection not found');
+      }
+
+      const hasRole = await this.advancedAccessService.hasRoleToAccessForm(
+        collectionToGet,
+        caller,
+      );
+      const hasPassedSybilCheck =
+        await this.advancedAccessService.hasPassedSybilProtection(
+          collectionToGet,
+          caller,
+        );
+      const formHasCredentialsButUserIsntConnected =
+        collectionToGet.mintkudosTokenId &&
+        collectionToGet.mintkudosTokenId > 0 &&
+        !caller;
+      const canFillForm =
+        hasRole &&
+        !formHasCredentialsButUserIsntConnected &&
+        hasPassedSybilCheck;
+
+      const previousResponses = [];
+      if (collectionToGet.dataOwner)
+        for (const [dataSlug, owner] of Object.entries(
+          collectionToGet.dataOwner,
+        )) {
+          if (owner === caller?.id) {
+            previousResponses.push(collectionToGet.data[dataSlug]);
+          }
+        }
+
+      const kudosClaimedByUser =
+        collectionToGet.mintkudosClaimedBy &&
+        collectionToGet.mintkudosClaimedBy.includes(caller?.id);
+      const canClaimKudos =
+        collectionToGet.mintkudosTokenId &&
+        !kudosClaimedByUser &&
+        collectionToGet.numOfKudos > collectionToGet.mintkudosClaimedBy?.length;
+      const res =
+        this.advancedAccessService.removePrivateFields(collectionToGet);
+      return {
+        ...res,
+        canFillForm,
+        hasRole,
+        canClaimKudos,
+        hasPassedSybilCheck,
+        previousResponses,
+      };
+    } catch (error) {
+      this.logger.logError(
+        `Failed while getting public collection with error: ${error.message}`,
+        query,
+      );
+      throw new InternalServerErrorException(
+        'Failed while getting public collection',
+        error.message,
+      );
+    }
+  }
+}
+
+@QueryHandler(GetPrivateViewCollectionQuery)
+export class GetPrivateViewCollectionQueryHandler
+  implements IQueryHandler<GetPrivateViewCollectionQuery>
+{
+  constructor(
+    private readonly queryBus: QueryBus,
+    private readonly commonTools: CommonTools,
+    private readonly logger: LoggingService,
+  ) {
+    logger.setContext('GetPrivateViewCollectionQueryHandler');
+  }
+
+  async execute(
+    query: GetPrivateViewCollectionQuery,
+  ): Promise<CollectionResponseDto> {
+    try {
+      const { slug, collection } = query;
+      let collectionToGet = collection;
+      if (!collectionToGet) {
+        collectionToGet = await this.queryBus.execute(
+          new GetCollectionBySlugQuery(slug),
+        );
+      }
+      if (!collectionToGet) {
+        throw new Error('Collection not found');
+      }
+
+      let profileInfo = [];
+      if (collectionToGet.dataOwner) {
+        const profiles = [];
+        for (const [dataSlug, owner] of Object.entries(
+          collectionToGet.dataOwner,
+        )) {
+          profiles.push(owner);
+        }
+        if (profiles.length > 0) {
+          profileInfo = await this.queryBus.execute(
+            new GetMultipleUsersByIdsQuery(profiles, null, {
+              username: 1,
+              avatar: 1,
+              ethAddress: 1,
+            }),
+          );
+        }
+      }
+      return {
+        ...collectionToGet,
+        profiles: this.commonTools.objectify(profileInfo, 'id'),
+      };
+    } catch (error) {
+      this.logger.logError(
+        `Failed while getting private collection with error: ${error.message}`,
+        query,
+      );
+      throw new InternalServerErrorException(
+        'Failed while getting private collection',
         error.message,
       );
     }

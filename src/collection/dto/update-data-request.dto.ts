@@ -12,4 +12,9 @@ export class UpdateDataDto {
   readonly data: object;
 }
 
+export class VoteDataDto {
+  @IsNotEmpty()
+  readonly vote: number;
+}
+
 export class ArchiveDataDto {}

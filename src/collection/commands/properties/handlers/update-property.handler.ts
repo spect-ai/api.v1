@@ -1,11 +1,12 @@
 import { InternalServerErrorException } from '@nestjs/common';
-import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
+import { CommandHandler, ICommandHandler, QueryBus } from '@nestjs/cqrs';
 import { CollectionRepository } from 'src/collection/collection.repository';
 import { Collection } from 'src/collection/model/collection.model';
 import { MappedItem } from 'src/common/interfaces';
 import { LoggingService } from 'src/logging/logging.service';
 import { UpdatePropertyCommand } from '../impl/update-property.command';
 import { Property } from 'src/collection/types/types';
+import { GetPrivateViewCollectionQuery } from 'src/collection/queries';
 
 @CommandHandler(UpdatePropertyCommand)
 export class UpdatePropertyCommandHandler
@@ -14,6 +15,7 @@ export class UpdatePropertyCommandHandler
   constructor(
     private readonly collectionRepository: CollectionRepository,
     private readonly logger: LoggingService,
+    private readonly queryBus: QueryBus,
   ) {
     this.logger.setContext('UpdatePropertyCommandHandler');
   }
@@ -107,7 +109,9 @@ export class UpdatePropertyCommandHandler
         },
       );
 
-      return updatedCollection;
+      return await this.queryBus.execute(
+        new GetPrivateViewCollectionQuery(null, updatedCollection),
+      );
     } catch (error) {
       this.logger.error(
         `Failed updating property to collection with error: ${error}`,
@@ -129,6 +133,7 @@ export class UpdatePropertyCommandHandler
     if (prevProperty.type === newProperty.type || !newProperty.type) {
       return dataObj;
     }
+    if (!dataObj) return dataObj;
     switch (prevProperty.type) {
       case 'shortText':
       case 'longText':

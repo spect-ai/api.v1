@@ -93,8 +93,10 @@ export class DataValidationService {
       if (['shortText', 'longText'].includes(properties[propertyId].type)) {
         if (typeof data !== 'string') return false;
       } else if (['singleSelect'].includes(properties[propertyId].type)) {
+        console.log(data);
         if (typeof data !== 'object') return false;
-        if (!data['value'] || !data['label']) return false;
+        if (Object.keys(data)?.length && (!data['value'] || !data['label']))
+          return false;
       } else if (['multiSelect'].includes(properties[propertyId].type)) {
         if (!Array.isArray(data)) return false;
         for (const elem of data) {

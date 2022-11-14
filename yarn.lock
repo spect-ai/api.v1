@@ -743,6 +743,35 @@
     "@ethersproject/properties" "^5.7.0"
     "@ethersproject/strings" "^5.7.0"
 
+"@gitcoinco/passport-sdk-reader@^0.1.4":
+  version "0.1.4"
+  resolved "https://registry.yarnpkg.com/@gitcoinco/passport-sdk-reader/-/passport-sdk-reader-0.1.4.tgz#875ee9cc421c6f93e97fcba6d530b5c1882ce71f"
+  integrity sha512-MRZ+p3ZdBz7/7U7/+3/LnwU4nXMeWGwPWakvPLTXL0ys74jmIrn0b1j2uh0D8EsdstoAnksbO9wEBRED40wHAg==
+  dependencies:
+    "@gitcoinco/passport-sdk-types" "^0.2.0"
+    tulons "^0.0.7"
+
+"@gitcoinco/passport-sdk-scorer@git+https://github.com/spect-ai/scorer.git":
+  version "0.1.4"
+  resolved "git+https://github.com/spect-ai/scorer.git#a433780c165c12414dd918f4a29867898c6ef38a"
+  dependencies:
+    "@gitcoinco/passport-sdk-reader" "^0.1.4"
+    "@gitcoinco/passport-sdk-types" "^0.2.0"
+    "@gitcoinco/passport-sdk-verifier" "^0.2.1"
+
+"@gitcoinco/passport-sdk-types@^0.2.0":
+  version "0.2.0"
+  resolved "https://registry.yarnpkg.com/@gitcoinco/passport-sdk-types/-/passport-sdk-types-0.2.0.tgz#51be289db9621c84c247fc5f05bcd46196bfe94d"
+  integrity sha512-qS7P4atgeAEfI6VlGcoXr10E6SsKAlHiPNfSyr25HJpnNomi7J0Yy6krscUPiPsn1eCKOFQeC8uDqTdiXXMGLw==
+
+"@gitcoinco/passport-sdk-verifier@^0.2.1", "@gitcoinco/passport-sdk-verifier@git+https://github.com/spect-ai/passport-sdk-verifier.git":
+  version "0.2.1"
+  resolved "git+https://github.com/spect-ai/passport-sdk-verifier.git#cbc4a93fdf7d7439ad485c844bd98b1a9726de7d"
+  dependencies:
+    "@gitcoinco/passport-sdk-reader" "^0.1.4"
+    "@gitcoinco/passport-sdk-types" "^0.2.0"
+    "@spruceid/didkit-wasm-node" "^0.2.1"
+
 "@guildxyz/sdk@^1.1.1":
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/@guildxyz/sdk/-/sdk-1.1.1.tgz#1ff8d3ff12e5003d9286e49b5a66de3bc5b10166"
@@ -1409,6 +1438,11 @@
   version "3.1.0"
   resolved "https://registry.yarnpkg.com/@socket.io/component-emitter/-/component-emitter-3.1.0.tgz#96116f2a912e0c02817345b3c10751069920d553"
   integrity sha512-+9jVqKhRSpsc591z5vX+X5Yyw+he/HCB4iQ/RYxw35CEPaY1gnsNE43nf9n9AaYjAQrTiI/mOwKUKdUs9vf7Xg==
+
+"@spruceid/didkit-wasm-node@^0.2.1":
+  version "0.2.1"
+  resolved "https://registry.yarnpkg.com/@spruceid/didkit-wasm-node/-/didkit-wasm-node-0.2.1.tgz#85f7023979b4ef84bd6de16c79c67b6e9a08e1db"
+  integrity sha512-c8e3u5FIRS/2Gf6UHnRPnfRozgKgby4avZzlvIiaJRDVLl1LaX1SE13vEvKV2rAq6NMfZrV4YG908M4uVlT90Q==
 
 "@spruceid/siwe-parser@^1.1.3":
   version "1.1.3"
@@ -2359,7 +2393,7 @@ asynckit@^0.4.0:
   resolved "https://registry.yarnpkg.com/asynckit/-/asynckit-0.4.0.tgz#c79ed97f7f34cb8f2ba1bc9790bcc366474b4b79"
   integrity sha512-Oei9OH4tRh0YqU3GxhX79dM/mwVgvbZJaSNaRk+bshkj0S5cfHcgYakreBjrHwatXKbz+IoIdYLxrKim2MjW0Q==
 
-axios@0.27.2:
+axios@0.27.2, axios@^0.27.2:
   version "0.27.2"
   resolved "https://registry.yarnpkg.com/axios/-/axios-0.27.2.tgz#207658cc8621606e586c85db4b41a750e756d972"
   integrity sha512-t+yRIyySRTp/wua5xEr+z1q60QmLq8ABsS5O9Me1AsE5dfKqgnCFzwiCZZ/cGNd1lq4/7akDWMxdhVlucjmnOQ==
@@ -7974,6 +8008,13 @@ tsutils@^3.21.0:
   integrity sha512-mHKK3iUXL+3UF6xL5k0PEhKRUBKPBCv/+RkEOpjRWxxx27KKRBmmA60A9pgOUvMi8GKhRMPEmjBRPzs2W7O1OA==
   dependencies:
     tslib "^1.8.1"
+
+tulons@^0.0.7:
+  version "0.0.7"
+  resolved "https://registry.yarnpkg.com/tulons/-/tulons-0.0.7.tgz#31677402ab51dc51478d375f90df76ea2ca8cbb9"
+  integrity sha512-JyL9Vn4PPG2TTEJS35yqQgAMLd3IX9pFIlbiLmv47HuHTo2F3ihYg2yfMqde4hqGY1nGk77iJ/lvsTbAURJ8rg==
+  dependencies:
+    axios "^0.27.2"
 
 tv4@^1.3.0:
   version "1.3.0"

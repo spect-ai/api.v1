@@ -50,11 +50,9 @@ export class ResponseCredentialingService {
       collection.mintkudosTokenId,
       this.requestProvider.user.ethAddress,
     );
-    console.log({ operationId });
     if (operationId) {
       const mintkudosClaimedBy = collection.mintkudosClaimedBy || [];
 
-      mintkudosClaimedBy.push(this.requestProvider.user.id);
       await this.collectionRepository.updateById(collection.id, {
         mintkudosClaimedBy: [
           ...mintkudosClaimedBy,

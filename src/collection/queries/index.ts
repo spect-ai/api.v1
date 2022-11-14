@@ -5,6 +5,8 @@ import {
   GetCollectionByIdQueryHandler,
   GetCollectionBySlugQueryHandler,
   GetMultipleCollectionsQueryHandler,
+  GetPrivateViewCollectionQueryHandler,
+  GetPublicViewCollectionQueryHandler,
 } from './handlers/get-collection.handler';
 
 export const QueryHandlers = [
@@ -12,4 +14,6 @@ export const QueryHandlers = [
   GetCollectionByIdQueryHandler,
   GetCollectionBySlugQueryHandler,
   GetMultipleCollectionsQueryHandler,
+  GetPrivateViewCollectionQueryHandler,
+  GetPublicViewCollectionQueryHandler,
 ];

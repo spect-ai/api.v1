@@ -1,12 +1,14 @@
 import {
   IsArray,
   IsBoolean,
-  IsNotEmpty,
   IsNumber,
+  IsObject,
   IsOptional,
   IsString,
 } from 'class-validator';
 import { GuildRole } from 'src/common/types/role.type';
+import { OpportunityInfo } from '../types/types';
+import { Voting } from '../types/types';
 
 export class UpdateCollectionDto {
   /**
@@ -105,4 +107,31 @@ export class UpdateCollectionDto {
   @IsArray()
   @IsOptional()
   propertyOrder: string[];
+
+  @IsBoolean()
+  @IsOptional()
+  sybilProtectionEnabled: boolean;
+
+  @IsObject()
+  @IsOptional()
+  sybilProtectionScores: { [id: string]: number };
+
+  @IsNumber()
+  @IsOptional()
+  numOfKudos: number;
+
+  @IsBoolean()
+  @IsOptional()
+  credentialCurationEnabled: boolean;
+
+  @IsBoolean()
+  @IsOptional()
+  isAnOpportunity: boolean;
+
+  @IsObject()
+  @IsOptional()
+  opportunityInfo: OpportunityInfo;
+  @IsObject()
+  @IsOptional()
+  voting: Voting;
 }

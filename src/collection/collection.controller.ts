@@ -28,7 +28,6 @@ import {
   RequiredSlugDto,
   RequiredUUIDDto,
 } from 'src/common/dtos/string.dto';
-import { MailService } from 'src/mail/mail.service';
 import {
   AddCommentCommand,
   AddPropertyCommand,
@@ -45,6 +44,7 @@ import {
   RemoveMultipleDataCommand,
 } from './commands/data/impl/remove-data.command';
 import { UpdateDataCommand } from './commands/data/impl/update-data.command';
+import { VoteDataCommand } from './commands/data/impl/vote-data.command';
 import {
   CollectionPublicResponseDto,
   CollectionResponseDto,
@@ -56,14 +56,20 @@ import {
   AddCommentDto,
   UpdateCommentDto,
 } from './dto/update-comments-request.dto';
-import { AddDataDto, UpdateDataDto } from './dto/update-data-request.dto';
+import {
+  AddDataDto,
+  UpdateDataDto,
+  VoteDataDto,
+} from './dto/update-data-request.dto';
 import {
   AddPropertyDto,
   UpdatePropertyDto,
 } from './dto/update-property-request.dto';
 import { Collection } from './model/collection.model';
-import { GetCollectionBySlugQuery } from './queries/impl/get-collection.query';
-import { CrudService } from './services/crud.service';
+import {
+  GetPrivateViewCollectionQuery,
+  GetPublicViewCollectionQuery,
+} from './queries/impl/get-collection.query';
 import { ResponseCredentialingService } from './services/response-credentialing.service';
 
 @Controller('collection/v1')
@@ -71,9 +77,7 @@ export class CollectionController {
   constructor(
     private readonly commandBus: CommandBus,
     private readonly queryBus: QueryBus,
-    private readonly crudService: CrudService,
     private readonly credentialingService: ResponseCredentialingService,
-    private readonly mailService: MailService,
   ) {}
 
   @UseGuards(ViewCollectionAuthGuard)
@@ -81,21 +85,20 @@ export class CollectionController {
   async findBySlug(
     @Param() param: RequiredSlugDto,
   ): Promise<CollectionResponseDto> {
-    return await this.crudService.getCollectionBySlug(param.slug);
+    return await this.queryBus.execute(
+      new GetPrivateViewCollectionQuery(param.slug),
+    );
   }
 
   @UseGuards(PublicViewAuthGuard)
   @Get('/public/slug/:slug')
   async findBySlugPublic(
     @Param() param: RequiredSlugDto,
+    @Request() req,
   ): Promise<CollectionPublicResponseDto> {
-    return await this.crudService.getCollectionPublicViewBySlug(param.slug);
-  }
-
-  @UseGuards(PublicViewAuthGuard)
-  @Get('/:id')
-  async findByObjectId(@Param() param: ObjectIdDto): Promise<Collection> {
-    return await this.queryBus.execute(new GetCollectionBySlugQuery(param.id));
+    return await this.queryBus.execute(
+      new GetPublicViewCollectionQuery(req.user, param.slug),
+    );
   }
 
   @UseGuards(CreateNewCollectionAuthGuard)
@@ -210,6 +213,7 @@ export class CollectionController {
         req.user,
         param.id,
         dataIdParam.dataId,
+        'public',
       ),
     );
   }
@@ -229,19 +233,8 @@ export class CollectionController {
         req.user,
         param.id,
         dataIdParam.dataId,
+        'private',
       ),
-    );
-  }
-
-  @UseGuards(SessionAuthGuard)
-  @Patch('/:id/removeData')
-  async removeData(
-    @Param() param: ObjectIdDto,
-    @Query() dataIdParam: RequiredUUIDDto,
-    @Request() req,
-  ): Promise<Collection> {
-    return await this.commandBus.execute(
-      new RemoveDataCommand(req.user, param.id, dataIdParam.dataId),
     );
   }
 
@@ -346,5 +339,23 @@ export class CollectionController {
   @Patch('/:id/airdropKudos')
   async airdropKudos(@Param() param: ObjectIdDto): Promise<object> {
     return await this.credentialingService.airdropMintkudosToken(param.id);
+  }
+
+  @UseGuards(SessionAuthGuard)
+  @Patch('/:id/voteOnData')
+  async voteOnData(
+    @Param() param: ObjectIdDto,
+    @Query() dataIdParam: RequiredUUIDDto,
+    @Body() voteDataDto: VoteDataDto,
+    @Request() req,
+  ): Promise<Collection> {
+    return await this.commandBus.execute(
+      new VoteDataCommand(
+        dataIdParam.dataId,
+        req.user,
+        param.id,
+        voteDataDto.vote,
+      ),
+    );
   }
 }

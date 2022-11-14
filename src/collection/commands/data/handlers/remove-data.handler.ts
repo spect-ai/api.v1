@@ -6,6 +6,7 @@ import {
   QueryBus,
 } from '@nestjs/cqrs';
 import { CollectionRepository } from 'src/collection/collection.repository';
+import { GetPrivateViewCollectionQuery } from 'src/collection/queries';
 import { LoggingService } from 'src/logging/logging.service';
 import {
   RemoveDataCommand,
@@ -39,7 +40,9 @@ export class RemoveDataCommandHandler
           data: collection.data,
         },
       );
-      return updatedCollection;
+      return await this.queryBus.execute(
+        new GetPrivateViewCollectionQuery(null, updatedCollection),
+      );
     } catch (err) {
       this.logger.error(
         `Failed removing data from collection Id ${collectionId} with error ${err.message}`,
@@ -82,7 +85,9 @@ export class RemoveMultipleDataCommandHandler
           data: collection.data,
         },
       );
-      return updatedCollection;
+      return await this.queryBus.execute(
+        new GetPrivateViewCollectionQuery(null, updatedCollection),
+      );
     } catch (err) {
       this.logger.error(
         `Failed removing multiple data from collection Id ${collectionId} with error ${err.message}`,

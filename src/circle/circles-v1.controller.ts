@@ -94,43 +94,6 @@ export class CircleV1Controller {
     private readonly circleRepository: CirclesRepository,
   ) {}
 
-  @Patch('/syncAll')
-  async syncAll() {
-    const circles = await this.circleRepository.findAll();
-    for (const circle of circles) {
-      for (const [roleId, role] of Object.entries(circle.roles)) {
-        role.permissions = {
-          ...role.permissions,
-          createNewForm: role.permissions.createNewProject,
-          manageFormSettings: role.permissions.manageProjectSettings,
-          updateFormResponsesManually: role.permissions.createNewProject,
-        };
-      }
-
-      await this.circleRepository.updateById(circle.id, {
-        roles: circle.roles,
-      });
-    }
-    return true;
-  }
-
-  @Patch('/syncOne')
-  async syncOne() {
-    const circle = await this.circleRepository.findOne({ slug: '0-1' });
-    for (const [roleId, role] of Object.entries(circle.roles)) {
-      role.permissions = {
-        ...role.permissions,
-        createNewForm: role.permissions.createNewProject,
-        manageFormSettings: role.permissions.manageProjectSettings,
-        updateFormResponsesManually: role.permissions.createNewProject,
-      };
-    }
-    await this.circleRepository.updateById(circle.id, {
-      roles: circle.roles,
-    });
-
-    return true;
-  }
   @UseGuards(PublicViewAuthGuard)
   @Get('/allPublicParents')
   async findAllParentCircles(): Promise<BucketizedCircleResponseDto> {

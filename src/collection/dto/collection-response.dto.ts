@@ -1,4 +1,6 @@
 import { MappedItem } from 'src/common/interfaces';
+import { GuildRole } from 'src/common/types/role.type';
+import { User } from 'src/users/model/users.model';
 import { Activity, DefaultViewType, Property } from '../types/types';
 
 export class CollectionPublicResponseDto {
@@ -25,6 +27,8 @@ export class CollectionPublicResponseDto {
   updatingResponseAllowed: boolean;
 
   previousResponses: MappedItem<object>;
+  hasRole: boolean;
+  hasPassedSybilCheck: boolean;
 }
 
 export class CollectionResponseDto {
@@ -50,9 +54,7 @@ export class CollectionResponseDto {
 
   defaultView: DefaultViewType;
 
-  formRoleGating: number[];
-
-  canFillForm: boolean;
+  formRoleGating: GuildRole[];
 
   mintkudosTokenId: number;
 
@@ -60,4 +62,5 @@ export class CollectionResponseDto {
   circleRolesToNotifyUponNewResponse: string[];
 
   circleRolesToNotifyUponUpdatedResponse: string[];
+  profiles: { [key: string]: User };
 }

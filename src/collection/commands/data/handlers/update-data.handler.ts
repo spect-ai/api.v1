@@ -11,6 +11,10 @@ import { UpdateDataCommand } from '../impl/update-data.command';
 import { DataValidationService } from 'src/collection/validations/data-validation.service';
 import { DataUpatedEvent } from 'src/collection/events';
 import { ActivityBuilder } from 'src/collection/services/activity.service';
+import {
+  GetPrivateViewCollectionQuery,
+  GetPublicViewCollectionQuery,
+} from 'src/collection/queries';
 
 @CommandHandler(UpdateDataCommand)
 export class UpdateDataCommandHandler
@@ -28,7 +32,7 @@ export class UpdateDataCommandHandler
   }
 
   async execute(command: UpdateDataCommand) {
-    const { data, caller, collectionId, dataSlug } = command;
+    const { data, caller, collectionId, dataSlug, view } = command;
     try {
       const collection = await this.collectionRepository.findById(collectionId);
       if (!collection) throw 'Collection does not exist';
@@ -46,12 +50,12 @@ export class UpdateDataCommandHandler
       if (!validData) {
         throw new Error(`Data invalid`);
       }
-      const { dataActivities, dataActivityOrder } = this.activityBuilder.build(
-        data,
-        collection,
-        dataSlug,
-        caller?.id,
-      );
+      // const { dataActivities, dataActivityOrder } = this.activityBuilder.build(
+      //   data,
+      //   collection,
+      //   dataSlug,
+      //   caller?.id,
+      // );
       const updatedCollection = await this.collectionRepository.updateById(
         collectionId,
         {
@@ -62,8 +66,8 @@ export class UpdateDataCommandHandler
               ...data,
             },
           },
-          dataActivities,
-          dataActivityOrder,
+          // dataActivities,
+          // dataActivityOrder,
         },
       );
       this.eventBus.publish(
@@ -74,7 +78,19 @@ export class UpdateDataCommandHandler
           caller,
         ),
       );
-      return updatedCollection;
+      if (view === 'public') {
+        const publicView = await this.queryBus.execute(
+          new GetPublicViewCollectionQuery(
+            caller,
+            collection.slug,
+            updatedCollection,
+          ),
+        );
+        return publicView;
+      }
+      return await await this.queryBus.execute(
+        new GetPrivateViewCollectionQuery(collection.slug, updatedCollection),
+      );
     } catch (err) {
       this.logger.error(
         `Failed updating data in collection with collection Id ${collectionId} with error ${err.message}`,

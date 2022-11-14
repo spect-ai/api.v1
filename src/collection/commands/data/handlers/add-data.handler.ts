@@ -15,6 +15,8 @@ import { DataAddedEvent } from 'src/collection/events';
 import { Collection } from 'src/collection/model/collection.model';
 import { MappedItem } from 'src/common/interfaces';
 import { Activity } from 'src/collection/types/types';
+import { AdvancedAccessService } from 'src/collection/services/advanced-access.service';
+import { GetPublicViewCollectionQuery } from 'src/collection/queries';
 
 @CommandHandler(AddDataCommand)
 export class AddDataCommandHandler implements ICommandHandler<AddDataCommand> {
@@ -24,6 +26,7 @@ export class AddDataCommandHandler implements ICommandHandler<AddDataCommand> {
     private readonly eventBus: EventBus,
     private readonly logger: LoggingService,
     private readonly validationService: DataValidationService,
+    private readonly advancedAccessService: AdvancedAccessService,
   ) {
     this.logger.setContext('AddDataCommandHandler');
   }
@@ -40,7 +43,20 @@ export class AddDataCommandHandler implements ICommandHandler<AddDataCommand> {
       ) {
         throw 'User has already submitted a response';
       }
-      console.log({ data });
+      const hasRole = await this.advancedAccessService.hasRoleToAccessForm(
+        collection,
+        caller,
+      );
+      if (!hasRole)
+        throw 'User does not have access to add data this collection';
+
+      const hasPassedSybilCheck =
+        await this.advancedAccessService.hasPassedSybilProtection(
+          collection,
+          caller,
+        );
+      if (!hasPassedSybilCheck) throw 'User has not passed sybil check';
+
       const validData = await this.validationService.validate(
         data,
         'add',
@@ -55,19 +71,15 @@ export class AddDataCommandHandler implements ICommandHandler<AddDataCommand> {
         if (property.default && !data[propertyId]) {
           data[propertyId] = property.default;
         }
-        if (
-          collection.properties[propertyId]?.type === 'date' &&
-          data[propertyId]
-        ) {
-          data[propertyId] = new Date(data[propertyId]);
-        }
       }
       data['slug'] = uuidv4();
-      const { dataActivities, dataActivityOrder } = this.getActivity(
-        collection,
-        data,
-        caller?.id,
-      );
+
+      /** Disabling activity for forms as it doesnt quite make sense yet */
+      // const { dataActivities, dataActivityOrder } = this.getActivity(
+      //   collection,
+      //   data,
+      //   caller?.id,
+      // );
       const updatedCollection = await this.collectionRepository.updateById(
         collectionId,
         {
@@ -75,8 +87,8 @@ export class AddDataCommandHandler implements ICommandHandler<AddDataCommand> {
             ...collection.data,
             [data['slug']]: data,
           },
-          dataActivities,
-          dataActivityOrder,
+          // dataActivities,
+          // dataActivityOrder,
           dataOwner: {
             ...(collection.dataOwner || {}),
             [data['slug']]: caller?.id,
@@ -84,7 +96,13 @@ export class AddDataCommandHandler implements ICommandHandler<AddDataCommand> {
         },
       );
       this.eventBus.publish(new DataAddedEvent(collection, data, caller));
-      return updatedCollection;
+      return await this.queryBus.execute(
+        new GetPublicViewCollectionQuery(
+          caller,
+          collection.slug,
+          updatedCollection,
+        ),
+      );
     } catch (err) {
       this.logger.error(
         `Failed adding collection to collection Id ${collectionId} with error ${err}`,

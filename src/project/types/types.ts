@@ -26,6 +26,8 @@ export type Filter = {
   deadline: string;
 };
 
+export type ViewType = 'List' | 'Board' | 'Gantt' | 'Table';
+
 export type View = {
   type: 'List' | 'Board' | 'Gantt' | 'Table';
   hidden: boolean;
@@ -35,7 +37,7 @@ export type View = {
 };
 
 export type PopulatedProjectFields = {
-  cards?: { [fieldName: string]: 0 | 1 };
+  cards?: { [fieldName: string]: 0 | 1 | { [fieldName: string]: 0 | 1 } };
   parents?: { [fieldName: string]: 0 | 1 };
 };
 

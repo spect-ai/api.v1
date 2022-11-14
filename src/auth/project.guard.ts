@@ -60,7 +60,7 @@ export class ProjectAuthGuard implements CanActivate {
       );
     } catch (error) {
       console.log(error);
-      request.session.destroy();
+      // request.session.destroy();
       throw new HttpException({ message: error }, 422);
     }
   }
@@ -96,7 +96,7 @@ export class CreateNewProjectAuthGuard implements CanActivate {
       );
     } catch (error) {
       console.log(error);
-      request.session.destroy();
+      // request.session.destroy();
       throw new HttpException({ message: error }, 422);
     }
   }
@@ -148,7 +148,7 @@ export class ViewProjectAuthGuard implements CanActivate {
       return true;
     } catch (error) {
       console.log(error);
-      request.session.destroy();
+      // request.session.destroy();
       throw new HttpException({ message: error }, 422);
     }
   }

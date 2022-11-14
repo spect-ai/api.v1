@@ -1,7 +1,8 @@
 import { InternalServerErrorException } from '@nestjs/common';
-import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
+import { CommandHandler, ICommandHandler, QueryBus } from '@nestjs/cqrs';
 import { CollectionRepository } from 'src/collection/collection.repository';
 import { Collection } from 'src/collection/model/collection.model';
+import { GetPrivateViewCollectionQuery } from 'src/collection/queries';
 import { LoggingService } from 'src/logging/logging.service';
 import { RemovePropertyCommand } from '../impl/remove-property.command';
 
@@ -12,6 +13,7 @@ export class RemovePropertyCommandHandler
   constructor(
     private readonly collectionRepository: CollectionRepository,
     private readonly logger: LoggingService,
+    private readonly queryBus: QueryBus,
   ) {
     this.logger.setContext('RemovePropertyCommandHandler');
   }
@@ -45,7 +47,9 @@ export class RemovePropertyCommandHandler
           data: collection.data,
         },
       );
-      return updatedCollection;
+      return await this.queryBus.execute(
+        new GetPrivateViewCollectionQuery(null, updatedCollection),
+      );
     } catch (error) {
       this.logger.error(
         `Failed removing property to collection with error: ${error.message}`,
