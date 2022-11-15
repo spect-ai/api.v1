@@ -53,12 +53,6 @@ export class UsersController {
     return this.usersService.getUserById(req.user.id);
   }
 
-  // @UseGuards(SessionAuthGuard)
-  @Get('/verifiedCircles/:id')
-  async getMyVerifiedCircles(@Param('id') id: string) {
-    return await this.usersService.getVerifiedCircles(id);
-  }
-
   @UseGuards(PublicViewAuthGuard)
   @Get('/:id')
   findById(@Param('id') id: string) {

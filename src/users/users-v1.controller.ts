@@ -1,18 +1,10 @@
-import {
-  Controller,
-  Get,
-  Param,
-  Query,
-  Request,
-  UseGuards,
-} from '@nestjs/common';
+import { Controller, Get, Param, Request, UseGuards } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { ApiTags } from '@nestjs/swagger';
 import {
   PublicViewAuthGuard,
   SessionAuthGuard,
 } from 'src/auth/iron-session.guard';
-import { GetMultipleCirclesQuery } from 'src/circle/queries/impl';
 import { ObjectIdDto } from 'src/common/dtos/object-id.dto';
 import { RequiredUsernameDto } from 'src/common/dtos/string.dto';
 import { CirclesOfUserDto } from './dto/metadata-of-user.dto';
@@ -80,5 +72,10 @@ export class UsersControllerV1 {
   @Get('/:id/circles')
   getCircles(@Param() param: ObjectIdDto): Promise<CirclesOfUserDto> {
     return this.userMetadataService.getCirclesByUserId(param.id);
+  }
+
+  @Get('/verifiedCircles/:address')
+  async getMyVerifiedCircles(@Param('address') address: string) {
+    return await this.usersService.getVerifiedCircles(address);
   }
 }

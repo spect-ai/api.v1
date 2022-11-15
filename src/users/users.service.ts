@@ -19,11 +19,13 @@ import { AddItemsCommand, RemoveItemsCommand } from './commands/impl';
 import { UserCreatedEvent } from './events/impl';
 import { LensService } from './external/lens.service';
 import { GetCircleByIdQuery } from 'src/circle/queries/impl';
+import { EthAddressService } from 'src/_eth-address/_eth-address.service';
 
 @Injectable()
 export class UsersService {
   constructor(
     private readonly ethAddressRepository: EthAddressRepository,
+    private readonly ethAddressService: EthAddressService,
     private readonly usersRepository: UsersRepository,
     private readonly requestProvider: RequestProvider,
     private readonly queryBus: QueryBus,
@@ -238,12 +240,16 @@ export class UsersService {
     }
   }
 
-  async getVerifiedCircles(id: string): Promise<string[]> {
+  async getVerifiedCircles(address: string): Promise<string[]> {
     try {
-      console.log({ id });
-      const user: User = await this.queryBus.execute(
-        new GetUserByIdQuery(id, this.requestProvider.user?.id),
-      );
+      console.log({ address });
+      const user: any = (
+        await this.ethAddressService.findByAddress(address.toLowerCase())
+      )?.user;
+      if (!user) {
+        return [];
+      }
+      console.log({ user });
       const circles = await Promise.all(
         user.circles.map(async (circleId) => {
           const circle = await this.queryBus.execute(
