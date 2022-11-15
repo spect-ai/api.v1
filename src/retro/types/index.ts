@@ -33,6 +33,11 @@ export type Stats = {
    * Can receive votes from other members
    */
   canReceive?: boolean;
+
+  /**
+   * Whether the participant voted in the retro or not
+   */
+  voted?: boolean;
 };
 
 export type MappedFeedback = {

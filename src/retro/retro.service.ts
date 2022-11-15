@@ -50,8 +50,17 @@ export class RetroService {
   ): Promise<DetailedRetroResponseDto> {
     let feedbackGiven = {} as MappedFeedback;
     let feedbackReceived = {} as MappedFeedback;
+    const stats = retro.stats as MappedStats;
     if (this.requestProvider.user) {
-      for (const [userId, stats] of Object.entries(retro.stats)) {
+      for (const [userId] of Object.entries(retro.stats)) {
+        const stat = stats?.[userId];
+        let voted = false;
+        if (retro.stats[userId].votesRemaining != 100) {
+          voted = true;
+        }
+        Object.assign(stat, { voted });
+      }
+      for (const [userId] of Object.entries(retro.stats)) {
         if (userId !== this.requestProvider.user.id) {
           delete retro.stats[userId].votesGiven;
           delete retro.stats[userId].votesRemaining;
@@ -75,6 +84,7 @@ export class RetroService {
     return Object.assign(retro, {
       feedbackGiven,
       feedbackReceived,
+      stats,
     });
   }
 
