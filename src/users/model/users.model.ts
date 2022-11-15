@@ -175,13 +175,13 @@ export class User extends ProfileModel {
   @prop({ default: {} })
   formResponses: FormResponses;
 
-  @prop({ default: {} })
+  @prop({ default: [] })
   experiences?: LensExperience[];
 
   /**
    * Educations of user
    */
-  @prop({ default: {} })
+  @prop({ default: [] })
   education?: LensEducation[];
 
   /**
