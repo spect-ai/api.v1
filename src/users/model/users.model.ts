@@ -1,10 +1,9 @@
 import { prop } from '@typegoose/typegoose';
 import { ProfileModel } from 'src/common/models/profile.model';
 import { useMongoosePlugin } from 'src/base/decorators/use-mongoose-plugins.decorator';
-import { ObjectId, Schema } from 'mongoose';
+import { Schema } from 'mongoose';
 import { Circle } from 'src/circle/model/circle.model';
 import { Card } from 'src/card/model/card.model';
-import { Project } from 'src/project/model/project.model';
 import {
   Activity,
   FormResponses,
@@ -16,6 +15,7 @@ import {
   UserSubmittedApplication,
 } from '../types/types';
 import { Retro } from 'src/retro/models/retro.model';
+import { Collection } from 'src/collection/model/collection.model';
 
 @useMongoosePlugin()
 export class User extends ProfileModel {
@@ -78,6 +78,18 @@ export class User extends ProfileModel {
    */
   @prop({ ref: () => Circle, type: Schema.Types.String, default: [] })
   circles: string[];
+
+  /**
+   * List of collections created by the user
+   */
+  @prop({ ref: () => Collection, type: Schema.Types.String, default: [] })
+  collections: string[];
+
+  /**
+   * List of forms responded to by the user
+   */
+  @prop({ ref: () => Collection, type: Schema.Types.String, default: [] })
+  collectionsSubmittedTo: string[];
 
   /**
    * List of cards a user is currently assigned to
@@ -168,12 +180,6 @@ export class User extends ProfileModel {
    */
   @prop({ ref: () => Retro, type: Schema.Types.String, default: [] })
   retro: string[];
-
-  /**
-   * Data created in forms indexed by users
-   */
-  @prop({ default: {} })
-  formResponses: FormResponses;
 
   @prop({ default: [] })
   experiences?: LensExperience[];

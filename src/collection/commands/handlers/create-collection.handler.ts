@@ -1,6 +1,7 @@
 import {
   CommandBus,
   CommandHandler,
+  EventBus,
   ICommandHandler,
   QueryBus,
 } from '@nestjs/cqrs';
@@ -14,6 +15,7 @@ import { GetCircleByIdQuery } from 'src/circle/queries/impl';
 import { UpdateCircleCommand } from 'src/circle/commands/impl/update-circle.command';
 import { LoggingService } from 'src/logging/logging.service';
 import { InternalServerErrorException } from '@nestjs/common';
+import { CollectionCreatedEvent } from 'src/collection/events';
 
 @CommandHandler(CreateCollectionCommand)
 export class CreateCollectionCommandHandler
@@ -23,6 +25,7 @@ export class CreateCollectionCommandHandler
     private readonly collectionRepository: CollectionRepository,
     private readonly queryBus: QueryBus,
     private readonly commandBus: CommandBus,
+    private readonly eventBus: EventBus,
     private readonly logger: LoggingService,
   ) {
     this.logger.setContext('CreateCollectionCommandHandler');
@@ -96,6 +99,10 @@ export class CreateCollectionCommandHandler
           },
           caller,
         ),
+      );
+
+      this.eventBus.publish(
+        new CollectionCreatedEvent(createdCollection, caller),
       );
 
       return createdCollection;

@@ -74,7 +74,9 @@ export type ArrayField =
   | 'assignedClosedCards'
   | 'reviewingClosedCards'
   | 'followedCircles'
-  | 'retro';
+  | 'retro'
+  | 'collectionsSubmittedTo'
+  | 'collections';
 
 export type FlattendedArrayFieldItems = {
   fieldName: ArrayField;

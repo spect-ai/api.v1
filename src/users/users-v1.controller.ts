@@ -7,6 +7,8 @@ import {
 } from 'src/auth/iron-session.guard';
 import { ObjectIdDto } from 'src/common/dtos/object-id.dto';
 import { RequiredUsernameDto } from 'src/common/dtos/string.dto';
+import { GetCirclesCommand } from './commands/metadata/impl/get-circles.command';
+import { GetResponsesCommand } from './commands/metadata/impl/get-responses.command';
 import { CirclesOfUserDto } from './dto/metadata-of-user.dto';
 import {
   PrivateProfileResponseDto,
@@ -14,7 +16,6 @@ import {
 } from './dto/profile-response.dto';
 import { LensService } from './external/lens.service';
 import { GetProfileByIdQuery } from './queries/impl';
-import { UserMetadataService } from './services/user-metadata.service';
 import { UsersService } from './users.service';
 
 @Controller('user/v1')
@@ -22,10 +23,9 @@ import { UsersService } from './users.service';
 export class UsersControllerV1 {
   constructor(
     private readonly usersService: UsersService,
-    private readonly commandBus: CommandBus,
     private readonly queryBus: QueryBus,
+    private readonly commandBus: CommandBus,
     private readonly lensService: LensService,
-    private readonly userMetadataService: UserMetadataService,
   ) {}
 
   @UseGuards(PublicViewAuthGuard)
@@ -70,8 +70,14 @@ export class UsersControllerV1 {
 
   @UseGuards(PublicViewAuthGuard)
   @Get('/:id/circles')
-  getCircles(@Param() param: ObjectIdDto): Promise<CirclesOfUserDto> {
-    return this.userMetadataService.getCirclesByUserId(param.id);
+  async getCircles(@Param() param: ObjectIdDto): Promise<CirclesOfUserDto> {
+    return await this.commandBus.execute(new GetCirclesCommand(param.id));
+  }
+
+  @UseGuards(PublicViewAuthGuard)
+  @Get('/:id/responses')
+  async getResponses(@Param() param: ObjectIdDto): Promise<CirclesOfUserDto> {
+    return await this.commandBus.execute(new GetResponsesCommand(param.id));
   }
 
   @Get('/verifiedCircles/:address')

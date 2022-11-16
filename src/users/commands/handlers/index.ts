@@ -8,6 +8,8 @@ import { RemoveExperienceCommandHandler } from '../experience/handlers/remove-ex
 import { AddEducationCommandHandler } from '../education/handlers/add-education.handler';
 import { RemoveEducationCommandHandler } from '../education/handlers/remove-education.handler';
 import { UpdateEducationCommandHandler } from '../education/handlers/update-education.handler';
+import { GetCirclesCommandHandler } from '../metadata/handlers/get-circles.handler';
+import { GetResponsesCommandHandler } from '../metadata/handlers/get-responses.handler';
 
 export const CommandHandlers = [
   AddItemCommandHandler,
@@ -20,4 +22,6 @@ export const CommandHandlers = [
   AddEducationCommandHandler,
   RemoveEducationCommandHandler,
   UpdateEducationCommandHandler,
+  GetCirclesCommandHandler,
+  GetResponsesCommandHandler,
 ];

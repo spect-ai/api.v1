@@ -4,7 +4,6 @@ import {
   EventsHandler,
   IEventHandler,
 } from '@nestjs/cqrs';
-import { CirclesRepository } from 'src/circle/circles.repository';
 import { LoggingService } from 'src/logging/logging.service';
 import { AddItemsCommand as AddItemsToUserCommand } from 'src/users/commands/impl';
 import { CreatedCircleEvent } from '../impl';

@@ -23,7 +23,6 @@ import { LoggingService } from 'src/logging/logging.service';
 import { MailService } from 'src/mail/mail.service';
 import { LensService } from './external/lens.service';
 import { UsersControllerV1 } from './users-v1.controller';
-import { UserMetadataService } from './services/user-metadata.service';
 
 @Module({
   imports: [
@@ -49,7 +48,6 @@ import { UserMetadataService } from './services/user-metadata.service';
     LoggingService,
     MailService,
     LensService,
-    UserMetadataService,
   ],
   exports: [UsersService, UsersRepository, UsersModule],
 })

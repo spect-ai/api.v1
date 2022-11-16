@@ -7,14 +7,12 @@ import {
 } from '@nestjs/cqrs';
 import { Circle } from 'src/circle/model/circle.model';
 import { GetCircleByIdQuery } from 'src/circle/queries/impl';
-import {
-  GetCollectionBySlugQuery,
-  GetPrivateViewCollectionQuery,
-} from 'src/collection/queries';
+import { GetPrivateViewCollectionQuery } from 'src/collection/queries';
 import { LoggingService } from 'src/logging/logging.service';
 import { RealtimeGateway } from 'src/realtime/realtime.gateway';
 import { SingleNotificationEvent } from 'src/users/events/impl';
 import { DataAddedEvent } from '../impl/data-added.event';
+import { AddItemsCommand as AddItemsToUserCommand } from 'src/users/commands/impl';
 
 @EventsHandler(DataAddedEvent)
 export class DataAddedEventHandler implements IEventHandler<DataAddedEvent> {
@@ -77,6 +75,20 @@ export class DataAddedEventHandler implements IEventHandler<DataAddedEvent> {
       const updatedCollection = await this.queryBus.execute(
         new GetPrivateViewCollectionQuery(collection.slug),
       );
+
+      this.commandBus.execute(
+        new AddItemsToUserCommand(
+          [
+            {
+              fieldName: 'collectionsSubmittedTo',
+              itemIds: [collection.slug],
+            },
+          ],
+          null,
+          caller.id,
+        ),
+      );
+
       console.log('event', `${collection.slug}:dataAdded`);
       this.realtime.server.emit(
         `${collection.slug}:dataAdded`,
