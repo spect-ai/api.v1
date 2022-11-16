@@ -47,15 +47,15 @@ export class GetCirclesCommandHandler
           slug: circle.slug,
           description: circle.description,
           id: circle._id.toString(),
-          avatar: circle.avatar || circle.parents[0].avatar,
+          avatar: circle.avatar || circle.parents[0]?.avatar,
           parents: circle.parents,
-          gradient: circle.gradient || circle.parents[0].gradient,
+          gradient: circle.gradient || circle.parents[0]?.gradient,
         };
       });
     } catch (err) {
-      this.logger.error(`Failed adding education to user with error ${err}`);
+      this.logger.error(`Failed getting circles with error ${err}`);
       throw new InternalServerErrorException(
-        `Failed adding education to user with error ${err}`,
+        `Failed getting circles with error ${err}`,
       );
     }
   }

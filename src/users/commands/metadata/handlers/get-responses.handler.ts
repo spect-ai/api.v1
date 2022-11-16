@@ -44,9 +44,9 @@ export class GetResponsesCommandHandler
         };
       });
     } catch (err) {
-      this.logger.error(`Failed adding education to user with error ${err}`);
+      this.logger.error(`Failed getting responses with error ${err}`);
       throw new InternalServerErrorException(
-        `Failed adding education to user with error ${err}`,
+        `Failed getting responses with error ${err}`,
       );
     }
   }
