@@ -23,20 +23,33 @@ export class GetCirclesCommandHandler
       console.log({ userId });
       const user = await this.userRepository.findById(userId);
       const circles = await this.queryBus.execute(
-        new GetMultipleCirclesQuery({
-          _id: {
-            $in: user?.circles || [],
+        new GetMultipleCirclesQuery(
+          {
+            _id: {
+              $in: user?.circles || [],
+            },
+            'status.archived': false,
           },
-          'status.archived': false,
-        }),
+          {
+            parents: {
+              slug: 1,
+              avatar: 1,
+              id: 1,
+              name: 1,
+              gradient: 1,
+            },
+          },
+        ),
       );
-      return circles.map((circle) => {
+      return circles.map((circle: any) => {
         return {
           name: circle.name,
           slug: circle.slug,
           description: circle.description,
           id: circle._id.toString(),
-          avatar: circle.avatar,
+          avatar: circle.avatar || circle.parents[0].avatar,
+          parents: circle.parents,
+          gradient: circle.gradient || circle.parents[0].gradient,
         };
       });
     } catch (err) {

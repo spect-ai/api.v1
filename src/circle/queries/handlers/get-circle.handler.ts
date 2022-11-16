@@ -1,9 +1,6 @@
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { CirclesRepository } from 'src/circle/circles.repository';
-import {
-  DetailedCircleResponseDto,
-  CircleResponseDto,
-} from 'src/circle/dto/detailed-circle-response.dto';
+import { DetailedCircleResponseDto } from 'src/circle/dto/detailed-circle-response.dto';
 import {
   GetCircleBySlugQuery,
   GetCircleByIdQuery,
@@ -14,7 +11,7 @@ import {
 } from '../impl/get-circle.query';
 import { LoggingService } from 'src/logging/logging.service';
 import { InternalServerErrorException } from '@nestjs/common';
-import { Circle, ExtendedCircle } from 'src/circle/model/circle.model';
+import { ExtendedCircle } from 'src/circle/model/circle.model';
 
 @QueryHandler(GetCircleByIdQuery)
 export class GetCircleByIdQueryHandler
