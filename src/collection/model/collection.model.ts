@@ -11,6 +11,7 @@ import {
   Property,
   Voting,
   OpportunityInfo,
+  Permissions,
 } from '../types/types';
 
 @useMongoosePlugin()
@@ -53,6 +54,12 @@ export class Collection extends BaseModel {
    */
   @prop({ required: true })
   creator: string;
+
+  /**
+   * Form Specific roles
+   **/
+  @prop()
+  permissions: Permissions;
 
   /**
    * Parent Ids of the collection

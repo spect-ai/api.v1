@@ -7,6 +7,7 @@ import {
   OpportunityInfo,
   Property,
   Voting,
+  Permissions,
 } from '../types/types';
 
 export class CreateCollectionResponseDto {
@@ -211,6 +212,8 @@ export class CreateCollectionResponseDto {
   isAnOpportunity: boolean;
 
   opportunityInfo: OpportunityInfo;
+
+  permissions: Permissions;
 
   voting: Voting;
 }
