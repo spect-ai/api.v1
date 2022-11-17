@@ -30,6 +30,8 @@ export class AddPropertyCommandHandler
       )
         throw 'Cannot add property with duplicate name';
 
+      if (addPropertyCommandDto.name === 'slug')
+        throw 'Cannot add property with name slug';
       const updatedCollection = await this.collectionRepository.updateById(
         collectionId,
         {
@@ -55,7 +57,7 @@ export class AddPropertyCommandHandler
         command,
       );
       throw new InternalServerErrorException(
-        'Failed adding property to collection with error: ${error}',
+        `Failed adding property to collection with error: ${error}`,
         error.message,
       );
     }
