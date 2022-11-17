@@ -1,14 +1,10 @@
 import {
   Body,
   Controller,
-  Delete,
   Get,
   HttpException,
-  InternalServerErrorException,
   Param,
-  ParseArrayPipe,
   Patch,
-  Post,
   Query,
   SetMetadata,
   UseGuards,
@@ -17,17 +13,16 @@ import {
   PublicViewAuthGuard,
   SessionAuthGuard,
 } from 'src/auth/iron-session.guard';
-import { CircleAuthGuard, CreateCircleAuthGuard } from 'src/auth/circle.guard';
+import { CircleAuthGuard } from 'src/auth/circle.guard';
 import { CirclesService } from './circles.service';
 import { CirclesRepository } from './circles.repository';
-import { CreateCircleRequestDto } from './dto/create-circle-request.dto';
 import { DetailedCircleResponseDto } from './dto/detailed-circle-response.dto';
 import {
   UpdateCircleGithubRepoRequestDto,
   UpdateCircleRequestDto,
 } from './dto/update-circle-request.dto';
 import { RequestProvider } from 'src/users/user.provider';
-import { ApiParam, ApiQuery } from '@nestjs/swagger';
+import { ApiQuery, ApiTags } from '@nestjs/swagger';
 import { ObjectIdDto } from 'src/common/dtos/object-id.dto';
 import { UpdateMemberRolesDto } from './dto/update-member-role.dto';
 import { MemberDto } from './dto/params.dto';
@@ -38,6 +33,7 @@ import { RequiredSlugDto } from 'src/common/dtos/string.dto';
 import { CirclePermission } from 'src/common/types/role.type';
 
 @Controller('circle')
+@ApiTags('circle.v0(deprecated)')
 export class CirclesController {
   constructor(
     private readonly circlesService: CirclesService,

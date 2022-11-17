@@ -8,6 +8,7 @@ import {
   SetMetadata,
   UseGuards,
 } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 import { SessionAuthGuard } from 'src/auth/iron-session.guard';
 import { CreateNewRetroAuthGuard, RetroAuthGuard } from 'src/auth/retro.guard';
 import { ObjectIdDto } from 'src/common/dtos/object-id.dto';
@@ -22,6 +23,7 @@ import {
 import { RetroService } from './retro.service';
 
 @Controller('retro')
+@ApiTags('retro.v0')
 export class RetroController {
   constructor(private readonly retroService: RetroService) {}
 

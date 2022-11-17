@@ -5,23 +5,20 @@ import {
   InternalServerErrorException,
   Param,
   Patch,
-  Post,
   SetMetadata,
   UseGuards,
 } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 import { CircleAuthGuard } from 'src/auth/circle.guard';
-import { SessionAuthGuard } from 'src/auth/iron-session.guard';
 import { ObjectIdDto } from 'src/common/dtos/object-id.dto';
 import { LoggingService } from 'src/logging/logging.service';
 import { CirclesPrivateRepository } from './circles-private.repository';
-import {
-  CreatePrivateCircleRequestDto,
-  UpdatePrivateCircleRequestDto,
-} from './dto/private-circle-request.dto';
+import { UpdatePrivateCircleRequestDto } from './dto/private-circle-request.dto';
 
 import { CirclePrivate } from './model/circle-private.model';
 
 @Controller('circle/private/v1')
+@ApiTags('circle.private.v1')
 export class CirclePrivateController {
   constructor(
     private readonly circlesPrivateRepository: CirclesPrivateRepository,

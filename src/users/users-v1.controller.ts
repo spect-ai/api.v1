@@ -19,7 +19,7 @@ import { GetProfileByIdQuery } from './queries/impl';
 import { UsersService } from './users.service';
 
 @Controller('user/v1')
-@ApiTags('Users')
+@ApiTags('user.v1')
 export class UsersControllerV1 {
   constructor(
     private readonly usersService: UsersService,

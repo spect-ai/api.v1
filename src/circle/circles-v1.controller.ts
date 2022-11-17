@@ -72,8 +72,10 @@ import {
   ClaimKudosDto,
   MintKudosDto,
 } from 'src/credentials/dto/mint-kudos.dto';
+import { ApiTags } from '@nestjs/swagger';
 
 @Controller('circle/v1')
+@ApiTags('circle.v1')
 export class CircleV1Controller {
   constructor(
     private readonly circleMembershipService: CircleMembershipService,

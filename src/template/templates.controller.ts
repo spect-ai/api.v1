@@ -1,5 +1,5 @@
 import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
-import { ObjectId } from 'mongoose';
+import { ApiTags } from '@nestjs/swagger';
 import { SessionAuthGuard } from 'src/auth/iron-session.guard';
 import { CreateTemplateDto } from './dto/create-project-template-dto';
 import { DetailedTemplateResponseDto } from './dto/detailed-template-response.dto';
@@ -7,6 +7,7 @@ import { GetProjectTemplatesDto } from './dto/get-project-templates.dto';
 import { TemplatesService } from './templates.service';
 
 @Controller('template')
+@ApiTags('template.v0')
 export class TemplatesController {
   constructor(private readonly templatesService: TemplatesService) {}
 

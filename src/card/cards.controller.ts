@@ -4,50 +4,30 @@ import {
   Get,
   Param,
   Patch,
-  Post,
   Query,
   SetMetadata,
   UseGuards,
 } from '@nestjs/common';
 import { ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
 import {
-  ConnectedGithubAuthGuard,
   PublicViewAuthGuard,
   SessionAuthGuard,
 } from 'src/auth/iron-session.guard';
-import {
-  CardAuthGuard,
-  CreateGithubPRAuthGuard,
-  CreateNewCardAuthGuard,
-} from 'src/auth/card.guard';
+import { CardAuthGuard, CreateGithubPRAuthGuard } from 'src/auth/card.guard';
 import { ObjectIdDto } from 'src/common/dtos/object-id.dto';
-import { DetailedProjectResponseDto } from 'src/project/dto/detailed-project-response.dto';
-import { CreateCardRequestDto } from './dto/create-card-request.dto';
 import { DetailedCardResponseDto } from './dto/detailed-card-response-dto';
 import {
   GetByProjectAndSlugDto,
   GetByProjectSlugAndCardSlugDto,
 } from './dto/get-card-params.dto';
-import {
-  MultiCardCloseDto,
-  MultiCardCloseWithSlugDto,
-  UpdateCardRequestDto,
-  UpdateCardStatusRequestDto,
-} from './dto/update-card-request.dto';
-import {
-  UpdateWorkUnitRequestDto,
-  CreateWorkThreadRequestDto,
-  UpdateWorkThreadRequestDto,
-  CreateWorkUnitRequestDto,
-  CreateGithubPRDto,
-} from './dto/work-request.dto';
+import {} from './dto/update-card-request.dto';
+import { CreateGithubPRDto } from './dto/work-request.dto';
 import { AddCommentDto, UpdateCommentDto } from './dto/comment-body.dto';
 import {
   MultipleValidCardActionResponseDto,
   ValidCardActionResponseDto,
 } from './dto/card-access-response.dto';
 import { AggregatedFlattenedPaymentInfo } from './dto/payment-info-response.dto';
-import { UpdatePaymentInfoDto } from './dto/update-payment-info.dto';
 import {
   CreateApplicationDto,
   PickApplicationDto,
@@ -57,19 +37,16 @@ import { UpdateApplicationParamDto } from './dto/param.dto';
 import { CardsService } from './cards.service';
 import { ApplicationService } from './application.cards.service';
 import { ActionService } from './actions.service';
-import { WorkService } from './work.cards.service';
 import { CommentService } from './comments.cards.service';
 import { CardsPaymentService } from './payment.cards.service';
 import { WorkCommandHandler } from './handlers/work.command.handler';
 import {
   RequiredCommitIdDto,
   RequiredSlugDto,
-  RequiredThreadIdDto,
-  RequiredWorkUnitIdDto,
 } from 'src/common/dtos/string.dto';
 
 @Controller('card')
-@ApiTags('card')
+@ApiTags('card.v0(deprecated)')
 export class CardsController {
   constructor(
     private readonly cardsService: CardsService,

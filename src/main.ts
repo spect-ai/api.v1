@@ -14,12 +14,22 @@ async function bootstrap() {
   );
   const config = new DocumentBuilder()
     .setTitle('Spect API')
-    .setDescription('The Spect API description')
+    .setDescription('Spect API playground')
     .setVersion('1.0')
-    .addTag('spect')
     .build();
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api', app, document);
+  SwaggerModule.setup('api', app, document, {
+    swaggerOptions: {
+      docExpansion: 'none',
+      filter: true,
+      showRequestDuration: true,
+      tagSorter: 'alpha',
+      operationsSorter: 'alpha',
+    },
+    customSiteTitle: 'Spect API',
+    customfavIcon:
+      'https://spect.infura-ipfs.io/ipfs/QmcBLdB23dQkXdMKFHAjVKMKBPJF82XkqR5ZkxyCk6aset',
+  });
   app.enableCors({
     origin: true,
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',

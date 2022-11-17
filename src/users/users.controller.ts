@@ -38,7 +38,7 @@ import { UsersRepository } from './users.repository';
 import { UsersService } from './users.service';
 
 @Controller('user')
-@ApiTags('Users')
+@ApiTags('user.v0')
 export class UsersController {
   constructor(
     private readonly usersService: UsersService,
