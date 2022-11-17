@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsNotEmpty, IsObject, IsString } from 'class-validator';
 import { Activity } from 'src/common/types/activity.type';
 import {
   NotificationV2,
@@ -18,9 +18,18 @@ export class ConnectUserDto {
    * The message of the signature
    * @example '{"domain":"localhost:3000","address":"0x6304CE63F2EBf8C0Cc76b60d34Cc52a84aBB6057","statement":"Sign in with Ethereum to the app.","uri":"http://localhost:3000","version":"1","chainId":137,"nonce":"QagEAtOtgjksroxNu","issuedAt":"2022-11-09T09:40:57.409Z"}'
    */
-  @IsString()
+  @IsObject()
   @IsNotEmpty()
-  message: string;
+  message: {
+    domain: string;
+    address: string;
+    statement: string;
+    uri: string;
+    version: string;
+    chainId: number;
+    nonce: string;
+    issuedAt: string;
+  };
 }
 
 export class ConnectUserResponseDto {
