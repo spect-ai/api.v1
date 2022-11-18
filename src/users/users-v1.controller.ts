@@ -15,7 +15,7 @@ import {
   PublicProfileResponseDto,
 } from './dto/profile-response.dto';
 import { LensService } from './external/lens.service';
-import { GetProfileByIdQuery } from './queries/impl';
+import { GetMeQuery, GetProfileByIdQuery } from './queries/impl';
 import { UsersService } from './users.service';
 
 @Controller('user/v1')
@@ -27,6 +27,12 @@ export class UsersControllerV1 {
     private readonly commandBus: CommandBus,
     private readonly lensService: LensService,
   ) {}
+
+  @UseGuards(SessionAuthGuard)
+  @Get('/me')
+  findMe(@Request() req) {
+    return this.queryBus.execute(new GetMeQuery(req.user.id));
+  }
 
   @UseGuards(PublicViewAuthGuard)
   @Get('/:id/profile')
