@@ -120,4 +120,26 @@ export class UsersRepository extends BaseRepository<User> {
       return null;
     }
   }
+
+  async getMultipleUsersByFilter(
+    filterQuery: FilterQuery<User>,
+    customPopulate?: PopulatedUserFields,
+    selectedFields?: Record<string, unknown>,
+  ): Promise<User[]> {
+    const query = this.findAll(filterQuery, {
+      projection: selectedFields || {},
+    });
+    let populatedFields = defaultPopulate;
+    if (customPopulate) populatedFields = customPopulate;
+
+    Object.keys(populatedFields).forEach((key) => {
+      query.populate(key, populatedFields[key]);
+    });
+
+    try {
+      return await query.exec();
+    } catch (error) {
+      return null;
+    }
+  }
 }

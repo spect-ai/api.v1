@@ -2,7 +2,10 @@ import { InternalServerErrorException } from '@nestjs/common';
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { CommonTools } from 'src/common/common.service';
 import { LoggingService } from 'src/logging/logging.service';
-import { PublicProfileResponseDto } from 'src/users/dto/profile-response.dto';
+import {
+  PrivateProfileResponseDto,
+  PublicProfileResponseDto,
+} from 'src/users/dto/profile-response.dto';
 import { LensService } from 'src/users/external/lens.service';
 import { UsersRepository } from 'src/users/users.repository';
 import { GetProfileByIdQuery } from '../impl/get-profile.query';
@@ -19,6 +22,8 @@ const publicProfileFields = {
   ethAddress: 1,
   lensHandle: 1,
   avatar: 1,
+  email: 1,
+  id: 1,
 };
 
 @QueryHandler(GetProfileByIdQuery)
@@ -36,14 +41,18 @@ export class GetProfileByIdQueryHandler
 
   async execute(query: GetProfileByIdQuery): Promise<PublicProfileResponseDto> {
     try {
-      console.log({ query });
-      const user = await this.userRepository.getUserByFilter(
+      let user = (await this.userRepository.getUserByFilter(
         query.filterQuery,
         null,
         publicProfileFields,
-      );
+      )) as PrivateProfileResponseDto;
+
       if (!user) {
         throw `User with filter ${query.filterQuery} not found`;
+      }
+
+      if (query.caller !== user.id) {
+        user = this.filterPrivateFields(user);
       }
       if (!user.lensHandle) {
         return user;
@@ -61,7 +70,6 @@ export class GetProfileByIdQueryHandler
           localAttributes[attribute.key] = JSON.parse(attribute.value);
         }
         if (attribute.key === 'avatar') {
-          console.log({ attribute });
           user.avatar = attribute.value;
         }
       }
@@ -77,5 +85,12 @@ export class GetProfileByIdQueryHandler
       this.logger.error(`Failed getting user with error: ${error}`);
       throw new InternalServerErrorException(`Failed getting user`, error);
     }
+  }
+
+  filterPrivateFields(
+    user: PrivateProfileResponseDto,
+  ): PublicProfileResponseDto {
+    delete user.email;
+    return user;
   }
 }

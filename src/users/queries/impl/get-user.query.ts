@@ -36,3 +36,12 @@ export class GetUserByFilterQuery {
     public readonly selectedFields?: Record<string, unknown>,
   ) {}
 }
+
+export class GetMultipleUsersByFilterQuery {
+  constructor(
+    public readonly filter: FilterQuery<User>,
+    public readonly caller: string,
+    public readonly customPopulate?: PopulatedUserFields,
+    public readonly selectedFields?: Record<string, unknown>,
+  ) {}
+}

@@ -30,13 +30,8 @@ export class UpdatePropertyCommandHandler
       if (!collection.properties || !collection.properties[propertyId])
         throw `Cannot find property with id ${propertyId}`;
 
-      console.log({
-        updatePropertyCommandDto,
-        caller,
-        collectionId,
-        propertyId,
-      });
-
+      if (updatePropertyCommandDto.name === 'slug')
+        throw 'Cannot add property with name slug';
       // Clear data where an option is removed
       if (updatePropertyCommandDto.options) {
         const optionValueSet = new Set([
@@ -118,7 +113,7 @@ export class UpdatePropertyCommandHandler
         command,
       );
       throw new InternalServerErrorException(
-        'Failed updating property to collection with error: ${error}',
+        `Failed updating property to collection with error: ${error}`,
         error.message,
       );
     }

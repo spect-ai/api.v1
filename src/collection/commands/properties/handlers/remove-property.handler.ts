@@ -52,11 +52,11 @@ export class RemovePropertyCommandHandler
       );
     } catch (error) {
       this.logger.error(
-        `Failed removing property to collection with error: ${error.message}`,
+        `Failed removing property to collection with error: ${error}`,
         command,
       );
       throw new InternalServerErrorException(
-        'Failed removing property to collection with error: ${error.message}',
+        `Failed removing property to collection with error: ${error}`,
         error.message,
       );
     }

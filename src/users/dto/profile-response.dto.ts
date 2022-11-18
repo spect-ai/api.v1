@@ -8,6 +8,8 @@ import {
 import { LensEducation, LensExperience, LensSkills } from '../types/types';
 
 export class PublicProfileResponseDto {
+  id: string;
+
   @IsString()
   @IsNotEmpty()
   @IsOptional()
@@ -51,6 +53,8 @@ export class PublicProfileResponseDto {
 }
 
 export class PrivateProfileResponseDto {
+  id: string;
+
   @IsString()
   @IsNotEmpty()
   @IsOptional()
@@ -78,13 +82,13 @@ export class PrivateProfileResponseDto {
 
   @IsString()
   @IsOptional()
-  avatar: string;
+  avatar?: string;
 
   @IsString()
   @IsNotEmpty()
-  email: string;
+  email?: string;
 
   @IsString()
   @IsNotEmpty()
-  lensHandle: string;
+  lensHandle?: string;
 }
