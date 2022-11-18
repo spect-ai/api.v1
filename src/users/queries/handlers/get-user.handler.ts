@@ -17,6 +17,7 @@ import { User } from 'src/users/model/users.model';
 import { RequestProvider } from 'src/users/user.provider';
 import { UsersRepository } from '../../users.repository';
 import {
+  GetMultipleUsersByFilterQuery,
   GetMultipleUsersByIdsQuery,
   GetUserByFilterQuery,
   GetUserByIdQuery,
@@ -375,5 +376,21 @@ export class GetUserByFilterQueryHandler
     const user = await this.userRepository.findOne(query.filter);
     if (!user) throw new HttpException('User not found', 404);
     return await this.fieldResolver.resolve(user, query.caller);
+  }
+}
+
+@QueryHandler(GetMultipleUsersByFilterQuery)
+export class GetMultipleUsersByFilterQueryHandler
+  implements IQueryHandler<GetMultipleUsersByFilterQuery>
+{
+  constructor(private readonly userRepository: UsersRepository) {}
+
+  async execute(query: GetMultipleUsersByFilterQuery): Promise<User[]> {
+    const users = await this.userRepository.getMultipleUsersByFilter(
+      query.filter,
+      query.customPopulate,
+      query.selectedFields,
+    );
+    return users;
   }
 }
