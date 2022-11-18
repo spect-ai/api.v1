@@ -5,11 +5,11 @@ import {
   Param,
   Patch,
   Query,
-  Request,
   SetMetadata,
   UseGuards,
 } from '@nestjs/common';
 import { QueryBus, CommandBus } from '@nestjs/cqrs';
+import { ApiTags } from '@nestjs/swagger';
 import { ProjectAuthGuard, ViewProjectAuthGuard } from 'src/auth/project.guard';
 import {
   CreateAutomationDto,
@@ -35,6 +35,7 @@ import {
 } from './queries/impl';
 
 @Controller('project/v1')
+@ApiTags('project.v1')
 export class ProjectV1Controller {
   constructor(
     private readonly crudOrchestrator: CrudOrchestrator,

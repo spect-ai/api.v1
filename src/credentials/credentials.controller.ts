@@ -7,8 +7,8 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 import { AdminAuthGuard } from 'src/auth/iron-session.guard';
-import { CommonTools } from 'src/common/common.service';
 import { ObjectIdDto } from 'src/common/dtos/object-id.dto';
 import {
   OptionalArrayOfTags,
@@ -25,6 +25,7 @@ import { GitcoinPassportService } from './services/gitcoin-passport.service';
 import { MazuryService } from './services/mazury.service';
 
 @Controller('credentials/v1')
+@ApiTags('credentials.v1')
 export class CredentialsController {
   constructor(
     private readonly credentialService: CredentialsService,

@@ -1,5 +1,12 @@
 import { MappedItem } from 'src/common/interfaces';
 
+export type Permissions = {
+  manageSettings: string[];
+  updateResponsesManually: string[];
+  viewResponses: string[];
+  addComments: string[];
+};
+
 export type TokenModel = {
   symbol: string;
 

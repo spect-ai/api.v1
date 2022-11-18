@@ -12,6 +12,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
+import { ApiTags } from '@nestjs/swagger';
 import {
   CollectionAuthGuard,
   CreateNewCollectionAuthGuard,
@@ -50,6 +51,7 @@ import {
   CollectionResponseDto,
 } from './dto/collection-response.dto';
 import { CreateCollectionDto } from './dto/create-collection-request.dto';
+import { CreateCollectionResponseDto } from './dto/create-collection-response.dto';
 import { RemoveDataDto } from './dto/remove.data-request.dto';
 import { UpdateCollectionDto } from './dto/update-collection-request.dto';
 import {
@@ -73,6 +75,7 @@ import {
 import { ResponseCredentialingService } from './services/response-credentialing.service';
 
 @Controller('collection/v1')
+@ApiTags('collection.v1')
 export class CollectionController {
   constructor(
     private readonly commandBus: CommandBus,
@@ -106,7 +109,7 @@ export class CollectionController {
   async create(
     @Body() createCollectionDto: CreateCollectionDto,
     @Request() req,
-  ): Promise<Collection> {
+  ): Promise<CreateCollectionResponseDto> {
     return await this.commandBus.execute(
       new CreateCollectionCommand(createCollectionDto, req.user.id),
     );

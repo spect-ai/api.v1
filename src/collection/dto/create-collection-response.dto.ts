@@ -1,196 +1,219 @@
-import { prop } from '@typegoose/typegoose';
-import { Schema } from 'mongoose';
-import { BaseModel } from 'src/base/base.model';
-import { useMongoosePlugin } from 'src/base/decorators/use-mongoose-plugins.decorator';
-import { Circle } from 'src/circle/model/circle.model';
+import { ApiProperty } from '@nestjs/swagger';
 import { MappedItem } from 'src/common/interfaces';
 import { GuildRole } from 'src/common/types/role.type';
 import {
   Activity,
   DefaultViewType,
+  OpportunityInfo,
   Property,
   Voting,
-  OpportunityInfo,
   Permissions,
 } from '../types/types';
 
-@useMongoosePlugin()
-export class Collection extends BaseModel {
+export class CreateCollectionResponseDto {
   /**
    * The name of the collection
+   * @example "My Collection"
    */
-  @prop({ required: true })
   name: string;
+
   /**
    * The unique slug of the collection
+   * @example "my-collection"
    */
-  @prop({ required: true })
   slug: string;
+
   /**
    * Is collection private?
+   * @example true
    */
-  @prop({ default: true })
   privateResponses: boolean;
+
   /**
    * The description of the collection
+   * @example "This collection is created to track the progress of the project"
    */
-  @prop()
   description: string;
 
   /**
    * Properties in the collection
+   * @example {"name": "Name", "type": "shortText", "isPartOfFormView": true}
    */
-  @prop()
+  @ApiProperty({
+    type: () =>
+      class {
+        properties: MappedItem<Property>;
+      },
+    example: {
+      name: 'Name',
+      type: 'shortText',
+      isPartOfFormView: true,
+    },
+  })
   properties: MappedItem<Property>;
 
   /**
    * Properties in the collection
+   * @example ["name"]
    */
-  @prop({ default: [] })
   propertyOrder: string[];
 
   /**
-   * The description of the collection
+   * The creator of the collection
+   * @example "5f7e9b9b9b9b9b9b9b9b9b9b"
    */
-  @prop({ required: true })
   creator: string;
 
   /**
-   * Form Specific roles
-   **/
-  @prop()
-  permissions: Permissions;
-
-  /**
    * Parent Ids of the collection
+   * @example ["5f7e9b9b9b9b9b9b9b9b9b9b"]
    */
-  @prop({ ref: () => Circle, type: Schema.Types.String, default: [] })
   parents: string[];
 
   /**
    * The data contained in the collection
+   * @example {"name": "John Doe"}
    */
-  @prop({ default: {} })
+  @ApiProperty({
+    type: () =>
+      class {
+        data: MappedItem<object>;
+      },
+    example: {
+      name: 'John Doe',
+    },
+  })
   data: MappedItem<object>;
 
   /**
    * All the activities in all the data streams - { dataSlug : { activityId: ActivityObject  } }
+   * @example {}
    */
-  @prop({ default: {} })
   dataActivities: MappedItem<MappedItem<Activity>>;
 
   /**
    * All the activity orders in all the data streams
+   * @example []
    */
-  @prop({ default: {} })
+  @ApiProperty({
+    type: () =>
+      class {
+        dataActivityOrder: MappedItem<string[]>;
+      },
+  })
   dataActivityOrder: MappedItem<string[]>;
 
   /**
    * The owner of the data
+   * @example "5f7e9b9b9b9b9b9b9b9b9b9b"
    */
-  @prop({ default: {} })
+  @ApiProperty({
+    type: () =>
+      class {
+        dataOwner: MappedItem<string>;
+      },
+  })
   dataOwner: MappedItem<string>;
 
   /**
    * The data indexed by different fields
+   * @example {}
    */
-  @prop({ default: {} })
   indexes: MappedItem<string[]>;
 
   /**
    * The default view of the collection
+   * @example "form"
    */
-  @prop({ default: 'table' })
   defaultView: DefaultViewType;
 
   /**
    * The guild.xyz roles that a person needs to hold to fill up form
+   * @example ["5f7e9b9b9b9b9b9b9b9b9b9b"]
    */
-  @prop({ default: [] })
   formRoleGating: GuildRole[];
 
   /**
    * The mintkudos token id to distribute when a person fills the form
+   * @example "5f7e9b9b9b9b9b9b9b9b9b9b"
    */
-  @prop()
   mintkudosTokenId: number;
 
   /**
    * The addresses that have already claimed mintkudos for submitting form
+   * @example ["0x1234567890", "0x1234567890"]
    */
-  @prop({ default: [] })
   mintkudosClaimedBy: string[];
 
   /**
    * The message to show when the form is submitted
+   * @example "Thanks for your response!"
    */
-  @prop({ default: 'Thanks for your response!' })
   messageOnSubmission: string;
 
   /**
    * Multiple responses by same user allowed?
+   * @example true
    */
-  @prop({ default: true })
   multipleResponsesAllowed: boolean;
 
   /**
    * Updating responses allowed?
+   * @example true
    */
-  @prop({ default: true })
   updatingResponseAllowed: boolean;
 
   /**
    * Send confirmation email upon submission?
+   * @example true
    */
-  @prop({ default: false })
   sendConfirmationEmail: boolean;
 
   /**
    * Send email to circle members upon new response
+   * @example true
    */
-  @prop({ default: [] })
   circleRolesToNotifyUponNewResponse: string[];
 
   /**
    * Send email to circle members upon updated response
+   * @example true
    */
-  @prop({ default: [] })
   circleRolesToNotifyUponUpdatedResponse: string[];
 
   /**
-   * The message to show when the form is submitted
+   * The logo of the collection
+   * @example "https://example.com/logo.png"
    */
-  @prop({ default: '' })
   logo: string;
 
   /**
-   * The message to show when the form is submitted
+   * The cover image of the collection
+   * @example "https://example.com/cover.png"
    */
-  @prop({ default: '' })
   cover: string;
 
-  @prop({ default: false })
+  /**
+   * Sybil protection enabled?
+   * @example true
+   */
   sybilProtectionEnabled: boolean;
 
-  @prop()
   sybilProtectionScores: { [id: string]: number };
 
-  @prop()
   numOfKudos: number;
 
-  @prop({ default: false })
+  /**
+   * Credential curation
+   * @example true
+   */
   credentialCurationEnabled: boolean;
 
-  @prop({ default: false })
   isAnOpportunity: boolean;
 
-  @prop()
   opportunityInfo: OpportunityInfo;
 
-  @prop({
-    default: {
-      enabled: false,
-    },
-  })
+  permissions: Permissions;
+
   voting: Voting;
 }

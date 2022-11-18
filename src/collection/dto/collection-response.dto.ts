@@ -1,17 +1,24 @@
+import { ApiHideProperty } from '@nestjs/swagger';
 import { MappedItem } from 'src/common/interfaces';
 import { GuildRole } from 'src/common/types/role.type';
 import { User } from 'src/users/model/users.model';
-import { Activity, DefaultViewType, Property } from '../types/types';
+import {
+  Activity,
+  DefaultViewType,
+  Property,
+  Permissions,
+} from '../types/types';
 
 export class CollectionPublicResponseDto {
   name: string;
   slug: string;
   description: string;
-
+  @ApiHideProperty()
   properties: MappedItem<Property>;
 
   propertyOrder: string[];
   defaultView: DefaultViewType;
+  permissions: Permissions;
 
   formRoleGating: number[];
 
@@ -25,7 +32,7 @@ export class CollectionPublicResponseDto {
 
   multipleResponsesAllowed: boolean;
   updatingResponseAllowed: boolean;
-
+  @ApiHideProperty()
   previousResponses: MappedItem<object>;
   hasRole: boolean;
   hasPassedSybilCheck: boolean;
@@ -35,21 +42,26 @@ export class CollectionResponseDto {
   name: string;
   slug: string;
   description: string;
-
+  @ApiHideProperty()
   properties: MappedItem<Property>;
 
   propertyOrder: string[];
 
   creator: string;
+  permissions: Permissions;
 
   parents: string[];
 
+  @ApiHideProperty()
   data: MappedItem<object>;
 
+  @ApiHideProperty()
   dataActivities: MappedItem<MappedItem<Activity>>;
 
+  @ApiHideProperty()
   dataActivityOrder: MappedItem<string[]>;
 
+  @ApiHideProperty()
   indexes: MappedItem<string[]>;
 
   defaultView: DefaultViewType;

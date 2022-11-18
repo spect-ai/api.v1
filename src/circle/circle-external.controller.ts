@@ -5,15 +5,15 @@ import {
   Param,
   UseGuards,
 } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 import { CircleAuthGuard } from 'src/auth/circle.guard';
 import { ObjectIdDto } from 'src/common/dtos/object-id.dto';
 import { GuildxyzService } from 'src/common/guildxyz.service';
 import { LoggingService } from 'src/logging/logging.service';
 import { CirclesRepository } from './circles.repository';
 
-import { CirclePrivate } from './model/circle-private.model';
-
 @Controller('circle/external/v1')
+@ApiTags('circle.external.v1')
 export class CircleExternalController {
   constructor(
     private readonly logger: LoggingService,

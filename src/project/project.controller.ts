@@ -1,7 +1,6 @@
 import {
   Body,
   Controller,
-  Delete,
   Get,
   Param,
   Patch,
@@ -9,6 +8,7 @@ import {
   SetMetadata,
   UseGuards,
 } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 import {
   CreateNewProjectAuthGuard,
   ProjectAuthGuard,
@@ -31,6 +31,7 @@ import { Project } from './model/project.model';
 import { ProjectService } from './project.service';
 
 @Controller('project')
+@ApiTags('project.v0(deprecated)')
 export class ProjectController {
   constructor(private readonly projectService: ProjectService) {}
 

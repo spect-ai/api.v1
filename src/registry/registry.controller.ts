@@ -1,9 +1,11 @@
 import { Body, Controller, Get, Post } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 import { AddNewNetworkDto } from './dto/add-new-network.dto';
 import { AddNewTokenDto } from './dto/add-new-token.dto';
 import { RegistryService } from './registry.service';
 
 @Controller('registry')
+@ApiTags('registry.v0')
 export class RegistryController {
   constructor(private readonly registryService: RegistryService) {}
 

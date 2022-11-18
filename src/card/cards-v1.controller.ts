@@ -60,7 +60,7 @@ import {
 import { UpdateCardProjectDto } from './dto/update-card-project.dto';
 
 @Controller('card/v1')
-@ApiTags('cardv1')
+@ApiTags('card.v1')
 export class CardsV1Controller {
   constructor(
     private readonly crudOrchestrator: CrudOrchestrator,
