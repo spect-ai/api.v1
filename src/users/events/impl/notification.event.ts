@@ -24,17 +24,28 @@ export class NotificationEvent {
 export class NotificationEventV2 {
   constructor(
     public readonly content: string,
+    public readonly avatar: string,
+    public readonly redirect: string,
+    public readonly timestamp: Date,
     public readonly recipients: string[],
-    public readonly ref?: MappedItem<NotifRef>,
   ) {}
 }
 
 export class SingleNotificationEvent {
   constructor(
     public readonly content: string,
+    public readonly avatar: string,
+    public readonly redirect: string,
+    public readonly timestamp: Date,
+    public readonly recipients: string[],
+  ) {}
+}
+
+export class SingleEmailNotificationEvent {
+  constructor(
+    public readonly content: string,
+    public readonly subject: string,
+    public readonly redirectUrl: string,
     public readonly recipient: string,
-    public readonly subject?: string,
-    public readonly redirectUrl?: string,
-    public readonly ref?: MappedItem<NotifRef>,
   ) {}
 }

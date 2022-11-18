@@ -1,3 +1,5 @@
+import { MappedItem } from 'src/common/interfaces';
+import { NotifRef } from '../events/impl';
 import { User } from '../model/users.model';
 
 export type MappedUser = {
@@ -19,7 +21,7 @@ export type Notification = {
 export type NotificationV2 = {
   id: string;
   content: string;
-  ref?: Reference;
+  ref?: MappedItem<NotifRef>;
   read: boolean;
 };
 

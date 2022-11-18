@@ -16,6 +16,7 @@ import { UpdateCircleCommand } from 'src/circle/commands/impl/update-circle.comm
 import { LoggingService } from 'src/logging/logging.service';
 import { InternalServerErrorException } from '@nestjs/common';
 import { CollectionCreatedEvent } from 'src/collection/events';
+import { Circle } from 'src/circle/model/circle.model';
 
 @CommandHandler(CreateCollectionCommand)
 export class CreateCollectionCommandHandler
@@ -72,7 +73,7 @@ export class CreateCollectionCommandHandler
       } as MappedItem<Property>;
       const propertyOrder = ['Title', 'Description', 'Status'];
 
-      const parentCircle = await this.queryBus.execute(
+      const parentCircle: Circle = await this.queryBus.execute(
         new GetCircleByIdQuery(createCollectionDto.circleId, {}),
       );
 
@@ -86,6 +87,7 @@ export class CreateCollectionCommandHandler
         creator: caller,
         parents: [createCollectionDto.circleId],
         slug: uuidv4(),
+        logo: parentCircle.avatar,
       });
 
       await this.commandBus.execute(

@@ -15,7 +15,11 @@ import {
   PublicProfileResponseDto,
 } from './dto/profile-response.dto';
 import { LensService } from './external/lens.service';
-import { GetMeQuery, GetProfileByIdQuery } from './queries/impl';
+import {
+  GetMeQuery,
+  GetNotificationsQuery,
+  GetProfileByIdQuery,
+} from './queries/impl';
 import { UsersService } from './users.service';
 
 @Controller('user/v1')
@@ -75,19 +79,25 @@ export class UsersControllerV1 {
   }
 
   @UseGuards(PublicViewAuthGuard)
-  @Get('/:id/circles')
-  async getCircles(@Param() param: ObjectIdDto): Promise<CirclesOfUserDto> {
-    return await this.commandBus.execute(new GetCirclesCommand(param.id));
+  @Get('/circles')
+  async getCircles(@Request() req): Promise<CirclesOfUserDto> {
+    return await this.commandBus.execute(new GetCirclesCommand(req.user.id));
   }
 
   @UseGuards(PublicViewAuthGuard)
-  @Get('/:id/responses')
-  async getResponses(@Param() param: ObjectIdDto): Promise<CirclesOfUserDto> {
-    return await this.commandBus.execute(new GetResponsesCommand(param.id));
+  @Get('/responses')
+  async getResponses(@Request() req): Promise<CirclesOfUserDto> {
+    return await this.commandBus.execute(new GetResponsesCommand(req.user.id));
   }
 
   @Get('/verifiedCircles/:address')
   async getMyVerifiedCircles(@Param('address') address: string) {
     return await this.usersService.getVerifiedCircles(address);
+  }
+
+  @UseGuards(SessionAuthGuard)
+  @Get('/notifications')
+  getNotifications(@Request() req) {
+    return this.queryBus.execute(new GetNotificationsQuery(req.user));
   }
 }

@@ -30,27 +30,28 @@ export class DataAddedEventHandler implements IEventHandler<DataAddedEvent> {
     try {
       console.log('DataAddedEventHandler');
       const { caller, collection } = event;
+      const circle = (await this.queryBus.execute(
+        new GetCircleByIdQuery(collection.parents[0]),
+      )) as Circle;
 
       const notifContent = `A new response was received on ${collection.name}`;
-      const subject = `New response on ${collection.name}`;
-      const redirectUrl = `https://circles.spect.network/collection/${collection.slug}`;
+      const redirectUrl = `/${circle.slug}/r/${collection.slug}?responses`;
       if (
         collection.circleRolesToNotifyUponNewResponse &&
         collection.circleRolesToNotifyUponNewResponse.length > 0
       ) {
-        const circle = (await this.queryBus.execute(
-          new GetCircleByIdQuery(collection.parents[0]),
-        )) as Circle;
         const roleSet = new Set(collection.circleRolesToNotifyUponNewResponse);
+        console.log({ roleSet });
         for (const [memberId, roles] of Object.entries(circle.memberRoles)) {
           const hasRole = roles.some((role) => roleSet.has(role));
           if (hasRole) {
             this.eventBus.publish(
               new SingleNotificationEvent(
                 notifContent,
-                memberId,
-                subject,
+                collection.logo || circle.avatar,
                 redirectUrl,
+                new Date(),
+                [memberId],
               ),
             );
           }
@@ -58,14 +59,15 @@ export class DataAddedEventHandler implements IEventHandler<DataAddedEvent> {
       }
 
       const notifResponderContent = `Your response on ${collection.name} was received.`;
-      const responderSubject = `Response received!`;
-      const responderRedirectUrl = `https://circles.spect.network/`;
+      // const responderSubject = `Response received!`;
+      const responderRedirectUrl = `/r/${collection.slug}`;
       this.eventBus.publish(
         new SingleNotificationEvent(
           notifResponderContent,
-          caller?.id,
-          responderSubject,
+          collection.logo || circle.avatar,
           responderRedirectUrl,
+          new Date(),
+          [caller.id],
         ),
       );
 

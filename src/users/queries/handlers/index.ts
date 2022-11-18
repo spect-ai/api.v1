@@ -7,6 +7,7 @@ import {
 } from './get-user.handler';
 
 import { GetMeQueryHandler } from './get-me.handler';
+import { GetNotificationsQueryHandler } from './get-notifications.handler';
 
 export const QueryHandlers = [
   GetUserByIdQueryHandler,
@@ -15,4 +16,5 @@ export const QueryHandlers = [
   GetUserByFilterQueryHandler,
   GetProfileByIdQueryHandler,
   GetMeQueryHandler,
+  GetNotificationsQueryHandler,
 ];

@@ -1,4 +1,3 @@
-import { InternalServerErrorException } from '@nestjs/common';
 import { EventsHandler, IEventHandler } from '@nestjs/cqrs';
 import { Card } from 'src/card/model/card.model';
 import { Circle } from 'src/circle/model/circle.model';
@@ -12,6 +11,7 @@ import { UsersRepository } from 'src/users/users.repository';
 import {
   NotificationEvent,
   NotificationEventV2,
+  SingleEmailNotificationEvent,
   SingleNotificationEvent,
 } from '../impl';
 import { LoggingService } from 'src/logging/logging.service';
@@ -130,7 +130,7 @@ export class NotificationEventV2Handler
   async handle(event: NotificationEventV2) {
     try {
       console.log('NotificationEventHandler');
-      const { recipients, content, ref } = event;
+      const { content, avatar, redirect, timestamp, recipients } = event;
       console.log(recipients);
       for (const recipient of recipients) {
         const recipientEntity = await this.userRepository.findById(recipient);
@@ -139,8 +139,10 @@ export class NotificationEventV2Handler
           notificationsV2: [
             ...(recipientEntity.notificationsV2 || []),
             {
-              content: content,
-              ref,
+              content,
+              avatar,
+              redirect,
+              timestamp,
             },
           ],
         });
@@ -168,15 +170,18 @@ export class SingleNotificationEventHandler
   async handle(event: SingleNotificationEvent) {
     try {
       console.log('NotificationEventHandler');
-      const { recipient, content, ref } = event;
-      const recipientEntity = await this.userRepository.findById(recipient);
+      const { content, avatar, redirect, timestamp, recipients } = event;
+      console.log({ recipients });
+      const recipientEntity = await this.userRepository.findById(recipients[0]);
 
-      await this.userRepository.updateById(recipient, {
+      await this.userRepository.updateById(recipients[0], {
         notificationsV2: [
           ...(recipientEntity.notificationsV2 || []),
           {
-            content: content,
-            ref,
+            content,
+            avatar,
+            redirect,
+            timestamp,
           },
         ],
       });
@@ -189,9 +194,9 @@ export class SingleNotificationEventHandler
   }
 }
 
-@EventsHandler(SingleNotificationEvent)
+@EventsHandler(SingleEmailNotificationEvent)
 export class SingleEmailNotificationEventHandler
-  implements IEventHandler<SingleNotificationEvent>
+  implements IEventHandler<SingleEmailNotificationEvent>
 {
   constructor(
     private readonly userRepository: UsersRepository,
@@ -201,10 +206,10 @@ export class SingleEmailNotificationEventHandler
     this.logger.setContext('SingleEmailNotificationEventHandler');
   }
 
-  async handle(event: SingleNotificationEvent) {
+  async handle(event: SingleEmailNotificationEvent) {
     try {
       console.log('NotificationEventHandler');
-      const { recipient, content, ref, subject, redirectUrl } = event;
+      const { recipient, content, subject, redirectUrl } = event;
       const recipientEntity = await this.userRepository.findById(recipient);
       if (recipientEntity.email) {
         const mail = {
