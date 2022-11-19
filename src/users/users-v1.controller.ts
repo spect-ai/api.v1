@@ -1,4 +1,11 @@
-import { Controller, Get, Param, Request, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Param,
+  Query,
+  Request,
+  UseGuards,
+} from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { ApiTags } from '@nestjs/swagger';
 import {
@@ -97,7 +104,13 @@ export class UsersControllerV1 {
 
   @UseGuards(SessionAuthGuard)
   @Get('/notifications')
-  getNotifications(@Request() req) {
-    return this.queryBus.execute(new GetNotificationsQuery(req.user));
+  getNotifications(
+    @Request() req,
+    @Query('limit') limit: number,
+    @Query('page') page: number,
+  ) {
+    return this.queryBus.execute(
+      new GetNotificationsQuery(req.user, limit, page),
+    );
   }
 }

@@ -22,12 +22,16 @@ export class GetNotificationsQueryHandler
 
   async execute(query: GetNotificationsQuery): Promise<NotificationV2[]> {
     try {
-      const { caller } = query;
+      const { caller, limit, page } = query;
       console.log({ caller });
       if (!caller) {
         throw `User with id ${caller.id} not found`;
       }
-      return caller.notificationsV2;
+      const allNotifications = caller.notificationsV2;
+      const notifications = allNotifications
+        .reverse()
+        .slice((page - 1) * limit, page * limit);
+      return notifications;
     } catch (error) {
       this.logger.error(
         `Failed getting user notifications with error: ${error}`,
