@@ -55,6 +55,34 @@ export class UpdateUserDto extends PartialType(User) {
   githubId?: string;
 
   /**
+   * Twitter account associated with the profile
+   */
+  @IsString()
+  @IsOptional()
+  twitter?: string;
+
+  /**
+   * Github account associated with the profile
+   */
+  @IsString()
+  @IsOptional()
+  github?: string;
+
+  /**
+   * Behance account associated with the profile
+   */
+  @IsString()
+  @IsOptional()
+  behance?: string;
+
+  /**
+   * Website account associated with the profile
+   */
+  @IsString()
+  @IsOptional()
+  website?: string;
+
+  /**
    * EMail of user
    */
   @IsNullableEmail()
