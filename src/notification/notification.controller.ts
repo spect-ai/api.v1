@@ -12,8 +12,6 @@ export class NotificationController {
   @UseGuards(AdminAuthGuard)
   @Post('/sendWeeklyOpportunityDigest')
   async getProfile(@Request() req): Promise<boolean> {
-    return await this.notificationService.sendWeeklyOpportunityDigest(
-      req.user?.id,
-    );
+    return await this.notificationService.sendWeeklyOpportunityDigest(req.user);
   }
 }

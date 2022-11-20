@@ -4,6 +4,7 @@ import {
   GetUserByUsernameQueryHandler,
   GetMultipleUsersByIdsQueryHandler,
   GetUserByFilterQueryHandler,
+  GetMultipleUsersByFilterQueryHandler,
 } from './get-user.handler';
 
 import { GetMeQueryHandler } from './get-me.handler';
@@ -17,4 +18,5 @@ export const QueryHandlers = [
   GetProfileByIdQueryHandler,
   GetMeQueryHandler,
   GetNotificationsQueryHandler,
+  GetMultipleUsersByFilterQueryHandler,
 ];

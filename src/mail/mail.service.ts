@@ -12,7 +12,6 @@ export class MailService {
 
   async send(mail: SendGrid.MailDataRequired) {
     const transport = await SendGrid.send(mail);
-    // avoid this on production. use log instead :)
     return transport;
   }
 }

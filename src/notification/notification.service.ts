@@ -1,9 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
+import { Circle } from 'src/circle/model/circle.model';
 import { Collection } from 'src/collection/model/collection.model';
 import { GetMultipleCollectionsQuery } from 'src/collection/queries';
 import { MailService } from 'src/mail/mail.service';
+import { User } from 'src/users/model/users.model';
 import { GetMultipleUsersByFilterQuery } from 'src/users/queries/impl';
+import { EmailGeneratorService } from './email-generatr.service';
 
 @Injectable()
 export class NotificationService {
@@ -11,13 +14,21 @@ export class NotificationService {
     private readonly queryBus: QueryBus,
     private readonly commandBus: CommandBus,
     private readonly mailService: MailService,
+    private readonly emailGenerator: EmailGeneratorService,
   ) {}
 
-  async sendWeeklyOpportunityDigest(caller: string) {
+  async sendWeeklyOpportunityDigest(caller: User) {
     const collections = (await this.queryBus.execute(
-      new GetMultipleCollectionsQuery({
-        isAnOpportunity: true,
-      }),
+      new GetMultipleCollectionsQuery(
+        {
+          isAnOpportunity: true,
+        },
+        {
+          parents: {
+            name: 1,
+          },
+        },
+      ),
     )) as Collection[];
     const users = await this.queryBus.execute(
       new GetMultipleUsersByFilterQuery(
@@ -26,7 +37,7 @@ export class NotificationService {
             $exists: true,
           },
         },
-        caller,
+        caller.id,
       ),
     );
 
@@ -41,53 +52,30 @@ export class NotificationService {
     }
     const userToCollectionMap = {};
     for (const user of users) {
-      user.skills?.forEach((skill) => {
-        if (!userToCollectionMap[user.id]) {
-          userToCollectionMap[user.id] = [];
-        }
-        userToCollectionMap[user.id].push(...skillToCollectionMap[skill]);
+      userToCollectionMap[user._id.toString()] = [];
+
+      user.skillsV2?.forEach((skill) => {
+        userToCollectionMap[user._id.toString()].push(
+          ...(skillToCollectionMap[skill.category] || []),
+        );
       });
-    }
-    for (const user of users) {
-      const collectionSet = new Set(userToCollectionMap[user.id]);
-      const collections = Array.from(collectionSet) as Collection[];
-      let opportunityDigest = '';
-      for (const collection of collections) {
-        opportunityDigest =
-          opportunityDigest +
-          `<h2>${collection.name}</h2>
-        <button
-          style="
-            background-color: #ecdef3;
-            border-color: white;
-            width: 6rem;
-            height: 2rem;
-            border-radius: 0.5rem;
-            color: #ae5fe2;
-            font-weight: bold;
-            cursor: pointer;
-          "
-          onclick="window.location.href='https://stackoverflow.com/questions/2906582/how-do-i-create-an-html-button-that-acts-like-a-link'"
-        >
-          Apply
-        </button>`;
+      if (userToCollectionMap[user._id.toString()].length > 0) {
+        const html = this.emailGenerator.generateDigestEmail(
+          userToCollectionMap[user._id.toString()],
+          user,
+        );
+        const mail = {
+          to: `${user.email}`,
+          from: {
+            name: 'Team Spect',
+            email: process.env.NOTIFICATION_EMAIL,
+          }, // Fill it with your validated email on SendGrid account
+          html,
+          subject: 'Your curated opportunities are here!',
+        };
+
+        const res = await this.mailService.send(mail);
       }
-
-      const mail = {
-        to: `${user.email}`,
-        from: {
-          name: 'Team Spect',
-          email: process.env.NOTIFICATION_EMAIL,
-        }, // Fill it with your validated email on SendGrid account
-        html: `<h1>Your curated opportunities are here!</h1>
-        <div class="opportunities">
-          <div class="opportunity">
-            ${opportunityDigest}
-          </div>
-          </div>`,
-      };
-
-      await this.mailService.send(mail);
     }
 
     return true;
