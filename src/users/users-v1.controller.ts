@@ -108,6 +108,7 @@ export class UsersControllerV1 {
     @Request() req,
     @Query('limit') limit: number,
     @Query('page') page: number,
+    @Query('unread') unread: boolean,
   ) {
     return this.queryBus.execute(
       new GetNotificationsQuery(req.user, limit, page),

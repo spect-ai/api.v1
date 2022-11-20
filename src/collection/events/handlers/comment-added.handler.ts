@@ -35,8 +35,8 @@ export class CommentAddedEventHandler
         new GetCircleByIdQuery(collection.parents[0]),
       )) as Circle;
 
-      const notifContent = `A new comment was added on ${collection.name}'s response`;
-      const redirectUrl = `/${circle.slug}/r/${collection.slug}?responses`;
+      const notifContent = `A new comment was added on ${collection.name}'s response by ${caller.username}`;
+      const redirectUrl = `/${circle.slug}/r/${collection.slug}?dataId=${data.slug}`;
       if (
         collection.circleRolesToNotifyUponNewResponse &&
         collection.circleRolesToNotifyUponNewResponse.length > 0
@@ -45,7 +45,7 @@ export class CommentAddedEventHandler
         console.log({ roleSet });
         for (const [memberId, roles] of Object.entries(circle.memberRoles)) {
           const hasRole = roles.some((role) => roleSet.has(role));
-          if (hasRole && memberId !== caller.id) {
+          if (hasRole && memberId !== caller.id && !collection.creator) {
             this.eventBus.publish(
               new SingleNotificationEvent(
                 notifContent,
@@ -59,8 +59,20 @@ export class CommentAddedEventHandler
         }
       }
 
+      if (collection.creator !== caller.id) {
+        this.eventBus.publish(
+          new SingleNotificationEvent(
+            notifContent,
+            collection.logo || circle.avatar,
+            redirectUrl,
+            new Date(),
+            [collection.creator],
+          ),
+        );
+      }
+
       if (caller.id != collection.dataOwner[data.slug]) {
-        const notifResponderContent = `Your response on ${collection.name} was received.`;
+        const notifResponderContent = `A new comment was added on your response for ${collection.name} by ${caller.username}`;
         // const responderSubject = `Response received!`;
         const responderRedirectUrl = `/r/${collection.slug}`;
         this.eventBus.publish(
@@ -75,23 +87,8 @@ export class CommentAddedEventHandler
       }
 
       this.logger.log(
-        `Created New Data in collection ${event.collection?.name}`,
+        `Created New comment in collection ${event.collection?.name} ${data.slug} by ${caller.username}`,
       );
-
-      this.commandBus.execute(
-        new AddItemsToUserCommand(
-          [
-            {
-              fieldName: 'collectionsSubmittedTo',
-              itemIds: [collection.slug],
-            },
-          ],
-          null,
-          caller.id,
-        ),
-      );
-
-      console.log('event', `${collection.slug}:dataAdded`);
     } catch (error) {
       this.logger.error(`${error.message}`);
     }

@@ -6,7 +6,7 @@ import {
   QueryBus,
 } from '@nestjs/cqrs';
 import { CollectionRepository } from 'src/collection/collection.repository';
-import { DataUpatedEvent } from 'src/collection/events';
+import { CommentAddedEvent, DataUpatedEvent } from 'src/collection/events';
 import {
   GetPrivateViewCollectionQuery,
   GetPublicViewCollectionQuery,
@@ -70,6 +70,11 @@ export class AddCommentCommandHandler
           caller,
         ),
       );
+
+      this.eventBus.publish(
+        new CommentAddedEvent(collection, collection.data[dataSlug], caller),
+      );
+
       if (isPublic)
         return await this.queryBus.execute(
           new GetPublicViewCollectionQuery(caller, updatedCollection.slug),
