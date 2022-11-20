@@ -36,6 +36,8 @@ export class AddDataCommandHandler implements ICommandHandler<AddDataCommand> {
     try {
       const collection = await this.collectionRepository.findById(collectionId);
       if (!collection) throw 'Collection does not exist';
+      // Required to maitain backward compatibility
+      if (collection.active === false) throw 'Collection is inactive';
       if (
         !collection.multipleResponsesAllowed &&
         collection.dataOwner &&

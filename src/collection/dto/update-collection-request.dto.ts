@@ -67,6 +67,13 @@ export class UpdateCollectionDto {
   updatingResponseAllowed: boolean;
 
   /**
+   * Updating responses allowed?
+   */
+  @IsBoolean()
+  @IsOptional()
+  active: boolean;
+
+  /**
    * Send confirmation email upon submission?
    */
   @IsBoolean()

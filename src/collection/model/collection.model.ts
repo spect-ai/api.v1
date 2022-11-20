@@ -193,4 +193,7 @@ export class Collection extends BaseModel {
     },
   })
   voting: Voting;
+
+  @prop({ default: true })
+  active: boolean;
 }

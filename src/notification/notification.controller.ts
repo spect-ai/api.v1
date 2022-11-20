@@ -5,7 +5,7 @@ import { AdminAuthGuard } from 'src/auth/iron-session.guard';
 import { NotificationService } from './notification.service';
 
 @Controller('notification')
-@ApiTags('Notification')
+@ApiTags('notification.v1')
 export class NotificationController {
   constructor(private readonly notificationService: NotificationService) {}
 

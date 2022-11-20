@@ -36,6 +36,9 @@ export class UpdateDataCommandHandler
     try {
       const collection = await this.collectionRepository.findById(collectionId);
       if (!collection) throw 'Collection does not exist';
+      // Required to maitain backward compatibility
+      if (collection.active === false) throw 'Collection is inactive';
+
       if (!collection.updatingResponseAllowed) {
         throw 'Updating response is not allowed';
       }
