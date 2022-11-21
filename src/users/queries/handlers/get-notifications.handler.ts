@@ -5,7 +5,7 @@ import { LoggingService } from 'src/logging/logging.service';
 import { LensService } from 'src/users/external/lens.service';
 import { NotificationV2 } from 'src/users/types/types';
 import { UsersRepository } from 'src/users/users.repository';
-import { GetNotificationsQuery } from '../impl';
+import { GetNotificationsQuery, GetUnreadNotificationsQuery } from '../impl';
 
 @QueryHandler(GetNotificationsQuery)
 export class GetNotificationsQueryHandler
@@ -17,7 +17,7 @@ export class GetNotificationsQueryHandler
     private readonly logger: LoggingService,
     private readonly commonTools: CommonTools,
   ) {
-    this.logger.setContext('GetMeQueryHandler');
+    this.logger.setContext('GetNotifsHandler');
   }
 
   async execute(query: GetNotificationsQuery): Promise<NotificationV2[]> {
@@ -37,6 +37,36 @@ export class GetNotificationsQueryHandler
         `Failed getting user notifications with error: ${error}`,
       );
       throw new InternalServerErrorException(`Failed getting user me`, error);
+    }
+  }
+}
+
+@QueryHandler(GetUnreadNotificationsQuery)
+export class GetUnreadNotificationsQueryHandler
+  implements IQueryHandler<GetUnreadNotificationsQuery>
+{
+  constructor(private readonly logger: LoggingService) {
+    this.logger.setContext('GetUnreadNotifs');
+  }
+
+  async execute(query: GetUnreadNotificationsQuery): Promise<number> {
+    try {
+      const { caller } = query;
+      console.log({ caller });
+      if (!caller) {
+        throw `User with id ${caller.id} not found`;
+      }
+      const allNotifications = caller.notificationsV2;
+      return allNotifications.filter((n) => !n.read && n.read !== undefined)
+        .length;
+    } catch (error) {
+      this.logger.error(
+        `Failed getting user unread  notifications with error: ${error}`,
+      );
+      throw new InternalServerErrorException(
+        `Failed getting user unread notifcations`,
+        error,
+      );
     }
   }
 }

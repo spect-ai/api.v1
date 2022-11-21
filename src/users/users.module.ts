@@ -23,6 +23,7 @@ import { LoggingService } from 'src/logging/logging.service';
 import { MailService } from 'src/mail/mail.service';
 import { LensService } from './external/lens.service';
 import { UsersControllerV1 } from './users-v1.controller';
+import { RealtimeGateway } from 'src/realtime/realtime.gateway';
 
 @Module({
   imports: [
@@ -48,6 +49,7 @@ import { UsersControllerV1 } from './users-v1.controller';
     LoggingService,
     MailService,
     LensService,
+    RealtimeGateway,
   ],
   exports: [UsersService, UsersRepository, UsersModule],
 })

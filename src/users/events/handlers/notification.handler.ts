@@ -17,6 +17,7 @@ import {
 import { LoggingService } from 'src/logging/logging.service';
 import { v4 as uuidv4 } from 'uuid';
 import { MailService } from 'src/mail/mail.service';
+import { RealtimeGateway } from 'src/realtime/realtime.gateway';
 
 @EventsHandler(NotificationEvent)
 export class NotificationEventHandler
@@ -162,6 +163,7 @@ export class SingleNotificationEventHandler
 {
   constructor(
     private readonly userRepository: UsersRepository,
+    private readonly realtime: RealtimeGateway,
     private readonly logger: LoggingService,
   ) {
     this.logger.setContext('SingleNotificationEventHandler');
@@ -171,10 +173,8 @@ export class SingleNotificationEventHandler
     try {
       console.log('NotificationEventHandler');
       const { content, avatar, redirect, timestamp, recipients } = event;
-      console.log({ recipients });
       const recipientEntity = await this.userRepository.findById(recipients[0]);
-
-      await this.userRepository.updateById(recipients[0], {
+      const user = await this.userRepository.updateById(recipients[0], {
         notificationsV2: [
           ...(recipientEntity.notificationsV2 || []),
           {
@@ -182,8 +182,16 @@ export class SingleNotificationEventHandler
             avatar,
             redirect,
             timestamp,
+            read: false,
           },
         ],
+      });
+      const unreadNotifications = user.notificationsV2.filter(
+        (notification) => !notification.read,
+      );
+      console.log('realtime emit', unreadNotifications, recipients[0]);
+      this.realtime.server.to(recipients[0]).emit('notification', {
+        unreadNotifications: unreadNotifications.length,
       });
     } catch (error) {
       // Make sure to not send a large object to the logger
