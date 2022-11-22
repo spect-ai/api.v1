@@ -7,3 +7,7 @@ export class GetNotificationsQuery {
     public readonly page: number,
   ) {}
 }
+
+export class GetUnreadNotificationsQuery {
+  constructor(public readonly caller: User) {}
+}

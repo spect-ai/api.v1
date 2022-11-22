@@ -13,15 +13,23 @@ export class RealtimeGateway {
   afterInit(server: Server) {
     console.log('Realtime Gateway Initialized');
     this.server = server;
-  }
+    server.on('connection', (socket) => {
+      console.log(`Connected ${socket.id}`);
 
-  handleDisconnect(client: Socket) {
-    console.log(`Disconnected: ${client.id}`);
-  }
+      socket.on('join', (room) => {
+        console.log(`Joined ${room}`);
+        socket.join(room);
+      });
 
-  handleConnection(client: Socket, ...args: any[]) {
-    console.log(`Connected ${client.id}`);
-    this.server.emit('test', 'test');
+      socket.on('leave', (room) => {
+        console.log(`Left ${room}`);
+        socket.leave(room);
+      });
+
+      socket.on('disconnect', () => {
+        console.log(`Disconnected ${socket.id}`);
+      });
+    });
   }
 
   sendToAll(event: string, data: any) {

@@ -44,7 +44,7 @@ export class DataAddedEventHandler implements IEventHandler<DataAddedEvent> {
         console.log({ roleSet });
         for (const [memberId, roles] of Object.entries(circle.memberRoles)) {
           const hasRole = roles.some((role) => roleSet.has(role));
-          if (hasRole) {
+          if (hasRole && !collection.creator) {
             this.eventBus.publish(
               new SingleNotificationEvent(
                 notifContent,
@@ -57,6 +57,16 @@ export class DataAddedEventHandler implements IEventHandler<DataAddedEvent> {
           }
         }
       }
+
+      this.eventBus.publish(
+        new SingleNotificationEvent(
+          notifContent,
+          collection.logo || circle.avatar,
+          redirectUrl,
+          new Date(),
+          [collection.creator],
+        ),
+      );
 
       const notifResponderContent = `Your response on ${collection.name} was received.`;
       // const responderSubject = `Response received!`;

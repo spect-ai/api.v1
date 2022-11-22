@@ -2,6 +2,7 @@ import {
   Controller,
   Get,
   Param,
+  Patch,
   Query,
   Request,
   UseGuards,
@@ -16,6 +17,7 @@ import { ObjectIdDto } from 'src/common/dtos/object-id.dto';
 import { RequiredUsernameDto } from 'src/common/dtos/string.dto';
 import { GetCirclesCommand } from './commands/metadata/impl/get-circles.command';
 import { GetResponsesCommand } from './commands/metadata/impl/get-responses.command';
+import { SetUnreadNotificationsCommand } from './commands/notifications/impl';
 import { CirclesOfUserDto } from './dto/metadata-of-user.dto';
 import {
   PrivateProfileResponseDto,
@@ -26,6 +28,7 @@ import {
   GetMeQuery,
   GetNotificationsQuery,
   GetProfileByIdQuery,
+  GetUnreadNotificationsQuery,
 } from './queries/impl';
 import { UsersService } from './users.service';
 
@@ -112,5 +115,17 @@ export class UsersControllerV1 {
     return this.queryBus.execute(
       new GetNotificationsQuery(req.user, limit, page),
     );
+  }
+
+  @UseGuards(SessionAuthGuard)
+  @Get('/notifications/unread')
+  getUnreadNotifications(@Request() req) {
+    return this.queryBus.execute(new GetUnreadNotificationsQuery(req.user));
+  }
+
+  @UseGuards(SessionAuthGuard)
+  @Patch('/notifications/unread')
+  setUnreadNotifications(@Request() req) {
+    return this.commandBus.execute(new SetUnreadNotificationsCommand(req.user));
   }
 }

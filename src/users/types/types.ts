@@ -19,9 +19,10 @@ export type Notification = {
 };
 
 export type NotificationV2 = {
-  id: string;
   content: string;
-  ref?: MappedItem<NotifRef>;
+  avatar: string;
+  redirect: string;
+  timestamp: string;
   read: boolean;
 };
 

@@ -10,6 +10,7 @@ import { RemoveEducationCommandHandler } from '../education/handlers/remove-educ
 import { UpdateEducationCommandHandler } from '../education/handlers/update-education.handler';
 import { GetCirclesCommandHandler } from '../metadata/handlers/get-circles.handler';
 import { GetResponsesCommandHandler } from '../metadata/handlers/get-responses.handler';
+import { SetUnreadNotificationsCommandHandler } from '../notifications/handlers/set-unread-notifications.handler';
 
 export const CommandHandlers = [
   AddItemCommandHandler,
@@ -24,4 +25,5 @@ export const CommandHandlers = [
   UpdateEducationCommandHandler,
   GetCirclesCommandHandler,
   GetResponsesCommandHandler,
+  SetUnreadNotificationsCommandHandler,
 ];
