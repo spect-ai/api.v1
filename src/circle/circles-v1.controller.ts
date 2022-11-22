@@ -15,6 +15,7 @@ import {
 import { QueryBus, CommandBus } from '@nestjs/cqrs';
 import { CircleAuthGuard, CreateCircleAuthGuard } from 'src/auth/circle.guard';
 import {
+  AdminAuthGuard,
   PublicViewAuthGuard,
   SessionAuthGuard,
 } from 'src/auth/iron-session.guard';
@@ -421,5 +422,43 @@ export class CircleV1Controller {
         param.id,
       ),
     );
+  }
+
+  @UseGuards(AdminAuthGuard)
+  @Patch('/:id/migrateRoles')
+  async migrateRoles() {
+    const circles = await this.circleRepository.findAll();
+    for (const circle of circles) {
+      const roles = circle.roles;
+      for (const [roleId, role] of Object.entries(roles)) {
+        const permissions = {};
+        for (const [permissionId, permission] of Object.entries(
+          role.permissions,
+        )) {
+          if (
+            permissionId === 'manageFormSettings' ||
+            permissionId === 'updateFormResponsesManually'
+          ) {
+            continue;
+          }
+          permissions[permissionId] = permission;
+        }
+        if (!role.permissions['createNewForm']) {
+          permissions['createNewForm'] = permissions['createNewProject'];
+        }
+        if (!role.permissions['distributeCredentials']) {
+          permissions['distributeCredentials'] = permissions['makePayment'];
+        }
+
+        roles[roleId] = {
+          ...role,
+          permissions,
+        };
+      }
+
+      await this.circleRepository.updateById(circle.id, {
+        roles,
+      });
+    }
   }
 }
