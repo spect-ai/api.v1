@@ -48,6 +48,12 @@ export class Permissions {
   @IsBoolean()
   manageMembers: boolean;
 
+  @IsBoolean()
+  distributeCredentials: boolean;
+
+  @IsBoolean()
+  createNewForm: boolean;
+
   @ValidateNested()
   @Type(() => CardTypeBasedPermissions)
   @IsNotEmpty()
