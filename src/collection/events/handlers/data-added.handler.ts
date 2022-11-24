@@ -48,7 +48,7 @@ export class DataAddedEventHandler implements IEventHandler<DataAddedEvent> {
             this.eventBus.publish(
               new SingleNotificationEvent(
                 notifContent,
-                collection.logo || circle.avatar,
+                collection.formMetadata.logo || circle.avatar,
                 redirectUrl,
                 new Date(),
                 [memberId],
@@ -61,7 +61,7 @@ export class DataAddedEventHandler implements IEventHandler<DataAddedEvent> {
       this.eventBus.publish(
         new SingleNotificationEvent(
           notifContent,
-          collection.logo || circle.avatar,
+          collection.formMetadata.logo || circle.avatar,
           redirectUrl,
           new Date(),
           [collection.creator],
@@ -74,7 +74,7 @@ export class DataAddedEventHandler implements IEventHandler<DataAddedEvent> {
       this.eventBus.publish(
         new SingleNotificationEvent(
           notifResponderContent,
-          collection.logo || circle.avatar,
+          collection.formMetadata.logo || circle.avatar,
           responderRedirectUrl,
           new Date(),
           [caller.id],

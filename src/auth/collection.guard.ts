@@ -8,6 +8,7 @@ import { Reflector } from '@nestjs/core';
 import { CirclesRepository } from 'src/circle/circles.repository';
 import { CirclesService } from 'src/circle/circles.service';
 import { CollectionRepository } from 'src/collection/collection.repository';
+import { Collection } from 'src/collection/model/collection.model';
 import { User } from 'src/users/model/users.model';
 import { CircleAuthGuard } from './circle.guard';
 import { SessionAuthGuard } from './iron-session.guard';
@@ -24,9 +25,11 @@ export class CollectionAuthGuard implements CanActivate {
   async checkPermissions(
     permissions: string[],
     userId: string,
-    circleIds: string[],
+    collection: Collection,
+    circleIds: string[] = [],
   ): Promise<boolean> {
     if (permissions.length === 0) return true;
+    if (collection.creator === userId) return true;
     const collatedUserPermissions =
       await this.circlesService.getCollatedUserPermissions(circleIds, userId);
     for (const permission of permissions) {
@@ -47,7 +50,6 @@ export class CollectionAuthGuard implements CanActivate {
       )) as unknown as User;
       if (!request.user) return false;
 
-      console.log(request.params.id);
       const collection = await this.collectionRepository.findById(
         request.params.id,
       );
@@ -59,6 +61,7 @@ export class CollectionAuthGuard implements CanActivate {
       return await this.checkPermissions(
         permissions,
         request.user.id,
+        collection,
         collection.parents,
       );
     } catch (error) {

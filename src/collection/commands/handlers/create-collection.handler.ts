@@ -87,7 +87,14 @@ export class CreateCollectionCommandHandler
         creator: caller,
         parents: [createCollectionDto.circleId],
         slug: uuidv4(),
-        logo: parentCircle.avatar,
+        collectionType: 0,
+        formMetadata: {
+          active: true,
+          logo: parentCircle.avatar,
+          messageOnSubmission: 'Thank you for submitting your response',
+          multipleResponsesAllowed: false,
+          updatingResponseAllowed: false,
+        },
       });
 
       await this.commandBus.execute(

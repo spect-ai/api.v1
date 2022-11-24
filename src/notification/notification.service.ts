@@ -43,7 +43,7 @@ export class NotificationService {
 
     const skillToCollectionMap = {};
     for (const collection of collections) {
-      collection.opportunityInfo.skills?.forEach((skill) => {
+      collection.formMetadata.opportunityInfo.skills?.forEach((skill) => {
         if (!skillToCollectionMap[skill]) {
           skillToCollectionMap[skill] = [];
         }

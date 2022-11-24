@@ -40,7 +40,7 @@ export class GetResponsesCommandHandler
           slug: collection.slug,
           description: collection.description,
           id: collection._id.toString(),
-          logo: collection.logo,
+          logo: collection.formMetadata.logo,
         };
       });
     } catch (err) {

@@ -46,41 +46,6 @@ export class UpdateCollectionDto {
   mintkudosTokenId: number;
 
   /**
-   * The message to show when the form is submitted
-   */
-  @IsString()
-  @IsOptional()
-  messageOnSubmission: string;
-
-  /**
-   * Multiple responses by same user allowed?
-   */
-  @IsBoolean()
-  @IsOptional()
-  multipleResponsesAllowed: boolean;
-
-  /**
-   * Updating responses allowed?
-   */
-  @IsBoolean()
-  @IsOptional()
-  updatingResponseAllowed: boolean;
-
-  /**
-   * Updating responses allowed?
-   */
-  @IsBoolean()
-  @IsOptional()
-  active: boolean;
-
-  /**
-   * Send confirmation email upon submission?
-   */
-  @IsBoolean()
-  @IsOptional()
-  sendConfirmationEmail: boolean;
-
-  /**
    * Send email to circle members upon new response
    */
   @IsArray()
@@ -95,37 +60,11 @@ export class UpdateCollectionDto {
   circleRolesToNotifyUponUpdatedResponse: string[];
 
   /**
-   * The message to show when the form is submitted
-   */
-  @IsString()
-  @IsOptional()
-  logo: string;
-
-  /**
-   * The message to show when the form is submitted
-   */
-  @IsString()
-  @IsOptional()
-  cover: string;
-
-  /**
    * The updated property order
    */
   @IsArray()
   @IsOptional()
   propertyOrder: string[];
-
-  @IsBoolean()
-  @IsOptional()
-  sybilProtectionEnabled: boolean;
-
-  @IsObject()
-  @IsOptional()
-  sybilProtectionScores: { [id: string]: number };
-
-  @IsNumber()
-  @IsOptional()
-  numOfKudos: number;
 
   @IsObject()
   @IsOptional()
@@ -135,15 +74,26 @@ export class UpdateCollectionDto {
   @IsOptional()
   credentialCurationEnabled: boolean;
 
-  @IsBoolean()
-  @IsOptional()
-  isAnOpportunity: boolean;
-
-  @IsObject()
-  @IsOptional()
-  opportunityInfo: OpportunityInfo;
-
   @IsObject()
   @IsOptional()
   voting: Voting;
+
+  @IsObject()
+  @IsOptional()
+  formMetadata: Partial<FormMetadata>;
+}
+
+interface FormMetadata {
+  messageOnSubmission: string;
+  multipleResponsesAllowed: boolean;
+  updatingResponseAllowed: boolean;
+  active: boolean;
+  sendConfirmationEmail: boolean;
+  logo: string;
+  cover: string;
+  sybilProtectionEnabled: boolean;
+  sybilProtectionScores: { [id: string]: number };
+  numOfKudos: number;
+  isAnOpportunity: boolean;
+  opportunityInfo: OpportunityInfo;
 }

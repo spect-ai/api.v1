@@ -179,8 +179,8 @@ export class GetPublicViewCollectionQueryHandler
           caller,
         );
       const formHasCredentialsButUserIsntConnected =
-        collectionToGet.mintkudosTokenId &&
-        collectionToGet.mintkudosTokenId > 0 &&
+        collectionToGet.formMetadata.mintkudosTokenId &&
+        collectionToGet.formMetadata.mintkudosTokenId > 0 &&
         !caller;
       const canFillForm =
         hasRole &&
@@ -198,12 +198,13 @@ export class GetPublicViewCollectionQueryHandler
         }
 
       const kudosClaimedByUser =
-        collectionToGet.mintkudosClaimedBy &&
-        collectionToGet.mintkudosClaimedBy.includes(caller?.id);
+        collectionToGet.formMetadata.mintkudosClaimedBy &&
+        collectionToGet.formMetadata.mintkudosClaimedBy.includes(caller?.id);
       const canClaimKudos =
-        collectionToGet.mintkudosTokenId &&
+        collectionToGet.formMetadata.mintkudosTokenId &&
         !kudosClaimedByUser &&
-        collectionToGet.numOfKudos > collectionToGet.mintkudosClaimedBy?.length;
+        collectionToGet.formMetadata.numOfKudos >
+          collectionToGet.formMetadata.mintkudosClaimedBy?.length;
       let activityOrder, activity;
       if (previousResponses.length > 0) {
         const prevSlug = previousResponses[previousResponses.length - 1].slug;
@@ -248,9 +249,7 @@ export class GetPrivateViewCollectionQueryHandler
     logger.setContext('GetPrivateViewCollectionQueryHandler');
   }
 
-  async execute(
-    query: GetPrivateViewCollectionQuery,
-  ): Promise<CollectionResponseDto> {
+  async execute(query: GetPrivateViewCollectionQuery): Promise<any> {
     try {
       const { slug, collection } = query;
       let collectionToGet = collection;

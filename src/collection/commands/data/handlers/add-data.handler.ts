@@ -1,6 +1,5 @@
 import { InternalServerErrorException } from '@nestjs/common';
 import {
-  CommandBus,
   CommandHandler,
   EventBus,
   ICommandHandler,
@@ -37,9 +36,10 @@ export class AddDataCommandHandler implements ICommandHandler<AddDataCommand> {
       const collection = await this.collectionRepository.findById(collectionId);
       if (!collection) throw 'Collection does not exist';
       // Required to maitain backward compatibility
-      if (collection.active === false) throw 'Collection is inactive';
+      if (collection.formMetadata.active === false)
+        throw 'Collection is inactive';
       if (
-        !collection.multipleResponsesAllowed &&
+        !collection.formMetadata.multipleResponsesAllowed &&
         collection.dataOwner &&
         Object.values(collection.dataOwner)?.includes(caller?.id)
       ) {
