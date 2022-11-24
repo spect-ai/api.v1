@@ -151,6 +151,24 @@ export class DataValidationService {
               return false;
           }
         }
+      } else if (['singleURL'].includes(properties[propertyId].type)) {
+        if (
+          data &&
+          !String(data)
+            .toLowerCase()
+            .match(/((?:https?:\/\/|www\.)(?:[-a-z0-9]+\.)*[-a-z0-9]+.*)/i)
+        )
+          return false;
+      } else if (['multiURL'].includes(properties[propertyId].type)) {
+        for (const url of data) {
+          if (
+            url &&
+            !String(url)
+              .toLowerCase()
+              .match(/((?:https?:\/\/|www\.)(?:[-a-z0-9]+\.)*[-a-z0-9]+.*)/i)
+          )
+            return false;
+        }
       }
     }
     return true;

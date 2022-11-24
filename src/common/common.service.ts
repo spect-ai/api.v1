@@ -123,7 +123,9 @@ export class CommonTools {
       case 'ethAddress':
       case 'date':
       case 'email':
+      case 'singleURL':
         return elem1 !== elem2;
+      case 'multiURL':
       case 'user[]':
         const difference = arrayDiff(elem1, elem2);
         return (
