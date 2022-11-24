@@ -80,22 +80,34 @@ export class CreateCollectionCommandHandler
       if (!parentCircle)
         throw `Circle with id ${createCollectionDto.circleId} not found`;
 
-      const createdCollection = await this.collectionRepository.create({
-        ...createCollectionDto,
-        properties,
-        propertyOrder,
-        creator: caller,
-        parents: [createCollectionDto.circleId],
-        slug: uuidv4(),
-        collectionType: 0,
-        formMetadata: {
-          active: true,
-          logo: parentCircle.avatar,
-          messageOnSubmission: 'Thank you for submitting your response',
-          multipleResponsesAllowed: false,
-          updatingResponseAllowed: false,
-        },
-      });
+      let createdCollection;
+
+      if (createCollectionDto.collectionType === 0) {
+        createdCollection = await this.collectionRepository.create({
+          ...createCollectionDto,
+          properties,
+          propertyOrder,
+          creator: caller,
+          parents: [createCollectionDto.circleId],
+          slug: uuidv4(),
+          formMetadata: {
+            active: true,
+            logo: parentCircle.avatar,
+            messageOnSubmission: 'Thank you for submitting your response',
+            multipleResponsesAllowed: false,
+            updatingResponseAllowed: false,
+          },
+        });
+      } else if (createCollectionDto.collectionType === 1) {
+        createdCollection = await this.collectionRepository.create({
+          ...createCollectionDto,
+          properties,
+          propertyOrder,
+          creator: caller,
+          parents: [createCollectionDto.circleId],
+          slug: uuidv4(),
+        });
+      }
 
       await this.commandBus.execute(
         new UpdateCircleCommand(

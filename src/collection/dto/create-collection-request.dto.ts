@@ -1,4 +1,10 @@
-import { IsBoolean, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import {
+  IsBoolean,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 import { IsObjectId } from 'class-validator-mongo-object-id';
 import { DefaultViewType } from '../types/types';
 
@@ -41,4 +47,11 @@ export class CreateCollectionDto {
   @IsString()
   @IsOptional()
   defaultView?: DefaultViewType;
+
+  /**
+   * The default view of the collection
+   * @example "form"
+   */
+  @IsNumber()
+  collectionType: 0 | 1;
 }
