@@ -38,6 +38,8 @@ export class AddPropertyDto {
     'multiSelect',
     'ethAddress',
     'milestone',
+    'singleURL',
+    'multiURL',
   ])
   @IsNotEmpty()
   type: PropertyType;
@@ -109,6 +111,8 @@ export class UpdatePropertyDto {
     'multiSelect',
     'ethAddress',
     'milestone',
+    'singleURL',
+    'multiURL',
   ])
   @IsOptional()
   type: PropertyType;

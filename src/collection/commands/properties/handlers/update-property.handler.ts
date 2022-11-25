@@ -162,6 +162,7 @@ export class UpdatePropertyCommandHandler
         return this.clearAllData(prevProperty, dataObj);
       case 'ethAddress':
       case 'email':
+      case 'singleURL':
       case 'date':
         if (newProperty.type === 'shortText' || newProperty.type === 'longText')
           return dataObj;
@@ -192,6 +193,7 @@ export class UpdatePropertyCommandHandler
       case 'multiSelect':
       case 'user[]':
       case 'reward':
+      case 'multiURL':
       case 'milestone':
         return this.clearAllData(prevProperty, dataObj);
 

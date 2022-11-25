@@ -71,7 +71,9 @@ export type PropertyType =
   | 'multiSelect'
   | 'ethAddress'
   | 'email'
-  | 'milestone';
+  | 'milestone'
+  | 'singleURL'
+  | 'multiURL';
 
 export type Option = {
   label: string;
