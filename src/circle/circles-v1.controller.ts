@@ -20,7 +20,11 @@ import {
   SessionAuthGuard,
 } from 'src/auth/iron-session.guard';
 import { ObjectIdDto } from 'src/common/dtos/object-id.dto';
-import { RequiredRoleDto, RequiredSlugDto } from 'src/common/dtos/string.dto';
+import {
+  RequiredAutomationIdDto,
+  RequiredRoleDto,
+  RequiredSlugDto,
+} from 'src/common/dtos/string.dto';
 import {
   ArchiveCircleByIdCommand,
   ClaimCircleCommand,
@@ -74,6 +78,12 @@ import {
   MintKudosDto,
 } from 'src/credentials/dto/mint-kudos.dto';
 import { ApiTags } from '@nestjs/swagger';
+import { CreateAutomationDto, UpdateAutomationDto } from './dto/automation.dto';
+import {
+  AddAutomationCommand,
+  RemoveAutomationCommand,
+  UpdateAutomationCommand,
+} from './commands/automation/impl';
 
 @Controller('circle/v1')
 @ApiTags('circle.v1')
@@ -421,6 +431,47 @@ export class CircleV1Controller {
         null,
         param.id,
       ),
+    );
+  }
+
+  @SetMetadata('permissions', ['manageCircleSettings'])
+  @UseGuards(CircleAuthGuard)
+  @Patch('/:id/addAutomation')
+  async addAutomation(
+    @Param() param: ObjectIdDto,
+    @Body() addAutomationDto: CreateAutomationDto,
+  ) {
+    return await this.commandBus.execute(
+      new AddAutomationCommand(param.id, addAutomationDto),
+    );
+  }
+
+  @SetMetadata('permissions', ['manageCircleSettings'])
+  @UseGuards(CircleAuthGuard)
+  @Patch('/:id/updateAutomation')
+  async updateAutomation(
+    @Param() param: ObjectIdDto,
+    @Query() query: RequiredAutomationIdDto,
+    @Body() updateAutomationDto: UpdateAutomationDto,
+  ) {
+    return await this.commandBus.execute(
+      new UpdateAutomationCommand(
+        param.id,
+        query.automationId,
+        updateAutomationDto,
+      ),
+    );
+  }
+
+  @SetMetadata('permissions', ['manageCircleSettings'])
+  @UseGuards(CircleAuthGuard)
+  @Patch('/:id/removeAutomation')
+  async removeAutomation(
+    @Param() param: ObjectIdDto,
+    @Query() query: RequiredAutomationIdDto,
+  ) {
+    return await this.commandBus.execute(
+      new RemoveAutomationCommand(param.id, query.automationId),
     );
   }
 

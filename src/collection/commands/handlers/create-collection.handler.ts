@@ -68,7 +68,7 @@ export class CreateCollectionCommandHandler
               value: 'Done',
             },
           ],
-          isPartOfFormView: true,
+          isPartOfFormView: false,
         },
       } as MappedItem<Property>;
       const propertyOrder = ['Title', 'Description', 'Status'];
