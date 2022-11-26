@@ -15,7 +15,10 @@ import { Collection } from 'src/collection/model/collection.model';
 import { MappedItem } from 'src/common/interfaces';
 import { Activity } from 'src/collection/types/types';
 import { AdvancedAccessService } from 'src/collection/services/advanced-access.service';
-import { GetPublicViewCollectionQuery } from 'src/collection/queries';
+import {
+  GetPrivateViewCollectionQuery,
+  GetPublicViewCollectionQuery,
+} from 'src/collection/queries';
 
 @CommandHandler(AddDataCommand)
 export class AddDataCommandHandler implements ICommandHandler<AddDataCommand> {
@@ -35,15 +38,22 @@ export class AddDataCommandHandler implements ICommandHandler<AddDataCommand> {
     try {
       const collection = await this.collectionRepository.findById(collectionId);
       if (!collection) throw 'Collection does not exist';
-      // Required to maitain backward compatibility
-      if (collection.formMetadata.active === false)
-        throw 'Collection is inactive';
-      if (
-        !collection.formMetadata.multipleResponsesAllowed &&
-        collection.dataOwner &&
-        Object.values(collection.dataOwner)?.includes(caller?.id)
-      ) {
-        throw 'User has already submitted a response';
+      if (collection.collectionType === 0) {
+        if (collection.formMetadata.active === false)
+          throw 'Collection is inactive';
+        if (
+          !collection.formMetadata.multipleResponsesAllowed &&
+          collection.dataOwner &&
+          Object.values(collection.dataOwner)?.includes(caller?.id)
+        ) {
+          throw 'User has already submitted a response';
+        }
+        const hasPassedSybilCheck =
+          await this.advancedAccessService.hasPassedSybilProtection(
+            collection,
+            caller,
+          );
+        if (!hasPassedSybilCheck) throw 'User has not passed sybil check';
       }
       const hasRole = await this.advancedAccessService.hasRoleToAccessForm(
         collection,
@@ -51,13 +61,6 @@ export class AddDataCommandHandler implements ICommandHandler<AddDataCommand> {
       );
       if (!hasRole)
         throw 'User does not have access to add data this collection';
-
-      const hasPassedSybilCheck =
-        await this.advancedAccessService.hasPassedSybilProtection(
-          collection,
-          caller,
-        );
-      if (!hasPassedSybilCheck) throw 'User has not passed sybil check';
 
       const validData = await this.validationService.validate(
         data,
@@ -98,13 +101,19 @@ export class AddDataCommandHandler implements ICommandHandler<AddDataCommand> {
         },
       );
       this.eventBus.publish(new DataAddedEvent(collection, data, caller));
-      return await this.queryBus.execute(
-        new GetPublicViewCollectionQuery(
-          caller,
-          collection.slug,
-          updatedCollection,
-        ),
-      );
+      if (collection.collectionType === 0) {
+        return await this.queryBus.execute(
+          new GetPublicViewCollectionQuery(
+            caller,
+            collection.slug,
+            updatedCollection,
+          ),
+        );
+      } else {
+        return await this.queryBus.execute(
+          new GetPrivateViewCollectionQuery(null, updatedCollection),
+        );
+      }
     } catch (err) {
       this.logger.error(
         `Failed adding collection to collection Id ${collectionId} with error ${err}`,
