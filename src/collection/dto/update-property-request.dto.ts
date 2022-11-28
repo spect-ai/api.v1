@@ -44,6 +44,10 @@ export class AddPropertyDto {
   @IsNotEmpty()
   type: PropertyType;
 
+  @IsString()
+  @IsOptional()
+  description: string;
+
   @IsOptional()
   default: any;
 
@@ -120,6 +124,10 @@ export class UpdatePropertyDto {
   @IsString()
   @IsOptional()
   default: any;
+
+  @IsString()
+  @IsOptional()
+  description: string;
 
   @IsOptional()
   @IsArray()
