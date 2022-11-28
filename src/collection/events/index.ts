@@ -1,6 +1,9 @@
 import { DataAddedEventHandler } from './handlers/data-added.handler';
 import { DataRemovedEventHandler } from './handlers/data-removed.handler';
-import { DataUpatedEventHandler } from './handlers/data-updated.handler';
+import {
+  AutomationHandler,
+  DataUpatedEventHandler,
+} from './handlers/data-updated.handler';
 import { CollectionCreatedEventHandler } from './handlers/collection-created.handler';
 import { CommentAddedEventHandler } from './handlers/comment-added.handler';
 
@@ -16,4 +19,5 @@ export const EventHandlers = [
   DataRemovedEventHandler,
   CollectionCreatedEventHandler,
   CommentAddedEventHandler,
+  AutomationHandler,
 ];

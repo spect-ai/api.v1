@@ -18,7 +18,6 @@ export class SetUnreadNotificationsCommandHandler
   async execute(command: SetUnreadNotificationsCommand): Promise<boolean> {
     try {
       const { caller } = command;
-      console.log({ caller });
       if (!caller) {
         throw `User with id ${caller.id} not found`;
       }

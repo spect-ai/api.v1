@@ -1,4 +1,7 @@
-import { GetTriggeredAutomationsQueryHandler } from './get-triggered-automation.handler';
+import {
+  GetTriggeredAutomationsQueryHandler,
+  GetTriggeredCollectionAutomationsQueryHandler,
+} from './get-triggered-automation.handler';
 import {
   HasSatisfiedConditionsQueryHandler,
   HasSatisfiedBasicConditionQueryHandler,
@@ -7,6 +10,7 @@ import {
   HasSatisfiedMemberConditionQueryHandler,
   HasSatisfiedStatusConditionQueryHandler,
 } from './has-satisfied-condition.handler';
+import { IsTriggeredSelectFieldQueryHandler } from './is-triggered-v2.handler';
 import {
   IsBasicChangeTriggeredQueryHandler,
   IsStatusTriggeredQueryHandler,
@@ -32,4 +36,7 @@ export const QueryHandlers = [
   HasSatisfiedStartDateConditionQueryHandler,
   HasSatisfiedMemberConditionQueryHandler,
   HasSatisfiedStatusConditionQueryHandler,
+
+  GetTriggeredCollectionAutomationsQueryHandler,
+  IsTriggeredSelectFieldQueryHandler,
 ];

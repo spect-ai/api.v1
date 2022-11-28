@@ -74,12 +74,7 @@ export class UpdateDataCommandHandler
         },
       );
       this.eventBus.publish(
-        new DataUpatedEvent(
-          collection,
-          data,
-          collection.data[dataSlug],
-          caller,
-        ),
+        new DataUpatedEvent(collection, data, dataSlug, caller),
       );
       if (view === 'public') {
         const publicView = await this.queryBus.execute(

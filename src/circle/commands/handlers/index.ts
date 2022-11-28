@@ -22,7 +22,10 @@ import {
 import { AddSafeCommandHandler } from '../safe/handlers/add-safe.handler';
 import { RemoveSafeCommandHandler } from '../safe/handlers/remove-safe.handler';
 import { ClaimCircleCommandHandler } from '../claim/handlers/claim-circle.handler';
-import { UpdateCircleCommandHandler } from './update-circle.handler';
+import {
+  UpdateCircleCommandHandler,
+  UpdateMultipleCircleCommandHandler,
+} from './update-circle.handler';
 import {
   AddProjectsCommandHandler,
   AddProjectsToMultipleCirclesCommandHandler,
@@ -70,4 +73,5 @@ export const CommandHandlers = [
   AddAutomationCommandHandler,
   UpdateAutomationCommandHandler,
   RemoveAutomationCommandHandler,
+  UpdateMultipleCircleCommandHandler,
 ];

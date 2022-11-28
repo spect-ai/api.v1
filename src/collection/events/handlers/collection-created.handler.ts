@@ -19,8 +19,6 @@ export class CollectionCreatedEventHandler
       console.log('CreatedCollectionEvent');
       const { caller, collection } = event;
 
-      console.log({ caller, collection });
-
       if (caller) {
         this.commandBus.execute(
           new AddItemsToUserCommand(

@@ -29,10 +29,10 @@ export class RemoveAutomationCommandHandler
       } else if (
         circle.automations[automationId].triggerCategory === 'collection'
       ) {
-        updates['automationIndexedByCollection'] = {
-          ...circle.automationIndexedByCollection,
+        updates['automationsIndexedByCollection'] = {
+          ...circle.automationsIndexedByCollection,
           [circle.automations[automationId].triggerCollectionSlug]:
-            circle.automationIndexedByCollection[
+            circle.automationsIndexedByCollection[
               circle.automations[automationId].triggerCollectionSlug
             ].filter((id) => id !== automationId),
         };
@@ -40,7 +40,6 @@ export class RemoveAutomationCommandHandler
 
       delete circle.automations[automationId];
       updates['automations'] = circle.automations;
-
       const updatedCircle =
         await this.circlesRepository.updateCircleAndReturnWithPopulatedReferences(
           circleId,

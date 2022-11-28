@@ -280,7 +280,7 @@ export class Circle extends ProfileModel {
   rootAutomations?: RootAutomationsType;
 
   @prop({ default: {} })
-  automationIndexedByCollection?: AutomationsIndexedByCollectionSlugType;
+  automationsIndexedByCollection?: AutomationsIndexedByCollectionSlugType;
 }
 
 export class ExtendedCircle extends Circle {

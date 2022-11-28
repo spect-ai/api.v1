@@ -18,7 +18,6 @@ export class AdvancedAccessService {
   ) {}
 
   async hasRoleToAccessForm(collection: Collection, caller?: User) {
-    console.log({ caller: caller?.id });
     if (collection.formRoleGating && collection.formRoleGating.length > 0) {
       if (!caller) return false;
       const circle = await this.queryBus.execute(

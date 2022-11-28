@@ -20,6 +20,8 @@ export class AddAutomationCommandHandler
   async execute(command: AddAutomationCommand): Promise<CircleResponseDto> {
     try {
       const { circleId, createAutomationDto } = command;
+      console.log({ createAutomationDto });
+      console.log({ circleId });
       const circle = await this.circlesRepository.findById(circleId);
       const newAutomationId = uuidv4();
       const updates = {};
@@ -36,17 +38,22 @@ export class AddAutomationCommandHandler
           newAutomationId,
         ];
       } else if (createAutomationDto.triggerCategory === 'collection') {
-        updates['automationIndexedByCollection'] = {
-          ...circle.automationIndexedByCollection,
-          [createAutomationDto.triggerCollectionSlug]: [
-            ...(circle.automationIndexedByCollection[
-              createAutomationDto.triggerCollectionSlug
-            ] || []),
-            newAutomationId,
-          ],
-        };
+        if (!circle.automationsIndexedByCollection) {
+          updates['automationsIndexedByCollection'] = {
+            [createAutomationDto.triggerCollectionSlug]: [newAutomationId],
+          };
+        } else
+          updates['automationsIndexedByCollection'] = {
+            ...circle.automationsIndexedByCollection,
+            [createAutomationDto.triggerCollectionSlug]: [
+              ...(circle.automationsIndexedByCollection[
+                createAutomationDto.triggerCollectionSlug
+              ] || []),
+              newAutomationId,
+            ],
+          };
       }
-
+      updates['automationCount'] = (circle.automationCount || 0) + 1;
       const updatedCircle =
         await this.circlesRepository.updateCircleAndReturnWithPopulatedReferences(
           circleId,
@@ -56,6 +63,7 @@ export class AddAutomationCommandHandler
         updatedCircle,
       );
     } catch (error) {
+      console.log({ error });
       throw new InternalServerErrorException(error);
     }
   }

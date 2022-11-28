@@ -3,6 +3,7 @@ import { CqrsModule } from '@nestjs/cqrs';
 import { CardsModule } from 'src/card/cards.module';
 import { CommonTools } from 'src/common/common.service';
 import { LoggingService } from 'src/logging/logging.service';
+import { MailService } from 'src/mail/mail.service';
 import { CardsProjectService } from 'src/project/cards.project.service';
 import { ProjectModule } from 'src/project/project.module';
 import { RequestProvider } from 'src/users/user.provider';
@@ -28,6 +29,7 @@ import { QueryHandlers } from './queries/handlers';
     ...CommandHandlers,
     ...QueryHandlers,
     LoggingService,
+    MailService,
   ],
 })
 export class AutomationModule {}

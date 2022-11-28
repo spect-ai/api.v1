@@ -8,7 +8,7 @@ import {
 } from 'src/users/dto/profile-response.dto';
 import { LensService } from 'src/users/external/lens.service';
 import { UsersRepository } from 'src/users/users.repository';
-import { GetProfileByIdQuery } from '../impl/get-profile.query';
+import { GetProfileQuery } from '../impl/get-profile.query';
 
 const publicProfileFields = {
   _id: 1,
@@ -26,20 +26,18 @@ const publicProfileFields = {
   id: 1,
 };
 
-@QueryHandler(GetProfileByIdQuery)
-export class GetProfileByIdQueryHandler
-  implements IQueryHandler<GetProfileByIdQuery>
-{
+@QueryHandler(GetProfileQuery)
+export class GetProfileQueryHandler implements IQueryHandler<GetProfileQuery> {
   constructor(
     private readonly userRepository: UsersRepository,
     private readonly lensService: LensService,
     private readonly logger: LoggingService,
     private readonly commonTools: CommonTools,
   ) {
-    this.logger.setContext('GetProfileByIdQueryQueryHandler');
+    this.logger.setContext('GetProfileQueryQueryHandler');
   }
 
-  async execute(query: GetProfileByIdQuery): Promise<PublicProfileResponseDto> {
+  async execute(query: GetProfileQuery): Promise<PublicProfileResponseDto> {
     try {
       let user = (await this.userRepository.getUserByFilter(
         query.filterQuery,

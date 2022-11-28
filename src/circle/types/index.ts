@@ -60,6 +60,7 @@ export type Folder = {
 export type Action = {
   id: string;
   type: string;
+  subType?: string;
   name: string;
   service: string;
   data: any;
@@ -68,6 +69,7 @@ export type Action = {
 export type Trigger = {
   id: string;
   type: string;
+  subType?: string;
   name: string;
   service: string;
   data: any;

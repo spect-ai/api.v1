@@ -66,7 +66,7 @@ export class AddCommentCommandHandler
         new DataUpatedEvent(
           collection,
           collection.data[dataSlug],
-          collection.data[dataSlug],
+          dataSlug,
           caller,
         ),
       );
