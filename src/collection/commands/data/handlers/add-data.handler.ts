@@ -54,13 +54,13 @@ export class AddDataCommandHandler implements ICommandHandler<AddDataCommand> {
             caller,
           );
         if (!hasPassedSybilCheck) throw 'User has not passed sybil check';
+        const hasRole = await this.advancedAccessService.hasRoleToAccessForm(
+          collection,
+          caller,
+        );
+        if (!hasRole)
+          throw 'User does not have access to add data this collection';
       }
-      const hasRole = await this.advancedAccessService.hasRoleToAccessForm(
-        collection,
-        caller,
-      );
-      if (!hasRole)
-        throw 'User does not have access to add data this collection';
 
       const validData = await this.validationService.validate(
         data,

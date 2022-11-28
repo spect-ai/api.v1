@@ -57,15 +57,15 @@ export class CreateCollectionCommandHandler
           options: [
             {
               label: 'To Do',
-              value: 'To Do',
+              value: uuidv4(),
             },
             {
               label: 'In Progress',
-              value: 'In Progress',
+              value: uuidv4(),
             },
             {
               label: 'Done',
-              value: 'Done',
+              value: uuidv4(),
             },
           ],
           isPartOfFormView: true,
