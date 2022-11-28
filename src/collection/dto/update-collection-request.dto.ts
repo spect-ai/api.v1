@@ -7,6 +7,7 @@ import {
   IsString,
 } from 'class-validator';
 import { GuildRole } from 'src/common/types/role.type';
+import { ProjectMetadata } from '../model/collection.model';
 import { OpportunityInfo, Permissions } from '../types/types';
 import { Voting } from '../types/types';
 
@@ -81,6 +82,10 @@ export class UpdateCollectionDto {
   @IsObject()
   @IsOptional()
   formMetadata: Partial<FormMetadata>;
+
+  @IsObject()
+  @IsOptional()
+  projectMetadata: Partial<ProjectMetadata>;
 }
 
 interface FormMetadata {

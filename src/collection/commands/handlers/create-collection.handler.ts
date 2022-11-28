@@ -99,6 +99,7 @@ export class CreateCollectionCommandHandler
           },
         });
       } else if (createCollectionDto.collectionType === 1) {
+        const defaultViewId = uuidv4();
         createdCollection = await this.collectionRepository.create({
           ...createCollectionDto,
           properties,
@@ -106,6 +107,17 @@ export class CreateCollectionCommandHandler
           creator: caller,
           parents: [createCollectionDto.circleId],
           slug: uuidv4(),
+          projectMetadata: {
+            viewOrder: [defaultViewId],
+            views: {
+              [defaultViewId]: {
+                name: 'Grid view 1',
+                type: 'grid',
+                filters: [],
+                sort: {},
+              },
+            },
+          },
         });
       }
 

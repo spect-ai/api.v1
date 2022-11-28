@@ -127,8 +127,11 @@ export class Collection extends BaseModel {
   /**
    * Send email to circle members upon updated response
    */
-  @prop({ default: [] })
+  @prop({ default: {} })
   formMetadata: FormMetadata;
+
+  @prop({ default: {} })
+  projectMetadata: ProjectMetadata;
 }
 
 export interface FormMetadata {
@@ -195,4 +198,17 @@ export interface FormMetadata {
   opportunityInfo?: OpportunityInfo;
 
   active?: boolean;
+}
+
+export interface ProjectMetadata {
+  views: {
+    [id: string]: {
+      name: string;
+      type: 'grid' | 'kanban' | 'gantt' | 'list';
+      groupByColumn?: string;
+      filters?: any;
+      sort?: any;
+    };
+  };
+  viewOrder: string[];
 }
