@@ -1,15 +1,60 @@
+import { Injectable } from '@nestjs/common';
 import { CommandHandler, ICommandHandler, QueryBus } from '@nestjs/cqrs';
 import { Circle } from 'src/circle/model/circle.model';
 import { GetCircleByIdQuery } from 'src/circle/queries/impl';
 import { Collection } from 'src/collection/model/collection.model';
 import { GetCollectionBySlugQuery } from 'src/collection/queries';
+import { MappedItem } from 'src/common/interfaces';
 import { LoggingService } from 'src/logging/logging.service';
 import { MailService } from 'src/mail/mail.service';
+import { EmailGeneratorService } from 'src/notification/email-generatr.service';
 import { GetProfileQuery } from 'src/users/queries/impl';
 import {
   GiveRoleActionCommand,
   SendEmailActionCommand,
 } from '../impl/take-action-v2.command';
+
+@Injectable()
+export class CommonActionService {
+  constructor(private readonly queryBus: QueryBus) {}
+
+  async getCircleCollectionUsersFromRelevantIds(
+    circleId: string,
+    relevantIds: MappedItem<any>,
+  ) {
+    const circle = await this.queryBus.execute(
+      new GetCircleByIdQuery(circleId),
+    );
+    if (!circle) throw new Error('Circle not found');
+    const collection = await this.queryBus.execute(
+      new GetCollectionBySlugQuery(relevantIds.collectionSlug),
+    );
+    if (!collection) {
+      throw new Error('No collection found for the given slug');
+    }
+
+    const userId = collection.dataOwner[relevantIds.dataSlug];
+    console.log({ userId });
+    const user = await this.queryBus.execute(
+      new GetProfileQuery(
+        {
+          _id: userId,
+        },
+        userId,
+      ),
+    );
+
+    if (!user) {
+      throw new Error('No user found for the given id');
+    }
+
+    return {
+      circle,
+      collection,
+      user,
+    };
+  }
+}
 
 @CommandHandler(SendEmailActionCommand)
 export class SendEmailActionCommandHandler
@@ -18,23 +63,45 @@ export class SendEmailActionCommandHandler
   constructor(
     private readonly emailService: MailService,
     private readonly logger: LoggingService,
+    private readonly commonActionService: CommonActionService,
+    private readonly emailGeneratorService: EmailGeneratorService,
   ) {
     this.logger.setContext(SendEmailActionCommandHandler.name);
   }
 
   async execute(command: SendEmailActionCommand): Promise<any> {
-    const { action, caller } = command;
+    console.log('SendEmailActionCommandHandler');
+    const { action, caller, relevantIds } = command;
+    const circleId = action.data.circleId;
+    if (!circleId) {
+      throw new Error('No circleId provided in automation data');
+    }
+    if (!action.data.message) return;
+
+    const { circle, collection, user } =
+      await this.commonActionService.getCircleCollectionUsersFromRelevantIds(
+        circleId,
+        relevantIds,
+      );
+
     try {
+      if (!user.email) return;
+      const html = this.emailGeneratorService.generateEmailWithMessage(
+        action.data.message,
+        `https://circles.spect.network`,
+        user,
+        circle,
+      );
       const mail = {
-        to: `adityachakra16@gmail.com`,
+        to: `${user.email}`,
         from: {
-          name: 'Team Spect',
+          name: 'Spect Notifications',
           email: process.env.NOTIFICATION_EMAIL,
         }, // Fill it with your validated email on SendGrid account
-        content: action.data.message,
-        subject: 'Your curated opportunities are here!',
+        html,
+        subject: `You have a new notification from ${circle.name}`,
       };
-      await this.emailService.send(mail);
+      const res = await this.emailService.send(mail);
     } catch (err) {
       this.logger.error(err);
     }
@@ -48,13 +115,13 @@ export class GiveRoleActionCommandHandler
   constructor(
     private readonly logger: LoggingService,
     private readonly queryBus: QueryBus,
+    private readonly commonActionService: CommonActionService,
   ) {
     this.logger.setContext(GiveRoleActionCommandHandler.name);
   }
 
   async execute(command: GiveRoleActionCommand): Promise<any> {
-    const { action, caller, dataContainer, updatesContainer, relevantIds } =
-      command;
+    const { action, caller, updatesContainer, relevantIds } = command;
     try {
       console.log('GiveRoleActionCommandHandler');
       const circleId = action.data.circleId;
@@ -67,53 +134,18 @@ export class GiveRoleActionCommandHandler
         if (give) roles.push(role);
       }
       if (!roles || roles.length === 0) return;
-      if (!dataContainer[circleId]) {
-        dataContainer[circleId] = await this.queryBus.execute(
-          new GetCircleByIdQuery(circleId),
+      const { circle, collection, user } =
+        await this.commonActionService.getCircleCollectionUsersFromRelevantIds(
+          circleId,
+          relevantIds,
         );
-        if (!dataContainer[circleId]) {
-          throw new Error('No circle found for the given id');
-        }
-      }
-
-      if (!dataContainer[relevantIds.collectionSlug]) {
-        dataContainer[relevantIds.collectionSlug] = await this.queryBus.execute(
-          new GetCollectionBySlugQuery(relevantIds.collectionSlug),
-        );
-        if (!dataContainer[relevantIds.collectionSlug]) {
-          throw new Error('No collection found for the given id');
-        }
-      }
-      const userId =
-        dataContainer[relevantIds.collectionSlug].dataOwner[
-          relevantIds.dataSlug
-        ];
-      if (!dataContainer[userId]) {
-        dataContainer[userId] = await this.queryBus.execute(
-          new GetProfileQuery(
-            {
-              _id: userId,
-            },
-            caller,
-          ),
-        );
-        if (!dataContainer[userId]) {
-          throw new Error('No user found for the given id');
-        }
-      }
 
       let newMemberRoles = [];
-      if (
-        dataContainer[circleId].memberRoles[
-          dataContainer[userId]._id.toString()
-        ]
-      ) {
+      if (circle.memberRoles[user._id.toString()]) {
         newMemberRoles = [
           ...new Set([
             ...roles,
-            ...(dataContainer[circleId].memberRoles[
-              dataContainer[userId]._id.toString()
-            ] || []),
+            ...(circle.memberRoles[user._id.toString()] || []),
           ]),
         ];
       } else {
@@ -121,15 +153,17 @@ export class GiveRoleActionCommandHandler
       }
 
       const memberRoles = {
-        ...dataContainer[circleId].memberRoles,
-        [dataContainer[userId]._id.toString()]: newMemberRoles,
+        ...circle.memberRoles,
+        [user._id.toString()]: newMemberRoles,
       };
-      const members = [...(dataContainer[circleId].members || []), userId];
+
+      if (!circle.members.includes(user._id.toString()))
+        circle.members = [...(circle.members || []), user._id.toString()];
 
       updatesContainer['circle'][circleId] = {
         ...(updatesContainer['circle'][circleId] || {}),
         memberRoles,
-        members,
+        members: circle.members,
       };
 
       return updatesContainer;
