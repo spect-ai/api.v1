@@ -36,6 +36,7 @@ export type PopulatedCircleFields = {
   children?: { [fieldName: string]: number };
   retro?: { [fieldName: string]: number };
   collections?: { [fieldName: string]: number };
+  memberRoles?: number;
 };
 
 export type SafeAddresses = {

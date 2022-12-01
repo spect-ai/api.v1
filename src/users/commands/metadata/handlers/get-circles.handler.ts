@@ -38,6 +38,13 @@ export class GetCirclesCommandHandler
               name: 1,
               gradient: 1,
             },
+            memberRoles: 1,
+            projects: {
+              slug: 1,
+            },
+            collections: {
+              slug: 1,
+            },
           },
         ),
       );
@@ -50,6 +57,9 @@ export class GetCirclesCommandHandler
           avatar: circle.avatar || circle.parents[0]?.avatar,
           parents: circle.parents,
           gradient: circle.gradient || circle.parents[0]?.gradient,
+          projects: circle.projects,
+          collections: circle.collections,
+          memberRoles: circle.memberRoles,
         };
       });
     } catch (err) {
