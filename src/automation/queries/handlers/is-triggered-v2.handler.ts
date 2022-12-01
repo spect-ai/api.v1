@@ -13,22 +13,21 @@ export class IsTriggeredSelectFieldQueryHandler
     const to = trigger.data.to;
     if (!from && !to) return false;
 
-    console.log({ from, to });
-    console.log({ fieldname: trigger.data.fieldName });
-    console.log({ update });
-    console.log({ prev: prevCollection.data[trigger.data.fieldName] });
-
-    if (
-      from &&
-      !from.includes(
-        prevCollection.data[dataSlug][trigger.data.fieldName]?.['value'],
+    if (from.length > 0) {
+      const fromValues = from.map((val) => val.value);
+      if (
+        !fromValues.includes(
+          prevCollection.data[dataSlug][trigger.data.fieldName]?.['value'],
+        )
       )
-    ) {
-      return false;
+        return false;
     }
 
-    if (to && !to.includes(update[trigger.data.fieldName]?.value)) {
-      return false;
+    if (to.length) {
+      const toValues = to.map((val) => val.value);
+
+      if (!toValues.includes(update[trigger.data.fieldName]?.['value']))
+        return false;
     }
 
     return true;

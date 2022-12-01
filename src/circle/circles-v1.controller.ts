@@ -84,6 +84,8 @@ import {
   RemoveAutomationCommand,
   UpdateAutomationCommand,
 } from './commands/automation/impl';
+import { CirclesCollectionService } from './services/circle-collection.service';
+import { Collection } from 'src/collection/model/collection.model';
 
 @Controller('circle/v1')
 @ApiTags('circle.v1')
@@ -96,6 +98,7 @@ export class CircleV1Controller {
     private readonly commandBus: CommandBus,
     private readonly kudosService: MintKudosService,
     private readonly circleRepository: CirclesRepository,
+    private readonly circleCollectionService: CirclesCollectionService,
   ) {}
 
   @UseGuards(PublicViewAuthGuard)
@@ -123,6 +126,21 @@ export class CircleV1Controller {
     @Param() param: RequiredSlugDto,
   ): Promise<CircleResponseDto> {
     return await this.circleCrudService.getBySlug(param.slug);
+  }
+
+  @UseGuards(PublicViewAuthGuard)
+  @Get('/:id/allActiveCollections')
+  async findAllActiveCollections(
+    @Param() param: ObjectIdDto,
+  ): Promise<Collection[]> {
+    try {
+      return await this.circleCollectionService.getAllActiveCollections(
+        param.id,
+      );
+    } catch (error) {
+      console.log(error);
+      return [];
+    }
   }
 
   @UseGuards(CreateCircleAuthGuard)
