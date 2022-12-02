@@ -18,8 +18,12 @@ export class ActionCommand {
 
 export class SendEmailActionCommand extends ActionCommand {}
 export class GiveRoleActionCommand extends ActionCommand {}
+export class GiveDiscordRoleActionCommand extends ActionCommand {}
+export class CreateDiscordChannelActionCommand extends ActionCommand {}
 
 export const actionIdToCommandMapNew = {
   sendEmail: SendEmailActionCommand,
   giveRole: GiveRoleActionCommand,
+  createDiscordChannel: CreateDiscordChannelActionCommand,
+  giveDiscordRole: GiveDiscordRoleActionCommand,
 };

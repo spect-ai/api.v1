@@ -97,8 +97,8 @@ export class EmailGeneratorService {
   generateEmailWithMessage(
     message: string,
     link: string,
-    receipient: User,
     circle?: Circle,
+    receipient?: User,
   ) {
     const { html, errors } = render(
       <Mjml>
@@ -139,7 +139,11 @@ export class EmailGeneratorService {
                 color="#ae5fe2"
                 align="right"
                 text-decoration="underline"
-                href={`https://circles.spect.network/profile/${receipient.username}`}
+                href={
+                  receipient
+                    ? `https://circles.spect.network/profile/${receipient.username}`
+                    : `https://circles.spect.network/`
+                }
               >
                 Unsub
               </MjmlButton>

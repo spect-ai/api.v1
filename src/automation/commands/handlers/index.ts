@@ -4,6 +4,8 @@ import {
   PerformMultipleAutomationsCommandHandler,
 } from './perform-automation.handler';
 import {
+  CreateDiscordChannelActionCommandHandler,
+  GiveDiscordRoleActionCommandHandler,
   GiveRoleActionCommandHandler,
   SendEmailActionCommandHandler,
 } from './take -action-v2.handler';
@@ -29,4 +31,6 @@ export const CommandHandlers = [
   PerformAutomationOnCollectionDataUpdateCommandHandler,
   GiveRoleActionCommandHandler,
   SendEmailActionCommandHandler,
+  CreateDiscordChannelActionCommandHandler,
+  GiveDiscordRoleActionCommandHandler,
 ];
