@@ -19,6 +19,7 @@ export class DataValidationService {
   async validate(
     dataObj: object,
     operation: 'update' | 'add',
+    skipRequiredFieldValidation?: boolean,
     collection?: Collection,
     collectionId?: string,
   ) {
@@ -51,13 +52,15 @@ export class DataValidationService {
       if (!valueValidationPassed) return false;
       console.log(valueValidationPassed);
 
-      const requiredValidationPassed = this.validateRequriedFields(
-        dataObj,
-        collectionToValidate.properties,
-        operation,
-      );
-      if (!requiredValidationPassed) return false;
-      console.log(valueValidationPassed);
+      if (!skipRequiredFieldValidation) {
+        const requiredValidationPassed = this.validateRequriedFields(
+          dataObj,
+          collectionToValidate.properties,
+          operation,
+        );
+        if (!requiredValidationPassed) return false;
+        console.log(valueValidationPassed);
+      }
 
       return true;
     } catch (err) {

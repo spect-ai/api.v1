@@ -26,6 +26,8 @@ export class CirclesCollectionService {
             slug: 1,
             id: 1,
             active: 1,
+            properties: 1,
+            propertyOrder: 1,
           },
         }),
       );

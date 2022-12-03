@@ -4,6 +4,7 @@ import {
   PerformMultipleAutomationsCommandHandler,
 } from './perform-automation.handler';
 import {
+  CreateCardActionCommandHandler,
   CreateDiscordChannelActionCommandHandler,
   GiveDiscordRoleActionCommandHandler,
   GiveRoleActionCommandHandler,
@@ -33,4 +34,5 @@ export const CommandHandlers = [
   SendEmailActionCommandHandler,
   CreateDiscordChannelActionCommandHandler,
   GiveDiscordRoleActionCommandHandler,
+  CreateCardActionCommandHandler,
 ];

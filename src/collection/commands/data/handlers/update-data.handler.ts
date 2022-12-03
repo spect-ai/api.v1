@@ -48,6 +48,7 @@ export class UpdateDataCommandHandler
       const validData = await this.validationService.validate(
         data,
         'update',
+        false,
         collection,
       );
       if (!validData) {
