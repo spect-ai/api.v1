@@ -222,6 +222,7 @@ export class AddDataUsingAutomationCommandHandler
       const { dataActivities, dataActivityOrder } = this.getActivity(
         collection,
         data,
+        botUser.id,
       );
       const updatedCollection = await this.collectionRepository.updateById(
         collectionId,
@@ -259,21 +260,30 @@ export class AddDataUsingAutomationCommandHandler
   getActivity(
     collection: Collection,
     data: object,
+    caller: string,
   ): {
     dataActivities: MappedItem<MappedItem<Activity>>;
     dataActivityOrder: MappedItem<string[]>;
   } {
     const activityId = uuidv4();
-    let ref;
+    let content, ref;
     const dataType =
       collection.defaultView === 'form'
         ? 'response'
         : collection.defaultView === 'table'
         ? 'row'
         : 'card';
-
-    const content = `New ${dataType} was added`;
-
+    if (caller) {
+      content = `created new ${dataType}`;
+      ref = {
+        actor: {
+          id: caller,
+          type: 'user',
+        },
+      };
+    } else {
+      content = `New ${dataType} was added`;
+    }
     return {
       dataActivities: {
         ...(collection.dataActivities || {}),

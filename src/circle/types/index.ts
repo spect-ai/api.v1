@@ -76,12 +76,20 @@ export type Trigger = {
   data: any;
 };
 
+export type Condition = {
+  id: string;
+  type: string;
+  service: string;
+  data: any;
+};
+
 export type Automation = {
   id: string;
   name: string;
   description: string;
   trigger: Trigger;
   actions: Action[];
+  conditions?: Condition[];
   triggerCategory: 'collection' | 'root';
   triggerCollectionSlug?: string;
 };
