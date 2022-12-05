@@ -203,11 +203,13 @@ export interface FormMetadata {
 export interface ProjectMetadata {
   views: {
     [id: string]: {
+      id: string;
       name: string;
       type: 'grid' | 'kanban' | 'gantt' | 'list';
       groupByColumn?: string;
       filters?: any;
       sort?: any;
+      cardColumnOrder?: string[][];
     };
   };
   viewOrder: string[];

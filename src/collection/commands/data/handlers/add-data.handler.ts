@@ -85,6 +85,30 @@ export class AddDataCommandHandler implements ICommandHandler<AddDataCommand> {
         data,
         caller?.id,
       );
+
+      const views = collection.projectMetadata.views;
+      const viewsValues = Object.values(views);
+
+      viewsValues.forEach((view) => {
+        if (['kanban', 'list'].includes(view.type)) {
+          const columnIndex = collection.properties[
+            view.groupByColumn
+          ].options.findIndex(
+            (option) => option.value === data[view.groupByColumn].value,
+          );
+          if (columnIndex === -1) {
+            throw new Error(
+              `Column value ${data[view.groupByColumn].value} does not exist`,
+            );
+          }
+          view.cardColumnOrder[columnIndex].push(data['slug']);
+        }
+      });
+
+      Object.keys(views).forEach((viewId, index) => {
+        views[viewId] = viewsValues[index];
+      });
+
       const updatedCollection = await this.collectionRepository.updateById(
         collectionId,
         {
@@ -97,6 +121,10 @@ export class AddDataCommandHandler implements ICommandHandler<AddDataCommand> {
           dataOwner: {
             ...(collection.dataOwner || {}),
             [data['slug']]: caller?.id,
+          },
+          projectMetadata: {
+            ...collection.projectMetadata,
+            views,
           },
         },
       );

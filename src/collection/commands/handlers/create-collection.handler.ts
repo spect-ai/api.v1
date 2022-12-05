@@ -111,6 +111,7 @@ export class CreateCollectionCommandHandler
             viewOrder: [defaultViewId],
             views: {
               [defaultViewId]: {
+                id: defaultViewId,
                 name: 'Grid view 1',
                 type: 'grid',
                 filters: [],
