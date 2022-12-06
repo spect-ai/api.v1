@@ -281,6 +281,9 @@ export class Circle extends ProfileModel {
 
   @prop({ default: {} })
   automationsIndexedByCollection?: AutomationsIndexedByCollectionSlugType;
+
+  @prop({ default: [] })
+  nftTypeIds?: string[];
 }
 
 export class ExtendedCircle extends Circle {

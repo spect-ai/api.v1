@@ -424,7 +424,6 @@ export class CircleV1Controller {
 
   @Get('/:id/communityKudosDesigns')
   async communityKudosDesigns(@Param() param: ObjectIdDto): Promise<nftTypes> {
-    console.log({ param });
     return await this.kudosService.getCommunityKudosDesigns(param.id);
   }
 

@@ -1,9 +1,12 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
-import { QueryBus } from '@nestjs/cqrs';
+import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import fetch from 'node-fetch';
 import { CirclesPrivateRepository } from 'src/circle/circles-private.repository';
 import { CirclesRepository } from 'src/circle/circles.repository';
-import { GetPrivateCircleByCircleIdQuery } from 'src/circle/queries/impl';
+import {
+  GetCircleByIdQuery,
+  GetPrivateCircleByCircleIdQuery,
+} from 'src/circle/queries/impl';
 import { LoggingService } from 'src/logging/logging.service';
 import {
   ClaimKudosDto,
@@ -30,6 +33,7 @@ export type AddedNFTTypeResponse = {
 };
 import { Readable } from 'stream';
 import { KudosType } from '../types/types';
+import { UpdateCircleCommand } from 'src/circle/commands/impl/update-circle.command';
 
 // TODO
 @Injectable()
@@ -37,6 +41,7 @@ export class MintKudosService {
   constructor(
     private readonly logger: LoggingService,
     private readonly queryBus: QueryBus,
+    private readonly commandBus: CommandBus,
   ) {
     this.logger.setContext('MintKudosService');
   }
@@ -45,14 +50,18 @@ export class MintKudosService {
     const privateProps = await this.queryBus.execute(
       new GetPrivateCircleByCircleIdQuery(id),
     );
-    if (!privateProps) {
-      throw 'Circle doesnt have Mintkudos credentials setup';
-    }
     return privateProps;
   }
 
   private async getEncodedString(id: string): Promise<string> {
     const privateProps = await this.getPrivateProps(id);
+    if (!privateProps) {
+      const stringToEncode =
+        process.env.MINTKUDOS_DEFAULT_COMMUNITY_ID +
+        ':' +
+        process.env.MINTKUDOS_DEFAULT_API_KEY;
+      return Buffer.from(stringToEncode).toString('base64');
+    }
     const stringToEncode =
       privateProps.mintkudosCommunityId + ':' + privateProps.mintkudosApiKey;
     return Buffer.from(stringToEncode).toString('base64');
@@ -61,7 +70,6 @@ export class MintKudosService {
   async mintKudos(id: string, kudos: MintKudosDto): Promise<string> {
     try {
       const encodedString = await this.getEncodedString(id);
-      console.log(kudos);
       const res = await fetch(`${process.env.MINTKUDOS_URL}/v1/tokens`, {
         headers: {
           Accept: 'application/json',
@@ -71,9 +79,7 @@ export class MintKudosService {
         method: 'POST',
         body: JSON.stringify(kudos),
       });
-      console.log(res);
       const data = await res.json();
-      console.log(data);
       const operationId = res.headers.get('Location');
       return operationId;
     } catch (e) {
@@ -119,10 +125,7 @@ export class MintKudosService {
     tokenId: string,
     ethAddress: string,
   ): Promise<KudosResponseDto> {
-    const privateProps = await this.getPrivateProps(circleId);
-    const encodedString = Buffer.from(
-      privateProps.mintkudosCommunityId + ':' + privateProps.mintkudosApiKey,
-    ).toString('base64');
+    const encodedString = await this.getEncodedString(circleId);
     const res = await fetch(
       `${process.env.MINTKUDOS_URL}/v1/tokens/${tokenId}/airdrop`,
       {
@@ -142,24 +145,53 @@ export class MintKudosService {
   }
 
   async getCommunityKudosDesigns(id: string): Promise<nftTypes> {
-    console.log(id);
     const privateProps = await this.getPrivateProps(id);
-    const encodedString = Buffer.from(
-      privateProps.mintkudosCommunityId + ':' + privateProps.mintkudosApiKey,
-    ).toString('base64');
-    const res = await fetch(
-      `${process.env.MINTKUDOS_URL}/v1/communities/${privateProps.mintkudosCommunityId}/nftTypes`,
-      {
-        headers: {
-          Accept: 'application/json',
-          'Content-Type': 'application/json',
-          Authorization: `Basic ${encodedString}`,
+    if (privateProps) {
+      const encodedString = Buffer.from(
+        privateProps.mintkudosCommunityId + ':' + privateProps.mintkudosApiKey,
+      ).toString('base64');
+      const res = await fetch(
+        `${process.env.MINTKUDOS_URL}/v1/communities/${privateProps.mintkudosCommunityId}/nftTypes`,
+        {
+          headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+            Authorization: `Basic ${encodedString}`,
+          },
         },
-      },
-    );
-    if (res.ok) {
-      const nftTypes = await res.json();
-      return nftTypes?.data;
+      );
+      if (res.ok) {
+        const nftTypes = await res.json();
+        return nftTypes?.data;
+      }
+    } else {
+      const encodedString = Buffer.from(
+        process.env.MINTKUDOS_DEFAULT_COMMUNITY_ID +
+          ':' +
+          process.env.MINTKUDOS_DEFAULT_API_KEY,
+      ).toString('base64');
+      const res = await fetch(
+        `${process.env.MINTKUDOS_URL}/v1/communities/${process.env.MINTKUDOS_DEFAULT_COMMUNITY_ID}/nftTypes`,
+        {
+          headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+            Authorization: `Basic ${encodedString}`,
+          },
+        },
+      );
+      if (res.ok) {
+        const nftTypes = await res.json();
+        const circle = await this.queryBus.execute(new GetCircleByIdQuery(id));
+        const nftTypeIdSet = new Set(circle.nftTypeIds);
+        const nftTypesFiltered = nftTypes?.data.filter(
+          (nftType) =>
+            nftTypeIdSet.has(nftType.nftTypeId) ||
+            nftType.nftTypeId?.startsWith('default'),
+        );
+
+        return nftTypesFiltered;
+      }
     }
   }
 
@@ -167,10 +199,19 @@ export class MintKudosService {
     circleId: string,
     asset: Express.Multer.File,
   ): Promise<AddedNFTTypeResponse> {
+    let communityId, encodedString;
     const privateProps = await this.getPrivateProps(circleId);
-    const encodedString = Buffer.from(
-      privateProps.mintkudosCommunityId + ':' + privateProps.mintkudosApiKey,
-    ).toString('base64');
+    if (privateProps) {
+      communityId = privateProps.mintkudosCommunityId;
+      encodedString = Buffer.from(
+        communityId + ':' + privateProps.mintkudosApiKey,
+      ).toString('base64');
+    } else {
+      communityId = process.env.MINTKUDOS_DEFAULT_COMMUNITY_ID;
+      encodedString = Buffer.from(
+        communityId + ':' + process.env.MINTKUDOS_DEFAULT_API_KEY,
+      ).toString('base64');
+    }
 
     const nftTypeId = uuidv4();
 
@@ -180,10 +221,9 @@ export class MintKudosService {
     });
     formData.append('name', asset.originalname);
     formData.append('nftTypeId', nftTypeId);
-    console.log({ formData });
     const res = await (
       await fetch(
-        `${process.env.MINTKUDOS_URL}/v1/communities/${privateProps.mintkudosCommunityId}/nftTypes`,
+        `${process.env.MINTKUDOS_URL}/v1/communities/${communityId}/nftTypes`,
         {
           method: 'POST',
           headers: {
@@ -193,6 +233,22 @@ export class MintKudosService {
         },
       )
     ).json();
+
+    if (!privateProps) {
+      const circle = await this.queryBus.execute(
+        new GetCircleByIdQuery(circleId),
+      );
+
+      const res = await this.commandBus.execute(
+        new UpdateCircleCommand(
+          circleId,
+          {
+            nftTypeIds: [...(circle.nftTypeIds || []), nftTypeId],
+          },
+          '',
+        ),
+      );
+    }
     return { ...res, nftTypeId, name: asset.originalname };
   }
 
