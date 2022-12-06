@@ -22,12 +22,7 @@ import {
   GetPrivateViewCollectionQuery,
   GetPublicViewCollectionQuery,
 } from 'src/collection/queries';
-import {
-  GetProfileQuery,
-  GetUserByFilterQuery,
-  GetUserByIdQuery,
-  GetUserByUsernameQuery,
-} from 'src/users/queries/impl';
+import { GetProfileQuery } from 'src/users/queries/impl';
 
 @CommandHandler(AddDataCommand)
 export class AddDataCommandHandler implements ICommandHandler<AddDataCommand> {
@@ -101,17 +96,11 @@ export class AddDataCommandHandler implements ICommandHandler<AddDataCommand> {
 
       viewsValues.forEach((view) => {
         if (['kanban', 'list'].includes(view.type)) {
-          const columnIndex = collection.properties[
-            view.groupByColumn
-          ].options.findIndex(
-            (option) => option.value === data[view.groupByColumn].value,
-          );
-          if (columnIndex === -1) {
-            throw new Error(
-              `Column value ${data[view.groupByColumn].value} does not exist`,
-            );
-          }
-          view.cardColumnOrder[columnIndex].push(data['slug']);
+          const columnIndex =
+            collection.properties[view.groupByColumn].options.findIndex(
+              (option) => option.value === data[view.groupByColumn]?.value,
+            ) || -1;
+          view.cardColumnOrder[columnIndex + 1].push(data['slug']);
         }
       });
 
@@ -154,10 +143,10 @@ export class AddDataCommandHandler implements ICommandHandler<AddDataCommand> {
       }
     } catch (err) {
       this.logger.error(
-        `Failed adding collection to collection Id ${collectionId} with error ${err}`,
+        `Failed adding data to collection Id ${collectionId} with error ${err}`,
       );
       throw new InternalServerErrorException(
-        `Failed adding collection to collection Id ${collectionId} with error ${err}`,
+        `Failed adding data to collection Id ${collectionId} with error ${err}`,
       );
     }
   }
