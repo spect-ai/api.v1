@@ -50,6 +50,7 @@ export class UpdateDataCommandHandler
       const validData = await this.validationService.validate(
         data,
         'update',
+        false,
         collection,
       );
       if (!validData) {
@@ -76,12 +77,7 @@ export class UpdateDataCommandHandler
         },
       );
       this.eventBus.publish(
-        new DataUpatedEvent(
-          collection,
-          data,
-          collection.data[dataSlug],
-          caller,
-        ),
+        new DataUpatedEvent(collection, data, dataSlug, caller),
       );
       if (view === 'public') {
         const publicView = await this.queryBus.execute(

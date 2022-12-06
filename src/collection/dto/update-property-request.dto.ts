@@ -9,7 +9,12 @@ import {
   IsString,
   ValidateNested,
 } from 'class-validator';
-import { NetworkModel, PropertyType, UserType } from '../types/types';
+import {
+  Condition,
+  NetworkModel,
+  PropertyType,
+  UserType,
+} from '../types/types';
 import { IsValidRewardOptions } from '../validations/reward-validations.service';
 
 export class OptionModel {
@@ -38,9 +43,15 @@ export class AddPropertyDto {
     'multiSelect',
     'ethAddress',
     'milestone',
+    'singleURL',
+    'multiURL',
   ])
   @IsNotEmpty()
   type: PropertyType;
+
+  @IsString()
+  @IsOptional()
+  description: string;
 
   @IsOptional()
   default: any;
@@ -86,6 +97,13 @@ export class AddPropertyDto {
   @IsArray()
   @IsOptional()
   milestoneFields: string[];
+
+  /**
+   * Conditions to show this field
+   */
+  @IsArray()
+  @IsOptional()
+  viewConditions?: Condition[];
 }
 
 export class UpdatePropertyDto {
@@ -109,6 +127,8 @@ export class UpdatePropertyDto {
     'multiSelect',
     'ethAddress',
     'milestone',
+    'singleURL',
+    'multiURL',
   ])
   @IsOptional()
   type: PropertyType;
@@ -116,6 +136,10 @@ export class UpdatePropertyDto {
   @IsString()
   @IsOptional()
   default: any;
+
+  @IsString()
+  @IsOptional()
+  description: string;
 
   @IsOptional()
   @IsArray()
@@ -160,4 +184,11 @@ export class UpdatePropertyDto {
   @IsArray()
   @IsOptional()
   milestoneFields: string[];
+
+  /**
+   * Conditions to show this field
+   */
+  @IsArray()
+  @IsOptional()
+  viewConditions?: Condition[];
 }

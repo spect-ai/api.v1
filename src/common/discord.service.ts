@@ -11,7 +11,7 @@ export class DiscordService {
     console.log({ discordId, guildId });
     try {
       const res = await fetch(
-        `https://spect-discord-bot.herokuapp.com/api/userRoles?userId=${discordId}&guildId=${guildId}`,
+        `process.env.DISCORD_URI/api/userRoles?userId=${discordId}&guildId=${guildId}`,
       );
       if (res.ok) {
         const json = await res.json();
@@ -31,7 +31,7 @@ export class DiscordService {
     url: string,
   ) {
     const res = await fetch(
-      `https://spect-discord-bot.herokuapp.com/api/postNotificationOnNewCircle?guildId=${guildId}`,
+      `process.env.DISCORD_URI/api/postNotificationOnNewCircle?guildId=${guildId}`,
       {
         headers: {
           'Content-Type': 'application/json',
@@ -41,6 +41,52 @@ export class DiscordService {
           circle,
           channels,
           url,
+        }),
+      },
+    );
+    if (res.ok) {
+      const data = await res.json();
+      return data;
+    }
+    return null;
+  }
+
+  async giveRolesToUser(
+    guildId: string,
+    discordUserId: string,
+    roleIds: string[],
+  ) {
+    const res = await fetch(
+      `${process.env.DISCORD_URI}/api/giveRoles?guildId=${guildId}`,
+      {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        method: 'POST',
+        body: JSON.stringify({
+          roleIds,
+          userId: discordUserId,
+        }),
+      },
+    );
+    if (res.ok) {
+      const data = await res.json();
+      return data;
+    }
+    return null;
+  }
+
+  async createChannel(guildId: string, channelName: string, parentId?: string) {
+    const res = await fetch(
+      `${process.env.DISCORD_URI}/api/createChannel?guildId=${guildId}`,
+      {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        method: 'POST',
+        body: JSON.stringify({
+          channelName,
+          parentId,
         }),
       },
     );

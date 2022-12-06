@@ -8,3 +8,10 @@ export class AddDataCommand {
     public readonly onlyIfForm?: boolean,
   ) {}
 }
+
+export class AddDataUsingAutomationCommand {
+  constructor(
+    public readonly data: object,
+    public readonly collectionId: string,
+  ) {}
+}

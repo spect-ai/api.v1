@@ -166,9 +166,14 @@ export class ActivityBuilder {
     const timestamp = new Date();
     for (const [propertyId, data] of Object.entries(dataUpdateObj)) {
       if (
-        ['shortText', 'ethAddress', 'number', 'email'].includes(
-          collection.properties[propertyId].type,
-        )
+        [
+          'shortText',
+          'ethAddress',
+          'number',
+          'email',
+          'singleURL',
+          'multiURL',
+        ].includes(collection.properties[propertyId].type)
       ) {
         const { content, ref } = this.simpleFieldActivity(
           propertyId,

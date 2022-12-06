@@ -57,6 +57,7 @@ export type Property = {
   rewardOptions?: Map<string, NetworkModel>; // only relevant when type is reward
   required?: boolean;
   description?: string;
+  viewConditions?: Condition[];
 };
 
 export type PropertyType =
@@ -71,21 +72,20 @@ export type PropertyType =
   | 'multiSelect'
   | 'ethAddress'
   | 'email'
-  | 'milestone';
+  | 'milestone'
+  | 'singleURL'
+  | 'multiURL';
 
 export type Option = {
   label: string;
   value: string | number;
 };
 
-export type Conditions = Condition[];
-
-export type Condition = DateConditions;
-
-export type DateConditions = {
-  propertyId: string;
-  condition: ComparisonCondition;
-  feedback: string;
+export type Condition = {
+  id: string;
+  type: string;
+  service: string;
+  data: any;
 };
 
 export type ComparisonCondition = 'greaterThanOrEqualTo' | 'lessThanOrEqualTo';

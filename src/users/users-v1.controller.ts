@@ -27,7 +27,7 @@ import { LensService } from './external/lens.service';
 import {
   GetMeQuery,
   GetNotificationsQuery,
-  GetProfileByIdQuery,
+  GetProfileQuery,
   GetUnreadNotificationsQuery,
 } from './queries/impl';
 import { UsersService } from './users.service';
@@ -55,7 +55,7 @@ export class UsersControllerV1 {
     @Request() req,
   ): Promise<PublicProfileResponseDto | PrivateProfileResponseDto> {
     return this.queryBus.execute(
-      new GetProfileByIdQuery(
+      new GetProfileQuery(
         {
           _id: param.id,
         },
@@ -71,7 +71,7 @@ export class UsersControllerV1 {
     @Request() req,
   ): Promise<PublicProfileResponseDto | PrivateProfileResponseDto> {
     return this.queryBus.execute(
-      new GetProfileByIdQuery(
+      new GetProfileQuery(
         {
           username: param.username,
         },

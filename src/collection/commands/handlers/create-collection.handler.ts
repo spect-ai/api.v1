@@ -68,7 +68,7 @@ export class CreateCollectionCommandHandler
               value: uuidv4(),
             },
           ],
-          isPartOfFormView: true,
+          isPartOfFormView: false,
         },
       } as MappedItem<Property>;
       const propertyOrder = ['Title', 'Description', 'Status'];

@@ -1,0 +1,3 @@
+export * from './add-automation.command';
+export * from './update-automation.command';
+export * from './remove-automation.command';

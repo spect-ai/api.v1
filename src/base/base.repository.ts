@@ -315,7 +315,7 @@ export abstract class BaseRepository<TModel extends BaseModel> {
   }
 
   async bundleAndExecuteUpdates(
-    updates: MappedItem<TModel>,
+    updates: MappedItem<Partial<TModel>>,
   ): Promise<mongodb.BulkWriteResult> {
     try {
       const queries = [];

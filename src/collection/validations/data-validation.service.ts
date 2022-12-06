@@ -19,6 +19,7 @@ export class DataValidationService {
   async validate(
     dataObj: object,
     operation: 'update' | 'add',
+    skipRequiredFieldValidation?: boolean,
     collection?: Collection,
     collectionId?: string,
   ) {
@@ -51,13 +52,15 @@ export class DataValidationService {
       if (!valueValidationPassed) return false;
       console.log(valueValidationPassed);
 
-      const requiredValidationPassed = this.validateRequriedFields(
-        dataObj,
-        collectionToValidate.properties,
-        operation,
-      );
-      if (!requiredValidationPassed) return false;
-      console.log(valueValidationPassed);
+      if (!skipRequiredFieldValidation) {
+        const requiredValidationPassed = this.validateRequriedFields(
+          dataObj,
+          collectionToValidate.properties,
+          operation,
+        );
+        if (!requiredValidationPassed) return false;
+        console.log(valueValidationPassed);
+      }
 
       return true;
     } catch (err) {
@@ -150,6 +153,24 @@ export class DataValidationService {
             )
               return false;
           }
+        }
+      } else if (['singleURL'].includes(properties[propertyId].type)) {
+        if (
+          data &&
+          !String(data)
+            .toLowerCase()
+            .match(/((?:https?:\/\/|www\.)(?:[-a-z0-9]+\.)*[-a-z0-9]+.*)/i)
+        )
+          return false;
+      } else if (['multiURL'].includes(properties[propertyId].type)) {
+        for (const url of data) {
+          if (
+            url &&
+            !String(url)
+              .toLowerCase()
+              .match(/((?:https?:\/\/|www\.)(?:[-a-z0-9]+\.)*[-a-z0-9]+.*)/i)
+          )
+            return false;
         }
       }
     }

@@ -93,4 +93,66 @@ export class EmailGeneratorService {
 
     return html;
   }
+
+  generateEmailWithMessage(
+    message: string,
+    link: string,
+    circle?: Circle,
+    receipient?: User,
+  ) {
+    const { html, errors } = render(
+      <Mjml>
+        <MjmlHead>
+          {`You have a new notification ${
+            circle ? `from ${circle.name}!` : '!'
+          }`}
+        </MjmlHead>
+
+        <MjmlBody background-color="#f7f7f7">
+          <MjmlSection>
+            <MjmlColumn>
+              <MjmlText font-size="20px" color="#ae5fe2">
+                {message}
+              </MjmlText>
+            </MjmlColumn>
+          </MjmlSection>
+          <MjmlSection>
+            <MjmlColumn>
+              <MjmlButton
+                background-color="#ecdef3"
+                align="right"
+                border="1px solid #d9d9d9"
+                color="#ae5fe2"
+                font-weight="bold"
+                border-radius="6px"
+                href={`${link}`}
+              >
+                Check it out
+              </MjmlButton>
+            </MjmlColumn>
+          </MjmlSection>
+          <MjmlSection>
+            <MjmlColumn>
+              <MjmlDivider border-color="#ae5fe2" border-width="2px" />
+              <MjmlButton
+                background-color="#f7f7f7"
+                color="#ae5fe2"
+                align="right"
+                text-decoration="underline"
+                href={
+                  receipient
+                    ? `https://circles.spect.network/profile/${receipient.username}`
+                    : `https://circles.spect.network/`
+                }
+              >
+                Unsub
+              </MjmlButton>
+            </MjmlColumn>
+          </MjmlSection>
+        </MjmlBody>
+      </Mjml>,
+    );
+
+    return html;
+  }
 }

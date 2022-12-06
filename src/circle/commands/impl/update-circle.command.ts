@@ -1,4 +1,6 @@
 import { UpdateCircleRequestDto } from 'src/circle/dto/update-circle-request.dto';
+import { Circle } from 'src/circle/model/circle.model';
+import { MappedItem } from 'src/common/interfaces';
 
 export class UpdateCircleCommand {
   constructor(
@@ -6,4 +8,8 @@ export class UpdateCircleCommand {
     public readonly updateCircleDto: UpdateCircleRequestDto,
     public readonly caller: string,
   ) {}
+}
+
+export class UpdateMultipleCirclesCommand {
+  constructor(public readonly updates: MappedItem<Partial<Circle>>) {}
 }

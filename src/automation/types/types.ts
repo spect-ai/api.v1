@@ -1,6 +1,7 @@
 import { Card, ExtendedCard } from 'src/card/model/card.model';
 import { WorkThreadStatus } from 'src/card/types/types';
 import { Circle } from 'src/circle/model/circle.model';
+import { Collection } from 'src/collection/model/collection.model';
 import { MappedItem, MappedPartialItem } from 'src/common/interfaces';
 import { Status } from 'src/common/types/status.type';
 import { Project } from 'src/project/model/project.model';
@@ -22,6 +23,18 @@ export type PerformAutomationCommandContainer = {
   circle?: Circle;
   retro?: Retro;
   misc?: any;
+};
+
+export type DataContainer = {
+  collection?: MappedItem<Collection>;
+  circle?: MappedItem<Circle>;
+  retro?: MappedItem<Retro>;
+};
+
+export type AutomationUpdatesContainer = {
+  collection?: MappedItem<Partial<Collection>>;
+  circle?: MappedItem<Partial<Circle>>;
+  retro?: MappedItem<Partial<Retro>>;
 };
 
 export type Automation = {

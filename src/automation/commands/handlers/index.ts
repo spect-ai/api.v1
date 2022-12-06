@@ -1,7 +1,15 @@
+import { PerformAutomationOnCollectionDataUpdateCommandHandler } from './perform-automation-v2.handler';
 import {
   PerformAutomationCommandHandler,
   PerformMultipleAutomationsCommandHandler,
 } from './perform-automation.handler';
+import {
+  CreateCardActionCommandHandler,
+  CreateDiscordChannelActionCommandHandler,
+  GiveDiscordRoleActionCommandHandler,
+  GiveRoleActionCommandHandler,
+  SendEmailActionCommandHandler,
+} from './take -action-v2.handler';
 import {
   ChangeColumnActionCommandHandler,
   ChangeLabelActionCommandHandler,
@@ -20,4 +28,11 @@ export const CommandHandlers = [
   ChangeMemberActionCommandHandler,
   ChangeLabelActionCommandHandler,
   CloseCardActionCommandHandler,
+
+  PerformAutomationOnCollectionDataUpdateCommandHandler,
+  GiveRoleActionCommandHandler,
+  SendEmailActionCommandHandler,
+  CreateDiscordChannelActionCommandHandler,
+  GiveDiscordRoleActionCommandHandler,
+  CreateCardActionCommandHandler,
 ];

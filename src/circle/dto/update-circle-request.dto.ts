@@ -146,6 +146,13 @@ export class UpdateCircleRequestDto extends OmitType(CreateCircleRequestDto, [
   @IsString()
   @IsOptional()
   collections?: string[];
+
+  /**
+   * Designs of issuer community part of spect community
+   */
+  @IsString()
+  @IsOptional()
+  nftTypeIds?: string[];
 }
 
 export class UpdateCircleGithubRepoRequestDto {

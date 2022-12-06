@@ -31,6 +31,7 @@ import { CirclePrivate } from './model/circle-private.model';
 import { GuildxyzService } from 'src/common/guildxyz.service';
 import { CircleExternalController } from './circle-external.controller';
 import { MintKudosService } from 'src/credentials/services/mintkudos.service';
+import { CirclesCollectionService } from './services/circle-collection.service';
 
 @Module({
   imports: [
@@ -69,6 +70,7 @@ import { MintKudosService } from 'src/credentials/services/mintkudos.service';
     CirclesRolesService,
     CirclesPrivateRepository,
     MintKudosService,
+    CirclesCollectionService,
   ],
   exports: [CirclesService, CirclesRepository, CirclesModule],
 })

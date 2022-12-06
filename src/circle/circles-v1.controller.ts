@@ -20,7 +20,11 @@ import {
   SessionAuthGuard,
 } from 'src/auth/iron-session.guard';
 import { ObjectIdDto } from 'src/common/dtos/object-id.dto';
-import { RequiredRoleDto, RequiredSlugDto } from 'src/common/dtos/string.dto';
+import {
+  RequiredAutomationIdDto,
+  RequiredRoleDto,
+  RequiredSlugDto,
+} from 'src/common/dtos/string.dto';
 import {
   ArchiveCircleByIdCommand,
   ClaimCircleCommand,
@@ -74,6 +78,14 @@ import {
   MintKudosDto,
 } from 'src/credentials/dto/mint-kudos.dto';
 import { ApiTags } from '@nestjs/swagger';
+import { CreateAutomationDto, UpdateAutomationDto } from './dto/automation.dto';
+import {
+  AddAutomationCommand,
+  RemoveAutomationCommand,
+  UpdateAutomationCommand,
+} from './commands/automation/impl';
+import { CirclesCollectionService } from './services/circle-collection.service';
+import { Collection } from 'src/collection/model/collection.model';
 
 @Controller('circle/v1')
 @ApiTags('circle.v1')
@@ -86,6 +98,7 @@ export class CircleV1Controller {
     private readonly commandBus: CommandBus,
     private readonly kudosService: MintKudosService,
     private readonly circleRepository: CirclesRepository,
+    private readonly circleCollectionService: CirclesCollectionService,
   ) {}
 
   @UseGuards(PublicViewAuthGuard)
@@ -113,6 +126,21 @@ export class CircleV1Controller {
     @Param() param: RequiredSlugDto,
   ): Promise<CircleResponseDto> {
     return await this.circleCrudService.getBySlug(param.slug);
+  }
+
+  @UseGuards(PublicViewAuthGuard)
+  @Get('/:id/allActiveCollections')
+  async findAllActiveCollections(
+    @Param() param: ObjectIdDto,
+  ): Promise<Collection[]> {
+    try {
+      return await this.circleCollectionService.getAllActiveCollections(
+        param.id,
+      );
+    } catch (error) {
+      console.log(error);
+      return [];
+    }
   }
 
   @UseGuards(CreateCircleAuthGuard)
@@ -396,7 +424,6 @@ export class CircleV1Controller {
 
   @Get('/:id/communityKudosDesigns')
   async communityKudosDesigns(@Param() param: ObjectIdDto): Promise<nftTypes> {
-    console.log({ param });
     return await this.kudosService.getCommunityKudosDesigns(param.id);
   }
 
@@ -421,6 +448,47 @@ export class CircleV1Controller {
         null,
         param.id,
       ),
+    );
+  }
+
+  @SetMetadata('permissions', ['manageCircleSettings'])
+  @UseGuards(CircleAuthGuard)
+  @Patch('/:id/addAutomation')
+  async addAutomation(
+    @Param() param: ObjectIdDto,
+    @Body() addAutomationDto: CreateAutomationDto,
+  ) {
+    return await this.commandBus.execute(
+      new AddAutomationCommand(param.id, addAutomationDto),
+    );
+  }
+
+  @SetMetadata('permissions', ['manageCircleSettings'])
+  @UseGuards(CircleAuthGuard)
+  @Patch('/:id/updateAutomation')
+  async updateAutomation(
+    @Param() param: ObjectIdDto,
+    @Query() query: RequiredAutomationIdDto,
+    @Body() updateAutomationDto: UpdateAutomationDto,
+  ) {
+    return await this.commandBus.execute(
+      new UpdateAutomationCommand(
+        param.id,
+        query.automationId,
+        updateAutomationDto,
+      ),
+    );
+  }
+
+  @SetMetadata('permissions', ['manageCircleSettings'])
+  @UseGuards(CircleAuthGuard)
+  @Patch('/:id/removeAutomation')
+  async removeAutomation(
+    @Param() param: ObjectIdDto,
+    @Query() query: RequiredAutomationIdDto,
+  ) {
+    return await this.commandBus.execute(
+      new RemoveAutomationCommand(param.id, query.automationId),
     );
   }
 

@@ -22,7 +22,10 @@ import {
 import { AddSafeCommandHandler } from '../safe/handlers/add-safe.handler';
 import { RemoveSafeCommandHandler } from '../safe/handlers/remove-safe.handler';
 import { ClaimCircleCommandHandler } from '../claim/handlers/claim-circle.handler';
-import { UpdateCircleCommandHandler } from './update-circle.handler';
+import {
+  UpdateCircleCommandHandler,
+  UpdateMultipleCircleCommandHandler,
+} from './update-circle.handler';
 import {
   AddProjectsCommandHandler,
   AddProjectsToMultipleCirclesCommandHandler,
@@ -34,6 +37,9 @@ import { UpdateFolderCommandHandler } from '../folders/handlers/update-folder.ha
 import { UpdateFolderOrderCommandHandler } from '../folders/handlers/update-folder-order.handler';
 import { DeleteFolderCommandHandler } from '../folders/handlers/delete-folder.handler';
 import { UpdateFolderDetailsCommandHandler } from '../folders/handlers/update-folder-details.handler';
+import { AddAutomationCommandHandler } from '../automation/handlers/add-automation.handler';
+import { UpdateAutomationCommandHandler } from '../automation/handlers/update-automation.handler';
+import { RemoveAutomationCommandHandler } from '../automation/handlers/remove-automation.handler';
 
 export const CommandHandlers = [
   RemoveProjectsCommandHandler,
@@ -64,4 +70,8 @@ export const CommandHandlers = [
   JoinAsWhitelistedAddressCommandHandler,
   JoinWithoutInvitationCommandHandler,
   UpdateFolderDetailsCommandHandler,
+  AddAutomationCommandHandler,
+  UpdateAutomationCommandHandler,
+  RemoveAutomationCommandHandler,
+  UpdateMultipleCircleCommandHandler,
 ];

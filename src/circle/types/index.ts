@@ -36,6 +36,7 @@ export type PopulatedCircleFields = {
   children?: { [fieldName: string]: number };
   retro?: { [fieldName: string]: number };
   collections?: { [fieldName: string]: number };
+  memberRoles?: number;
 };
 
 export type SafeAddresses = {
@@ -56,3 +57,49 @@ export type Folder = {
   avatar: string;
   contentIds?: string[];
 };
+
+export type Action = {
+  id: string;
+  type: string;
+  subType?: string;
+  name: string;
+  service: string;
+  data: any;
+};
+
+export type Trigger = {
+  id: string;
+  type: string;
+  subType?: string;
+  name: string;
+  service: string;
+  data: any;
+};
+
+export type Condition = {
+  id: string;
+  type: string;
+  service: string;
+  data: any;
+};
+
+export type Automation = {
+  id: string;
+  name: string;
+  description: string;
+  trigger: Trigger;
+  actions: Action[];
+  conditions?: Condition[];
+  triggerCategory: 'collection' | 'root';
+  triggerCollectionSlug?: string;
+};
+
+export type AutomationType = {
+  [id: string]: Automation;
+};
+
+export type AutomationsIndexedByCollectionSlugType = {
+  [id: string]: string[];
+};
+
+export type RootAutomationsType = string[];

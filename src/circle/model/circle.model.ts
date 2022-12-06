@@ -18,6 +18,9 @@ import {
   SafeAddresses,
   WhitelistedMembershipAddresses,
   Folder,
+  AutomationType,
+  RootAutomationsType,
+  AutomationsIndexedByCollectionSlugType,
 } from '../types';
 
 export type Invite = {
@@ -266,6 +269,21 @@ export class Circle extends ProfileModel {
 
   @prop({ default: false })
   verified?: boolean;
+
+  @prop({ default: 0 })
+  automationCount?: number;
+
+  @prop()
+  automations?: AutomationType;
+
+  @prop({ default: [] })
+  rootAutomations?: RootAutomationsType;
+
+  @prop({ default: {} })
+  automationsIndexedByCollection?: AutomationsIndexedByCollectionSlugType;
+
+  @prop({ default: [] })
+  nftTypeIds?: string[];
 }
 
 export class ExtendedCircle extends Circle {

@@ -13,7 +13,10 @@ export * from './comments/impl/remove-comment.command';
 import { AddCommentCommandHandler } from './comments/handlers/add-comment.handler';
 import { RemoveCommentCommandHandler } from './comments/handlers/remove-comment.handler';
 import { UpdateCommentCommandHandler } from './comments/handlers/update-comment.handler';
-import { AddDataCommandHandler } from './data/handlers/add-data.handler';
+import {
+  AddDataCommandHandler,
+  AddDataUsingAutomationCommandHandler,
+} from './data/handlers/add-data.handler';
 import {
   RemoveDataCommandHandler,
   RemoveMultipleDataCommandHandler,
@@ -40,4 +43,5 @@ export const CommandHandlers = [
   UpdateCommentCommandHandler,
   RemoveCommentCommandHandler,
   VoteDataCommandHandler,
+  AddDataUsingAutomationCommandHandler,
 ];

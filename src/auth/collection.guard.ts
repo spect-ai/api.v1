@@ -26,15 +26,15 @@ export class CollectionAuthGuard implements CanActivate {
     permissions: string[],
     userId: string,
     collection: Collection,
-    circleIds: string[] = [],
+    circleIds: string[],
   ): Promise<boolean> {
     if (permissions.length === 0) return true;
     if (collection.creator === userId) return true;
-    const collatedUserPermissions =
-      await this.circlesService.getCollatedUserPermissions(circleIds, userId);
-    for (const permission of permissions) {
-      if (!collatedUserPermissions[permission]) return false;
-    }
+    // const collatedUserPermissions =
+    //   await this.circlesService.getCollatedUserPermissions(circleIds, userId);
+    // for (const permission of permissions) {
+    //   if (!collatedUserPermissions[permission]) return false;
+    // }
     return true;
   }
 

@@ -23,7 +23,6 @@ export class GetNotificationsQueryHandler
   async execute(query: GetNotificationsQuery): Promise<NotificationV2[]> {
     try {
       const { caller, limit, page } = query;
-      console.log({ caller });
       if (!caller) {
         throw `User with id ${caller.id} not found`;
       }
@@ -52,7 +51,6 @@ export class GetUnreadNotificationsQueryHandler
   async execute(query: GetUnreadNotificationsQuery): Promise<number> {
     try {
       const { caller } = query;
-      console.log({ caller });
       if (!caller) {
         throw `User with id ${caller.id} not found`;
       }
