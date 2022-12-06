@@ -127,6 +127,47 @@ export const defaultCircleRoles = {
       },
     } as CirclePermission,
   },
+  voter: {
+    name: 'voter',
+    description: 'Voter role',
+    selfAssignable: false,
+    mutable: false,
+    permissions: {
+      createNewCircle: false,
+      manageCircleSettings: false,
+      createNewProject: false,
+      manageProjectSettings: false,
+      createNewRetro: false,
+      endRetroManually: false,
+      managePaymentOptions: false,
+      makePayment: false,
+      inviteMembers: false,
+      manageRoles: false,
+      manageMembers: false,
+      distributeCredentials: false,
+      createNewForm: false,
+      manageCardProperties: {
+        Task: false,
+        Bounty: false,
+      },
+      createNewCard: {
+        Task: false,
+        Bounty: false,
+      },
+      manageRewards: {
+        Task: false,
+        Bounty: false,
+      },
+      reviewWork: {
+        Task: false,
+        Bounty: false,
+      },
+      canClaim: {
+        Task: false,
+        Bounty: false,
+      },
+    } as CirclePermission,
+  },
 } as Roles;
 
 export const permissionToPermissionNameMap = {
