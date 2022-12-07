@@ -1,3 +1,4 @@
+import { StartVotingPeriodRequestDto } from 'src/collection/dto/voting.dto';
 import { User } from 'src/users/model/users.model';
 
 export class VoteDataCommand {
@@ -6,5 +7,22 @@ export class VoteDataCommand {
     public readonly caller: User,
     public readonly collectionId: string,
     public readonly vote: number,
+  ) {}
+}
+
+export class StartVotingPeriodCommand {
+  constructor(
+    public readonly dataSlug: string,
+    public readonly caller: User,
+    public readonly collectionId: string,
+    public readonly startVotingPeriodRequestDto?: StartVotingPeriodRequestDto,
+  ) {}
+}
+
+export class EndVotingPeriodCommand {
+  constructor(
+    public readonly dataSlug: string,
+    public readonly caller: User,
+    public readonly collectionId: string,
   ) {}
 }

@@ -22,7 +22,11 @@ import {
   RemoveMultipleDataCommandHandler,
 } from './data/handlers/remove-data.handler';
 import { UpdateDataCommandHandler } from './data/handlers/update-data.handler';
-import { VoteDataCommandHandler } from './data/handlers/vote-data.handler';
+import {
+  EndVotingPeriodCommandHandler,
+  StartVotingPeriodCommandHandler,
+  VoteDataCommandHandler,
+} from './data/handlers/vote-data.handler';
 import { CreateCollectionCommandHandler } from './handlers/create-collection.handler';
 import { UpdateCollectionCommandHandler } from './handlers/update-collection.handler';
 import { AddPropertyCommandHandler } from './properties/handlers/add-property.handler';
@@ -44,4 +48,6 @@ export const CommandHandlers = [
   RemoveCommentCommandHandler,
   VoteDataCommandHandler,
   AddDataUsingAutomationCommandHandler,
+  StartVotingPeriodCommandHandler,
+  EndVotingPeriodCommandHandler,
 ];
