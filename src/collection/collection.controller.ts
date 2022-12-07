@@ -45,7 +45,11 @@ import {
   RemoveMultipleDataCommand,
 } from './commands/data/impl/remove-data.command';
 import { UpdateDataCommand } from './commands/data/impl/update-data.command';
-import { VoteDataCommand } from './commands/data/impl/vote-data.command';
+import {
+  EndVotingPeriodCommand,
+  StartVotingPeriodCommand,
+  VoteDataCommand,
+} from './commands/data/impl/vote-data.command';
 import {
   CollectionPublicResponseDto,
   CollectionResponseDto,
@@ -67,6 +71,7 @@ import {
   AddPropertyDto,
   UpdatePropertyDto,
 } from './dto/update-property-request.dto';
+import { StartVotingPeriodRequestDto } from './dto/voting.dto';
 import { Collection } from './model/collection.model';
 import {
   GetPrivateViewCollectionQuery,
@@ -401,6 +406,36 @@ export class CollectionController {
   @Patch('/:id/airdropKudos')
   async airdropKudos(@Param() param: ObjectIdDto): Promise<object> {
     return await this.credentialingService.airdropMintkudosToken(param.id);
+  }
+
+  @UseGuards(SessionAuthGuard)
+  @Patch('/:id/startVotingPeriod')
+  async startVotingPeriod(
+    @Param() param: ObjectIdDto,
+    @Query() dataIdParam: RequiredUUIDDto,
+    @Body() startVotingPeriodRequestDto: StartVotingPeriodRequestDto,
+    @Request() req,
+  ): Promise<Collection> {
+    return await this.commandBus.execute(
+      new StartVotingPeriodCommand(
+        dataIdParam.dataId,
+        req.user,
+        param.id,
+        startVotingPeriodRequestDto,
+      ),
+    );
+  }
+
+  @UseGuards(SessionAuthGuard)
+  @Patch('/:id/endVotingPeriod')
+  async endVotingPeriod(
+    @Param() param: ObjectIdDto,
+    @Query() dataIdParam: RequiredUUIDDto,
+    @Request() req,
+  ): Promise<Collection> {
+    return await this.commandBus.execute(
+      new EndVotingPeriodCommand(dataIdParam.dataId, req.user, param.id),
+    );
   }
 
   @UseGuards(SessionAuthGuard)

@@ -116,9 +116,33 @@ export type OpportunityInfo = {
   skills: string[];
   tags: string[];
 };
+
+export type VotingPeriod = {
+  votingType: Option;
+  active: boolean;
+  message?: string;
+  options?: Option[];
+  votesArePublic?: boolean;
+  votesAreWeightedByTokens?: boolean;
+  endsOn?: Date;
+  startedOn?: Date;
+  snapshot?: SnapshotVoting;
+  votes?: MappedItem<number>;
+};
+
+export type SnapshotVoting = {
+  onSnapshot?: boolean;
+  space?: string;
+  proposalId?: string;
+};
+
 export type Voting = {
+  votingType: Option;
   enabled: boolean;
   message?: string;
   options?: Option[];
-  votes?: MappedItem<MappedItem<number>>;
+  votesArePublic?: boolean;
+  votesAreWeightedByTokens?: boolean;
+  periods?: MappedItem<VotingPeriod>;
+  periodsOnCollection?: MappedItem<VotingPeriod>;
 };
