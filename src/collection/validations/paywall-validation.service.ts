@@ -22,9 +22,10 @@ const supportedNetworks = [
 @ValidatorConstraint({ name: 'validConditions', async: false })
 export class IsPaywallValidConstraint implements ValidatorConstraintInterface {
   validate(paywallOptions: PayWallOptions, args: ValidationArguments) {
-    const validNetwork = validateNetwork(paywallOptions.network);
+    if (!paywallOptions.network) return true;
+    const validNetwork = validateNetwork(paywallOptions?.network);
     if (!validNetwork) return false;
-    const validReceiver = validateAddress(paywallOptions.receiver);
+    const validReceiver = validateAddress(paywallOptions?.receiver);
     if (!validReceiver) return false;
     return true;
   }
@@ -37,7 +38,7 @@ export class IsPaywallValidConstraint implements ValidatorConstraintInterface {
 export function IsValidPaywallOptions(validationOptions?: ValidationOptions) {
   return function (object: any, propertyName: string) {
     registerDecorator({
-      name: 'IsValidRewardOptions',
+      name: 'IsValidPaywallOptions',
       target: object.constructor,
       propertyName: propertyName,
       options: validationOptions,
