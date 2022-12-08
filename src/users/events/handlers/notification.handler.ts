@@ -189,7 +189,7 @@ export class SingleNotificationEventHandler
       const unreadNotifications = user.notificationsV2.filter(
         (notification) => !notification.read,
       );
-      console.log('realtime emit', unreadNotifications, recipients[0]);
+      // console.log('realtime emit', unreadNotifications, recipients[0]);
       this.realtime.server.to(recipients[0]).emit('notification', {
         unreadNotifications: unreadNotifications.length,
       });

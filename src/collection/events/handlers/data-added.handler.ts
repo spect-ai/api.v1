@@ -13,6 +13,11 @@ import { RealtimeGateway } from 'src/realtime/realtime.gateway';
 import { SingleNotificationEvent } from 'src/users/events/impl';
 import { DataAddedEvent } from '../impl/data-added.event';
 import { AddItemsCommand as AddItemsToUserCommand } from 'src/users/commands/impl';
+import {
+  PerformAutomationOnCollectionDataAddCommand,
+  PerformAutomationOnCollectionDataUpdateCommand,
+} from 'src/automation/commands/impl';
+import { UpdateMultipleCirclesCommand } from 'src/circle/commands/impl/update-circle.command';
 
 @EventsHandler(DataAddedEvent)
 export class DataAddedEventHandler implements IEventHandler<DataAddedEvent> {
@@ -41,7 +46,7 @@ export class DataAddedEventHandler implements IEventHandler<DataAddedEvent> {
         collection.circleRolesToNotifyUponNewResponse.length > 0
       ) {
         const roleSet = new Set(collection.circleRolesToNotifyUponNewResponse);
-        console.log({ roleSet });
+        // console.log({ roleSet });
         for (const [memberId, roles] of Object.entries(circle.memberRoles)) {
           const hasRole = roles.some((role) => roleSet.has(role));
           if (hasRole && !collection.creator) {
@@ -101,11 +106,55 @@ export class DataAddedEventHandler implements IEventHandler<DataAddedEvent> {
         ),
       );
 
-      console.log('event', `${collection.slug}:dataAdded`);
+      // console.log('event', `${collection.slug}:dataAdded`);
       this.realtime.server.emit(
         `${collection.slug}:dataAdded`,
         updatedCollection,
       );
+    } catch (error) {
+      this.logger.error(`${error.message}`);
+    }
+  }
+}
+
+@EventsHandler(DataAddedEvent)
+export class AutomationOnDataAddedEventHandler
+  implements IEventHandler<DataAddedEvent>
+{
+  constructor(
+    private readonly queryBus: QueryBus,
+    private readonly commandBus: CommandBus,
+    private readonly logger: LoggingService,
+    private readonly realtime: RealtimeGateway,
+  ) {
+    this.logger.setContext('AutomationOnDataAddedEventHandler');
+  }
+
+  async handle(event: DataAddedEvent) {
+    try {
+      console.log('AutomationHandler');
+      const { caller, collection, data } = event;
+      this.logger.log(`Update Data in collection ${event.collection?.name}`);
+
+      const circle = await this.queryBus.execute(
+        new GetCircleByIdQuery(collection.parents[0]),
+      );
+      console.log('ksksksk');
+      const res = await this.commandBus.execute(
+        new PerformAutomationOnCollectionDataAddCommand(
+          collection,
+          data,
+          data['slug'],
+          caller.id,
+          circle,
+        ),
+      );
+      console.log({ res });
+      if (Object.keys(res.circle).length > 0) {
+        await this.commandBus.execute(
+          new UpdateMultipleCirclesCommand(res.circle),
+        );
+      }
     } catch (error) {
       this.logger.error(`${error.message}`);
     }

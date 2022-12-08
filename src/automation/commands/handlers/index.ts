@@ -1,4 +1,7 @@
-import { PerformAutomationOnCollectionDataUpdateCommandHandler } from './perform-automation-v2.handler';
+import {
+  PerformAutomationOnCollectionDataAddCommandHandler,
+  PerformAutomationOnCollectionDataUpdateCommandHandler,
+} from './perform-automation-v2.handler';
 import {
   PerformAutomationCommandHandler,
   PerformMultipleAutomationsCommandHandler,
@@ -35,4 +38,5 @@ export const CommandHandlers = [
   CreateDiscordChannelActionCommandHandler,
   GiveDiscordRoleActionCommandHandler,
   CreateCardActionCommandHandler,
+  PerformAutomationOnCollectionDataAddCommandHandler,
 ];

@@ -196,4 +196,7 @@ export class Collection extends BaseModel {
 
   @prop({ default: true })
   active: boolean;
+
+  @prop({ default: false })
+  requireDiscordConnection: boolean;
 }

@@ -10,6 +10,7 @@ import {
   HasSatisfiedMemberConditionQueryHandler,
   HasSatisfiedStatusConditionQueryHandler,
 } from './has-satisfied-condition.handler';
+import { HasSatisfiedDataConditionsQueryHandler } from './has-satisfied-conditions-v2.handler';
 import { IsTriggeredSelectFieldQueryHandler } from './is-triggered-v2.handler';
 import {
   IsBasicChangeTriggeredQueryHandler,
@@ -39,4 +40,5 @@ export const QueryHandlers = [
 
   GetTriggeredCollectionAutomationsQueryHandler,
   IsTriggeredSelectFieldQueryHandler,
+  HasSatisfiedDataConditionsQueryHandler,
 ];

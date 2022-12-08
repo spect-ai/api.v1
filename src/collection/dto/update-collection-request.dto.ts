@@ -146,4 +146,8 @@ export class UpdateCollectionDto {
   @IsObject()
   @IsOptional()
   voting: Voting;
+
+  @IsBoolean()
+  @IsOptional()
+  requireDiscordConnection: boolean;
 }

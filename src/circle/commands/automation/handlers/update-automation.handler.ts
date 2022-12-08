@@ -1,7 +1,14 @@
 import { InternalServerErrorException } from '@nestjs/common';
-import { CommandHandler, EventBus, ICommandHandler } from '@nestjs/cqrs';
+import {
+  CommandBus,
+  CommandHandler,
+  EventBus,
+  ICommandHandler,
+} from '@nestjs/cqrs';
 import { CirclesRepository } from 'src/circle/circles.repository';
 import { CircleResponseDto } from 'src/circle/dto/detailed-circle-response.dto';
+import { UpdateCollectionCommand } from 'src/collection/commands';
+import { UpdateCollectionDto } from 'src/collection/dto/update-collection-request.dto';
 import { LoggingService } from 'src/logging/logging.service';
 import { UpdateAutomationCommand } from '../impl';
 
@@ -10,7 +17,7 @@ export class UpdateAutomationCommandHandler
   implements ICommandHandler<UpdateAutomationCommand>
 {
   constructor(
-    private readonly eventBus: EventBus,
+    private readonly commandBus: CommandBus,
     private readonly circlesRepository: CirclesRepository,
     private readonly logger: LoggingService,
   ) {
@@ -28,6 +35,31 @@ export class UpdateAutomationCommandHandler
           ...updateAutomationDto,
         },
       };
+
+      if (
+        circle.automations[automationId].trigger?.type === 'giveDiscordRole' &&
+        updateAutomationDto.trigger?.type !== 'giveDiscordRole'
+      ) {
+        await this.commandBus.execute(
+          new UpdateCollectionCommand(
+            {
+              requireDiscordConnection: false,
+            } as UpdateCollectionDto,
+            null,
+            circle.automations[automationId].triggerCollectionSlug,
+          ),
+        );
+      } else if (updateAutomationDto.trigger?.type === 'giveDiscordRole') {
+        await this.commandBus.execute(
+          new UpdateCollectionCommand(
+            {
+              requireDiscordConnection: true,
+            } as UpdateCollectionDto,
+            null,
+            circle.automations[automationId].triggerCollectionSlug,
+          ),
+        );
+      }
 
       const updatedCircle =
         await this.circlesRepository.updateCircleAndReturnWithPopulatedReferences(

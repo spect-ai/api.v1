@@ -5,7 +5,7 @@ import {
   IsOptional,
   IsString,
 } from 'class-validator';
-import { Action, Trigger } from '../types';
+import { Action, Condition, Trigger } from '../types';
 
 export class CreateAutomationDto {
   /**
@@ -49,6 +49,13 @@ export class CreateAutomationDto {
   @IsArray()
   @IsNotEmpty()
   actions: Action[];
+
+  /**
+   * Conditons of the automation
+   **/
+  @IsArray()
+  @IsOptional()
+  conditions: Condition[];
 }
 
 export class UpdateAutomationDto {
@@ -79,4 +86,11 @@ export class UpdateAutomationDto {
   @IsArray()
   @IsOptional()
   actions: Action[];
+
+  /**
+   * Conditons of the automation
+   **/
+  @IsArray()
+  @IsOptional()
+  conditions: Condition[];
 }
