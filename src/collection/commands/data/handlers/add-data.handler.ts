@@ -90,23 +90,17 @@ export class AddDataCommandHandler implements ICommandHandler<AddDataCommand> {
         data,
         caller?.id,
       );
-
-      const views = collection.projectMetadata.views;
-      const viewsValues = Object.values(views);
-
-      viewsValues.forEach((view) => {
-        if (['kanban', 'list'].includes(view.type)) {
-          const columnIndex =
-            collection.properties[view.groupByColumn].options.findIndex(
-              (option) => option.value === data[view.groupByColumn]?.value,
-            ) || -1;
-          view.cardColumnOrder[columnIndex + 1].push(data['slug']);
-        }
-      });
-
-      Object.keys(views).forEach((viewId, index) => {
-        views[viewId] = viewsValues[index];
-      });
+      const cardOrders = collection.projectMetadata.cardOrders || {};
+      if (Object.keys(cardOrders).length) {
+        Object.keys(cardOrders).forEach((groupByColumn) => {
+          const columnIndex = collection.properties[
+            groupByColumn
+          ].options.findIndex(
+            (option) => option.value === data[groupByColumn]?.value,
+          );
+          cardOrders[groupByColumn][columnIndex + 1].push(data['slug']);
+        });
+      }
 
       const updatedCollection = await this.collectionRepository.updateById(
         collectionId,
@@ -123,7 +117,7 @@ export class AddDataCommandHandler implements ICommandHandler<AddDataCommand> {
           },
           projectMetadata: {
             ...collection.projectMetadata,
-            views,
+            cardOrders,
           },
         },
       );

@@ -209,8 +209,10 @@ export interface ProjectMetadata {
       groupByColumn?: string;
       filters?: any;
       sort?: any;
-      cardColumnOrder?: string[][];
     };
   };
   viewOrder: string[];
+  cardOrders: {
+    [columnName: string]: string[][];
+  };
 }

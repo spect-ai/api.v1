@@ -23,7 +23,6 @@ export class UpdateCollectionCommandHandler
       collectionId,
       updateCollectionDto,
     );
-
     return await this.queryBus.execute(
       new GetPrivateViewCollectionQuery(null, updatedCollection),
     );

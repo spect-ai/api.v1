@@ -118,6 +118,7 @@ export class CreateCollectionCommandHandler
                 sort: {},
               },
             },
+            cardOrders: {},
           },
         });
       }
