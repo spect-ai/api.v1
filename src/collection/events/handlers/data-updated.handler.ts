@@ -28,38 +28,6 @@ export class DataUpatedEventHandler implements IEventHandler<DataUpatedEvent> {
       console.log('DataUpatedEventHandler');
       const { caller, collection, update, dataSlug } = event;
       this.logger.log(`Update Data in collection ${event.collection?.name}`);
-      const pvtCollection = await this.queryBus.execute(
-        new GetPrivateViewCollectionQuery(collection.slug),
-      );
-      this.realtime.server.emit(`${collection.slug}:newActivityPrivate`, {
-        data: pvtCollection,
-        user: caller.id,
-      });
-      this.realtime.server.emit(`${collection.slug}:newActivityPublic`, {
-        user: caller.id,
-      });
-    } catch (error) {
-      this.logger.error(`${error.message}`);
-    }
-  }
-}
-
-@EventsHandler(DataUpatedEvent)
-export class AutomationHandler implements IEventHandler<DataUpatedEvent> {
-  constructor(
-    private readonly queryBus: QueryBus,
-    private readonly commandBus: CommandBus,
-    private readonly logger: LoggingService,
-    private readonly realtime: RealtimeGateway,
-  ) {
-    this.logger.setContext('DataUpatedEventHandler');
-  }
-
-  async handle(event: DataUpatedEvent) {
-    try {
-      console.log('AutomationHandler');
-      const { caller, collection, update, dataSlug } = event;
-      this.logger.log(`Update Data in collection ${event.collection?.name}`);
 
       const circle = await this.queryBus.execute(
         new GetCircleByIdQuery(collection.parents[0]),
@@ -79,6 +47,16 @@ export class AutomationHandler implements IEventHandler<DataUpatedEvent> {
           new UpdateMultipleCirclesCommand(res.circle),
         );
       }
+      const pvtCollection = await this.queryBus.execute(
+        new GetPrivateViewCollectionQuery(collection.slug),
+      );
+      this.realtime.server.emit(`${collection.slug}:newActivityPrivate`, {
+        data: pvtCollection,
+        user: caller.id,
+      });
+      this.realtime.server.emit(`${collection.slug}:newActivityPublic`, {
+        user: caller.id,
+      });
     } catch (error) {
       this.logger.error(`${error.message}`);
     }

@@ -24,9 +24,11 @@ import {
   GiveDiscordRoleActionCommand,
   GiveRoleActionCommand,
   SendEmailActionCommand,
+  StartVotingPeriodActionCommand,
 } from '../impl/take-action-v2.command';
 import { v4 as uuidv4 } from 'uuid';
 import { AddDataUsingAutomationCommand } from 'src/collection/commands';
+import { StartVotingPeriodCommand } from 'src/collection/commands/data/impl/vote-data.command';
 
 @Injectable()
 export class CommonActionService {
@@ -316,6 +318,40 @@ export class CreateCardActionCommandHandler
         ),
       );
 
+      return updatesContainer;
+    } catch (err) {
+      this.logger.error(err);
+    }
+  }
+}
+
+@CommandHandler(StartVotingPeriodActionCommand)
+export class StartVotingPeriodActionCommandHandler
+  implements ICommandHandler<StartVotingPeriodActionCommand>
+{
+  constructor(
+    private readonly logger: LoggingService,
+    private readonly commandBus: CommandBus,
+    private readonly queryBus: QueryBus,
+  ) {
+    this.logger.setContext(CreateCardActionCommandHandler.name);
+  }
+
+  async execute(command: StartVotingPeriodActionCommand): Promise<any> {
+    const { action, caller, updatesContainer, relevantIds } = command;
+    try {
+      console.log('StartVotingPeriodActionCommandHandler');
+      const fromCollection = await this.queryBus.execute(
+        new GetCollectionByFilterQuery({
+          slug: relevantIds.collectionSlug,
+        }),
+      );
+      await this.commandBus.execute(
+        new StartVotingPeriodCommand(
+          relevantIds.dataSlug,
+          fromCollection._id.toString(),
+        ),
+      );
       return updatesContainer;
     } catch (err) {
       this.logger.error(err);

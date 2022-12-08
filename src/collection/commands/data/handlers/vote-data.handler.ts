@@ -164,10 +164,10 @@ export class StartVotingPeriodCommandHandler
                 votesArePublic: collection.voting.votesArePublic,
                 votesAreWeightedByTokens:
                   collection.voting.votesAreWeightedByTokens,
-                endsOn: startVotingPeriodRequestDto.endsOn,
+                endsOn: startVotingPeriodRequestDto?.endsOn,
                 startedOn: new Date(),
                 snapshot: {
-                  onSnapshot: startVotingPeriodRequestDto.postOnSnapshot,
+                  onSnapshot: startVotingPeriodRequestDto?.postOnSnapshot,
                 },
                 votes: {},
               },

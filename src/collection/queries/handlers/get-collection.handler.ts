@@ -182,10 +182,15 @@ export class GetPublicViewCollectionQueryHandler
         collectionToGet.mintkudosTokenId &&
         collectionToGet.mintkudosTokenId > 0 &&
         !caller;
+
+      const formRequiresDiscordButUserIsntConnected =
+        collectionToGet.requireDiscordConnection && !caller?.discordId;
+
       const canFillForm =
         hasRole &&
         !formHasCredentialsButUserIsntConnected &&
-        hasPassedSybilCheck;
+        hasPassedSybilCheck &&
+        !formRequiresDiscordButUserIsntConnected;
 
       const previousResponses = [];
       if (collectionToGet.dataOwner)
@@ -196,10 +201,6 @@ export class GetPublicViewCollectionQueryHandler
             previousResponses.push(collectionToGet.data[dataSlug]);
           }
         }
-
-      console.log({ claimedBy: collectionToGet.mintkudosClaimedBy });
-      console.log({ caller: caller?.id });
-
       const kudosClaimedByUser =
         collectionToGet.mintkudosClaimedBy &&
         collectionToGet.mintkudosClaimedBy.includes(caller?.id);

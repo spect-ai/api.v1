@@ -36,6 +36,7 @@ export class CollectionPublicResponseDto {
   previousResponses: MappedItem<object>;
   hasRole: boolean;
   hasPassedSybilCheck: boolean;
+  requireDiscordConnection: boolean;
 }
 
 export class CollectionResponseDto {

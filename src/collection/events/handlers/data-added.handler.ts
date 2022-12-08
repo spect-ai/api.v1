@@ -34,7 +34,7 @@ export class DataAddedEventHandler implements IEventHandler<DataAddedEvent> {
   async handle(event: DataAddedEvent) {
     try {
       console.log('DataAddedEventHandler');
-      const { caller, collection } = event;
+      const { caller, collection, data } = event;
       const circle = (await this.queryBus.execute(
         new GetCircleByIdQuery(collection.parents[0]),
       )) as Circle;
@@ -72,6 +72,22 @@ export class DataAddedEventHandler implements IEventHandler<DataAddedEvent> {
           [collection.creator],
         ),
       );
+
+      const res = await this.commandBus.execute(
+        new PerformAutomationOnCollectionDataAddCommand(
+          collection,
+          data,
+          data['slug'],
+          caller.id,
+          circle,
+        ),
+      );
+      console.log({ res });
+      if (Object.keys(res.circle).length > 0) {
+        await this.commandBus.execute(
+          new UpdateMultipleCirclesCommand(res.circle),
+        );
+      }
 
       const notifResponderContent = `Your response on ${collection.name} was received.`;
       // const responderSubject = `Response received!`;
@@ -111,50 +127,6 @@ export class DataAddedEventHandler implements IEventHandler<DataAddedEvent> {
         `${collection.slug}:dataAdded`,
         updatedCollection,
       );
-    } catch (error) {
-      this.logger.error(`${error.message}`);
-    }
-  }
-}
-
-@EventsHandler(DataAddedEvent)
-export class AutomationOnDataAddedEventHandler
-  implements IEventHandler<DataAddedEvent>
-{
-  constructor(
-    private readonly queryBus: QueryBus,
-    private readonly commandBus: CommandBus,
-    private readonly logger: LoggingService,
-    private readonly realtime: RealtimeGateway,
-  ) {
-    this.logger.setContext('AutomationOnDataAddedEventHandler');
-  }
-
-  async handle(event: DataAddedEvent) {
-    try {
-      console.log('AutomationHandler');
-      const { caller, collection, data } = event;
-      this.logger.log(`Update Data in collection ${event.collection?.name}`);
-
-      const circle = await this.queryBus.execute(
-        new GetCircleByIdQuery(collection.parents[0]),
-      );
-      console.log('ksksksk');
-      const res = await this.commandBus.execute(
-        new PerformAutomationOnCollectionDataAddCommand(
-          collection,
-          data,
-          data['slug'],
-          caller.id,
-          circle,
-        ),
-      );
-      console.log({ res });
-      if (Object.keys(res.circle).length > 0) {
-        await this.commandBus.execute(
-          new UpdateMultipleCirclesCommand(res.circle),
-        );
-      }
     } catch (error) {
       this.logger.error(`${error.message}`);
     }

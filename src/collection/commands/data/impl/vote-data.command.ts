@@ -13,8 +13,8 @@ export class VoteDataCommand {
 export class StartVotingPeriodCommand {
   constructor(
     public readonly dataSlug: string,
-    public readonly caller: User,
     public readonly collectionId: string,
+    public readonly caller?: User,
     public readonly startVotingPeriodRequestDto?: StartVotingPeriodRequestDto,
   ) {}
 }

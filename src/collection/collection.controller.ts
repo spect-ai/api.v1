@@ -419,8 +419,8 @@ export class CollectionController {
     return await this.commandBus.execute(
       new StartVotingPeriodCommand(
         dataIdParam.dataId,
-        req.user,
         param.id,
+        req.user,
         startVotingPeriodRequestDto,
       ),
     );

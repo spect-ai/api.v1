@@ -12,6 +12,7 @@ import {
   GiveDiscordRoleActionCommandHandler,
   GiveRoleActionCommandHandler,
   SendEmailActionCommandHandler,
+  StartVotingPeriodActionCommandHandler,
 } from './take -action-v2.handler';
 import {
   ChangeColumnActionCommandHandler,
@@ -39,4 +40,5 @@ export const CommandHandlers = [
   GiveDiscordRoleActionCommandHandler,
   CreateCardActionCommandHandler,
   PerformAutomationOnCollectionDataAddCommandHandler,
+  StartVotingPeriodActionCommandHandler,
 ];

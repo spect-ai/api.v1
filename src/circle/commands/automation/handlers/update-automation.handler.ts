@@ -4,11 +4,14 @@ import {
   CommandHandler,
   EventBus,
   ICommandHandler,
+  QueryBus,
 } from '@nestjs/cqrs';
 import { CirclesRepository } from 'src/circle/circles.repository';
+import { UpdateAutomationDto } from 'src/circle/dto/automation.dto';
 import { CircleResponseDto } from 'src/circle/dto/detailed-circle-response.dto';
 import { UpdateCollectionCommand } from 'src/collection/commands';
 import { UpdateCollectionDto } from 'src/collection/dto/update-collection-request.dto';
+import { GetCollectionBySlugQuery } from 'src/collection/queries';
 import { LoggingService } from 'src/logging/logging.service';
 import { UpdateAutomationCommand } from '../impl';
 
@@ -18,6 +21,7 @@ export class UpdateAutomationCommandHandler
 {
   constructor(
     private readonly commandBus: CommandBus,
+    private readonly queryBus: QueryBus,
     private readonly circlesRepository: CirclesRepository,
     private readonly logger: LoggingService,
   ) {
@@ -36,30 +40,10 @@ export class UpdateAutomationCommandHandler
         },
       };
 
-      if (
-        circle.automations[automationId].trigger?.type === 'giveDiscordRole' &&
-        updateAutomationDto.trigger?.type !== 'giveDiscordRole'
-      ) {
-        await this.commandBus.execute(
-          new UpdateCollectionCommand(
-            {
-              requireDiscordConnection: false,
-            } as UpdateCollectionDto,
-            null,
-            circle.automations[automationId].triggerCollectionSlug,
-          ),
-        );
-      } else if (updateAutomationDto.trigger?.type === 'giveDiscordRole') {
-        await this.commandBus.execute(
-          new UpdateCollectionCommand(
-            {
-              requireDiscordConnection: true,
-            } as UpdateCollectionDto,
-            null,
-            circle.automations[automationId].triggerCollectionSlug,
-          ),
-        );
-      }
+      await this.updateCollectionRequireDiscordConnection(
+        circle.automations[automationId].triggerCollectionSlug,
+        updateAutomationDto,
+      );
 
       const updatedCircle =
         await this.circlesRepository.updateCircleAndReturnWithPopulatedReferences(
@@ -71,6 +55,45 @@ export class UpdateAutomationCommandHandler
       );
     } catch (error) {
       throw new InternalServerErrorException(error);
+    }
+  }
+
+  private async updateCollectionRequireDiscordConnection(
+    collectionSlug: string,
+    updateAutomationDto: UpdateAutomationDto,
+  ): Promise<void> {
+    const collection = await this.queryBus.execute(
+      new GetCollectionBySlugQuery(collectionSlug),
+    );
+    let requireDiscordConnection = false;
+    for (const action of updateAutomationDto.actions) {
+      if (action.type === 'giveDiscordRole') {
+        requireDiscordConnection = true;
+      }
+    }
+    if (collection.requiredDiscordConnection && !requireDiscordConnection) {
+      await this.commandBus.execute(
+        new UpdateCollectionCommand(
+          {
+            requireDiscordConnection: false,
+          } as UpdateCollectionDto,
+          null,
+          collection._id.toString(),
+        ),
+      );
+    } else if (
+      !collection.requiredDiscordConnection &&
+      requireDiscordConnection
+    ) {
+      await this.commandBus.execute(
+        new UpdateCollectionCommand(
+          {
+            requireDiscordConnection: true,
+          } as UpdateCollectionDto,
+          null,
+          collection._id.toString(),
+        ),
+      );
     }
   }
 }

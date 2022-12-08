@@ -4,11 +4,14 @@ import {
   CommandHandler,
   EventBus,
   ICommandHandler,
+  QueryBus,
 } from '@nestjs/cqrs';
 import { CirclesRepository } from 'src/circle/circles.repository';
+import { CreateAutomationDto } from 'src/circle/dto/automation.dto';
 import { CircleResponseDto } from 'src/circle/dto/detailed-circle-response.dto';
 import { UpdateCollectionCommand } from 'src/collection/commands';
 import { UpdateCollectionDto } from 'src/collection/dto/update-collection-request.dto';
+import { GetCollectionBySlugQuery } from 'src/collection/queries';
 import { LoggingService } from 'src/logging/logging.service';
 import { v4 as uuidv4 } from 'uuid';
 import { AddAutomationCommand } from '../impl';
@@ -18,6 +21,7 @@ export class AddAutomationCommandHandler
   implements ICommandHandler<AddAutomationCommand>
 {
   constructor(
+    private readonly queryBus: QueryBus,
     private readonly commandBus: CommandBus,
     private readonly circlesRepository: CirclesRepository,
     private readonly logger: LoggingService,
@@ -59,17 +63,10 @@ export class AddAutomationCommandHandler
           };
       }
       updates['automationCount'] = (circle.automationCount || 0) + 1;
-      if (createAutomationDto.trigger?.type === 'giveDiscordRole') {
-        await this.commandBus.execute(
-          new UpdateCollectionCommand(
-            {
-              requireDiscordConnection: true,
-            } as UpdateCollectionDto,
-            null,
-            createAutomationDto.triggerCollectionSlug,
-          ),
-        );
-      }
+      await this.updateCollectionRequireDiscordConnection(
+        createAutomationDto.triggerCollectionSlug,
+        createAutomationDto,
+      );
       const updatedCircle =
         await this.circlesRepository.updateCircleAndReturnWithPopulatedReferences(
           circleId,
@@ -81,6 +78,45 @@ export class AddAutomationCommandHandler
     } catch (error) {
       console.log({ error });
       throw new InternalServerErrorException(error);
+    }
+  }
+
+  private async updateCollectionRequireDiscordConnection(
+    collectionSlug: string,
+    addAutomationDto: CreateAutomationDto,
+  ): Promise<void> {
+    const collection = await this.queryBus.execute(
+      new GetCollectionBySlugQuery(collectionSlug),
+    );
+    let requireDiscordConnection = false;
+    for (const action of addAutomationDto.actions) {
+      if (action.type === 'giveDiscordRole') {
+        requireDiscordConnection = true;
+      }
+    }
+    if (collection.requiredDiscordConnection && !requireDiscordConnection) {
+      await this.commandBus.execute(
+        new UpdateCollectionCommand(
+          {
+            requireDiscordConnection: false,
+          } as UpdateCollectionDto,
+          null,
+          collection._id.toString(),
+        ),
+      );
+    } else if (
+      !collection.requiredDiscordConnection &&
+      requireDiscordConnection
+    ) {
+      await this.commandBus.execute(
+        new UpdateCollectionCommand(
+          {
+            requireDiscordConnection: true,
+          } as UpdateCollectionDto,
+          null,
+          collection._id.toString(),
+        ),
+      );
     }
   }
 }
