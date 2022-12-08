@@ -197,6 +197,9 @@ export class GetPublicViewCollectionQueryHandler
           }
         }
 
+      console.log({ claimedBy: collectionToGet.mintkudosClaimedBy });
+      console.log({ caller: caller?.id });
+
       const kudosClaimedByUser =
         collectionToGet.mintkudosClaimedBy &&
         collectionToGet.mintkudosClaimedBy.includes(caller?.id);
@@ -222,6 +225,7 @@ export class GetPublicViewCollectionQueryHandler
         previousResponses,
         activity,
         activityOrder,
+        kudosClaimedByUser,
       };
     } catch (error) {
       this.logger.logError(
