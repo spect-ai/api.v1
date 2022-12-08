@@ -9,7 +9,13 @@ import {
   IsString,
   ValidateNested,
 } from 'class-validator';
-import { NetworkModel, PropertyType, UserType } from '../types/types';
+import {
+  NetworkModel,
+  PayWallOptions,
+  PropertyType,
+  UserType,
+} from '../types/types';
+import { IsValidPaywallOptions } from '../validations/paywall-validation.service';
 import { IsValidRewardOptions } from '../validations/reward-validations.service';
 
 export class OptionModel {
@@ -40,6 +46,7 @@ export class AddPropertyDto {
     'milestone',
     'singleURL',
     'multiURL',
+    'payWall',
   ])
   @IsNotEmpty()
   type: PropertyType;
@@ -60,6 +67,10 @@ export class AddPropertyDto {
   @IsOptional()
   @IsValidRewardOptions()
   rewardOptions: Map<string, NetworkModel>;
+
+  @IsOptional()
+  @IsValidPaywallOptions()
+  payWallOptions: PayWallOptions;
 
   @IsBoolean()
   @IsOptional()
@@ -117,9 +128,14 @@ export class UpdatePropertyDto {
     'milestone',
     'singleURL',
     'multiURL',
+    'payWall',
   ])
   @IsOptional()
   type: PropertyType;
+
+  @IsOptional()
+  @IsValidPaywallOptions()
+  payWallOptions: PayWallOptions;
 
   @IsString()
   @IsOptional()

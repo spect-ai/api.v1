@@ -169,6 +169,21 @@ export class DataValidationService {
           )
             return false;
         }
+      } else if (['payWall'].includes(properties[propertyId].type)) {
+        if (data['network']) {
+          const network = data['network'];
+          if (
+            typeof network['token'] !== 'object' ||
+            typeof network['chain'] !== 'object' ||
+            typeof network['chain']['label'] !== 'string' ||
+            typeof network['chain']['value'] !== 'string' ||
+            typeof network['token']['label'] !== 'string' ||
+            typeof network['token']['value'] !== 'string' ||
+            typeof data['txnHash'] !== 'string' ||
+            typeof data['paid'] !== 'boolean'
+          )
+            return false;
+        }
       }
     }
     return true;

@@ -195,6 +195,7 @@ export class UpdatePropertyCommandHandler
       case 'reward':
       case 'multiURL':
       case 'milestone':
+      case 'payWall':
         return this.clearAllData(prevProperty, dataObj);
 
       default:
