@@ -1,3 +1,4 @@
+import { BooleanSchemaDefinition } from 'mongoose';
 import { MappedItem } from 'src/common/interfaces';
 
 export type Permissions = {
@@ -21,6 +22,13 @@ export type NetworkModel = {
   chainId: string;
 
   tokens: TokenModel[];
+};
+
+export type PayWallOptions = {
+  network: Map<string, NetworkModel>;
+  value: number;
+  receiver: string;
+  paid?: boolean;
 };
 
 export type Milestone = {
@@ -56,6 +64,7 @@ export type Property = {
   onUpdateNotifyUserTypes?: UserType[];
   rewardOptions?: Map<string, NetworkModel>; // only relevant when type is reward
   required?: boolean;
+  payWallOptions?: PayWallOptions;
   description?: string;
   viewConditions?: Condition[];
 };
@@ -74,7 +83,8 @@ export type PropertyType =
   | 'email'
   | 'milestone'
   | 'singleURL'
-  | 'multiURL';
+  | 'multiURL'
+  | 'payWall';
 
 export type Option = {
   label: string;
