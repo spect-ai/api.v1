@@ -115,7 +115,10 @@ export class CreateCollectionCommandHandler
                 name: 'Grid view 1',
                 type: 'grid',
                 filters: [],
-                sort: {},
+                sort: {
+                  property: '',
+                  direction: 'asc',
+                },
               },
             },
             cardOrders: {},

@@ -12,6 +12,7 @@ import {
   Voting,
   OpportunityInfo,
   Permissions,
+  Condition,
 } from '../types/types';
 
 @useMongoosePlugin()
@@ -68,6 +69,12 @@ export class Collection extends BaseModel {
    */
   @prop({ default: {} })
   data: MappedItem<object>;
+
+  /**
+   * The data contained in the collection
+   */
+  @prop({ default: {} })
+  archivedData: MappedItem<object>;
 
   /**
    * All the activities in all the data streams - { dataSlug : { activityId: ActivityObject  } }
@@ -207,8 +214,11 @@ export interface ProjectMetadata {
       name: string;
       type: 'grid' | 'kanban' | 'gantt' | 'list';
       groupByColumn?: string;
-      filters?: any;
-      sort?: any;
+      filters?: Condition[];
+      sort?: {
+        property: string;
+        direction: 'asc' | 'desc';
+      };
     };
   };
   viewOrder: string[];

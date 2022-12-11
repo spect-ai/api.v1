@@ -6,6 +6,7 @@ import {
   IsOptional,
   IsString,
 } from 'class-validator';
+import { MappedItem } from 'src/common/interfaces';
 import { GuildRole } from 'src/common/types/role.type';
 import { ProjectMetadata } from '../model/collection.model';
 import { OpportunityInfo, Permissions } from '../types/types';
@@ -86,6 +87,14 @@ export class UpdateCollectionDto {
   @IsObject()
   @IsOptional()
   projectMetadata: Partial<ProjectMetadata>;
+
+  @IsObject()
+  @IsOptional()
+  data: MappedItem<object>;
+
+  @IsObject()
+  @IsOptional()
+  archivedData: MappedItem<object>;
 }
 
 interface FormMetadata {
