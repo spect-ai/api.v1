@@ -31,7 +31,7 @@ export class IsPaywallValidConstraint implements ValidatorConstraintInterface {
   }
 
   defaultMessage(validationArguments?: ValidationArguments): string {
-    return 'Paywall is not valid';
+    return 'Payment settings are not valid';
   }
 }
 
