@@ -99,7 +99,7 @@ export class CreateCollectionCommandHandler
           },
         });
       } else if (createCollectionDto.collectionType === 1) {
-        const defaultViewId = uuidv4();
+        const defaultViewId = '0x0';
         createdCollection = await this.collectionRepository.create({
           ...createCollectionDto,
           properties,
@@ -112,7 +112,7 @@ export class CreateCollectionCommandHandler
             views: {
               [defaultViewId]: {
                 id: defaultViewId,
-                name: 'Grid view 1',
+                name: 'Default View',
                 type: 'grid',
                 filters: [],
                 sort: {

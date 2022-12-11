@@ -1,8 +1,8 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
-  InternalServerErrorException,
   Param,
   Patch,
   Post,
@@ -33,6 +33,7 @@ import {
   AddCommentCommand,
   AddPropertyCommand,
   CreateCollectionCommand,
+  DeleteCollectionCommand,
   RemoveCommentCommand,
   RemovePropertyCommand,
   UpdateCollectionCommand,
@@ -130,6 +131,19 @@ export class CollectionController {
   ): Promise<Collection> {
     return await this.commandBus.execute(
       new UpdateCollectionCommand(updateCollectionDto, req.user?.id, param.id),
+    );
+  }
+
+  @SetMetadata('permissions', ['manageFormSettings'])
+  @UseGuards(CollectionAuthGuard)
+  @Delete('/:id')
+  async delete(
+    @Param() param: ObjectIdDto,
+    @Body() updateCollectionDto: UpdateCollectionDto,
+    @Request() req,
+  ): Promise<Collection> {
+    return await this.commandBus.execute(
+      new DeleteCollectionCommand(param.id, req.user?.id),
     );
   }
 

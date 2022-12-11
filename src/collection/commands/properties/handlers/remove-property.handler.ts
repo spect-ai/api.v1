@@ -39,12 +39,35 @@ export class RemovePropertyCommandHandler
           delete data[propertyId];
         }
 
+      // remove any associated card orders
+      if (
+        collection.projectMetadata?.cardOrders &&
+        collection.projectMetadata.cardOrders[propertyId]
+      ) {
+        delete collection.projectMetadata.cardOrders[propertyId];
+      }
+
+      // remove all views that use this property as a group by column
+      if (collection.projectMetadata.viewOrder) {
+        collection.projectMetadata.viewOrder =
+          collection.projectMetadata.viewOrder.filter((v) => {
+            if (
+              collection.projectMetadata.views[v].groupByColumn === propertyId
+            ) {
+              delete collection.projectMetadata.views[v];
+              return false;
+            }
+            return true;
+          });
+      }
+
       const updatedCollection = await this.collectionRepository.updateById(
         collectionId,
         {
           properties: collection.properties,
           propertyOrder: collection.propertyOrder,
           data: collection.data,
+          projectMetadata: collection.projectMetadata,
         },
       );
       return await this.queryBus.execute(
