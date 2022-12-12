@@ -90,7 +90,7 @@ export class AddDataCommandHandler implements ICommandHandler<AddDataCommand> {
         data,
         caller?.id,
       );
-      const cardOrders = collection.projectMetadata.cardOrders || {};
+      const cardOrders = collection.projectMetadata?.cardOrders || {};
       if (Object.keys(cardOrders).length) {
         Object.keys(cardOrders).forEach((groupByColumn) => {
           const columnIndex = collection.properties[

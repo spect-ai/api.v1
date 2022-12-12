@@ -216,11 +216,14 @@ export class GetPublicViewCollectionQueryHandler
 
       return {
         ...res,
-        canFillForm,
-        hasRole,
-        canClaimKudos,
-        hasPassedSybilCheck,
-        previousResponses,
+        formMetadata: {
+          ...res.formMetadata,
+          canFillForm,
+          hasRole,
+          canClaimKudos,
+          hasPassedSybilCheck,
+          previousResponses,
+        },
         activity,
         activityOrder,
       };

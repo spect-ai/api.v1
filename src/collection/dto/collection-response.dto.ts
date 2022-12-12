@@ -2,6 +2,7 @@ import { ApiHideProperty } from '@nestjs/swagger';
 import { MappedItem } from 'src/common/interfaces';
 import { GuildRole } from 'src/common/types/role.type';
 import { User } from 'src/users/model/users.model';
+import { FormMetadata } from '../model/collection.model';
 import {
   Activity,
   DefaultViewType,
@@ -15,27 +16,10 @@ export class CollectionPublicResponseDto {
   description: string;
   @ApiHideProperty()
   properties: MappedItem<Property>;
-
   propertyOrder: string[];
   defaultView: DefaultViewType;
   permissions: Permissions;
-
-  formRoleGating: number[];
-
-  canFillForm: boolean;
-
-  messageOnSubmission: string;
-
-  mintkudosTokenId: number;
-
-  kudosClaimedByUser: boolean;
-
-  multipleResponsesAllowed: boolean;
-  updatingResponseAllowed: boolean;
-  @ApiHideProperty()
-  previousResponses: MappedItem<object>;
-  hasRole: boolean;
-  hasPassedSybilCheck: boolean;
+  formMetadata: FormMetadata;
 }
 
 export class CollectionResponseDto {
