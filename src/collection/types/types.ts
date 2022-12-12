@@ -58,7 +58,6 @@ export type Property = {
   isPartOfFormView: boolean;
   immutable?: boolean;
   default?: any;
-  condition?: any; // Show property only when condition is met
   options?: Option[];
   userType?: UserType; // user type only relevant when type is user or user[]
   onUpdateNotifyUserTypes?: UserType[];

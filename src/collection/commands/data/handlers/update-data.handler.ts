@@ -15,6 +15,8 @@ import {
   GetPrivateViewCollectionQuery,
   GetPublicViewCollectionQuery,
 } from 'src/collection/queries';
+import { Collection } from 'src/collection/model/collection.model';
+import { HasSatisfiedDataConditionsQuery } from 'src/automation/queries/impl';
 
 @CommandHandler(UpdateDataCommand)
 export class UpdateDataCommandHandler
@@ -54,21 +56,24 @@ export class UpdateDataCommandHandler
       if (!validData) {
         throw new Error(`Data invalid`);
       }
+      const filteredData =
+        await this.filterValuesWherePropertyDoesntSatisfyCondition(
+          collection,
+          data,
+        );
       const { dataActivities, dataActivityOrder } = this.activityBuilder.build(
-        data,
+        filteredData,
         collection,
         dataSlug,
         caller?.id,
       );
+
       const updatedCollection = await this.collectionRepository.updateById(
         collectionId,
         {
           data: {
             ...collection.data,
-            [dataSlug]: {
-              ...collection.data[dataSlug],
-              ...data,
-            },
+            [dataSlug]: filteredData,
           },
           dataActivities,
           dataActivityOrder,
@@ -98,5 +103,28 @@ export class UpdateDataCommandHandler
         `Failed updating data in collection to collection Id ${collectionId} with error ${err.message}`,
       );
     }
+  }
+
+  async filterValuesWherePropertyDoesntSatisfyCondition(
+    collection: Collection,
+    data: object,
+  ) {
+    const filteredData = {};
+    for (const [propertyId, property] of Object.entries(
+      collection.properties,
+    )) {
+      console.log({ property });
+      if (property.viewConditions) {
+        const condition = property.viewConditions;
+        const satisfied = await this.queryBus.execute(
+          new HasSatisfiedDataConditionsQuery(collection, data, condition),
+        );
+        console.log({ propertyId, satisfied });
+        if (satisfied) filteredData[propertyId] = data[propertyId];
+      } else {
+        filteredData[propertyId] = data[propertyId];
+      }
+    }
+    return filteredData;
   }
 }

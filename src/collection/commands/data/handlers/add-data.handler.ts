@@ -26,6 +26,7 @@ import {
   GetUserByIdQuery,
   GetUserByUsernameQuery,
 } from 'src/users/queries/impl';
+import { HasSatisfiedDataConditionsQuery } from 'src/automation/queries/impl';
 
 @CommandHandler(AddDataCommand)
 export class AddDataCommandHandler implements ICommandHandler<AddDataCommand> {
@@ -84,12 +85,17 @@ export class AddDataCommandHandler implements ICommandHandler<AddDataCommand> {
           data[propertyId] = property.default;
         }
       }
-      data['slug'] = uuidv4();
+      const filteredData =
+        await this.filterValuesWherePropertyDoesntSatisfyCondition(
+          collection,
+          data,
+        );
+      filteredData['slug'] = uuidv4();
 
       /** Disabling activity for forms as it doesnt quite make sense yet */
       const { dataActivities, dataActivityOrder } = this.getActivity(
         collection,
-        data,
+        filteredData,
         caller?.id,
       );
       const updatedCollection = await this.collectionRepository.updateById(
@@ -97,13 +103,13 @@ export class AddDataCommandHandler implements ICommandHandler<AddDataCommand> {
         {
           data: {
             ...collection.data,
-            [data['slug']]: data,
+            [filteredData['slug']]: filteredData,
           },
           dataActivities,
           dataActivityOrder,
           dataOwner: {
             ...(collection.dataOwner || {}),
-            [data['slug']]: caller?.id,
+            [filteredData['slug']]: caller?.id,
           },
         },
       );
@@ -169,6 +175,27 @@ export class AddDataCommandHandler implements ICommandHandler<AddDataCommand> {
         [data['slug']]: [activityId],
       },
     };
+  }
+
+  async filterValuesWherePropertyDoesntSatisfyCondition(
+    collection: Collection,
+    data: object,
+  ) {
+    const filteredData = {};
+    for (const [propertyId, property] of Object.entries(
+      collection.properties,
+    )) {
+      if (property.viewConditions) {
+        const condition = property.viewConditions;
+        const satisfied = await this.queryBus.execute(
+          new HasSatisfiedDataConditionsQuery(collection, data, condition),
+        );
+        if (satisfied) filteredData[propertyId] = data[propertyId];
+      } else {
+        filteredData[propertyId] = data[propertyId];
+      }
+    }
+    return filteredData;
   }
 }
 
