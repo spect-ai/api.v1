@@ -24,6 +24,7 @@ const publicProfileFields = {
   avatar: 1,
   email: 1,
   id: 1,
+  discordId: 1,
 };
 
 @QueryHandler(GetProfileQuery)
@@ -89,6 +90,7 @@ export class GetProfileQueryHandler implements IQueryHandler<GetProfileQuery> {
     user: PrivateProfileResponseDto,
   ): PublicProfileResponseDto {
     delete user.email;
+    delete user.discordId;
     return user;
   }
 }

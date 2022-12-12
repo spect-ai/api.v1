@@ -91,4 +91,8 @@ export class PrivateProfileResponseDto {
   @IsString()
   @IsNotEmpty()
   lensHandle?: string;
+
+  @IsString()
+  @IsNotEmpty()
+  discordId?: string;
 }

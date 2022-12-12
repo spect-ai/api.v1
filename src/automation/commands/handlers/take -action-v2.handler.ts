@@ -50,7 +50,6 @@ export class CommonActionService {
     }
 
     const userId = collection.dataOwner[relevantIds.dataSlug];
-    console.log({ userId });
     const user = await this.queryBus.execute(
       new GetProfileQuery(
         {
@@ -107,7 +106,6 @@ export class SendEmailActionCommandHandler
         collection.data[relevantIds.dataSlug][emailProperty],
       ];
     }
-    console.log({ emails });
     try {
       for (const email of emails) {
         if (!email) continue;
