@@ -86,45 +86,48 @@ export class SendEmailActionCommandHandler
 
   async execute(command: SendEmailActionCommand): Promise<any> {
     console.log('SendEmailActionCommandHandler');
-    const { action, caller, relevantIds } = command;
-    const circleId = action.data.circleId;
-    if (!circleId) {
-      throw new Error('No circleId provided in automation data');
-    }
-    if (!action.data.message) return;
-
-    const { circle, collection, user } =
-      await this.commonActionService.getCircleCollectionUsersFromRelevantIds(
-        circleId,
-        relevantIds,
-      );
-
-    let emails = [];
-    for (const emailProperty of action.data.toEmailProperties) {
-      emails = [
-        ...emails,
-        collection.data[relevantIds.dataSlug][emailProperty],
-      ];
-    }
     try {
+      const { action, caller, relevantIds } = command;
+      const circleId = action.data.circleId;
+      if (!circleId) {
+        throw new Error('No circleId provided in automation data');
+      }
+      if (!action.data.message) return;
+
+      const { circle, collection, user } =
+        await this.commonActionService.getCircleCollectionUsersFromRelevantIds(
+          circleId,
+          relevantIds,
+        );
+
+      let emails = [];
+      for (const emailProperty of action.data.toEmailProperties) {
+        emails = [
+          ...emails,
+          collection.data[relevantIds.dataSlug][emailProperty],
+        ];
+      }
       for (const email of emails) {
         if (!email) continue;
-
-        const html = this.emailGeneratorService.generateEmailWithMessage(
-          action.data.message,
-          `https://circles.spect.network`,
-          circle,
-        );
-        const mail = {
-          to: `${email}`,
-          from: {
-            name: 'Spect Notifications',
-            email: process.env.NOTIFICATION_EMAIL,
-          }, // Fill it with your validated email on SendGrid account
-          html,
-          subject: `You have a new notification from ${circle.name}`,
-        };
-        const res = await this.emailService.send(mail);
+        try {
+          const html = this.emailGeneratorService.generateEmailWithMessage(
+            action.data.message,
+            `https://circles.spect.network`,
+            circle,
+          );
+          const mail = {
+            to: `${email}`,
+            from: {
+              name: 'Spect Notifications',
+              email: process.env.NOTIFICATION_EMAIL,
+            }, // Fill it with your validated email on SendGrid account
+            html,
+            subject: `You have a new notification from ${circle.name}`,
+          };
+          const res = await this.emailService.send(mail);
+        } catch (err) {
+          this.logger.error(err);
+        }
       }
     } catch (err) {
       this.logger.error(err);

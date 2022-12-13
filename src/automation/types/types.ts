@@ -6,6 +6,7 @@ import { MappedItem, MappedPartialItem } from 'src/common/interfaces';
 import { Status } from 'src/common/types/status.type';
 import { Project } from 'src/project/model/project.model';
 import { Retro } from 'src/retro/models/retro.model';
+import { User } from 'src/users/model/users.model';
 
 export type MultipleItemContainer = {
   updates?: MappedPartialItem<Card | Retro | Project | Circle>;
@@ -34,7 +35,7 @@ export type DataContainer = {
 export type AutomationUpdatesContainer = {
   collection?: MappedItem<Partial<Collection>>;
   circle?: MappedItem<Partial<Circle>>;
-  retro?: MappedItem<Partial<Retro>>;
+  user?: MappedItem<Partial<User>>;
 };
 
 export type Automation = {
