@@ -68,9 +68,14 @@ export class AddDataCommandHandler implements ICommandHandler<AddDataCommand> {
           caller,
         );
       if (!hasPassedSybilCheck) throw 'User has not passed sybil check';
-
+      let filteredData =
+        await this.filterValuesWherePropertyDoesntSatisfyCondition(
+          collection,
+          data,
+        );
+      filteredData = await this.filterUndefinedValues(filteredData);
       const validData = await this.validationService.validate(
-        data,
+        filteredData,
         'add',
         false,
         collection,
@@ -85,11 +90,7 @@ export class AddDataCommandHandler implements ICommandHandler<AddDataCommand> {
           data[propertyId] = property.default;
         }
       }
-      const filteredData =
-        await this.filterValuesWherePropertyDoesntSatisfyCondition(
-          collection,
-          data,
-        );
+
       filteredData['slug'] = uuidv4();
 
       /** Disabling activity for forms as it doesnt quite make sense yet */
@@ -175,6 +176,16 @@ export class AddDataCommandHandler implements ICommandHandler<AddDataCommand> {
         [data['slug']]: [activityId],
       },
     };
+  }
+
+  filterUndefinedValues(data: object) {
+    const filteredData = {};
+    for (const [key, value] of Object.entries(data)) {
+      if (value !== undefined) {
+        filteredData[key] = value;
+      }
+    }
+    return filteredData;
   }
 
   async filterValuesWherePropertyDoesntSatisfyCondition(

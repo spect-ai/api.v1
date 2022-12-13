@@ -6,11 +6,14 @@ import { Collection } from '../model/collection.model';
 import { Property } from '../types/types';
 import { ethers } from 'ethers';
 import mongoose from 'mongoose';
+import { QueryBus } from '@nestjs/cqrs';
+import { HasSatisfiedDataConditionsQuery } from 'src/automation/queries/impl';
 
 @Injectable()
 export class DataValidationService {
   constructor(
     private readonly collectionRepositor: CollectionRepository,
+    private readonly queryBus: QueryBus,
     private readonly logger: LoggingService,
   ) {
     this.logger.setContext('DataValidationService');
@@ -43,23 +46,23 @@ export class DataValidationService {
         collectionToValidate.properties,
       );
       if (!typeValidationPassed) return false;
-      console.log(typeValidationPassed);
+      console.log({ typeValidationPassed });
 
       const valueValidationPassed = this.validateValue(
         dataObj,
         collectionToValidate.properties,
       );
       if (!valueValidationPassed) return false;
-      console.log(valueValidationPassed);
+      console.log({ valueValidationPassed });
 
       if (!skipRequiredFieldValidation) {
-        const requiredValidationPassed = this.validateRequriedFields(
+        const requiredValidationPassed = await this.validateRequriedFields(
           dataObj,
-          collectionToValidate.properties,
+          collectionToValidate,
           operation,
         );
         if (!requiredValidationPassed) return false;
-        console.log(valueValidationPassed);
+        console.log({ requiredValidationPassed });
       }
 
       return true;
@@ -91,12 +94,13 @@ export class DataValidationService {
     properties: MappedItem<Property>,
   ): boolean {
     for (const [propertyId, data] of Object.entries(dataObj)) {
-      console.log(propertyId);
       if (data === null) continue;
+      console.log({ data });
+      console.log({ propertyId });
+
       if (['shortText', 'longText'].includes(properties[propertyId].type)) {
         if (typeof data !== 'string') return false;
       } else if (['singleSelect'].includes(properties[propertyId].type)) {
-        console.log(data);
         if (typeof data !== 'object') return false;
         if (Object.keys(data)?.length && (!data['value'] || !data['label']))
           return false;
@@ -108,7 +112,7 @@ export class DataValidationService {
       } else if (['number'].includes(properties[propertyId].type)) {
         if (typeof data !== 'number') return false;
       } else if (['reward'].includes(properties[propertyId].type)) {
-        if (data['value']) {
+        if (data && data['value']) {
           if (
             typeof data['token'] !== 'object' ||
             typeof data['chain'] !== 'object' ||
@@ -123,10 +127,12 @@ export class DataValidationService {
       } else if (['ethAddress'].includes(properties[propertyId].type)) {
         if (data && !ethers.utils.isAddress(data)) return false;
       } else if (['user'].includes(properties[propertyId].type)) {
-        if (data.value && !mongoose.isValidObjectId(data.value)) return false;
+        if (data && data.value && !mongoose.isValidObjectId(data.value))
+          return false;
       } else if (['user[]'].includes(properties[propertyId].type)) {
-        for (const user of data)
-          if (!mongoose.isValidObjectId(user.value)) return false;
+        if (data)
+          for (const user of data)
+            if (!mongoose.isValidObjectId(user.value)) return false;
       } else if (['email'].includes(properties[propertyId].type)) {
         if (
           data &&
@@ -138,22 +144,23 @@ export class DataValidationService {
         )
           return false;
       } else if (['milestone'].includes(properties[propertyId].type)) {
-        for (const milestone of data) {
-          if (!milestone['title']) return false;
-          const reward = milestone['reward'];
-          if (reward && reward['value']) {
-            if (
-              typeof reward['token'] !== 'object' ||
-              typeof reward['chain'] !== 'object' ||
-              typeof reward['value'] !== 'number' ||
-              typeof reward['chain']['label'] !== 'string' ||
-              typeof reward['chain']['value'] !== 'string' ||
-              typeof reward['token']['label'] !== 'string' ||
-              typeof reward['token']['value'] !== 'string'
-            )
-              return false;
+        if (data)
+          for (const milestone of data) {
+            if (!milestone['title']) return false;
+            const reward = milestone['reward'];
+            if (reward && reward['value']) {
+              if (
+                typeof reward['token'] !== 'object' ||
+                typeof reward['chain'] !== 'object' ||
+                typeof reward['value'] !== 'number' ||
+                typeof reward['chain']['label'] !== 'string' ||
+                typeof reward['chain']['value'] !== 'string' ||
+                typeof reward['token']['label'] !== 'string' ||
+                typeof reward['token']['value'] !== 'string'
+              )
+                return false;
+            }
           }
-        }
       } else if (['singleURL'].includes(properties[propertyId].type)) {
         if (
           data &&
@@ -163,17 +170,18 @@ export class DataValidationService {
         )
           return false;
       } else if (['multiURL'].includes(properties[propertyId].type)) {
-        for (const url of data) {
-          if (
-            url &&
-            !String(url)
-              .toLowerCase()
-              .match(/((?:https?:\/\/|www\.)(?:[-a-z0-9]+\.)*[-a-z0-9]+.*)/i)
-          )
-            return false;
-        }
+        if (data)
+          for (const url of data) {
+            if (
+              url &&
+              !String(url)
+                .toLowerCase()
+                .match(/((?:https?:\/\/|www\.)(?:[-a-z0-9]+\.)*[-a-z0-9]+.*)/i)
+            )
+              return false;
+          }
       } else if (['payWall'].includes(properties[propertyId].type)) {
-        if (data['network']) {
+        if (data && data['network']) {
           const network = data['network'];
           if (
             typeof network['token'] !== 'object' ||
@@ -199,13 +207,24 @@ export class DataValidationService {
     return true;
   }
 
-  private validateRequriedFields(
+  private async validateRequriedFields(
     dataObj: object,
-    properties: MappedItem<Property>,
+    collection: Collection,
     operation: 'update' | 'add',
-  ): boolean {
-    for (const [propertyId, property] of Object.entries(properties)) {
-      if (property.required) {
+  ): Promise<boolean> {
+    for (const [propertyId, property] of Object.entries(
+      collection.properties,
+    )) {
+      let satisfiedConditions = true;
+      if (property.viewConditions)
+        satisfiedConditions = await this.queryBus.execute(
+          new HasSatisfiedDataConditionsQuery(
+            collection,
+            dataObj || {},
+            property.viewConditions,
+          ),
+        );
+      if (property.required && satisfiedConditions) {
         if (
           operation === 'update' &&
           propertyId in dataObj &&
