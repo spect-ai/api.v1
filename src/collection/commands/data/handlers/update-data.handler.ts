@@ -47,13 +47,15 @@ export class UpdateDataCommandHandler
       if (!collection.dataOwner[dataSlug]) {
         throw 'You are not the owner of this data';
       }
-
-      let filteredData =
-        await this.filterValuesWherePropertyDoesntSatisfyCondition(
-          collection,
-          data,
-        );
-      filteredData = await this.filterUndefinedValues(filteredData);
+      let filteredData = data;
+      if (view === 'public') {
+        filteredData =
+          await this.filterValuesWherePropertyDoesntSatisfyCondition(
+            collection,
+            data,
+          );
+      }
+      filteredData = this.filterUndefinedValues(filteredData);
       const validData = await this.validationService.validate(
         filteredData,
         'update',
@@ -76,7 +78,10 @@ export class UpdateDataCommandHandler
         {
           data: {
             ...collection.data,
-            [dataSlug]: filteredData,
+            [dataSlug]: {
+              ...collection.data[dataSlug],
+              ...filteredData,
+            },
           },
           dataActivities,
           dataActivityOrder,

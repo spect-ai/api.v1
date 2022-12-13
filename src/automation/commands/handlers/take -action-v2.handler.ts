@@ -265,11 +265,31 @@ export class CreateDiscordChannelActionCommandHandler
       const circle = await this.queryBus.execute(
         new GetCircleByIdQuery(circleId),
       );
-      await this.discordService.createChannel(
-        circle.discordGuildId,
-        action.data.channelName,
-        action.data.channelCategory.value,
-      );
+
+      let channelName;
+      if (
+        action.data.channelNameType === 'value' &&
+        action.data.channelName?.value
+      ) {
+        channelName = action.data.channelName?.value;
+      } else if (
+        action.data.channelNameType === 'mapping' &&
+        action.data.channelName?.value
+      ) {
+        const collection = await this.queryBus.execute(
+          new GetCollectionByFilterQuery({
+            slug: relevantIds.collectionSlug,
+          }),
+        );
+        channelName =
+          collection.data[relevantIds.dataSlug][action.data.channelName.value];
+      }
+      if (channelName)
+        await this.discordService.createChannel(
+          circle.discordGuildId,
+          channelName,
+          action.data.channelCategory.value,
+        );
 
       return updatesContainer;
     } catch (err) {
