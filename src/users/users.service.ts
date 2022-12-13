@@ -127,7 +127,7 @@ export class UsersService {
       //   );
       // }
       const user = await this.usersRepository.create({
-        username: `fren${numUsers + 500}`,
+        username: `fren${numUsers + 200}`,
         ethAddress: ethAddress,
         lensHandle: lensProfile?.handle,
       });

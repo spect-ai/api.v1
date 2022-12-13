@@ -47,8 +47,15 @@ export class UpdateDataCommandHandler
       if (!collection.dataOwner[dataSlug]) {
         throw 'You are not the owner of this data';
       }
+
+      let filteredData =
+        await this.filterValuesWherePropertyDoesntSatisfyCondition(
+          collection,
+          data,
+        );
+      filteredData = await this.filterUndefinedValues(filteredData);
       const validData = await this.validationService.validate(
-        data,
+        filteredData,
         'update',
         false,
         collection,
@@ -56,11 +63,7 @@ export class UpdateDataCommandHandler
       if (!validData) {
         throw new Error(`Data invalid`);
       }
-      const filteredData =
-        await this.filterValuesWherePropertyDoesntSatisfyCondition(
-          collection,
-          data,
-        );
+
       const { dataActivities, dataActivityOrder } = this.activityBuilder.build(
         filteredData,
         collection,
@@ -103,6 +106,16 @@ export class UpdateDataCommandHandler
         `Failed updating data in collection to collection Id ${collectionId} with error ${err.message}`,
       );
     }
+  }
+
+  filterUndefinedValues(data: object) {
+    const filteredData = {};
+    for (const [key, value] of Object.entries(data)) {
+      if (value !== undefined) {
+        filteredData[key] = value;
+      }
+    }
+    return filteredData;
   }
 
   async filterValuesWherePropertyDoesntSatisfyCondition(

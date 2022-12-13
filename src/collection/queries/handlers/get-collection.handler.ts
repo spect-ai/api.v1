@@ -198,7 +198,10 @@ export class GetPublicViewCollectionQueryHandler
           collectionToGet.dataOwner,
         )) {
           if (owner === caller?.id) {
-            previousResponses.push(collectionToGet.data[dataSlug]);
+            previousResponses.push({
+              slug: dataSlug,
+              ...collectionToGet.data[dataSlug],
+            });
           }
         }
       const kudosClaimedByUser =
