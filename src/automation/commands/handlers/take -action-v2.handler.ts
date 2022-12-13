@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import {
   CommandBus,
   CommandHandler,
+  EventBus,
   ICommandHandler,
   QueryBus,
 } from '@nestjs/cqrs';
@@ -29,6 +30,7 @@ import {
 import { v4 as uuidv4 } from 'uuid';
 import { AddDataUsingAutomationCommand } from 'src/collection/commands';
 import { StartVotingPeriodCommand } from 'src/collection/commands/data/impl/vote-data.command';
+import { JoinedCircleEvent } from 'src/circle/events/impl';
 
 @Injectable()
 export class CommonActionService {
@@ -141,7 +143,7 @@ export class GiveRoleActionCommandHandler
 {
   constructor(
     private readonly logger: LoggingService,
-    private readonly queryBus: QueryBus,
+    private readonly eventBus: EventBus,
     private readonly commonActionService: CommonActionService,
   ) {
     this.logger.setContext(GiveRoleActionCommandHandler.name);
@@ -192,6 +194,10 @@ export class GiveRoleActionCommandHandler
         memberRoles,
         members: circle.members,
       };
+
+      this.eventBus.publish(
+        new JoinedCircleEvent(user._id.toString(), circleId, null),
+      );
 
       return updatesContainer;
     } catch (err) {
