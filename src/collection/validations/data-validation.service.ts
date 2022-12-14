@@ -95,7 +95,7 @@ export class DataValidationService {
   ): boolean {
     for (const [propertyId, data] of Object.entries(dataObj)) {
       if (data === null) continue;
-      console.log({ data });
+      console.log(data?.[0]);
       console.log({ propertyId });
 
       if (['shortText', 'longText'].includes(properties[propertyId].type)) {
@@ -190,10 +190,11 @@ export class DataValidationService {
               typeof payment['chain']['value'] !== 'string' ||
               typeof payment['token']['label'] !== 'string' ||
               typeof payment['token']['value'] !== 'string' ||
-              typeof data['txnHash'] !== 'string' ||
-              typeof data['paid'] !== 'boolean'
-            )
+              typeof payment['txnHash'] !== 'string' ||
+              typeof payment['paid'] !== 'boolean'
+            ) {
               return false;
+            }
           }
         }
       }
