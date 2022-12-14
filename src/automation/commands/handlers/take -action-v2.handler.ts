@@ -259,6 +259,7 @@ export class CreateDiscordChannelActionCommandHandler
     private readonly logger: LoggingService,
     private readonly discordService: DiscordService,
     private readonly queryBus: QueryBus,
+    private readonly commonActionService: CommonActionService,
   ) {
     this.logger.setContext(CreateDiscordChannelActionCommandHandler.name);
   }
@@ -271,9 +272,11 @@ export class CreateDiscordChannelActionCommandHandler
       if (!circleId) {
         throw new Error('No circleId provided in automation data');
       }
-      const circle = await this.queryBus.execute(
-        new GetCircleByIdQuery(circleId),
-      );
+      const { circle, collection, user } =
+        await this.commonActionService.getCircleCollectionUsersFromRelevantIds(
+          circleId,
+          relevantIds,
+        );
 
       let channelName;
       if (
@@ -285,19 +288,30 @@ export class CreateDiscordChannelActionCommandHandler
         action.data.channelNameType === 'mapping' &&
         action.data.channelName?.value
       ) {
-        const collection = await this.queryBus.execute(
-          new GetCollectionByFilterQuery({
-            slug: relevantIds.collectionSlug,
-          }),
-        );
         channelName =
           collection.data[relevantIds.dataSlug][action.data.channelName.value];
       }
+      const rolesToAdd = [];
+      if (action.data.rolesToAdd && typeof action.data.rolesToAdd === 'object')
+        for (const [role, give] of Object.entries(action.data.rolesToAdd)) {
+          if (give) rolesToAdd.push(role);
+        }
+
+      const usersToAdd = [];
+      if (action.data.addResponder) {
+        if (user.discordId) {
+          usersToAdd.push(user.discordId);
+        }
+      }
+
       if (channelName)
         await this.discordService.createChannel(
           circle.discordGuildId,
           channelName,
           action.data.channelCategory.value,
+          action.data.isPrivate,
+          rolesToAdd,
+          usersToAdd,
         );
 
       return updatesContainer;
