@@ -173,8 +173,8 @@ export class DataValidationService {
         if (data)
           for (const url of data) {
             if (
-              url &&
-              !String(url)
+              url['value'] &&
+              !String(url['value'])
                 .toLowerCase()
                 .match(/((?:https?:\/\/|www\.)(?:[-a-z0-9]+\.)*[-a-z0-9]+.*)/i)
             )

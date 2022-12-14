@@ -125,7 +125,6 @@ export class CommonTools {
       case 'email':
       case 'singleURL':
         return elem1 !== elem2;
-      case 'multiURL':
       case 'user[]':
         const difference = arrayDiff(elem1, elem2);
         return (
@@ -133,6 +132,7 @@ export class CommonTools {
         );
       case 'singleSelect':
         return elem1.value !== elem2.value;
+      case 'multiURL':
       case 'multiSelect':
         const elem1ValueSet = new Set([...elem1.map((e) => e.value)]);
         const elem2ValueSet = new Set([...elem2.map((e) => e.value)]);
