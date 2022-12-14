@@ -93,6 +93,13 @@ export class AddAutomationCommandHandler
       if (action.type === 'giveDiscordRole') {
         requireDiscordConnection = true;
       }
+      if (
+        action.type === 'createDiscordChannel' &&
+        action.data?.isPrivate &&
+        action.data?.addResponder
+      ) {
+        requireDiscordConnection = true;
+      }
     }
     if (collection.requiredDiscordConnection && !requireDiscordConnection) {
       await this.commandBus.execute(

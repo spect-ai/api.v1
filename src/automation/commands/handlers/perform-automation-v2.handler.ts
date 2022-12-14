@@ -51,7 +51,7 @@ export class PerformAutomationOnCollectionDataUpdateCommandHandler
       const updateContainer = {
         collection: {},
         circle: {},
-        retro: {},
+        user: {},
       };
       console.log({ triggeredAutomations });
       for (const automationId of triggeredAutomations) {

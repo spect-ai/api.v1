@@ -76,7 +76,14 @@ export class DiscordService {
     return null;
   }
 
-  async createChannel(guildId: string, channelName: string, parentId?: string) {
+  async createChannel(
+    guildId: string,
+    channelName: string,
+    parentId?: string,
+    isPrivate?: boolean,
+    rolesToAdd?: string[],
+    usersToAdd?: string[],
+  ) {
     const res = await fetch(
       `${process.env.DISCORD_URI}/api/createChannel?guildId=${guildId}`,
       {
@@ -87,6 +94,9 @@ export class DiscordService {
         body: JSON.stringify({
           channelName,
           parentId,
+          isPrivate,
+          rolesToAdd,
+          usersToAdd,
         }),
       },
     );
