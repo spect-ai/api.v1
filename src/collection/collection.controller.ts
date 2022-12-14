@@ -34,6 +34,7 @@ import {
   AddPropertyCommand,
   CreateCollectionCommand,
   DeleteCollectionCommand,
+  MigrateCollectionCommand,
   RemoveCommentCommand,
   RemovePropertyCommand,
   UpdateCollectionCommand,
@@ -55,7 +56,10 @@ import {
   CollectionPublicResponseDto,
   CollectionResponseDto,
 } from './dto/collection-response.dto';
-import { CreateCollectionDto } from './dto/create-collection-request.dto';
+import {
+  CreateCollectionDto,
+  MigrateCollectionDto,
+} from './dto/create-collection-request.dto';
 import { CreateCollectionResponseDto } from './dto/create-collection-response.dto';
 import { RemoveDataDto } from './dto/remove.data-request.dto';
 import { UpdateCollectionDto } from './dto/update-collection-request.dto';
@@ -118,6 +122,17 @@ export class CollectionController {
   ): Promise<CreateCollectionResponseDto> {
     return await this.commandBus.execute(
       new CreateCollectionCommand(createCollectionDto, req.user.id),
+    );
+  }
+
+  @UseGuards(CreateNewCollectionAuthGuard)
+  @Post('/migrateFromProject')
+  async migrate(
+    @Body() migrateollectionDto: MigrateCollectionDto,
+    @Request() req,
+  ): Promise<CreateCollectionResponseDto> {
+    return await this.commandBus.execute(
+      new MigrateCollectionCommand(migrateollectionDto.projectId, req.user.id),
     );
   }
 

@@ -1,6 +1,7 @@
 export * from './impl/create-collection.command';
 export * from './impl/update-collection.command';
 export * from './impl/delete-collection.command';
+export * from './impl/migrate-collection.command';
 export * from './properties/impl/add-property.command';
 export * from './properties/impl/update-property.command';
 export * from './properties/impl/remove-property.command';
@@ -31,6 +32,7 @@ import {
 import { CreateCollectionCommandHandler } from './handlers/create-collection.handler';
 import { DeleteCollectionCommandHandler } from './handlers/delete-collection.handler';
 import { UpdateCollectionCommandHandler } from './handlers/update-collection.handler';
+import { MigrateCollectionCommandHandler } from './handlers/migrate-collection.handler';
 import { AddPropertyCommandHandler } from './properties/handlers/add-property.handler';
 import { RemovePropertyCommandHandler } from './properties/handlers/remove-property.handler';
 import { UpdatePropertyCommandHandler } from './properties/handlers/update-property.handler';
@@ -38,6 +40,7 @@ import { UpdatePropertyCommandHandler } from './properties/handlers/update-prope
 export const CommandHandlers = [
   CreateCollectionCommandHandler,
   UpdateCollectionCommandHandler,
+  MigrateCollectionCommandHandler,
   AddPropertyCommandHandler,
   UpdatePropertyCommandHandler,
   RemovePropertyCommandHandler,

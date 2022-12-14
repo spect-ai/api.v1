@@ -8,8 +8,6 @@ import { CommonTools } from 'src/common/common.service';
 import { DiscordService } from 'src/common/discord.service';
 import { GuildxyzService } from 'src/common/guildxyz.service';
 import { CredentialsModule } from 'src/credentials/credentials.module';
-import { CredentialsService } from 'src/credentials/credentials.service';
-import { GitcoinPassportService } from 'src/credentials/services/gitcoin-passport.service';
 import { MintKudosService } from 'src/credentials/services/mintkudos.service';
 import { LoggingService } from 'src/logging/logging.service';
 import { MailModule } from 'src/mail/mail.module';

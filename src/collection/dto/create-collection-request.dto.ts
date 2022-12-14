@@ -55,3 +55,13 @@ export class CreateCollectionDto {
   @IsNumber()
   collectionType: 0 | 1;
 }
+
+export class MigrateCollectionDto {
+  /**
+   * The name collection
+   * @example "My Collection"
+   */
+  @IsString()
+  @IsNotEmpty()
+  projectId: string;
+}
