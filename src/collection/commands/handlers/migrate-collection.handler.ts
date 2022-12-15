@@ -20,6 +20,9 @@ import { GetCircleByIdQuery } from 'src/circle/queries/impl';
 import { Project } from 'src/project/model/project.model';
 import { Circle } from 'src/circle/model/circle.model';
 import { Card } from 'src/card/model/card.model';
+import { GetPrivateViewCollectionQuery } from 'src/collection/queries';
+import { CommonTools } from 'src/common/common.service';
+import { CirclesRepository } from 'src/circle/circles.repository';
 
 @CommandHandler(MigrateCollectionCommand)
 export class MigrateCollectionCommandHandler
@@ -27,6 +30,8 @@ export class MigrateCollectionCommandHandler
 {
   constructor(
     private readonly collectionRepository: CollectionRepository,
+    private readonly commonTools: CommonTools,
+    private readonly circlesRepository: CirclesRepository,
     private readonly queryBus: QueryBus,
     private readonly commandBus: CommandBus,
     private readonly eventBus: EventBus,
@@ -42,11 +47,26 @@ export class MigrateCollectionCommandHandler
       const project: Project = await this.queryBus.execute(
         new GetProjectByIdQuery(projectId),
       );
-      console.log({ project: JSON.stringify(project, null, 2) });
       const circle: Circle = await this.queryBus.execute(
         new GetCircleByIdQuery(project.parents[0]),
       );
 
+      console.log({ projectId }, project.parents);
+      const circles = await this.circlesRepository
+        .findAll(
+          {
+            _id: { $in: project.parents },
+          },
+          {
+            projection: {
+              members: 1,
+            },
+          },
+        )
+        .populate('members');
+      let res = this.commonTools.arrayify(circles, 'members');
+      res = this.commonTools.distinctify(res, 'id');
+      const memberDetails = this.commonTools.objectify(res, 'id');
       const statusOptions = project.columnOrder.map((column) => ({
         label: project.columnDetails[column].name,
         value: column,
@@ -106,7 +126,7 @@ export class MigrateCollectionCommandHandler
           isPartOfFormView: false,
           options: circle.labels.map((label) => ({
             label: label,
-            value: uuidv4(),
+            value: label,
           })),
         },
         Priority: {
@@ -116,19 +136,19 @@ export class MigrateCollectionCommandHandler
           options: [
             {
               label: 'Low',
-              value: uuidv4(),
+              value: 'low',
             },
             {
               label: 'Medium',
-              value: uuidv4(),
+              value: 'medium',
             },
             {
               label: 'High',
-              value: uuidv4(),
+              value: 'high',
             },
             {
               label: 'Urgent',
-              value: uuidv4(),
+              value: 'urgent',
             },
           ],
         },
@@ -157,67 +177,94 @@ export class MigrateCollectionCommandHandler
             property: '',
             direction: 'asc',
           },
-          filters: Object.keys(views[viewId].filters).map((key) => {
-            switch (key) {
-              case 'assignee':
-              case 'reviewer':
-              case 'labels':
-                return {
-                  id: uuidv4(),
-                  service: 'collection',
-                  type: 'data',
-                  data: {
-                    field: {
-                      label: key.replace(/^\w/, (c) => c.toUpperCase()),
-                      value: key.replace(/^\w/, (c) => c.toUpperCase()),
-                    },
-                    comparator: {
-                      label: 'includes one of',
-                      value: 'includes one of',
-                    },
-                    value: views[viewId].filters[key].map((user) => ({
-                      label: user,
-                      value: user,
-                    })),
-                  },
-                };
-              default:
-                return undefined;
-            }
-          }),
+          filters: {},
         };
       }
 
-      console.log({ views: JSON.stringify(views, null, 2) });
-
       const data: any = {};
       const projectCards = project.cards as any as Card[];
+
       for (const card of projectCards) {
+        const cardColumn = project.columnOrder
+          .map((column) => {
+            if (
+              project.columnDetails[column].cards.findIndex(
+                (c) => c === card.id,
+              ) !== -1
+            )
+              return column;
+          })
+          .filter((c) => c)[0];
         data[card.id] = {
           Title: card.title,
           Description: card.description,
-          Status: card.status,
+          Status: {
+            label: project.columnDetails[cardColumn].name,
+            value: cardColumn,
+          },
           Start_Date: card.startDate,
           Deadline: card.deadline,
-          Reward: card.reward,
-          Assignee: card.assignee,
-          Reviewer: card.reviewer,
-          Labels: card.labels,
-          Priority: card.priority,
+          Reward: {
+            ...card.reward,
+            chain: {
+              label: card.reward.chain.name,
+              value: card.reward.chain.chainId,
+            },
+            token: {
+              label: card.reward.token.symbol,
+              value: card.reward.token.address,
+            },
+          },
+          Assignee: card.assignee.map((assignee) => {
+            return {
+              label: memberDetails[assignee].username,
+              value: assignee,
+            };
+          }),
+          Reviewer: card.reviewer.map((reviewer) => {
+            return {
+              label: memberDetails[reviewer].username,
+              value: reviewer,
+            };
+          }),
+          Labels: card.labels.map((label) => {
+            return {
+              label: label,
+              value: label,
+            };
+          }),
+          Priority: {
+            label: this.getCardPriorityLabel(card.priority),
+            value: this.getCardPriorityLabel(card.priority).toLowerCase(),
+          },
           slug: card.id,
         };
       }
 
       const dataActivities: any = {};
+      const dataActivityOrder: any = {};
+      const dataOwner: any = {};
 
-      // Object.keys(data).map((cardId) => {
-      //   dataActivities[cardId] = {
-      //     comment: project.cards[cardId].activity
-      //   };
-      // })
+      for (const card of projectCards) {
+        console.log({ activity: JSON.stringify(card) });
+        const activityId = uuidv4();
+        dataActivities[card.id] = {
+          [activityId]: {
+            comment: false,
+            content: 'created new row',
+            ref: {
+              actor: card.activity[0].actorId,
+              type: 'user',
+            },
+            timestamp: card.activity[0].timestamp,
+          },
+        };
+        dataActivityOrder[card.id] = [activityId];
+        dataOwner[card.id] = card.activity[0].actorId;
+      }
 
       const defaultViewId = '0x0';
-      const createdCollection = await this.collectionRepository.create({
+      const newCollection = await this.collectionRepository.create({
         name: project.name,
         description: project.description,
         collectionType: 1,
@@ -228,6 +275,9 @@ export class MigrateCollectionCommandHandler
         parents: [(project.parents[0] as any).id],
         slug: uuidv4(),
         data,
+        dataOwner,
+        dataActivities,
+        dataActivityOrder,
         projectMetadata: {
           viewOrder: [defaultViewId, ...project.viewOrder],
           views: {
@@ -245,7 +295,15 @@ export class MigrateCollectionCommandHandler
           },
           cardOrders: {
             Status: project.columnOrder.map((column) => [
-              ...project.columnDetails[column].cards,
+              ...project.columnDetails[column].cards
+                .map((card) => {
+                  if (project.cards.find((c: any) => c.id === card)) {
+                    return card;
+                  } else {
+                    return undefined;
+                  }
+                })
+                .filter((card) => card !== undefined),
             ]),
           },
         },
@@ -261,22 +319,37 @@ export class MigrateCollectionCommandHandler
         new UpdateCircleCommand(
           circle.id,
           {
-            collections: [...(circle.collections || []), createdCollection.id],
+            collections: [...(circle.collections || []), newCollection.id],
           },
           caller,
         ),
       );
 
-      this.eventBus.publish(
-        new CollectionCreatedEvent(createdCollection, caller),
+      this.eventBus.publish(new CollectionCreatedEvent(newCollection, caller));
+
+      const createdCollection = await this.queryBus.execute(
+        new GetPrivateViewCollectionQuery(newCollection.slug),
       );
 
       return createdCollection;
     } catch (err) {
+      console.log({ err });
       this.logger.error(`Failed creating collection with error ${err.message}`);
       throw new InternalServerErrorException(
         `Failed creating collection with error ${err.message}`,
       );
+    }
+  }
+
+  getCardPriorityLabel(prio: number) {
+    if (prio === 0) {
+      return 'Low';
+    } else if (prio === 1) {
+      return 'Medium';
+    } else if (prio === 2) {
+      return 'High';
+    } else if (prio === 3) {
+      return 'Urgent';
     }
   }
 }

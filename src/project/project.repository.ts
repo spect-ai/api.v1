@@ -50,6 +50,7 @@ const defaultPopulate: PopulatedProjectFields = {
     },
     assignedCircle: 1,
     description: 1,
+    activity: 1,
   },
 };
 
