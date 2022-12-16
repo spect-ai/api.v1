@@ -7,6 +7,7 @@ import {
   InviteToCircleCommand,
   JoinUsingDiscordCommand,
   JoinUsingGuildxyzCommand,
+  JoinMultipleCirclesUsingGuildCommand,
   JoinUsingInvitationCommand,
   JoinWithoutInvitationCommand,
   RemoveFromCircleCommand,
@@ -115,6 +116,24 @@ export class CircleMembershipService {
       );
       throw new InternalServerErrorException(
         'Failed joining circle',
+        error.message,
+      );
+    }
+  }
+
+  async joinMultipleCirclesUsingGuildxyz(id: string): Promise<boolean> {
+    try {
+      await this.commandBus.execute(
+        new JoinMultipleCirclesUsingGuildCommand(id, this.requestProvider.user),
+      );
+      return true;
+    } catch (error) {
+      this.logger.logError(
+        `Failed joining Multiple circles using guild with error: ${error.message}`,
+        this.requestProvider,
+      );
+      throw new InternalServerErrorException(
+        'Failed joining Multiple circle',
         error.message,
       );
     }

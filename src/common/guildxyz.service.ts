@@ -41,4 +41,20 @@ export class GuildxyzService {
 
     throw new InternalServerErrorException();
   }
+
+  async getGuildMemberships(ethAddress: string) {
+    try {
+      const res = await fetch(
+        `https://api.guild.xyz/v1/user/membership/${ethAddress}`,
+      );
+      if (res.ok) {
+        const data = await res.json();
+        return data;
+      }
+    } catch (e) {
+      console.log({ e });
+    }
+
+    throw new InternalServerErrorException();
+  }
 }

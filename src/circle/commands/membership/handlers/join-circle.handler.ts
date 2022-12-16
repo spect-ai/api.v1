@@ -11,6 +11,7 @@ import {
   JoinAsWhitelistedAddressCommand,
   JoinUsingDiscordCommand,
   JoinUsingGuildxyzCommand,
+  JoinMultipleCirclesUsingGuildCommand,
   JoinUsingInvitationCommand,
   JoinWithoutInvitationCommand,
 } from 'src/circle/commands/impl';
@@ -18,6 +19,8 @@ import { DetailedCircleResponseDto } from 'src/circle/dto/detailed-circle-respon
 import { JoinedCircleEvent } from 'src/circle/events/impl';
 import { LoggingService } from 'src/logging/logging.service';
 import { RolesService } from 'src/roles/roles.service';
+import { GuildxyzService } from 'src/common/guildxyz.service';
+import { Circle } from 'src/circle/model/circle.model';
 
 @CommandHandler(JoinUsingInvitationCommand)
 export class JoinUsingInvitationCommandHandler
@@ -174,6 +177,76 @@ export class JoinUsingGuildxyzCommandHandler
         new JoinedCircleEvent(caller.id, id, updatedCircle),
       );
       return updatedCircle;
+    } catch (error) {
+      throw new InternalServerErrorException(error);
+    }
+  }
+}
+
+@CommandHandler(JoinMultipleCirclesUsingGuildCommand)
+export class JoinMultipleCirclesUsingGuildCommandHandler
+  implements ICommandHandler<JoinMultipleCirclesUsingGuildCommand>
+{
+  constructor(
+    private readonly circlesRepository: CirclesRepository,
+    private readonly eventBus: EventBus,
+    private readonly guildService: GuildxyzService,
+    private readonly validationService: CircleValidationService,
+    private readonly roleService: RolesService,
+  ) {}
+
+  async execute(command: JoinMultipleCirclesUsingGuildCommand): Promise<void> {
+    try {
+      const { ethAddress, caller } = command;
+      const memberships = await this.guildService.getGuildMemberships(
+        ethAddress,
+      );
+      const guildIds = memberships.map((guild) => guild.guildId);
+      const circles: Circle[] = await this.circlesRepository.findAll({
+        guildxyzId: { $in: guildIds },
+      });
+
+      if (circles?.length == 0) return;
+
+      for (const i in circles) {
+        const id = circles?.[i]?.id;
+        const circle =
+          await this.circlesRepository.getCircleWithUnpopulatedReferences(id);
+
+        if (
+          circle.guildxyzId &&
+          circle.guildxyzToCircleRoles &&
+          !circle.private
+        ) {
+          this.validationService.validateNewMember(circle, caller.id);
+
+          const role = await this.roleService.getSpectRoleFromGuildxyz(
+            caller,
+            circle,
+          );
+          if (!role || role.length === 0) {
+            throw new HttpException(
+              'Role required to join circle not found',
+              HttpStatus.NOT_FOUND,
+            );
+          }
+          const updatedCircle =
+            await this.circlesRepository.updateCircleAndReturnWithPopulatedReferences(
+              id,
+              {
+                members: [...circle.members, caller.id],
+                memberRoles: {
+                  ...circle.memberRoles,
+                  [caller.id]: role,
+                },
+              },
+            );
+
+          this.eventBus.publish(
+            new JoinedCircleEvent(caller.id, id, updatedCircle),
+          );
+        }
+      }
     } catch (error) {
       throw new InternalServerErrorException(error);
     }

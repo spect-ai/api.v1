@@ -203,6 +203,16 @@ export class CircleV1Controller {
   }
 
   @UseGuards(SessionAuthGuard)
+  @Patch('/:id/joinMultipleCirclesUsingGuildxyz')
+  async joinMultipleCirclesUsingGuildxyz(
+    @Param() param: { id: string },
+  ): Promise<boolean> {
+    return await this.circleMembershipService.joinMultipleCirclesUsingGuildxyz(
+      param.id,
+    );
+  }
+
+  @UseGuards(SessionAuthGuard)
   @Patch('/:id/join')
   async join(@Param() param: ObjectIdDto): Promise<CircleResponseDto> {
     return await this.circleMembershipService.join(param.id);
