@@ -55,15 +55,20 @@ export class MintKudosService {
 
   private async getEncodedString(id: string): Promise<string> {
     const privateProps = await this.getPrivateProps(id);
-    if (!privateProps) {
-      const stringToEncode =
+    let stringToEncode;
+    if (
+      !privateProps ||
+      !privateProps.mintkudosApiKey ||
+      !privateProps.mintkudosCommunityId
+    ) {
+      stringToEncode =
         process.env.MINTKUDOS_DEFAULT_COMMUNITY_ID +
         ':' +
         process.env.MINTKUDOS_DEFAULT_API_KEY;
       return Buffer.from(stringToEncode).toString('base64');
-    }
-    const stringToEncode =
-      privateProps.mintkudosCommunityId + ':' + privateProps.mintkudosApiKey;
+    } else
+      stringToEncode =
+        privateProps.mintkudosCommunityId + ':' + privateProps.mintkudosApiKey;
     return Buffer.from(stringToEncode).toString('base64');
   }
 
@@ -214,12 +219,13 @@ export class MintKudosService {
     }
 
     const nftTypeId = uuidv4();
-
+    const ext = asset.originalname.split('.').pop();
     const formData = new FormData();
     formData.append('assetFile', Readable.from(asset.buffer), {
       filename: asset.originalname,
     });
-    formData.append('name', asset.originalname);
+    formData.append('name', `${uuidv4()}.${ext}`);
+    formData.append('alias', `${asset.originalname}`);
     formData.append('nftTypeId', nftTypeId);
     const res = await (
       await fetch(
