@@ -21,6 +21,7 @@ import {
   AutomationType,
   RootAutomationsType,
   AutomationsIndexedByCollectionSlugType,
+  PaymentDetails,
 } from '../types';
 
 export type Invite = {
@@ -284,6 +285,18 @@ export class Circle extends ProfileModel {
 
   @prop({ default: [] })
   nftTypeIds?: string[];
+
+  @prop({ default: [] })
+  pendingPayments?: string[];
+
+  @prop({ default: [] })
+  completedPayments?: string[];
+
+  @prop({ default: [] })
+  cancelledPayments?: string[];
+
+  @prop({ default: {} })
+  paymentDetails?: { [key: string]: PaymentDetails };
 }
 
 export class ExtendedCircle extends Circle {
