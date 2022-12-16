@@ -48,6 +48,13 @@ export class UpdateUserDto extends PartialType(User) {
   discordId?: string;
 
   /**
+   * Discord username associated with the profile
+   */
+  @IsString()
+  @IsOptional()
+  discordUsername?: string;
+
+  /**
    * Github Id associated with the profile
    */
   @IsString()
