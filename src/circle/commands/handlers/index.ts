@@ -4,7 +4,6 @@ import {
   JoinAsWhitelistedAddressCommandHandler,
   JoinUsingDiscordCommandHandler,
   JoinUsingGuildxyzCommandHandler,
-  JoinMultipleCirclesUsingGuildCommandHandler,
   JoinUsingInvitationCommandHandler,
   JoinWithoutInvitationCommandHandler,
 } from '../membership/handlers/join-circle.handler';
@@ -50,7 +49,6 @@ export const CommandHandlers = [
   JoinUsingInvitationCommandHandler,
   JoinUsingDiscordCommandHandler,
   JoinUsingGuildxyzCommandHandler,
-  JoinMultipleCirclesUsingGuildCommandHandler,
   InviteToCircleCommandHandler,
   RemoveFromCircleCommandHandler,
   CreateCircleCommandHandler,

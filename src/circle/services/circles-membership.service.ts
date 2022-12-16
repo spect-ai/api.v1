@@ -1,24 +1,25 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { CommandBus, EventBus } from '@nestjs/cqrs';
+import { GuildxyzService } from 'src/common/guildxyz.service';
 import { LoggingService } from 'src/logging/logging.service';
+import { RolesService } from 'src/roles/roles.service';
 import { RequestProvider } from 'src/users/user.provider';
 import { CirclesRepository } from '../circles.repository';
 import {
   InviteToCircleCommand,
   JoinUsingDiscordCommand,
   JoinUsingGuildxyzCommand,
-  JoinMultipleCirclesUsingGuildCommand,
   JoinUsingInvitationCommand,
   JoinWithoutInvitationCommand,
   RemoveFromCircleCommand,
   UpdateMemberRolesCommand,
 } from '../commands/impl';
-import {
-  DetailedCircleResponseDto,
-  CircleResponseDto,
-} from '../dto/detailed-circle-response.dto';
+import { CircleResponseDto } from '../dto/detailed-circle-response.dto';
 import { InviteDto } from '../dto/invite.dto';
-import { JoinCircleUsingInvitationRequestDto } from '../dto/join-circle.dto';
+import {
+  JoinCircleUsingInvitationRequestDto,
+  JoinMultipleCirclesUsingDiscordDto,
+} from '../dto/join-circle.dto';
 import { UpdateMemberRolesDto } from '../dto/update-member-role.dto';
 
 @Injectable()
@@ -27,6 +28,8 @@ export class CircleMembershipService {
     private readonly requestProvider: RequestProvider,
     private readonly circlesRepository: CirclesRepository,
     private readonly commandBus: CommandBus,
+    private readonly roleService: RolesService,
+    private readonly guildService: GuildxyzService,
     private readonly logger: LoggingService,
     private readonly eventBus: EventBus,
   ) {
@@ -121,19 +124,68 @@ export class CircleMembershipService {
     }
   }
 
-  async joinMultipleCirclesUsingGuildxyz(id: string): Promise<boolean> {
+  async joinMultipleCirclesUsingGuildxyz(id: string): Promise<void> {
     try {
-      await this.commandBus.execute(
-        new JoinMultipleCirclesUsingGuildCommand(id, this.requestProvider.user),
-      );
-      return true;
+      const memberships = await this.guildService.getGuildMemberships(id);
+      const guildIds = memberships.map((guild) => guild.guildId);
+      if (guildIds?.length == 0) return;
+      const guildCircles = await this.circlesRepository.findAll({
+        $and: [
+          { guildxyzId: { $in: guildIds } },
+          { members: { $nin: this.requestProvider.user.id } },
+          { guildxyzToCircleRoles: { $exists: true } },
+          { private: false },
+        ],
+      });
+
+      if (guildCircles?.length == 0) return;
+      for (const i in guildCircles) {
+        const id = guildCircles?.[i]?.id;
+        await this.commandBus.execute(
+          new JoinUsingGuildxyzCommand(id, this.requestProvider.user),
+        );
+      }
     } catch (error) {
       this.logger.logError(
         `Failed joining Multiple circles using guild with error: ${error.message}`,
         this.requestProvider,
       );
       throw new InternalServerErrorException(
-        'Failed joining Multiple circle',
+        'Failed joining Multiple circle using Guild',
+        error.message,
+      );
+    }
+  }
+
+  async joinMultipleCirclesUsingDiscord(
+    joinDto: JoinMultipleCirclesUsingDiscordDto,
+  ): Promise<void> {
+    try {
+      const guildIds = joinDto.guildData.map((guild) => guild.id);
+      if (guildIds?.length == 0) return;
+      const guildCircles = await this.circlesRepository.findAll({
+        $and: [
+          { discordGuildId: { $in: guildIds } },
+          { members: { $nin: this.requestProvider.user?.id } },
+          { discordToCircleRoles: { $exists: true } },
+          { private: false },
+        ],
+      });
+
+      if (guildCircles?.length == 0) return;
+      for (const i in guildCircles) {
+        const id = guildCircles?.[i]?.id;
+        await this.commandBus.execute(
+          new JoinUsingDiscordCommand(id, this.requestProvider.user),
+        );
+      }
+    } catch (error) {
+      this.logger.logError(
+        `Failed joining Multiple circles using Discord with error: ${error.message}`,
+        this.requestProvider,
+      );
+      throw new InternalServerErrorException(
+        'Failed joining Multiple circles using Discord',
         error.message,
       );
     }

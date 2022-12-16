@@ -11,7 +11,7 @@ export class DiscordService {
     console.log({ discordId, guildId });
     try {
       const res = await fetch(
-        `process.env.DISCORD_URI/api/userRoles?userId=${discordId}&guildId=${guildId}`,
+        `${process.env.DISCORD_URI}/api/userRoles?userId=${discordId}&guildId=${guildId}`,
       );
       if (res.ok) {
         const json = await res.json();
@@ -31,7 +31,7 @@ export class DiscordService {
     url: string,
   ) {
     const res = await fetch(
-      `process.env.DISCORD_URI/api/postNotificationOnNewCircle?guildId=${guildId}`,
+      `${process.env.DISCORD_URI}/api/postNotificationOnNewCircle?guildId=${guildId}`,
       {
         headers: {
           'Content-Type': 'application/json',

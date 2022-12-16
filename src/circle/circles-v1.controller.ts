@@ -43,7 +43,10 @@ import {
   CircleResponseDto,
 } from './dto/detailed-circle-response.dto';
 import { InviteDto } from './dto/invite.dto';
-import { JoinCircleUsingInvitationRequestDto } from './dto/join-circle.dto';
+import {
+  JoinCircleUsingInvitationRequestDto,
+  JoinMultipleCirclesUsingDiscordDto,
+} from './dto/join-circle.dto';
 import { MemberDto } from './dto/params.dto';
 import { AddRoleDto, UpdateRoleDto } from './dto/roles-requests.dto';
 import { SafeAddress } from './dto/safe-request.dto';
@@ -206,9 +209,20 @@ export class CircleV1Controller {
   @Patch('/:id/joinMultipleCirclesUsingGuildxyz')
   async joinMultipleCirclesUsingGuildxyz(
     @Param() param: { id: string },
-  ): Promise<boolean> {
+  ): Promise<void> {
     return await this.circleMembershipService.joinMultipleCirclesUsingGuildxyz(
       param.id,
+    );
+  }
+
+  @UseGuards(SessionAuthGuard)
+  @Patch('/:id/joinMultipleCirclesUsingDiscord')
+  async joinMultipleCirclesUsingDiscord(
+    @Param() param: { id: string },
+    @Body() joinDto: JoinMultipleCirclesUsingDiscordDto,
+  ): Promise<void> {
+    return await this.circleMembershipService.joinMultipleCirclesUsingDiscord(
+      joinDto,
     );
   }
 

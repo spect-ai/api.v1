@@ -17,13 +17,6 @@ export class JoinUsingGuildxyzCommand {
   constructor(public readonly id: string, public readonly caller: User) {}
 }
 
-export class JoinMultipleCirclesUsingGuildCommand {
-  constructor(
-    public readonly ethAddress: string,
-    public readonly caller: User,
-  ) {}
-}
-
 export class JoinAsWhitelistedAddressCommand {
   constructor(public readonly id: string, public readonly caller: User) {}
 }
