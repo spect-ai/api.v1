@@ -1,20 +1,35 @@
-import { IsNotEmpty, IsObject, IsOptional, IsString } from 'class-validator';
+import {
+  IsArray,
+  IsNotEmpty,
+  IsObject,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 
-export class AddPaymentsDto {
+export class AddPaymentsRequestDto {
   @IsString()
   @IsNotEmpty()
   collectionId: string;
 
-  @IsObject()
-  @IsOptional()
-  dataSlugsToPaymentObj: {
-    [key: string]: {
-      rewardProperty: string[];
-      payToProperty: string[];
-      distributionStrategy: 'distributeEvenly' | 'distributeToFirstPerson';
-    };
-  };
+  @IsArray()
+  dataSlugs: string[];
 }
+
+// export class AddPaymentsDto {
+//   @IsString()
+//   @IsNotEmpty()
+//   collectionId: string;
+
+//   @IsObject()
+//   @IsOptional()
+//   dataSlugsToPaymentObj: {
+//     [key: string]: {
+//       rewardProperty: string[];
+//       payToProperty: string[];
+//       distributionStrategy: 'distributeEvenly' | 'distributeToFirstPerson';
+//     };
+//   };
+// }
 
 export class CancelPaymentsDto {
   @IsString()
