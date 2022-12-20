@@ -34,6 +34,7 @@ const defaultPopulate: PopulatedCircleFields = {
     name: 1,
     slug: 1,
     description: 1,
+    archived: 1,
   },
   retro: {
     title: 1,

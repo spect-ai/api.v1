@@ -14,7 +14,6 @@ import { UpdateCircleCommand } from 'src/circle/commands/impl/update-circle.comm
 import { LoggingService } from 'src/logging/logging.service';
 import { InternalServerErrorException } from '@nestjs/common';
 import { CollectionCreatedEvent } from 'src/collection/events';
-import { MigrateCollectionCommand } from '../impl/migrate-collection.command';
 import { GetProjectByIdQuery } from 'src/project/queries/impl';
 import { GetCircleByIdQuery } from 'src/circle/queries/impl';
 import { Project } from 'src/project/model/project.model';
@@ -23,10 +22,14 @@ import { Card } from 'src/card/model/card.model';
 import { GetPrivateViewCollectionQuery } from 'src/collection/queries';
 import { CommonTools } from 'src/common/common.service';
 import { CirclesRepository } from 'src/circle/circles.repository';
+import {
+  MigrateAllCollectionsCommand,
+  MigrateProjectCommand,
+} from '../impl/migrate-collection.command';
 
-@CommandHandler(MigrateCollectionCommand)
+@CommandHandler(MigrateProjectCommand)
 export class MigrateCollectionCommandHandler
-  implements ICommandHandler<MigrateCollectionCommand>
+  implements ICommandHandler<MigrateProjectCommand>
 {
   constructor(
     private readonly collectionRepository: CollectionRepository,
@@ -40,7 +43,7 @@ export class MigrateCollectionCommandHandler
     this.logger.setContext('CreateCollectionCommandHandler');
   }
 
-  async execute(command: MigrateCollectionCommand): Promise<Collection> {
+  async execute(command: MigrateProjectCommand): Promise<Collection> {
     try {
       const { projectId, caller } = command;
 
@@ -351,5 +354,56 @@ export class MigrateCollectionCommandHandler
     } else if (prio === 3) {
       return 'Urgent';
     }
+  }
+}
+
+@CommandHandler(MigrateAllCollectionsCommand)
+export class MigrateAllCollectionsCommandHandler
+  implements ICommandHandler<MigrateAllCollectionsCommand>
+{
+  constructor(
+    private readonly collectionRepository: CollectionRepository,
+    private readonly queryBus: QueryBus,
+    private readonly commonTools: CommonTools,
+  ) {}
+
+  async execute(command: MigrateAllCollectionsCommand) {
+    // get all collections and move all formMetadata properties to formMetadata
+    const formMetadataProperties = [
+      'privateResponses',
+      'formRoleGating',
+      'mintkudosTokenId',
+      'mintkudosClaimedBy',
+      'messageOnSubmission',
+      'multipleResponsesAllowed',
+      'updatingResponseAllowed',
+      'sendConfirmationEmail',
+      'logo',
+      'cover',
+      'sybilProtectionEnabled',
+      'sybilProtectionScores',
+      'numOfKudos',
+      'credentialCurationEnabled',
+      'isAnOpportunity',
+      'opportunityInfo',
+      'active',
+    ];
+
+    const allCollections = await this.collectionRepository.findAll();
+
+    for (const collection of allCollections) {
+      if (!collection.formMetadata && !collection.collectionType) {
+        collection.formMetadata = {};
+        for (const property of formMetadataProperties) {
+          collection.formMetadata[property] = collection[property];
+          delete collection[property];
+        }
+        console.log({ collection });
+        collection.collectionType = 0;
+        await this.collectionRepository.updateById(collection.id, collection);
+      }
+    }
+
+    return true;
   }
 }

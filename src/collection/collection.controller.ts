@@ -19,6 +19,7 @@ import {
   ViewCollectionAuthGuard,
 } from 'src/auth/collection.guard';
 import {
+  AdminAuthGuard,
   PublicViewAuthGuard,
   SessionAuthGuard,
 } from 'src/auth/iron-session.guard';
@@ -34,7 +35,8 @@ import {
   AddPropertyCommand,
   CreateCollectionCommand,
   DeleteCollectionCommand,
-  MigrateCollectionCommand,
+  MigrateAllCollectionsCommand,
+  MigrateProjectCommand,
   RemoveCommentCommand,
   RemovePropertyCommand,
   UpdateCollectionCommand,
@@ -127,12 +129,22 @@ export class CollectionController {
 
   @UseGuards(CreateNewCollectionAuthGuard)
   @Post('/migrateFromProject')
-  async migrate(
+  async migrateProject(
     @Body() migrateollectionDto: MigrateCollectionDto,
     @Request() req,
   ): Promise<CreateCollectionResponseDto> {
     return await this.commandBus.execute(
-      new MigrateCollectionCommand(migrateollectionDto.projectId, req.user.id),
+      new MigrateProjectCommand(migrateollectionDto.projectId, req.user.id),
+    );
+  }
+
+  @UseGuards(AdminAuthGuard)
+  @Patch('/migrateAllCollections')
+  async migrateCollection(
+    @Request() req,
+  ): Promise<CreateCollectionResponseDto> {
+    return await this.commandBus.execute(
+      new MigrateAllCollectionsCommand(req.user.id),
     );
   }
 

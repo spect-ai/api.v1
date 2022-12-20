@@ -139,6 +139,9 @@ export class Collection extends BaseModel {
 
   @prop({ default: {} })
   projectMetadata: ProjectMetadata;
+
+  @prop({ default: false })
+  archived?: boolean;
 }
 
 export interface FormMetadata {

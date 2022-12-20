@@ -95,6 +95,10 @@ export class UpdateCollectionDto {
   @IsObject()
   @IsOptional()
   archivedData: MappedItem<object>;
+
+  @IsBoolean()
+  @IsOptional()
+  archived: boolean;
 }
 
 interface FormMetadata {
