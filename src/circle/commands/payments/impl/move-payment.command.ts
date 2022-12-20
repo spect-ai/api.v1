@@ -1,4 +1,4 @@
-import { CancelPaymentsDto, MakePaymentsDto } from 'src/circle/dto/payment.dto';
+import { CancelPaymentsDto, MovePaymentsDto } from 'src/circle/dto/payment.dto';
 
 export class CancelPaymentsCommand {
   constructor(
@@ -7,9 +7,9 @@ export class CancelPaymentsCommand {
   ) {}
 }
 
-export class MakePaymentsCommand {
+export class MovePaymentsCommand {
   constructor(
     public readonly circleId: string,
-    public readonly cancelPaymentsDto: MakePaymentsDto,
+    public readonly movePaymentsDto: MovePaymentsDto,
   ) {}
 }

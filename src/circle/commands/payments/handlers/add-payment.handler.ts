@@ -76,21 +76,57 @@ export class AddPaymentsCommandHandler
           continue;
         const paymentId = uuidv4();
         const paidTo = [];
+        let paidToValue;
         if (collection.properties[rewardPaidTo[0]].type === 'user[]') {
           for (const user of collection.data[dataSlug][rewardPaidTo[0]]) {
             paidTo.push({
               propertyType: 'user',
-              value: user,
+              value: user.value,
+              reward:
+                paidTo.length === 0
+                  ? {
+                      chain:
+                        collection.data[dataSlug][rewardFieldToPayOn[0]].chain,
+                      token:
+                        collection.data[dataSlug][rewardFieldToPayOn[0]].token,
+                      value:
+                        collection.data[dataSlug][rewardFieldToPayOn[0]].value,
+                    }
+                  : {
+                      chain: null,
+                      token: null,
+                      value: 0,
+                    },
             });
           }
         } else {
           paidTo.push({
             propertyType: collection.properties[rewardPaidTo[0]].type,
-            value: collection.data[dataSlug][rewardPaidTo[0]],
+            value:
+              collection.properties[rewardPaidTo[0]].type === 'user'
+                ? collection.data[dataSlug][rewardPaidTo[0]]?.value
+                : collection.data[dataSlug][rewardPaidTo[0]],
+            reward:
+              paidTo.length === 0
+                ? {
+                    chain:
+                      collection.data[dataSlug][rewardFieldToPayOn[0]].chain,
+                    token:
+                      collection.data[dataSlug][rewardFieldToPayOn[0]].token,
+                    value:
+                      collection.data[dataSlug][rewardFieldToPayOn[0]].value,
+                  }
+                : {
+                    chain: null,
+                    token: null,
+                    value: 0,
+                  },
           });
         }
+
         newPaymentDetails[paymentId] = {
           id: paymentId,
+          title: collection.data[dataSlug]['Title'],
           type: 'addedFromCard',
           dataSlug,
           collectionId: addPaymentsDto.collectionId,

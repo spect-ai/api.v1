@@ -15,22 +15,6 @@ export class AddPaymentsRequestDto {
   dataSlugs: string[];
 }
 
-// export class AddPaymentsDto {
-//   @IsString()
-//   @IsNotEmpty()
-//   collectionId: string;
-
-//   @IsObject()
-//   @IsOptional()
-//   dataSlugsToPaymentObj: {
-//     [key: string]: {
-//       rewardProperty: string[];
-//       payToProperty: string[];
-//       distributionStrategy: 'distributeEvenly' | 'distributeToFirstPerson';
-//     };
-//   };
-// }
-
 export class CancelPaymentsDto {
   @IsString()
   @IsNotEmpty()
@@ -45,12 +29,22 @@ export class CancelPaymentsDto {
   cancellationReason: string;
 }
 
-export class MakePaymentsDto {
-  @IsString()
+export class MovePaymentsDto {
+  @IsArray()
   @IsNotEmpty()
-  collectionId: string;
+  paymentIds: string[];
 
   @IsString()
-  @IsOptional()
-  dataSlugs: string;
+  @IsNotEmpty()
+  from: string;
+
+  @IsString()
+  @IsNotEmpty()
+  to: string;
+}
+
+export class MakePaymentsRequestDto {
+  @IsArray()
+  @IsNotEmpty()
+  paymentIds: string[];
 }
