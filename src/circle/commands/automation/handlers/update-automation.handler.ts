@@ -2,7 +2,6 @@ import { InternalServerErrorException } from '@nestjs/common';
 import {
   CommandBus,
   CommandHandler,
-  EventBus,
   ICommandHandler,
   QueryBus,
 } from '@nestjs/cqrs';
@@ -10,7 +9,6 @@ import { CirclesRepository } from 'src/circle/circles.repository';
 import { UpdateAutomationDto } from 'src/circle/dto/automation.dto';
 import { CircleResponseDto } from 'src/circle/dto/detailed-circle-response.dto';
 import { UpdateCollectionCommand } from 'src/collection/commands';
-import { UpdateCollectionDto } from 'src/collection/dto/update-collection-request.dto';
 import { GetCollectionBySlugQuery } from 'src/collection/queries';
 import { LoggingService } from 'src/logging/logging.service';
 import { UpdateAutomationCommand } from '../impl';
@@ -82,8 +80,11 @@ export class UpdateAutomationCommandHandler
       await this.commandBus.execute(
         new UpdateCollectionCommand(
           {
-            requireDiscordConnection: false,
-          } as UpdateCollectionDto,
+            formMetadata: {
+              ...collection.formMetadata,
+              discordConnectionRequired: false,
+            },
+          },
           null,
           collection._id.toString(),
         ),
@@ -95,8 +96,11 @@ export class UpdateAutomationCommandHandler
       await this.commandBus.execute(
         new UpdateCollectionCommand(
           {
-            requireDiscordConnection: true,
-          } as UpdateCollectionDto,
+            formMetadata: {
+              ...collection.formMetadata,
+              discordConnectionRequired: true,
+            },
+          },
           null,
           collection._id.toString(),
         ),

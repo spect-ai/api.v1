@@ -1,10 +1,7 @@
 import { InternalServerErrorException } from '@nestjs/common';
 import { IQueryHandler, QueryBus, QueryHandler } from '@nestjs/cqrs';
 import { CollectionRepository } from 'src/collection/collection.repository';
-import {
-  CollectionPublicResponseDto,
-  CollectionResponseDto,
-} from 'src/collection/dto/collection-response.dto';
+import { CollectionPublicResponseDto } from 'src/collection/dto/collection-response.dto';
 import { Collection } from 'src/collection/model/collection.model';
 import { AdvancedAccessService } from 'src/collection/services/advanced-access.service';
 import { CommonTools } from 'src/common/common.service';
@@ -184,7 +181,8 @@ export class GetPublicViewCollectionQueryHandler
         !caller;
 
       const formRequiresDiscordButUserIsntConnected =
-        collectionToGet.requireDiscordConnection && !caller?.discordId;
+        collectionToGet.formMetadata.requireDiscordConnection &&
+        !caller?.discordId;
 
       const canFillForm =
         hasRole &&

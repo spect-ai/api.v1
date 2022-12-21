@@ -105,8 +105,11 @@ export class AddAutomationCommandHandler
       await this.commandBus.execute(
         new UpdateCollectionCommand(
           {
-            requireDiscordConnection: false,
-          } as UpdateCollectionDto,
+            formMetadata: {
+              ...collection.formMetadata,
+              discordConnectionRequired: false,
+            },
+          },
           null,
           collection._id.toString(),
         ),
@@ -118,8 +121,11 @@ export class AddAutomationCommandHandler
       await this.commandBus.execute(
         new UpdateCollectionCommand(
           {
-            requireDiscordConnection: true,
-          } as UpdateCollectionDto,
+            formMetadata: {
+              ...collection.formMetadata,
+              discordConnectionRequired: true,
+            },
+          },
           null,
           collection._id.toString(),
         ),
