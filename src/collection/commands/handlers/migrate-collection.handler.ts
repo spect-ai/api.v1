@@ -26,6 +26,7 @@ import {
   MigrateAllCollectionsCommand,
   MigrateProjectCommand,
 } from '../impl/migrate-collection.command';
+import { UpdateFolderCommand } from 'src/circle/commands/impl';
 
 @CommandHandler(MigrateProjectCommand)
 export class MigrateCollectionCommandHandler
@@ -326,6 +327,20 @@ export class MigrateCollectionCommandHandler
           },
           caller,
         ),
+      );
+
+      // find the folder id of the project
+      const folderId = circle.folderOrder.find((folder) =>
+        circle.folderDetails[folder].contentIds.includes(project.id),
+      );
+
+      await this.commandBus.execute(
+        new UpdateFolderCommand(circle.id, folderId, {
+          contentIds: [
+            ...circle.folderDetails[folderId].contentIds,
+            newCollection.id,
+          ],
+        }),
       );
 
       this.eventBus.publish(new CollectionCreatedEvent(newCollection, caller));
