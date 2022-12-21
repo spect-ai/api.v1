@@ -1,6 +1,7 @@
 import { InternalServerErrorException } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { CirclesRepository } from 'src/circle/circles.repository';
+import { CircleResponseDto } from 'src/circle/dto/detailed-circle-response.dto';
 import { Circle } from 'src/circle/model/circle.model';
 import { LoggingService } from 'src/logging/logging.service';
 import { MoveItemCommand } from 'src/users/commands/impl';
@@ -17,7 +18,7 @@ export class MovePaymentsCommandHandler
     this.logger.setContext('MovePaymentsCommandHandler');
   }
 
-  async execute(command: MovePaymentsCommand): Promise<Circle> {
+  async execute(command: MovePaymentsCommand): Promise<CircleResponseDto> {
     try {
       console.log('MakePaymentsCommandHandler');
       const { movePaymentsDto, circleId } = command;
@@ -68,7 +69,9 @@ export class MovePaymentsCommandHandler
         circleId,
         updates,
       );
-      return updatedCircle;
+      return await this.circleRepository.getCircleWithMinimalDetails(
+        updatedCircle,
+      );
     } catch (error) {
       this.logger.error(
         `Failed move item with error: ${error.message}`,
