@@ -1,6 +1,5 @@
 import { InternalServerErrorException } from '@nestjs/common';
 import {
-  CommandBus,
   CommandHandler,
   EventBus,
   ICommandHandler,
@@ -19,13 +18,11 @@ import { Collection } from 'src/collection/model/collection.model';
 import { MappedItem } from 'src/common/interfaces';
 import { Activity } from 'src/collection/types/types';
 import { AdvancedAccessService } from 'src/collection/services/advanced-access.service';
-import { GetPublicViewCollectionQuery } from 'src/collection/queries';
 import {
-  GetProfileQuery,
-  GetUserByFilterQuery,
-  GetUserByIdQuery,
-  GetUserByUsernameQuery,
-} from 'src/users/queries/impl';
+  GetPrivateViewCollectionQuery,
+  GetPublicViewCollectionQuery,
+} from 'src/collection/queries';
+import { GetProfileQuery } from 'src/users/queries/impl';
 import { HasSatisfiedDataConditionsQuery } from 'src/automation/queries/impl';
 
 @CommandHandler(AddDataCommand)
@@ -46,34 +43,39 @@ export class AddDataCommandHandler implements ICommandHandler<AddDataCommand> {
     try {
       const collection = await this.collectionRepository.findById(collectionId);
       if (!collection) throw 'Collection does not exist';
-      // Required to maitain backward compatibility
-      if (collection.active === false) throw 'Collection is inactive';
-      if (
-        !collection.multipleResponsesAllowed &&
-        collection.dataOwner &&
-        Object.values(collection.dataOwner)?.includes(caller?.id)
-      ) {
-        throw 'User has already submitted a response';
-      }
-      const hasRole = await this.advancedAccessService.hasRoleToAccessForm(
-        collection,
-        caller,
-      );
-      if (!hasRole)
-        throw 'User does not have access to add data this collection';
-
-      const hasPassedSybilCheck =
-        await this.advancedAccessService.hasPassedSybilProtection(
+      if (collection.collectionType === 0) {
+        if (collection.formMetadata.active === false)
+          throw 'Collection is inactive';
+        if (
+          !collection.formMetadata.multipleResponsesAllowed &&
+          collection.dataOwner &&
+          Object.values(collection.dataOwner)?.includes(caller?.id)
+        ) {
+          throw 'User has already submitted a response';
+        }
+        const hasPassedSybilCheck =
+          await this.advancedAccessService.hasPassedSybilProtection(
+            collection,
+            caller,
+          );
+        if (!hasPassedSybilCheck) throw 'User has not passed sybil check';
+        const hasRole = await this.advancedAccessService.hasRoleToAccessForm(
           collection,
           caller,
         );
-      if (!hasPassedSybilCheck) throw 'User has not passed sybil check';
+        if (!hasPassedSybilCheck) throw 'User has not passed sybil check';
+
+        if (!hasRole)
+          throw 'User does not have access to add data this collection';
+      }
+
       let filteredData =
         await this.filterValuesWherePropertyDoesntSatisfyCondition(
           collection,
           data,
         );
       filteredData = await this.filterUndefinedValues(filteredData);
+
       const validData = await this.validationService.validate(
         filteredData,
         'add',
@@ -99,6 +101,18 @@ export class AddDataCommandHandler implements ICommandHandler<AddDataCommand> {
         filteredData,
         caller?.id,
       );
+      const cardOrders = collection.projectMetadata?.cardOrders || {};
+      if (Object.keys(cardOrders).length) {
+        Object.keys(cardOrders).forEach((groupByColumn) => {
+          const columnIndex = collection.properties[
+            groupByColumn
+          ].options.findIndex(
+            (option) => option.value === data[groupByColumn]?.value,
+          );
+          cardOrders[groupByColumn][columnIndex + 1].push(data['slug']);
+        });
+      }
+
       const updatedCollection = await this.collectionRepository.updateById(
         collectionId,
         {
@@ -112,22 +126,32 @@ export class AddDataCommandHandler implements ICommandHandler<AddDataCommand> {
             ...(collection.dataOwner || {}),
             [filteredData['slug']]: caller?.id,
           },
+          projectMetadata: {
+            ...collection.projectMetadata,
+            cardOrders,
+          },
         },
       );
       this.eventBus.publish(new DataAddedEvent(collection, data, caller));
-      return await this.queryBus.execute(
-        new GetPublicViewCollectionQuery(
-          caller,
-          collection.slug,
-          updatedCollection,
-        ),
-      );
+      if (collection.collectionType === 0) {
+        return await this.queryBus.execute(
+          new GetPublicViewCollectionQuery(
+            caller,
+            collection.slug,
+            updatedCollection,
+          ),
+        );
+      } else {
+        return await this.queryBus.execute(
+          new GetPrivateViewCollectionQuery(null, updatedCollection),
+        );
+      }
     } catch (err) {
       this.logger.error(
-        `Failed adding collection to collection Id ${collectionId} with error ${err}`,
+        `Failed adding data to collection Id ${collectionId} with error ${err}`,
       );
       throw new InternalServerErrorException(
-        `Failed adding collection to collection Id ${collectionId} with error ${err}`,
+        `Failed adding data to collection Id ${collectionId} with error ${err}`,
       );
     }
   }

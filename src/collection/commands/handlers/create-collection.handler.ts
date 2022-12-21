@@ -57,15 +57,15 @@ export class CreateCollectionCommandHandler
           options: [
             {
               label: 'To Do',
-              value: 'To Do',
+              value: uuidv4(),
             },
             {
               label: 'In Progress',
-              value: 'In Progress',
+              value: uuidv4(),
             },
             {
               label: 'Done',
-              value: 'Done',
+              value: uuidv4(),
             },
           ],
           isPartOfFormView: false,
@@ -80,15 +80,51 @@ export class CreateCollectionCommandHandler
       if (!parentCircle)
         throw `Circle with id ${createCollectionDto.circleId} not found`;
 
-      const createdCollection = await this.collectionRepository.create({
-        ...createCollectionDto,
-        properties,
-        propertyOrder,
-        creator: caller,
-        parents: [createCollectionDto.circleId],
-        slug: uuidv4(),
-        logo: parentCircle.avatar,
-      });
+      let createdCollection;
+
+      if (createCollectionDto.collectionType === 0) {
+        createdCollection = await this.collectionRepository.create({
+          ...createCollectionDto,
+          properties,
+          propertyOrder,
+          creator: caller,
+          parents: [createCollectionDto.circleId],
+          slug: uuidv4(),
+          formMetadata: {
+            active: true,
+            logo: parentCircle.avatar,
+            messageOnSubmission: 'Thank you for submitting your response',
+            multipleResponsesAllowed: false,
+            updatingResponseAllowed: false,
+          },
+        });
+      } else if (createCollectionDto.collectionType === 1) {
+        const defaultViewId = '0x0';
+        createdCollection = await this.collectionRepository.create({
+          ...createCollectionDto,
+          properties,
+          propertyOrder,
+          creator: caller,
+          parents: [createCollectionDto.circleId],
+          slug: uuidv4(),
+          projectMetadata: {
+            viewOrder: [defaultViewId],
+            views: {
+              [defaultViewId]: {
+                id: defaultViewId,
+                name: 'Default View',
+                type: 'grid',
+                filters: [],
+                sort: {
+                  property: '',
+                  direction: 'asc',
+                },
+              },
+            },
+            cardOrders: {},
+          },
+        });
+      }
 
       await this.commandBus.execute(
         new UpdateCircleCommand(

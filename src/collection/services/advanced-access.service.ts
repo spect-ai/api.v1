@@ -18,7 +18,11 @@ export class AdvancedAccessService {
   ) {}
 
   async hasRoleToAccessForm(collection: Collection, caller?: User) {
-    if (collection.formRoleGating && collection.formRoleGating.length > 0) {
+    console.log({ caller: caller?.id });
+    if (
+      collection.formMetadata.formRoleGating &&
+      collection.formMetadata.formRoleGating.length > 0
+    ) {
       if (!caller) return false;
       const circle = await this.queryBus.execute(
         new GetCircleByIdQuery(collection.parents[0]),
@@ -34,7 +38,7 @@ export class AdvancedAccessService {
         }
       }
 
-      for (const role of collection.formRoleGating) {
+      for (const role of collection.formMetadata.formRoleGating) {
         if (roleIds.has(role.id)) {
           return true;
         }
@@ -49,13 +53,13 @@ export class AdvancedAccessService {
     collection: Collection,
     caller?: User,
   ): Promise<boolean> {
-    if (!collection.sybilProtectionEnabled) return true;
+    if (!collection.formMetadata.sybilProtectionEnabled) return true;
 
     if (!caller) return false;
 
     return await this.credentialService.hasPassedSybilCheck(
       caller.ethAddress,
-      collection.sybilProtectionScores,
+      collection.formMetadata.sybilProtectionScores,
     );
   }
 
@@ -64,7 +68,7 @@ export class AdvancedAccessService {
     delete collection.data;
     delete collection.dataActivities;
     delete collection.dataActivityOrder;
-    delete collection.mintkudosClaimedBy;
+    delete collection.formMetadata.mintkudosClaimedBy;
 
     return collection;
   }

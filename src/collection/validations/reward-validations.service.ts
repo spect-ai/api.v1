@@ -10,8 +10,10 @@ import { NetworkModel, TokenModel } from '../types/types';
 const supportedNetworks = [
   '1',
   '137',
+  '43113',
   '43114',
   '42161',
+  '80001',
   '10',
   '100',
   '56',

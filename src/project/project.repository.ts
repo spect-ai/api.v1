@@ -49,6 +49,8 @@ const defaultPopulate: PopulatedProjectFields = {
       slug: 1,
     },
     assignedCircle: 1,
+    description: 1,
+    activity: 1,
   },
 };
 

@@ -89,6 +89,14 @@ import {
 } from './commands/automation/impl';
 import { CirclesCollectionService } from './services/circle-collection.service';
 import { Collection } from 'src/collection/model/collection.model';
+import {
+  AddPaymentsCommand,
+  MovePaymentsCommand,
+} from './commands/payments/impl';
+import {
+  AddPaymentsRequestDto,
+  MakePaymentsRequestDto,
+} from './dto/payment.dto';
 
 @Controller('circle/v1')
 @ApiTags('circle.v1')
@@ -513,6 +521,34 @@ export class CircleV1Controller {
   ) {
     return await this.commandBus.execute(
       new RemoveAutomationCommand(param.id, query.automationId),
+    );
+  }
+
+  @SetMetadata('permissions', ['managePaymentOptions'])
+  @UseGuards(CircleAuthGuard)
+  @Patch('/:id/addPendingPayment')
+  async addPendingPayment(
+    @Param() param: ObjectIdDto,
+    @Body() addPaymentsRequestDto: AddPaymentsRequestDto,
+  ): Promise<DetailedCircleResponseDto> {
+    return await this.commandBus.execute(
+      new AddPaymentsCommand(param.id, addPaymentsRequestDto),
+    );
+  }
+
+  @SetMetadata('permissions', ['makePayment'])
+  @UseGuards(CircleAuthGuard)
+  @Patch('/:id/makePayments')
+  async makePayments(
+    @Param() param: ObjectIdDto,
+    @Body() makePaymentsRequestDto: MakePaymentsRequestDto,
+  ): Promise<DetailedCircleResponseDto> {
+    return await this.commandBus.execute(
+      new MovePaymentsCommand(param.id, {
+        ...makePaymentsRequestDto,
+        from: 'pending',
+        to: 'completed',
+      }),
     );
   }
 

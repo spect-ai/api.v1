@@ -1,8 +1,8 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
-  InternalServerErrorException,
   Param,
   Patch,
   Post,
@@ -19,6 +19,7 @@ import {
   ViewCollectionAuthGuard,
 } from 'src/auth/collection.guard';
 import {
+  AdminAuthGuard,
   PublicViewAuthGuard,
   SessionAuthGuard,
 } from 'src/auth/iron-session.guard';
@@ -33,6 +34,9 @@ import {
   AddCommentCommand,
   AddPropertyCommand,
   CreateCollectionCommand,
+  DeleteCollectionCommand,
+  MigrateAllCollectionsCommand,
+  MigrateProjectCommand,
   RemoveCommentCommand,
   RemovePropertyCommand,
   UpdateCollectionCommand,
@@ -54,7 +58,10 @@ import {
   CollectionPublicResponseDto,
   CollectionResponseDto,
 } from './dto/collection-response.dto';
-import { CreateCollectionDto } from './dto/create-collection-request.dto';
+import {
+  CreateCollectionDto,
+  MigrateCollectionDto,
+} from './dto/create-collection-request.dto';
 import { CreateCollectionResponseDto } from './dto/create-collection-response.dto';
 import { RemoveDataDto } from './dto/remove.data-request.dto';
 import { UpdateCollectionDto } from './dto/update-collection-request.dto';
@@ -120,6 +127,27 @@ export class CollectionController {
     );
   }
 
+  @UseGuards(CreateNewCollectionAuthGuard)
+  @Post('/migrateFromProject')
+  async migrateProject(
+    @Body() migrateollectionDto: MigrateCollectionDto,
+    @Request() req,
+  ): Promise<CreateCollectionResponseDto> {
+    return await this.commandBus.execute(
+      new MigrateProjectCommand(migrateollectionDto.projectId, req.user.id),
+    );
+  }
+
+  @UseGuards(AdminAuthGuard)
+  @Patch('/migrateAllCollections')
+  async migrateCollection(
+    @Request() req,
+  ): Promise<CreateCollectionResponseDto> {
+    return await this.commandBus.execute(
+      new MigrateAllCollectionsCommand(req.user.id),
+    );
+  }
+
   @SetMetadata('permissions', ['manageFormSettings'])
   @UseGuards(CollectionAuthGuard)
   @Patch('/:id')
@@ -130,6 +158,19 @@ export class CollectionController {
   ): Promise<Collection> {
     return await this.commandBus.execute(
       new UpdateCollectionCommand(updateCollectionDto, req.user?.id, param.id),
+    );
+  }
+
+  @SetMetadata('permissions', ['manageFormSettings'])
+  @UseGuards(CollectionAuthGuard)
+  @Delete('/:id')
+  async delete(
+    @Param() param: ObjectIdDto,
+    @Body() updateCollectionDto: UpdateCollectionDto,
+    @Request() req,
+  ): Promise<Collection> {
+    return await this.commandBus.execute(
+      new DeleteCollectionCommand(param.id, req.user?.id),
     );
   }
 

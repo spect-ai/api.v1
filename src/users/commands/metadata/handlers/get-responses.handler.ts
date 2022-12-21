@@ -23,7 +23,6 @@ export class GetResponsesCommandHandler
   async execute(command: GetCirclesCommand) {
     const { userId } = command;
     try {
-      console.log({ userId });
       const user = await this.userRepository.findById(userId);
       const collections = await this.queryBus.execute(
         new GetMultipleCollectionsQuery({
@@ -33,14 +32,13 @@ export class GetResponsesCommandHandler
           // 'status.archived': false,
         }),
       );
-      console.log({ collections });
       return collections.map((collection: Collection) => {
         return {
           name: collection.name,
           slug: collection.slug,
           description: collection.description,
           id: collection._id.toString(),
-          logo: collection.logo,
+          logo: collection.formMetadata?.logo,
         };
       });
     } catch (err) {

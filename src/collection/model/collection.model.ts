@@ -12,6 +12,7 @@ import {
   Voting,
   OpportunityInfo,
   Permissions,
+  Condition,
 } from '../types/types';
 
 @useMongoosePlugin()
@@ -26,11 +27,7 @@ export class Collection extends BaseModel {
    */
   @prop({ required: true })
   slug: string;
-  /**
-   * Is collection private?
-   */
-  @prop({ default: true })
-  privateResponses: boolean;
+
   /**
    * The description of the collection
    */
@@ -74,6 +71,12 @@ export class Collection extends BaseModel {
   data: MappedItem<object>;
 
   /**
+   * The data contained in the collection
+   */
+  @prop({ default: {} })
+  archivedData: MappedItem<object>;
+
+  /**
    * All the activities in all the data streams - { dataSlug : { activityId: ActivityObject  } }
    */
   @prop({ default: {} })
@@ -104,48 +107,6 @@ export class Collection extends BaseModel {
   defaultView: DefaultViewType;
 
   /**
-   * The guild.xyz roles that a person needs to hold to fill up form
-   */
-  @prop({ default: [] })
-  formRoleGating: GuildRole[];
-
-  /**
-   * The mintkudos token id to distribute when a person fills the form
-   */
-  @prop()
-  mintkudosTokenId: number;
-
-  /**
-   * The addresses that have already claimed mintkudos for submitting form
-   */
-  @prop({ default: [] })
-  mintkudosClaimedBy: string[];
-
-  /**
-   * The message to show when the form is submitted
-   */
-  @prop({ default: 'Thanks for your response!' })
-  messageOnSubmission: string;
-
-  /**
-   * Multiple responses by same user allowed?
-   */
-  @prop({ default: true })
-  multipleResponsesAllowed: boolean;
-
-  /**
-   * Updating responses allowed?
-   */
-  @prop({ default: true })
-  updatingResponseAllowed: boolean;
-
-  /**
-   * Send confirmation email upon submission?
-   */
-  @prop({ default: false })
-  sendConfirmationEmail: boolean;
-
-  /**
    * Send email to circle members upon new response
    */
   @prop({ default: [] })
@@ -157,36 +118,6 @@ export class Collection extends BaseModel {
   @prop({ default: [] })
   circleRolesToNotifyUponUpdatedResponse: string[];
 
-  /**
-   * The message to show when the form is submitted
-   */
-  @prop({ default: '' })
-  logo: string;
-
-  /**
-   * The message to show when the form is submitted
-   */
-  @prop({ default: '' })
-  cover: string;
-
-  @prop({ default: false })
-  sybilProtectionEnabled: boolean;
-
-  @prop()
-  sybilProtectionScores: { [id: string]: number };
-
-  @prop()
-  numOfKudos: number;
-
-  @prop({ default: false })
-  credentialCurationEnabled: boolean;
-
-  @prop({ default: false })
-  isAnOpportunity: boolean;
-
-  @prop()
-  opportunityInfo: OpportunityInfo;
-
   @prop({
     default: {
       enabled: false,
@@ -194,9 +125,109 @@ export class Collection extends BaseModel {
   })
   voting: Voting;
 
-  @prop({ default: true })
-  active: boolean;
+  /**
+   * collectiontypes: 0: forms, 1: project
+   */
+  @prop({ default: 0 })
+  collectionType: number;
+
+  /**
+   * Send email to circle members upon updated response
+   */
+  @prop({ default: {} })
+  formMetadata: FormMetadata;
+
+  @prop({ default: {} })
+  projectMetadata: ProjectMetadata;
 
   @prop({ default: false })
-  requireDiscordConnection: boolean;
+  archived?: boolean;
+}
+
+export interface FormMetadata {
+  /**
+   * Is collection private?
+   */
+  privateResponses?: boolean;
+
+  /**
+   * The guild.xyz roles that a person needs to hold to fill up form
+   */
+  formRoleGating?: GuildRole[];
+
+  /**
+   * The mintkudos token id to distribute when a person fills the form
+   */
+  mintkudosTokenId?: number;
+
+  /**
+   * The addresses that have already claimed mintkudos for submitting form
+   */
+  mintkudosClaimedBy?: string[];
+
+  /**
+   * The message to show when the form is submitted
+   */
+  messageOnSubmission?: string;
+
+  /**
+   * Multiple responses by same user allowed?
+   */
+  multipleResponsesAllowed?: boolean;
+
+  /**
+   * Updating responses allowed?
+   */
+  updatingResponseAllowed?: boolean;
+
+  /**
+   * Send confirmation email upon submission?
+   */
+  sendConfirmationEmail?: boolean;
+
+  /**
+   * The message to show when the form is submitted
+   */
+  logo?: string;
+
+  /**
+   * The message to show when the form is submitted
+   */
+  cover?: string;
+
+  sybilProtectionEnabled?: boolean;
+
+  sybilProtectionScores?: { [id: string]: number };
+
+  numOfKudos?: number;
+
+  credentialCurationEnabled?: boolean;
+
+  isAnOpportunity?: boolean;
+
+  opportunityInfo?: OpportunityInfo;
+
+  active?: boolean;
+
+  requireDiscordConnection?: boolean;
+}
+
+export interface ProjectMetadata {
+  views: {
+    [id: string]: {
+      id: string;
+      name: string;
+      type: 'grid' | 'kanban' | 'gantt' | 'list';
+      groupByColumn?: string;
+      filters?: Condition[];
+      sort?: {
+        property: string;
+        direction: 'asc' | 'desc';
+      };
+    };
+  };
+  viewOrder: string[];
+  cardOrders: {
+    [columnName: string]: string[][];
+  };
 }

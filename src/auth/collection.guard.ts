@@ -50,7 +50,6 @@ export class CollectionAuthGuard implements CanActivate {
       )) as unknown as User;
       if (!request.user) return false;
 
-      console.log(request.params.id);
       const collection = await this.collectionRepository.findById(
         request.params.id,
       );

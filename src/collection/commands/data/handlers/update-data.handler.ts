@@ -38,14 +38,16 @@ export class UpdateDataCommandHandler
     try {
       const collection = await this.collectionRepository.findById(collectionId);
       if (!collection) throw 'Collection does not exist';
-      // Required to maitain backward compatibility
-      if (collection.active === false) throw 'Collection is inactive';
+      if (collection.collectionType === 0) {
+        if (collection.formMetadata.active === false)
+          throw 'Collection is inactive';
 
-      if (!collection.updatingResponseAllowed) {
-        throw 'Updating response is not allowed';
-      }
-      if (!collection.dataOwner[dataSlug]) {
-        throw 'You are not the owner of this data';
+        if (!collection.formMetadata.updatingResponseAllowed) {
+          throw 'Updating response is not allowed';
+        }
+        if (!collection.dataOwner[dataSlug]) {
+          throw 'You are not the owner of this data';
+        }
       }
       let filteredData = data;
       if (view === 'public') {

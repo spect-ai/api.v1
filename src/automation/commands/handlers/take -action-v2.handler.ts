@@ -6,9 +6,7 @@ import {
   ICommandHandler,
   QueryBus,
 } from '@nestjs/cqrs';
-import { Circle } from 'src/circle/model/circle.model';
 import { GetCircleByIdQuery } from 'src/circle/queries/impl';
-import { Collection } from 'src/collection/model/collection.model';
 import {
   GetCollectionByFilterQuery,
   GetCollectionBySlugQuery,
@@ -27,7 +25,6 @@ import {
   SendEmailActionCommand,
   StartVotingPeriodActionCommand,
 } from '../impl/take-action-v2.command';
-import { v4 as uuidv4 } from 'uuid';
 import { AddDataUsingAutomationCommand } from 'src/collection/commands';
 import { StartVotingPeriodCommand } from 'src/collection/commands/data/impl/vote-data.command';
 import { JoinedCircleEvent } from 'src/circle/events/impl';

@@ -1,3 +1,5 @@
+import { Chain } from 'src/common/models/chain.model';
+import { Token } from 'src/common/models/token.model';
 import { TokenInfo } from 'src/registry/model/registry.model';
 
 export type TokenDetails = {
@@ -103,3 +105,17 @@ export type AutomationsIndexedByCollectionSlugType = {
 };
 
 export type RootAutomationsType = string[];
+
+export type PaymentDetails = {
+  id: string;
+  type: 'manuallyAdded' | 'addedFromCard';
+  chain: Chain;
+  token: Token;
+  value: number;
+  paidTo: {
+    propertyType: string;
+    value: any;
+  }[];
+  dataSlug?: string;
+  collectionId?: string;
+};

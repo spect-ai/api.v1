@@ -94,7 +94,7 @@ export class RequiredPropertyIdDto {
 
 export class RequiredUUIDDto {
   @IsNotEmpty()
-  @IsUUID()
+  @IsString()
   dataId: string;
 }
 
