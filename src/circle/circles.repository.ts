@@ -35,6 +35,11 @@ const defaultPopulate: PopulatedCircleFields = {
     slug: 1,
     description: 1,
     archived: 1,
+    collectionType: 1,
+    projectMetadata: {
+      views: 1,
+      viewOrder: 1,
+    },
   },
   retro: {
     title: 1,
@@ -321,7 +326,15 @@ export class CirclesRepository extends BaseRepository<Circle> {
     if (circle?.collections) {
       for (const populatedCollection of circle?.collections) {
         const collection = populatedCollection as unknown as Collection;
-        collections[collection.id] = collection;
+        collections[collection.id] = {
+          ...collection,
+          projectMetadata: undefined, // remove projectMetadata from collection
+          viewType: collection.projectMetadata?.views
+            ? collection.projectMetadata?.views[
+                collection.projectMetadata.viewOrder[0]
+              ]?.type
+            : undefined,
+        };
       }
     }
 

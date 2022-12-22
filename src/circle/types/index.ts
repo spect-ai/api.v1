@@ -37,7 +37,7 @@ export type PopulatedCircleFields = {
   parents?: { [fieldName: string]: number };
   children?: { [fieldName: string]: number };
   retro?: { [fieldName: string]: number };
-  collections?: { [fieldName: string]: number };
+  collections?: any;
   memberRoles?: number;
 };
 

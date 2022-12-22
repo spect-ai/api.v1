@@ -92,7 +92,7 @@ export class GetCircleBySlugQueryHandler
     query: GetCircleBySlugQuery,
   ): Promise<DetailedCircleResponseDto> {
     try {
-      const circle = await this.circleRepository.getCircleBySlug(
+      const circle: any = await this.circleRepository.getCircleBySlug(
         query.slug,
         query.customPopulate,
         query.selectedFields,
