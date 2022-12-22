@@ -129,21 +129,28 @@ export class CircleMembershipService {
       const memberships = await this.guildService.getGuildMemberships(id);
       const guildIds = memberships.map((guild) => guild.guildId);
       if (guildIds?.length == 0) return;
+
       const guildCircles = await this.circlesRepository.findAll({
         $and: [
-          { guildxyzId: { $in: guildIds } },
-          { members: { $nin: this.requestProvider.user.id } },
-          { guildxyzToCircleRoles: { $exists: true } },
-          { private: false },
+          {
+            guildxyzId: { $in: guildIds },
+            guildxyzToCircleRoles: { $exists: true },
+            private: false,
+          },
         ],
       });
 
       if (guildCircles?.length == 0) return;
       for (const i in guildCircles) {
-        const id = guildCircles?.[i]?.id;
-        await this.commandBus.execute(
-          new JoinUsingGuildxyzCommand(id, this.requestProvider.user),
-        );
+        if (
+          !guildCircles[i]?.members?.includes(this.requestProvider.user.id) &&
+          guildCircles[i]?.status.archived == false
+        ) {
+          const id = guildCircles?.[i]?.id;
+          await this.commandBus.execute(
+            new JoinUsingGuildxyzCommand(id, this.requestProvider.user),
+          );
+        }
       }
     } catch (error) {
       this.logger.logError(
@@ -151,7 +158,7 @@ export class CircleMembershipService {
         this.requestProvider,
       );
       throw new InternalServerErrorException(
-        'Failed joining Multiple circle using Guild',
+        'Failed joining Multiple circles using Guild',
         error.message,
       );
     }
@@ -165,19 +172,25 @@ export class CircleMembershipService {
       if (guildIds?.length == 0) return;
       const guildCircles = await this.circlesRepository.findAll({
         $and: [
-          { discordGuildId: { $in: guildIds } },
-          { members: { $nin: this.requestProvider.user?.id } },
-          { discordToCircleRoles: { $exists: true } },
-          { private: false },
+          {
+            discordGuildId: { $in: guildIds },
+            discordToCircleRoles: { $exists: true },
+            private: false,
+          },
         ],
       });
 
       if (guildCircles?.length == 0) return;
       for (const i in guildCircles) {
-        const id = guildCircles?.[i]?.id;
-        await this.commandBus.execute(
-          new JoinUsingDiscordCommand(id, this.requestProvider.user),
-        );
+        if (
+          !guildCircles[i]?.members?.includes(this.requestProvider.user.id) &&
+          guildCircles[i]?.status.archived == false
+        ) {
+          const id = guildCircles?.[i]?.id;
+          await this.commandBus.execute(
+            new JoinUsingDiscordCommand(id, this.requestProvider.user),
+          );
+        }
       }
     } catch (error) {
       this.logger.logError(
