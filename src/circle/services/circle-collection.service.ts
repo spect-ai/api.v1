@@ -17,7 +17,7 @@ export class CirclesCollectionService {
     logger.setContext('CirclesRolesService');
   }
 
-  async getAllActiveCollections(id: string): Promise<Collection[]> {
+  async getAllCollections(id: string): Promise<Collection[]> {
     try {
       const circle = await this.queryBus.execute(
         new GetCircleByIdQuery(id, {
@@ -28,16 +28,12 @@ export class CirclesCollectionService {
             active: 1,
             properties: 1,
             propertyOrder: 1,
+            collectionType: 1,
           },
         }),
       );
-      const activeCollections = [];
-      for (const col of circle.collections) {
-        if (col.active) {
-          activeCollections.push(col);
-        }
-      }
-      return activeCollections;
+
+      return circle.collections;
     } catch (error) {
       this.logger.logError(
         `Failed getting collections in circle with error: ${error.message}`,

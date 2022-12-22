@@ -252,6 +252,7 @@ export class AddDataUsingAutomationCommandHandler
   async execute(command: AddDataUsingAutomationCommand) {
     const { data, collectionId } = command;
     try {
+      console.log({ data });
       const collection = await this.collectionRepository.findById(collectionId);
       if (!collection) throw 'Collection does not exist';
       const botUser = await this.queryBus.execute(
@@ -262,6 +263,7 @@ export class AddDataUsingAutomationCommandHandler
           '',
         ),
       );
+      console.log({ botUser });
       const validData = await this.validationService.validate(
         data,
         'add',
@@ -286,6 +288,7 @@ export class AddDataUsingAutomationCommandHandler
         data,
         botUser.id,
       );
+      console.log({ dataActivities, dataActivityOrder });
       const updatedCollection = await this.collectionRepository.updateById(
         collectionId,
         {
@@ -302,19 +305,20 @@ export class AddDataUsingAutomationCommandHandler
         },
       );
       // this.eventBus.publish(new DataAddedEvent(collection, data, botUser));
-      return await this.queryBus.execute(
-        new GetPublicViewCollectionQuery(
-          botUser,
-          collection.slug,
-          updatedCollection,
-        ),
-      );
+      // return await this.queryBus.execute(
+      //   new GetPublicViewCollectionQuery(
+      //     botUser,
+      //     collection.slug,
+      //     updatedCollection,
+      //   ),
+      // );
+      return true;
     } catch (err) {
       this.logger.error(
-        `Failed adding collection to collection Id ${collectionId} with error ${err}`,
+        `Failed adding data to collection Id ${collectionId} with error ${err}`,
       );
       throw new InternalServerErrorException(
-        `Failed adding collection to collection Id ${collectionId} with error ${err}`,
+        `Failed adding data to collection Id ${collectionId} with error ${err}`,
       );
     }
   }

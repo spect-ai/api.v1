@@ -42,7 +42,10 @@ export class UpdateDataCommandHandler
         if (collection.formMetadata.active === false)
           throw 'Collection is inactive';
 
-        if (!collection.formMetadata.updatingResponseAllowed) {
+        if (
+          !collection.formMetadata.updatingResponseAllowed &&
+          view === 'public'
+        ) {
           throw 'Updating response is not allowed';
         }
         if (!collection.dataOwner[dataSlug]) {
@@ -107,10 +110,10 @@ export class UpdateDataCommandHandler
       );
     } catch (err) {
       this.logger.error(
-        `Failed updating data in collection with collection Id ${collectionId} with error ${err.message}`,
+        `Failed updating data in collection with collection Id ${collectionId} with error ${err}`,
       );
       throw new InternalServerErrorException(
-        `Failed updating data in collection to collection Id ${collectionId} with error ${err.message}`,
+        `Failed updating data in collection to collection Id ${collectionId} with error ${err}`,
       );
     }
   }

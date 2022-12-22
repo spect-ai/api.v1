@@ -145,9 +145,7 @@ export class CircleV1Controller {
     @Param() param: ObjectIdDto,
   ): Promise<Collection[]> {
     try {
-      return await this.circleCollectionService.getAllActiveCollections(
-        param.id,
-      );
+      return await this.circleCollectionService.getAllCollections(param.id);
     } catch (error) {
       console.log(error);
       return [];
