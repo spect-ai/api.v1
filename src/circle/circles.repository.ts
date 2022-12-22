@@ -331,7 +331,7 @@ export class CirclesRepository extends BaseRepository<Circle> {
           projectMetadata: undefined, // remove projectMetadata from collection
           viewType: collection.projectMetadata?.views
             ? collection.projectMetadata?.views[
-                collection.projectMetadata.viewOrder[0]
+                collection.projectMetadata?.viewOrder?.[0]
               ]?.type
             : undefined,
         };
