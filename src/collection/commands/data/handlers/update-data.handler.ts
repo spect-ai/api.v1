@@ -37,15 +37,22 @@ export class UpdateDataCommandHandler
     const { data, caller, collectionId, dataSlug, view } = command;
     try {
       const collection = await this.collectionRepository.findById(collectionId);
-      // check if update already done
-      if (
-        collection.data[dataSlug] &&
-        Object.keys(data).every(
-          (key) => collection.data[dataSlug][key] === data[key],
-        )
-      ) {
+      // remove all properties from the upadte which are same as the existing data
+      for (const [key, value] of Object.entries(data)) {
+        if (
+          JSON.stringify(collection.data[dataSlug][key]) ===
+          JSON.stringify(value)
+        ) {
+          delete data[key];
+        }
+      }
+
+      if (Object.keys(data).length === 0) {
         return;
       }
+
+      console.log({ data });
+
       if (!collection) throw 'Collection does not exist';
       if (collection.collectionType === 0) {
         if (collection.formMetadata.active === false)
