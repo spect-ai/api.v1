@@ -2,13 +2,19 @@ import { InternalServerErrorException } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { CirclesRepository } from 'src/circle/circles.repository';
 import { Circle } from 'src/circle/model/circle.model';
+import { LoggingService } from 'src/logging/logging.service';
 import { RemoveSafeCommand } from '../impl';
 
 @CommandHandler(RemoveSafeCommand)
 export class RemoveSafeCommandHandler
   implements ICommandHandler<RemoveSafeCommand>
 {
-  constructor(private readonly circlesRepository: CirclesRepository) {}
+  constructor(
+    private readonly circlesRepository: CirclesRepository,
+    private readonly logger: LoggingService,
+  ) {
+    this.logger.setContext(RemoveSafeCommandHandler.name);
+  }
 
   async execute(command: RemoveSafeCommand): Promise<Circle> {
     try {
@@ -43,6 +49,7 @@ export class RemoveSafeCommandHandler
         );
       return updatedCircle;
     } catch (error) {
+      this.logger.error(error);
       throw new InternalServerErrorException(error.message);
     }
   }

@@ -65,6 +65,25 @@ export class MovePaymentsCommandHandler
             (paymentId) => !paymentIds.includes(paymentId),
           );
 
+      for (const paymentId of paymentIds)
+        if (to === 'completed' && from === 'pending') {
+          updates['paymentDetails'] = {
+            ...(circleToUpdate.paymentDetails || {}),
+            [paymentId]: {
+              ...(circleToUpdate.paymentDetails || {})[paymentId],
+              paidOn: new Date(),
+            },
+          };
+        } else if (to === 'cancelled' && from === 'pending') {
+          updates['paymentDetails'] = {
+            ...(circleToUpdate.paymentDetails || {}),
+            [paymentId]: {
+              ...(circleToUpdate.paymentDetails || {})[paymentId],
+              cancelledOn: new Date(),
+            },
+          };
+        }
+
       const updatedCircle = await this.circleRepository.updateById(
         circleId,
         updates,
