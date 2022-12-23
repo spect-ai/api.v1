@@ -109,7 +109,7 @@ export class AddDataCommandHandler implements ICommandHandler<AddDataCommand> {
           ].options.findIndex(
             (option) => option.value === data[groupByColumn]?.value,
           );
-          cardOrders[groupByColumn][columnIndex + 1].push(data['slug']);
+          cardOrders[groupByColumn][columnIndex + 1].push(filteredData['slug']);
         });
       }
 
@@ -252,7 +252,6 @@ export class AddDataUsingAutomationCommandHandler
   async execute(command: AddDataUsingAutomationCommand) {
     const { data, collectionId } = command;
     try {
-      console.log({ data });
       const collection = await this.collectionRepository.findById(collectionId);
       if (!collection) throw 'Collection does not exist';
       const botUser = await this.queryBus.execute(
@@ -263,7 +262,6 @@ export class AddDataUsingAutomationCommandHandler
           '',
         ),
       );
-      console.log({ botUser });
       const validData = await this.validationService.validate(
         data,
         'add',
@@ -281,29 +279,23 @@ export class AddDataUsingAutomationCommandHandler
         }
       }
       data['slug'] = uuidv4();
-
-      /** Disabling activity for forms as it doesnt quite make sense yet */
       const { dataActivities, dataActivityOrder } = this.getActivity(
         collection,
         data,
         botUser.id,
       );
-      console.log({ dataActivities, dataActivityOrder });
-      const updatedCollection = await this.collectionRepository.updateById(
-        collectionId,
-        {
-          data: {
-            ...collection.data,
-            [data['slug']]: data,
-          },
-          dataActivities,
-          dataActivityOrder,
-          dataOwner: {
-            ...(collection.dataOwner || {}),
-            [data['slug']]: botUser.id,
-          },
+      await this.collectionRepository.updateById(collectionId, {
+        data: {
+          ...collection.data,
+          [data['slug']]: data,
         },
-      );
+        dataActivities,
+        dataActivityOrder,
+        dataOwner: {
+          ...(collection.dataOwner || {}),
+          [data['slug']]: botUser.id,
+        },
+      });
       // this.eventBus.publish(new DataAddedEvent(collection, data, botUser));
       // return await this.queryBus.execute(
       //   new GetPublicViewCollectionQuery(
