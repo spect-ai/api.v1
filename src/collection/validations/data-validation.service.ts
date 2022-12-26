@@ -1,4 +1,4 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { MappedItem } from 'src/common/interfaces';
 import { LoggingService } from 'src/logging/logging.service';
 import { CollectionRepository } from '../collection.repository';
@@ -26,54 +26,38 @@ export class DataValidationService {
     collection?: Collection,
     collectionId?: string,
   ) {
-    try {
-      let collectionToValidate = collection;
-      if (!collectionToValidate)
-        collectionToValidate = await this.collectionRepositor.findById(
-          collectionId,
-        );
-      if (!collectionToValidate) throw 'Collection not found';
+    let collectionToValidate = collection;
+    if (!collectionToValidate)
+      collectionToValidate = await this.collectionRepositor.findById(
+        collectionId,
+      );
+    if (!collectionToValidate) throw 'Collection not found';
 
-      const propertyValidationPassed = this.validateProperty(
+    const propertyValidationPassed = this.validateProperty(
+      dataObj,
+      collectionToValidate.properties,
+    );
+    console.log({ propertyValidationPassed });
+    if (!propertyValidationPassed) return false;
+
+    const typeValidationPassed = this.validateType(
+      dataObj,
+      collectionToValidate.properties,
+    );
+    if (!typeValidationPassed) return false;
+    console.log({ typeValidationPassed });
+
+    if (!skipRequiredFieldValidation) {
+      const requiredValidationPassed = await this.validateRequriedFields(
         dataObj,
-        collectionToValidate.properties,
+        collectionToValidate,
+        operation,
       );
-      console.log({ propertyValidationPassed });
-      if (!propertyValidationPassed) return false;
-
-      const typeValidationPassed = this.validateType(
-        dataObj,
-        collectionToValidate.properties,
-      );
-      if (!typeValidationPassed) return false;
-      console.log({ typeValidationPassed });
-
-      const valueValidationPassed = this.validateValue(
-        dataObj,
-        collectionToValidate.properties,
-      );
-      if (!valueValidationPassed) return false;
-      console.log({ valueValidationPassed });
-
-      if (!skipRequiredFieldValidation) {
-        const requiredValidationPassed = await this.validateRequriedFields(
-          dataObj,
-          collectionToValidate,
-          operation,
-        );
-        if (!requiredValidationPassed) return false;
-        console.log({ requiredValidationPassed });
-      }
-
-      return true;
-    } catch (err) {
-      this.logger.error(
-        `Validating data in collection failed with error ${err.message}`,
-      );
-      throw new InternalServerErrorException(
-        `Validating data in collection failed with error ${err.message}`,
-      );
+      if (!requiredValidationPassed) return false;
+      console.log({ requiredValidationPassed });
     }
+
+    return true;
   }
 
   private validateProperty(
@@ -95,22 +79,23 @@ export class DataValidationService {
   ): boolean {
     for (const [propertyId, data] of Object.entries(dataObj)) {
       if (data === null) continue;
-      console.log(data?.[0]);
-      console.log({ propertyId });
-
       if (['shortText', 'longText'].includes(properties[propertyId].type)) {
-        if (typeof data !== 'string') return false;
+        if (typeof data !== 'string') {
+          throw Error("Data type should be 'string'");
+        }
       } else if (['singleSelect'].includes(properties[propertyId].type)) {
         if (typeof data !== 'object') return false;
         if (Object.keys(data)?.length && (!data['value'] || !data['label']))
-          return false;
+          throw Error("Single select data type doesn't match");
       } else if (['multiSelect'].includes(properties[propertyId].type)) {
         if (!Array.isArray(data)) return false;
         for (const elem of data) {
-          if (!elem['value'] || !elem['label']) return false;
+          if (!elem['value'] || !elem['label'])
+            throw Error("Multi select data type doesn't match");
         }
       } else if (['number'].includes(properties[propertyId].type)) {
-        if (typeof data !== 'number') return false;
+        if (typeof data !== 'number')
+          throw Error("Data type should be 'number'");
       } else if (['reward'].includes(properties[propertyId].type)) {
         if (data && data['value']) {
           if (
@@ -122,17 +107,19 @@ export class DataValidationService {
             typeof data['token']['label'] !== 'string' ||
             typeof data['token']['value'] !== 'string'
           )
-            return false;
+            throw new Error("Reward data type doesn't match");
         }
       } else if (['ethAddress'].includes(properties[propertyId].type)) {
-        if (data && !ethers.utils.isAddress(data)) return false;
+        if (data && !ethers.utils.isAddress(data))
+          throw new Error('Invalid ethereum address');
       } else if (['user'].includes(properties[propertyId].type)) {
         if (data && data.value && !mongoose.isValidObjectId(data.value))
-          return false;
+          throw new Error('Invalid user');
       } else if (['user[]'].includes(properties[propertyId].type)) {
         if (data)
           for (const user of data)
-            if (!mongoose.isValidObjectId(user.value)) return false;
+            if (!mongoose.isValidObjectId(user.value))
+              throw new Error('Invalid multi user data type');
       } else if (['email'].includes(properties[propertyId].type)) {
         if (
           data &&
@@ -142,7 +129,7 @@ export class DataValidationService {
               /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
             )
         )
-          return false;
+          throw new Error('Invalid email address');
       } else if (['milestone'].includes(properties[propertyId].type)) {
         if (data)
           for (const milestone of data) {
@@ -158,7 +145,7 @@ export class DataValidationService {
                 typeof reward['token']['label'] !== 'string' ||
                 typeof reward['token']['value'] !== 'string'
               )
-                return false;
+                throw new Error("Milestone data type doesn't match");
             }
           }
       } else if (['singleURL'].includes(properties[propertyId].type)) {
@@ -168,7 +155,7 @@ export class DataValidationService {
             .toLowerCase()
             .match(/((?:https?:\/\/|www\.)(?:[-a-z0-9]+\.)*[-a-z0-9]+.*)/i)
         )
-          return false;
+          throw new Error('Invalid URL');
       } else if (['multiURL'].includes(properties[propertyId].type)) {
         if (data)
           for (const url of data) {
@@ -178,7 +165,7 @@ export class DataValidationService {
                 .toLowerCase()
                 .match(/((?:https?:\/\/|www\.)(?:[-a-z0-9]+\.)*[-a-z0-9]+.*)/i)
             )
-              return false;
+              throw new Error('Invalid URL(s)');
           }
       } else if (['payWall'].includes(properties[propertyId].type)) {
         if (data) {
@@ -193,19 +180,12 @@ export class DataValidationService {
               typeof payment['txnHash'] !== 'string' ||
               typeof payment['paid'] !== 'boolean'
             ) {
-              return false;
+              throw new Error("Paywall data type doesn't match");
             }
           }
         }
       }
     }
-    return true;
-  }
-
-  private validateValue(
-    dataObj: object,
-    properties: MappedItem<Property>,
-  ): boolean {
     return true;
   }
 

@@ -77,15 +77,12 @@ export class UpdateDataCommandHandler
           );
       }
       filteredData = this.filterUndefinedValues(filteredData);
-      const validData = await this.validationService.validate(
+      await this.validationService.validate(
         filteredData,
         'update',
         false,
         collection,
       );
-      if (!validData) {
-        throw new Error(`Data invalid`);
-      }
 
       const { dataActivities, dataActivityOrder } = this.activityBuilder.build(
         filteredData,
@@ -144,6 +141,7 @@ export class UpdateDataCommandHandler
       );
       throw new InternalServerErrorException(
         `Failed updating data in collection to collection Id ${collectionId} with error ${err}`,
+        err.message,
       );
     }
   }
