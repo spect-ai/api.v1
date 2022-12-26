@@ -13,10 +13,7 @@ import { RealtimeGateway } from 'src/realtime/realtime.gateway';
 import { SingleNotificationEvent } from 'src/users/events/impl';
 import { DataAddedEvent } from '../impl/data-added.event';
 import { AddItemsCommand as AddItemsToUserCommand } from 'src/users/commands/impl';
-import {
-  PerformAutomationOnCollectionDataAddCommand,
-  PerformAutomationOnCollectionDataUpdateCommand,
-} from 'src/automation/commands/impl';
+import { PerformAutomationOnCollectionDataAddCommand } from 'src/automation/commands/impl';
 import { UpdateMultipleCirclesCommand } from 'src/circle/commands/impl/update-circle.command';
 
 @EventsHandler(DataAddedEvent)

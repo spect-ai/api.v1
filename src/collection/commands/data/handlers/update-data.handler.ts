@@ -37,6 +37,22 @@ export class UpdateDataCommandHandler
     const { data, caller, collectionId, dataSlug, view } = command;
     try {
       const collection = await this.collectionRepository.findById(collectionId);
+      // remove all properties from the upadte which are same as the existing data
+      for (const [key, value] of Object.entries(data)) {
+        if (
+          JSON.stringify(collection.data[dataSlug][key]) ===
+          JSON.stringify(value)
+        ) {
+          delete data[key];
+        }
+      }
+
+      if (Object.keys(data).length === 0) {
+        return;
+      }
+
+      console.log({ data });
+
       if (!collection) throw 'Collection does not exist';
       if (collection.collectionType === 0) {
         if (collection.formMetadata.active === false)
@@ -61,15 +77,12 @@ export class UpdateDataCommandHandler
           );
       }
       filteredData = this.filterUndefinedValues(filteredData);
-      const validData = await this.validationService.validate(
+      await this.validationService.validate(
         filteredData,
         'update',
         false,
         collection,
       );
-      if (!validData) {
-        throw new Error(`Data invalid`);
-      }
 
       const { dataActivities, dataActivityOrder } = this.activityBuilder.build(
         filteredData,
@@ -77,8 +90,8 @@ export class UpdateDataCommandHandler
         dataSlug,
         caller?.id,
       );
-
-      const updatedCollection = await this.collectionRepository.updateById(
+      let updatedCollection;
+      updatedCollection = await this.collectionRepository.updateById(
         collectionId,
         {
           data: {
@@ -92,6 +105,20 @@ export class UpdateDataCommandHandler
           dataActivityOrder,
         },
       );
+      const propertyName = Object.keys(data)[0];
+      if (
+        collection.collectionType === 1 &&
+        collection.projectMetadata.cardOrders &&
+        collection.projectMetadata.cardOrders[propertyName]
+      ) {
+        updatedCollection = await this.addDataToViews(
+          collection,
+          data,
+          dataSlug,
+          propertyName,
+        );
+      }
+
       this.eventBus.publish(
         new DataUpatedEvent(collection, filteredData, dataSlug, caller),
       );
@@ -114,6 +141,7 @@ export class UpdateDataCommandHandler
       );
       throw new InternalServerErrorException(
         `Failed updating data in collection to collection Id ${collectionId} with error ${err}`,
+        err.message,
       );
     }
   }
@@ -149,5 +177,42 @@ export class UpdateDataCommandHandler
       }
     }
     return filteredData;
+  }
+
+  async addDataToViews(
+    collection: Collection,
+    update: object,
+    slug: string,
+    propertyName: string,
+  ) {
+    const columns = collection.properties[propertyName].options;
+    const cardColumnOrder = collection.projectMetadata.cardOrders[propertyName];
+    const sourceColumnIndex =
+      columns.findIndex(
+        (column) => column.value === collection.data[slug][propertyName]?.value,
+      ) + 1;
+    const destColumnIndex =
+      columns.findIndex(
+        (column) => column.value === update[propertyName]?.value,
+      ) + 1;
+
+    const newSourceColumnOrder = Array.from(cardColumnOrder[sourceColumnIndex]);
+
+    newSourceColumnOrder.splice(newSourceColumnOrder.indexOf(slug), 1);
+    const newDestColumnOrder = Array.from(cardColumnOrder[destColumnIndex]);
+    newDestColumnOrder.splice(0, 0, slug);
+
+    const newCardColumnOrder = Array.from(cardColumnOrder);
+    newCardColumnOrder[sourceColumnIndex] = newSourceColumnOrder;
+    newCardColumnOrder[destColumnIndex] = newDestColumnOrder;
+    return await this.collectionRepository.updateById(collection.id, {
+      projectMetadata: {
+        ...collection.projectMetadata,
+        cardOrders: {
+          ...collection.projectMetadata.cardOrders,
+          [propertyName]: newCardColumnOrder,
+        },
+      },
+    });
   }
 }
