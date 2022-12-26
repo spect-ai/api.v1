@@ -132,7 +132,9 @@ export class AddDataCommandHandler implements ICommandHandler<AddDataCommand> {
           },
         },
       );
-      this.eventBus.publish(new DataAddedEvent(collection, data, caller));
+      this.eventBus.publish(
+        new DataAddedEvent(collection, filteredData, caller),
+      );
       if (collection.collectionType === 0) {
         return await this.queryBus.execute(
           new GetPublicViewCollectionQuery(

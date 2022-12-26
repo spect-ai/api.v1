@@ -16,7 +16,7 @@ import { MappedItem } from 'src/common/interfaces';
 import { LoggingService } from 'src/logging/logging.service';
 import { MailService } from 'src/mail/mail.service';
 import { EmailGeneratorService } from 'src/notification/email-generatr.service';
-import { GetProfileQuery } from 'src/users/queries/impl';
+import { GetProfileQuery, GetUserByFilterQuery } from 'src/users/queries/impl';
 import {
   CreateCardActionCommand,
   CreateDiscordChannelActionCommand,
@@ -339,13 +339,55 @@ export class CreateCardActionCommandHandler
           slug: relevantIds.collectionSlug,
         }),
       );
+      const toCollection = await this.queryBus.execute(
+        new GetCollectionByFilterQuery({
+          _id: action.data.selectedCollection?.value,
+        }),
+      );
+
       const data = {};
       for (const value of action.data.values) {
+        console.log({
+          v: value.mapping.to.value,
+          p: toCollection.properties[value.mapping.to.value],
+        });
         if (value.type === 'default') {
           data[value.default.field.value] = value.default.value;
         } else if (value.type === 'mapping') {
           data[value.mapping.to.value] =
             fromCollection.data[relevantIds.dataSlug][value.mapping.from.value];
+        } else if (value.type === 'responder') {
+          const dataOwner = await this.queryBus.execute(
+            new GetProfileQuery(
+              {
+                _id: fromCollection.dataOwner[relevantIds.dataSlug],
+              },
+              fromCollection.dataOwner[relevantIds.dataSlug],
+            ),
+          );
+          if (toCollection.properties[value.mapping.to.value].type === 'user') {
+            console.log('user');
+            data[value.mapping.to.value] = {
+              label: dataOwner.username,
+              value: dataOwner._id.toString(),
+            };
+          } else if (
+            toCollection.properties[value.mapping.to.value].type === 'user[]'
+          ) {
+            console.log('user[]');
+            data[value.mapping.to.value] = [
+              ...(data[value.mapping.to.value] || []),
+              {
+                label: dataOwner.username,
+                value: dataOwner._id.toString(),
+              },
+            ];
+          } else if (
+            toCollection.properties[value.mapping.to.value].type ===
+            'ethAddress'
+          ) {
+            data[value.mapping.to.value] = dataOwner.ethAddress;
+          }
         }
       }
 

@@ -73,6 +73,7 @@ export class DataAddedEventHandler implements IEventHandler<DataAddedEvent> {
         ),
       );
 
+      console.log({ data });
       const res = await this.commandBus.execute(
         new PerformAutomationOnCollectionDataAddCommand(
           collection,
