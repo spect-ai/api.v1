@@ -168,6 +168,8 @@ export class StartVotingPeriodCommandHandler
                 startedOn: new Date(),
                 snapshot: {
                   onSnapshot: startVotingPeriodRequestDto?.postOnSnapshot,
+                  space: startVotingPeriodRequestDto?.space,
+                  proposalId: startVotingPeriodRequestDto?.proposalId,
                 },
                 votes: {},
               },
