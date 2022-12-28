@@ -94,6 +94,7 @@ export type Automation = {
   conditions?: Condition[];
   triggerCategory: 'collection' | 'root';
   triggerCollectionSlug?: string;
+  disabled?: boolean;
 };
 
 export type AutomationType = {

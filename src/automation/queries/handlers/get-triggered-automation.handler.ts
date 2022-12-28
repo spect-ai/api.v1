@@ -78,7 +78,7 @@ export class GetTriggeredCollectionAutomationsQueryHandler
 
       for (const automationId of automationIds) {
         const automation = circle.automations[automationId];
-        if (!automation) continue;
+        if (!automation || automation.disabled) continue;
         try {
           const { trigger } = automation;
           if (!trigger) continue;

@@ -1,5 +1,6 @@
 import {
   IsArray,
+  IsBoolean,
   IsNotEmpty,
   IsObject,
   IsOptional,
@@ -93,4 +94,11 @@ export class UpdateAutomationDto {
   @IsArray()
   @IsOptional()
   conditions: Condition[];
+
+  /**
+   * Automation is disabled
+   **/
+  @IsBoolean()
+  @IsOptional()
+  disabled: string;
 }

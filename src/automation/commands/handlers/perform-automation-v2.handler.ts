@@ -100,7 +100,8 @@ export class PerformAutomationOnCollectionDataAddCommandHandler
         circle.automationsIndexedByCollection[collection.slug];
       const triggeredAutomations = automationIds.filter(
         (automationId) =>
-          circle.automations[automationId].trigger?.type === 'newData',
+          circle.automations[automationId].trigger?.type === 'newData' &&
+          !circle.automations[automationId].disabled,
       );
 
       const dataContainer = {};
