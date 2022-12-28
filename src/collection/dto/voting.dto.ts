@@ -8,4 +8,12 @@ export class StartVotingPeriodRequestDto {
   @IsBoolean()
   @IsOptional()
   readonly postOnSnapshot?: boolean;
+
+  @IsString()
+  @IsOptional()
+  readonly space?: string;
+
+  @IsString()
+  @IsOptional()
+  readonly proposalId?: string;
 }

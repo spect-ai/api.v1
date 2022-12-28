@@ -145,6 +145,13 @@ export type SnapshotVoting = {
   proposalId?: string;
 };
 
+export type SnapshotSpace = {
+  name: string;
+  id: string;
+  network: string;
+  symbol: string;
+};
+
 export type Voting = {
   votingType: Option;
   enabled: boolean;
@@ -154,4 +161,5 @@ export type Voting = {
   votesAreWeightedByTokens?: boolean;
   periods?: MappedItem<VotingPeriod>;
   periodsOnCollection?: MappedItem<VotingPeriod>;
+  snapshot?: SnapshotSpace;
 };
