@@ -286,6 +286,19 @@ export class AddDataUsingAutomationCommandHandler
         data,
         botUser.id,
       );
+      const cardOrders = collection.projectMetadata?.cardOrders || {};
+      console.log({ cardOrders });
+      if (Object.keys(cardOrders).length) {
+        Object.keys(cardOrders).forEach((groupByColumn) => {
+          const columnIndex = collection.properties[
+            groupByColumn
+          ].options.findIndex(
+            (option) => option.value === data[groupByColumn]?.value,
+          );
+          cardOrders[groupByColumn][columnIndex + 1].push(data['slug']);
+        });
+      }
+
       await this.collectionRepository.updateById(collectionId, {
         data: {
           ...collection.data,
@@ -296,6 +309,10 @@ export class AddDataUsingAutomationCommandHandler
         dataOwner: {
           ...(collection.dataOwner || {}),
           [data['slug']]: botUser.id,
+        },
+        projectMetadata: {
+          ...collection.projectMetadata,
+          cardOrders,
         },
       });
       // this.eventBus.publish(new DataAddedEvent(collection, data, botUser));
