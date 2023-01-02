@@ -217,7 +217,7 @@ export interface ProjectMetadata {
     [id: string]: {
       id: string;
       name: string;
-      type: 'grid' | 'kanban' | 'gantt' | 'list';
+      type: 'grid' | 'kanban' | 'gantt' | 'list' | 'form';
       groupByColumn?: string;
       filters?: Condition[];
       sort?: {

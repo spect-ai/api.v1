@@ -83,6 +83,7 @@ export class CreateCollectionCommandHandler
       let createdCollection;
 
       if (createCollectionDto.collectionType === 0) {
+        const defaultViewId = '0x0';
         createdCollection = await this.collectionRepository.create({
           ...createCollectionDto,
           properties,
@@ -96,6 +97,22 @@ export class CreateCollectionCommandHandler
             messageOnSubmission: 'Thank you for submitting your response',
             multipleResponsesAllowed: false,
             updatingResponseAllowed: false,
+          },
+          projectMetadata: {
+            viewOrder: [defaultViewId],
+            views: {
+              [defaultViewId]: {
+                id: defaultViewId,
+                name: 'Default View',
+                type: 'form',
+                filters: [],
+                sort: {
+                  property: '',
+                  direction: 'asc',
+                },
+              },
+            },
+            cardOrders: {},
           },
         });
       } else if (createCollectionDto.collectionType === 1) {
