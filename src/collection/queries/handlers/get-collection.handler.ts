@@ -181,7 +181,7 @@ export class GetPublicViewCollectionQueryHandler
         !caller;
 
       const formRequiresDiscordButUserIsntConnected =
-        collectionToGet.formMetadata.requireDiscordConnection &&
+        collectionToGet.formMetadata.discordConnectionRequired &&
         !caller?.discordId;
 
       const canFillForm =

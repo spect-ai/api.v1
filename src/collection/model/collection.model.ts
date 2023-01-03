@@ -209,7 +209,7 @@ export interface FormMetadata {
 
   active?: boolean;
 
-  requireDiscordConnection?: boolean;
+  discordConnectionRequired?: boolean;
 }
 
 export interface ProjectMetadata {
