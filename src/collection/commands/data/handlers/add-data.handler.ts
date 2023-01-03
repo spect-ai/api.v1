@@ -1,4 +1,4 @@
-import { InternalServerErrorException } from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import {
   CommandHandler,
   EventBus,
@@ -10,6 +10,7 @@ import { LoggingService } from 'src/logging/logging.service';
 import {
   AddDataCommand,
   AddDataUsingAutomationCommand,
+  AddMultipleDataUsingAutomationCommand,
 } from '../impl/add-data.command';
 import { v4 as uuidv4 } from 'uuid';
 import { DataValidationService } from 'src/collection/validations/data-validation.service';
@@ -25,6 +26,55 @@ import {
 import { GetProfileQuery } from 'src/users/queries/impl';
 import { HasSatisfiedDataConditionsQuery } from 'src/automation/queries/impl';
 
+@Injectable()
+export class ActivityOnAddData {
+  getActivity(
+    collection: Collection,
+    data: object,
+    caller: string,
+  ): {
+    dataActivities: MappedItem<MappedItem<Activity>>;
+    dataActivityOrder: MappedItem<string[]>;
+  } {
+    const activityId = uuidv4();
+    let content, ref;
+    const dataType =
+      collection.defaultView === 'form'
+        ? 'response'
+        : collection.defaultView === 'table'
+        ? 'row'
+        : 'card';
+    if (caller) {
+      content = `created new ${dataType}`;
+      ref = {
+        actor: {
+          id: caller,
+          type: 'user',
+        },
+      };
+    } else {
+      content = `New ${dataType} was added`;
+    }
+    return {
+      dataActivities: {
+        ...(collection.dataActivities || {}),
+        [data['slug']]: {
+          [activityId]: {
+            content,
+            ref,
+            timestamp: new Date(),
+            comment: false,
+          },
+        },
+      },
+      dataActivityOrder: {
+        ...(collection.dataActivityOrder || {}),
+        [data['slug']]: [activityId],
+      },
+    };
+  }
+}
+
 @CommandHandler(AddDataCommand)
 export class AddDataCommandHandler implements ICommandHandler<AddDataCommand> {
   constructor(
@@ -34,6 +84,7 @@ export class AddDataCommandHandler implements ICommandHandler<AddDataCommand> {
     private readonly logger: LoggingService,
     private readonly validationService: DataValidationService,
     private readonly advancedAccessService: AdvancedAccessService,
+    private readonly activityOnAddData: ActivityOnAddData,
   ) {
     this.logger.setContext('AddDataCommandHandler');
   }
@@ -96,11 +147,12 @@ export class AddDataCommandHandler implements ICommandHandler<AddDataCommand> {
       filteredData['slug'] = uuidv4();
 
       /** Disabling activity for forms as it doesnt quite make sense yet */
-      const { dataActivities, dataActivityOrder } = this.getActivity(
-        collection,
-        filteredData,
-        caller?.id,
-      );
+      const { dataActivities, dataActivityOrder } =
+        this.activityOnAddData.getActivity(
+          collection,
+          filteredData,
+          caller?.id,
+        );
       const cardOrders = collection.projectMetadata?.cardOrders || {};
       if (Object.keys(cardOrders).length) {
         Object.keys(cardOrders).forEach((groupByColumn) => {
@@ -158,52 +210,6 @@ export class AddDataCommandHandler implements ICommandHandler<AddDataCommand> {
     }
   }
 
-  getActivity(
-    collection: Collection,
-    data: object,
-    caller: string,
-  ): {
-    dataActivities: MappedItem<MappedItem<Activity>>;
-    dataActivityOrder: MappedItem<string[]>;
-  } {
-    const activityId = uuidv4();
-    let content, ref;
-    const dataType =
-      collection.defaultView === 'form'
-        ? 'response'
-        : collection.defaultView === 'table'
-        ? 'row'
-        : 'card';
-    if (caller) {
-      content = `created new ${dataType}`;
-      ref = {
-        actor: {
-          id: caller,
-          type: 'user',
-        },
-      };
-    } else {
-      content = `New ${dataType} was added`;
-    }
-    return {
-      dataActivities: {
-        ...(collection.dataActivities || {}),
-        [data['slug']]: {
-          [activityId]: {
-            content,
-            ref,
-            timestamp: new Date(),
-            comment: false,
-          },
-        },
-      },
-      dataActivityOrder: {
-        ...(collection.dataActivityOrder || {}),
-        [data['slug']]: [activityId],
-      },
-    };
-  }
-
   filterUndefinedValues(data: object) {
     const filteredData = {};
     for (const [key, value] of Object.entries(data)) {
@@ -246,7 +252,7 @@ export class AddDataUsingAutomationCommandHandler
     private readonly eventBus: EventBus,
     private readonly logger: LoggingService,
     private readonly validationService: DataValidationService,
-    private readonly advancedAccessService: AdvancedAccessService,
+    private readonly activityOnAddData: ActivityOnAddData,
   ) {
     this.logger.setContext('AddDataUsingAutomationCommandHandler');
   }
@@ -281,11 +287,8 @@ export class AddDataUsingAutomationCommandHandler
         }
       }
       data['slug'] = uuidv4();
-      const { dataActivities, dataActivityOrder } = this.getActivity(
-        collection,
-        data,
-        botUser.id,
-      );
+      const { dataActivities, dataActivityOrder } =
+        this.activityOnAddData.getActivity(collection, data, botUser.id);
       const cardOrders = collection.projectMetadata?.cardOrders || {};
       console.log({ cardOrders });
       if (Object.keys(cardOrders).length) {
@@ -333,50 +336,108 @@ export class AddDataUsingAutomationCommandHandler
       );
     }
   }
+}
 
-  getActivity(
-    collection: Collection,
-    data: object,
-    caller: string,
-  ): {
-    dataActivities: MappedItem<MappedItem<Activity>>;
-    dataActivityOrder: MappedItem<string[]>;
-  } {
-    const activityId = uuidv4();
-    let content, ref;
-    const dataType =
-      collection.defaultView === 'form'
-        ? 'response'
-        : collection.defaultView === 'table'
-        ? 'row'
-        : 'card';
-    if (caller) {
-      content = `created new ${dataType}`;
-      ref = {
-        actor: {
-          id: caller,
-          type: 'user',
-        },
-      };
-    } else {
-      content = `New ${dataType} was added`;
-    }
-    return {
-      dataActivities: {
-        ...(collection.dataActivities || {}),
-        [data['slug']]: {
-          [activityId]: {
-            content,
-            ref,
-            timestamp: new Date(),
-            comment: false,
+@CommandHandler(AddMultipleDataUsingAutomationCommand)
+export class AddMultipleDataUsingAutomationCommandHandler
+  implements ICommandHandler<AddMultipleDataUsingAutomationCommand>
+{
+  constructor(
+    private readonly collectionRepository: CollectionRepository,
+    private readonly queryBus: QueryBus,
+    private readonly eventBus: EventBus,
+    private readonly logger: LoggingService,
+    private readonly validationService: DataValidationService,
+    private readonly activityOnAddData: ActivityOnAddData,
+  ) {
+    this.logger.setContext('AddMultipleDataUsingAutomationCommandHandler');
+  }
+
+  async execute(command: AddMultipleDataUsingAutomationCommand) {
+    const { data, collectionId } = command;
+    try {
+      const collection = await this.collectionRepository.findById(collectionId);
+      if (!collection) throw 'Collection does not exist';
+      const botUser = await this.queryBus.execute(
+        new GetProfileQuery(
+          {
+            username: 'Stu, the Spect Bot',
           },
-        },
-      },
-      dataActivityOrder: {
-        ...(collection.dataActivityOrder || {}),
-        [data['slug']]: [activityId],
-      },
-    };
+          '',
+        ),
+      );
+      const dataUpdates = collection.data || {};
+      const dataOwners = collection.dataOwner || {};
+      let projectMetadata = collection.projectMetadata || {};
+      let dataActivities = collection.dataActivities || {};
+      let dataActivityOrder = collection.dataActivityOrder || {};
+      for (const d of data) {
+        const validData = await this.validationService.validate(
+          d,
+          'add',
+          true,
+          collection,
+        );
+
+        if (!validData) {
+          continue;
+        }
+
+        for (const [propertyId, property] of Object.entries(
+          collection.properties,
+        )) {
+          if (property.default && !d[propertyId]) {
+            d[propertyId] = property.default;
+          }
+        }
+        d['slug'] = uuidv4();
+        const act = this.activityOnAddData.getActivity(
+          collection,
+          d,
+          botUser.id,
+        );
+        dataActivities = {
+          ...dataActivities,
+          ...act.dataActivities,
+        };
+        dataActivityOrder = {
+          ...dataActivityOrder,
+          ...act.dataActivityOrder,
+        };
+        const cardOrders = collection.projectMetadata?.cardOrders || {};
+        if (Object.keys(cardOrders).length) {
+          Object.keys(cardOrders).forEach((groupByColumn) => {
+            const columnIndex = collection.properties[
+              groupByColumn
+            ].options.findIndex(
+              (option) => option.value === d[groupByColumn]?.value,
+            );
+            cardOrders[groupByColumn][columnIndex + 1].push(d['slug']);
+          });
+        }
+        dataUpdates[d['slug']] = d;
+        dataOwners[d['slug']] = botUser.id;
+        projectMetadata = {
+          ...projectMetadata,
+          cardOrders,
+        };
+      }
+      console.log({ dataUpdates });
+      await this.collectionRepository.updateById(collectionId, {
+        data: dataUpdates,
+        dataActivities,
+        dataActivityOrder,
+        dataOwner: dataOwners,
+        projectMetadata,
+      });
+      return true;
+    } catch (err) {
+      this.logger.error(
+        `Failed adding data to collection Id ${collectionId} with error ${err}`,
+      );
+      throw new InternalServerErrorException(
+        `Failed adding data to collection Id ${collectionId} with error ${err}`,
+      );
+    }
   }
 }

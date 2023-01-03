@@ -33,6 +33,7 @@ export class DataValidationService {
       );
     if (!collectionToValidate) throw 'Collection not found';
 
+    console.log({ dataObj });
     const propertyValidationPassed = this.validateProperty(
       dataObj,
       collectionToValidate.properties,

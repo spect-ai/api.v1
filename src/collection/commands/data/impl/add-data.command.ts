@@ -15,3 +15,9 @@ export class AddDataUsingAutomationCommand {
     public readonly collectionId: string,
   ) {}
 }
+export class AddMultipleDataUsingAutomationCommand {
+  constructor(
+    public readonly data: any[],
+    public readonly collectionId: string,
+  ) {}
+}

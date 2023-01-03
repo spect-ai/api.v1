@@ -25,7 +25,10 @@ import {
   SendEmailActionCommand,
   StartVotingPeriodActionCommand,
 } from '../impl/take-action-v2.command';
-import { AddDataUsingAutomationCommand } from 'src/collection/commands';
+import {
+  AddDataUsingAutomationCommand,
+  AddMultipleDataUsingAutomationCommand,
+} from 'src/collection/commands';
 import { StartVotingPeriodCommand } from 'src/collection/commands/data/impl/vote-data.command';
 import { JoinedCircleEvent } from 'src/circle/events/impl';
 
@@ -346,16 +349,32 @@ export class CreateCardActionCommandHandler
       );
 
       const data = {};
+      let milestoneFields = {} as { [key: string]: string[][] };
+
       for (const value of action.data.values) {
-        console.log({
-          v: value.mapping.to.value,
-          p: toCollection.properties[value.mapping.to.value],
-        });
         if (value.type === 'default') {
           data[value.default.field.value] = value.default.value;
         } else if (value.type === 'mapping') {
-          data[value.mapping.to.value] =
-            fromCollection.data[relevantIds.dataSlug][value.mapping.from.value];
+          if (
+            value.mapping.from.data?.fieldType === 'milestone' &&
+            ['shortText', 'longText', 'date', 'reward'].includes(
+              value.mapping.from.data?.type,
+            )
+          ) {
+            if (!milestoneFields[value.mapping.from.data?.fieldName])
+              milestoneFields = {
+                ...milestoneFields,
+                [value.mapping.from.data?.fieldName]: [],
+              };
+            milestoneFields[value.mapping.from.data?.fieldName].push([
+              value.mapping.from.data?.subFieldName,
+              value.mapping.to.value,
+            ]);
+          } else
+            data[value.mapping.to.value] =
+              fromCollection.data[relevantIds.dataSlug][
+                value.mapping.from.value
+              ];
         } else if (value.type === 'responder') {
           const dataOwner = await this.queryBus.execute(
             new GetProfileQuery(
@@ -366,7 +385,6 @@ export class CreateCardActionCommandHandler
             ),
           );
           if (toCollection.properties[value.mapping.to.value].type === 'user') {
-            console.log('user');
             data[value.mapping.to.value] = {
               label: dataOwner.username,
               value: dataOwner._id.toString(),
@@ -374,7 +392,6 @@ export class CreateCardActionCommandHandler
           } else if (
             toCollection.properties[value.mapping.to.value].type === 'user[]'
           ) {
-            console.log('user[]');
             data[value.mapping.to.value] = [
               ...(data[value.mapping.to.value] || []),
               {
@@ -391,9 +408,25 @@ export class CreateCardActionCommandHandler
         }
       }
 
+      const allData = [];
+      console.log({ milestoneFields });
+      for (const [milestoneField, fields] of Object.entries(milestoneFields)) {
+        for (const milestone of fromCollection.data[relevantIds.dataSlug][
+          milestoneField
+        ]) {
+          const data = {};
+          for (const field of fields) {
+            if (milestone[field[0]]) data[field[1]] = milestone[field[0]];
+          }
+          allData.push(data);
+        }
+      }
+
+      console.log({ allData });
+      if (allData.length === 0) allData.push(data);
       await this.commandBus.execute(
-        new AddDataUsingAutomationCommand(
-          data,
+        new AddMultipleDataUsingAutomationCommand(
+          allData,
           action.data.selectedCollection.value,
         ),
       );

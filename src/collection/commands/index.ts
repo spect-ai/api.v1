@@ -18,6 +18,7 @@ import { UpdateCommentCommandHandler } from './comments/handlers/update-comment.
 import {
   AddDataCommandHandler,
   AddDataUsingAutomationCommandHandler,
+  AddMultipleDataUsingAutomationCommandHandler,
 } from './data/handlers/add-data.handler';
 import {
   RemoveDataCommandHandler,
@@ -60,4 +61,5 @@ export const CommandHandlers = [
   StartVotingPeriodCommandHandler,
   EndVotingPeriodCommandHandler,
   DeleteCollectionCommandHandler,
+  AddMultipleDataUsingAutomationCommandHandler,
 ];

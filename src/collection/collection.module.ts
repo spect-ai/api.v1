@@ -18,6 +18,7 @@ import { EthAddressModule } from 'src/_eth-address/_eth-address.module';
 import { CollectionController } from './collection.controller';
 import { CollectionRepository } from './collection.repository';
 import { CommandHandlers } from './commands';
+import { ActivityOnAddData } from './commands/data/handlers/add-data.handler';
 import { EventHandlers } from './events';
 import { Collection } from './model/collection.model';
 import { QueryHandlers } from './queries';
@@ -55,6 +56,7 @@ import { DataValidationService } from './validations/data-validation.service';
     ResponseCredentialingService,
     CircleAuthGuard,
     RolesService,
+    ActivityOnAddData,
     DiscordService,
   ],
   exports: [CollectionModule, CollectionRepository],
