@@ -290,7 +290,6 @@ export class AddDataUsingAutomationCommandHandler
       const { dataActivities, dataActivityOrder } =
         this.activityOnAddData.getActivity(collection, data, botUser.id);
       const cardOrders = collection.projectMetadata?.cardOrders || {};
-      console.log({ cardOrders });
       if (Object.keys(cardOrders).length) {
         Object.keys(cardOrders).forEach((groupByColumn) => {
           const columnIndex = collection.properties[
@@ -422,7 +421,6 @@ export class AddMultipleDataUsingAutomationCommandHandler
           cardOrders,
         };
       }
-      console.log({ dataUpdates });
       await this.collectionRepository.updateById(collectionId, {
         data: dataUpdates,
         dataActivities,

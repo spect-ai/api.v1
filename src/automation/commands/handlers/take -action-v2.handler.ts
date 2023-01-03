@@ -409,16 +409,16 @@ export class CreateCardActionCommandHandler
       }
 
       const allData = [];
-      console.log({ milestoneFields });
       for (const [milestoneField, fields] of Object.entries(milestoneFields)) {
         for (const milestone of fromCollection.data[relevantIds.dataSlug][
           milestoneField
         ]) {
-          const data = {};
+          const d = { ...data };
           for (const field of fields) {
-            if (milestone[field[0]]) data[field[1]] = milestone[field[0]];
+            if (milestone[field[0]]) d[field[1]] = milestone[field[0]];
           }
-          allData.push(data);
+          console.log({ d });
+          allData.push(d);
         }
       }
 
