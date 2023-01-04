@@ -4,9 +4,7 @@ import { CirclesRepository } from 'src/circle/circles.repository';
 import { AddPaymentsCommand } from '../impl/add-payment.command';
 import { v4 as uuidv4 } from 'uuid';
 import { Circle } from 'src/circle/model/circle.model';
-import { PaymentDetails } from 'src/circle/types';
 import { GetCollectionByIdQuery } from 'src/collection/queries';
-import { GetProfileQuery, GetUserByFilterQuery } from 'src/users/queries/impl';
 import { CommonTools } from 'src/common/common.service';
 import { LoggingService } from 'src/logging/logging.service';
 import { Collection } from 'src/collection/model/collection.model';
@@ -44,25 +42,16 @@ export class AddPaymentsCommandHandler
       }
 
       const pendingPayments = circleToUpdate.pendingPayments;
-      const rewardFieldToPayOn = Object.entries(collection.properties)
-        .filter(([propertyId, property]) => {
-          if (property.type === 'reward') return propertyId;
-        })
-        .map(([propertyId, property]) => propertyId);
-      if (rewardFieldToPayOn.length === 0) {
+      const rewardFieldToPayOn =
+        collection.projectMetadata.payments.rewardField;
+      if (!rewardFieldToPayOn) {
         throw new InternalServerErrorException(
           `Reward property doesnt exist in collection ${addPaymentsDto.collectionId}`,
         );
       }
       console.log({ rewardFieldToPayOn });
-
-      const rewardPaidTo = Object.entries(collection.properties)
-        .filter(([propertyId, property]) => {
-          if (['user', 'user[]', 'ethAddress'].includes(property.type))
-            return propertyId;
-        })
-        .map(([propertyId, property]) => propertyId);
-      if (rewardPaidTo.length === 0) {
+      const rewardPaidTo = collection.projectMetadata.payments.payeeField;
+      if (!rewardPaidTo) {
         throw new InternalServerErrorException(
           `User[], user or ethAddress property doesnt exist in collection ${addPaymentsDto.collectionId}`,
         );
@@ -72,13 +61,11 @@ export class AddPaymentsCommandHandler
       const paymentIds = [];
       console.log({ dataSlugs: addPaymentsDto.dataSlugs });
       for (const dataSlug of addPaymentsDto.dataSlugs) {
-        if (collection.data[dataSlug][rewardFieldToPayOn[0]].value === 0)
-          continue;
+        if (collection.data[dataSlug][rewardFieldToPayOn].value === 0) continue;
         const paymentId = uuidv4();
         const paidTo = [];
-        let paidToValue;
-        if (collection.properties[rewardPaidTo[0]].type === 'user[]') {
-          for (const user of collection.data[dataSlug][rewardPaidTo[0]]) {
+        if (collection.properties[rewardPaidTo].type === 'user[]') {
+          for (const user of collection.data[dataSlug][rewardPaidTo]) {
             paidTo.push({
               propertyType: 'user',
               value: user.value,
@@ -86,11 +73,11 @@ export class AddPaymentsCommandHandler
                 paidTo.length === 0
                   ? {
                       chain:
-                        collection.data[dataSlug][rewardFieldToPayOn[0]].chain,
+                        collection.data[dataSlug][rewardFieldToPayOn].chain,
                       token:
-                        collection.data[dataSlug][rewardFieldToPayOn[0]].token,
+                        collection.data[dataSlug][rewardFieldToPayOn].token,
                       value:
-                        collection.data[dataSlug][rewardFieldToPayOn[0]].value,
+                        collection.data[dataSlug][rewardFieldToPayOn].value,
                     }
                   : {
                       chain: null,
@@ -101,20 +88,17 @@ export class AddPaymentsCommandHandler
           }
         } else {
           paidTo.push({
-            propertyType: collection.properties[rewardPaidTo[0]].type,
+            propertyType: collection.properties[rewardPaidTo].type,
             value:
-              collection.properties[rewardPaidTo[0]].type === 'user'
-                ? collection.data[dataSlug][rewardPaidTo[0]]?.value
-                : collection.data[dataSlug][rewardPaidTo[0]],
+              collection.properties[rewardPaidTo].type === 'user'
+                ? collection.data[dataSlug][rewardPaidTo]?.value
+                : collection.data[dataSlug][rewardPaidTo],
             reward:
               paidTo.length === 0
                 ? {
-                    chain:
-                      collection.data[dataSlug][rewardFieldToPayOn[0]].chain,
-                    token:
-                      collection.data[dataSlug][rewardFieldToPayOn[0]].token,
-                    value:
-                      collection.data[dataSlug][rewardFieldToPayOn[0]].value,
+                    chain: collection.data[dataSlug][rewardFieldToPayOn].chain,
+                    token: collection.data[dataSlug][rewardFieldToPayOn].token,
+                    value: collection.data[dataSlug][rewardFieldToPayOn].value,
                   }
                 : {
                     chain: null,
@@ -130,9 +114,9 @@ export class AddPaymentsCommandHandler
           type: 'addedFromCard',
           dataSlug,
           collectionId: addPaymentsDto.collectionId,
-          chain: collection.data[dataSlug][rewardFieldToPayOn[0]].chain,
-          token: collection.data[dataSlug][rewardFieldToPayOn[0]].token,
-          value: collection.data[dataSlug][rewardFieldToPayOn[0]].value,
+          chain: collection.data[dataSlug][rewardFieldToPayOn].chain,
+          token: collection.data[dataSlug][rewardFieldToPayOn].token,
+          value: collection.data[dataSlug][rewardFieldToPayOn].value,
           paidTo: paidTo,
         };
         paymentIds.push(paymentId);

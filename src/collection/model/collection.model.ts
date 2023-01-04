@@ -230,4 +230,8 @@ export interface ProjectMetadata {
   cardOrders: {
     [columnName: string]: string[][];
   };
+  payments?: {
+    rewardField: string;
+    payeeField: string;
+  };
 }
