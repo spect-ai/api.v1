@@ -140,6 +140,7 @@ export type VotingPeriod = {
 };
 
 export type SnapshotVoting = {
+  endsOn?: string;
   onSnapshot?: boolean;
   space?: string;
   proposalId?: string;

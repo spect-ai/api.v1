@@ -2,6 +2,7 @@ import { InternalServerErrorException } from '@nestjs/common';
 import {
   CommandBus,
   CommandHandler,
+  EventBus,
   ICommandHandler,
   QueryBus,
 } from '@nestjs/cqrs';
@@ -16,6 +17,7 @@ import {
 import { GetCircleByIdQuery } from 'src/circle/queries/impl';
 import { UpdateCircleCommand } from 'src/circle/commands/impl/update-circle.command';
 import { defaultCircleRoles } from 'src/constants';
+import { VotingStartedEvent, VotingEndedEvent } from 'src/collection/events';
 
 @CommandHandler(VoteDataCommand)
 export class VoteDataCommandHandler
@@ -131,6 +133,7 @@ export class StartVotingPeriodCommandHandler
     private readonly collectionRepository: CollectionRepository,
     private readonly queryBus: QueryBus,
     private readonly commandBus: CommandBus,
+    private readonly eventBus: EventBus,
     private readonly logger: LoggingService,
   ) {
     this.logger.setContext('StartVotingPeriodCommandHandler');
@@ -167,6 +170,7 @@ export class StartVotingPeriodCommandHandler
                 endsOn: startVotingPeriodRequestDto?.endsOn,
                 startedOn: new Date(),
                 snapshot: {
+                  endsOn: startVotingPeriodRequestDto?.endsOn,
                   onSnapshot: startVotingPeriodRequestDto?.postOnSnapshot,
                   space: startVotingPeriodRequestDto?.space,
                   proposalId: startVotingPeriodRequestDto?.proposalId,
@@ -177,6 +181,16 @@ export class StartVotingPeriodCommandHandler
           },
         },
       );
+
+      this.eventBus.publish(
+        new VotingStartedEvent(
+          collection,
+          startVotingPeriodRequestDto,
+          dataSlug,
+          caller,
+        ),
+      );
+
       return await await this.queryBus.execute(
         new GetPrivateViewCollectionQuery(collection.slug, updatedCollection),
       );
@@ -199,6 +213,7 @@ export class EndVotingPeriodCommandHandler
     private readonly collectionRepository: CollectionRepository,
     private readonly queryBus: QueryBus,
     private readonly commandBus: CommandBus,
+    private readonly eventBus: EventBus,
     private readonly logger: LoggingService,
   ) {
     this.logger.setContext('EndVotingPeriodCommandHandler');
@@ -231,6 +246,12 @@ export class EndVotingPeriodCommandHandler
           },
         },
       );
+
+      if (!collection.voting.periods[dataSlug].snapshot.proposalId) {
+        this.eventBus.publish(
+          new VotingEndedEvent(collection, dataSlug, caller),
+        );
+      }
       return await await this.queryBus.execute(
         new GetPrivateViewCollectionQuery(collection.slug, updatedCollection),
       );
