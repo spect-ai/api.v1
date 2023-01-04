@@ -145,7 +145,6 @@ export class UpdatePropertyDto {
   @IsValidPaywallOptions()
   payWallOptions: PayWallOptions;
 
-  @IsString()
   @IsOptional()
   default: any;
 

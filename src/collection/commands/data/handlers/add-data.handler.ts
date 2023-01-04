@@ -139,8 +139,8 @@ export class AddDataCommandHandler implements ICommandHandler<AddDataCommand> {
       for (const [propertyId, property] of Object.entries(
         collection.properties,
       )) {
-        if (property.default && !data[propertyId]) {
-          data[propertyId] = property.default;
+        if (property.default && !filteredData[propertyId]) {
+          filteredData[propertyId] = property.default;
         }
       }
 
@@ -381,7 +381,6 @@ export class AddMultipleDataUsingAutomationCommandHandler
         if (!validData) {
           continue;
         }
-
         for (const [propertyId, property] of Object.entries(
           collection.properties,
         )) {
