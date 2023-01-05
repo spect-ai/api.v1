@@ -31,8 +31,11 @@ export class VotingEndedEventHandler
       const notifContent = `Voting period ended on ${collection.name}`;
       const redirectUrl = `/${circle.slug}/r/${collection.slug}?cardSlug=${dataSlug}`;
 
-      for (const [memberId] of Object.entries(circle.memberRoles)) {
-        if (collection.creator !== memberId) {
+      const roleSet = new Set(collection.permissions.viewResponses);
+
+      for (const [memberId, roles] of Object.entries(circle.memberRoles)) {
+        const hasRole = roles.some((role) => roleSet.has(role));
+        if (collection.creator !== memberId && hasRole) {
           this.eventBus.publish(
             new SingleNotificationEvent(
               notifContent,

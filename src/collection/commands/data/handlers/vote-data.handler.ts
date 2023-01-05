@@ -1,4 +1,4 @@
-import { InternalServerErrorException } from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import {
   CommandBus,
   CommandHandler,
@@ -18,6 +18,57 @@ import { GetCircleByIdQuery } from 'src/circle/queries/impl';
 import { UpdateCircleCommand } from 'src/circle/commands/impl/update-circle.command';
 import { defaultCircleRoles } from 'src/constants';
 import { VotingStartedEvent, VotingEndedEvent } from 'src/collection/events';
+import { Collection } from 'src/collection/model/collection.model';
+import { MappedItem } from 'src/common/interfaces';
+import { Activity } from 'src/collection/types/types';
+import { v4 as uuidv4 } from 'uuid';
+
+@Injectable()
+export class ActivityOnVoting {
+  getActivity(
+    collection: Collection,
+    dataSlug: string,
+    caller: string,
+    action: 'start' | 'end',
+  ): {
+    dataActivities: MappedItem<MappedItem<Activity>>;
+    dataActivityOrder: MappedItem<string[]>;
+  } {
+    const activityId = uuidv4();
+    let content, ref;
+    const dataType = collection.defaultView === 'form' ? 'Voting period' : '';
+    if (caller) {
+      content = `${action}ed ${dataType}`;
+      ref = {
+        actor: {
+          id: caller,
+          type: 'user',
+        },
+      };
+    } else {
+      content = `${dataType} ${action}ed`;
+    }
+
+    return {
+      dataActivities: {
+        ...(collection.dataActivities || {}),
+        [dataSlug]: {
+          ...((collection.dataActivities || {})?.[dataSlug] || {}),
+          [activityId]: {
+            content,
+            ref,
+            timestamp: new Date(),
+            comment: false,
+          },
+        },
+      },
+      dataActivityOrder: {
+        ...(collection.dataActivityOrder || {}),
+        [dataSlug]: [...collection.dataActivityOrder?.[dataSlug], activityId],
+      },
+    } as any;
+  }
+}
 
 @CommandHandler(VoteDataCommand)
 export class VoteDataCommandHandler
@@ -135,6 +186,7 @@ export class StartVotingPeriodCommandHandler
     private readonly commandBus: CommandBus,
     private readonly eventBus: EventBus,
     private readonly logger: LoggingService,
+    private readonly activityOnVoting: ActivityOnVoting,
   ) {
     this.logger.setContext('StartVotingPeriodCommandHandler');
   }
@@ -152,6 +204,15 @@ export class StartVotingPeriodCommandHandler
         collection.voting.periods[dataSlug]?.active
       )
         throw 'Voting already started for this data';
+
+      const { dataActivities, dataActivityOrder } =
+        this.activityOnVoting.getActivity(
+          collection,
+          dataSlug,
+          caller?.id,
+          'start',
+        );
+
       const updatedCollection = await this.collectionRepository.updateById(
         collectionId,
         {
@@ -179,6 +240,8 @@ export class StartVotingPeriodCommandHandler
               },
             },
           },
+          dataActivities,
+          dataActivityOrder,
         },
       );
 
@@ -215,6 +278,7 @@ export class EndVotingPeriodCommandHandler
     private readonly commandBus: CommandBus,
     private readonly eventBus: EventBus,
     private readonly logger: LoggingService,
+    private readonly activityOnVoting: ActivityOnVoting,
   ) {
     this.logger.setContext('EndVotingPeriodCommandHandler');
   }
@@ -231,6 +295,14 @@ export class EndVotingPeriodCommandHandler
         !collection.voting.periods[dataSlug]?.active
       )
         throw 'Voting already ended for this data';
+
+      const { dataActivities, dataActivityOrder } =
+        this.activityOnVoting.getActivity(
+          collection,
+          dataSlug,
+          caller?.id,
+          'end',
+        );
       const updatedCollection = await this.collectionRepository.updateById(
         collectionId,
         {
@@ -244,6 +316,8 @@ export class EndVotingPeriodCommandHandler
               },
             },
           },
+          dataActivities,
+          dataActivityOrder,
         },
       );
 
