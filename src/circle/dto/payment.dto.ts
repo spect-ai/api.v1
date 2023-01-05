@@ -43,8 +43,12 @@ export class MovePaymentsDto {
   to: string;
 }
 
-export class MakePaymentsRequestDto {
+export class PaymentIdsDto {
   @IsArray()
   @IsNotEmpty()
   paymentIds: string[];
+
+  @IsObject()
+  @IsOptional()
+  transactionHash: { [key: string]: string };
 }

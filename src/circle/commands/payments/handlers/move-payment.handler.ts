@@ -21,7 +21,7 @@ export class MovePaymentsCommandHandler
   async execute(command: MovePaymentsCommand): Promise<CircleResponseDto> {
     try {
       console.log('MakePaymentsCommandHandler');
-      const { movePaymentsDto, circleId } = command;
+      const { movePaymentsDto, circleId, transactionHash } = command;
       const circleToUpdate = await this.circleRepository.findById(circleId);
       if (!circleToUpdate) {
         throw new InternalServerErrorException(
@@ -83,6 +83,29 @@ export class MovePaymentsCommandHandler
             },
           };
         }
+
+      if (transactionHash) {
+        for (const paymentId of paymentIds)
+          if (
+            circleToUpdate.paymentDetails[paymentId]?.token.address === '0x0'
+          ) {
+            updates['paymentDetails'] = {
+              ...(updates['paymentDetails'] || {}),
+              [paymentId]: {
+                ...(updates['paymentDetails'] || {})[paymentId],
+                transactionHash: transactionHash['currency'],
+              },
+            };
+          } else {
+            updates['paymentDetails'] = {
+              ...(updates['paymentDetails'] || {}),
+              [paymentId]: {
+                ...(updates['paymentDetails'] || {})[paymentId],
+                transactionHash: transactionHash['tokens'],
+              },
+            };
+          }
+      }
 
       const updatedCircle = await this.circleRepository.updateById(
         circleId,
