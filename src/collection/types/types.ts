@@ -1,4 +1,3 @@
-import { BooleanSchemaDefinition } from 'mongoose';
 import { MappedItem } from 'src/common/interfaces';
 
 export type Permissions = {
