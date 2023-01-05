@@ -49,14 +49,12 @@ export class AddPaymentsCommandHandler
           `Reward property doesnt exist in collection ${addPaymentsDto.collectionId}`,
         );
       }
-      console.log({ rewardFieldToPayOn });
       const rewardPaidTo = collection.projectMetadata.payments.payeeField;
       if (!rewardPaidTo) {
         throw new InternalServerErrorException(
           `User[], user or ethAddress property doesnt exist in collection ${addPaymentsDto.collectionId}`,
         );
       }
-      console.log({ rewardPaidTo });
       const newPaymentDetails = {};
       const paymentIds = [];
       console.log({ dataSlugs: addPaymentsDto.dataSlugs });
