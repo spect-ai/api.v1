@@ -19,6 +19,7 @@ import { CollectionController } from './collection.controller';
 import { CollectionRepository } from './collection.repository';
 import { CommandHandlers } from './commands';
 import { ActivityOnAddData } from './commands/data/handlers/add-data.handler';
+import { ActivityOnVoting } from './commands/data/handlers/vote-data.handler';
 import { EventHandlers } from './events';
 import { Collection } from './model/collection.model';
 import { QueryHandlers } from './queries';
@@ -58,6 +59,7 @@ import { DataValidationService } from './validations/data-validation.service';
     RolesService,
     ActivityOnAddData,
     DiscordService,
+    ActivityOnVoting,
   ],
   exports: [CollectionModule, CollectionRepository],
 })

@@ -1,4 +1,3 @@
-import { BooleanSchemaDefinition } from 'mongoose';
 import { MappedItem } from 'src/common/interfaces';
 
 export type Permissions = {
@@ -140,6 +139,7 @@ export type VotingPeriod = {
 };
 
 export type SnapshotVoting = {
+  endsOn?: string;
   onSnapshot?: boolean;
   space?: string;
   proposalId?: string;
