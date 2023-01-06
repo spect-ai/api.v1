@@ -86,9 +86,7 @@ export class MovePaymentsCommandHandler
 
       if (transactionHash) {
         for (const paymentId of paymentIds)
-          if (
-            circleToUpdate.paymentDetails[paymentId]?.token.address === '0x0'
-          ) {
+          if (circleToUpdate.paymentDetails[paymentId]?.token.value === '0x0') {
             updates['paymentDetails'] = {
               ...(updates['paymentDetails'] || {}),
               [paymentId]: {

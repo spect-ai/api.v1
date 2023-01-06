@@ -110,8 +110,14 @@ export type RootAutomationsType = string[];
 export type PaymentDetails = {
   id: string;
   type: 'manuallyAdded' | 'addedFromCard';
-  chain: Chain;
-  token: Token;
+  chain: {
+    label: string;
+    value: string;
+  };
+  token: {
+    label: string;
+    value: string;
+  };
   value: number;
   paidTo: {
     propertyType: string;
