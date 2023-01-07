@@ -82,6 +82,23 @@ export class CreateCollectionCommandHandler
 
       let createdCollection;
 
+      // give default permissions to roles which have createForm permission
+      const defaultPermissions = {
+        manageSettings: [],
+        updateResponsesManually: [],
+        viewResponses: [],
+        addComments: [],
+      };
+
+      Object.keys(parentCircle.roles).map((role) => {
+        if (parentCircle.roles[role].permissions.createNewForm) {
+          defaultPermissions.manageSettings.push(role);
+          defaultPermissions.updateResponsesManually.push(role);
+          defaultPermissions.viewResponses.push(role);
+          defaultPermissions.addComments.push(role);
+        }
+      });
+
       if (createCollectionDto.collectionType === 0) {
         const defaultViewId = '0x0';
         createdCollection = await this.collectionRepository.create({
@@ -91,6 +108,7 @@ export class CreateCollectionCommandHandler
           creator: caller,
           parents: [createCollectionDto.circleId],
           slug: uuidv4(),
+          permissions: defaultPermissions,
           formMetadata: {
             active: true,
             logo: parentCircle.avatar,
@@ -124,6 +142,7 @@ export class CreateCollectionCommandHandler
           creator: caller,
           parents: [createCollectionDto.circleId],
           slug: uuidv4(),
+          permissions: defaultPermissions,
           projectMetadata: {
             viewOrder: [defaultViewId],
             views: {
