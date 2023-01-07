@@ -407,7 +407,7 @@ export class MigrateAllCollectionsCommandHandler
     const allCollections = await this.collectionRepository.findAll();
 
     for (const collection of allCollections) {
-      if (!collection.formMetadata && !collection.collectionType) {
+      if (collection.collectionType === undefined) {
         collection.formMetadata = {};
         for (const property of formMetadataProperties) {
           collection.formMetadata[property] = collection[property];
@@ -415,6 +415,28 @@ export class MigrateAllCollectionsCommandHandler
         }
         console.log({ collection });
         collection.collectionType = 0;
+        await this.collectionRepository.updateById(collection.id, collection);
+      } else if (
+        collection.collectionType === 0 &&
+        !collection.projectMetadata
+      ) {
+        const defaultViewId = '0x0';
+        collection.projectMetadata = {
+          viewOrder: [defaultViewId],
+          views: {
+            [defaultViewId]: {
+              id: defaultViewId,
+              name: 'Default View',
+              type: 'form',
+              filters: [],
+              sort: {
+                property: '',
+                direction: 'asc',
+              },
+            },
+          },
+          cardOrders: {},
+        };
         await this.collectionRepository.updateById(collection.id, collection);
       }
     }
