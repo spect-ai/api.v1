@@ -25,7 +25,10 @@ export class AddRoleCommandHandler implements ICommandHandler<AddRoleCommand> {
 
       const roles = {
         ...circleToUpdate.roles,
-        [role]: { ...roleDto, mutable: roleDto.mutable || true },
+        [role]: {
+          ...roleDto,
+          mutable: roleDto.mutable !== undefined ? roleDto.mutable : true,
+        },
       };
 
       const updatedCircle =

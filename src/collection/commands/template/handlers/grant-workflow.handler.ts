@@ -8,7 +8,7 @@ import { CollectionRepository } from 'src/collection/collection.repository';
 import { QueryBus, CommandBus } from '@nestjs/cqrs';
 import { GetCircleByIdQuery } from 'src/circle/queries/impl';
 import { UpdateCircleCommand } from 'src/circle/commands/impl/update-circle.command';
-import { CreateFolderCommand } from 'src/circle/commands/impl';
+import { AddRoleCommand, CreateFolderCommand } from 'src/circle/commands/impl';
 import { AddAutomationCommand } from 'src/circle/commands/automation/impl';
 import {
   getGranteeCollectionDto,
@@ -16,6 +16,7 @@ import {
   getOnboardingFormDetails,
 } from '../constants';
 import { getAutomations } from '../constants/onboardingForm';
+import { defaultCircleRoles } from 'src/constants';
 
 @CommandHandler(CreateGrantWorkflowCommand)
 export class CreateGrantWorkflowCommandHandler
@@ -37,8 +38,12 @@ export class CreateGrantWorkflowCommandHandler
         new GetCircleByIdQuery(id, {}),
       );
 
-      // Create Onboarding Form
-      const onboardingformDetails = getOnboardingFormDetails(circle);
+      // 1. Create Onboarding Form
+      const onboardingformDetails = getOnboardingFormDetails(
+        circle,
+        templateDto.snapshot,
+        templateDto.permissions,
+      );
       const onboardingForm = await this.collectionRepository.create({
         creator: caller,
         parents: [id],
@@ -46,7 +51,7 @@ export class CreateGrantWorkflowCommandHandler
         ...onboardingformDetails,
       } as any);
 
-      // Create Milestone Collection
+      // 2. Create Milestone Collection
       const milstoneViewId = uuidv4();
       const milestoneCollectionDto = getMilestoneCollectionDetails(
         circle,
@@ -59,7 +64,7 @@ export class CreateGrantWorkflowCommandHandler
         ...milestoneCollectionDto,
       } as any);
 
-      // Create Grantee Collection
+      // 3. Create Grantee Collection
       const granteeViewId = uuidv4();
       const granteeCollectionDto = getGranteeCollectionDto(
         circle,
@@ -72,7 +77,25 @@ export class CreateGrantWorkflowCommandHandler
         ...granteeCollectionDto,
       } as any);
 
-      // Add Automations
+      // 4. Check if there exists a Grantee role in the circle
+      if (!Object.keys(circle.roles).includes('grantee')) {
+        await this.commandBus.execute(
+          new AddRoleCommand(
+            {
+              name: 'Grantee',
+              description:
+                'This role is awarded to the grantees who have been accepted for the grants program',
+              mutable: false,
+              selfAssignable: false,
+              permissions: defaultCircleRoles?.['applicant'].permissions,
+            },
+            circle,
+            id,
+          ),
+        );
+      }
+
+      // 5. Add Automations
       const automations = getAutomations(
         id,
         grantee.id,
@@ -80,6 +103,8 @@ export class CreateGrantWorkflowCommandHandler
         milestone.id,
         milestone.slug,
         onboardingForm.slug,
+        templateDto.roles,
+        templateDto.channelCategory,
       );
 
       for (const i in automations) {
@@ -88,7 +113,7 @@ export class CreateGrantWorkflowCommandHandler
         );
       }
 
-      // Create a Folder
+      // 6. Create a Folder
       await this.commandBus.execute(
         new CreateFolderCommand(id, {
           name: 'Grants Workflow',
@@ -97,7 +122,7 @@ export class CreateGrantWorkflowCommandHandler
         }),
       );
 
-      // Update the circle
+      // 7. Update the circle
       const updatedCircle = await this.commandBus.execute(
         new UpdateCircleCommand(
           id,
@@ -112,6 +137,7 @@ export class CreateGrantWorkflowCommandHandler
           caller,
         ),
       );
+
       return updatedCircle;
     } catch (error) {
       this.logger.error(error);

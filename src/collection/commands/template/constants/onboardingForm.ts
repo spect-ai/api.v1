@@ -235,7 +235,46 @@ export function getAutomations(
   milestoneId: string,
   milestoneSlug: string,
   triggerSlug: string,
+  roles?: {
+    [key: string]: boolean;
+  },
+  channelCategory?: {
+    label: string;
+    value: number;
+  },
 ) {
+  const dicordRole = roles
+    ? {
+        id: 'giveDiscordRole',
+        name: 'Give Discord Role',
+        service: 'circle',
+        type: 'giveDiscordRole',
+        data: {
+          roles,
+          circleId: circleId,
+        },
+      }
+    : {};
+  const discordChannel = channelCategory.value
+    ? {
+        id: 'createDiscordChannel',
+        name: 'Create Discord Channel',
+        service: 'discord',
+        type: 'createDiscordChannel',
+        data: {
+          channelName: {
+            label: 'Map from value in "Project Name"',
+            value: 'Project Name',
+          },
+          channelCategory,
+          channelNameType: 'mapping',
+          isPrivate: false,
+          addResponder: false,
+          rolesToAdd: {},
+          circleId: circleId,
+        },
+      }
+    : {};
   const automations = [
     {
       name: 'Submitted',
@@ -604,6 +643,8 @@ export function getAutomations(
         service: 'collection',
       },
       actions: [
+        dicordRole,
+        discordChannel,
         {
           id: 'giveRole',
           name: 'Give Circle Role',
@@ -889,8 +930,7 @@ export function getAutomations(
     },
     {
       name: 'Rejected',
-      description:
-        'These automations are rejected when a grant application is rejected',
+      description: '',
       trigger: {
         id: 'dataChange',
         type: 'dataChange',

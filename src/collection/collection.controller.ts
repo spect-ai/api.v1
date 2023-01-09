@@ -66,7 +66,7 @@ import {
 } from './dto/create-collection-request.dto';
 import { CreateCollectionResponseDto } from './dto/create-collection-response.dto';
 import { RemoveDataDto } from './dto/remove.data-request.dto';
-import { UseTemplateDto } from './dto/template.dto';
+import { UseTemplateDto } from './dto/grant-workflow-template.dto';
 import { UpdateCollectionDto } from './dto/update-collection-request.dto';
 import {
   AddCommentDto,

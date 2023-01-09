@@ -11,6 +11,7 @@ import {
   onboardingFormProperties,
   onboardingFormPropertyOrder,
 } from './onboardingForm';
+import { v4 as uuidv4 } from 'uuid';
 
 const defaultViewId = '0x0';
 
@@ -34,14 +35,48 @@ const getDefaultPermissions = (circle: Circle) => {
   return defaultPermissions;
 };
 
-export const getOnboardingFormDetails = (circle) => {
+export const getOnboardingFormDetails = (
+  circle: Circle,
+  snapshot?: any,
+  permissions?: string[],
+) => {
+  const formPermissions = permissions
+    ? { ...getDefaultPermissions(circle), viewResponses: permissions }
+    : getDefaultPermissions(circle);
+  const voting = snapshot
+    ? {
+        enabled: true,
+        options: [
+          {
+            label: 'For',
+            value: `option-${uuidv4()}`,
+          },
+          {
+            label: 'Against',
+            value: `option-${uuidv4()}`,
+          },
+          {
+            label: 'Abstain',
+            value: `option-${uuidv4()}`,
+          },
+        ],
+        message: 'Please Vote',
+        votingType: {
+          label: 'Single Choice',
+          value: 'singleChoice',
+        },
+        votesArePublic: true,
+        votesAreWeightedByTokens: true,
+        snapshot,
+      }
+    : {};
   const onboardingFormDetails = {
     name: 'Grants Onboarding Form',
     collectionType: 0,
     description: ' ',
     properties: onboardingFormProperties,
     propertyOrder: onboardingFormPropertyOrder,
-    permissions: getDefaultPermissions(circle),
+    permissions: formPermissions,
     formMetadata: {
       active: true,
       logo: circle.avatar,
@@ -65,6 +100,7 @@ export const getOnboardingFormDetails = (circle) => {
       },
       cardOrders: {},
     },
+    voting,
   };
   return onboardingFormDetails;
 };
