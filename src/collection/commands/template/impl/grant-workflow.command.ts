@@ -1,4 +1,4 @@
-import { UseTemplateDto } from 'src/collection/dto/template.dto';
+import { UseTemplateDto } from 'src/collection/dto/grant-workflow-template.dto';
 
 export class CreateGrantWorkflowCommand {
   constructor(
