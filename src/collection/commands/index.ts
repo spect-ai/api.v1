@@ -40,6 +40,7 @@ import {
 import { AddPropertyCommandHandler } from './properties/handlers/add-property.handler';
 import { RemovePropertyCommandHandler } from './properties/handlers/remove-property.handler';
 import { UpdatePropertyCommandHandler } from './properties/handlers/update-property.handler';
+import { CreateGrantWorkflowCommandHandler } from './template/handlers/grant-workflow.handler';
 
 export const CommandHandlers = [
   CreateCollectionCommandHandler,
@@ -62,4 +63,5 @@ export const CommandHandlers = [
   EndVotingPeriodCommandHandler,
   DeleteCollectionCommandHandler,
   AddMultipleDataUsingAutomationCommandHandler,
+  CreateGrantWorkflowCommandHandler,
 ];
