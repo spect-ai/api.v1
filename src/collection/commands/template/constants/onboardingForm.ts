@@ -26,6 +26,10 @@ export const onboardingFormProperties = {
         value: rejected,
       },
     ],
+    default: {
+      label: 'Submitted',
+      value: submitted,
+    },
     isPartOfFormView: false,
     rewardOptions: {},
     description: '',
@@ -228,56 +232,13 @@ export function getAutomations(
   circleId: string,
   granteeId: string,
   granteeSlug: string,
+  milestoneId: string,
+  milestoneSlug: string,
   triggerSlug: string,
 ) {
   const automations = [
     {
-      name: 'Rejected',
-      description:
-        'These automations are rejected when a grant application is rejected',
-      trigger: {
-        id: 'dataChange',
-        type: 'dataChange',
-        subType: 'singleSelect',
-        name: '"Status" changes',
-        data: {
-          fieldName: 'Status',
-          fieldType: 'singleSelect',
-          from: [
-            {
-              label: 'Submitted',
-              value: submitted,
-            },
-          ],
-          to: [
-            {
-              label: 'Accepted',
-              value: accepted,
-            },
-          ],
-        },
-        service: 'collection',
-      },
-      actions: [
-        {
-          id: 'sendEmail',
-          name: 'Send Email',
-          service: 'email',
-          type: 'sendEmail',
-          data: {
-            toEmailProperties: ['Email'],
-            circleId: circleId,
-            message:
-              "We're sorry to inform you that your grant application has been rejected. We wish you the best for your future endeavors. ",
-          },
-        },
-      ],
-      conditions: [],
-      triggerCategory: 'collection',
-      triggerCollectionSlug: triggerSlug,
-    },
-    {
-      name: 'Submission',
+      name: 'Submitted',
       description: '',
       trigger: {
         id: 'newData',
@@ -480,7 +441,7 @@ export function getAutomations(
                   'Assignee',
                 ],
                 collectionType: 1,
-                id: '63bc47e794a45ed1d953b580',
+                id: granteeId,
               },
             },
             values: [
@@ -592,7 +553,378 @@ export function getAutomations(
                   },
                 },
               },
+              {
+                type: 'default',
+                default: {
+                  field: {
+                    label: 'Status',
+                    value: 'Status',
+                    data: {
+                      type: 'singleSelect',
+                    },
+                  },
+                  value: {
+                    label: 'Submitted',
+                    value: granteeStatus.submitted,
+                  },
+                },
+              },
             ],
+          },
+        },
+      ],
+      conditions: [],
+      triggerCategory: 'collection',
+      triggerCollectionSlug: triggerSlug,
+    },
+    {
+      name: 'Accepted',
+      description: '',
+      trigger: {
+        id: 'dataChange',
+        type: 'dataChange',
+        subType: 'singleSelect',
+        name: '"Status" changes',
+        data: {
+          fieldName: 'Status',
+          fieldType: 'singleSelect',
+          to: [
+            {
+              label: 'Accepted',
+              value: accepted,
+            },
+          ],
+          from: [
+            {
+              label: 'Submitted',
+              value: submitted,
+            },
+          ],
+        },
+        service: 'collection',
+      },
+      actions: [
+        {
+          id: 'giveRole',
+          name: 'Give Circle Role',
+          service: 'circle',
+          type: 'giveRole',
+          data: {
+            roles: {
+              grantee: true,
+            },
+            circleId: circleId,
+          },
+        },
+        {
+          id: 'sendEmail',
+          name: 'Send Email',
+          service: 'email',
+          type: 'sendEmail',
+          data: {
+            toEmailProperties: ['Email'],
+            circleId: circleId,
+            message:
+              "Bravo ! Your application has been accepted for the grants program. You will be awarded the role of a 'Grantee' in the DAO's Spect Circle.  Make sure to check it out using the button below\n",
+          },
+        },
+        {
+          id: 'createCard',
+          name: 'Create Card',
+          service: 'collection',
+          type: 'createCard',
+          data: {
+            selectedCollection: {
+              label: 'Milestones',
+              value: milestoneId,
+              data: {
+                name: 'Milestones',
+                slug: milestoneSlug,
+                properties: {
+                  Title: {
+                    name: 'Title',
+                    type: 'shortText',
+                    default: '',
+                    isPartOfFormView: true,
+                    immutable: true,
+                  },
+                  Description: {
+                    name: 'Description',
+                    type: 'longText',
+                    default: '',
+                    isPartOfFormView: true,
+                  },
+                  'Project Name': {
+                    name: 'Project Name',
+                    type: 'shortText',
+                    isPartOfFormView: true,
+                    description: '',
+                    rewardOptions: {},
+                    required: false,
+                    milestoneFields: [],
+                    viewConditions: [],
+                    payWallOptions: {},
+                  },
+                  Status: {
+                    name: 'Status',
+                    type: 'singleSelect',
+                    options: [
+                      {
+                        label: 'To Do',
+                        value: mileStoneStatus.todo,
+                      },
+                      {
+                        label: 'In Progress',
+                        value: mileStoneStatus.inProgress,
+                      },
+                      {
+                        label: 'Done',
+                        value: mileStoneStatus.done,
+                      },
+                    ],
+                    isPartOfFormView: false,
+                  },
+                  Reward: {
+                    name: 'Reward',
+                    type: 'reward',
+                    isPartOfFormView: true,
+                    description: '',
+                    rewardOptions: {
+                      '137': {
+                        _id: '62b8fc1fb4a7e8cb15182309',
+                        chainId: '137',
+                        name: 'polygon',
+                        distributorAddress:
+                          '0x54904743F2A0d0BCC228e334bF52d4b578901cfB',
+                        mainnet: true,
+                        nativeCurrency: 'MATIC',
+                        pictureUrl:
+                          'https://ipfs.moralis.io:2053/ipfs/QmRNqgazYuxUa5WdddFPftTWiP3KwzBMgV9Z19QWnLMETc',
+                        blockExplorer: 'https://polygonscan.com/',
+                        provider: 'https://polygon-rpc.com',
+                        tokenDetails: {
+                          '0x0': {
+                            address: '0x0',
+                            symbol: 'MATIC',
+                            name: 'Matic',
+                            blacklisted: false,
+                          },
+                          '0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270': {
+                            address:
+                              '0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270',
+                            symbol: 'WMATIC',
+                            name: 'Wrapped MATIC',
+                            blacklisted: false,
+                          },
+                        },
+                        createdAt: '2022-06-27T00:38:55.296Z',
+                        updatedAt: '2022-06-27T01:23:28.582Z',
+                        id: '62b8fc1fb4a7e8cb15182309',
+                        '0x0': {
+                          address: '0x0',
+                          symbol: 'MATIC',
+                          name: 'Matic',
+                          blacklisted: false,
+                        },
+                      },
+                    },
+                    required: false,
+                    milestoneFields: [],
+                    viewConditions: [],
+                    payWallOptions: {},
+                  },
+                  'Due Date': {
+                    name: 'Due Date',
+                    type: 'date',
+                    isPartOfFormView: true,
+                    description: '',
+                    options: [],
+                    rewardOptions: {},
+                    required: false,
+                    milestoneFields: [],
+                    viewConditions: [],
+                    payWallOptions: {},
+                  },
+                },
+                propertyOrder: [
+                  'Title',
+                  'Description',
+                  'Status',
+                  'Reward',
+                  'Due Date',
+                  'Project Name',
+                ],
+                collectionType: 1,
+                id: milestoneId,
+              },
+            },
+            values: [
+              {
+                type: 'mapping',
+                mapping: {
+                  to: {
+                    label: 'Title',
+                    value: 'Title',
+                    data: {
+                      type: 'shortText',
+                    },
+                  },
+                  from: {
+                    label: 'Milestones title',
+                    value: 'Milestones.title',
+                    data: {
+                      type: 'shortText',
+                      fieldType: 'milestone',
+                      fieldName: 'Milestones',
+                      subFieldName: 'title',
+                    },
+                  },
+                },
+              },
+              {
+                type: 'mapping',
+                mapping: {
+                  to: {
+                    label: 'Description',
+                    value: 'Description',
+                    data: {
+                      type: 'longText',
+                    },
+                  },
+                  from: {
+                    label: 'Milestones description',
+                    value: 'Milestones.description',
+                    data: {
+                      type: 'longText',
+                      fieldType: 'milestone',
+                      fieldName: 'Milestones',
+                      subFieldName: 'description',
+                    },
+                  },
+                },
+              },
+              {
+                type: 'mapping',
+                mapping: {
+                  to: {
+                    label: 'Due Date',
+                    value: 'Due Date',
+                    data: {
+                      type: 'date',
+                    },
+                  },
+                  from: {
+                    label: 'Milestones date',
+                    value: 'Milestones.date',
+                    data: {
+                      type: 'date',
+                      fieldType: 'milestone',
+                      fieldName: 'Milestones',
+                      subFieldName: 'dueDate',
+                    },
+                  },
+                },
+              },
+              {
+                type: 'mapping',
+                mapping: {
+                  to: {
+                    label: 'Reward',
+                    value: 'Reward',
+                    data: {
+                      type: 'reward',
+                    },
+                  },
+                  from: {
+                    label: 'Milestones reward',
+                    value: 'Milestones.reward',
+                    data: {
+                      type: 'reward',
+                      fieldType: 'milestone',
+                      fieldName: 'Milestones',
+                      subFieldName: 'reward',
+                    },
+                  },
+                },
+              },
+              {
+                type: 'mapping',
+                mapping: {
+                  to: {
+                    label: 'Project Name',
+                    value: 'Project Name',
+                    data: {
+                      type: 'shortText',
+                    },
+                  },
+                  from: {
+                    label: 'Project Name',
+                    value: 'Project Name',
+                  },
+                },
+              },
+              {
+                type: 'default',
+                default: {
+                  field: {
+                    label: 'Status',
+                    value: 'Status',
+                    data: {
+                      type: 'singleSelect',
+                    },
+                  },
+                  value: {
+                    label: 'To Do',
+                    value: mileStoneStatus.todo,
+                  },
+                },
+              },
+            ],
+          },
+        },
+      ],
+      conditions: [],
+      triggerCategory: 'collection',
+      triggerCollectionSlug: triggerSlug,
+    },
+    {
+      name: 'Rejected',
+      description:
+        'These automations are rejected when a grant application is rejected',
+      trigger: {
+        id: 'dataChange',
+        type: 'dataChange',
+        subType: 'singleSelect',
+        name: '"Status" changes',
+        data: {
+          fieldName: 'Status',
+          fieldType: 'singleSelect',
+          from: [
+            {
+              label: 'Submitted',
+              value: submitted,
+            },
+          ],
+          to: [
+            {
+              label: 'Rejected',
+              value: rejected,
+            },
+          ],
+        },
+        service: 'collection',
+      },
+      actions: [
+        {
+          id: 'sendEmail',
+          name: 'Send Email',
+          service: 'email',
+          type: 'sendEmail',
+          data: {
+            toEmailProperties: ['Email'],
+            circleId: circleId,
+            message:
+              "We're sorry to inform you that your grant application has been rejected. We wish you the best for your future endeavors. ",
           },
         },
       ],

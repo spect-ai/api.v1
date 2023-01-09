@@ -99,6 +99,17 @@ export const milestoneProperties = {
     viewConditions: [],
     payWallOptions: {},
   },
+  'Project Name': {
+    name: 'Project Name',
+    type: 'shortText',
+    isPartOfFormView: true,
+    description: '',
+    rewardOptions: {},
+    required: false,
+    milestoneFields: [],
+    viewConditions: [],
+    payWallOptions: {},
+  },
 } as unknown as MappedItem<Property>;
 
 export const milestonePropertyOrder = [
@@ -107,4 +118,5 @@ export const milestonePropertyOrder = [
   'Status',
   'Reward',
   'Due Date',
+  'Project Name',
 ];

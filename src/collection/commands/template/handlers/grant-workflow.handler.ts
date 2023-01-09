@@ -77,6 +77,8 @@ export class CreateGrantWorkflowCommandHandler
         id,
         grantee.id,
         grantee.slug,
+        milestone.id,
+        milestone.slug,
         onboardingForm.slug,
       );
 
