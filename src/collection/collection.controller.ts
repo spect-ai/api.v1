@@ -23,6 +23,7 @@ import {
   PublicViewAuthGuard,
   SessionAuthGuard,
 } from 'src/auth/iron-session.guard';
+import { Circle } from 'src/circle/model/circle.model';
 import { ObjectIdDto } from 'src/common/dtos/object-id.dto';
 import {
   RequiredActivityUUIDDto,
@@ -506,7 +507,7 @@ export class CollectionController {
     @Param() param: ObjectIdDto,
     @Body() template: UseTemplateDto,
     @Request() req,
-  ) {
+  ): Promise<Circle> {
     return await this.commandBus.execute(
       new CreateGrantWorkflowCommand(template, param.id, req.user?.id),
     );
