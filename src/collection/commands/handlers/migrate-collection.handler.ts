@@ -238,8 +238,8 @@ export class MigrateCollectionCommandHandler
             };
           }),
           Priority: {
-            label: this.getCardPriorityLabel(card.priority),
-            value: this.getCardPriorityLabel(card.priority).toLowerCase(),
+            label: this.getCardPriorityLabel(card.priority || 0),
+            value: this.getCardPriorityLabel(card.priority || 0).toLowerCase(),
           },
           slug: card.id,
         };
