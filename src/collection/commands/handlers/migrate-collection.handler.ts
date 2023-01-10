@@ -368,6 +368,8 @@ export class MigrateCollectionCommandHandler
       return 'High';
     } else if (prio === 3) {
       return 'Urgent';
+    } else {
+      return 'Low';
     }
   }
 }
