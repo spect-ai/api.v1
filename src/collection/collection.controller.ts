@@ -23,6 +23,7 @@ import {
   PublicViewAuthGuard,
   SessionAuthGuard,
 } from 'src/auth/iron-session.guard';
+import { Circle } from 'src/circle/model/circle.model';
 import { ObjectIdDto } from 'src/common/dtos/object-id.dto';
 import {
   RequiredActivityUUIDDto,
@@ -54,6 +55,7 @@ import {
   StartVotingPeriodCommand,
   VoteDataCommand,
 } from './commands/data/impl/vote-data.command';
+import { CreateGrantWorkflowCommand } from './commands/template/impl';
 import {
   CollectionPublicResponseDto,
   CollectionResponseDto,
@@ -64,6 +66,7 @@ import {
 } from './dto/create-collection-request.dto';
 import { CreateCollectionResponseDto } from './dto/create-collection-response.dto';
 import { RemoveDataDto } from './dto/remove.data-request.dto';
+import { UseTemplateDto } from './dto/grant-workflow-template.dto';
 import { UpdateCollectionDto } from './dto/update-collection-request.dto';
 import {
   AddCommentDto,
@@ -494,6 +497,19 @@ export class CollectionController {
         param.id,
         voteDataDto.vote,
       ),
+    );
+  }
+
+  @SetMetadata('permissions', ['manageCircleSettings'])
+  @UseGuards(SessionAuthGuard)
+  @Patch('/:id/useTemplate')
+  async useTemplate(
+    @Param() param: ObjectIdDto,
+    @Body() template: UseTemplateDto,
+    @Request() req,
+  ): Promise<Circle> {
+    return await this.commandBus.execute(
+      new CreateGrantWorkflowCommand(template, param.id, req.user?.id),
     );
   }
 }
