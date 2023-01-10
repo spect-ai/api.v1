@@ -71,7 +71,7 @@ export const getOnboardingFormDetails = (
       }
     : {};
   const onboardingFormDetails = {
-    name: 'Grants Onboarding Form',
+    name: 'Application Form',
     collectionType: 0,
     description: ' ',
     properties: onboardingFormProperties,
