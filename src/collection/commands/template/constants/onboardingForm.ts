@@ -240,7 +240,7 @@ export function getAutomations(
   },
   channelCategory?: {
     label: string;
-    value: number;
+    value: string;
   },
 ) {
   const dicordRole = roles
@@ -255,7 +255,7 @@ export function getAutomations(
         },
       }
     : {};
-  const discordChannel = channelCategory.value
+  const discordChannel = channelCategory?.value
     ? {
         id: 'createDiscordChannel',
         name: 'Create Discord Channel',
@@ -643,8 +643,6 @@ export function getAutomations(
         service: 'collection',
       },
       actions: [
-        dicordRole,
-        discordChannel,
         {
           id: 'giveRole',
           name: 'Give Circle Role',
@@ -973,6 +971,10 @@ export function getAutomations(
       triggerCollectionSlug: triggerSlug,
     },
   ];
+
+  if (roles) automations?.[1]?.actions.push(dicordRole as any);
+  if (channelCategory?.value)
+    automations?.[1]?.actions.push(discordChannel as any);
 
   return automations;
 }

@@ -1,4 +1,10 @@
-import { IsNotEmpty, IsObject, IsOptional, IsString } from 'class-validator';
+import {
+  IsArray,
+  IsNotEmpty,
+  IsObject,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 
 export class UseTemplateDto {
   /**
@@ -18,7 +24,7 @@ export class UseTemplateDto {
   @IsOptional()
   channelCategory?: {
     label: string;
-    value: number;
+    value: string;
   };
 
   @IsObject()
@@ -30,7 +36,7 @@ export class UseTemplateDto {
     symbol: string;
   };
 
-  @IsString()
+  @IsArray()
   @IsOptional()
   permissions: string[];
 }
