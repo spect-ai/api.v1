@@ -243,18 +243,19 @@ export function getAutomations(
     value: string;
   },
 ) {
-  const dicordRole = roles
-    ? {
-        id: 'giveDiscordRole',
-        name: 'Give Discord Role',
-        service: 'circle',
-        type: 'giveDiscordRole',
-        data: {
-          roles,
-          circleId: circleId,
-        },
-      }
-    : {};
+  const dicordRole =
+    roles && Object.keys(roles).length > 0
+      ? {
+          id: 'giveDiscordRole',
+          name: 'Give Discord Role',
+          service: 'circle',
+          type: 'giveDiscordRole',
+          data: {
+            roles,
+            circleId: circleId,
+          },
+        }
+      : {};
   const discordChannel = channelCategory?.value
     ? {
         id: 'createDiscordChannel',
@@ -972,7 +973,8 @@ export function getAutomations(
     },
   ];
 
-  if (roles) automations?.[1]?.actions.push(dicordRole as any);
+  if (roles && Object.keys(roles).length > 0)
+    automations?.[1]?.actions.push(dicordRole as any);
   if (channelCategory?.value)
     automations?.[1]?.actions.push(discordChannel as any);
 
