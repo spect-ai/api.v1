@@ -208,13 +208,8 @@ export const getGranteeCollectionDto = (circle, granteeViewId, registry) => {
   return granteeCollectionDto;
 };
 
-export const getOnboardingFormDetails = (
-  circle: Circle,
-  permissions?: string[],
-) => {
-  const formPermissions = permissions
-    ? { ...getDefaultPermissions(circle), viewResponses: permissions }
-    : getDefaultPermissions(circle);
+export const getOnboardingFormDetails = (circle: Circle) => {
+  const formPermissions = getDefaultPermissions(circle);
   const onboardingFormDetails = {
     name: 'Contributor Onboarding Form',
     collectionType: 0,

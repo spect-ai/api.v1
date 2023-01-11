@@ -38,10 +38,7 @@ export class OnboardingWorkflowCommandHandler
       );
 
       // 1. Create Onboarding Form
-      const onboardingformDetails = getOnboardingFormDetails(
-        circle,
-        templateDto.permissions,
-      );
+      const onboardingformDetails = getOnboardingFormDetails(circle);
       const onboardingForm = await this.collectionRepository.create({
         creator: caller,
         parents: [id],
