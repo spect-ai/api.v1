@@ -2,15 +2,15 @@ import { Circle } from 'src/circle/model/circle.model';
 import {
   granteeCollectionProperties,
   granteeCollectionPropertyOrder,
-} from './granteecollection';
+} from './constants/granteecollection';
 import {
   milestoneProperties,
   milestonePropertyOrder,
-} from './milestonecollection';
+} from './constants/milestonecollection';
 import {
   onboardingFormProperties,
   onboardingFormPropertyOrder,
-} from './onboardingForm';
+} from './constants/onboardingForm';
 import { v4 as uuidv4 } from 'uuid';
 
 const defaultViewId = '0x0';

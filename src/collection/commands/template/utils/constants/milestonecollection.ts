@@ -1,6 +1,6 @@
 import { MappedItem } from 'src/common/interfaces';
 import { v4 as uuidv4 } from 'uuid';
-import { Property } from '../../../types/types';
+import { Property } from '../../../../types/types';
 
 export const mileStoneStatus = {
   todo: uuidv4(),

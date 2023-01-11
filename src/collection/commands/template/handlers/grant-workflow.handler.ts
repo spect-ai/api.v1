@@ -15,7 +15,7 @@ import {
   getGranteeCollectionDto,
   getMilestoneCollectionDetails,
 } from '../utils';
-import { getAutomations } from '../utils/onboardingForm';
+import { getAutomations } from '../utils/constants/onboardingForm';
 import { defaultCircleRoles } from 'src/constants';
 
 @CommandHandler(CreateGrantWorkflowCommand)
