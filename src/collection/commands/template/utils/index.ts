@@ -16,6 +16,10 @@ import {
   onboardingFormProperties,
   onboardingFormPropertyOrder,
 } from './constants/onboardingTemplate/onboardingForm';
+import {
+  onboardingProjectProperties,
+  onboardingProjectPropertyOrder,
+} from './constants/onboardingTemplate/onboardingProject';
 
 const defaultViewId = '0x0';
 
@@ -234,4 +238,44 @@ export const getOnboardingFormDetails = (
     },
   };
   return onboardingFormDetails;
+};
+
+export const getOnboardingTasksProjectDetails = (circle, projectViewId) => {
+  return {
+    name: 'Onboarding Tasks',
+    collectionType: 1,
+    description: ' ',
+    properties: onboardingProjectProperties,
+    propertyOrder: onboardingProjectPropertyOrder,
+    permissions: getDefaultPermissions(circle),
+    projectMetadata: {
+      views: {
+        [defaultViewId]: {
+          id: defaultViewId,
+          name: 'Default View',
+          type: 'grid',
+          filters: [],
+          sort: {
+            property: '',
+            direction: 'asc',
+          },
+        },
+        [projectViewId]: {
+          id: projectViewId,
+          name: 'Tasks',
+          type: 'kanban',
+          groupByColumn: 'Status',
+          filters: [],
+          sort: {
+            property: '',
+            direction: 'asc',
+          },
+        },
+      },
+      viewOrder: [projectViewId, '0x0'],
+      cardOrders: {
+        Status: [[], [], [], []],
+      },
+    },
+  };
 };

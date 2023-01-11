@@ -8,15 +8,11 @@ import { CollectionRepository } from 'src/collection/collection.repository';
 import { QueryBus, CommandBus } from '@nestjs/cqrs';
 import { GetCircleByIdQuery } from 'src/circle/queries/impl';
 import { UpdateCircleCommand } from 'src/circle/commands/impl/update-circle.command';
-import { AddRoleCommand, CreateFolderCommand } from 'src/circle/commands/impl';
-import { AddAutomationCommand } from 'src/circle/commands/automation/impl';
+import { CreateFolderCommand } from 'src/circle/commands/impl';
 import {
   getGrantApplicationFormDetails,
-  getGranteeCollectionDto,
-  getMilestoneCollectionDetails,
+  getOnboardingTasksProjectDetails,
 } from '../utils';
-import { getAutomations } from '../utils/constants/grantTemplate/grantApplicationForm';
-import { defaultCircleRoles } from 'src/constants';
 import { OnboardingWorkflowCommand } from '../impl/onboarding-workflow.command';
 
 @CommandHandler(OnboardingWorkflowCommand)
@@ -52,78 +48,47 @@ export class OnboardingWorkflowCommandHandler
         ...onboardingformDetails,
       } as any);
 
-      // 2. Create Milestone Collection
-      const milstoneViewId = uuidv4();
-      const milestoneCollectionDto = getMilestoneCollectionDetails(
+      // 2. Create Onboarding tasks project
+      const projectViewId = uuidv4();
+      const onboardingProjectDto = getOnboardingTasksProjectDetails(
         circle,
-        milstoneViewId,
+        projectViewId,
       );
-      const milestone = await this.collectionRepository.create({
+      const onboardingProject = await this.collectionRepository.create({
         creator: caller,
         parents: [id],
         slug: uuidv4(),
-        ...milestoneCollectionDto,
+        ...onboardingProjectDto,
       } as any);
 
-      // 3. Create Grantee Collection
-      const granteeViewId = uuidv4();
-      const granteeCollectionDto = getGranteeCollectionDto(
-        circle,
-        granteeViewId,
-      );
-      const grantee = await this.collectionRepository.create({
-        creator: caller,
-        parents: [id],
-        slug: uuidv4(),
-        ...granteeCollectionDto,
-      } as any);
+      // 3. Add Automations
+      // const automations = getAutomations(
+      //   id,
+      //   grantee.id,
+      //   grantee.slug,
+      //   onboardingProject.id,
+      //   onboardingProject.slug,
+      //   onboardingForm.slug,
+      //   templateDto.roles,
+      //   templateDto.channelCategory,
+      // );
 
-      // 4. Check if there exists a Grantee role in the circle
-      if (!Object.keys(circle.roles).includes('grantee')) {
-        await this.commandBus.execute(
-          new AddRoleCommand(
-            {
-              name: 'Grantee',
-              description:
-                'This role is awarded to the grantees who have been accepted for the grants program',
-              mutable: false,
-              selfAssignable: false,
-              permissions: defaultCircleRoles?.['applicant'].permissions,
-            },
-            circle,
-            id,
-          ),
-        );
-      }
+      // for (const i in automations) {
+      //   await this.commandBus.execute(
+      //     new AddAutomationCommand(id, automations?.[i] as any),
+      //   );
+      // }
 
-      // 5. Add Automations
-      const automations = getAutomations(
-        id,
-        grantee.id,
-        grantee.slug,
-        milestone.id,
-        milestone.slug,
-        onboardingForm.slug,
-        templateDto.roles,
-        templateDto.channelCategory,
-      );
-
-      for (const i in automations) {
-        await this.commandBus.execute(
-          new AddAutomationCommand(id, automations?.[i] as any),
-        );
-      }
-
-      // 6. Create a Folder
+      // 4. Create a Folder
       await this.commandBus.execute(
         new CreateFolderCommand(id, {
           name: 'Grants Workflow',
           avatar: 'Grants Workflow',
-          contentIds: [onboardingForm.id, milestone.id, grantee.id],
+          contentIds: [onboardingForm.id, onboardingProject.id],
         }),
       );
 
-      // 7. Update the circle
+      // 5. Update the circle
       const updatedCircle = await this.commandBus.execute(
         new UpdateCircleCommand(
           id,
@@ -131,8 +96,7 @@ export class OnboardingWorkflowCommandHandler
             collections: [
               ...(circle.collections || []),
               onboardingForm.id,
-              milestone.id,
-              grantee.id,
+              onboardingProject.id,
             ],
           },
           caller,

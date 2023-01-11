@@ -228,7 +228,7 @@ export const grantApplicationFormPropertyOrder = [
   'Total Reward',
 ];
 
-export function getAutomations(
+export function getGrantWorkflowAutomations(
   circleId: string,
   granteeId: string,
   granteeSlug: string,

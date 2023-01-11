@@ -2,9 +2,15 @@ import { Property } from 'src/collection/types/types';
 import { MappedItem } from 'src/common/interfaces';
 import { v4 as uuidv4 } from 'uuid';
 
-const submitted = uuidv4();
-const accepted = uuidv4();
+const interested = uuidv4();
+const added = uuidv4();
 const rejected = uuidv4();
+
+export const onboardingStatus = {
+  interested,
+  added,
+  rejected,
+};
 
 export const onboardingFormProperties = {
   Status: {
@@ -13,11 +19,11 @@ export const onboardingFormProperties = {
     options: [
       {
         label: 'Interested',
-        value: submitted,
+        value: interested,
       },
       {
         label: 'Added',
-        value: accepted,
+        value: added,
       },
       {
         label: 'Rejected',
@@ -26,7 +32,7 @@ export const onboardingFormProperties = {
     ],
     default: {
       label: 'Interested',
-      value: submitted,
+      value: interested,
     },
     isPartOfFormView: false,
     rewardOptions: {},

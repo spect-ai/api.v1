@@ -15,8 +15,8 @@ import {
   getGranteeCollectionDto,
   getMilestoneCollectionDetails,
 } from '../utils';
-import { getAutomations } from '../utils/constants/grantTemplate/grantApplicationForm';
 import { defaultCircleRoles } from 'src/constants';
+import { getGrantWorkflowAutomations } from '../utils/constants/grantTemplate/grantApplicationForm';
 
 @CommandHandler(CreateGrantWorkflowCommand)
 export class CreateGrantWorkflowCommandHandler
@@ -96,7 +96,7 @@ export class CreateGrantWorkflowCommandHandler
       }
 
       // 5. Add Automations
-      const automations = getAutomations(
+      const automations = getGrantWorkflowAutomations(
         id,
         grantee.id,
         grantee.slug,
