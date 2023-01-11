@@ -36,9 +36,9 @@ export class UseTemplateDto {
     symbol: string;
   };
 
-  @IsArray()
-  @IsOptional()
-  permissions?: string[];
+  // @IsArray()
+  // @IsOptional()
+  // permissions?: string[];
 
   @IsObject()
   @IsOptional()

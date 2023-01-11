@@ -47,7 +47,6 @@ export class CreateGrantWorkflowCommandHandler
         circle,
         templateDto.registry || { '137': registry?.['137'] },
         templateDto.snapshot,
-        templateDto.permissions,
       );
       const applicationForm = await this.collectionRepository.create({
         creator: caller,

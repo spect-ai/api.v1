@@ -244,7 +244,6 @@ export function getGrantWorkflowAutomations(
                     type: 'longText',
                     default: '',
                     isPartOfFormView: true,
-                    immutable: true,
                   },
                   Status: {
                     name: 'Status',

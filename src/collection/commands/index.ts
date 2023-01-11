@@ -42,6 +42,7 @@ import { RemovePropertyCommandHandler } from './properties/handlers/remove-prope
 import { UpdatePropertyCommandHandler } from './properties/handlers/update-property.handler';
 import { CreateGrantWorkflowCommandHandler } from './template/handlers/grant-workflow.handler';
 import { OnboardingWorkflowCommandHandler } from './template/handlers/onboarding-workflow.handler';
+import { KanbanProjectCommandHandler } from './template/handlers/kanban-project.handler';
 
 export const CommandHandlers = [
   CreateCollectionCommandHandler,
@@ -66,4 +67,5 @@ export const CommandHandlers = [
   AddMultipleDataUsingAutomationCommandHandler,
   CreateGrantWorkflowCommandHandler,
   OnboardingWorkflowCommandHandler,
+  KanbanProjectCommandHandler,
 ];

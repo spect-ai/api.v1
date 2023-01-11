@@ -57,6 +57,7 @@ import {
 } from './commands/data/impl/vote-data.command';
 import {
   CreateGrantWorkflowCommand,
+  KanbanProjectCommand,
   OnboardingWorkflowCommand,
 } from './commands/template/impl';
 import {
@@ -522,6 +523,10 @@ export class CollectionController {
     } else if (query.templateId === '2') {
       return await this.commandBus.execute(
         new OnboardingWorkflowCommand(template, param.id, req.user?.id),
+      );
+    } else if (query.templateId === '3') {
+      return await this.commandBus.execute(
+        new KanbanProjectCommand(template, param.id, req.user?.id),
       );
     }
   }

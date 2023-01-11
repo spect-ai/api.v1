@@ -14,6 +14,10 @@ import {
   milestonePropertyOrder,
 } from './constants/grantTemplate/milestonecollection';
 import {
+  getKanbanProjectProperties,
+  kanbanProjectPropertyOrder,
+} from './constants/kanbanTemplate/kanbanProject';
+import {
   onboardingFormProperties,
   onboardingFormPropertyOrder,
 } from './constants/onboardingTemplate/onboardingForm';
@@ -50,11 +54,8 @@ export const getGrantApplicationFormDetails = (
     [k: string]: Registry;
   },
   snapshot?: any,
-  permissions?: string[],
 ) => {
-  const formPermissions = permissions
-    ? { ...getDefaultPermissions(circle), viewResponses: permissions }
-    : getDefaultPermissions(circle);
+  const formPermissions = getDefaultPermissions(circle);
   const voting = snapshot
     ? {
         enabled: true,
@@ -255,6 +256,46 @@ export const getOnboardingTasksProjectDetails = (circle, projectViewId) => {
     description: ' ',
     properties: onboardingProjectProperties,
     propertyOrder: onboardingProjectPropertyOrder,
+    permissions: getDefaultPermissions(circle),
+    projectMetadata: {
+      views: {
+        [defaultViewId]: {
+          id: defaultViewId,
+          name: 'Default View',
+          type: 'grid',
+          filters: [],
+          sort: {
+            property: '',
+            direction: 'asc',
+          },
+        },
+        [projectViewId]: {
+          id: projectViewId,
+          name: 'Tasks',
+          type: 'kanban',
+          groupByColumn: 'Status',
+          filters: [],
+          sort: {
+            property: '',
+            direction: 'asc',
+          },
+        },
+      },
+      viewOrder: [projectViewId, '0x0'],
+      cardOrders: {
+        Status: [[], [], [], []],
+      },
+    },
+  };
+};
+
+export const getKanbanProjectDetails = (circle, projectViewId, registry) => {
+  return {
+    name: 'Tasks',
+    collectionType: 1,
+    description: ' ',
+    properties: getKanbanProjectProperties(registry),
+    propertyOrder: kanbanProjectPropertyOrder,
     permissions: getDefaultPermissions(circle),
     projectMetadata: {
       views: {
