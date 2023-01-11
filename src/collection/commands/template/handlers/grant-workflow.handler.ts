@@ -38,17 +38,17 @@ export class CreateGrantWorkflowCommandHandler
         new GetCircleByIdQuery(id, {}),
       );
 
-      // 1. Create Onboarding Form
-      const onboardingformDetails = getGrantApplicationFormDetails(
+      // 1. Create Application Form
+      const applicationformDetails = getGrantApplicationFormDetails(
         circle,
         templateDto.snapshot,
         templateDto.permissions,
       );
-      const onboardingForm = await this.collectionRepository.create({
+      const applicationForm = await this.collectionRepository.create({
         creator: caller,
         parents: [id],
         slug: uuidv4(),
-        ...onboardingformDetails,
+        ...applicationformDetails,
       } as any);
 
       // 2. Create Milestone Collection
@@ -102,7 +102,7 @@ export class CreateGrantWorkflowCommandHandler
         grantee.slug,
         milestone.id,
         milestone.slug,
-        onboardingForm.slug,
+        applicationForm.slug,
         templateDto.roles,
         templateDto.channelCategory,
       );
@@ -118,7 +118,7 @@ export class CreateGrantWorkflowCommandHandler
         new CreateFolderCommand(id, {
           name: 'Grants Workflow',
           avatar: 'Grants Workflow',
-          contentIds: [onboardingForm.id, milestone.id, grantee.id],
+          contentIds: [applicationForm.id, milestone.id, grantee.id],
         }),
       );
 
@@ -129,7 +129,7 @@ export class CreateGrantWorkflowCommandHandler
           {
             collections: [
               ...(circle.collections || []),
-              onboardingForm.id,
+              applicationForm.id,
               milestone.id,
               grantee.id,
             ],
