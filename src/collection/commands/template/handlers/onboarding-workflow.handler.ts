@@ -11,11 +11,11 @@ import { UpdateCircleCommand } from 'src/circle/commands/impl/update-circle.comm
 import { AddRoleCommand, CreateFolderCommand } from 'src/circle/commands/impl';
 import { AddAutomationCommand } from 'src/circle/commands/automation/impl';
 import {
+  getGrantApplicationFormDetails,
   getGranteeCollectionDto,
   getMilestoneCollectionDetails,
-  getOnboardingFormDetails,
-} from '../constants';
-import { getAutomations } from '../constants/onboardingForm';
+} from '../utils';
+import { getAutomations } from '../utils/onboardingForm';
 import { defaultCircleRoles } from 'src/constants';
 import { OnboardingWorkflowCommand } from '../impl/onboarding-workflow.command';
 
@@ -40,7 +40,7 @@ export class OnboardingWorkflowCommandHandler
       );
 
       // 1. Create Onboarding Form
-      const onboardingformDetails = getOnboardingFormDetails(
+      const onboardingformDetails = getGrantApplicationFormDetails(
         circle,
         templateDto.snapshot,
         templateDto.permissions,

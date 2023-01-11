@@ -35,7 +35,7 @@ const getDefaultPermissions = (circle: Circle) => {
   return defaultPermissions;
 };
 
-export const getOnboardingFormDetails = (
+export const getGrantApplicationFormDetails = (
   circle: Circle,
   snapshot?: any,
   permissions?: string[],
