@@ -1,17 +1,21 @@
 import { Circle } from 'src/circle/model/circle.model';
-import {
-  granteeCollectionProperties,
-  granteeCollectionPropertyOrder,
-} from './constants/granteecollection';
-import {
-  milestoneProperties,
-  milestonePropertyOrder,
-} from './constants/milestonecollection';
 import { v4 as uuidv4 } from 'uuid';
 import {
   grantApplicationFormProperties,
   grantApplicationFormPropertyOrder,
-} from './constants/onboardingForm';
+} from './constants/grantTemplate/grantApplicationForm';
+import {
+  granteeCollectionProperties,
+  granteeCollectionPropertyOrder,
+} from './constants/grantTemplate/granteecollection';
+import {
+  milestoneProperties,
+  milestonePropertyOrder,
+} from './constants/grantTemplate/milestonecollection';
+import {
+  onboardingFormProperties,
+  onboardingFormPropertyOrder,
+} from './constants/onboardingTemplate/onboardingForm';
 
 const defaultViewId = '0x0';
 
@@ -202,8 +206,8 @@ export const getOnboardingFormDetails = (
     name: 'Contributor Onboarding Form',
     collectionType: 0,
     description: ' ',
-    properties: grantApplicationFormProperties,
-    propertyOrder: grantApplicationFormPropertyOrder,
+    properties: onboardingFormProperties,
+    propertyOrder: onboardingFormPropertyOrder,
     permissions: formPermissions,
     formMetadata: {
       active: true,
