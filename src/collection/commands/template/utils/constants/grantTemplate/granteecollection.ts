@@ -3,9 +3,9 @@ import { MappedItem } from 'src/common/interfaces';
 import { v4 as uuidv4 } from 'uuid';
 
 export const granteeStatus = {
-  submitted: uuidv4(),
-  accepted: uuidv4(),
-  rejected: uuidv4(),
+  inProgress: uuidv4(),
+  completed: uuidv4(),
+  churned: uuidv4(),
 };
 
 export const granteeCollectionProperties = {
@@ -27,16 +27,16 @@ export const granteeCollectionProperties = {
     type: 'singleSelect',
     options: [
       {
-        label: 'Submitted',
-        value: granteeStatus.submitted,
+        label: 'In Progress',
+        value: granteeStatus.inProgress,
       },
       {
-        label: 'Accepted',
-        value: granteeStatus.accepted,
+        label: 'Completed',
+        value: granteeStatus.completed,
       },
       {
-        label: 'Rejected',
-        value: granteeStatus.rejected,
+        label: 'Churned',
+        value: granteeStatus.churned,
       },
     ],
     isPartOfFormView: false,

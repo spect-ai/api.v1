@@ -4,9 +4,9 @@ import { Property } from '../../../../../types/types';
 import { mileStoneStatus } from './milestonecollection';
 import { granteeStatus } from './granteecollection';
 
-const submitted = uuidv4();
-const accepted = uuidv4();
-const rejected = uuidv4();
+const inProgress = uuidv4();
+const completed = uuidv4();
+const churned = uuidv4();
 
 export const grantApplicationFormProperties = {
   Status: {
@@ -14,21 +14,21 @@ export const grantApplicationFormProperties = {
     type: 'singleSelect',
     options: [
       {
-        label: 'Submitted',
-        value: submitted,
+        label: 'In Progress',
+        value: inProgress,
       },
       {
-        label: 'Accepted',
-        value: accepted,
+        label: 'Completed',
+        value: completed,
       },
       {
-        label: 'Rejected',
-        value: rejected,
+        label: 'Churned',
+        value: churned,
       },
     ],
     default: {
-      label: 'Submitted',
-      value: submitted,
+      label: 'In Progress',
+      value: inProgress,
     },
     isPartOfFormView: false,
     rewardOptions: {},
@@ -278,7 +278,7 @@ export function getGrantWorkflowAutomations(
     : {};
   const automations = [
     {
-      name: 'Submitted',
+      name: 'In Progress',
       description: '',
       trigger: {
         id: 'newData',
@@ -319,16 +319,16 @@ export function getGrantWorkflowAutomations(
                     type: 'singleSelect',
                     options: [
                       {
-                        label: 'Submitted',
-                        value: granteeStatus.submitted,
+                        label: 'In Progress',
+                        value: granteeStatus.inProgress,
                       },
                       {
-                        label: 'Accepted',
-                        value: granteeStatus.accepted,
+                        label: 'Completed',
+                        value: granteeStatus.completed,
                       },
                       {
-                        label: 'Rejected',
-                        value: granteeStatus.rejected,
+                        label: 'Churned',
+                        value: granteeStatus.churned,
                       },
                     ],
                     isPartOfFormView: false,
@@ -604,8 +604,8 @@ export function getGrantWorkflowAutomations(
                     },
                   },
                   value: {
-                    label: 'Submitted',
-                    value: granteeStatus.submitted,
+                    label: 'In Progress',
+                    value: granteeStatus.inProgress,
                   },
                 },
               },
@@ -618,7 +618,7 @@ export function getGrantWorkflowAutomations(
       triggerCollectionSlug: triggerSlug,
     },
     {
-      name: 'Accepted',
+      name: 'Completed',
       description: '',
       trigger: {
         id: 'dataChange',
@@ -630,14 +630,14 @@ export function getGrantWorkflowAutomations(
           fieldType: 'singleSelect',
           to: [
             {
-              label: 'Accepted',
-              value: accepted,
+              label: 'Completed',
+              value: completed,
             },
           ],
           from: [
             {
-              label: 'Submitted',
-              value: submitted,
+              label: 'In Progress',
+              value: inProgress,
             },
           ],
         },
@@ -928,7 +928,7 @@ export function getGrantWorkflowAutomations(
       triggerCollectionSlug: triggerSlug,
     },
     {
-      name: 'Rejected',
+      name: 'Churned',
       description: '',
       trigger: {
         id: 'dataChange',
@@ -940,14 +940,14 @@ export function getGrantWorkflowAutomations(
           fieldType: 'singleSelect',
           from: [
             {
-              label: 'Submitted',
-              value: submitted,
+              label: 'In Progress',
+              value: inProgress,
             },
           ],
           to: [
             {
-              label: 'Rejected',
-              value: rejected,
+              label: 'Churned',
+              value: churned,
             },
           ],
         },
