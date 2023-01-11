@@ -113,17 +113,8 @@ export class CreateGrantWorkflowCommandHandler
         );
       }
 
-      // 6. Create a Folder
+      // 6. Update the circle
       await this.commandBus.execute(
-        new CreateFolderCommand(id, {
-          name: 'Grants Workflow',
-          avatar: 'Grants Workflow',
-          contentIds: [applicationForm.id, milestone.id, grantee.id],
-        }),
-      );
-
-      // 7. Update the circle
-      const updatedCircle = await this.commandBus.execute(
         new UpdateCircleCommand(
           id,
           {
@@ -136,6 +127,15 @@ export class CreateGrantWorkflowCommandHandler
           },
           caller,
         ),
+      );
+
+      // 7. Create a Folder
+      const updatedCircle = await this.commandBus.execute(
+        new CreateFolderCommand(id, {
+          name: 'Grants Workflow',
+          avatar: 'Grants Workflow',
+          contentIds: [applicationForm.id, milestone.id, grantee.id],
+        }),
       );
 
       return updatedCircle;
