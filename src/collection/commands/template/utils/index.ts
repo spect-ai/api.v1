@@ -7,11 +7,11 @@ import {
   milestoneProperties,
   milestonePropertyOrder,
 } from './constants/milestonecollection';
-import {
-  onboardingFormProperties,
-  onboardingFormPropertyOrder,
-} from './constants/onboardingForm';
 import { v4 as uuidv4 } from 'uuid';
+import {
+  grantApplicationFormProperties,
+  grantApplicationFormPropertyOrder,
+} from './constants/onboardingForm';
 
 const defaultViewId = '0x0';
 
@@ -74,8 +74,8 @@ export const getGrantApplicationFormDetails = (
     name: 'Grants Onboarding Form',
     collectionType: 0,
     description: ' ',
-    properties: onboardingFormProperties,
-    propertyOrder: onboardingFormPropertyOrder,
+    properties: grantApplicationFormProperties,
+    propertyOrder: grantApplicationFormPropertyOrder,
     permissions: formPermissions,
     formMetadata: {
       active: true,
@@ -189,4 +189,45 @@ export const getGranteeCollectionDto = (circle, granteeViewId) => {
     },
   };
   return granteeCollectionDto;
+};
+
+export const getOnboardingFormDetails = (
+  circle: Circle,
+  permissions?: string[],
+) => {
+  const formPermissions = permissions
+    ? { ...getDefaultPermissions(circle), viewResponses: permissions }
+    : getDefaultPermissions(circle);
+  const onboardingFormDetails = {
+    name: 'Contributor Onboarding Form',
+    collectionType: 0,
+    description: ' ',
+    properties: grantApplicationFormProperties,
+    propertyOrder: grantApplicationFormPropertyOrder,
+    permissions: formPermissions,
+    formMetadata: {
+      active: true,
+      logo: circle.avatar,
+      messageOnSubmission: 'Thank you for submitting your response',
+      multipleResponsesAllowed: false,
+      updatingResponseAllowed: false,
+    },
+    projectMetadata: {
+      viewOrder: [defaultViewId],
+      views: {
+        [defaultViewId]: {
+          id: defaultViewId,
+          name: 'Default View',
+          type: 'form',
+          filters: [],
+          sort: {
+            property: '',
+            direction: 'asc',
+          },
+        },
+      },
+      cardOrders: {},
+    },
+  };
+  return onboardingFormDetails;
 };

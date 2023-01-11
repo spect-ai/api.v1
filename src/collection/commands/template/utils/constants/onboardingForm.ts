@@ -8,7 +8,7 @@ const submitted = uuidv4();
 const accepted = uuidv4();
 const rejected = uuidv4();
 
-export const onboardingFormProperties = {
+export const grantApplicationFormProperties = {
   Status: {
     name: 'Status',
     type: 'singleSelect',
@@ -218,7 +218,7 @@ export const onboardingFormProperties = {
   },
 } as unknown as MappedItem<Property>;
 
-export const onboardingFormPropertyOrder = [
+export const grantApplicationFormPropertyOrder = [
   'Project Name',
   'About your Project',
   'Status',
