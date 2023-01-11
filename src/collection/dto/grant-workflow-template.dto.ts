@@ -13,13 +13,6 @@ export class TemplateIdDto {
 }
 
 export class UseTemplateDto {
-  /**
-   * Name of the automation
-   **/
-  @IsString()
-  @IsNotEmpty()
-  name: string;
-
   @IsObject()
   @IsOptional()
   roles?: {
@@ -35,7 +28,7 @@ export class UseTemplateDto {
 
   @IsObject()
   @IsOptional()
-  snapshot: {
+  snapshot?: {
     name: string;
     id: string;
     network: string;
@@ -44,5 +37,5 @@ export class UseTemplateDto {
 
   @IsArray()
   @IsOptional()
-  permissions: string[];
+  permissions?: string[];
 }

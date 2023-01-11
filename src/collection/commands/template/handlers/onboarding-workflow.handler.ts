@@ -14,6 +14,8 @@ import {
   getOnboardingTasksProjectDetails,
 } from '../utils';
 import { OnboardingWorkflowCommand } from '../impl/onboarding-workflow.command';
+import { getOnboardingflowAutomations } from '../utils/constants/onboardingTemplate/onboardingAutomations';
+import { AddAutomationCommand } from 'src/circle/commands/automation/impl';
 
 @CommandHandler(OnboardingWorkflowCommand)
 export class OnboardingWorkflowCommandHandler
@@ -62,28 +64,24 @@ export class OnboardingWorkflowCommandHandler
       } as any);
 
       // 3. Add Automations
-      // const automations = getAutomations(
-      //   id,
-      //   grantee.id,
-      //   grantee.slug,
-      //   onboardingProject.id,
-      //   onboardingProject.slug,
-      //   onboardingForm.slug,
-      //   templateDto.roles,
-      //   templateDto.channelCategory,
-      // );
+      const automations = getOnboardingflowAutomations(
+        id,
+        onboardingProject,
+        onboardingForm.slug,
+        templateDto.roles,
+      );
 
-      // for (const i in automations) {
-      //   await this.commandBus.execute(
-      //     new AddAutomationCommand(id, automations?.[i] as any),
-      //   );
-      // }
+      for (const i in automations) {
+        await this.commandBus.execute(
+          new AddAutomationCommand(id, automations?.[i] as any),
+        );
+      }
 
       // 4. Create a Folder
       await this.commandBus.execute(
         new CreateFolderCommand(id, {
-          name: 'Grants Workflow',
-          avatar: 'Grants Workflow',
+          name: 'Onboarding Workflow',
+          avatar: 'Onboarding Workflow',
           contentIds: [onboardingForm.id, onboardingProject.id],
         }),
       );
