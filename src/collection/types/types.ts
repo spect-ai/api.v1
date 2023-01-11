@@ -51,6 +51,11 @@ export type Milestone = {
 
 export type UserType = 'assignee' | 'reviewer' | 'grantee' | 'applicant';
 
+export type CardRelationOptions = {
+  childRelation: string;
+  parentRelation: string;
+};
+
 export type Property = {
   name: string;
   type: PropertyType;
@@ -65,6 +70,7 @@ export type Property = {
   payWallOptions?: PayWallOptions;
   description?: string;
   viewConditions?: Condition[];
+  cardRelationOptions?: CardRelationOptions;
 };
 
 export type PropertyType =
@@ -82,7 +88,8 @@ export type PropertyType =
   | 'milestone'
   | 'singleURL'
   | 'multiURL'
-  | 'payWall';
+  | 'payWall'
+  | 'cardRelation';
 
 export type Option = {
   label: string;

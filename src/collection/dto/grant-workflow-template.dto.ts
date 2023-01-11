@@ -6,6 +6,12 @@ import {
   IsString,
 } from 'class-validator';
 
+export class TemplateIdDto {
+  @IsNotEmpty()
+  @IsString()
+  templateId: string;
+}
+
 export class UseTemplateDto {
   /**
    * Name of the automation

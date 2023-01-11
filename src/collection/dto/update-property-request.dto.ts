@@ -1,3 +1,4 @@
+import { Optional } from '@nestjs/common';
 import { Type } from 'class-transformer';
 import {
   IsArray,
@@ -15,6 +16,7 @@ import {
   PropertyType,
   UserType,
   Condition,
+  CardRelationOptions,
 } from '../types/types';
 import { IsValidPaywallOptions } from '../validations/paywall-validation.service';
 import { IsValidRewardOptions } from '../validations/reward-validations.service';
@@ -29,7 +31,7 @@ export class OptionModel {
 
 export class AddPropertyDto {
   @IsString()
-  @IsNotEmpty()
+  @Optional()
   name: string;
 
   @IsEnum([
@@ -48,6 +50,7 @@ export class AddPropertyDto {
     'singleURL',
     'multiURL',
     'payWall',
+    'cardRelation',
   ])
   @IsNotEmpty()
   type: PropertyType;
@@ -111,6 +114,10 @@ export class AddPropertyDto {
   @IsArray()
   @IsOptional()
   viewConditions?: Condition[];
+
+  @IsObject()
+  @IsOptional()
+  cardRelationOptions: CardRelationOptions;
 }
 
 export class UpdatePropertyDto {

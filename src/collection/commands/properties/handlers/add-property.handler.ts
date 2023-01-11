@@ -24,6 +24,47 @@ export class AddPropertyCommandHandler
       const { addPropertyCommandDto, caller, collectionId } = command;
       const collection = await this.collectionRepository.findById(collectionId);
       console.log(addPropertyCommandDto);
+      if (addPropertyCommandDto.type === 'cardRelation') {
+        console.log({ addPropertyCommandDto });
+        const parentRelationpProperty =
+          addPropertyCommandDto.cardRelationOptions.parentRelation;
+        const childRelationProperty =
+          addPropertyCommandDto.cardRelationOptions.childRelation;
+        if (
+          collection.properties &&
+          (collection.properties[parentRelationpProperty] ||
+            collection.properties[childRelationProperty])
+        )
+          throw 'Cannot add property with duplicate name';
+        const updatedCollection = await this.collectionRepository.updateById(
+          collectionId,
+          {
+            properties: {
+              ...collection.properties,
+              [parentRelationpProperty]: {
+                ...addPropertyCommandDto,
+                name: parentRelationpProperty,
+                isPartOfFormView:
+                  addPropertyCommandDto.isPartOfFormView || true,
+              },
+              [childRelationProperty]: {
+                ...addPropertyCommandDto,
+                name: childRelationProperty,
+                isPartOfFormView:
+                  addPropertyCommandDto.isPartOfFormView || true,
+              },
+            },
+            propertyOrder: [
+              ...(collection.propertyOrder || []),
+              parentRelationpProperty,
+              childRelationProperty,
+            ],
+          },
+        );
+        return await this.queryBus.execute(
+          new GetPrivateViewCollectionQuery(null, updatedCollection),
+        );
+      }
       if (
         collection.properties &&
         collection.properties[addPropertyCommandDto.name]

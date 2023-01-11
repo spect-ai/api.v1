@@ -11,12 +11,12 @@ import { UpdateCircleCommand } from 'src/circle/commands/impl/update-circle.comm
 import { AddRoleCommand, CreateFolderCommand } from 'src/circle/commands/impl';
 import { AddAutomationCommand } from 'src/circle/commands/automation/impl';
 import {
+  getGrantApplicationFormDetails,
   getGranteeCollectionDto,
   getMilestoneCollectionDetails,
-  getOnboardingFormDetails,
-} from '../constants';
-import { getAutomations } from '../constants/onboardingForm';
+} from '../utils';
 import { defaultCircleRoles } from 'src/constants';
+import { getGrantWorkflowAutomations } from '../utils/constants/grantTemplate/grantApplicationForm';
 
 @CommandHandler(CreateGrantWorkflowCommand)
 export class CreateGrantWorkflowCommandHandler
@@ -39,7 +39,7 @@ export class CreateGrantWorkflowCommandHandler
       );
 
       // 1. Create Onboarding Form
-      const onboardingformDetails = getOnboardingFormDetails(
+      const onboardingformDetails = getGrantApplicationFormDetails(
         circle,
         templateDto.snapshot,
         templateDto.permissions,
@@ -96,7 +96,7 @@ export class CreateGrantWorkflowCommandHandler
       }
 
       // 5. Add Automations
-      const automations = getAutomations(
+      const automations = getGrantWorkflowAutomations(
         id,
         grantee.id,
         grantee.slug,

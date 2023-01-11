@@ -1,17 +1,25 @@
 import { Circle } from 'src/circle/model/circle.model';
+import { v4 as uuidv4 } from 'uuid';
+import {
+  grantApplicationFormProperties,
+  grantApplicationFormPropertyOrder,
+} from './constants/grantTemplate/grantApplicationForm';
 import {
   granteeCollectionProperties,
   granteeCollectionPropertyOrder,
-} from './granteecollection';
+} from './constants/grantTemplate/granteecollection';
 import {
   milestoneProperties,
   milestonePropertyOrder,
-} from './milestonecollection';
+} from './constants/grantTemplate/milestonecollection';
 import {
   onboardingFormProperties,
   onboardingFormPropertyOrder,
-} from './onboardingForm';
-import { v4 as uuidv4 } from 'uuid';
+} from './constants/onboardingTemplate/onboardingForm';
+import {
+  onboardingProjectProperties,
+  onboardingProjectPropertyOrder,
+} from './constants/onboardingTemplate/onboardingProject';
 
 const defaultViewId = '0x0';
 
@@ -35,7 +43,7 @@ const getDefaultPermissions = (circle: Circle) => {
   return defaultPermissions;
 };
 
-export const getOnboardingFormDetails = (
+export const getGrantApplicationFormDetails = (
   circle: Circle,
   snapshot?: any,
   permissions?: string[],
@@ -74,8 +82,8 @@ export const getOnboardingFormDetails = (
     name: 'Application Form',
     collectionType: 0,
     description: ' ',
-    properties: onboardingFormProperties,
-    propertyOrder: onboardingFormPropertyOrder,
+    properties: grantApplicationFormProperties,
+    propertyOrder: grantApplicationFormPropertyOrder,
     permissions: formPermissions,
     formMetadata: {
       active: true,
@@ -189,4 +197,85 @@ export const getGranteeCollectionDto = (circle, granteeViewId) => {
     },
   };
   return granteeCollectionDto;
+};
+
+export const getOnboardingFormDetails = (
+  circle: Circle,
+  permissions?: string[],
+) => {
+  const formPermissions = permissions
+    ? { ...getDefaultPermissions(circle), viewResponses: permissions }
+    : getDefaultPermissions(circle);
+  const onboardingFormDetails = {
+    name: 'Contributor Onboarding Form',
+    collectionType: 0,
+    description: ' ',
+    properties: onboardingFormProperties,
+    propertyOrder: onboardingFormPropertyOrder,
+    permissions: formPermissions,
+    formMetadata: {
+      active: true,
+      logo: circle.avatar,
+      messageOnSubmission: 'Thank you for submitting your response',
+      multipleResponsesAllowed: false,
+      updatingResponseAllowed: false,
+    },
+    projectMetadata: {
+      viewOrder: [defaultViewId],
+      views: {
+        [defaultViewId]: {
+          id: defaultViewId,
+          name: 'Default View',
+          type: 'form',
+          filters: [],
+          sort: {
+            property: '',
+            direction: 'asc',
+          },
+        },
+      },
+      cardOrders: {},
+    },
+  };
+  return onboardingFormDetails;
+};
+
+export const getOnboardingTasksProjectDetails = (circle, projectViewId) => {
+  return {
+    name: 'Onboarding Tasks',
+    collectionType: 1,
+    description: ' ',
+    properties: onboardingProjectProperties,
+    propertyOrder: onboardingProjectPropertyOrder,
+    permissions: getDefaultPermissions(circle),
+    projectMetadata: {
+      views: {
+        [defaultViewId]: {
+          id: defaultViewId,
+          name: 'Default View',
+          type: 'grid',
+          filters: [],
+          sort: {
+            property: '',
+            direction: 'asc',
+          },
+        },
+        [projectViewId]: {
+          id: projectViewId,
+          name: 'Tasks',
+          type: 'kanban',
+          groupByColumn: 'Status',
+          filters: [],
+          sort: {
+            property: '',
+            direction: 'asc',
+          },
+        },
+      },
+      viewOrder: [projectViewId, '0x0'],
+      cardOrders: {
+        Status: [[], [], [], []],
+      },
+    },
+  };
 };

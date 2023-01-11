@@ -1,6 +1,6 @@
 import { MappedItem } from 'src/common/interfaces';
 import { v4 as uuidv4 } from 'uuid';
-import { Property } from '../../../types/types';
+import { Property } from '../../../../../types/types';
 import { mileStoneStatus } from './milestonecollection';
 import { granteeStatus } from './granteecollection';
 
@@ -8,7 +8,7 @@ const submitted = uuidv4();
 const accepted = uuidv4();
 const rejected = uuidv4();
 
-export const onboardingFormProperties = {
+export const grantApplicationFormProperties = {
   Status: {
     name: 'Status',
     type: 'singleSelect',
@@ -218,7 +218,7 @@ export const onboardingFormProperties = {
   },
 } as unknown as MappedItem<Property>;
 
-export const onboardingFormPropertyOrder = [
+export const grantApplicationFormPropertyOrder = [
   'Project Name',
   'About your Project',
   'Status',
@@ -228,7 +228,7 @@ export const onboardingFormPropertyOrder = [
   'Total Reward',
 ];
 
-export function getAutomations(
+export function getGrantWorkflowAutomations(
   circleId: string,
   granteeId: string,
   granteeSlug: string,
