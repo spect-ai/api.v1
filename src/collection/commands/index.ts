@@ -41,6 +41,7 @@ import { AddPropertyCommandHandler } from './properties/handlers/add-property.ha
 import { RemovePropertyCommandHandler } from './properties/handlers/remove-property.handler';
 import { UpdatePropertyCommandHandler } from './properties/handlers/update-property.handler';
 import { CreateGrantWorkflowCommandHandler } from './template/handlers/grant-workflow.handler';
+import { OnboardingWorkflowCommandHandler } from './template/handlers/onboarding-workflow.handler';
 
 export const CommandHandlers = [
   CreateCollectionCommandHandler,
@@ -64,4 +65,5 @@ export const CommandHandlers = [
   DeleteCollectionCommandHandler,
   AddMultipleDataUsingAutomationCommandHandler,
   CreateGrantWorkflowCommandHandler,
+  OnboardingWorkflowCommandHandler,
 ];

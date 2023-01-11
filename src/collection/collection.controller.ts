@@ -55,7 +55,10 @@ import {
   StartVotingPeriodCommand,
   VoteDataCommand,
 } from './commands/data/impl/vote-data.command';
-import { CreateGrantWorkflowCommand } from './commands/template/impl';
+import {
+  CreateGrantWorkflowCommand,
+  OnboardingWorkflowCommand,
+} from './commands/template/impl';
 import {
   CollectionPublicResponseDto,
   CollectionResponseDto,
@@ -66,7 +69,10 @@ import {
 } from './dto/create-collection-request.dto';
 import { CreateCollectionResponseDto } from './dto/create-collection-response.dto';
 import { RemoveDataDto } from './dto/remove.data-request.dto';
-import { UseTemplateDto } from './dto/grant-workflow-template.dto';
+import {
+  TemplateIdDto,
+  UseTemplateDto,
+} from './dto/grant-workflow-template.dto';
 import { UpdateCollectionDto } from './dto/update-collection-request.dto';
 import {
   AddCommentDto,
@@ -506,10 +512,17 @@ export class CollectionController {
   async useTemplate(
     @Param() param: ObjectIdDto,
     @Body() template: UseTemplateDto,
+    @Query() query: TemplateIdDto,
     @Request() req,
   ): Promise<Circle> {
-    return await this.commandBus.execute(
-      new CreateGrantWorkflowCommand(template, param.id, req.user?.id),
-    );
+    if (query.templateId === '1') {
+      return await this.commandBus.execute(
+        new CreateGrantWorkflowCommand(template, param.id, req.user?.id),
+      );
+    } else if (query.templateId === '2') {
+      return await this.commandBus.execute(
+        new OnboardingWorkflowCommand(template, param.id, req.user?.id),
+      );
+    }
   }
 }
