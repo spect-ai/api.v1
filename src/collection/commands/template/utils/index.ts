@@ -1,15 +1,16 @@
 import { Circle } from 'src/circle/model/circle.model';
+import { Registry } from 'src/registry/model/registry.model';
 import { v4 as uuidv4 } from 'uuid';
 import {
-  grantApplicationFormProperties,
+  getGrantApplicationFormProperties,
   grantApplicationFormPropertyOrder,
 } from './constants/grantTemplate/grantApplicationForm';
 import {
-  granteeCollectionProperties,
+  getGranteeCollectionProperties,
   granteeCollectionPropertyOrder,
 } from './constants/grantTemplate/granteecollection';
 import {
-  milestoneProperties,
+  getMilestoneProperties,
   milestonePropertyOrder,
 } from './constants/grantTemplate/milestonecollection';
 import {
@@ -45,6 +46,9 @@ const getDefaultPermissions = (circle: Circle) => {
 
 export const getGrantApplicationFormDetails = (
   circle: Circle,
+  registry: {
+    [k: string]: Registry;
+  },
   snapshot?: any,
   permissions?: string[],
 ) => {
@@ -82,7 +86,7 @@ export const getGrantApplicationFormDetails = (
     name: 'Application Form',
     collectionType: 0,
     description: ' ',
-    properties: grantApplicationFormProperties,
+    properties: getGrantApplicationFormProperties(registry),
     propertyOrder: grantApplicationFormPropertyOrder,
     permissions: formPermissions,
     formMetadata: {
@@ -113,12 +117,16 @@ export const getGrantApplicationFormDetails = (
   return onboardingFormDetails;
 };
 
-export const getMilestoneCollectionDetails = (circle, milstoneViewId) => {
+export const getMilestoneCollectionDetails = (
+  circle,
+  milstoneViewId,
+  registry,
+) => {
   const milestoneCollectionDto = {
     name: 'Milestones',
     collectionType: 1,
     description: ' ',
-    properties: milestoneProperties,
+    properties: getMilestoneProperties(registry),
     propertyOrder: milestonePropertyOrder,
     permissions: getDefaultPermissions(circle),
     projectMetadata: {
@@ -154,12 +162,12 @@ export const getMilestoneCollectionDetails = (circle, milstoneViewId) => {
   return milestoneCollectionDto;
 };
 
-export const getGranteeCollectionDto = (circle, granteeViewId) => {
+export const getGranteeCollectionDto = (circle, granteeViewId, registry) => {
   const granteeCollectionDto = {
     name: 'Grantee',
     collectionType: 1,
     description: ' ',
-    properties: granteeCollectionProperties,
+    properties: getGranteeCollectionProperties(registry),
     propertyOrder: granteeCollectionPropertyOrder,
     permissions: getDefaultPermissions(circle),
     projectMetadata: {

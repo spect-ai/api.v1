@@ -27,6 +27,8 @@ import { ActivityBuilder, ActivityResolver } from './services/activity.service';
 import { AdvancedAccessService } from './services/advanced-access.service';
 import { ResponseCredentialingService } from './services/response-credentialing.service';
 import { DataValidationService } from './validations/data-validation.service';
+import { RegistryService } from 'src/registry/registry.service';
+import { RegistryModule } from 'src/registry/registry.module';
 
 @Module({
   imports: [
@@ -37,6 +39,7 @@ import { DataValidationService } from './validations/data-validation.service';
     CirclesModule,
     RealtimeModule,
     CredentialsModule,
+    RegistryModule,
   ],
   controllers: [CollectionController],
   providers: [
@@ -60,6 +63,7 @@ import { DataValidationService } from './validations/data-validation.service';
     ActivityOnAddData,
     DiscordService,
     ActivityOnVoting,
+    RegistryService,
   ],
   exports: [CollectionModule, CollectionRepository],
 })

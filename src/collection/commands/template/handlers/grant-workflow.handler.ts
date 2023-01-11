@@ -17,6 +17,7 @@ import {
 } from '../utils';
 import { defaultCircleRoles } from 'src/constants';
 import { getGrantWorkflowAutomations } from '../utils/constants/grantTemplate/grantApplicationForm';
+import { RegistryService } from 'src/registry/registry.service';
 
 @CommandHandler(CreateGrantWorkflowCommand)
 export class CreateGrantWorkflowCommandHandler
@@ -24,6 +25,7 @@ export class CreateGrantWorkflowCommandHandler
 {
   constructor(
     private readonly collectionRepository: CollectionRepository,
+    private readonly registryService: RegistryService,
     private readonly commandBus: CommandBus,
     private readonly queryBus: QueryBus,
     private readonly logger: LoggingService,
@@ -38,9 +40,12 @@ export class CreateGrantWorkflowCommandHandler
         new GetCircleByIdQuery(id, {}),
       );
 
+      const registry = await this.registryService.getRegistry();
+
       // 1. Create Application Form
       const applicationformDetails = getGrantApplicationFormDetails(
         circle,
+        templateDto.registry || { '137': registry?.['137'] },
         templateDto.snapshot,
         templateDto.permissions,
       );
@@ -56,6 +61,7 @@ export class CreateGrantWorkflowCommandHandler
       const milestoneCollectionDto = getMilestoneCollectionDetails(
         circle,
         milstoneViewId,
+        templateDto.registry || { '137': registry?.['137'] },
       );
       const milestone = await this.collectionRepository.create({
         creator: caller,
@@ -69,6 +75,7 @@ export class CreateGrantWorkflowCommandHandler
       const granteeCollectionDto = getGranteeCollectionDto(
         circle,
         granteeViewId,
+        templateDto.registry || { '137': registry?.['137'] },
       );
       const grantee = await this.collectionRepository.create({
         creator: caller,

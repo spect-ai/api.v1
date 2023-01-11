@@ -5,6 +5,7 @@ import {
   IsOptional,
   IsString,
 } from 'class-validator';
+import { Registry } from 'src/registry/model/registry.model';
 
 export class TemplateIdDto {
   @IsNotEmpty()
@@ -38,4 +39,8 @@ export class UseTemplateDto {
   @IsArray()
   @IsOptional()
   permissions?: string[];
+
+  @IsObject()
+  @IsOptional()
+  registry?: { [key: string]: Registry };
 }

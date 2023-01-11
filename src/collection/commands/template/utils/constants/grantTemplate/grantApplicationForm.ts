@@ -8,215 +8,146 @@ const inProgress = uuidv4();
 const completed = uuidv4();
 const churned = uuidv4();
 
-export const grantApplicationFormProperties = {
-  Status: {
-    name: 'Status',
-    type: 'singleSelect',
-    options: [
-      {
+export const getGrantApplicationFormProperties = (registry) => {
+  const properties = {
+    Status: {
+      name: 'Status',
+      type: 'singleSelect',
+      options: [
+        {
+          label: 'In Progress',
+          value: inProgress,
+        },
+        {
+          label: 'Completed',
+          value: completed,
+        },
+        {
+          label: 'Churned',
+          value: churned,
+        },
+      ],
+      default: {
         label: 'In Progress',
         value: inProgress,
       },
-      {
-        label: 'Completed',
-        value: completed,
-      },
-      {
-        label: 'Churned',
-        value: churned,
-      },
-    ],
-    default: {
-      label: 'In Progress',
-      value: inProgress,
+      isPartOfFormView: false,
+      rewardOptions: {},
+      description: '',
+      required: false,
+      milestoneFields: [],
+      viewConditions: [],
+      payWallOptions: {},
     },
-    isPartOfFormView: false,
-    rewardOptions: {},
-    description: '',
-    required: false,
-    milestoneFields: [],
-    viewConditions: [],
-    payWallOptions: {},
-  },
-  ['Project Name']: {
-    name: 'Project Name',
-    type: 'shortText',
-    options: [
-      {
-        label: 'Option 1',
-        value: `option-${uuidv4()}`,
-      },
-    ],
-    rewardOptions: {},
-    description: '',
-    default: '',
-    isPartOfFormView: true,
-    required: true,
-    milestoneFields: [],
-    viewConditions: [],
-    payWallOptions: {},
-  },
-  ['About your Project']: {
-    name: 'About your Project',
-    type: 'longText',
-    options: [
-      {
-        label: 'Option 1',
-        value: `option-${uuidv4()}`,
-      },
-    ],
-    rewardOptions: {},
-    description:
-      'Describe how your venture would solve the problems in Web3, how your team when around shipping it ',
-    default: '',
-    isPartOfFormView: true,
-    required: true,
-    milestoneFields: [],
-    viewConditions: [],
-    payWallOptions: {},
-  },
-  Email: {
-    name: 'Email',
-    type: 'email',
-    isPartOfFormView: true,
-    description: '',
-    options: [
-      {
-        label: 'Option 1',
-        value: `option-${uuidv4()}`,
-      },
-    ],
-    rewardOptions: {},
-    required: true,
-    milestoneFields: [],
-    viewConditions: [],
-    payWallOptions: {},
-  },
-  Milestones: {
-    name: 'Milestones',
-    type: 'milestone',
-    isPartOfFormView: true,
-    description:
-      'Give a detailed description on the milestones you would want to achieve during this grant program',
-    options: [
-      {
-        label: 'Option 1',
-        value: `option-${uuidv4()}`,
-      },
-    ],
-    rewardOptions: {
-      '137': {
-        _id: '62b8fc1fb4a7e8cb15182309',
-        chainId: '137',
-        name: 'polygon',
-        distributorAddress: '0xD38028814eC0AAD592c97dE015B6F7ee5c019B48',
-        mainnet: true,
-        nativeCurrency: 'MATIC',
-        pictureUrl:
-          'https://ipfs.moralis.io:2053/ipfs/QmRNqgazYuxUa5WdddFPftTWiP3KwzBMgV9Z19QWnLMETc',
-        blockExplorer: 'https://polygonscan.com/',
-        provider: 'https://polygon-rpc.com',
-        tokenDetails: {
-          '0x0': {
-            address: '0x0',
-            symbol: 'MATIC',
-            name: 'Matic',
-            blacklisted: false,
-          },
-          '0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270': {
-            address: '0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270',
-            symbol: 'WMATIC',
-            name: 'Wrapped MATIC',
-            blacklisted: false,
-          },
+    ['Project Name']: {
+      name: 'Project Name',
+      type: 'shortText',
+      options: [
+        {
+          label: 'Option 1',
+          value: `option-${uuidv4()}`,
         },
-        createdAt: '2022-06-27T00:38:55.296Z',
-        updatedAt: '2022-06-27T01:23:28.582Z',
-        id: '62b8fc1fb4a7e8cb15182309',
-        '0x0': {
-          address: '0x0',
-          symbol: 'MATIC',
-          name: 'Matic',
-          blacklisted: false,
-        },
-      },
+      ],
+      rewardOptions: {},
+      description: '',
+      default: '',
+      isPartOfFormView: true,
+      required: true,
+      milestoneFields: [],
+      viewConditions: [],
+      payWallOptions: {},
     },
-    required: true,
-    milestoneFields: ['name', 'description', 'dueDate', 'reward'],
-    viewConditions: [],
-    payWallOptions: {},
-  },
-  ['About the Team']: {
-    name: 'About the Team',
-    type: 'longText',
-    options: [
-      {
-        label: 'Option 1',
-        value: `option-${uuidv4()}`,
-      },
-    ],
-    rewardOptions: {},
-    description: '',
-    isPartOfFormView: true,
-    required: false,
-    milestoneFields: [],
-    viewConditions: [],
-    payWallOptions: {},
-  },
-  ['Total Reward']: {
-    name: 'Total Reward',
-    type: 'reward',
-    isPartOfFormView: true,
-    description: '',
-    options: [
-      {
-        label: 'Option 1',
-        value: `option-${uuidv4()}`,
-      },
-    ],
-    rewardOptions: {
-      '137': {
-        _id: '62b8fc1fb4a7e8cb15182309',
-        chainId: '137',
-        name: 'polygon',
-        distributorAddress: '0xD38028814eC0AAD592c97dE015B6F7ee5c019B48',
-        mainnet: true,
-        nativeCurrency: 'MATIC',
-        pictureUrl:
-          'https://ipfs.moralis.io:2053/ipfs/QmRNqgazYuxUa5WdddFPftTWiP3KwzBMgV9Z19QWnLMETc',
-        blockExplorer: 'https://polygonscan.com/',
-        provider: 'https://polygon-rpc.com',
-        tokenDetails: {
-          '0x0': {
-            address: '0x0',
-            symbol: 'MATIC',
-            name: 'Matic',
-            blacklisted: false,
-          },
-          '0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270': {
-            address: '0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270',
-            symbol: 'WMATIC',
-            name: 'Wrapped MATIC',
-            blacklisted: false,
-          },
+    ['About your Project']: {
+      name: 'About your Project',
+      type: 'longText',
+      options: [
+        {
+          label: 'Option 1',
+          value: `option-${uuidv4()}`,
         },
-        createdAt: '2022-06-27T00:38:55.296Z',
-        updatedAt: '2022-06-27T01:23:28.582Z',
-        id: '62b8fc1fb4a7e8cb15182309',
-        '0x0': {
-          address: '0x0',
-          symbol: 'MATIC',
-          name: 'Matic',
-          blacklisted: false,
-        },
-      },
+      ],
+      rewardOptions: {},
+      description:
+        'Describe how your venture would solve the problems in Web3, how your team when around shipping it ',
+      default: '',
+      isPartOfFormView: true,
+      required: true,
+      milestoneFields: [],
+      viewConditions: [],
+      payWallOptions: {},
     },
-    required: true,
-    milestoneFields: [],
-    viewConditions: [],
-    payWallOptions: {},
-  },
-} as unknown as MappedItem<Property>;
+    Email: {
+      name: 'Email',
+      type: 'email',
+      isPartOfFormView: true,
+      description: '',
+      options: [
+        {
+          label: 'Option 1',
+          value: `option-${uuidv4()}`,
+        },
+      ],
+      rewardOptions: {},
+      required: true,
+      milestoneFields: [],
+      viewConditions: [],
+      payWallOptions: {},
+    },
+    Milestones: {
+      name: 'Milestones',
+      type: 'milestone',
+      isPartOfFormView: true,
+      description:
+        'Give a detailed description on the milestones you would want to achieve during this grant program',
+      options: [
+        {
+          label: 'Option 1',
+          value: `option-${uuidv4()}`,
+        },
+      ],
+      rewardOptions: registry,
+      required: true,
+      milestoneFields: ['name', 'description', 'dueDate', 'reward'],
+      viewConditions: [],
+      payWallOptions: {},
+    },
+    ['About the Team']: {
+      name: 'About the Team',
+      type: 'longText',
+      options: [
+        {
+          label: 'Option 1',
+          value: `option-${uuidv4()}`,
+        },
+      ],
+      rewardOptions: {},
+      description: '',
+      isPartOfFormView: true,
+      required: false,
+      milestoneFields: [],
+      viewConditions: [],
+      payWallOptions: {},
+    },
+    ['Total Reward']: {
+      name: 'Total Reward',
+      type: 'reward',
+      isPartOfFormView: true,
+      description: '',
+      options: [
+        {
+          label: 'Option 1',
+          value: `option-${uuidv4()}`,
+        },
+      ],
+      rewardOptions: registry,
+      required: true,
+      milestoneFields: [],
+      viewConditions: [],
+      payWallOptions: {},
+    },
+  } as unknown as MappedItem<Property>;
+  return properties;
+};
 
 export const grantApplicationFormPropertyOrder = [
   'Project Name',
@@ -242,6 +173,7 @@ export function getGrantWorkflowAutomations(
     label: string;
     value: string;
   },
+  registry?: any,
 ) {
   const dicordRole =
     roles && Object.keys(roles).length > 0
@@ -349,45 +281,7 @@ export function getGrantWorkflowAutomations(
                     type: 'milestone',
                     isPartOfFormView: true,
                     description: '',
-                    rewardOptions: {
-                      '137': {
-                        _id: '62b8fc1fb4a7e8cb15182309',
-                        chainId: '137',
-                        name: 'polygon',
-                        distributorAddress:
-                          '0x54904743F2A0d0BCC228e334bF52d4b578901cfB',
-                        mainnet: true,
-                        nativeCurrency: 'MATIC',
-                        pictureUrl:
-                          'https://ipfs.moralis.io:2053/ipfs/QmRNqgazYuxUa5WdddFPftTWiP3KwzBMgV9Z19QWnLMETc',
-                        blockExplorer: 'https://polygonscan.com/',
-                        provider: 'https://polygon-rpc.com',
-                        tokenDetails: {
-                          '0x0': {
-                            address: '0x0',
-                            symbol: 'MATIC',
-                            name: 'Matic',
-                            blacklisted: false,
-                          },
-                          '0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270': {
-                            address:
-                              '0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270',
-                            symbol: 'WMATIC',
-                            name: 'Wrapped MATIC',
-                            blacklisted: false,
-                          },
-                        },
-                        createdAt: '2022-06-27T00:38:55.296Z',
-                        updatedAt: '2022-06-27T01:23:28.582Z',
-                        id: '62b8fc1fb4a7e8cb15182309',
-                        '0x0': {
-                          address: '0x0',
-                          symbol: 'MATIC',
-                          name: 'Matic',
-                          blacklisted: false,
-                        },
-                      },
-                    },
+                    rewardOptions: registry,
                     required: false,
                     milestoneFields: [
                       'name',
@@ -403,45 +297,7 @@ export function getGrantWorkflowAutomations(
                     type: 'reward',
                     isPartOfFormView: true,
                     description: '',
-                    rewardOptions: {
-                      '137': {
-                        _id: '62b8fc1fb4a7e8cb15182309',
-                        chainId: '137',
-                        name: 'polygon',
-                        distributorAddress:
-                          '0x54904743F2A0d0BCC228e334bF52d4b578901cfB',
-                        mainnet: true,
-                        nativeCurrency: 'MATIC',
-                        pictureUrl:
-                          'https://ipfs.moralis.io:2053/ipfs/QmRNqgazYuxUa5WdddFPftTWiP3KwzBMgV9Z19QWnLMETc',
-                        blockExplorer: 'https://polygonscan.com/',
-                        provider: 'https://polygon-rpc.com',
-                        tokenDetails: {
-                          '0x0': {
-                            address: '0x0',
-                            symbol: 'MATIC',
-                            name: 'Matic',
-                            blacklisted: false,
-                          },
-                          '0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270': {
-                            address:
-                              '0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270',
-                            symbol: 'WMATIC',
-                            name: 'Wrapped MATIC',
-                            blacklisted: false,
-                          },
-                        },
-                        createdAt: '2022-06-27T00:38:55.296Z',
-                        updatedAt: '2022-06-27T01:23:28.582Z',
-                        id: '62b8fc1fb4a7e8cb15182309',
-                        '0x0': {
-                          address: '0x0',
-                          symbol: 'MATIC',
-                          name: 'Matic',
-                          blacklisted: false,
-                        },
-                      },
-                    },
+                    rewardOptions: registry,
                     required: false,
                     milestoneFields: [],
                     viewConditions: [],
@@ -729,45 +585,7 @@ export function getGrantWorkflowAutomations(
                     type: 'reward',
                     isPartOfFormView: true,
                     description: '',
-                    rewardOptions: {
-                      '137': {
-                        _id: '62b8fc1fb4a7e8cb15182309',
-                        chainId: '137',
-                        name: 'polygon',
-                        distributorAddress:
-                          '0x54904743F2A0d0BCC228e334bF52d4b578901cfB',
-                        mainnet: true,
-                        nativeCurrency: 'MATIC',
-                        pictureUrl:
-                          'https://ipfs.moralis.io:2053/ipfs/QmRNqgazYuxUa5WdddFPftTWiP3KwzBMgV9Z19QWnLMETc',
-                        blockExplorer: 'https://polygonscan.com/',
-                        provider: 'https://polygon-rpc.com',
-                        tokenDetails: {
-                          '0x0': {
-                            address: '0x0',
-                            symbol: 'MATIC',
-                            name: 'Matic',
-                            blacklisted: false,
-                          },
-                          '0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270': {
-                            address:
-                              '0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270',
-                            symbol: 'WMATIC',
-                            name: 'Wrapped MATIC',
-                            blacklisted: false,
-                          },
-                        },
-                        createdAt: '2022-06-27T00:38:55.296Z',
-                        updatedAt: '2022-06-27T01:23:28.582Z',
-                        id: '62b8fc1fb4a7e8cb15182309',
-                        '0x0': {
-                          address: '0x0',
-                          symbol: 'MATIC',
-                          name: 'Matic',
-                          blacklisted: false,
-                        },
-                      },
-                    },
+                    rewardOptions: registry,
                     required: false,
                     milestoneFields: [],
                     viewConditions: [],

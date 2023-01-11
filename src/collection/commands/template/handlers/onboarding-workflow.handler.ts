@@ -16,6 +16,7 @@ import {
 import { OnboardingWorkflowCommand } from '../impl/onboarding-workflow.command';
 import { getOnboardingflowAutomations } from '../utils/constants/onboardingTemplate/onboardingAutomations';
 import { AddAutomationCommand } from 'src/circle/commands/automation/impl';
+import { RegistryService } from 'src/registry/registry.service';
 
 @CommandHandler(OnboardingWorkflowCommand)
 export class OnboardingWorkflowCommandHandler
@@ -23,6 +24,7 @@ export class OnboardingWorkflowCommandHandler
 {
   constructor(
     private readonly collectionRepository: CollectionRepository,
+    private readonly registryService: RegistryService,
     private readonly commandBus: CommandBus,
     private readonly queryBus: QueryBus,
     private readonly logger: LoggingService,
@@ -37,9 +39,12 @@ export class OnboardingWorkflowCommandHandler
         new GetCircleByIdQuery(id, {}),
       );
 
+      const registry = await this.registryService.getRegistry();
+
       // 1. Create Onboarding Form
       const onboardingformDetails = getGrantApplicationFormDetails(
         circle,
+        templateDto.registry || { '137': registry?.['137'] },
         templateDto.snapshot,
         templateDto.permissions,
       );
