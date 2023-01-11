@@ -10,13 +10,12 @@ import { GetCircleByIdQuery } from 'src/circle/queries/impl';
 import { UpdateCircleCommand } from 'src/circle/commands/impl/update-circle.command';
 import { CreateFolderCommand } from 'src/circle/commands/impl';
 import {
-  getGrantApplicationFormDetails,
+  getOnboardingFormDetails,
   getOnboardingTasksProjectDetails,
 } from '../utils';
 import { OnboardingWorkflowCommand } from '../impl/onboarding-workflow.command';
 import { getOnboardingflowAutomations } from '../utils/constants/onboardingTemplate/onboardingAutomations';
 import { AddAutomationCommand } from 'src/circle/commands/automation/impl';
-import { RegistryService } from 'src/registry/registry.service';
 
 @CommandHandler(OnboardingWorkflowCommand)
 export class OnboardingWorkflowCommandHandler
@@ -24,7 +23,6 @@ export class OnboardingWorkflowCommandHandler
 {
   constructor(
     private readonly collectionRepository: CollectionRepository,
-    private readonly registryService: RegistryService,
     private readonly commandBus: CommandBus,
     private readonly queryBus: QueryBus,
     private readonly logger: LoggingService,
@@ -39,13 +37,9 @@ export class OnboardingWorkflowCommandHandler
         new GetCircleByIdQuery(id, {}),
       );
 
-      const registry = await this.registryService.getRegistry();
-
       // 1. Create Onboarding Form
-      const onboardingformDetails = getGrantApplicationFormDetails(
+      const onboardingformDetails = getOnboardingFormDetails(
         circle,
-        templateDto.registry || { '137': registry?.['137'] },
-        templateDto.snapshot,
         templateDto.permissions,
       );
       const onboardingForm = await this.collectionRepository.create({
@@ -82,17 +76,8 @@ export class OnboardingWorkflowCommandHandler
         );
       }
 
-      // 4. Create a Folder
+      // 4. Update the circle
       await this.commandBus.execute(
-        new CreateFolderCommand(id, {
-          name: 'Onboarding Workflow',
-          avatar: 'Onboarding Workflow',
-          contentIds: [onboardingForm.id, onboardingProject.id],
-        }),
-      );
-
-      // 5. Update the circle
-      const updatedCircle = await this.commandBus.execute(
         new UpdateCircleCommand(
           id,
           {
@@ -104,6 +89,15 @@ export class OnboardingWorkflowCommandHandler
           },
           caller,
         ),
+      );
+
+      // 5. Create a Folder
+      const updatedCircle = await this.commandBus.execute(
+        new CreateFolderCommand(id, {
+          name: 'Onboarding Workflow',
+          avatar: 'Onboarding Workflow',
+          contentIds: [onboardingForm.id, onboardingProject.id],
+        }),
       );
 
       return updatedCircle;
