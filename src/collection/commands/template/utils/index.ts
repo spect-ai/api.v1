@@ -79,7 +79,7 @@ export const getGrantApplicationFormDetails = (
       }
     : {};
   const onboardingFormDetails = {
-    name: 'Grants Onboarding Form',
+    name: 'Application Form',
     collectionType: 0,
     description: ' ',
     properties: grantApplicationFormProperties,
