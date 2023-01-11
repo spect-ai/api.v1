@@ -10,7 +10,7 @@ import { GetCircleByIdQuery } from 'src/circle/queries/impl';
 import { UpdateCircleCommand } from 'src/circle/commands/impl/update-circle.command';
 import { CreateFolderCommand } from 'src/circle/commands/impl';
 import {
-  getGrantApplicationFormDetails,
+  getOnboardingFormDetails,
   getOnboardingTasksProjectDetails,
 } from '../utils';
 import { OnboardingWorkflowCommand } from '../impl/onboarding-workflow.command';
@@ -38,9 +38,8 @@ export class OnboardingWorkflowCommandHandler
       );
 
       // 1. Create Onboarding Form
-      const onboardingformDetails = getGrantApplicationFormDetails(
+      const onboardingformDetails = getOnboardingFormDetails(
         circle,
-        templateDto.snapshot,
         templateDto.permissions,
       );
       const onboardingForm = await this.collectionRepository.create({
