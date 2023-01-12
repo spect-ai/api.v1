@@ -110,7 +110,6 @@ export class CreateGrantWorkflowCommandHandler
         milestone.slug,
         applicationForm.slug,
         templateDto.roles,
-        templateDto.channelCategory,
       );
 
       for (const i in automations) {
