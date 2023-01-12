@@ -56,7 +56,7 @@ export const getGrantApplicationFormDetails = (
   snapshot?: any,
 ) => {
   const formPermissions = getDefaultPermissions(circle);
-  const voting = snapshot
+  const voting = snapshot?.id
     ? {
         enabled: true,
         options: [
