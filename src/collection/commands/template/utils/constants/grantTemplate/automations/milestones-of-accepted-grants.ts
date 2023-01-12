@@ -1,5 +1,9 @@
 import { applicationFormStatus } from '../grantApplicationForm';
-import { mileStoneStatus } from '../milestonecollection';
+import {
+  getMilestoneProperties,
+  milestonePropertyOrder,
+  mileStoneStatus,
+} from '../milestonecollection';
 
 export const automationForMilestonesOfAcceptedGrants = (
   milestoneId: string,
@@ -46,82 +50,8 @@ export const automationForMilestonesOfAcceptedGrants = (
             data: {
               name: 'Milestones',
               slug: milestoneSlug,
-              properties: {
-                Title: {
-                  name: 'Title',
-                  type: 'shortText',
-                  default: '',
-                  isPartOfFormView: true,
-                  immutable: true,
-                },
-                Description: {
-                  name: 'Description',
-                  type: 'longText',
-                  default: '',
-                  isPartOfFormView: true,
-                },
-                'Project Name': {
-                  name: 'Project Name',
-                  type: 'shortText',
-                  isPartOfFormView: true,
-                  description: '',
-                  rewardOptions: {},
-                  required: false,
-                  milestoneFields: [],
-                  viewConditions: [],
-                  payWallOptions: {},
-                },
-                Status: {
-                  name: 'Status',
-                  type: 'singleSelect',
-                  options: [
-                    {
-                      label: 'To Do',
-                      value: mileStoneStatus.todo,
-                    },
-                    {
-                      label: 'In Progress',
-                      value: mileStoneStatus.inProgress,
-                    },
-                    {
-                      label: 'Done',
-                      value: mileStoneStatus.done,
-                    },
-                  ],
-                  isPartOfFormView: false,
-                },
-                Reward: {
-                  name: 'Reward',
-                  type: 'reward',
-                  isPartOfFormView: true,
-                  description: '',
-                  rewardOptions: registry,
-                  required: false,
-                  milestoneFields: [],
-                  viewConditions: [],
-                  payWallOptions: {},
-                },
-                'Due Date': {
-                  name: 'Due Date',
-                  type: 'date',
-                  isPartOfFormView: true,
-                  description: '',
-                  options: [],
-                  rewardOptions: {},
-                  required: false,
-                  milestoneFields: [],
-                  viewConditions: [],
-                  payWallOptions: {},
-                },
-              },
-              propertyOrder: [
-                'Title',
-                'Description',
-                'Status',
-                'Reward',
-                'Due Date',
-                'Project Name',
-              ],
+              properties: getMilestoneProperties(registry),
+              propertyOrder: milestonePropertyOrder,
               collectionType: 1,
               id: milestoneId,
             },
@@ -228,6 +158,18 @@ export const automationForMilestonesOfAcceptedGrants = (
                 from: {
                   label: 'Project Name',
                   value: 'Project Name',
+                },
+              },
+            },
+            {
+              type: 'responder',
+              mapping: {
+                to: {
+                  label: 'Assignee',
+                  value: 'Assignee',
+                  data: {
+                    type: 'user[]',
+                  },
                 },
               },
             },

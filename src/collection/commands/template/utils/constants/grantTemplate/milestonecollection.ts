@@ -75,6 +75,17 @@ export const getMilestoneProperties = (registry) => {
       viewConditions: [],
       payWallOptions: {},
     },
+    Assignee: {
+      name: 'Assignee',
+      type: 'user[]',
+      isPartOfFormView: true,
+      description: '',
+      rewardOptions: {},
+      required: false,
+      milestoneFields: [],
+      viewConditions: [],
+      payWallOptions: {},
+    },
   } as unknown as MappedItem<Property>;
   return props;
 };
@@ -86,4 +97,5 @@ export const milestonePropertyOrder = [
   'Reward',
   'Due Date',
   'Project Name',
+  'Assignee',
 ];
