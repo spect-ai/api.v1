@@ -17,7 +17,7 @@ export function getOnboardingflowAutomations(
           service: 'circle',
           type: 'giveDiscordRole',
           data: {
-            discordRoles,
+            roles: discordRoles,
             circleId: circleId,
           },
         }

@@ -45,7 +45,7 @@ export class GetProfileQueryHandler implements IQueryHandler<GetProfileQuery> {
         null,
         publicProfileFields,
       )) as PrivateProfileResponseDto;
-
+      console.log({ query: query.filterQuery, user });
       if (!user) {
         throw `User with filter ${query.filterQuery} not found`;
       }
@@ -81,8 +81,13 @@ export class GetProfileQueryHandler implements IQueryHandler<GetProfileQuery> {
         bio: lensProfile.bio,
       };
     } catch (error) {
-      this.logger.error(`Failed getting user with error: ${error}`);
-      throw new InternalServerErrorException(`Failed getting user`, error);
+      this.logger.error(
+        `Failed getting user with error: ${JSON.stringify(error)}`,
+      );
+      throw new InternalServerErrorException(
+        `Failed getting user`,
+        JSON.stringify(error),
+      );
     }
   }
 

@@ -430,10 +430,14 @@ export class AddMultipleDataUsingAutomationCommandHandler
       return true;
     } catch (err) {
       this.logger.error(
-        `Failed adding data to collection Id ${collectionId} with error ${err}`,
+        `Failed adding data to collection Id ${collectionId} with error ${JSON.stringify(
+          err,
+        )}`,
       );
       throw new InternalServerErrorException(
-        `Failed adding data to collection Id ${collectionId} with error ${err}`,
+        `Failed adding data to collection Id ${collectionId} with error ${JSON.stringify(
+          err,
+        )}`,
       );
     }
   }
