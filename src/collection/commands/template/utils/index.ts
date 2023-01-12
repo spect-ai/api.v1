@@ -56,7 +56,7 @@ export const getGrantApplicationFormDetails = (
   snapshot?: any,
 ) => {
   const formPermissions = getDefaultPermissions(circle);
-  const voting = snapshot
+  const voting = snapshot?.id
     ? {
         enabled: true,
         options: [
@@ -185,8 +185,8 @@ export const getGranteeCollectionDto = (circle, granteeViewId, registry) => {
         },
         [granteeViewId]: {
           id: granteeViewId,
-          name: 'Status View',
-          type: 'kanban',
+          name: 'Grantee List',
+          type: 'list',
           groupByColumn: 'Status',
           filters: [],
           sort: {
