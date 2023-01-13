@@ -158,6 +158,10 @@ export const getMilestoneCollectionDetails = (
       cardOrders: {
         Status: [[], [], [], []],
       },
+      payments: {
+        rewardField: 'Reward',
+        payeeField: 'Assignee',
+      },
     },
   };
   return milestoneCollectionDto;
@@ -319,6 +323,10 @@ export const getKanbanProjectDetails = (circle, projectViewId, registry) => {
       viewOrder: [projectViewId, '0x0'],
       cardOrders: {
         Status: [[], [], [], []],
+      },
+      payments: {
+        rewardField: 'Reward',
+        payeeField: 'Assignee',
       },
     },
   };
