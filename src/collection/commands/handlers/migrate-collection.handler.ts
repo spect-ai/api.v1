@@ -329,7 +329,7 @@ export class MigrateCollectionCommandHandler
         ),
       );
 
-      // find the folder id of the project
+      // find the folder id of the project and add the new collection to it
       const folderId = circle.folderOrder.find((folder) =>
         circle.folderDetails[folder].contentIds.includes(project.id),
       );
