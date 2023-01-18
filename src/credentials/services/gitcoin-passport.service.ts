@@ -35,6 +35,8 @@ export class GitcoinPassportService {
     const PassportScorer = (await import('@gitcoinco/passport-sdk-scorer'))
       .PassportScorer;
     const stampsWithCredentials = [];
+    console.log({ passport });
+    if (!passport?.stamps) return false;
     for (const stamp of passport.stamps) {
       if (!stamp.credential) {
         continue;
