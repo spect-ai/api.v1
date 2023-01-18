@@ -90,6 +90,9 @@ export class UpdateDataCommandHandler
         dataSlug,
         caller?.id,
       );
+      if (data['anonymous'] !== undefined) {
+        filteredData['anonymous'] = data['anonymous'];
+      }
       let updatedCollection;
       updatedCollection = await this.collectionRepository.updateById(
         collectionId,
@@ -105,6 +108,7 @@ export class UpdateDataCommandHandler
           dataActivityOrder,
         },
       );
+      console.log(updatedCollection.data[dataSlug]);
       const propertyName = Object.keys(data)[0];
       if (
         collection.collectionType === 1 &&
@@ -133,7 +137,7 @@ export class UpdateDataCommandHandler
         return publicView;
       }
       return await await this.queryBus.execute(
-        new GetPrivateViewCollectionQuery(collection.slug, updatedCollection),
+        new GetPrivateViewCollectionQuery(collection.slug, collection),
       );
     } catch (err) {
       this.logger.error(

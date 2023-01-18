@@ -241,7 +241,13 @@ export class CollectionController {
     @Request() req,
   ): Promise<Collection> {
     return await this.commandBus.execute(
-      new AddDataCommand(addDataDto.data, req.user, param.id, true),
+      new AddDataCommand(
+        addDataDto.data,
+        req.user,
+        param.id,
+        addDataDto.anon,
+        true,
+      ),
     );
   }
 
@@ -254,7 +260,7 @@ export class CollectionController {
     @Request() req,
   ): Promise<Collection> {
     return await this.commandBus.execute(
-      new AddDataCommand(addDataDto.data, req.user, param.id),
+      new AddDataCommand(addDataDto.data, req.user, param.id, false),
     );
   }
 
