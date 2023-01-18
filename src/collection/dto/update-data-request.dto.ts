@@ -6,8 +6,7 @@ export class AddDataDto {
   readonly data: object;
 
   @IsBoolean()
-  @IsNotEmpty()
-  readonly anon: boolean;
+  readonly anon?: boolean;
 }
 
 export class UpdateDataDto {
