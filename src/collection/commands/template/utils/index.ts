@@ -95,7 +95,7 @@ export const getGrantApplicationFormDetails = (
       logo: circle.avatar,
       messageOnSubmission: 'Thank you for submitting your response',
       multipleResponsesAllowed: false,
-      updatingResponseAllowed: false,
+      updatingResponseAllowed: true,
       allowAnonymousResponses: false,
     },
     projectMetadata: {
