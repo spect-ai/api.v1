@@ -96,6 +96,7 @@ export const getGrantApplicationFormDetails = (
       messageOnSubmission: 'Thank you for submitting your response',
       multipleResponsesAllowed: false,
       updatingResponseAllowed: false,
+      allowAnonymousResponses: false,
     },
     projectMetadata: {
       viewOrder: [defaultViewId],
@@ -227,6 +228,7 @@ export const getOnboardingFormDetails = (circle: Circle) => {
       messageOnSubmission: 'Thank you for submitting your response',
       multipleResponsesAllowed: false,
       updatingResponseAllowed: false,
+      allowAnonymousResponses: false,
     },
     projectMetadata: {
       viewOrder: [defaultViewId],
