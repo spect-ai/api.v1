@@ -114,4 +114,5 @@ interface FormMetadata {
   numOfKudos: number;
   isAnOpportunity: boolean;
   opportunityInfo: OpportunityInfo;
+  allowAnonymousResponses: boolean;
 }

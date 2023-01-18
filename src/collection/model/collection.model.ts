@@ -156,6 +156,11 @@ export interface FormMetadata {
   formRoleGating?: GuildRole[];
 
   /**
+   * Responses are anonymous?
+   */
+  allowAnonymousResponses?: boolean;
+
+  /**
    * The mintkudos token id to distribute when a person fills the form
    */
   mintkudosTokenId?: number;

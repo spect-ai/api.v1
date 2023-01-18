@@ -90,7 +90,7 @@ export class AddDataCommandHandler implements ICommandHandler<AddDataCommand> {
   }
 
   async execute(command: AddDataCommand) {
-    const { data, caller, collectionId } = command;
+    const { data, caller, collectionId, anon } = command;
     try {
       const collection = await this.collectionRepository.findById(collectionId);
       if (!collection) throw 'Collection does not exist';
@@ -144,7 +144,10 @@ export class AddDataCommandHandler implements ICommandHandler<AddDataCommand> {
         }
       }
 
+      console.log({ anon });
+
       filteredData['slug'] = uuidv4();
+      filteredData['anonymous'] = anon;
 
       /** Disabling activity for forms as it doesnt quite make sense yet */
       const { dataActivities, dataActivityOrder } =
