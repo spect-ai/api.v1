@@ -147,7 +147,6 @@ export class AddDataCommandHandler implements ICommandHandler<AddDataCommand> {
       console.log({ anon });
 
       filteredData['slug'] = uuidv4();
-      filteredData['anonymous'] = anon;
 
       /** Disabling activity for forms as it doesnt quite make sense yet */
       const { dataActivities, dataActivityOrder } =
@@ -173,7 +172,7 @@ export class AddDataCommandHandler implements ICommandHandler<AddDataCommand> {
         {
           data: {
             ...collection.data,
-            [filteredData['slug']]: filteredData,
+            [filteredData['slug']]: { ...filteredData, ['anonymous']: anon },
           },
           dataActivities,
           dataActivityOrder,

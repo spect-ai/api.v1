@@ -97,12 +97,13 @@ export class PerformAutomationOnCollectionDataAddCommandHandler
       const { collection, data, dataSlug, circle, caller } = command;
 
       const automationIds =
-        circle.automationsIndexedByCollection[collection.slug];
-      const triggeredAutomations = automationIds.filter(
-        (automationId) =>
-          circle.automations[automationId].trigger?.type === 'newData' &&
-          !circle.automations[automationId].disabled,
-      );
+        circle.automationsIndexedByCollection?.[collection?.slug];
+      const triggeredAutomations =
+        automationIds?.filter(
+          (automationId) =>
+            circle.automations[automationId].trigger?.type === 'newData' &&
+            !circle.automations[automationId].disabled,
+        ) || [];
 
       const dataContainer = {};
       const updateContainer = {
