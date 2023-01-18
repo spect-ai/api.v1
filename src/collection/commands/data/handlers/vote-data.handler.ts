@@ -36,7 +36,7 @@ export class ActivityOnVoting {
   } {
     const activityId = uuidv4();
     let content, ref;
-    const dataType = collection.defaultView === 'form' ? 'Voting period' : '';
+    const dataType = 'Voting period';
     if (caller) {
       content = `${action}ed ${dataType}`;
       ref = {
