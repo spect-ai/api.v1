@@ -30,7 +30,7 @@ export class OnboardingWorkflowCommandHandler
     this.logger.setContext(OnboardingWorkflowCommandHandler.name);
   }
 
-  async execute(command: CreateGrantWorkflowCommand): Promise<Circle> {
+  async execute(command: OnboardingWorkflowCommand): Promise<Circle> {
     try {
       const { id, templateDto, caller } = command;
       const circle: Circle = await this.queryBus.execute(

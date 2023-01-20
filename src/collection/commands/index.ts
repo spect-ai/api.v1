@@ -43,6 +43,7 @@ import { UpdatePropertyCommandHandler } from './properties/handlers/update-prope
 import { CreateGrantWorkflowCommandHandler } from './template/handlers/grant-workflow.handler';
 import { OnboardingWorkflowCommandHandler } from './template/handlers/onboarding-workflow.handler';
 import { KanbanProjectCommandHandler } from './template/handlers/kanban-project.handler';
+import { OnboardToSpectProjectCommandHandler } from './default/handlers/onboard-to-spect.handler';
 
 export const CommandHandlers = [
   CreateCollectionCommandHandler,
@@ -68,4 +69,5 @@ export const CommandHandlers = [
   CreateGrantWorkflowCommandHandler,
   OnboardingWorkflowCommandHandler,
   KanbanProjectCommandHandler,
+  OnboardToSpectProjectCommandHandler,
 ];
