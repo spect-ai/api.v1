@@ -525,9 +525,10 @@ export class CircleV1Controller {
   async addPendingPayment(
     @Param() param: ObjectIdDto,
     @Body() addPaymentsRequestDto: AddPaymentsRequestDto,
+    @Request() request,
   ): Promise<DetailedCircleResponseDto> {
     return await this.commandBus.execute(
-      new AddPaymentsCommand(param.id, addPaymentsRequestDto),
+      new AddPaymentsCommand(param.id, addPaymentsRequestDto, request.user),
     );
   }
 
@@ -537,6 +538,7 @@ export class CircleV1Controller {
   async makePayments(
     @Param() param: ObjectIdDto,
     @Body() makePaymentsRequestDto: PaymentIdsDto,
+    @Request() request,
   ): Promise<DetailedCircleResponseDto> {
     return await this.commandBus.execute(
       new MovePaymentsCommand(
@@ -546,6 +548,7 @@ export class CircleV1Controller {
           from: 'pending',
           to: 'completed',
         },
+        request.user,
         makePaymentsRequestDto.transactionHash,
       ),
     );
@@ -557,13 +560,18 @@ export class CircleV1Controller {
   async cancelPayments(
     @Param() param: ObjectIdDto,
     @Body() makePaymentsRequestDto: PaymentIdsDto,
+    @Request() request,
   ): Promise<DetailedCircleResponseDto> {
     return await this.commandBus.execute(
-      new MovePaymentsCommand(param.id, {
-        ...makePaymentsRequestDto,
-        from: 'pending',
-        to: 'cancelled',
-      }),
+      new MovePaymentsCommand(
+        param.id,
+        {
+          ...makePaymentsRequestDto,
+          from: 'pending',
+          to: 'cancelled',
+        },
+        request.user,
+      ),
     );
   }
 

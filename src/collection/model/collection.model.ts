@@ -239,4 +239,7 @@ export interface ProjectMetadata {
     rewardField: string;
     payeeField: string;
   };
+  paymentStatus?: {
+    [dataSlug: string]: 'pending' | 'pendingSignature' | 'completed';
+  };
 }
