@@ -1,4 +1,4 @@
-import { IsBoolean, IsNotEmpty, IsObject } from 'class-validator';
+import { IsBoolean, IsNotEmpty, IsObject, IsOptional } from 'class-validator';
 
 export class AddDataDto {
   @IsObject()
@@ -6,7 +6,7 @@ export class AddDataDto {
   readonly data: object;
 
   @IsBoolean()
-  @IsNotEmpty()
+  @IsOptional()
   readonly anon: boolean;
 }
 

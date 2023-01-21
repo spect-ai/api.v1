@@ -95,6 +95,7 @@ import {
   GetPublicViewCollectionQuery,
 } from './queries/impl/get-collection.query';
 import { ResponseCredentialingService } from './services/response-credentialing.service';
+import { OnboardToSpectProjectCommand } from './commands/default/impl';
 
 @Controller('collection/v1')
 @ApiTags('collection.v1')
@@ -535,5 +536,17 @@ export class CollectionController {
         new KanbanProjectCommand(template, param.id, req.user?.id),
       );
     }
+  }
+
+  @SetMetadata('permissions', ['manageCircleSettings'])
+  @UseGuards(SessionAuthGuard)
+  @Patch('/:id/defaultProject')
+  async useDefault(
+    @Param() param: ObjectIdDto,
+    @Request() req,
+  ): Promise<Circle> {
+    return await this.commandBus.execute(
+      new OnboardToSpectProjectCommand(param.id, req.user?.id),
+    );
   }
 }

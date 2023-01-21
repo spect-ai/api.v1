@@ -5,6 +5,7 @@ import { v4 as uuidv4 } from 'uuid';
 export const mileStoneStatus = {
   todo: uuidv4(),
   inProgress: uuidv4(),
+  inReview: uuidv4(),
   done: uuidv4(),
 };
 
@@ -34,6 +35,10 @@ export const getMilestoneProperties = (registry) => {
         {
           label: 'In Progress',
           value: mileStoneStatus.inProgress,
+        },
+        {
+          label: 'In Review',
+          value: mileStoneStatus.inReview,
         },
         {
           label: 'Done',

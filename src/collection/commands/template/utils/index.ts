@@ -95,7 +95,7 @@ export const getGrantApplicationFormDetails = (
       logo: circle.avatar,
       messageOnSubmission: 'Thank you for submitting your response',
       multipleResponsesAllowed: false,
-      updatingResponseAllowed: false,
+      updatingResponseAllowed: true,
       allowAnonymousResponses: false,
     },
     projectMetadata: {
@@ -135,7 +135,7 @@ export const getMilestoneCollectionDetails = (
       views: {
         [defaultViewId]: {
           id: defaultViewId,
-          name: 'Default View',
+          name: 'Grid View',
           type: 'grid',
           filters: [],
           sort: {
@@ -180,7 +180,7 @@ export const getGranteeCollectionDto = (circle, granteeViewId, registry) => {
       views: {
         [defaultViewId]: {
           id: defaultViewId,
-          name: 'Default View',
+          name: 'Approved Grantees',
           type: 'grid',
           filters: [],
           sort: {
@@ -188,19 +188,8 @@ export const getGranteeCollectionDto = (circle, granteeViewId, registry) => {
             direction: 'asc',
           },
         },
-        [granteeViewId]: {
-          id: granteeViewId,
-          name: 'Grantee List',
-          type: 'list',
-          groupByColumn: 'Status',
-          filters: [],
-          sort: {
-            property: '',
-            direction: 'asc',
-          },
-        },
       },
-      viewOrder: [granteeViewId, '0x0'],
+      viewOrder: ['0x0'],
       cardOrders: {
         Status: [[], [], [], []],
       },
@@ -262,7 +251,7 @@ export const getOnboardingTasksProjectDetails = (circle, projectViewId) => {
       views: {
         [defaultViewId]: {
           id: defaultViewId,
-          name: 'Default View',
+          name: 'Grid View',
           type: 'grid',
           filters: [],
           sort: {
@@ -302,7 +291,7 @@ export const getKanbanProjectDetails = (circle, projectViewId, registry) => {
       views: {
         [defaultViewId]: {
           id: defaultViewId,
-          name: 'Default View',
+          name: 'Grid View',
           type: 'grid',
           filters: [],
           sort: {
