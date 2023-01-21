@@ -65,6 +65,41 @@ export class UpdatePropertyCommandHandler
         }
       }
 
+      // Update data where an option label is changed
+      if (
+        updatePropertyCommandDto.options &&
+        collection.properties[propertyId].options
+      ) {
+        const optionLabelMap = new Map(
+          updatePropertyCommandDto.options.map((a) => [a.value, a.label]),
+        );
+        if (
+          collection.data &&
+          ['singleSelect', 'multiSelect'].includes(
+            collection.properties[propertyId].type,
+          ) &&
+          !updatePropertyCommandDto.type
+        ) {
+          for (const [id, data] of Object.entries(collection.data)) {
+            {
+              if (collection.properties[propertyId].type === 'singleSelect') {
+                console.log({ d: data[propertyId] });
+                if (data[propertyId]) {
+                  data[propertyId].label = optionLabelMap.get(
+                    data[propertyId].value,
+                  );
+                }
+              } else {
+                data[propertyId] = data[propertyId]?.map((a) => ({
+                  ...a,
+                  label: optionLabelMap.get(a.value),
+                }));
+              }
+            }
+          }
+        }
+      }
+
       collection.data = this.handleClearance(
         collection.properties[propertyId],
         updatePropertyCommandDto,
@@ -124,7 +159,6 @@ export class UpdatePropertyCommandHandler
     newProperty: Property,
     dataObj: MappedItem<object>,
   ) {
-    console.log({ prevProperty }, { newProperty });
     if (prevProperty.type === newProperty.type || !newProperty.type) {
       return dataObj;
     }
