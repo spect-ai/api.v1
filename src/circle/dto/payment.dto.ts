@@ -1,6 +1,7 @@
 import {
   IsArray,
   IsNotEmpty,
+  IsNumber,
   IsObject,
   IsOptional,
   IsString,
@@ -13,6 +14,37 @@ export class AddPaymentsRequestDto {
 
   @IsArray()
   dataSlugs: string[];
+}
+
+export class UpdatePaymentRequestDto {
+  @IsString()
+  @IsOptional()
+  type: 'Manually Added' | 'Added From Card';
+
+  @IsObject()
+  @IsOptional()
+  chain: {
+    label: string;
+    value: string;
+  };
+
+  @IsObject()
+  @IsOptional()
+  token: {
+    label: string;
+    value: string;
+  };
+
+  @IsNumber()
+  @IsOptional()
+  value: number;
+
+  @IsArray()
+  @IsOptional()
+  paidTo: {
+    propertyType: string;
+    value: any;
+  }[];
 }
 
 export class CancelPaymentsDto {

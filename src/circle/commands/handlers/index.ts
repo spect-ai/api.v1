@@ -42,6 +42,7 @@ import { UpdateAutomationCommandHandler } from '../automation/handlers/update-au
 import { RemoveAutomationCommandHandler } from '../automation/handlers/remove-automation.handler';
 import { AddPaymentsCommandHandler } from '../payments/handlers/add-payment.handler';
 import { MovePaymentsCommandHandler } from '../payments/handlers/move-payment.handler';
+import { UpdatePaymentCommandHandler } from '../payments/handlers/update-payment.handler';
 
 export const CommandHandlers = [
   RemoveProjectsCommandHandler,
@@ -78,4 +79,5 @@ export const CommandHandlers = [
   UpdateMultipleCircleCommandHandler,
   AddPaymentsCommandHandler,
   MovePaymentsCommandHandler,
+  UpdatePaymentCommandHandler,
 ];

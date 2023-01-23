@@ -6,16 +6,14 @@ import {
   QueryBus,
 } from '@nestjs/cqrs';
 import { CirclesRepository } from 'src/circle/circles.repository';
-import { AddPaymentsCommand } from '../impl/add-payment.command';
-import { v4 as uuidv4 } from 'uuid';
-import { Circle } from 'src/circle/model/circle.model';
-import { GetCollectionByIdQuery } from 'src/collection/queries';
-import { CommonTools } from 'src/common/common.service';
-import { LoggingService } from 'src/logging/logging.service';
-import { Collection } from 'src/collection/model/collection.model';
 import { UpdateCollectionCommand } from 'src/collection/commands';
-import { User } from 'src/users/model/users.model';
 import { CollectionResponseDto } from 'src/collection/dto/collection-response.dto';
+import { Collection } from 'src/collection/model/collection.model';
+import { GetCollectionByIdQuery } from 'src/collection/queries';
+import { LoggingService } from 'src/logging/logging.service';
+import { User } from 'src/users/model/users.model';
+import { v4 as uuidv4 } from 'uuid';
+import { AddPaymentsCommand } from '../impl/add-payment.command';
 
 @CommandHandler(AddPaymentsCommand)
 export class AddPaymentsCommandHandler
@@ -126,13 +124,14 @@ export class AddPaymentsCommandHandler
         newPaymentDetails[paymentId] = {
           id: paymentId,
           title: collection.data[dataSlug]['Title'],
-          type: 'addedFromCard',
+          type: 'Added From Card',
           dataSlug,
           collectionId: addPaymentsDto.collectionId,
           chain: collection.data[dataSlug][rewardFieldToPayOn].chain,
           token: collection.data[dataSlug][rewardFieldToPayOn].token,
           value: collection.data[dataSlug][rewardFieldToPayOn].value,
           paidTo: paidTo,
+          status: 'Pending',
         };
         paymentIds.push(paymentId);
         dataSlugsPendingPayment.push(dataSlug);

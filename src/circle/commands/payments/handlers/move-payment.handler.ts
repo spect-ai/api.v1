@@ -77,9 +77,10 @@ export class MovePaymentsCommandHandler
 
       const paymentStatus = {};
       for (const paymentId of paymentIds) {
+        console.log({ to });
         if (
           circleToUpdate.paymentDetails[paymentId] &&
-          circleToUpdate.paymentDetails[paymentId].type === 'addedFromCard'
+          circleToUpdate.paymentDetails[paymentId].type === 'Added From Card'
         ) {
           if (['pending', 'pendingSignature', 'completed'].includes(to))
             paymentStatus[
@@ -107,6 +108,7 @@ export class MovePaymentsCommandHandler
             [paymentId]: {
               ...(circleToUpdate.paymentDetails || {})[paymentId],
               paidOn: new Date(),
+              status: 'Completed',
             },
           };
         } else if (to === 'cancelled' && from === 'pending') {
@@ -115,6 +117,7 @@ export class MovePaymentsCommandHandler
             [paymentId]: {
               ...(circleToUpdate.paymentDetails || {})[paymentId],
               cancelledOn: new Date(),
+              status: 'Cancelled',
             },
           };
         }
