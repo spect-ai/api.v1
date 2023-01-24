@@ -55,7 +55,18 @@ export const getOnboardToSpectProjectDetails = (caller: string) => {
       },
       viewOrder: [viewId, '0x0'],
       cardOrders: {
-        Status: [[], [...Object.values(cardSlugs)], [], []],
+        Status: [
+          [],
+          [
+            cardSlugs.card1,
+            cardSlugs.card9,
+            cardSlugs.card6,
+            cardSlugs.card5,
+            cardSlugs.card2,
+          ],
+          [cardSlugs.card8, cardSlugs.card10, cardSlugs.card11],
+          [cardSlugs.card3, cardSlugs.card4],
+        ],
       },
       payments: {},
     },
