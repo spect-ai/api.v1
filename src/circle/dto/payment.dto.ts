@@ -6,6 +6,7 @@ import {
   IsOptional,
   IsString,
 } from 'class-validator';
+import { Option } from 'src/collection/types/types';
 
 export class AddPaymentsRequestDto {
   @IsString()
@@ -17,6 +18,14 @@ export class AddPaymentsRequestDto {
 }
 
 export class UpdatePaymentRequestDto {
+  @IsString()
+  @IsOptional()
+  title: string;
+
+  @IsString()
+  @IsOptional()
+  description: string;
+
   @IsString()
   @IsOptional()
   type: 'Manually Added' | 'Added From Card';
@@ -45,6 +54,10 @@ export class UpdatePaymentRequestDto {
     propertyType: string;
     value: any;
   }[];
+
+  @IsArray()
+  @IsOptional()
+  labels: Option[];
 }
 
 export class CancelPaymentsDto {

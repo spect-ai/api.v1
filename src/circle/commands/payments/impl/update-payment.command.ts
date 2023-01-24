@@ -1,4 +1,5 @@
 import { UpdatePaymentRequestDto } from 'src/circle/dto/payment.dto';
+import { Option } from 'src/collection/types/types';
 import { User } from 'src/users/model/users.model';
 
 export class UpdatePaymentsCommand {

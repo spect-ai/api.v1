@@ -6,6 +6,7 @@ import {
   QueryBus,
 } from '@nestjs/cqrs';
 import { CirclesRepository } from 'src/circle/circles.repository';
+import { PaymentDetails } from 'src/circle/types';
 import { CollectionResponseDto } from 'src/collection/dto/collection-response.dto';
 import { LoggingService } from 'src/logging/logging.service';
 import { UpdatePaymentsCommand } from '../impl';
@@ -23,7 +24,7 @@ export class UpdatePaymentCommandHandler
     this.logger.setContext(UpdatePaymentCommandHandler.name);
   }
 
-  async execute(command: UpdatePaymentsCommand): Promise<boolean> {
+  async execute(command: UpdatePaymentsCommand): Promise<PaymentDetails> {
     try {
       console.log('UpdatePaymentCommandHandler');
       const { circleId, paymentId, updatePaymentsDto, caller } = command;
@@ -44,7 +45,7 @@ export class UpdatePaymentCommandHandler
           },
         },
       });
-      return true;
+      return updatedCircle.paymentDetails[paymentId];
     } catch (error) {
       this.logger.error(error);
       throw error;
