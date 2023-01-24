@@ -22,6 +22,7 @@ import {
 import { ObjectIdDto } from 'src/common/dtos/object-id.dto';
 import {
   RequiredAutomationIdDto,
+  RequiredPaymentIdDto,
   RequiredRoleDto,
   RequiredSlugDto,
 } from 'src/common/dtos/string.dto';
@@ -92,8 +93,13 @@ import { Collection } from 'src/collection/model/collection.model';
 import {
   AddPaymentsCommand,
   MovePaymentsCommand,
+  UpdatePaymentsCommand,
 } from './commands/payments/impl';
-import { AddPaymentsRequestDto, PaymentIdsDto } from './dto/payment.dto';
+import {
+  AddPaymentsRequestDto,
+  PaymentIdsDto,
+  UpdatePaymentRequestDto,
+} from './dto/payment.dto';
 
 @Controller('circle/v1')
 @ApiTags('circle.v1')
@@ -525,9 +531,29 @@ export class CircleV1Controller {
   async addPendingPayment(
     @Param() param: ObjectIdDto,
     @Body() addPaymentsRequestDto: AddPaymentsRequestDto,
+    @Request() request,
   ): Promise<DetailedCircleResponseDto> {
     return await this.commandBus.execute(
-      new AddPaymentsCommand(param.id, addPaymentsRequestDto),
+      new AddPaymentsCommand(param.id, addPaymentsRequestDto, request.user),
+    );
+  }
+
+  @SetMetadata('permissions', ['managePaymentOptions'])
+  @UseGuards(CircleAuthGuard)
+  @Patch('/:id/updatePayment')
+  async updatePayment(
+    @Param() param: ObjectIdDto,
+    @Body() updatePaymentsRequestDto: UpdatePaymentRequestDto,
+    @Query() query: RequiredPaymentIdDto,
+    @Request() request,
+  ): Promise<DetailedCircleResponseDto> {
+    return await this.commandBus.execute(
+      new UpdatePaymentsCommand(
+        param.id,
+        query.paymentId,
+        updatePaymentsRequestDto,
+        request.user,
+      ),
     );
   }
 
@@ -537,6 +563,7 @@ export class CircleV1Controller {
   async makePayments(
     @Param() param: ObjectIdDto,
     @Body() makePaymentsRequestDto: PaymentIdsDto,
+    @Request() request,
   ): Promise<DetailedCircleResponseDto> {
     return await this.commandBus.execute(
       new MovePaymentsCommand(
@@ -546,6 +573,7 @@ export class CircleV1Controller {
           from: 'pending',
           to: 'completed',
         },
+        request.user,
         makePaymentsRequestDto.transactionHash,
       ),
     );
@@ -557,13 +585,18 @@ export class CircleV1Controller {
   async cancelPayments(
     @Param() param: ObjectIdDto,
     @Body() makePaymentsRequestDto: PaymentIdsDto,
+    @Request() request,
   ): Promise<DetailedCircleResponseDto> {
     return await this.commandBus.execute(
-      new MovePaymentsCommand(param.id, {
-        ...makePaymentsRequestDto,
-        from: 'pending',
-        to: 'cancelled',
-      }),
+      new MovePaymentsCommand(
+        param.id,
+        {
+          ...makePaymentsRequestDto,
+          from: 'pending',
+          to: 'cancelled',
+        },
+        request.user,
+      ),
     );
   }
 

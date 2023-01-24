@@ -8,6 +8,7 @@ import {
   IsOptional,
   IsString,
 } from 'class-validator';
+import { Option } from 'src/collection/types/types';
 import {
   DiscordToCircleRoles,
   GuildxyzToCircleRoles,
@@ -153,6 +154,13 @@ export class UpdateCircleRequestDto extends OmitType(CreateCircleRequestDto, [
   @IsString()
   @IsOptional()
   nftTypeIds?: string[];
+
+  /**
+   * Payment label options
+   */
+  @IsArray()
+  @IsOptional()
+  paymentLabelOptions?: Option[];
 }
 
 export class UpdateCircleGithubRepoRequestDto {

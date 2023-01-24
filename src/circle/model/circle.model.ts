@@ -23,6 +23,7 @@ import {
   AutomationsIndexedByCollectionSlugType,
   PaymentDetails,
 } from '../types';
+import { Option } from 'src/collection/types/types';
 
 export type Invite = {
   id: string;
@@ -297,6 +298,9 @@ export class Circle extends ProfileModel {
 
   @prop({ default: {} })
   paymentDetails?: { [key: string]: PaymentDetails };
+
+  @prop({ default: [] })
+  paymentLabelOptions?: Option[];
 }
 
 export class ExtendedCircle extends Circle {

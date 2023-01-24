@@ -1,10 +1,12 @@
 import {
   IsArray,
   IsNotEmpty,
+  IsNumber,
   IsObject,
   IsOptional,
   IsString,
 } from 'class-validator';
+import { Option } from 'src/collection/types/types';
 
 export class AddPaymentsRequestDto {
   @IsString()
@@ -13,6 +15,49 @@ export class AddPaymentsRequestDto {
 
   @IsArray()
   dataSlugs: string[];
+}
+
+export class UpdatePaymentRequestDto {
+  @IsString()
+  @IsOptional()
+  title: string;
+
+  @IsString()
+  @IsOptional()
+  description: string;
+
+  @IsString()
+  @IsOptional()
+  type: 'Manually Added' | 'Added From Card';
+
+  @IsObject()
+  @IsOptional()
+  chain: {
+    label: string;
+    value: string;
+  };
+
+  @IsObject()
+  @IsOptional()
+  token: {
+    label: string;
+    value: string;
+  };
+
+  @IsNumber()
+  @IsOptional()
+  value: number;
+
+  @IsArray()
+  @IsOptional()
+  paidTo: {
+    propertyType: string;
+    value: any;
+  }[];
+
+  @IsArray()
+  @IsOptional()
+  labels: Option[];
 }
 
 export class CancelPaymentsDto {

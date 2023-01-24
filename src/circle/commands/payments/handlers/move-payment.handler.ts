@@ -1,10 +1,18 @@
 import { InternalServerErrorException } from '@nestjs/common';
-import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
+import {
+  CommandBus,
+  CommandHandler,
+  ICommandHandler,
+  QueryBus,
+} from '@nestjs/cqrs';
 import { CirclesRepository } from 'src/circle/circles.repository';
 import { CircleResponseDto } from 'src/circle/dto/detailed-circle-response.dto';
 import { Circle } from 'src/circle/model/circle.model';
+import { UpdateCollectionCommand } from 'src/collection/commands';
+import { GetCollectionByIdQuery } from 'src/collection/queries';
 import { LoggingService } from 'src/logging/logging.service';
 import { MoveItemCommand } from 'src/users/commands/impl';
+import { User } from 'src/users/model/users.model';
 import { MovePaymentsCommand } from '../impl';
 
 @CommandHandler(MovePaymentsCommand)
@@ -13,6 +21,8 @@ export class MovePaymentsCommandHandler
 {
   constructor(
     private readonly circleRepository: CirclesRepository,
+    private readonly queryBus: QueryBus,
+    private readonly commandBus: CommandBus,
     private readonly logger: LoggingService,
   ) {
     this.logger.setContext('MovePaymentsCommandHandler');
@@ -21,7 +31,7 @@ export class MovePaymentsCommandHandler
   async execute(command: MovePaymentsCommand): Promise<CircleResponseDto> {
     try {
       console.log('MakePaymentsCommandHandler');
-      const { movePaymentsDto, circleId, transactionHash } = command;
+      const { movePaymentsDto, circleId, transactionHash, caller } = command;
       const circleToUpdate = await this.circleRepository.findById(circleId);
       if (!circleToUpdate) {
         throw new InternalServerErrorException(
@@ -65,13 +75,40 @@ export class MovePaymentsCommandHandler
             (paymentId) => !paymentIds.includes(paymentId),
           );
 
-      for (const paymentId of paymentIds)
+      const paymentStatus = {};
+      for (const paymentId of paymentIds) {
+        console.log({ to });
+        if (
+          circleToUpdate.paymentDetails[paymentId] &&
+          circleToUpdate.paymentDetails[paymentId].type === 'Added From Card'
+        ) {
+          if (['pending', 'pendingSignature', 'completed'].includes(to))
+            paymentStatus[
+              circleToUpdate.paymentDetails[paymentId].collectionId
+            ] = {
+              ...(paymentStatus[
+                circleToUpdate.paymentDetails[paymentId].collectionId
+              ] || {}),
+              [circleToUpdate.paymentDetails[paymentId].dataSlug]: to,
+            };
+          else if (to === 'cancelled')
+            paymentStatus[
+              circleToUpdate.paymentDetails[paymentId].collectionId
+            ] = {
+              ...(paymentStatus[
+                circleToUpdate.paymentDetails[paymentId].collectionId
+              ] || {}),
+              [circleToUpdate.paymentDetails[paymentId].dataSlug]: null,
+            };
+        }
+
         if (to === 'completed' && from === 'pending') {
           updates['paymentDetails'] = {
             ...(circleToUpdate.paymentDetails || {}),
             [paymentId]: {
               ...(circleToUpdate.paymentDetails || {})[paymentId],
               paidOn: new Date(),
+              status: 'Completed',
             },
           };
         } else if (to === 'cancelled' && from === 'pending') {
@@ -80,10 +117,11 @@ export class MovePaymentsCommandHandler
             [paymentId]: {
               ...(circleToUpdate.paymentDetails || {})[paymentId],
               cancelledOn: new Date(),
+              status: 'Cancelled',
             },
           };
         }
-
+      }
       if (transactionHash) {
         for (const paymentId of paymentIds)
           if (circleToUpdate.paymentDetails[paymentId]?.token.value === '0x0') {
@@ -109,6 +147,7 @@ export class MovePaymentsCommandHandler
         circleId,
         updates,
       );
+      await this.updateCollectionPaymentStatus(paymentStatus, caller);
       return await this.circleRepository.getCircleWithMinimalDetails(
         updatedCircle,
       );
@@ -117,6 +156,41 @@ export class MovePaymentsCommandHandler
         `Failed move item with error: ${error.message}`,
         command,
       );
+    }
+  }
+
+  async updateCollectionPaymentStatus(
+    paymentStatus: { [collectionId: string]: { [dataSlug: string]: string } },
+    caller: User,
+  ): Promise<void> {
+    for (const collectionId of Object.keys(paymentStatus)) {
+      try {
+        const collection = await this.queryBus.execute(
+          new GetCollectionByIdQuery(collectionId),
+        );
+        if (!collection) {
+          throw new InternalServerErrorException(
+            `Could not find collection with id ${collectionId}`,
+          );
+        }
+        const updates = {};
+        for (const dataSlug of Object.keys(paymentStatus[collectionId])) {
+          updates['projectMetadata'] = {
+            ...(collection['projectMetadata'] || {}),
+            paymentStatus: {
+              ...(collection['projectMetadata']?.paymentStatus || {}),
+              [dataSlug]: paymentStatus[collectionId][dataSlug],
+            },
+          };
+        }
+        await this.commandBus.execute(
+          new UpdateCollectionCommand(updates, caller, collectionId),
+        );
+      } catch (error) {
+        this.logger.error(
+          `Failed to update collection payment status with error: ${error}`,
+        );
+      }
     }
   }
 }

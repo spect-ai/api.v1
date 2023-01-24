@@ -109,7 +109,7 @@ export type RootAutomationsType = string[];
 
 export type PaymentDetails = {
   id: string;
-  type: 'manuallyAdded' | 'addedFromCard';
+  type: 'Manually Added' | 'Added From Card';
   chain: {
     label: string;
     value: string;

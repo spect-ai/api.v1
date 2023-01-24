@@ -1,13 +1,19 @@
 import { InternalServerErrorException } from '@nestjs/common';
-import { CommandHandler, ICommandHandler, QueryBus } from '@nestjs/cqrs';
+import {
+  CommandBus,
+  CommandHandler,
+  ICommandHandler,
+  QueryBus,
+} from '@nestjs/cqrs';
 import { CirclesRepository } from 'src/circle/circles.repository';
-import { AddPaymentsCommand } from '../impl/add-payment.command';
-import { v4 as uuidv4 } from 'uuid';
-import { Circle } from 'src/circle/model/circle.model';
-import { GetCollectionByIdQuery } from 'src/collection/queries';
-import { CommonTools } from 'src/common/common.service';
-import { LoggingService } from 'src/logging/logging.service';
+import { UpdateCollectionCommand } from 'src/collection/commands';
+import { CollectionResponseDto } from 'src/collection/dto/collection-response.dto';
 import { Collection } from 'src/collection/model/collection.model';
+import { GetCollectionByIdQuery } from 'src/collection/queries';
+import { LoggingService } from 'src/logging/logging.service';
+import { User } from 'src/users/model/users.model';
+import { v4 as uuidv4 } from 'uuid';
+import { AddPaymentsCommand } from '../impl/add-payment.command';
 
 @CommandHandler(AddPaymentsCommand)
 export class AddPaymentsCommandHandler
@@ -16,16 +22,18 @@ export class AddPaymentsCommandHandler
   constructor(
     private readonly circlesRepository: CirclesRepository,
     private readonly queryBus: QueryBus,
-    private readonly commonTools: CommonTools,
+    private readonly commandBus: CommandBus,
     private readonly logger: LoggingService,
   ) {
     this.logger.setContext(AddPaymentsCommandHandler.name);
   }
 
-  async execute(command: AddPaymentsCommand): Promise<Circle> {
+  async execute(
+    command: AddPaymentsCommand,
+  ): Promise<CollectionResponseDto | boolean> {
     try {
       console.log('AddPaymentsCommandHandler');
-      const { circleId, addPaymentsDto } = command;
+      const { circleId, addPaymentsDto, caller } = command;
       const circleToUpdate = await this.circlesRepository.findById(circleId);
       if (!circleToUpdate) {
         throw new InternalServerErrorException(
@@ -57,9 +65,16 @@ export class AddPaymentsCommandHandler
       }
       const newPaymentDetails = {};
       const paymentIds = [];
-      console.log({ dataSlugs: addPaymentsDto.dataSlugs });
+      const dataSlugsPendingPayment = [];
       for (const dataSlug of addPaymentsDto.dataSlugs) {
         if (collection.data[dataSlug][rewardFieldToPayOn].value === 0) continue;
+        if (
+          collection.projectMetadata.paymentStatus &&
+          ['pending', 'pendingSignature'].includes(
+            collection.projectMetadata.paymentStatus[dataSlug],
+          )
+        )
+          continue;
         const paymentId = uuidv4();
         const paidTo = [];
         if (collection.properties[rewardPaidTo].type === 'user[]') {
@@ -109,15 +124,17 @@ export class AddPaymentsCommandHandler
         newPaymentDetails[paymentId] = {
           id: paymentId,
           title: collection.data[dataSlug]['Title'],
-          type: 'addedFromCard',
+          type: 'Added From Card',
           dataSlug,
           collectionId: addPaymentsDto.collectionId,
           chain: collection.data[dataSlug][rewardFieldToPayOn].chain,
           token: collection.data[dataSlug][rewardFieldToPayOn].token,
           value: collection.data[dataSlug][rewardFieldToPayOn].value,
           paidTo: paidTo,
+          status: 'Pending',
         };
         paymentIds.push(paymentId);
+        dataSlugsPendingPayment.push(dataSlug);
       }
       const updatedCircle = await this.circlesRepository.updateById(circleId, {
         pendingPayments: [...(pendingPayments || []), ...paymentIds],
@@ -126,10 +143,57 @@ export class AddPaymentsCommandHandler
           ...newPaymentDetails,
         },
       });
-      return updatedCircle;
+      const updatedCollection = await this.updateData(
+        addPaymentsDto.collectionId,
+        dataSlugsPendingPayment,
+        caller,
+      );
+      return updatedCollection;
     } catch (error) {
       this.logger.error(error);
       throw new InternalServerErrorException(error);
+    }
+  }
+
+  async updateData(
+    collectionId: string,
+    dataSlugs: string[],
+    caller: User,
+  ): Promise<CollectionResponseDto | boolean> {
+    try {
+      const collection = (await this.queryBus.execute(
+        new GetCollectionByIdQuery(collectionId),
+      )) as Collection;
+      if (!collection) {
+        throw new InternalServerErrorException(
+          `Could not find collection with id ${collectionId}`,
+        );
+      }
+
+      const paymentStatus = {};
+      for (const dataSlug of dataSlugs) {
+        paymentStatus[dataSlug] = 'pending';
+      }
+      const updatedCollection = await this.commandBus.execute(
+        new UpdateCollectionCommand(
+          {
+            projectMetadata: {
+              ...collection.projectMetadata,
+
+              paymentStatus: {
+                ...(collection.projectMetadata?.paymentStatus || {}),
+                ...paymentStatus,
+              },
+            },
+          },
+          caller,
+          collectionId,
+        ),
+      );
+      return updatedCollection;
+    } catch (err) {
+      this.logger.error(err);
+      return false;
     }
   }
 }

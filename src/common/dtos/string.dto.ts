@@ -86,6 +86,12 @@ export class RequiredAutomationIdDto {
   automationId: string;
 }
 
+export class RequiredPaymentIdDto {
+  @IsNotEmpty()
+  @IsString()
+  paymentId: string;
+}
+
 export class RequiredPropertyIdDto {
   @IsNotEmpty()
   @IsString()
