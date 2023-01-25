@@ -81,7 +81,7 @@ export class AddPaymentsCommandHandler
           for (const user of collection.data[dataSlug][rewardPaidTo]) {
             paidTo.push({
               propertyType: 'user',
-              value: user.value,
+              value: user,
               reward:
                 paidTo.length === 0
                   ? {
@@ -102,10 +102,7 @@ export class AddPaymentsCommandHandler
         } else {
           paidTo.push({
             propertyType: collection.properties[rewardPaidTo].type,
-            value:
-              collection.properties[rewardPaidTo].type === 'user'
-                ? collection.data[dataSlug][rewardPaidTo]?.value
-                : collection.data[dataSlug][rewardPaidTo],
+            value: collection.data[dataSlug][rewardPaidTo],
             reward:
               paidTo.length === 0
                 ? {

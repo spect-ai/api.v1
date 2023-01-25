@@ -102,9 +102,11 @@ export class MovePaymentsCommandHandler
             };
         }
 
+        console.log({ paymentId, to, from });
         if (to === 'completed' && from === 'pending') {
           updates['paymentDetails'] = {
             ...(circleToUpdate.paymentDetails || {}),
+            ...(updates['paymentDetails'] || {}),
             [paymentId]: {
               ...(circleToUpdate.paymentDetails || {})[paymentId],
               paidOn: new Date(),
@@ -114,6 +116,7 @@ export class MovePaymentsCommandHandler
         } else if (to === 'cancelled' && from === 'pending') {
           updates['paymentDetails'] = {
             ...(circleToUpdate.paymentDetails || {}),
+            ...(updates['paymentDetails'] || {}),
             [paymentId]: {
               ...(circleToUpdate.paymentDetails || {})[paymentId],
               cancelledOn: new Date(),
