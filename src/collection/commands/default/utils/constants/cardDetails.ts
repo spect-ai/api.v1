@@ -33,17 +33,17 @@ const labelOptions = {
 };
 
 const statusOptions = {
-  toDo: {
-    label: 'To Do',
-    value: onboardToSpectStatus?.toDo,
+  beginner: {
+    label: 'Beginner',
+    value: onboardToSpectStatus?.beginner,
   },
-  inProgress: {
-    label: 'In Progress',
-    value: onboardToSpectStatus?.inProgress,
+  intermediate: {
+    label: 'Intermediate',
+    value: onboardToSpectStatus?.intermediate,
   },
-  done: {
-    label: 'Done',
-    value: onboardToSpectStatus?.done,
+  advanced: {
+    label: 'Advanced',
+    value: onboardToSpectStatus?.advanced,
   },
 };
 
@@ -54,7 +54,6 @@ export const cardSlugs = {
   card4: uuidv4(),
   card5: uuidv4(),
   card6: uuidv4(),
-  card7: uuidv4(),
   card8: uuidv4(),
   card9: uuidv4(),
   card10: uuidv4(),
@@ -73,7 +72,7 @@ export const getOnboardToSpectData = () => {
   return {
     [cardSlugs.card1]: {
       Title: 'Roles & Granular Permissions',
-      Status: statusOptions.toDo,
+      Status: statusOptions.beginner,
       slug: cardSlugs.card1,
       Labels: [labelOptions.feature, labelOptions.guide],
       Description:
@@ -81,7 +80,7 @@ export const getOnboardToSpectData = () => {
     },
     [cardSlugs.card2]: {
       Title: 'Pay using custom token & Gnosis safe',
-      Status: statusOptions.toDo,
+      Status: statusOptions.beginner,
       slug: cardSlugs.card2,
       Labels: [labelOptions.setup, labelOptions.guide],
       Description:
@@ -89,7 +88,7 @@ export const getOnboardToSpectData = () => {
     },
     [cardSlugs.card3]: {
       Title: 'Run a grant program',
-      Status: statusOptions.toDo,
+      Status: statusOptions.advanced,
       slug: cardSlugs.card3,
       Labels: [labelOptions.workflow, labelOptions.video, labelOptions.guide],
       Description:
@@ -98,7 +97,7 @@ export const getOnboardToSpectData = () => {
     [cardSlugs.card4]: {
       Title: 'Run an onboarding program',
       Labels: [labelOptions.workflow, labelOptions.video, labelOptions.guide],
-      Status: statusOptions.toDo,
+      Status: statusOptions.advanced,
       slug: cardSlugs.card4,
       Description:
         '<https://scribehow.com/shared/Run_a_onboarding_program__SxE6ihIxQzKbePZ8yVFu6A>',
@@ -106,28 +105,22 @@ export const getOnboardToSpectData = () => {
     [cardSlugs.card5]: {
       Title: 'Manage projects using a Kanban board',
       Labels: [labelOptions.workflow, labelOptions.video, labelOptions.guide],
-      Status: statusOptions.toDo,
+      Status: statusOptions.beginner,
       slug: cardSlugs.card5,
       Description:
         '<https://scribehow.com/shared/Manage_projects_using_a_Kanban_board__OY64snbqT2ikPxsk2BH-jw>',
     },
     [cardSlugs.card6]: {
       Title: 'Create a survey form.',
-      Status: statusOptions.toDo,
+      Status: statusOptions.beginner,
       Labels: [labelOptions.workflow, labelOptions.guide],
       slug: cardSlugs.card6,
       Description:
         '<https://scribehow.com/shared/Create_Communtiy_Surveys_using_Spect_Forms__SBZCZQdzTCekJNjJFamqqw>',
     },
-    [cardSlugs.card7]: {
-      Title: 'Scale your organization with workstreams',
-      Status: statusOptions.toDo,
-      Labels: [labelOptions.setup, labelOptions.guide],
-      slug: cardSlugs.card7,
-    },
     [cardSlugs.card8]: {
       Title: 'Automate recurring actions',
-      Status: statusOptions.toDo,
+      Status: statusOptions.intermediate,
       Labels: [labelOptions.guide, labelOptions.feature],
       slug: cardSlugs.card8,
       Description:
@@ -135,7 +128,7 @@ export const getOnboardToSpectData = () => {
     },
     [cardSlugs.card9]: {
       Title: 'Embed forms on Notion',
-      Status: statusOptions.toDo,
+      Status: statusOptions.beginner,
       Labels: [labelOptions.feature, labelOptions.guide],
       slug: cardSlugs.card9,
       Description:
@@ -143,7 +136,7 @@ export const getOnboardToSpectData = () => {
     },
     [cardSlugs.card10]: {
       Title: 'Create Sybil Protected Forms',
-      Status: statusOptions.toDo,
+      Status: statusOptions.intermediate,
       Labels: [labelOptions.feature, labelOptions.guide],
       slug: cardSlugs.card10,
       Description:
@@ -152,7 +145,7 @@ export const getOnboardToSpectData = () => {
     [cardSlugs.card11]: {
       Title:
         'Decentralize decision making with soft consensus & snapshot voting on Spect',
-      Status: statusOptions.toDo,
+      Status: statusOptions.intermediate,
       Labels: [labelOptions.feature, labelOptions.guide],
       slug: cardSlugs.card11,
       anonymous: false,

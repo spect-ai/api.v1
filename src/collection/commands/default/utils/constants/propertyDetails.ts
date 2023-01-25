@@ -2,9 +2,9 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { labels } from './cardDetails';
 export const onboardToSpectStatus = {
-  toDo: uuidv4(),
-  inProgress: uuidv4(),
-  done: uuidv4(),
+  beginner: uuidv4(),
+  intermediate: uuidv4(),
+  advanced: uuidv4(),
 };
 
 export const getProperties = () => {
@@ -27,24 +27,24 @@ export const getProperties = () => {
       type: 'singleSelect',
       options: [
         {
-          label: 'To Do',
-          value: onboardToSpectStatus.toDo,
+          label: 'Beginner',
+          value: onboardToSpectStatus.beginner,
         },
         {
-          label: 'In Progress',
-          value: onboardToSpectStatus.inProgress,
+          label: 'Intermediate',
+          value: onboardToSpectStatus.intermediate,
         },
         {
-          label: 'Done',
-          value: onboardToSpectStatus.done,
+          label: 'Advanced',
+          value: onboardToSpectStatus.advanced,
         },
       ],
       isPartOfFormView: false,
       rewardOptions: {},
       description: '',
       default: {
-        label: 'To Do',
-        value: onboardToSpectStatus.toDo,
+        label: 'Beginner',
+        value: onboardToSpectStatus.beginner,
       },
       required: false,
       milestoneFields: [],

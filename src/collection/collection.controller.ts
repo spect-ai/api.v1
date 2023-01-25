@@ -91,6 +91,7 @@ import {
 import { StartVotingPeriodRequestDto } from './dto/voting.dto';
 import { Collection } from './model/collection.model';
 import {
+  GetCollectionByIdQuery,
   GetPrivateViewCollectionQuery,
   GetPublicViewCollectionQuery,
 } from './queries/impl/get-collection.query';
@@ -105,6 +106,12 @@ export class CollectionController {
     private readonly queryBus: QueryBus,
     private readonly credentialingService: ResponseCredentialingService,
   ) {}
+
+  @UseGuards(ViewCollectionAuthGuard)
+  @Get('/:id')
+  async findById(@Param() param: ObjectIdDto): Promise<CollectionResponseDto> {
+    return await this.queryBus.execute(new GetCollectionByIdQuery(param.id));
+  }
 
   @UseGuards(ViewCollectionAuthGuard)
   @Get('/slug/:slug')
