@@ -417,7 +417,6 @@ export class CreateCardActionCommandHandler
           for (const field of fields) {
             if (milestone[field[0]]) d[field[1]] = milestone[field[0]];
           }
-          console.log({ d });
           allData.push(d);
         }
       }

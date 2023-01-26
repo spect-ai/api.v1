@@ -53,10 +53,8 @@ export class PerformAutomationOnCollectionDataUpdateCommandHandler
         circle: {},
         user: {},
       };
-      console.log({ triggeredAutomations });
       for (const automationId of triggeredAutomations) {
         const { actions } = circle.automations[automationId];
-        console.log({ actions });
         for (const action of actions) {
           const actionCommand = actionIdToCommandMapNew[action.type];
           await this.commandBus.execute(
@@ -111,7 +109,6 @@ export class PerformAutomationOnCollectionDataAddCommandHandler
         circle: {},
         retro: {},
       };
-      console.log({ triggeredAutomations });
       const triggeredAutomationsSatisfiedConditions = [];
       for (const automationId of triggeredAutomations) {
         const { conditions } = circle.automations[automationId];
@@ -122,11 +119,9 @@ export class PerformAutomationOnCollectionDataAddCommandHandler
         if (!hasSatisfied) continue;
         triggeredAutomationsSatisfiedConditions.push(automationId);
       }
-      console.log({ triggeredAutomationsSatisfiedConditions });
 
       for (const automationId of triggeredAutomationsSatisfiedConditions) {
         const { actions } = circle.automations[automationId];
-        console.log({ actions });
         for (const action of actions) {
           const actionCommand = actionIdToCommandMapNew[action.type];
           await this.commandBus.execute(
