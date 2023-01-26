@@ -41,7 +41,7 @@ export class VotingStartedEventHandler
           this.eventBus.publish(
             new SingleNotificationEvent(
               notifContent,
-              collection.formMetadata.logo || circle.avatar,
+              collection.formMetadata?.logo || circle.avatar,
               redirectUrl,
               new Date(),
               [memberId],

@@ -372,7 +372,16 @@ export class AddMultipleDataUsingAutomationCommandHandler
       let projectMetadata = collection.projectMetadata || {};
       let dataActivities = collection.dataActivities || {};
       let dataActivityOrder = collection.dataActivityOrder || {};
-      for (const d of data) {
+
+      const filteredData = data.map((d) => {
+        const obj = {};
+        for (const i of Object.keys(d)) {
+          if (d[i] !== undefined) obj[i] = d[i];
+        }
+        return obj;
+      });
+
+      for (const d of filteredData) {
         const validData = await this.validationService.validate(
           d,
           'add',

@@ -24,12 +24,12 @@ export class CommentAddedEventHandler
     private readonly realtime: RealtimeGateway,
     private readonly eventBus: EventBus,
   ) {
-    this.logger.setContext('DataUpatedEventHandler');
+    this.logger.setContext('CommentAddedEventHandler');
   }
 
   async handle(event: CommentAddedEvent) {
     try {
-      console.log('DataAddedEventHandler');
+      console.log('CommentAddedEventHandler');
       const { caller, collection, data } = event;
       const circle = (await this.queryBus.execute(
         new GetCircleByIdQuery(collection.parents[0]),
@@ -49,7 +49,7 @@ export class CommentAddedEventHandler
             this.eventBus.publish(
               new SingleNotificationEvent(
                 notifContent,
-                collection.formMetadata.logo || circle.avatar,
+                collection.formMetadata?.logo || circle.avatar,
                 redirectUrl,
                 new Date(),
                 [memberId],
@@ -63,7 +63,7 @@ export class CommentAddedEventHandler
         this.eventBus.publish(
           new SingleNotificationEvent(
             notifContent,
-            collection.formMetadata.logo || circle.avatar,
+            collection.formMetadata?.logo || circle.avatar,
             redirectUrl,
             new Date(),
             [collection.creator],
@@ -78,7 +78,7 @@ export class CommentAddedEventHandler
         this.eventBus.publish(
           new SingleNotificationEvent(
             notifResponderContent,
-            collection.formMetadata.logo || circle.avatar,
+            collection.formMetadata?.logo || circle.avatar,
             responderRedirectUrl,
             new Date(),
             [collection.dataOwner[data.slug]],
