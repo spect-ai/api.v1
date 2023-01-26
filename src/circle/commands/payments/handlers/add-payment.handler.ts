@@ -6,6 +6,8 @@ import {
   QueryBus,
 } from '@nestjs/cqrs';
 import { CirclesRepository } from 'src/circle/circles.repository';
+import { Circle } from 'src/circle/model/circle.model';
+import { GetCircleByIdQuery } from 'src/circle/queries/impl';
 import { UpdateCollectionCommand } from 'src/collection/commands';
 import { CollectionResponseDto } from 'src/collection/dto/collection-response.dto';
 import { Collection } from 'src/collection/model/collection.model';
@@ -13,7 +15,10 @@ import { GetCollectionByIdQuery } from 'src/collection/queries';
 import { LoggingService } from 'src/logging/logging.service';
 import { User } from 'src/users/model/users.model';
 import { v4 as uuidv4 } from 'uuid';
-import { AddPaymentsCommand } from '../impl/add-payment.command';
+import {
+  AddManualPaymentsCommand,
+  AddPaymentsCommand,
+} from '../impl/add-payment.command';
 
 @CommandHandler(AddPaymentsCommand)
 export class AddPaymentsCommandHandler
@@ -191,6 +196,51 @@ export class AddPaymentsCommandHandler
     } catch (err) {
       this.logger.error(err);
       return false;
+    }
+  }
+}
+
+@CommandHandler(AddManualPaymentsCommand)
+export class AddManualPaymentsCommandHandler
+  implements ICommandHandler<AddManualPaymentsCommand>
+{
+  constructor(
+    private readonly circlesRepository: CirclesRepository,
+    private readonly queryBus: QueryBus,
+    private readonly commandBus: CommandBus,
+    private readonly logger: LoggingService,
+  ) {
+    this.logger.setContext(AddManualPaymentsCommandHandler.name);
+  }
+
+  async execute(command: AddManualPaymentsCommand): Promise<boolean> {
+    try {
+      const { circleId, addManualPaymentDto, caller } = command;
+
+      const circle = (await this.queryBus.execute(
+        new GetCircleByIdQuery(circleId),
+      )) as Circle;
+      if (!circle) {
+        throw new InternalServerErrorException(
+          `Could not find circle with id ${circleId}`,
+        );
+      }
+      const paymentId = uuidv4();
+      await this.circlesRepository.updateById(circleId, {
+        pendingPayments: [...(circle.pendingPayments || []), paymentId],
+        paymentDetails: {
+          ...(circle.paymentDetails || {}),
+          [paymentId]: {
+            id: paymentId,
+            status: 'Pending',
+            ...addManualPaymentDto,
+          },
+        },
+      });
+      return true;
+    } catch (error) {
+      this.logger.error(error);
+      throw new InternalServerErrorException(error);
     }
   }
 }

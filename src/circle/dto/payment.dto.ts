@@ -8,6 +8,47 @@ import {
 } from 'class-validator';
 import { Option } from 'src/collection/types/types';
 
+export class AddManualPaymentRequestDto {
+  @IsString()
+  title: string;
+
+  @IsString()
+  @IsOptional()
+  description: string;
+
+  @IsString()
+  type: 'Manually Added' | 'Added From Card';
+
+  @IsString()
+  @IsOptional()
+  collectionId: string;
+
+  @IsObject()
+  chain: {
+    label: string;
+    value: string;
+  };
+
+  // @IsObject()
+  // token: {
+  //   label: string;
+  //   value: string;
+  // };
+
+  // @IsNumber()
+  // value: number;
+
+  @IsArray()
+  paidTo: {
+    propertyType: string;
+    value: any;
+  }[];
+
+  @IsArray()
+  @IsOptional()
+  labels: Option[];
+}
+
 export class AddPaymentsRequestDto {
   @IsString()
   @IsNotEmpty()
