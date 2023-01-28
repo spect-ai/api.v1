@@ -166,7 +166,7 @@ export class CollectionController {
     );
   }
 
-  @SetMetadata('permissions', ['manageFormSettings'])
+  @SetMetadata('permissions', ['manageSettings'])
   @UseGuards(CollectionAuthGuard)
   @Patch('/:id')
   async update(
@@ -179,7 +179,7 @@ export class CollectionController {
     );
   }
 
-  @SetMetadata('permissions', ['manageFormSettings'])
+  @SetMetadata('permissions', ['manageSettings'])
   @UseGuards(CollectionAuthGuard)
   @Delete('/:id')
   async delete(
@@ -192,7 +192,7 @@ export class CollectionController {
     );
   }
 
-  @SetMetadata('permissions', ['manageFormSettings'])
+  @SetMetadata('permissions', ['manageSettings'])
   @UseGuards(CollectionAuthGuard)
   @Patch('/:id/addProperty')
   async addProperty(
@@ -205,7 +205,7 @@ export class CollectionController {
     );
   }
 
-  @SetMetadata('permissions', ['manageFormSettings'])
+  @SetMetadata('permissions', ['manageSettings'])
   @UseGuards(CollectionAuthGuard)
   @Patch('/:id/updateProperty')
   async updateProperty(
@@ -224,7 +224,7 @@ export class CollectionController {
     );
   }
 
-  @SetMetadata('permissions', ['manageFormSettings'])
+  @SetMetadata('permissions', ['manageSettings'])
   @UseGuards(CollectionAuthGuard)
   @Patch('/:id/removeProperty')
   async removeProperty(
@@ -259,7 +259,7 @@ export class CollectionController {
     );
   }
 
-  @SetMetadata('permissions', ['updateFormResponsesManually'])
+  @SetMetadata('permissions', ['updateResponsesManually'])
   @UseGuards(CollectionAuthGuard)
   @Patch('/:id/addDataGuarded')
   async addData(
@@ -291,7 +291,7 @@ export class CollectionController {
     );
   }
 
-  @SetMetadata('permissions', ['updateFormResponsesManually'])
+  @SetMetadata('permissions', ['updateResponsesManually'])
   @UseGuards(CollectionAuthGuard)
   @Patch('/:id/updateDataGuarded')
   async updateDataGuarded(
@@ -311,7 +311,7 @@ export class CollectionController {
     );
   }
 
-  @SetMetadata('permissions', ['updateFormResponsesManually'])
+  @SetMetadata('permissions', ['updateResponsesManually'])
   @UseGuards(CollectionAuthGuard)
   @Patch('/:id/removeMultipleData')
   async removeMultipleData(
@@ -324,7 +324,7 @@ export class CollectionController {
     );
   }
 
-  @SetMetadata('permissions', ['updateFormResponsesManually'])
+  @SetMetadata('permissions', ['updateResponsesManually'])
   @UseGuards(CollectionAuthGuard)
   @Patch('/:id/removeDataGuarded')
   async removeDataGuarded(
@@ -337,7 +337,7 @@ export class CollectionController {
     );
   }
 
-  @SetMetadata('permissions', ['updateFormResponsesManually'])
+  @SetMetadata('permissions', ['updateResponsesManually'])
   @UseGuards(CollectionAuthGuard)
   @Patch('/:id/removeMultipleDataGuarded')
   async removeMultipleDataGuarded(
