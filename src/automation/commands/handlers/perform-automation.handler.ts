@@ -42,7 +42,6 @@ export class PerformAutomationCommandHandler
       );
       // Need to fetch all the required data to check / update based on the conditions and actions here
 
-      console.log('triggeredAutomations', triggeredAutomations);
       const automationIdsSatisfyingConditions = [];
       for (const automationId of triggeredAutomations) {
         const { conditions } = project.automations[automationId];
@@ -56,10 +55,6 @@ export class PerformAutomationCommandHandler
         if (!satisfied) continue;
         automationIdsSatisfyingConditions.push(automationId);
       }
-      console.log(
-        'automationIdsSatisfyingConditions',
-        automationIdsSatisfyingConditions,
-      );
 
       const returningMultipleItemContainer = {};
       for (const automationId of automationIdsSatisfyingConditions) {

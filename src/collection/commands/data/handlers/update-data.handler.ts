@@ -139,7 +139,6 @@ export class UpdateDataCommandHandler
       return await await this.queryBus.execute(
         new GetPrivateViewCollectionQuery(collection.slug, updatedCollection),
       );
-      
     } catch (err) {
       this.logger.error(
         `Failed updating data in collection with collection Id ${collectionId} with error ${err}`,

@@ -50,7 +50,7 @@ export class DataAddedEventHandler implements IEventHandler<DataAddedEvent> {
             this.eventBus.publish(
               new SingleNotificationEvent(
                 notifContent,
-                collection.formMetadata.logo || circle.avatar,
+                collection.formMetadata?.logo || circle.avatar,
                 redirectUrl,
                 new Date(),
                 [memberId],
@@ -63,14 +63,13 @@ export class DataAddedEventHandler implements IEventHandler<DataAddedEvent> {
       this.eventBus.publish(
         new SingleNotificationEvent(
           notifContent,
-          collection.formMetadata.logo || circle.avatar,
+          collection.formMetadata?.logo || circle.avatar,
           redirectUrl,
           new Date(),
           [collection.creator],
         ),
       );
 
-      console.log({ data });
       const res = await this.commandBus.execute(
         new PerformAutomationOnCollectionDataAddCommand(
           collection,
@@ -93,7 +92,7 @@ export class DataAddedEventHandler implements IEventHandler<DataAddedEvent> {
       this.eventBus.publish(
         new SingleNotificationEvent(
           notifResponderContent,
-          collection.formMetadata.logo || circle.avatar,
+          collection.formMetadata?.logo || circle.avatar,
           responderRedirectUrl,
           new Date(),
           [caller.id],
