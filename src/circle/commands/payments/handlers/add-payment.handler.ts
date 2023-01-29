@@ -149,6 +149,7 @@ export class AddPaymentsCommandHandler
         addPaymentsDto.collectionId,
         dataSlugsPendingPayment,
         caller,
+        paymentIds,
       );
       return updatedCollection;
     } catch (error) {
@@ -161,6 +162,7 @@ export class AddPaymentsCommandHandler
     collectionId: string,
     dataSlugs: string[],
     caller: User,
+    pendingPaymentIds: string[],
   ): Promise<CollectionResponseDto | boolean> {
     try {
       const collection = (await this.queryBus.execute(
@@ -173,15 +175,20 @@ export class AddPaymentsCommandHandler
       }
 
       const paymentStatus = {};
-      for (const dataSlug of dataSlugs) {
+      const paymentIds = {};
+      for (const [index, dataSlug] of dataSlugs.entries()) {
         paymentStatus[dataSlug] = 'pending';
+        paymentIds[dataSlug] = pendingPaymentIds[index];
       }
       const updatedCollection = await this.commandBus.execute(
         new UpdateCollectionCommand(
           {
             projectMetadata: {
               ...collection.projectMetadata,
-
+              paymentIds: {
+                ...(collection.projectMetadata?.paymentIds || {}),
+                ...paymentIds,
+              },
               paymentStatus: {
                 ...(collection.projectMetadata?.paymentStatus || {}),
                 ...paymentStatus,

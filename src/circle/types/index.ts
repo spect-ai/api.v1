@@ -125,4 +125,5 @@ export type PaymentDetails = {
   }[];
   dataSlug?: string;
   collectionId?: string;
+  status: 'Pending' | 'Completed' | 'Cancelled';
 };

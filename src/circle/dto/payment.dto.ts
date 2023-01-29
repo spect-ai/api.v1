@@ -61,44 +61,52 @@ export class AddPaymentsRequestDto {
 export class UpdatePaymentRequestDto {
   @IsString()
   @IsOptional()
-  title: string;
+  title?: string;
 
   @IsString()
   @IsOptional()
-  description: string;
+  description?: string;
 
   @IsString()
   @IsOptional()
-  type: 'Manually Added' | 'Added From Card';
+  type?: 'Manually Added' | 'Added From Card';
 
   @IsObject()
   @IsOptional()
-  chain: {
+  chain?: {
     label: string;
     value: string;
   };
 
   @IsObject()
   @IsOptional()
-  token: {
+  token?: {
     label: string;
     value: string;
   };
 
   @IsNumber()
   @IsOptional()
-  value: number;
+  value?: number;
 
   @IsArray()
   @IsOptional()
-  paidTo: {
+  paidTo?: {
     propertyType: string;
     value: any;
   }[];
 
   @IsArray()
   @IsOptional()
-  labels: Option[];
+  labels?: Option[];
+
+  @IsString()
+  @IsOptional()
+  transactionHash?: string;
+
+  @IsString()
+  @IsOptional()
+  status?: 'Pending' | 'Completed' | 'Cancelled';
 }
 
 export class CancelPaymentsDto {
