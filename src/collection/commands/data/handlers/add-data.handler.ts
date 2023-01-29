@@ -163,7 +163,23 @@ export class AddDataCommandHandler implements ICommandHandler<AddDataCommand> {
           ].options.findIndex(
             (option) => option.value === data[groupByColumn]?.value,
           );
-          cardOrders[groupByColumn][columnIndex + 1].push(filteredData['slug']);
+          try {
+            cardOrders[groupByColumn][columnIndex + 1].push(
+              filteredData['slug'],
+            );
+          } catch (e) {
+            // initialising the empty columns if they dont exist till that last index
+            for (
+              let i = cardOrders[groupByColumn].length;
+              i <= columnIndex + 1;
+              i++
+            ) {
+              cardOrders[groupByColumn].push([]);
+            }
+            cardOrders[groupByColumn][columnIndex + 1].push(
+              filteredData['slug'],
+            );
+          }
         });
       }
 
@@ -299,7 +315,19 @@ export class AddDataUsingAutomationCommandHandler
           ].options.findIndex(
             (option) => option.value === data[groupByColumn]?.value,
           );
-          cardOrders[groupByColumn][columnIndex + 1].push(data['slug']);
+          try {
+            cardOrders[groupByColumn][columnIndex + 1].push(data['slug']);
+          } catch (e) {
+            // initialising the empty columns if they dont exist till that last index
+            for (
+              let i = cardOrders[groupByColumn].length;
+              i <= columnIndex + 1;
+              i++
+            ) {
+              cardOrders[groupByColumn].push([]);
+            }
+            cardOrders[groupByColumn][columnIndex + 1].push(data['slug']);
+          }
         });
       }
 
@@ -421,7 +449,19 @@ export class AddMultipleDataUsingAutomationCommandHandler
             ].options.findIndex(
               (option) => option.value === d[groupByColumn]?.value,
             );
-            cardOrders[groupByColumn][columnIndex + 1].push(d['slug']);
+            try {
+              cardOrders[groupByColumn][columnIndex + 1].push(d['slug']);
+            } catch (e) {
+              // initialising the empty columns if they dont exist till that last index
+              for (
+                let i = cardOrders[groupByColumn].length;
+                i <= columnIndex + 1;
+                i++
+              ) {
+                cardOrders[groupByColumn].push([]);
+              }
+              cardOrders[groupByColumn][columnIndex + 1].push(d['slug']);
+            }
           });
         }
         dataUpdates[d['slug']] = d;

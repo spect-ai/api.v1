@@ -30,12 +30,19 @@ export class CollectionAuthGuard implements CanActivate {
   ): Promise<boolean> {
     if (permissions.length === 0) return true;
     if (collection.creator === userId) return true;
-    // const collatedUserPermissions =
-    //   await this.circlesService.getCollatedUserPermissions(circleIds, userId);
-    // for (const permission of permissions) {
-    //   if (!collatedUserPermissions[permission]) return false;
-    // }
-    return true;
+    const userRoles = await this.circlesService.getUserRolesInCircle(
+      circleIds,
+      userId,
+    );
+    if (!userRoles) return false;
+    for (const role of userRoles) {
+      for (const permission of permissions) {
+        if (collection.permissions[permission]?.includes(role)) {
+          return true;
+        }
+      }
+    }
+    return false;
   }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -145,13 +152,8 @@ export class ViewCollectionAuthGuard implements CanActivate {
       request.user = (await this.sessionAuthGuard.validateUser(
         request.session.siwe?.address,
       )) as unknown as User;
-      if (collection.privateResponses) {
-        if (!request.user) return false;
-
-        return await this.isMember(collection.parents, request.user.id);
-      }
-
-      return true;
+      if (!request.user) return false;
+      return await this.isMember(collection.parents, request.user.id);
     } catch (error) {
       console.log(error);
       // request.session.destroy();

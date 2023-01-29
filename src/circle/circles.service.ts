@@ -102,6 +102,20 @@ export class CirclesService {
     return circlePermissions;
   }
 
+  async getUserRolesInCircle(circleIds: string[], userId: string) {
+    const circle = await this.circlesRepository.findOne(
+      {
+        _id: { $in: circleIds },
+      },
+      {
+        projection: {
+          memberRoles: 1,
+        },
+      },
+    );
+    return circle.memberRoles[userId];
+  }
+
   async getMemberDetailsOfCircles(
     circleIds: string[] | ObjectId[],
   ): Promise<any> {
