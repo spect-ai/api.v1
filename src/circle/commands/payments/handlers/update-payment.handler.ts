@@ -186,33 +186,39 @@ export class UpdateMultiplePaymentsCommandHandler
             updates['pendingPayments'] = updates.pendingPayments.filter(
               (id) => id !== paymentId,
             );
-            updates['completedPayments'] = [
-              ...(updates.completedPayments || []),
-              paymentId,
-            ];
+          } else if (currStatus === 'Pending Signature') {
+            updates['pendingSignaturePayments'] =
+              updates.pendingSignaturePayments.filter((id) => id !== paymentId);
           }
+          updates['completedPayments'] = [
+            ...(updates.completedPayments || []),
+            paymentId,
+          ];
         } else if (updatePaymentsDto.status === 'Cancelled') {
           const currStatus = circleToUpdate.paymentDetails[paymentId].status;
           if (currStatus === 'Pending') {
             updates['pendingPayments'] = updates.pendingPayments.filter(
               (id) => id !== paymentId,
             );
-            updates['cancelledPayments'] = [
-              ...(updates.cancelledPayments || []),
-              paymentId,
-            ];
+          } else if (currStatus === 'Pending Signature') {
+            updates['pendingSignaturePayments'] =
+              updates.pendingSignaturePayments.filter((id) => id !== paymentId);
           }
+          updates['cancelledPayments'] = [
+            ...(updates.cancelledPayments || []),
+            paymentId,
+          ];
         } else if (updatePaymentsDto.status === 'Pending Signature') {
           const currStatus = circleToUpdate.paymentDetails[paymentId].status;
           if (currStatus === 'Pending') {
             updates['pendingPayments'] = updates.pendingPayments.filter(
               (id) => id !== paymentId,
             );
-            updates['pendingSignaturePayments'] = [
-              ...(updates.cancelledPayments || []),
-              paymentId,
-            ];
           }
+          updates['pendingSignaturePayments'] = [
+            ...(updates.pendingSignaturePayments || []),
+            paymentId,
+          ];
         }
 
         const collectionUpdates = {};
