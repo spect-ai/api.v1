@@ -1,4 +1,5 @@
 import {
+  AddPaymentsRequestDto,
   UpdateMultiplePaymentsDto,
   UpdatePaymentRequestDto,
 } from 'src/circle/dto/payment.dto';
@@ -19,6 +20,15 @@ export class UpdateMultiplePaymentsCommand {
     public readonly circleId: string,
     public readonly paymentIds: string[],
     public readonly updatePaymentsDto: UpdateMultiplePaymentsDto,
+    public readonly caller: User,
+  ) {}
+}
+
+export class UpdatePaymentFromCardCommand {
+  constructor(
+    public readonly circleId: string,
+    public readonly paymentId: string,
+    public readonly updatePaymentsDto: AddPaymentsRequestDto,
     public readonly caller: User,
   ) {}
 }

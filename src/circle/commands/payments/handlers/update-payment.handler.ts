@@ -18,7 +18,14 @@ import {
   GetCollectionBySlugQuery,
 } from 'src/collection/queries';
 import { LoggingService } from 'src/logging/logging.service';
-import { UpdateMultiplePaymentsCommand, UpdatePaymentsCommand } from '../impl';
+import {
+  UpdateMultiplePaymentsCommand,
+  UpdatePaymentFromCardCommand,
+  UpdatePaymentsCommand,
+} from '../impl';
+import { v4 as uuidv4 } from 'uuid';
+import { User } from 'src/users/model/users.model';
+import { Collection } from 'src/collection/model/collection.model';
 
 @CommandHandler(UpdatePaymentsCommand)
 export class UpdatePaymentCommandHandler

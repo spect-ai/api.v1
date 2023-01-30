@@ -58,6 +58,15 @@ export class AddPaymentsRequestDto {
   dataSlugs: string[];
 }
 
+export class UpdatePaymentFromCardRequestDto {
+  @IsString()
+  @IsNotEmpty()
+  collectionId: string;
+
+  @IsString()
+  dataSlug: string;
+}
+
 export class UpdatePaymentRequestDto {
   @IsString()
   @IsOptional()
