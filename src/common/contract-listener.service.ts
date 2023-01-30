@@ -4,7 +4,10 @@ import { Alchemy, Network } from 'alchemy-sdk';
 import { utils } from 'ethers';
 import { AbiCoder } from 'ethers/lib/utils';
 import { UpdatePaymentCommand } from 'src/card/commands/impl';
-import { UpdatePaymentsCommand } from 'src/circle/commands/payments/impl';
+import {
+  UpdateMultiplePaymentsCommand,
+  UpdatePaymentsCommand,
+} from 'src/circle/commands/payments/impl';
 import { GetCircleByIdQuery } from 'src/circle/queries/impl';
 import { LoggingService } from 'src/logging/logging.service';
 import { RealtimeGateway } from 'src/realtime/realtime.gateway';
@@ -145,18 +148,18 @@ export class ContractListener {
       const caller = d[0];
       const circleId = d[1];
       const ids = d[2];
-      for (const id of ids)
-        await this.commandBus.execute(
-          new UpdatePaymentsCommand(
-            circleId,
-            id,
-            {
-              transactionHash,
-              status: 'Completed',
-            },
-            caller,
-          ),
-        );
+      await this.commandBus.execute(
+        new UpdateMultiplePaymentsCommand(
+          circleId,
+          ids,
+          {
+            paymentIds: ids,
+            transactionHash,
+            status: 'Completed',
+          },
+          caller,
+        ),
+      );
     } catch (e) {
       this.logger.error(e.message);
     }

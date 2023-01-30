@@ -94,12 +94,14 @@ import {
   AddManualPaymentsCommand,
   AddPaymentsCommand,
   MovePaymentsCommand,
+  UpdateMultiplePaymentsCommand,
   UpdatePaymentsCommand,
 } from './commands/payments/impl';
 import {
   AddManualPaymentRequestDto,
   AddPaymentsRequestDto,
   PaymentIdsDto,
+  UpdateMultiplePaymentsDto,
   UpdatePaymentRequestDto,
 } from './dto/payment.dto';
 
@@ -554,6 +556,24 @@ export class CircleV1Controller {
         param.id,
         query.paymentId,
         updatePaymentsRequestDto,
+        request.user,
+      ),
+    );
+  }
+
+  @SetMetadata('permissions', ['managePaymentOptions'])
+  @UseGuards(CircleAuthGuard)
+  @Patch('/:id/updateMultiplePayments')
+  async updateMultiplePayments(
+    @Param() param: ObjectIdDto,
+    @Body() updateMultiplePaymentsRequestDto: UpdateMultiplePaymentsDto,
+    @Request() request,
+  ): Promise<DetailedCircleResponseDto> {
+    return await this.commandBus.execute(
+      new UpdateMultiplePaymentsCommand(
+        param.id,
+        updateMultiplePaymentsRequestDto.paymentIds,
+        updateMultiplePaymentsRequestDto,
         request.user,
       ),
     );

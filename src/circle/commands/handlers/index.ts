@@ -45,7 +45,10 @@ import {
   AddPaymentsCommandHandler,
 } from '../payments/handlers/add-payment.handler';
 import { MovePaymentsCommandHandler } from '../payments/handlers/move-payment.handler';
-import { UpdatePaymentCommandHandler } from '../payments/handlers/update-payment.handler';
+import {
+  UpdateMultiplePaymentsCommandHandler,
+  UpdatePaymentCommandHandler,
+} from '../payments/handlers/update-payment.handler';
 
 export const CommandHandlers = [
   RemoveProjectsCommandHandler,
@@ -84,4 +87,5 @@ export const CommandHandlers = [
   MovePaymentsCommandHandler,
   UpdatePaymentCommandHandler,
   AddManualPaymentsCommandHandler,
+  UpdateMultiplePaymentsCommandHandler,
 ];

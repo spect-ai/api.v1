@@ -94,6 +94,7 @@ export type PropertyType =
 export type Option = {
   label: string;
   value: string | number;
+  data?: any;
 };
 
 export type Condition = {

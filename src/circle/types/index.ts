@@ -126,5 +126,5 @@ export type PaymentDetails = {
   }[];
   data?: Option;
   collection?: Option;
-  status: 'Pending' | 'Completed' | 'Cancelled';
+  status: 'Pending' | 'Pending Signature' | 'Completed' | 'Cancelled';
 };

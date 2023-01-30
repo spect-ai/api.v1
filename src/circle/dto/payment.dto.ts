@@ -29,14 +29,14 @@ export class AddManualPaymentRequestDto {
     value: string;
   };
 
-  // @IsObject()
-  // token: {
-  //   label: string;
-  //   value: string;
-  // };
+  @IsObject()
+  token: {
+    label: string;
+    value: string;
+  };
 
-  // @IsNumber()
-  // value: number;
+  @IsNumber()
+  value: number;
 
   @IsArray()
   paidTo: {
@@ -106,7 +106,31 @@ export class UpdatePaymentRequestDto {
 
   @IsString()
   @IsOptional()
-  status?: 'Pending' | 'Completed' | 'Cancelled';
+  safeTransactionHash?: string;
+
+  @IsString()
+  @IsOptional()
+  status?: 'Pending' | 'Pending Signature' | 'Completed' | 'Cancelled';
+
+  @IsObject()
+  @IsOptional()
+  collection?: {
+    label: string;
+    value: string;
+  };
+
+  @IsObject()
+  @IsOptional()
+  data?: {
+    label: string;
+    value: string;
+  };
+}
+
+export class UpdateMultiplePaymentsDto extends UpdatePaymentRequestDto {
+  @IsArray()
+  @IsNotEmpty()
+  paymentIds: string[];
 }
 
 export class CancelPaymentsDto {
