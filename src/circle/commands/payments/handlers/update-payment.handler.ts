@@ -11,7 +11,10 @@ import { UpdatedCircleEvent } from 'src/circle/events/impl';
 import { PaymentDetails } from 'src/circle/types';
 import { UpdateCollectionCommand } from 'src/collection/commands';
 import { CollectionResponseDto } from 'src/collection/dto/collection-response.dto';
-import { GetCollectionByIdQuery } from 'src/collection/queries';
+import {
+  GetCollectionByIdQuery,
+  GetCollectionBySlugQuery,
+} from 'src/collection/queries';
 import { LoggingService } from 'src/logging/logging.service';
 import { UpdatePaymentsCommand } from '../impl';
 
@@ -81,13 +84,14 @@ export class UpdatePaymentCommandHandler
         ['Completed', 'Cancelled'].includes(updatePaymentsDto.status)
       ) {
         const collection = await this.queryBus.execute(
-          new GetCollectionByIdQuery(
-            circleToUpdate.paymentDetails[paymentId].collectionId,
+          new GetCollectionBySlugQuery(
+            circleToUpdate.paymentDetails[paymentId].collection
+              ?.value as string,
           ),
         );
         collectionUpdates['paymentStatus'] = {
           ...collection.paymentStatus,
-          [circleToUpdate.paymentDetails[paymentId].dataSlug]:
+          [circleToUpdate.paymentDetails[paymentId].data?.value]:
             updatePaymentsDto.status === 'Completed' ? 'completed' : null,
         };
 
@@ -95,7 +99,8 @@ export class UpdatePaymentCommandHandler
           new UpdateCollectionCommand(
             collectionUpdates,
             caller,
-            circleToUpdate.paymentDetails[paymentId].collectionId,
+            circleToUpdate.paymentDetails[paymentId].collection
+              ?.value as string,
           ),
         );
       }

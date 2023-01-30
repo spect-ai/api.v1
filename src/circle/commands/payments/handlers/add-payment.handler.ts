@@ -8,6 +8,7 @@ import {
 import { CirclesRepository } from 'src/circle/circles.repository';
 import { Circle } from 'src/circle/model/circle.model';
 import { GetCircleByIdQuery } from 'src/circle/queries/impl';
+import { PaymentDetails } from 'src/circle/types';
 import { UpdateCollectionCommand } from 'src/collection/commands';
 import { CollectionResponseDto } from 'src/collection/dto/collection-response.dto';
 import { Collection } from 'src/collection/model/collection.model';
@@ -127,14 +128,20 @@ export class AddPaymentsCommandHandler
           id: paymentId,
           title: collection.data[dataSlug]['Title'],
           type: 'Added From Card',
-          dataSlug,
-          collectionId: addPaymentsDto.collectionId,
+          data: {
+            label: collection.data[dataSlug]['Title'],
+            value: dataSlug,
+          },
+          collection: {
+            label: collection.name,
+            value: collection.slug,
+          },
           chain: collection.data[dataSlug][rewardFieldToPayOn].chain,
           token: collection.data[dataSlug][rewardFieldToPayOn].token,
           value: collection.data[dataSlug][rewardFieldToPayOn].value,
           paidTo: paidTo,
           status: 'Pending',
-        };
+        } as PaymentDetails;
         paymentIds.push(paymentId);
         dataSlugsPendingPayment.push(dataSlug);
       }

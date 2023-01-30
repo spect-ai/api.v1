@@ -24,11 +24,19 @@ export class UpdatedCircleEventHandler
   async handle(event: UpdatedCircleEvent) {
     try {
       const { caller, circle, eventName } = event;
-      if (eventName === 'paymentUpdate')
+      if (eventName === 'paymentUpdate') {
+        console.log('UpdatedCircleEvent');
+
         this.realtime.server.emit(`${circle.slug}:paymentUpdate`, {
-          data: circle.paymentDetails,
+          data: {
+            paymentDetails: circle.paymentDetails,
+            pendingPayments: circle.pendingPayments,
+            cancelledPayments: circle.cancelledPayments,
+            completedPayments: circle.completedPayments,
+          },
           user: caller,
         });
+      }
     } catch (error) {
       this.logger.error(`${error.message}`);
     }

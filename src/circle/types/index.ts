@@ -1,3 +1,4 @@
+import { Option } from 'src/collection/types/types';
 import { Chain } from 'src/common/models/chain.model';
 import { Token } from 'src/common/models/token.model';
 import { TokenInfo } from 'src/registry/model/registry.model';
@@ -123,7 +124,7 @@ export type PaymentDetails = {
     propertyType: string;
     value: any;
   }[];
-  dataSlug?: string;
-  collectionId?: string;
+  data?: Option;
+  collection?: Option;
   status: 'Pending' | 'Completed' | 'Cancelled';
 };
