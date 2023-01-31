@@ -117,7 +117,7 @@ export class UpdatePaymentCommandHandler
         await this.commandBus.execute(
           new UpdateCollectionCommand(
             collectionUpdates,
-            caller,
+            caller.id,
             circleToUpdate.paymentDetails[paymentId].collection
               ?.value as string,
           ),
@@ -241,7 +241,7 @@ export class UpdateMultiplePaymentsCommandHandler
           await this.commandBus.execute(
             new UpdateCollectionCommand(
               collectionUpdates,
-              caller,
+              caller.id,
               collection.id,
             ),
           );
