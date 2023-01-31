@@ -187,7 +187,7 @@ export class MovePaymentsCommandHandler
           };
         }
         await this.commandBus.execute(
-          new UpdateCollectionCommand(updates, caller, collectionId),
+          new UpdateCollectionCommand(updates, caller.id, collectionId),
         );
       } catch (error) {
         this.logger.error(

@@ -471,14 +471,13 @@ export class AddMultipleDataUsingAutomationCommandHandler
           cardOrders,
         };
       }
-      await this.collectionRepository.updateById(collectionId, {
+      return await this.collectionRepository.updateById(collectionId, {
         data: dataUpdates,
         dataActivities,
         dataActivityOrder,
         dataOwner: dataOwners,
         projectMetadata,
       });
-      return true;
     } catch (err) {
       this.logger.error(
         `Failed adding data to collection Id ${collectionId} with error ${JSON.stringify(

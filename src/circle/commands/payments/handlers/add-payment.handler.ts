@@ -183,7 +183,7 @@ export class AddPaymentsCommandHandler
               },
             },
           },
-          caller,
+          caller.id,
           collectionId,
         ),
       );
