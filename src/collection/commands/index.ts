@@ -33,7 +33,10 @@ import {
 } from './data/handlers/vote-data.handler';
 import { CreateCollectionCommandHandler } from './handlers/create-collection.handler';
 import { DeleteCollectionCommandHandler } from './handlers/delete-collection.handler';
-import { UpdateCollectionCommandHandler } from './handlers/update-collection.handler';
+import {
+  UpdateCollectionByFilterCommandHandler,
+  UpdateCollectionCommandHandler,
+} from './handlers/update-collection.handler';
 import {
   MigrateAllCollectionsCommandHandler,
   MigrateCollectionCommandHandler,
@@ -74,4 +77,5 @@ export const CommandHandlers = [
   KanbanProjectCommandHandler,
   OnboardToSpectProjectCommandHandler,
   ImportCommandHandler,
+  UpdateCollectionByFilterCommandHandler,
 ];

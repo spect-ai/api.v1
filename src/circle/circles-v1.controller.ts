@@ -91,13 +91,17 @@ import {
 import { CirclesCollectionService } from './services/circle-collection.service';
 import { Collection } from 'src/collection/model/collection.model';
 import {
+  AddManualPaymentsCommand,
   AddPaymentsCommand,
   MovePaymentsCommand,
+  UpdateMultiplePaymentsCommand,
   UpdatePaymentsCommand,
 } from './commands/payments/impl';
 import {
+  AddManualPaymentRequestDto,
   AddPaymentsRequestDto,
   PaymentIdsDto,
+  UpdateMultiplePaymentsDto,
   UpdatePaymentRequestDto,
 } from './dto/payment.dto';
 
@@ -554,6 +558,37 @@ export class CircleV1Controller {
         updatePaymentsRequestDto,
         request.user,
       ),
+    );
+  }
+
+  @SetMetadata('permissions', ['managePaymentOptions'])
+  @UseGuards(CircleAuthGuard)
+  @Patch('/:id/updateMultiplePayments')
+  async updateMultiplePayments(
+    @Param() param: ObjectIdDto,
+    @Body() updateMultiplePaymentsRequestDto: UpdateMultiplePaymentsDto,
+    @Request() request,
+  ): Promise<DetailedCircleResponseDto> {
+    return await this.commandBus.execute(
+      new UpdateMultiplePaymentsCommand(
+        param.id,
+        updateMultiplePaymentsRequestDto.paymentIds,
+        updateMultiplePaymentsRequestDto,
+        request.user,
+      ),
+    );
+  }
+
+  @SetMetadata('permissions', ['managePaymentOptions'])
+  @UseGuards(CircleAuthGuard)
+  @Patch('/:id/addManualPayment')
+  async addPayment(
+    @Param() param: ObjectIdDto,
+    @Body() addManualPaymentDto: AddManualPaymentRequestDto,
+    @Request() request,
+  ): Promise<DetailedCircleResponseDto> {
+    return await this.commandBus.execute(
+      new AddManualPaymentsCommand(param.id, addManualPaymentDto, request.user),
     );
   }
 

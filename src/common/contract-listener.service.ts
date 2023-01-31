@@ -4,6 +4,10 @@ import { Alchemy, Network } from 'alchemy-sdk';
 import { utils } from 'ethers';
 import { AbiCoder } from 'ethers/lib/utils';
 import { UpdatePaymentCommand } from 'src/card/commands/impl';
+import {
+  UpdateMultiplePaymentsCommand,
+  UpdatePaymentsCommand,
+} from 'src/circle/commands/payments/impl';
 import { GetCircleByIdQuery } from 'src/circle/queries/impl';
 import { LoggingService } from 'src/logging/logging.service';
 import { RealtimeGateway } from 'src/realtime/realtime.gateway';
@@ -39,7 +43,7 @@ export class ContractListener {
       const { filterEth, filterTokens, filterToken, alchemy } = this.getWS(
         process.env.ALCHEMY_API_KEY_MUMBAI,
         Network.MATIC_MUMBAI,
-        '0x2De899142D9B74273EE1e70Ca7AD31A6EF7fCAaE',
+        '0x05588517bC463f607Dca0E09d1f73CDaa30cfF10',
       );
       alchemy.ws.on(filterEth, (log) => {
         this.decodeTransactionAndRecord(log, '80001');
@@ -48,19 +52,7 @@ export class ContractListener {
         this.decodeTransactionAndRecord(log, '80001');
       });
     }
-    if (process.env.ALCHEMY_API_KEY_RINKEBY) {
-      const { filterEth, filterTokens, filterToken, alchemy } = this.getWS(
-        process.env.ALCHEMY_API_KEY_RINKEBY,
-        Network.ETH_RINKEBY,
-        '0x994DF14AbaDB671f35B89299FC983A478C6b907e',
-      );
-      alchemy.ws.on(filterEth, (log) => {
-        this.decodeTransactionAndRecord(log, '4');
-      });
-      alchemy.ws.on(filterTokens, (log) => {
-        this.decodeTransactionAndRecord(log, '4');
-      });
-    }
+
     if (process.env.ALCHEMY_API_KEY_OPTIMISM) {
       const { filterEth, filterTokens, filterToken, alchemy } = this.getWS(
         process.env.ALCHEMY_API_KEY_OPTIMISM,
@@ -127,69 +119,47 @@ export class ContractListener {
   private async decodeTransactionAndRecord(log: any, chainId: string) {
     try {
       let decodedEvents;
+      console.log({ log });
+      console.log({ id: utils.id('ethDistributed(address,string)') });
       if (log.topics[0] === utils.id('ethDistributed(address,string)')) {
         decodedEvents = this.iface.decodeEventLog(
           'ethDistributed',
           log.data,
           log.topics,
         );
-      }
-      if (log.topics[0] === utils.id('tokensDistributed(address,string)')) {
+      } else if (
+        log.topics[0] === utils.id('tokensDistributed(address,string)')
+      ) {
         decodedEvents = this.iface.decodeEventLog(
           'tokensDistributed',
           log.data,
           log.topics,
         );
       }
+      console.log({ decodedEvents });
       const d = this.decoder.decode(
-        ['string', 'string', 'string', 'string[]'],
+        ['string', 'string', 'string[]'],
         decodedEvents[1],
       );
+      console.log({ d });
 
       const transactionHash = log.transactionHash as string;
       const sender = decodedEvents[0];
       const caller = d[0];
       const circleId = d[1];
-      const type = d[2];
-      const ids = d[3];
-      const circle = await this.queryBus.execute(
-        new GetCircleByIdQuery(circleId),
+      const ids = d[2];
+      await this.commandBus.execute(
+        new UpdateMultiplePaymentsCommand(
+          circleId,
+          ids,
+          {
+            paymentIds: ids,
+            transactionHash,
+            status: 'Completed',
+          },
+          caller,
+        ),
       );
-      if (
-        (circle.safeAddresses &&
-          circle.safeAddresses[chainId] &&
-          circle.safeAddresses[chainId].includes(sender)) ||
-        chainId === '137' ||
-        chainId === '80001'
-      ) {
-        if (type === 'card') {
-          console.log('Updating card');
-          await this.commandBus.execute(
-            new UpdatePaymentCommand(
-              {
-                cardIds: ids,
-                transactionHash,
-              },
-              caller,
-            ),
-          );
-        } else if (type === 'retro') {
-          if (ids.length > 0) {
-            console.log('Updating retro');
-            this.commandBus.execute(
-              new UpdateRetroCommand(ids[0], {
-                reward: {
-                  transactionHash,
-                },
-                status: {
-                  active: false,
-                  paid: true,
-                },
-              }),
-            );
-          }
-        }
-      }
     } catch (e) {
       this.logger.error(e.message);
     }
