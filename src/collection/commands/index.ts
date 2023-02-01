@@ -2,6 +2,7 @@ export * from './impl/create-collection.command';
 export * from './impl/update-collection.command';
 export * from './impl/delete-collection.command';
 export * from './impl/migrate-collection.command';
+export * from './impl/import.command';
 export * from './properties/impl/add-property.command';
 export * from './properties/impl/update-property.command';
 export * from './properties/impl/remove-property.command';
@@ -48,6 +49,8 @@ import { OnboardingWorkflowCommandHandler } from './template/handlers/onboarding
 import { KanbanProjectCommandHandler } from './template/handlers/kanban-project.handler';
 import { OnboardToSpectProjectCommandHandler } from './default/handlers/onboard-to-spect.handler';
 
+import { ImportCommandHandler } from './handlers/import.handler';
+
 export const CommandHandlers = [
   CreateCollectionCommandHandler,
   UpdateCollectionCommandHandler,
@@ -73,5 +76,6 @@ export const CommandHandlers = [
   OnboardingWorkflowCommandHandler,
   KanbanProjectCommandHandler,
   OnboardToSpectProjectCommandHandler,
+  ImportCommandHandler,
   UpdateCollectionByFilterCommandHandler,
 ];
