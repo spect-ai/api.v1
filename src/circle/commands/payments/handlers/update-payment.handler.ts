@@ -7,25 +7,13 @@ import {
   QueryBus,
 } from '@nestjs/cqrs';
 import { CirclesRepository } from 'src/circle/circles.repository';
-import { CircleResponseDto } from 'src/circle/dto/detailed-circle-response.dto';
 import { UpdatedCircleEvent } from 'src/circle/events/impl';
 import { Circle } from 'src/circle/model/circle.model';
 import { PaymentDetails } from 'src/circle/types';
 import { UpdateCollectionCommand } from 'src/collection/commands';
-import { CollectionResponseDto } from 'src/collection/dto/collection-response.dto';
-import {
-  GetCollectionByIdQuery,
-  GetCollectionBySlugQuery,
-} from 'src/collection/queries';
+import { GetCollectionBySlugQuery } from 'src/collection/queries';
 import { LoggingService } from 'src/logging/logging.service';
-import {
-  UpdateMultiplePaymentsCommand,
-  UpdatePaymentFromCardCommand,
-  UpdatePaymentsCommand,
-} from '../impl';
-import { v4 as uuidv4 } from 'uuid';
-import { User } from 'src/users/model/users.model';
-import { Collection } from 'src/collection/model/collection.model';
+import { UpdateMultiplePaymentsCommand, UpdatePaymentsCommand } from '../impl';
 
 @CommandHandler(UpdatePaymentsCommand)
 export class UpdatePaymentCommandHandler
@@ -46,13 +34,12 @@ export class UpdatePaymentCommandHandler
       console.log('UpdatePaymentCommandHandler');
       const { circleId, paymentId, updatePaymentsDto, caller } = command;
       const circleToUpdate = await this.circlesRepository.findById(circleId);
-
+      console.log({ updatePaymentsDto });
       if (!circleToUpdate) {
         throw new InternalServerErrorException(
           `Could not find circle with id ${circleId}`,
         );
       }
-
       const updates = {
         paymentDetails: {
           ...circleToUpdate.paymentDetails,

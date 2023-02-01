@@ -47,6 +47,20 @@ export class AddManualPaymentRequestDto {
   @IsArray()
   @IsOptional()
   labels: Option[];
+
+  @IsObject()
+  @IsOptional()
+  collection?: {
+    label: string;
+    value: string;
+  };
+
+  @IsObject()
+  @IsOptional()
+  data?: {
+    label: string;
+    value: string;
+  };
 }
 
 export class AddPaymentsRequestDto {
