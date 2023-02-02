@@ -29,18 +29,5 @@ export class UseTemplateDto {
 
   @IsObject()
   @IsOptional()
-  snapshot?: {
-    name: string;
-    id: string;
-    network: string;
-    symbol: string;
-  };
-
-  // @IsArray()
-  // @IsOptional()
-  // permissions?: string[];
-
-  @IsObject()
-  @IsOptional()
   registry?: { [key: string]: Registry };
 }

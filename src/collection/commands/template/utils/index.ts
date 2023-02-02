@@ -53,36 +53,8 @@ export const getGrantApplicationFormDetails = (
   registry: {
     [k: string]: Registry;
   },
-  snapshot?: any,
 ) => {
   const formPermissions = getDefaultPermissions(circle);
-  const voting = snapshot?.id
-    ? {
-        enabled: true,
-        options: [
-          {
-            label: 'For',
-            value: `option-${uuidv4()}`,
-          },
-          {
-            label: 'Against',
-            value: `option-${uuidv4()}`,
-          },
-          {
-            label: 'Abstain',
-            value: `option-${uuidv4()}`,
-          },
-        ],
-        message: 'Please Vote',
-        votingType: {
-          label: 'Single Choice',
-          value: 'singleChoice',
-        },
-        votesArePublic: true,
-        votesAreWeightedByTokens: true,
-        snapshot,
-      }
-    : {};
   const onboardingFormDetails = {
     name: 'Application Form',
     collectionType: 0,
@@ -114,7 +86,6 @@ export const getGrantApplicationFormDetails = (
       },
       cardOrders: {},
     },
-    voting,
   };
   return onboardingFormDetails;
 };
