@@ -1,4 +1,7 @@
-import { StartVotingPeriodRequestDto } from 'src/collection/dto/voting.dto';
+import {
+  SnapshotProposalDto,
+  StartVotingPeriodRequestDto,
+} from 'src/collection/dto/voting.dto';
 import { User } from 'src/users/model/users.model';
 
 export class VoteDataCommand {
@@ -24,5 +27,14 @@ export class EndVotingPeriodCommand {
     public readonly dataSlug: string,
     public readonly caller: User,
     public readonly collectionId: string,
+  ) {}
+}
+
+export class RecordSnapshotProposalCommand {
+  constructor(
+    public readonly collectionId: string,
+    public readonly dataSlug: string,
+    public readonly snapshotProposalDto: SnapshotProposalDto,
+    public readonly caller: User,
   ) {}
 }

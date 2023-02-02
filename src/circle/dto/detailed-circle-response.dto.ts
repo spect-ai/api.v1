@@ -9,6 +9,7 @@ import { ObjectId } from 'mongoose';
 import { Circle } from '../model/circle.model';
 import { Payment } from 'src/common/models/payment.model';
 import { Status } from 'src/common/types/status.type';
+import { SnapshotSpace } from 'src/collection/types/types';
 
 export class DetailedCircleResponseDto {
   /**
@@ -269,4 +270,10 @@ export class CircleResponseDto {
    */
   @IsBoolean()
   unauthorized?: boolean;
+
+  /**
+   * Snapshot space of the circle
+   */
+  @IsObject()
+  snapshot?: SnapshotSpace;
 }

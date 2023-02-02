@@ -146,8 +146,6 @@ export type VotingPeriod = {
 };
 
 export type SnapshotVoting = {
-  endsOn?: string;
-  onSnapshot?: boolean;
   space?: string;
   proposalId?: string;
 };
@@ -168,5 +166,5 @@ export type Voting = {
   votesAreWeightedByTokens?: boolean;
   periods?: MappedItem<VotingPeriod>;
   periodsOnCollection?: MappedItem<VotingPeriod>;
-  snapshot?: SnapshotSpace;
+  snapshot?: { [key: string]: SnapshotVoting };
 };

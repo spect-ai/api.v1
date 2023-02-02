@@ -17,3 +17,11 @@ export class StartVotingPeriodRequestDto {
   @IsOptional()
   readonly proposalId?: string;
 }
+
+export class SnapshotProposalDto {
+  @IsString()
+  readonly proposalId: string;
+
+  @IsString()
+  readonly snapshotSpace: string;
+}

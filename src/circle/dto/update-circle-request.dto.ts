@@ -8,7 +8,7 @@ import {
   IsOptional,
   IsString,
 } from 'class-validator';
-import { Option } from 'src/collection/types/types';
+import { Option, SnapshotSpace } from 'src/collection/types/types';
 import {
   DiscordToCircleRoles,
   GuildxyzToCircleRoles,
@@ -161,6 +161,13 @@ export class UpdateCircleRequestDto extends OmitType(CreateCircleRequestDto, [
   @IsArray()
   @IsOptional()
   paymentLabelOptions?: Option[];
+
+  /**
+   * Snapshot space of the circle
+   */
+  @IsObject()
+  @IsOptional()
+  snapshot?: SnapshotSpace;
 }
 
 export class UpdateCircleGithubRepoRequestDto {

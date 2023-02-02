@@ -13,6 +13,7 @@ import {
   EndVotingPeriodCommand,
   StartVotingPeriodCommand,
   VoteDataCommand,
+  RecordSnapshotProposalCommand,
 } from '../impl/vote-data.command';
 import { GetCircleByIdQuery } from 'src/circle/queries/impl';
 import { UpdateCircleCommand } from 'src/circle/commands/impl/update-circle.command';
@@ -30,13 +31,14 @@ export class ActivityOnVoting {
     dataSlug: string,
     caller: string,
     action: 'start' | 'end',
+    snapshot?: boolean,
   ): {
     dataActivities: MappedItem<MappedItem<Activity>>;
     dataActivityOrder: MappedItem<string[]>;
   } {
     const activityId = uuidv4();
     let content, ref;
-    const dataType = 'Voting period';
+    const dataType = snapshot ? 'Snapshot voting window' : 'Voting period';
     if (caller) {
       content = `${action}ed ${dataType}`;
       ref = {
@@ -228,14 +230,7 @@ export class StartVotingPeriodCommandHandler
                 votesArePublic: collection.voting.votesArePublic,
                 votesAreWeightedByTokens:
                   collection.voting.votesAreWeightedByTokens,
-                endsOn: startVotingPeriodRequestDto?.endsOn,
                 startedOn: new Date(),
-                snapshot: {
-                  endsOn: startVotingPeriodRequestDto?.endsOn,
-                  onSnapshot: startVotingPeriodRequestDto?.postOnSnapshot,
-                  space: startVotingPeriodRequestDto?.space,
-                  proposalId: startVotingPeriodRequestDto?.proposalId,
-                },
                 votes: {},
               },
             },
@@ -335,6 +330,70 @@ export class EndVotingPeriodCommandHandler
       );
       throw new InternalServerErrorException(
         `Failed ending voting period in collection to collection Id ${collectionId} with error ${err}`,
+      );
+    }
+  }
+}
+
+@CommandHandler(RecordSnapshotProposalCommand)
+export class RecordSnapshotProposalCommandHandler
+  implements ICommandHandler<RecordSnapshotProposalCommand>
+{
+  constructor(
+    private readonly collectionRepository: CollectionRepository,
+    private readonly queryBus: QueryBus,
+    private readonly logger: LoggingService,
+    private readonly activityOnVoting: ActivityOnVoting,
+  ) {
+    this.logger.setContext('RecordSnapshotProposalCommandHandler');
+  }
+
+  async execute(command: RecordSnapshotProposalCommand) {
+    const { snapshotProposalDto, collectionId, dataSlug, caller } = command;
+    try {
+      const collection = await this.collectionRepository.findById(collectionId);
+      if (!collection) throw 'Collection does not exist';
+      if (
+        collection.voting.snapshot &&
+        collection.voting.snapshot[dataSlug]?.proposalId
+      )
+        throw 'Snapshot proposal already exists for this data';
+
+      const { dataActivities, dataActivityOrder } =
+        this.activityOnVoting.getActivity(
+          collection,
+          dataSlug,
+          caller?.id,
+          'start',
+          true,
+        );
+      const updatedCollection = await this.collectionRepository.updateById(
+        collectionId,
+        {
+          voting: {
+            ...collection.voting,
+            snapshot: {
+              ...(collection.voting.snapshot || {}),
+              [dataSlug]: {
+                space: snapshotProposalDto.snapshotSpace,
+                proposalId: snapshotProposalDto.proposalId,
+              },
+            },
+          },
+          dataActivities,
+          dataActivityOrder,
+        },
+      );
+
+      return await await this.queryBus.execute(
+        new GetPrivateViewCollectionQuery(collection.slug, updatedCollection),
+      );
+    } catch (err) {
+      this.logger.error(
+        `Failed recording snapshot proposal in collection with collection Id ${collectionId} with error ${err}`,
+      );
+      throw new InternalServerErrorException(
+        `Failed recording snapshot proposal in collection to collection Id ${collectionId} with error ${err}`,
       );
     }
   }

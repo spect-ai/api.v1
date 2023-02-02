@@ -27,6 +27,7 @@ import {
 import { UpdateDataCommandHandler } from './data/handlers/update-data.handler';
 import {
   EndVotingPeriodCommandHandler,
+  RecordSnapshotProposalCommandHandler,
   StartVotingPeriodCommandHandler,
   VoteDataCommandHandler,
 } from './data/handlers/vote-data.handler';
@@ -70,4 +71,5 @@ export const CommandHandlers = [
   OnboardingWorkflowCommandHandler,
   KanbanProjectCommandHandler,
   OnboardToSpectProjectCommandHandler,
+  RecordSnapshotProposalCommandHandler,
 ];

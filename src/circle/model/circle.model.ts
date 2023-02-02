@@ -23,7 +23,7 @@ import {
   AutomationsIndexedByCollectionSlugType,
   PaymentDetails,
 } from '../types';
-import { Option } from 'src/collection/types/types';
+import { Option, SnapshotSpace } from 'src/collection/types/types';
 
 export type Invite = {
   id: string;
@@ -268,6 +268,9 @@ export class Circle extends ProfileModel {
 
   @prop({ default: false })
   forceShowOnExplore?: boolean;
+
+  @prop()
+  snapshot: SnapshotSpace;
 
   @prop({ default: false })
   verified?: boolean;

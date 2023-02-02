@@ -54,6 +54,7 @@ import {
   EndVotingPeriodCommand,
   StartVotingPeriodCommand,
   VoteDataCommand,
+  RecordSnapshotProposalCommand,
 } from './commands/data/impl/vote-data.command';
 import {
   CreateGrantWorkflowCommand,
@@ -88,7 +89,10 @@ import {
   AddPropertyDto,
   UpdatePropertyDto,
 } from './dto/update-property-request.dto';
-import { StartVotingPeriodRequestDto } from './dto/voting.dto';
+import {
+  SnapshotProposalDto,
+  StartVotingPeriodRequestDto,
+} from './dto/voting.dto';
 import { Collection } from './model/collection.model';
 import {
   GetCollectionByIdQuery,
@@ -471,6 +475,24 @@ export class CollectionController {
   @Patch('/:id/airdropKudos')
   async airdropKudos(@Param() param: ObjectIdDto): Promise<object> {
     return await this.credentialingService.airdropMintkudosToken(param.id);
+  }
+
+  @UseGuards(SessionAuthGuard)
+  @Patch('/:id/snapshotProposal')
+  async recordSnapshotProposal(
+    @Param() param: ObjectIdDto,
+    @Query() dataIdParam: RequiredUUIDDto,
+    @Body() snapshotProposalDto: SnapshotProposalDto,
+    @Request() req,
+  ): Promise<Collection> {
+    return await this.commandBus.execute(
+      new RecordSnapshotProposalCommand(
+        param.id,
+        dataIdParam.dataId,
+        snapshotProposalDto,
+        req.user,
+      ),
+    );
   }
 
   @UseGuards(SessionAuthGuard)
