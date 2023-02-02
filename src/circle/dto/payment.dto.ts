@@ -148,6 +148,10 @@ export class UpdatePaymentRequestDto {
     label: string;
     value: string;
   };
+
+  @IsString()
+  @IsOptional()
+  paidOn?: Date;
 }
 
 export class UpdateMultiplePaymentsDto extends UpdatePaymentRequestDto {

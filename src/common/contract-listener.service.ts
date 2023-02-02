@@ -119,8 +119,6 @@ export class ContractListener {
   private async decodeTransactionAndRecord(log: any, chainId: string) {
     try {
       let decodedEvents;
-      console.log({ log });
-      console.log({ id: utils.id('ethDistributed(address,string)') });
       if (log.topics[0] === utils.id('ethDistributed(address,string)')) {
         decodedEvents = this.iface.decodeEventLog(
           'ethDistributed',
@@ -136,15 +134,12 @@ export class ContractListener {
           log.topics,
         );
       }
-      console.log({ decodedEvents });
       const d = this.decoder.decode(
         ['string', 'string', 'string[]'],
         decodedEvents[1],
       );
-      console.log({ d });
 
       const transactionHash = log.transactionHash as string;
-      const sender = decodedEvents[0];
       const caller = d[0];
       const circleId = d[1];
       const ids = d[2];
@@ -156,6 +151,7 @@ export class ContractListener {
             paymentIds: ids,
             transactionHash,
             status: 'Completed',
+            paidOn: new Date(),
           },
           caller,
         ),

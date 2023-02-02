@@ -12,7 +12,10 @@ import { PaymentDetails } from 'src/circle/types';
 import { UpdateCollectionCommand } from 'src/collection/commands';
 import { CollectionResponseDto } from 'src/collection/dto/collection-response.dto';
 import { Collection } from 'src/collection/model/collection.model';
-import { GetCollectionByIdQuery } from 'src/collection/queries';
+import {
+  GetCollectionByFilterQuery,
+  GetCollectionByIdQuery,
+} from 'src/collection/queries';
 import { LoggingService } from 'src/logging/logging.service';
 import { User } from 'src/users/model/users.model';
 import { v4 as uuidv4 } from 'uuid';
@@ -240,6 +243,37 @@ export class AddManualPaymentsCommandHandler
         );
       }
       const paymentId = uuidv4();
+      if (addManualPaymentDto.type === 'Added From Card') {
+        const collection = (await this.queryBus.execute(
+          new GetCollectionByFilterQuery({
+            slug: addManualPaymentDto.collection?.value,
+          }),
+        )) as Collection;
+        const paymentIds = {
+          ...(collection.projectMetadata?.paymentIds || {}),
+          [addManualPaymentDto.data?.value]: paymentId,
+        };
+        const paymentStatus = {
+          ...(collection.projectMetadata?.paymentStatus || {}),
+          [addManualPaymentDto.data?.value]: 'pending' as
+            | 'pending'
+            | 'completed'
+            | 'pendingSignature',
+        };
+        const updatedCollection = await this.commandBus.execute(
+          new UpdateCollectionCommand(
+            {
+              projectMetadata: {
+                ...collection.projectMetadata,
+                paymentIds,
+                paymentStatus,
+              },
+            },
+            caller.id,
+            collection.id,
+          ),
+        );
+      }
       await this.circlesRepository.updateById(circleId, {
         pendingPayments: [...(circle.pendingPayments || []), paymentId],
         paymentDetails: {

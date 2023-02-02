@@ -34,7 +34,6 @@ export class UpdatePaymentCommandHandler
       console.log('UpdatePaymentCommandHandler');
       const { circleId, paymentId, updatePaymentsDto, caller } = command;
       const circleToUpdate = await this.circlesRepository.findById(circleId);
-      console.log({ updatePaymentsDto });
       if (!circleToUpdate) {
         throw new InternalServerErrorException(
           `Could not find circle with id ${circleId}`,
@@ -56,8 +55,8 @@ export class UpdatePaymentCommandHandler
             (id) => id !== paymentId,
           );
           updates['completedPayments'] = [
-            ...(circleToUpdate.completedPayments || []),
             paymentId,
+            ...(circleToUpdate.completedPayments || []),
           ];
         }
       } else if (updatePaymentsDto.status === 'Cancelled') {
@@ -95,18 +94,20 @@ export class UpdatePaymentCommandHandler
               ?.value as string,
           ),
         );
-        collectionUpdates['paymentStatus'] = {
-          ...collection.paymentStatus,
-          [circleToUpdate.paymentDetails[paymentId].data?.value]:
-            updatePaymentsDto.status === 'Completed' ? 'completed' : null,
+        collectionUpdates['projectMetadata'] = {
+          ...(collection.projectMetadata || {}),
+          paymentStatus: {
+            ...(collection.projectMetadata.paymentStatus || {}),
+            [circleToUpdate.paymentDetails[paymentId].data?.value]:
+              updatePaymentsDto.status === 'Completed' ? 'completed' : null,
+          },
         };
 
         await this.commandBus.execute(
           new UpdateCollectionCommand(
             collectionUpdates,
             caller.id,
-            circleToUpdate.paymentDetails[paymentId].collection
-              ?.value as string,
+            collection.id,
           ),
         );
       }
@@ -115,6 +116,8 @@ export class UpdatePaymentCommandHandler
         circleId,
         updates,
       );
+
+      console.log();
       this.eventBus.publish(
         new UpdatedCircleEvent(updatedCircle, caller.id, 'paymentUpdate'),
       );
@@ -167,8 +170,9 @@ export class UpdateMultiplePaymentsCommandHandler
             ...updatePaymentsDto,
           },
         };
+        const currStatus = circleToUpdate.paymentDetails[paymentId].status;
+
         if (updatePaymentsDto.status === 'Completed') {
-          const currStatus = circleToUpdate.paymentDetails[paymentId].status;
           if (currStatus === 'Pending') {
             updates['pendingPayments'] = updates.pendingPayments.filter(
               (id) => id !== paymentId,
@@ -178,11 +182,10 @@ export class UpdateMultiplePaymentsCommandHandler
               updates.pendingSignaturePayments.filter((id) => id !== paymentId);
           }
           updates['completedPayments'] = [
-            ...(updates.completedPayments || []),
             paymentId,
+            ...(updates.completedPayments || []),
           ];
         } else if (updatePaymentsDto.status === 'Cancelled') {
-          const currStatus = circleToUpdate.paymentDetails[paymentId].status;
           if (currStatus === 'Pending') {
             updates['pendingPayments'] = updates.pendingPayments.filter(
               (id) => id !== paymentId,
@@ -196,7 +199,6 @@ export class UpdateMultiplePaymentsCommandHandler
             paymentId,
           ];
         } else if (updatePaymentsDto.status === 'Pending Signature') {
-          const currStatus = circleToUpdate.paymentDetails[paymentId].status;
           if (currStatus === 'Pending') {
             updates['pendingPayments'] = updates.pendingPayments.filter(
               (id) => id !== paymentId,
@@ -209,6 +211,7 @@ export class UpdateMultiplePaymentsCommandHandler
         }
 
         const collectionUpdates = {};
+
         if (
           circleToUpdate.paymentDetails[paymentId].type === 'Added From Card' &&
           ['Completed', 'Cancelled'].includes(updatePaymentsDto.status)
@@ -219,10 +222,13 @@ export class UpdateMultiplePaymentsCommandHandler
                 ?.value as string,
             ),
           );
-          collectionUpdates['paymentStatus'] = {
-            ...collection.paymentStatus,
-            [circleToUpdate.paymentDetails[paymentId].data?.value]:
-              updatePaymentsDto.status === 'Completed' ? 'completed' : null,
+          collectionUpdates['projectMetadata'] = {
+            ...(collection.projectMetadata || {}),
+            paymentStatus: {
+              ...(collection.projectMetadata.paymentStatus || {}),
+              [circleToUpdate.paymentDetails[paymentId].data?.value]:
+                updatePaymentsDto.status === 'Completed' ? 'completed' : null,
+            },
           };
 
           await this.commandBus.execute(

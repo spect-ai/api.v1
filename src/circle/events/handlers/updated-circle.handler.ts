@@ -34,7 +34,7 @@ export class UpdatedCircleEventHandler
             cancelledPayments: circle.cancelledPayments,
             completedPayments: circle.completedPayments,
             pendingSignaturePayments: circle.pendingSignaturePayments,
-            circleId: circle.id,
+            circleSlug: circle.slug,
           },
           user: caller,
         });
