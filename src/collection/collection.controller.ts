@@ -36,6 +36,7 @@ import {
   AddPropertyCommand,
   CreateCollectionCommand,
   DeleteCollectionCommand,
+  ImportCommand,
   MigrateAllCollectionsCommand,
   MigrateProjectCommand,
   RemoveCommentCommand,
@@ -101,6 +102,8 @@ import {
 } from './queries/impl/get-collection.query';
 import { ResponseCredentialingService } from './services/response-credentialing.service';
 import { OnboardToSpectProjectCommand } from './commands/default/impl';
+import { MappedItem } from 'src/common/interfaces';
+import { Property } from './types/types';
 
 @Controller('collection/v1')
 @ApiTags('collection.v1')
@@ -576,6 +579,32 @@ export class CollectionController {
   ): Promise<Circle> {
     return await this.commandBus.execute(
       new OnboardToSpectProjectCommand(param.id, req.user?.id),
+    );
+  }
+
+  @SetMetadata('permissions', ['manageCircleSettings'])
+  @UseGuards(SessionAuthGuard)
+  @Post('/importfromcsv')
+  async importfromCsv(
+    @Body()
+    body: {
+      data: object[];
+      collectionName: string;
+      collectionProperties: MappedItem<Property>;
+      groupByColumn: string;
+      circleId: string;
+    },
+    @Request() req,
+  ): Promise<Circle> {
+    return await this.commandBus.execute(
+      new ImportCommand(
+        body.data,
+        body.collectionName,
+        body.collectionProperties,
+        body.groupByColumn,
+        body.circleId,
+        req.user?.id,
+      ),
     );
   }
 }

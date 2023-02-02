@@ -2,6 +2,7 @@ export * from './impl/create-collection.command';
 export * from './impl/update-collection.command';
 export * from './impl/delete-collection.command';
 export * from './impl/migrate-collection.command';
+export * from './impl/import.command';
 export * from './properties/impl/add-property.command';
 export * from './properties/impl/update-property.command';
 export * from './properties/impl/remove-property.command';
@@ -33,7 +34,10 @@ import {
 } from './data/handlers/vote-data.handler';
 import { CreateCollectionCommandHandler } from './handlers/create-collection.handler';
 import { DeleteCollectionCommandHandler } from './handlers/delete-collection.handler';
-import { UpdateCollectionCommandHandler } from './handlers/update-collection.handler';
+import {
+  UpdateCollectionByFilterCommandHandler,
+  UpdateCollectionCommandHandler,
+} from './handlers/update-collection.handler';
 import {
   MigrateAllCollectionsCommandHandler,
   MigrateCollectionCommandHandler,
@@ -45,6 +49,8 @@ import { CreateGrantWorkflowCommandHandler } from './template/handlers/grant-wor
 import { OnboardingWorkflowCommandHandler } from './template/handlers/onboarding-workflow.handler';
 import { KanbanProjectCommandHandler } from './template/handlers/kanban-project.handler';
 import { OnboardToSpectProjectCommandHandler } from './default/handlers/onboard-to-spect.handler';
+
+import { ImportCommandHandler } from './handlers/import.handler';
 
 export const CommandHandlers = [
   CreateCollectionCommandHandler,
@@ -72,4 +78,6 @@ export const CommandHandlers = [
   KanbanProjectCommandHandler,
   OnboardToSpectProjectCommandHandler,
   RecordSnapshotProposalCommandHandler,
+  ImportCommandHandler,
+  UpdateCollectionByFilterCommandHandler,
 ];

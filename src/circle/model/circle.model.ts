@@ -294,6 +294,9 @@ export class Circle extends ProfileModel {
   pendingPayments?: string[];
 
   @prop({ default: [] })
+  pendingSignaturePayments?: string[];
+
+  @prop({ default: [] })
   completedPayments?: string[];
 
   @prop({ default: [] })

@@ -84,21 +84,21 @@ export class MovePaymentsCommandHandler
         ) {
           if (['pending', 'pendingSignature', 'completed'].includes(to))
             paymentStatus[
-              circleToUpdate.paymentDetails[paymentId].collectionId
+              circleToUpdate.paymentDetails[paymentId].collection?.value
             ] = {
               ...(paymentStatus[
-                circleToUpdate.paymentDetails[paymentId].collectionId
+                circleToUpdate.paymentDetails[paymentId].collection?.value
               ] || {}),
-              [circleToUpdate.paymentDetails[paymentId].dataSlug]: to,
+              [circleToUpdate.paymentDetails[paymentId].data?.value]: to,
             };
           else if (to === 'cancelled')
             paymentStatus[
-              circleToUpdate.paymentDetails[paymentId].collectionId
+              circleToUpdate.paymentDetails[paymentId].collection?.value
             ] = {
               ...(paymentStatus[
-                circleToUpdate.paymentDetails[paymentId].collectionId
+                circleToUpdate.paymentDetails[paymentId].collection?.value
               ] || {}),
-              [circleToUpdate.paymentDetails[paymentId].dataSlug]: null,
+              [circleToUpdate.paymentDetails[paymentId].data?.value]: null,
             };
         }
 
@@ -187,7 +187,7 @@ export class MovePaymentsCommandHandler
           };
         }
         await this.commandBus.execute(
-          new UpdateCollectionCommand(updates, caller, collectionId),
+          new UpdateCollectionCommand(updates, caller.id, collectionId),
         );
       } catch (error) {
         this.logger.error(

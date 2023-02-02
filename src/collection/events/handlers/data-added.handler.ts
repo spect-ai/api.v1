@@ -38,6 +38,7 @@ export class DataAddedEventHandler implements IEventHandler<DataAddedEvent> {
 
       const notifContent = `A new response was received on ${collection.name}`;
       const redirectUrl = `/${circle.slug}/r/${collection.slug}?responses`;
+
       if (
         collection.circleRolesToNotifyUponNewResponse &&
         collection.circleRolesToNotifyUponNewResponse.length > 0
@@ -60,15 +61,17 @@ export class DataAddedEventHandler implements IEventHandler<DataAddedEvent> {
         }
       }
 
-      this.eventBus.publish(
-        new SingleNotificationEvent(
-          notifContent,
-          collection.formMetadata?.logo || circle.avatar,
-          redirectUrl,
-          new Date(),
-          [collection.creator],
-        ),
-      );
+      if (collection.collectionType === 0) {
+        this.eventBus.publish(
+          new SingleNotificationEvent(
+            notifContent,
+            collection.formMetadata?.logo || circle.avatar,
+            redirectUrl,
+            new Date(),
+            [collection.creator],
+          ),
+        );
+      }
 
       const res = await this.commandBus.execute(
         new PerformAutomationOnCollectionDataAddCommand(
@@ -79,25 +82,26 @@ export class DataAddedEventHandler implements IEventHandler<DataAddedEvent> {
           circle,
         ),
       );
-      console.log({ res });
       if (Object.keys(res.circle).length > 0) {
         await this.commandBus.execute(
           new UpdateMultipleCirclesCommand(res.circle),
         );
       }
 
-      const notifResponderContent = `Your response on ${collection.name} was received.`;
-      // const responderSubject = `Response received!`;
-      const responderRedirectUrl = `/r/${collection.slug}`;
-      this.eventBus.publish(
-        new SingleNotificationEvent(
-          notifResponderContent,
-          collection.formMetadata?.logo || circle.avatar,
-          responderRedirectUrl,
-          new Date(),
-          [caller.id],
-        ),
-      );
+      if (collection.collectionType === 0) {
+        const notifResponderContent = `Your response on ${collection.name} was received.`;
+        // const responderSubject = `Response received!`;
+        const responderRedirectUrl = `/r/${collection.slug}`;
+        this.eventBus.publish(
+          new SingleNotificationEvent(
+            notifResponderContent,
+            collection.formMetadata?.logo || circle.avatar,
+            responderRedirectUrl,
+            new Date(),
+            [caller.id],
+          ),
+        );
+      }
 
       this.logger.log(
         `Created New Data in collection ${event.collection?.name}`,

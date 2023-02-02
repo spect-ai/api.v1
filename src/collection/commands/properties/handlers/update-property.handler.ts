@@ -100,6 +100,20 @@ export class UpdatePropertyCommandHandler
         }
       }
 
+      // delete filter if property is there
+      collection.projectMetadata.viewOrder.forEach((viewId) => {
+        const view = collection.projectMetadata.views[viewId];
+        // delete view filters if the data field is the property name
+        if (view.filters) {
+          view.filters = view.filters.filter((a) => {
+            return a.data.field.value !== propertyId;
+          });
+        }
+        // delete view sort if the data field is the property name
+        if (view.sort.property === propertyId) delete view.sort;
+        collection.projectMetadata.views[viewId] = view;
+      });
+
       collection.data = this.handleClearance(
         collection.properties[propertyId],
         updatePropertyCommandDto,
@@ -136,6 +150,7 @@ export class UpdatePropertyCommandHandler
           properties: collection.properties,
           propertyOrder: collection.propertyOrder,
           data: collection.data,
+          projectMetadata: collection.projectMetadata,
         },
       );
 

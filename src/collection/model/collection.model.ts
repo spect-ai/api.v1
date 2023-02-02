@@ -242,4 +242,7 @@ export interface ProjectMetadata {
   paymentStatus?: {
     [dataSlug: string]: 'pending' | 'pendingSignature' | 'completed';
   };
+  paymentIds?: {
+    [dataSlug: string]: string;
+  };
 }
