@@ -58,7 +58,8 @@ import { AdvancedAccessService } from './collection/services/advanced-access.ser
 import { MintKudosService } from './credentials/services/mintkudos.service';
 import { NotificationModule } from './notification/notification.module';
 
-const databaseUrl = process.env.MONGO_URL || 'mongodb://localhost:27017/nest';
+const databaseUrl =
+  `${process.env.MONGO_URL}/nest` || 'mongodb://localhost:27017/nest';
 
 console.log({ databaseUrl });
 @Module({
