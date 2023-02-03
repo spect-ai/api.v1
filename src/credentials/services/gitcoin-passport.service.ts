@@ -13,6 +13,8 @@ export class GitcoinPassportService {
     private readonly commonTools: CommonTools,
   ) {}
 
+  private readonly passportUrl = 'https://ceramic.passport-iam.gitcoin.co';
+
   async getAll(): Promise<Credentials[]> {
     return await this.credentialRepository.findAll();
   }
@@ -29,13 +31,13 @@ export class GitcoinPassportService {
         issuer: stamp.issuer,
       };
     });
-    const reader = new PassportReader('https://gateway.ceramic.network', '1');
+    const reader = new PassportReader(this.passportUrl, '1');
 
     const passport = await reader.getPassport(address);
     const PassportScorer = (await import('@gitcoinco/passport-sdk-scorer'))
       .PassportScorer;
     const stampsWithCredentials = [];
-    console.log({ passport });
+    console.log({ passport: JSON.stringify(passport) });
     if (!passport?.stamps) return false;
     for (const stamp of passport.stamps) {
       if (!stamp.credential) {
@@ -43,26 +45,24 @@ export class GitcoinPassportService {
       }
       stampsWithCredentials.push(stamp);
     }
-    const scorer = new PassportScorer(
-      passportScores,
-      'https://gateway.ceramic.network',
-    );
+    const scorer = new PassportScorer(passportScores, this.passportUrl);
     const score = await scorer.getScore(address, {
       ...passport,
       stamps: stampsWithCredentials,
     });
+    console.log({ score, stamps: stampsWithCredentials });
     return score >= 100;
   }
 
   async getByEthAddress(ethAddress: string): Promise<Credential[]> {
     const stamps = await this.getAll();
 
-    const reader = new PassportReader('https://gateway.ceramic.network', '1');
+    const reader = new PassportReader(this.passportUrl, '1');
 
     const PassportVerifier = (await import('@gitcoinco/passport-sdk-verifier'))
       .PassportVerifier;
 
-    const verifier = new PassportVerifier('https://gateway.ceramic.network');
+    const verifier = new PassportVerifier(this.passportUrl);
     const passport = await reader.getPassport(ethAddress);
     if (!passport) {
       return [];
