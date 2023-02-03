@@ -51,7 +51,6 @@ import { CollectionModule } from './collection/collection.module';
 import { RealtimeModule } from './realtime/realtime.module';
 import { ActivityResolver as CollectionDataActivityResolver } from './collection/services/activity.service';
 import { ResponseCredentialingService } from './collection/services/response-credentialing.service';
-import { CollectionRepository } from './collection/collection.repository';
 import { MailModule } from './mail/mail.module';
 import { CredentialsModule } from './credentials/credentials.module';
 import { AdvancedAccessService } from './collection/services/advanced-access.service';
