@@ -199,13 +199,10 @@ export class UpdateDataCommandHandler
       columns.findIndex(
         (column) => column.value === update[propertyName]?.value,
       ) + 1;
-
     const newSourceColumnOrder = Array.from(cardColumnOrder[sourceColumnIndex]);
-
     newSourceColumnOrder.splice(newSourceColumnOrder.indexOf(slug), 1);
     const newDestColumnOrder = Array.from(cardColumnOrder[destColumnIndex]);
     newDestColumnOrder.splice(0, 0, slug);
-
     const newCardColumnOrder = Array.from(cardColumnOrder);
     newCardColumnOrder[sourceColumnIndex] = newSourceColumnOrder;
     newCardColumnOrder[destColumnIndex] = newDestColumnOrder;
