@@ -25,6 +25,10 @@ const publicProfileFields = {
   email: 1,
   id: 1,
   discordId: 1,
+  twitter: 1,
+  github: 1,
+  behance: 1,
+  website: 1,
 };
 
 @QueryHandler(GetProfileQuery)

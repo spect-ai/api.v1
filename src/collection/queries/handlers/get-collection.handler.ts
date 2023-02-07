@@ -209,7 +209,7 @@ export class GetPublicViewCollectionQueryHandler
         collectionToGet.formMetadata.mintkudosTokenId &&
         !kudosClaimedByUser &&
         collectionToGet.formMetadata.numOfKudos >
-          collectionToGet.formMetadata.mintkudosClaimedBy?.length;
+          (collectionToGet.formMetadata.mintkudosClaimedBy?.length || 0);
       let activityOrder, activity;
       if (previousResponses.length > 0) {
         const prevSlug = previousResponses[previousResponses.length - 1].slug;

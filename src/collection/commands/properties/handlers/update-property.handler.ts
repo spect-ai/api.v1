@@ -65,6 +65,33 @@ export class UpdatePropertyCommandHandler
         }
       }
 
+      // check if property name changed
+      if (
+        updatePropertyCommandDto.name &&
+        updatePropertyCommandDto.name !== propertyId
+      ) {
+        if (collection.projectMetadata.cardOrders) {
+          for (const [id, cardOrder] of Object.entries(
+            collection.projectMetadata.cardOrders,
+          )) {
+            if (id === propertyId) {
+              console.log('updated group by column');
+              collection.projectMetadata.cardOrders[
+                updatePropertyCommandDto.name
+              ] = cardOrder;
+              delete collection.projectMetadata.cardOrders[id];
+            }
+          }
+        }
+        // change property name in all views
+        collection.projectMetadata.viewOrder.forEach((viewId) => {
+          const view = collection.projectMetadata.views[viewId];
+          if (view.groupByColumn === propertyId)
+            view.groupByColumn = updatePropertyCommandDto.name;
+          collection.projectMetadata.views[viewId] = view;
+        });
+      }
+
       // Update data where an option label is changed
       if (
         updatePropertyCommandDto.options &&
