@@ -106,4 +106,33 @@ export class DiscordService {
     }
     return null;
   }
+
+  async postCard(
+    channelId: string,
+    title: string,
+    url: string,
+    message: string,
+    fields: any,
+  ) {
+    const res = await fetch(`${process.env.DISCORD_URI}/api/postCard`, {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      method: 'POST',
+      body: JSON.stringify({
+        channelId,
+        card: {
+          url,
+          title,
+          fields,
+          msg: message,
+        },
+      }),
+    });
+    if (res.ok) {
+      const data = await res.json();
+      return data;
+    }
+    return null;
+  }
 }

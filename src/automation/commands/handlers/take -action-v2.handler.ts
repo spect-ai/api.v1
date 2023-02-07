@@ -22,6 +22,7 @@ import {
   CreateDiscordChannelActionCommand,
   GiveDiscordRoleActionCommand,
   GiveRoleActionCommand,
+  PostOnDiscordActionCommand,
   SendEmailActionCommand,
   StartVotingPeriodActionCommand,
 } from '../impl/take-action-v2.command';
@@ -428,6 +429,55 @@ export class CreateCardActionCommandHandler
           allData,
           action.data.selectedCollection.value,
         ),
+      );
+
+      return updatesContainer;
+    } catch (err) {
+      this.logger.error(err);
+    }
+  }
+}
+
+@CommandHandler(PostOnDiscordActionCommand)
+export class PostOnDiscordActionCommandHandler
+  implements ICommandHandler<PostOnDiscordActionCommand>
+{
+  constructor(
+    private readonly logger: LoggingService,
+    private readonly commandBus: CommandBus,
+    private readonly queryBus: QueryBus,
+    private readonly discordService: DiscordService,
+  ) {
+    this.logger.setContext(PostOnDiscordActionCommandHandler.name);
+  }
+
+  async execute(command: PostOnDiscordActionCommand): Promise<any> {
+    const { action, caller, updatesContainer, relevantIds } = command;
+    try {
+      console.log('PostOnDiscordActionCommandHandler');
+
+      const collection = await this.queryBus.execute(
+        new GetCollectionByFilterQuery({
+          slug: relevantIds.collectionSlug,
+        }),
+      );
+
+      const fields = action.data.fields
+        ?.map((f) => ({
+          name: f.value,
+          value:
+            collection.properties?.[f.value]?.type === 'singleSelect'
+              ? collection?.data?.[relevantIds.dataSlug]?.[f.value]?.label
+              : collection?.data?.[relevantIds.dataSlug]?.[f.value],
+        }))
+        .filter((f) => f.value !== undefined);
+
+      await this.discordService.postCard(
+        action.data.channel.value,
+        collection.data[relevantIds.dataSlug][action.data.title.value],
+        action.data.url + relevantIds.dataSlug,
+        action.data.message,
+        fields,
       );
 
       return updatesContainer;

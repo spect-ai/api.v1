@@ -11,6 +11,7 @@ import {
   CreateDiscordChannelActionCommandHandler,
   GiveDiscordRoleActionCommandHandler,
   GiveRoleActionCommandHandler,
+  PostOnDiscordActionCommandHandler,
   SendEmailActionCommandHandler,
   StartVotingPeriodActionCommandHandler,
 } from './take -action-v2.handler';
@@ -41,4 +42,5 @@ export const CommandHandlers = [
   CreateCardActionCommandHandler,
   PerformAutomationOnCollectionDataAddCommandHandler,
   StartVotingPeriodActionCommandHandler,
+  PostOnDiscordActionCommandHandler,
 ];
