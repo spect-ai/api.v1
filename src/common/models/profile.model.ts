@@ -35,6 +35,12 @@ export abstract class ProfileModel extends BaseModel {
   github: string;
 
   /**
+   * The behance account associated with the profile
+   */
+  @prop()
+  behance: string;
+
+  /**
    * The email associated with the profile
    */
   @prop()
