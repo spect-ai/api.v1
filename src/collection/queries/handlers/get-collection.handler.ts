@@ -271,6 +271,17 @@ export class GetPrivateViewCollectionQueryHandler
         throw new Error('Collection not found');
       }
 
+      // add __payment__ to properties if payment config is set
+      if (collectionToGet.formMetadata.paymentConfig) {
+        collectionToGet.properties.__payment__ = {
+          name: '__payment__',
+          type: 'payWall',
+          isPartOfFormView: false,
+          internal: true,
+        };
+        collectionToGet.propertyOrder.push('__payment__');
+      }
+
       let profileInfo = [];
       if (collectionToGet.dataOwner) {
         const profiles = [];

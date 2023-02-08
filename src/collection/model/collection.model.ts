@@ -215,6 +215,28 @@ export interface FormMetadata {
   active?: boolean;
 
   discordConnectionRequired?: boolean;
+
+  paymentConfig?: PaymentConfig;
+}
+
+export interface PaymentConfig {
+  networks: {
+    [chainId: string]: {
+      chainId: string;
+      chainName: string;
+      tokens: {
+        [tokenAddress: string]: {
+          address: string;
+          symbol: string;
+          tokenAmount?: string;
+          dollarAmount?: string;
+        };
+      };
+      receiverAddress: string;
+    };
+  };
+  type: 'paywall' | 'donation';
+  required: boolean;
 }
 
 export interface ProjectMetadata {
