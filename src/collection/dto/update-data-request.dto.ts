@@ -21,4 +21,9 @@ export class VoteDataDto {
   readonly vote: number;
 }
 
+export class ChangeDataStatusDto {
+  @IsNotEmpty()
+  readonly active: boolean;
+}
+
 export class ArchiveDataDto {}

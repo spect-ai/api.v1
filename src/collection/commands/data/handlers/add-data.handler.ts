@@ -200,6 +200,10 @@ export class AddDataCommandHandler implements ICommandHandler<AddDataCommand> {
             ...collection.projectMetadata,
             cardOrders,
           },
+          dataStatus: {
+            ...(collection.dataStatus || {}),
+            [data['slug']]: true,
+          },
         },
       );
       this.eventBus.publish(
@@ -345,6 +349,10 @@ export class AddDataUsingAutomationCommandHandler
         projectMetadata: {
           ...collection.projectMetadata,
           cardOrders,
+        },
+        dataStatus: {
+          ...(collection.dataStatus || {}),
+          [data['slug']]: true,
         },
       });
       // this.eventBus.publish(new DataAddedEvent(collection, data, botUser));

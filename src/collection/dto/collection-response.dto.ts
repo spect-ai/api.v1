@@ -46,6 +46,9 @@ export class CollectionResponseDto {
   dataActivityOrder: MappedItem<string[]>;
 
   @ApiHideProperty()
+  dataStatus: MappedItem<boolean>;
+
+  @ApiHideProperty()
   indexes: MappedItem<string[]>;
 
   defaultView: DefaultViewType;

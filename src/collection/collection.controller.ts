@@ -39,6 +39,7 @@ import {
   ImportCommand,
   MigrateAllCollectionsCommand,
   MigrateProjectCommand,
+  ModifyDataStatusCommand,
   RemoveCommentCommand,
   RemovePropertyCommand,
   UpdateCollectionCommand,
@@ -83,6 +84,7 @@ import {
 } from './dto/update-comments-request.dto';
 import {
   AddDataDto,
+  ChangeDataStatusDto,
   UpdateDataDto,
   VoteDataDto,
 } from './dto/update-data-request.dto';
@@ -244,6 +246,25 @@ export class CollectionController {
         req.user.id,
         param.id,
         propertyParam.propertyId,
+      ),
+    );
+  }
+
+  @SetMetadata('permissions', ['manageSettings'])
+  @UseGuards(CollectionAuthGuard)
+  @Patch('/:id/changeDataStatus')
+  async changeDataStatus(
+    @Param() param: ObjectIdDto,
+    @Query() dataIdParam: RequiredUUIDDto,
+    @Body() changeDataStatusDto: ChangeDataStatusDto,
+    @Request() req,
+  ): Promise<Collection> {
+    return await this.commandBus.execute(
+      new ModifyDataStatusCommand(
+        req.user,
+        dataIdParam.dataId,
+        changeDataStatusDto.active,
+        param.id,
       ),
     );
   }
