@@ -71,6 +71,7 @@ export type Property = {
   description?: string;
   viewConditions?: Condition[];
   cardRelationOptions?: CardRelationOptions;
+  internal?: boolean;
 };
 
 export type PropertyType =

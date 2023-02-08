@@ -144,8 +144,6 @@ export class AddDataCommandHandler implements ICommandHandler<AddDataCommand> {
         }
       }
 
-      console.log({ anon });
-
       filteredData['slug'] = uuidv4();
 
       /** Disabling activity for forms as it doesnt quite make sense yet */
@@ -259,6 +257,10 @@ export class AddDataCommandHandler implements ICommandHandler<AddDataCommand> {
       } else {
         filteredData[propertyId] = data[propertyId];
       }
+    }
+    // add payment data if it exists
+    if (collection.formMetadata.paymentConfig) {
+      filteredData['__payment__'] = data['__payment__'];
     }
     return filteredData;
   }

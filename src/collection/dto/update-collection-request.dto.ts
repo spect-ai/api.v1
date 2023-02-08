@@ -8,7 +8,7 @@ import {
 } from 'class-validator';
 import { MappedItem } from 'src/common/interfaces';
 import { GuildRole } from 'src/common/types/role.type';
-import { ProjectMetadata } from '../model/collection.model';
+import { PaymentConfig, ProjectMetadata } from '../model/collection.model';
 import { OpportunityInfo, Permissions } from '../types/types';
 import { Voting } from '../types/types';
 
@@ -115,4 +115,5 @@ interface FormMetadata {
   isAnOpportunity: boolean;
   opportunityInfo: OpportunityInfo;
   allowAnonymousResponses: boolean;
+  paymentConfig: PaymentConfig;
 }
