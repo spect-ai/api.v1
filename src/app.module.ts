@@ -57,8 +57,8 @@ import { AdvancedAccessService } from './collection/services/advanced-access.ser
 import { MintKudosService } from './credentials/services/mintkudos.service';
 import { NotificationModule } from './notification/notification.module';
 
-const databaseUrl = 'mongodb://localhost:27017/nest';
-console.log({ databaseUrl });
+const databaseUrl =
+  process.env.DATABASE_URL || 'mongodb://localhost:27017/nest';
 @Module({
   imports: [
     TypegooseModule.forRoot(databaseUrl),
