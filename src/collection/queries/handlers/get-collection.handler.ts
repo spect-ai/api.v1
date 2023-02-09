@@ -282,13 +282,15 @@ export class GetPrivateViewCollectionQueryHandler
         collectionToGet.propertyOrder.push('__payment__');
       }
 
-      collectionToGet.properties.__cardStatus__ = {
-        name: '__cardStatus__',
-        type: 'cardStatus',
-        isPartOfFormView: false,
-        internal: true,
-      };
-      collectionToGet.propertyOrder.push('__cardStatus__');
+      if (collectionToGet.collectionType === 1) {
+        collectionToGet.properties.__cardStatus__ = {
+          name: '__cardStatus__',
+          type: 'cardStatus',
+          isPartOfFormView: false,
+          internal: true,
+        };
+        collectionToGet.propertyOrder.push('__cardStatus__');
+      }
 
       let profileInfo = [];
       if (collectionToGet.dataOwner) {
