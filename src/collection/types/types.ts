@@ -90,7 +90,8 @@ export type PropertyType =
   | 'singleURL'
   | 'multiURL'
   | 'payWall'
-  | 'cardRelation';
+  | 'cardRelation'
+  | 'cardStatus';
 
 export type Option = {
   label: string;

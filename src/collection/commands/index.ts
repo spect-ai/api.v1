@@ -12,7 +12,6 @@ export * from './data/impl/remove-data.command';
 export * from './comments/impl/add-comment.command';
 export * from './comments/impl/update-comment.command';
 export * from './comments/impl/remove-comment.command';
-export * from './data/impl/modify-data-status.command';
 
 import { AddCommentCommandHandler } from './comments/handlers/add-comment.handler';
 import { RemoveCommentCommandHandler } from './comments/handlers/remove-comment.handler';
@@ -52,7 +51,6 @@ import { KanbanProjectCommandHandler } from './template/handlers/kanban-project.
 import { OnboardToSpectProjectCommandHandler } from './default/handlers/onboard-to-spect.handler';
 
 import { ImportCommandHandler } from './handlers/import.handler';
-import { ModifyDataStatusCommandHandler } from './data/handlers/modify-data-status.handler';
 
 export const CommandHandlers = [
   CreateCollectionCommandHandler,
@@ -82,5 +80,4 @@ export const CommandHandlers = [
   RecordSnapshotProposalCommandHandler,
   ImportCommandHandler,
   UpdateCollectionByFilterCommandHandler,
-  ModifyDataStatusCommandHandler,
 ];

@@ -65,7 +65,8 @@ export class DataValidationService {
     properties: MappedItem<Property>,
   ): boolean {
     for (const [propertyId, data] of Object.entries(dataObj)) {
-      if (propertyId === '__payment__') continue;
+      if (propertyId === '__payment__' || propertyId === '__cardStatus__')
+        continue;
       if (!properties[propertyId]) {
         console.log({ propertyId, data });
         return false;
@@ -80,7 +81,8 @@ export class DataValidationService {
   ): boolean {
     for (const [propertyId, data] of Object.entries(dataObj)) {
       if (data === null) continue;
-      if (propertyId === '__payment__') continue;
+      if (propertyId === '__payment__' || propertyId === '__cardStatus__')
+        continue;
       if (['shortText', 'longText'].includes(properties[propertyId].type)) {
         if (typeof data !== 'string') {
           throw Error("Data type should be 'string'");

@@ -93,6 +93,7 @@ export class UpdateDataCommandHandler
       if (data['anonymous'] !== undefined) {
         filteredData['anonymous'] = data['anonymous'];
       }
+
       let updatedCollection;
       updatedCollection = await this.collectionRepository.updateById(
         collectionId,
@@ -180,6 +181,7 @@ export class UpdateDataCommandHandler
         filteredData[propertyId] = data[propertyId];
       }
     }
+    filteredData['__cardStatus__'] = data['__cardStatus__'];
     return filteredData;
   }
 

@@ -165,6 +165,25 @@ export class ActivityBuilder {
     const activities = [] as Activity[];
     const timestamp = new Date();
     for (const [propertyId, data] of Object.entries(dataUpdateObj)) {
+      if (propertyId === '__cardStatus__') {
+        const { content, ref } = this.cardStatusActivity(
+          propertyId,
+          data,
+          collection,
+          diff,
+          caller,
+        );
+        if (content)
+          activities.push({
+            content,
+            ref,
+            timestamp,
+            comment: false,
+            imageRef: `Card Status Update`,
+          });
+        break;
+      }
+
       if (
         [
           'shortText',
@@ -881,6 +900,29 @@ export class ActivityBuilder {
           };
         }
       }
+    }
+    return { content: null, ref: {} };
+  }
+
+  cardStatusActivity(
+    propertyId: string,
+    data: any,
+    collection: Collection,
+    diff: Diff<any>,
+    caller: string,
+  ): { content: string; ref: MappedItem<Ref> } {
+    const { added, deleted, updated } = diff;
+    if (propertyId in added || propertyId in deleted || propertyId in updated) {
+      if (caller)
+        return {
+          content: `Card Status set to ${data}`,
+          ref: {
+            actor: {
+              id: caller,
+              refType: 'user',
+            },
+          },
+        };
     }
     return { content: null, ref: {} };
   }

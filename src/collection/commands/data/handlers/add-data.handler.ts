@@ -259,9 +259,10 @@ export class AddDataCommandHandler implements ICommandHandler<AddDataCommand> {
       }
     }
     // add payment data if it exists
-    if (collection.formMetadata.paymentConfig) {
+    if (collection.formMetadata?.paymentConfig) {
       filteredData['__payment__'] = data['__payment__'];
     }
+    filteredData['__cardStatus__'] = 'active';
     return filteredData;
   }
 }
