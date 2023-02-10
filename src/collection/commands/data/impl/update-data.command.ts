@@ -9,3 +9,11 @@ export class UpdateDataCommand {
     public readonly view: 'public' | 'private',
   ) {}
 }
+
+export class UpdateDataUsingAutomationCommand {
+  constructor(
+    public readonly data: object,
+    public readonly collectionId: string,
+    public readonly dataSlug: string,
+  ) {}
+}

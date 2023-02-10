@@ -14,6 +14,7 @@ import {
   PostOnDiscordActionCommandHandler,
   SendEmailActionCommandHandler,
   StartVotingPeriodActionCommandHandler,
+  CloseCardActionCommandHandler,
 } from './take -action-v2.handler';
 import {
   ChangeColumnActionCommandHandler,
@@ -21,7 +22,6 @@ import {
   ChangeMemberActionCommandHandler,
   ChangeSimpleFieldActionCommandHandler,
   ChangeStatusActionCommandHandler,
-  CloseCardActionCommandHandler,
 } from './take-action.handler';
 
 export const CommandHandlers = [
@@ -32,7 +32,6 @@ export const CommandHandlers = [
   ChangeColumnActionCommandHandler,
   ChangeMemberActionCommandHandler,
   ChangeLabelActionCommandHandler,
-  CloseCardActionCommandHandler,
 
   PerformAutomationOnCollectionDataUpdateCommandHandler,
   GiveRoleActionCommandHandler,
@@ -43,4 +42,5 @@ export const CommandHandlers = [
   PerformAutomationOnCollectionDataAddCommandHandler,
   StartVotingPeriodActionCommandHandler,
   PostOnDiscordActionCommandHandler,
+  CloseCardActionCommandHandler,
 ];

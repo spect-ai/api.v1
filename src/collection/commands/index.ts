@@ -25,7 +25,10 @@ import {
   RemoveDataCommandHandler,
   RemoveMultipleDataCommandHandler,
 } from './data/handlers/remove-data.handler';
-import { UpdateDataCommandHandler } from './data/handlers/update-data.handler';
+import {
+  UpdateDataCommandHandler,
+  UpdateDataUsingAutomationCommandHandler,
+} from './data/handlers/update-data.handler';
 import {
   EndVotingPeriodCommandHandler,
   RecordSnapshotProposalCommandHandler,
@@ -62,6 +65,7 @@ export const CommandHandlers = [
   RemovePropertyCommandHandler,
   AddDataCommandHandler,
   UpdateDataCommandHandler,
+  UpdateDataUsingAutomationCommandHandler,
   RemoveDataCommandHandler,
   RemoveMultipleDataCommandHandler,
   AddCommentCommandHandler,

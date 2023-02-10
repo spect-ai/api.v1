@@ -25,10 +25,12 @@ import {
   PostOnDiscordActionCommand,
   SendEmailActionCommand,
   StartVotingPeriodActionCommand,
+  CloseCardActionCommand,
 } from '../impl/take-action-v2.command';
 import {
   AddDataUsingAutomationCommand,
   AddMultipleDataUsingAutomationCommand,
+  UpdateDataUsingAutomationCommand,
 } from 'src/collection/commands';
 import { StartVotingPeriodCommand } from 'src/collection/commands/data/impl/vote-data.command';
 import { JoinedCircleEvent } from 'src/circle/events/impl';
@@ -474,12 +476,50 @@ export class PostOnDiscordActionCommandHandler
 
       await this.discordService.postCard(
         action.data.channel.value,
-        collection.data[relevantIds.dataSlug][action.data.title.value],
+        action.data.message +
+          collection.data[relevantIds.dataSlug][action.data.title.value],
         action.data.url + relevantIds.dataSlug,
         action.data.message,
         fields,
       );
 
+      return updatesContainer;
+    } catch (err) {
+      this.logger.error(err);
+    }
+  }
+}
+
+@CommandHandler(CloseCardActionCommand)
+export class CloseCardActionCommandHandler
+  implements ICommandHandler<CloseCardActionCommand>
+{
+  constructor(
+    private readonly logger: LoggingService,
+    private readonly commandBus: CommandBus,
+    private readonly queryBus: QueryBus,
+  ) {
+    this.logger.setContext(CloseCardActionCommand.name);
+  }
+
+  async execute(command: CloseCardActionCommand): Promise<any> {
+    const { action, caller, updatesContainer, relevantIds } = command;
+    try {
+      const collection = await this.queryBus.execute(
+        new GetCollectionByFilterQuery({
+          slug: relevantIds.collectionSlug,
+        }),
+      );
+
+      await this.commandBus.execute(
+        new UpdateDataUsingAutomationCommand(
+          {
+            __cardStatus__: 'closed',
+          },
+          collection?.id,
+          relevantIds.dataSlug,
+        ),
+      );
       return updatesContainer;
     } catch (err) {
       this.logger.error(err);
@@ -496,7 +536,7 @@ export class StartVotingPeriodActionCommandHandler
     private readonly commandBus: CommandBus,
     private readonly queryBus: QueryBus,
   ) {
-    this.logger.setContext(CreateCardActionCommandHandler.name);
+    this.logger.setContext(StartVotingPeriodActionCommandHandler.name);
   }
 
   async execute(command: StartVotingPeriodActionCommand): Promise<any> {

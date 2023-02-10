@@ -7,7 +7,10 @@ import {
 } from '@nestjs/cqrs';
 import { CollectionRepository } from 'src/collection/collection.repository';
 import { LoggingService } from 'src/logging/logging.service';
-import { UpdateDataCommand } from '../impl/update-data.command';
+import {
+  UpdateDataCommand,
+  UpdateDataUsingAutomationCommand,
+} from '../impl/update-data.command';
 import { DataValidationService } from 'src/collection/validations/data-validation.service';
 import { DataUpatedEvent } from 'src/collection/events';
 import { ActivityBuilder } from 'src/collection/services/activity.service';
@@ -17,6 +20,8 @@ import {
 } from 'src/collection/queries';
 import { Collection } from 'src/collection/model/collection.model';
 import { HasSatisfiedDataConditionsQuery } from 'src/automation/queries/impl';
+import { GetProfileQuery } from 'src/users/queries/impl';
+import { v4 as uuidv4 } from 'uuid';
 
 @CommandHandler(UpdateDataCommand)
 export class UpdateDataCommandHandler
@@ -217,5 +222,96 @@ export class UpdateDataCommandHandler
         },
       },
     });
+  }
+}
+@CommandHandler(UpdateDataUsingAutomationCommand)
+export class UpdateDataUsingAutomationCommandHandler
+  implements ICommandHandler<UpdateDataUsingAutomationCommand>
+{
+  constructor(
+    private readonly collectionRepository: CollectionRepository,
+    private readonly queryBus: QueryBus,
+    private readonly eventBus: EventBus,
+    private readonly logger: LoggingService,
+    private readonly validationService: DataValidationService,
+    private readonly activityBuilder: ActivityBuilder,
+  ) {
+    this.logger.setContext('AddDataUsingAutomationCommandHandler');
+  }
+
+  async execute(command: UpdateDataUsingAutomationCommand) {
+    const { data, collectionId, dataSlug } = command;
+    try {
+      const collection = await this.collectionRepository.findById(collectionId);
+      if (!collection) throw 'Collection does not exist';
+
+      for (const [key, value] of Object.entries(data)) {
+        if (
+          JSON.stringify(collection.data[dataSlug][key]) ===
+          JSON.stringify(value)
+        ) {
+          delete data[key];
+        }
+      }
+
+      if (Object.keys(data).length === 0) {
+        return;
+      }
+
+      const botUser = await this.queryBus.execute(
+        new GetProfileQuery(
+          {
+            username: 'Stu, the Spect Bot',
+          },
+          '',
+        ),
+      );
+      const validData = await this.validationService.validate(
+        data,
+        'add',
+        true,
+        collection,
+      );
+      if (!validData) {
+        throw new Error(`Data invalid`);
+      }
+      for (const [propertyId, property] of Object.entries(
+        collection.properties,
+      )) {
+        if (property.default && !data[propertyId]) {
+          data[propertyId] = property.default;
+        }
+      }
+      const { dataActivities, dataActivityOrder } = this.activityBuilder.build(
+        data,
+        collection,
+        dataSlug,
+        botUser.id,
+      );
+
+      const updatedCollection = await this.collectionRepository.updateById(
+        collectionId,
+        {
+          data: {
+            ...collection.data,
+            [dataSlug]: {
+              ...collection.data[dataSlug],
+              ...data,
+            },
+          },
+          dataActivities,
+          dataActivityOrder,
+        },
+      );
+      console.log(updatedCollection?.data?.[dataSlug]);
+      return true;
+    } catch (err) {
+      this.logger.error(
+        `Failed updating data via automation to collection Id ${collectionId} with error ${err}`,
+      );
+      throw new InternalServerErrorException(
+        `Failed updating data via automation data to collection Id ${collectionId} with error ${err}`,
+      );
+    }
   }
 }
