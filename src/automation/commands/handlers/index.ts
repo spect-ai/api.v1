@@ -12,6 +12,7 @@ import {
   GiveDiscordRoleActionCommandHandler,
   GiveRoleActionCommandHandler,
   PostOnDiscordActionCommandHandler,
+  InitiatePendingPaymentActionCommandHandler,
   SendEmailActionCommandHandler,
   StartVotingPeriodActionCommandHandler,
   CloseCardActionCommandHandler,
@@ -43,4 +44,5 @@ export const CommandHandlers = [
   StartVotingPeriodActionCommandHandler,
   PostOnDiscordActionCommandHandler,
   CloseCardActionCommandHandler,
+  InitiatePendingPaymentActionCommandHandler,
 ];

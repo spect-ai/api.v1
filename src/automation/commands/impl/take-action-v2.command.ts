@@ -24,6 +24,7 @@ export class CreateCardActionCommand extends ActionCommand {}
 export class StartVotingPeriodActionCommand extends ActionCommand {}
 export class PostOnDiscordActionCommand extends ActionCommand {}
 export class CloseCardActionCommand extends ActionCommand {}
+export class InitiatePendingPaymentActionCommand extends ActionCommand {}
 
 export const actionIdToCommandMapNew = {
   sendEmail: SendEmailActionCommand,
@@ -34,4 +35,5 @@ export const actionIdToCommandMapNew = {
   startVotingPeriod: StartVotingPeriodActionCommand,
   postOnDiscord: PostOnDiscordActionCommand,
   closeCard: CloseCardActionCommand,
+  initiatePendingPayment: InitiatePendingPaymentActionCommand,
 };

@@ -26,6 +26,7 @@ import {
   SendEmailActionCommand,
   StartVotingPeriodActionCommand,
   CloseCardActionCommand,
+  InitiatePendingPaymentActionCommand,
 } from '../impl/take-action-v2.command';
 import {
   AddDataUsingAutomationCommand,
@@ -34,6 +35,7 @@ import {
 } from 'src/collection/commands';
 import { StartVotingPeriodCommand } from 'src/collection/commands/data/impl/vote-data.command';
 import { JoinedCircleEvent } from 'src/circle/events/impl';
+import { AddPaymentsCommand } from 'src/circle/commands/payments/impl';
 
 @Injectable()
 export class CommonActionService {
@@ -477,6 +479,7 @@ export class PostOnDiscordActionCommandHandler
       await this.discordService.postCard(
         action.data.channel.value,
         action.data.message +
+          ' : ' +
           collection.data[relevantIds.dataSlug][action.data.title.value],
         action.data.url + relevantIds.dataSlug,
         action.data.message,
@@ -518,6 +521,61 @@ export class CloseCardActionCommandHandler
           },
           collection?.id,
           relevantIds.dataSlug,
+        ),
+      );
+      return updatesContainer;
+    } catch (err) {
+      this.logger.error(err);
+    }
+  }
+}
+
+@CommandHandler(InitiatePendingPaymentActionCommand)
+export class InitiatePendingPaymentActionCommandHandler
+  implements ICommandHandler<InitiatePendingPaymentActionCommand>
+{
+  constructor(
+    private readonly logger: LoggingService,
+    private readonly commandBus: CommandBus,
+    private readonly queryBus: QueryBus,
+  ) {
+    this.logger.setContext(InitiatePendingPaymentActionCommandHandler.name);
+  }
+
+  async execute(command: InitiatePendingPaymentActionCommand): Promise<any> {
+    const { action, caller, updatesContainer, relevantIds } = command;
+    try {
+      if (
+        !action.data.initiate ||
+        !action.data.rewardField ||
+        !action.data.payeeField
+      ) {
+        return updatesContainer;
+      }
+
+      const collection = await this.queryBus.execute(
+        new GetCollectionByFilterQuery({
+          slug: relevantIds.collectionSlug,
+        }),
+      );
+
+      const botUser = await this.queryBus.execute(
+        new GetProfileQuery(
+          {
+            username: 'Stu, the Spect Bot',
+          },
+          '',
+        ),
+      );
+
+      await this.commandBus.execute(
+        new AddPaymentsCommand(
+          collection?.parents?.[0],
+          {
+            collectionId: collection.id,
+            dataSlugs: [relevantIds.dataSlug],
+          },
+          botUser,
         ),
       );
       return updatesContainer;
