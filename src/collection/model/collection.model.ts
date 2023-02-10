@@ -142,9 +142,6 @@ export class Collection extends BaseModel {
 
   @prop({ default: false })
   archived?: boolean;
-
-  @prop({ default: {} })
-  dataStatus: MappedItem<boolean>;
 }
 
 export interface FormMetadata {
