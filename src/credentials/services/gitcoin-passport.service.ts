@@ -13,7 +13,7 @@ export class GitcoinPassportService {
     private readonly commonTools: CommonTools,
   ) {}
 
-  private readonly passportUrl = 'https://passport-iam.gitcoin.co';
+  private readonly passportUrl = 'https://ceramic.passport-iam.gitcoin.co';
 
   async getAll(): Promise<Credentials[]> {
     return await this.credentialRepository.findAll();
