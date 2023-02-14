@@ -43,7 +43,7 @@ export const getOnboardToSpectProjectDetails = (caller: string) => {
           },
         },
         [viewId]: {
-          name: 'Kanban',
+          name: 'Tutorials',
           type: 'kanban',
           groupByColumn: 'Status',
           filters: [],
