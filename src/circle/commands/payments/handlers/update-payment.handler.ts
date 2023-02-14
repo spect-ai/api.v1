@@ -7,7 +7,7 @@ import {
   QueryBus,
 } from '@nestjs/cqrs';
 import { CirclesRepository } from 'src/circle/circles.repository';
-import { UpdatedCircleEvent } from 'src/circle/events/impl';
+import { PaymentUpdateEvent, UpdatedCircleEvent } from 'src/circle/events/impl';
 import { Circle } from 'src/circle/model/circle.model';
 import { PaymentDetails } from 'src/circle/types';
 import { UpdateCollectionCommand } from 'src/collection/commands';
@@ -237,6 +237,13 @@ export class UpdateMultiplePaymentsCommandHandler
               caller.id,
               collection.id,
             ),
+          );
+
+          this.eventBus.publish(
+            new PaymentUpdateEvent(collection, circleToUpdate, caller.id, {
+              [circleToUpdate.paymentDetails[paymentId].data?.value]:
+                updatePaymentsDto.status === 'Completed' ? 'completed' : null,
+            }),
           );
         }
       }

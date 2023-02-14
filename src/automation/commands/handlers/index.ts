@@ -1,6 +1,8 @@
 import {
   PerformAutomationOnCollectionDataAddCommandHandler,
   PerformAutomationOnCollectionDataUpdateCommandHandler,
+  PerformAutomationOnPaymentCompleteCommandHandler,
+  PerformAutomationOnPaymentCancelledCommandHandler,
 } from './perform-automation-v2.handler';
 import {
   PerformAutomationCommandHandler,
@@ -41,6 +43,8 @@ export const CommandHandlers = [
   GiveDiscordRoleActionCommandHandler,
   CreateCardActionCommandHandler,
   PerformAutomationOnCollectionDataAddCommandHandler,
+  PerformAutomationOnPaymentCompleteCommandHandler,
+  PerformAutomationOnPaymentCancelledCommandHandler,
   StartVotingPeriodActionCommandHandler,
   PostOnDiscordActionCommandHandler,
   CloseCardActionCommandHandler,

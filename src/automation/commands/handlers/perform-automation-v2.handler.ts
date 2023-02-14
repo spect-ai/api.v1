@@ -14,6 +14,8 @@ import { LoggingService } from 'src/logging/logging.service';
 import {
   PerformAutomationOnCollectionDataAddCommand,
   PerformAutomationOnCollectionDataUpdateCommand,
+  PerformAutomationOnPaymentCancelledCommand,
+  PerformAutomationOnPaymentCompleteCommand,
 } from '../impl';
 import { actionIdToCommandMapNew } from '../impl/take-action-v2.command';
 
@@ -101,6 +103,140 @@ export class PerformAutomationOnCollectionDataAddCommandHandler
           (automationId) =>
             circle.automations[automationId].trigger?.type === 'newData' &&
             !circle.automations[automationId].disabled,
+        ) || [];
+
+      const dataContainer = {};
+      const updateContainer = {
+        collection: {},
+        circle: {},
+        retro: {},
+      };
+      const triggeredAutomationsSatisfiedConditions = [];
+      for (const automationId of triggeredAutomations) {
+        const { conditions } = circle.automations[automationId];
+        if (!conditions) continue;
+        const hasSatisfied = await this.queryBus.execute(
+          new HasSatisfiedDataConditionsQuery(collection, data, conditions),
+        );
+        if (!hasSatisfied) continue;
+        triggeredAutomationsSatisfiedConditions.push(automationId);
+      }
+
+      for (const automationId of triggeredAutomationsSatisfiedConditions) {
+        const { actions } = circle.automations[automationId];
+        for (const action of actions) {
+          const actionCommand = actionIdToCommandMapNew[action.type];
+          await this.commandBus.execute(
+            new actionCommand(action, caller, dataContainer, updateContainer, {
+              collectionSlug: collection.slug,
+              dataSlug,
+            }),
+          );
+        }
+      }
+
+      return updateContainer;
+    } catch (error) {
+      this.loggingService.error(error);
+      throw new InternalServerErrorException(error);
+    }
+  }
+}
+
+@CommandHandler(PerformAutomationOnPaymentCompleteCommand)
+export class PerformAutomationOnPaymentCompleteCommandHandler
+  implements ICommandHandler<PerformAutomationOnPaymentCompleteCommand>
+{
+  constructor(
+    private readonly commandBus: CommandBus,
+    private readonly queryBus: QueryBus,
+    private readonly loggingService: LoggingService,
+  ) {
+    this.loggingService.setContext(
+      PerformAutomationOnPaymentCompleteCommandHandler.name,
+    );
+  }
+
+  async execute(
+    command: PerformAutomationOnPaymentCompleteCommand,
+  ): Promise<AutomationUpdatesContainer> {
+    try {
+      const { collection, data, dataSlug, circle, caller } = command;
+
+      const automationIds =
+        circle.automationsIndexedByCollection?.[collection?.slug];
+      const triggeredAutomations =
+        automationIds?.filter(
+          (automationId) =>
+            circle.automations[automationId].trigger?.type ===
+              'completedPayment' && !circle.automations[automationId].disabled,
+        ) || [];
+
+      const dataContainer = {};
+      const updateContainer = {
+        collection: {},
+        circle: {},
+        retro: {},
+      };
+      const triggeredAutomationsSatisfiedConditions = [];
+      for (const automationId of triggeredAutomations) {
+        const { conditions } = circle.automations[automationId];
+        if (!conditions) continue;
+        const hasSatisfied = await this.queryBus.execute(
+          new HasSatisfiedDataConditionsQuery(collection, data, conditions),
+        );
+        if (!hasSatisfied) continue;
+        triggeredAutomationsSatisfiedConditions.push(automationId);
+      }
+
+      for (const automationId of triggeredAutomationsSatisfiedConditions) {
+        const { actions } = circle.automations[automationId];
+        for (const action of actions) {
+          const actionCommand = actionIdToCommandMapNew[action.type];
+          await this.commandBus.execute(
+            new actionCommand(action, caller, dataContainer, updateContainer, {
+              collectionSlug: collection.slug,
+              dataSlug,
+            }),
+          );
+        }
+      }
+
+      return updateContainer;
+    } catch (error) {
+      this.loggingService.error(error);
+      throw new InternalServerErrorException(error);
+    }
+  }
+}
+
+@CommandHandler(PerformAutomationOnPaymentCancelledCommand)
+export class PerformAutomationOnPaymentCancelledCommandHandler
+  implements ICommandHandler<PerformAutomationOnPaymentCancelledCommand>
+{
+  constructor(
+    private readonly commandBus: CommandBus,
+    private readonly queryBus: QueryBus,
+    private readonly loggingService: LoggingService,
+  ) {
+    this.loggingService.setContext(
+      PerformAutomationOnPaymentCancelledCommandHandler.name,
+    );
+  }
+
+  async execute(
+    command: PerformAutomationOnPaymentCancelledCommand,
+  ): Promise<AutomationUpdatesContainer> {
+    try {
+      const { collection, data, dataSlug, circle, caller } = command;
+
+      const automationIds =
+        circle.automationsIndexedByCollection?.[collection?.slug];
+      const triggeredAutomations =
+        automationIds?.filter(
+          (automationId) =>
+            circle.automations[automationId].trigger?.type ===
+              'cancelledPayment' && !circle.automations[automationId].disabled,
         ) || [];
 
       const dataContainer = {};

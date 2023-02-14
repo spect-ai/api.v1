@@ -20,3 +20,22 @@ export class PerformAutomationOnCollectionDataAddCommand {
     public readonly circle: Circle,
   ) {}
 }
+
+export class PerformAutomationOnPaymentCompleteCommand {
+  constructor(
+    public readonly collection: Collection,
+    public readonly data: any,
+    public readonly dataSlug: string,
+    public readonly caller: string,
+    public readonly circle: Circle,
+  ) {}
+}
+export class PerformAutomationOnPaymentCancelledCommand {
+  constructor(
+    public readonly collection: Collection,
+    public readonly data: any,
+    public readonly dataSlug: string,
+    public readonly caller: string,
+    public readonly circle: Circle,
+  ) {}
+}

@@ -2,16 +2,17 @@ import { InternalServerErrorException } from '@nestjs/common';
 import {
   CommandBus,
   CommandHandler,
+  EventBus,
   ICommandHandler,
   QueryBus,
 } from '@nestjs/cqrs';
 import { CirclesRepository } from 'src/circle/circles.repository';
 import { CircleResponseDto } from 'src/circle/dto/detailed-circle-response.dto';
+import { PaymentUpdateEvent } from 'src/circle/events/impl';
 import { Circle } from 'src/circle/model/circle.model';
 import { UpdateCollectionCommand } from 'src/collection/commands';
-import { GetCollectionByIdQuery } from 'src/collection/queries';
+import { GetCollectionBySlugQuery } from 'src/collection/queries';
 import { LoggingService } from 'src/logging/logging.service';
-import { MoveItemCommand } from 'src/users/commands/impl';
 import { User } from 'src/users/model/users.model';
 import { MovePaymentsCommand } from '../impl';
 
@@ -22,6 +23,7 @@ export class MovePaymentsCommandHandler
   constructor(
     private readonly circleRepository: CirclesRepository,
     private readonly queryBus: QueryBus,
+    private readonly eventBus: EventBus,
     private readonly commandBus: CommandBus,
     private readonly logger: LoggingService,
   ) {
@@ -150,7 +152,11 @@ export class MovePaymentsCommandHandler
         circleId,
         updates,
       );
-      await this.updateCollectionPaymentStatus(paymentStatus, caller);
+      await this.updateCollectionPaymentStatus(
+        paymentStatus,
+        caller,
+        updatedCircle,
+      );
       return await this.circleRepository.getCircleWithMinimalDetails(
         updatedCircle,
       );
@@ -163,31 +169,41 @@ export class MovePaymentsCommandHandler
   }
 
   async updateCollectionPaymentStatus(
-    paymentStatus: { [collectionId: string]: { [dataSlug: string]: string } },
+    paymentStatus: { [collectionSlug: string]: { [dataSlug: string]: string } },
     caller: User,
+    updatedCircle: Circle,
   ): Promise<void> {
-    for (const collectionId of Object.keys(paymentStatus)) {
+    for (const collectionSlug of Object.keys(paymentStatus)) {
       try {
         const collection = await this.queryBus.execute(
-          new GetCollectionByIdQuery(collectionId),
+          new GetCollectionBySlugQuery(collectionSlug),
         );
         if (!collection) {
           throw new InternalServerErrorException(
-            `Could not find collection with id ${collectionId}`,
+            `Could not find collection with id ${collectionSlug}`,
           );
         }
         const updates = {};
-        for (const dataSlug of Object.keys(paymentStatus[collectionId])) {
+        for (const dataSlug of Object.keys(paymentStatus[collectionSlug])) {
           updates['projectMetadata'] = {
             ...(collection['projectMetadata'] || {}),
             paymentStatus: {
               ...(collection['projectMetadata']?.paymentStatus || {}),
-              [dataSlug]: paymentStatus[collectionId][dataSlug],
+              [dataSlug]: paymentStatus[collectionSlug][dataSlug],
             },
           };
         }
         await this.commandBus.execute(
-          new UpdateCollectionCommand(updates, caller.id, collectionId),
+          new UpdateCollectionCommand(updates, caller.id, collection.id),
+        );
+
+        this.eventBus.publish(
+          new PaymentUpdateEvent(
+            collection,
+            updatedCircle,
+            caller.id,
+            paymentStatus[collectionSlug],
+          ),
         );
       } catch (error) {
         this.logger.error(
