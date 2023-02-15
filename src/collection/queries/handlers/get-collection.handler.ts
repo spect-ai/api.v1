@@ -4,6 +4,7 @@ import { CollectionRepository } from 'src/collection/collection.repository';
 import { CollectionPublicResponseDto } from 'src/collection/dto/collection-response.dto';
 import { Collection } from 'src/collection/model/collection.model';
 import { AdvancedAccessService } from 'src/collection/services/advanced-access.service';
+import { ResponseCredentialingService } from 'src/collection/services/response-credentialing.service';
 import { CommonTools } from 'src/common/common.service';
 import { LoggingService } from 'src/logging/logging.service';
 import { GetMultipleUsersByIdsQuery } from 'src/users/queries/impl';
@@ -116,6 +117,7 @@ export class GetCollectionByFilterQueryHandler
   constructor(
     private readonly collectionRepository: CollectionRepository,
     private readonly logger: LoggingService,
+    private readonly responseCredentialsService: ResponseCredentialingService,
   ) {
     logger.setContext('GetCollectionByFilterQueryHandler');
   }
@@ -210,6 +212,9 @@ export class GetPublicViewCollectionQueryHandler
         !kudosClaimedByUser &&
         collectionToGet.formMetadata.numOfKudos >
           (collectionToGet.formMetadata.mintkudosClaimedBy?.length || 0);
+
+      const canClaimSurveyToken = collectionToGet.formMetadata.surveyTokenId;
+
       let activityOrder, activity;
       if (previousResponses.length > 0) {
         const prevSlug = previousResponses[previousResponses.length - 1].slug;
@@ -228,6 +233,7 @@ export class GetPublicViewCollectionQueryHandler
           canClaimKudos,
           hasPassedSybilCheck,
           previousResponses,
+          canClaimSurveyToken,
         },
         activity,
         activityOrder,

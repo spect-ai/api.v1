@@ -12,6 +12,16 @@ export class RegistryService {
     private readonly commonTools: CommonTools,
   ) {}
 
+  async getProvider(chainId: string): Promise<any> {
+    const network = await this.registryRepository.findOne({
+      chainId,
+    });
+    if (!network) {
+      throw new Error('Network not found');
+    }
+    return network.provider;
+  }
+
   async getRegistry(): Promise<RegistryResponseDto> {
     const networks = await this.registryRepository.findAll();
     const res = this.commonTools.objectify(
