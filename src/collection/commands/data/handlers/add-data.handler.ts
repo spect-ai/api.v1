@@ -25,6 +25,10 @@ import {
 } from 'src/collection/queries';
 import { GetProfileQuery } from 'src/users/queries/impl';
 import { HasSatisfiedDataConditionsQuery } from 'src/automation/queries/impl';
+import {
+  ResponseCredentialingService,
+  ResponseCredentialService,
+} from 'src/collection/services/response-credentialing.service';
 
 @Injectable()
 export class ActivityOnAddData {
@@ -85,6 +89,7 @@ export class AddDataCommandHandler implements ICommandHandler<AddDataCommand> {
     private readonly validationService: DataValidationService,
     private readonly advancedAccessService: AdvancedAccessService,
     private readonly activityOnAddData: ActivityOnAddData,
+    private readonly responseCredentialService: ResponseCredentialService,
   ) {
     this.logger.setContext('AddDataCommandHandler');
   }
@@ -92,6 +97,7 @@ export class AddDataCommandHandler implements ICommandHandler<AddDataCommand> {
   async execute(command: AddDataCommand) {
     const { data, caller, collectionId, anon } = command;
     try {
+      console.log({ collectionId });
       const collection = await this.collectionRepository.findById(collectionId);
       if (!collection) throw 'Collection does not exist';
       if (collection.collectionType === 0) {
@@ -200,9 +206,29 @@ export class AddDataCommandHandler implements ICommandHandler<AddDataCommand> {
           },
         },
       );
+
       this.eventBus.publish(
         new DataAddedEvent(collection, filteredData, caller),
       );
+
+      if (
+        collection.collectionType === 0 &&
+        collection.formMetadata?.surveyTokenId
+      ) {
+        try {
+          const res =
+            await this.responseCredentialService.airdropResponseReceiptNFT(
+              caller.ethAddress,
+              null,
+              collection,
+            );
+        } catch (e) {
+          this.logger.error(
+            `Failed to airdrop response receipt NFT for collection ${collection.id} with error ${e}`,
+          );
+        }
+      }
+
       if (collection.collectionType === 0) {
         return await this.queryBus.execute(
           new GetPublicViewCollectionQuery(
@@ -217,6 +243,7 @@ export class AddDataCommandHandler implements ICommandHandler<AddDataCommand> {
         );
       }
     } catch (err) {
+      console.log({ err });
       this.logger.error(
         `Failed adding data to collection Id ${collectionId} with error ${err}`,
       );

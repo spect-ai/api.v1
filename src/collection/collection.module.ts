@@ -25,7 +25,10 @@ import { Collection } from './model/collection.model';
 import { QueryHandlers } from './queries';
 import { ActivityBuilder, ActivityResolver } from './services/activity.service';
 import { AdvancedAccessService } from './services/advanced-access.service';
-import { ResponseCredentialingService } from './services/response-credentialing.service';
+import {
+  ResponseCredentialingService,
+  ResponseCredentialService,
+} from './services/response-credentialing.service';
 import { DataValidationService } from './validations/data-validation.service';
 import { RegistryService } from 'src/registry/registry.service';
 import { RegistryModule } from 'src/registry/registry.module';
@@ -64,6 +67,7 @@ import { RegistryModule } from 'src/registry/registry.module';
     DiscordService,
     ActivityOnVoting,
     RegistryService,
+    ResponseCredentialService,
   ],
   exports: [CollectionModule, CollectionRepository],
 })
