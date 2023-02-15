@@ -57,6 +57,7 @@ export type CardRelationOptions = {
 };
 
 export type Property = {
+  id?: string;
   name: string;
   type: PropertyType;
   isPartOfFormView: boolean;

@@ -145,6 +145,7 @@ export class Collection extends BaseModel {
 }
 
 export interface FormMetadata {
+  ceramicEnabled?: boolean;
   /**
    * Is collection private?
    */

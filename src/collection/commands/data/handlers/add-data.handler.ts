@@ -285,6 +285,9 @@ export class AddDataCommandHandler implements ICommandHandler<AddDataCommand> {
     if (collection.formMetadata?.paymentConfig) {
       filteredData['__payment__'] = data['__payment__'];
     }
+    if (collection.formMetadata.ceramicEnabled) {
+      filteredData['__ceramic__'] = data['__ceramic__'];
+    }
     if (collection.collectionType === 1) {
       filteredData['__cardStatus__'] = 'active';
     }
