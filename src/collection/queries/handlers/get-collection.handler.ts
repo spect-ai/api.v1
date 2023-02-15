@@ -274,7 +274,8 @@ export class GetPrivateViewCollectionQueryHandler
       // add __payment__ to properties if payment config is set
       if (collectionToGet.formMetadata?.paymentConfig) {
         collectionToGet.properties.__payment__ = {
-          name: '__payment__',
+          name: 'Payment',
+          id: '__payment__',
           type: 'payWall',
           isPartOfFormView: false,
           internal: true,
@@ -284,7 +285,8 @@ export class GetPrivateViewCollectionQueryHandler
 
       if (collectionToGet.formMetadata?.ceramicEnabled) {
         collectionToGet.properties.__ceramic__ = {
-          name: '__ceramic__',
+          name: 'Ceramic Stream',
+          id: '__ceramic__',
           type: 'shortText',
           isPartOfFormView: false,
           internal: true,
@@ -294,7 +296,8 @@ export class GetPrivateViewCollectionQueryHandler
 
       if (collectionToGet.collectionType === 1) {
         collectionToGet.properties.__cardStatus__ = {
-          name: '__cardStatus__',
+          name: 'Card Status',
+          id: '__cardStatus__',
           type: 'cardStatus',
           isPartOfFormView: false,
           internal: true,
