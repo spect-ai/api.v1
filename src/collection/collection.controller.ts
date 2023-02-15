@@ -607,4 +607,10 @@ export class CollectionController {
       ),
     );
   }
+
+  @UseGuards(SessionAuthGuard)
+  @Patch('/:id/claimSurveyTokens')
+  async claimSurveyTokens(@Param() param: ObjectIdDto): Promise<boolean> {
+    return await this.credentialingService.airdropSurveyToken(param.id);
+  }
 }

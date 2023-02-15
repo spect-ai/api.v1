@@ -217,6 +217,10 @@ export interface FormMetadata {
   discordConnectionRequired?: boolean;
 
   paymentConfig?: PaymentConfig;
+
+  surveyTokenId?: number;
+
+  surveyTokenChainId?: string;
 }
 
 export interface PaymentConfig {
