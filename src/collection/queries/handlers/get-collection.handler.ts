@@ -282,6 +282,16 @@ export class GetPrivateViewCollectionQueryHandler
         collectionToGet.propertyOrder.push('__payment__');
       }
 
+      if (collectionToGet.formMetadata?.ceramicEnabled) {
+        collectionToGet.properties.__ceramic__ = {
+          name: '__ceramic__',
+          type: 'shortText',
+          isPartOfFormView: false,
+          internal: true,
+        };
+        collectionToGet.propertyOrder.push('__ceramic__');
+      }
+
       if (collectionToGet.collectionType === 1) {
         collectionToGet.properties.__cardStatus__ = {
           name: '__cardStatus__',
