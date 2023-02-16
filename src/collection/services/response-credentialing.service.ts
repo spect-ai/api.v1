@@ -185,10 +185,7 @@ export class ResponseCredentialService {
         throw new InternalServerErrorException('Collection not found');
       }
       const registry = await this.registryService.getRegistry();
-      console.log({
-        url: registry[collectionToUpdate.formMetadata.surveyTokenChainId]
-          .provider,
-      });
+
       const provider = new ethers.providers.JsonRpcProvider(
         registry[collectionToUpdate.formMetadata.surveyTokenChainId].provider,
       );

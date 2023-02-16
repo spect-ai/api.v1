@@ -32,6 +32,7 @@ import {
 import { DataValidationService } from './validations/data-validation.service';
 import { RegistryService } from 'src/registry/registry.service';
 import { RegistryModule } from 'src/registry/registry.module';
+import { WhitelistService } from './services/whitelist.service';
 
 @Module({
   imports: [
@@ -68,6 +69,7 @@ import { RegistryModule } from 'src/registry/registry.module';
     ActivityOnVoting,
     RegistryService,
     ResponseCredentialService,
+    WhitelistService,
   ],
   exports: [CollectionModule, CollectionRepository],
 })

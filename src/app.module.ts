@@ -56,6 +56,7 @@ import { CredentialsModule } from './credentials/credentials.module';
 import { AdvancedAccessService } from './collection/services/advanced-access.service';
 import { MintKudosService } from './credentials/services/mintkudos.service';
 import { NotificationModule } from './notification/notification.module';
+import { WhitelistService } from './collection/services/whitelist.service';
 
 const databaseUrl = process.env.MONGO_URL
   ? `${process.env.MONGO_URL}/nest?authSource=admin&retryWrites=true&w=majority`
@@ -128,6 +129,7 @@ const databaseUrl = process.env.MONGO_URL
     CollectionDataActivityResolver,
     MintKudosService,
     ResponseCredentialingService,
+    WhitelistService,
   ],
 })
 export class AppModule {}

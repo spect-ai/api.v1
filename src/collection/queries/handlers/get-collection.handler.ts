@@ -119,7 +119,7 @@ export class GetCollectionByFilterQueryHandler
     private readonly logger: LoggingService,
     private readonly responseCredentialsService: ResponseCredentialingService,
   ) {
-    logger.setContext('GetCollectionByFilterQueryHandler');
+    this.logger.setContext('GetCollectionByFilterQueryHandler');
   }
 
   async execute(query: GetCollectionByFilterQuery): Promise<Collection> {
@@ -130,13 +130,13 @@ export class GetCollectionByFilterQueryHandler
         query.selectedFields,
       );
     } catch (error) {
-      this.logger.logError(
-        `Failed while getting collection using filter with error: ${error.message}`,
+      this.logger.error(
+        `Failed while getting collection using filter with error: ${error}`,
         query,
       );
       throw new InternalServerErrorException(
         'Failed while getting collection using filter',
-        error.message,
+        error,
       );
     }
   }

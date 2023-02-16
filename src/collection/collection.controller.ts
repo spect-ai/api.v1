@@ -104,6 +104,7 @@ import { ResponseCredentialingService } from './services/response-credentialing.
 import { OnboardToSpectProjectCommand } from './commands/default/impl';
 import { MappedItem } from 'src/common/interfaces';
 import { Property } from './types/types';
+import { WhitelistService } from './services/whitelist.service';
 
 @Controller('collection/v1')
 @ApiTags('collection.v1')
@@ -112,7 +113,20 @@ export class CollectionController {
     private readonly commandBus: CommandBus,
     private readonly queryBus: QueryBus,
     private readonly credentialingService: ResponseCredentialingService,
+    private readonly whitelistService: WhitelistService,
   ) {}
+
+  @UseGuards(SessionAuthGuard)
+  @Get('/isWhitelisted')
+  async isWhitelisted(
+    @Query()
+    query: {
+      for: string;
+    },
+    @Request() req,
+  ): Promise<boolean> {
+    return await this.whitelistService.isWhitelisted(query.for, req.user);
+  }
 
   @UseGuards(ViewCollectionAuthGuard)
   @Get('/:id')
