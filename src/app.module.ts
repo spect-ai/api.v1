@@ -45,7 +45,6 @@ import { CardNotificationService } from './users/notification/card-notification.
 import { LoggingService } from './logging/logging.service';
 import { ConfigModule } from '@nestjs/config';
 import { ContractListener } from './common/contract-listener.service';
-import { QuestbookListener } from './common/questbook-listener.service';
 import { CollectionController } from './collection/collection.controller';
 import { CollectionModule } from './collection/collection.module';
 import { RealtimeModule } from './realtime/realtime.module';
@@ -57,6 +56,7 @@ import { AdvancedAccessService } from './collection/services/advanced-access.ser
 import { MintKudosService } from './credentials/services/mintkudos.service';
 import { NotificationModule } from './notification/notification.module';
 import { WhitelistService } from './collection/services/whitelist.service';
+import { SurveyProtocolListener } from './common/survey-protocol-listener.service';
 
 const databaseUrl = process.env.MONGO_URL
   ? `${process.env.MONGO_URL}/nest?authSource=admin&retryWrites=true&w=majority`
@@ -124,12 +124,12 @@ const databaseUrl = process.env.MONGO_URL
     CardNotificationService,
     LoggingService,
     ContractListener,
-    QuestbookListener,
     AdvancedAccessService,
     CollectionDataActivityResolver,
     MintKudosService,
     ResponseCredentialingService,
     WhitelistService,
+    SurveyProtocolListener,
   ],
 })
 export class AppModule {}
