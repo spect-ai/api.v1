@@ -148,6 +148,10 @@ export class UpdatePropertyDto {
     'singleURL',
     'multiURL',
     'payWall',
+    'discord',
+    'twitter',
+    'github',
+    'telegram',
   ])
   @IsOptional()
   type: PropertyType;
