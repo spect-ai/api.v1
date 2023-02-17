@@ -92,7 +92,11 @@ export type PropertyType =
   | 'multiURL'
   | 'payWall'
   | 'cardRelation'
-  | 'cardStatus';
+  | 'cardStatus'
+  | 'discord'
+  | 'twitter'
+  | 'github'
+  | 'telegram';
 
 export type Option = {
   label: string;

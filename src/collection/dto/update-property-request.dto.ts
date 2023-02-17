@@ -51,6 +51,10 @@ export class AddPropertyDto {
     'multiURL',
     'payWall',
     'cardRelation',
+    'discord',
+    'twitter',
+    'github',
+    'telegram',
   ])
   @IsNotEmpty()
   type: PropertyType;
