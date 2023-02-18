@@ -121,10 +121,12 @@ export class DataValidationService {
           )
             throw new Error("Reward data type doesn't match");
         }
-      } else if (['ethAddress'].includes(properties[propertyId].type)) {
-        if (data && !ethers.utils.isAddress(data))
-          throw new Error('Invalid ethereum address');
-      } else if (['user'].includes(properties[propertyId].type)) {
+      }
+      // else if (['ethAddress'].includes(properties[propertyId].type)) {
+      //   if (data && !ethers.utils.isAddress(data))
+      //     throw new Error('Invalid ethereum address');
+      // }
+      else if (['user'].includes(properties[propertyId].type)) {
         if (data && data.value && !mongoose.isValidObjectId(data.value))
           throw new Error('Invalid user');
       } else if (['user[]'].includes(properties[propertyId].type)) {
