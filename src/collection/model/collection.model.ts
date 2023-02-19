@@ -13,6 +13,7 @@ import {
   OpportunityInfo,
   Permissions,
   Condition,
+  Option,
 } from '../types/types';
 
 @useMongoosePlugin()
@@ -221,7 +222,11 @@ export interface FormMetadata {
 
   surveyTokenId?: number;
 
-  surveyTokenChainId?: string;
+  surveyVRFRequestId?: string;
+  surveyChain?: Option;
+  surveyToken?: Option;
+  surveyTotalValue?: number;
+  surveyLotteryWinner?: number;
 }
 
 export interface PaymentConfig {

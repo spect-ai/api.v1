@@ -57,6 +57,9 @@ import { MintKudosService } from './credentials/services/mintkudos.service';
 import { NotificationModule } from './notification/notification.module';
 import { WhitelistService } from './collection/services/whitelist.service';
 import { SurveyProtocolListener } from './common/survey-protocol-listener.service';
+import { VRFConsumerListener } from './common/vrf-listener.service';
+import { EmailGeneratorService } from './notification/email-generatr.service';
+import { MailService } from './mail/mail.service';
 
 const databaseUrl = process.env.MONGO_URL
   ? `${process.env.MONGO_URL}/nest?authSource=admin&retryWrites=true&w=majority`
@@ -130,6 +133,9 @@ const databaseUrl = process.env.MONGO_URL
     ResponseCredentialingService,
     WhitelistService,
     SurveyProtocolListener,
+    VRFConsumerListener,
+    EmailGeneratorService,
+    MailService,
   ],
 })
 export class AppModule {}

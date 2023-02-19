@@ -1,23 +1,25 @@
 import { Injectable } from '@nestjs/common';
+import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { Alchemy, Network } from 'alchemy-sdk';
 import { ethers, utils } from 'ethers';
 import { AbiCoder } from 'ethers/lib/utils';
+import { UpdateCollectionCommand } from 'src/collection/commands';
+import { GetCollectionByFilterQuery } from 'src/collection/queries';
 import { LoggingService } from 'src/logging/logging.service';
 import { RegistryService } from 'src/registry/registry.service';
-import { distributorAbi } from './abis/distributor';
 import { surveyHubAbi } from './abis/surveyHub';
 
 @Injectable()
 export class SurveyProtocolListener {
-  private iface = new utils.Interface(distributorAbi);
-  private decoder = new AbiCoder();
-
+  private iface = new utils.Interface(surveyHubAbi);
   constructor(
+    private readonly commandBus: CommandBus,
+    private readonly queryBus: QueryBus,
     private readonly registryService: RegistryService,
     private readonly logger: LoggingService,
   ) {
     // Need to refactor update payment method before we can use this
-    console.log('Listener listening');
+    console.log('Survey Protocol Listener listening');
     if (process.env.ALCHEMY_API_KEY_POLYGON) {
       const { filterResponse, alchemy } = this.getWS(
         process.env.ALCHEMY_API_KEY_POLYGON,
@@ -32,7 +34,7 @@ export class SurveyProtocolListener {
       const { filterResponse, alchemy } = this.getWS(
         process.env.ALCHEMY_API_KEY_MUMBAI,
         Network.MATIC_MUMBAI,
-        '0xaE54aD3a126c3C494B3aa9d82F3db6681BaE9a70',
+        '0x7eF12240354A0fFEdf646c90ab38b5E0eaCB0981',
       );
       alchemy.ws.on(filterResponse, (log) => {
         this.decodeTransactionAndRecord(log);
@@ -49,29 +51,40 @@ export class SurveyProtocolListener {
     // For some reason the filter is not working with mutliple topics
     const filterResponse = {
       address: surveyHubAddress,
-      topics: [utils.id('responseAdded(uint256, address, uint256)')],
+      topics: [utils.id('ResponseAdded(uint256,address,uint256)')],
     };
     return { filterResponse, alchemy };
   }
 
   private async decodeTransactionAndRecord(log: any) {
     try {
+      console.log({ log });
       if (
-        log.topics[0] === utils.id('responseAdded(uint256, address, uint256)')
+        log.topics[0] === utils.id('ResponseAdded(uint256,address,uint256)')
       ) {
+        console.log('asas');
         const decodedEvents = this.iface.decodeEventLog(
-          'responseAdded',
+          'ResponseAdded',
           log.data,
           log.topics,
         );
-        console.log({ decodedEvents });
+
+        const surveyId = decodedEvents[0].toNumber();
+        const responseCount = decodedEvents[2].toNumber();
+        await this.checkConditionAndTriggerRandomNumberGenerator(
+          surveyId,
+          responseCount,
+        );
       }
     } catch (e) {
       this.logger.error(e.message);
     }
   }
 
-  private async triggerRandomNumberGenerator(surveyId: number) {
+  private async checkConditionAndTriggerRandomNumberGenerator(
+    surveyId: number,
+    responseCount: number,
+  ) {
     try {
       const registry = await this.registryService.getRegistry();
 
@@ -85,8 +98,44 @@ export class SurveyProtocolListener {
         surveyHubAbi,
         signer,
       );
+      const distribution = await surveyProtocol.distributionInfo(surveyId);
+      console.log({ distribution });
+      if (
+        distribution.distributionType !== 0 ||
+        distribution.requestId?.toNumber() > 0
+      ) {
+        return;
+      }
+      const conditions = await surveyProtocol.conditionInfo(surveyId);
+      console.log({ conditions });
+      if (responseCount < conditions.minTotalSupply) {
+        return;
+      }
+
       console.log('triggering random number generator');
+
       await surveyProtocol.triggerRandomNumberGenerator(surveyId);
+      const distributionAfter = await surveyProtocol.distributionInfo(surveyId);
+      console.log({ distributionAfter });
+
+      const collection = await this.queryBus.execute(
+        new GetCollectionByFilterQuery({
+          'formMetadata.surveyId': surveyId,
+        }),
+      );
+
+      await this.commandBus.execute(
+        new UpdateCollectionCommand(
+          {
+            formMetadata: {
+              ...collection.formMetadata,
+              surveyVRFRequestId: distributionAfter.requestId,
+            },
+          },
+          'bot',
+          collection.id,
+        ),
+      );
     } catch (e) {
       this.logger.error(e.message);
     }

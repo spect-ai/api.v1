@@ -92,15 +92,15 @@ export class ResponseCredentialingService {
       }
       const registry = await this.registryService.getRegistry();
       console.log({
-        url: registry[collection.formMetadata.surveyTokenChainId].provider,
+        url: registry[collection.formMetadata.surveyChain.value].provider,
       });
       const provider = new ethers.providers.JsonRpcProvider(
-        registry[collection.formMetadata.surveyTokenChainId].provider,
+        registry[collection.formMetadata.surveyChain.value].provider,
       );
       const signer = new ethers.Wallet(process.env.PRIVATE_KEY, provider);
 
       const surveyProtocol = new ethers.Contract(
-        registry[collection.formMetadata.surveyTokenChainId].surveyHubAddress,
+        registry[collection.formMetadata.surveyChain.value].surveyHubAddress,
         surveyHubAbi,
         signer,
       );
@@ -187,13 +187,13 @@ export class ResponseCredentialService {
       const registry = await this.registryService.getRegistry();
 
       const provider = new ethers.providers.JsonRpcProvider(
-        registry[collectionToUpdate.formMetadata.surveyTokenChainId].provider,
+        registry[collectionToUpdate.formMetadata.surveyChain.value].provider,
       );
       const signer = new ethers.Wallet(process.env.PRIVATE_KEY, provider);
 
       const surveyProtocol = new ethers.Contract(
         registry[
-          collectionToUpdate.formMetadata.surveyTokenChainId
+          collectionToUpdate.formMetadata.surveyChain.value
         ].surveyHubAddress,
         surveyHubAbi,
         signer,
