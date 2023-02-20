@@ -69,6 +69,9 @@ export class AdvancedAccessService {
     delete collection.dataActivities;
     delete collection.dataActivityOrder;
     delete collection.formMetadata.mintkudosClaimedBy;
+    collection.propertyOrder = collection.propertyOrder.filter(
+      (property) => collection.properties[property],
+    );
 
     return collection;
   }

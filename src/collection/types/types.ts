@@ -73,6 +73,9 @@ export type Property = {
   viewConditions?: Condition[];
   cardRelationOptions?: CardRelationOptions;
   internal?: boolean;
+  maxSelections?: number;
+  allowCustom?: boolean;
+  milestoneFields?: string[];
 };
 
 export type PropertyType =

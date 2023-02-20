@@ -5,6 +5,7 @@ import {
   IsBoolean,
   IsEnum,
   IsNotEmpty,
+  IsNumber,
   IsObject,
   IsOptional,
   IsString,
@@ -122,6 +123,14 @@ export class AddPropertyDto {
   @IsObject()
   @IsOptional()
   cardRelationOptions: CardRelationOptions;
+
+  @IsBoolean()
+  @IsOptional()
+  allowCustom: boolean;
+
+  @IsNumber()
+  @IsOptional()
+  maxSelections: number;
 }
 
 export class UpdatePropertyDto {
@@ -148,6 +157,10 @@ export class UpdatePropertyDto {
     'singleURL',
     'multiURL',
     'payWall',
+    'discord',
+    'twitter',
+    'github',
+    'telegram',
   ])
   @IsOptional()
   type: PropertyType;
@@ -213,4 +226,12 @@ export class UpdatePropertyDto {
   @IsArray()
   @IsOptional()
   viewConditions?: Condition[];
+
+  @IsBoolean()
+  @IsOptional()
+  allowCustom: boolean;
+
+  @IsNumber()
+  @IsOptional()
+  maxSelections: number;
 }
