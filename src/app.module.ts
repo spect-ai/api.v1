@@ -60,6 +60,7 @@ import { SurveyProtocolListener } from './common/survey-protocol-listener.servic
 import { VRFConsumerListener } from './common/vrf-listener.service';
 import { EmailGeneratorService } from './notification/email-generatr.service';
 import { MailService } from './mail/mail.service';
+import { PoapService } from './credentials/services/poap.service';
 
 const databaseUrl = process.env.MONGO_URL
   ? `${process.env.MONGO_URL}/nest?authSource=admin&retryWrites=true&w=majority`
@@ -136,6 +137,7 @@ const databaseUrl = process.env.MONGO_URL
     VRFConsumerListener,
     EmailGeneratorService,
     MailService,
+    PoapService,
   ],
 })
 export class AppModule {}

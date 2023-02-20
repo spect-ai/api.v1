@@ -2,7 +2,9 @@ import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { QueryBus } from '@nestjs/cqrs';
 import { ethers } from 'ethers';
 import { surveyHubAbi } from 'src/common/abis/surveyHub';
+import { CreatePOAPDto } from 'src/credentials/dto/create-credential.dto';
 import { MintKudosService } from 'src/credentials/services/mintkudos.service';
+import { PoapService } from 'src/credentials/services/poap.service';
 import { LoggingService } from 'src/logging/logging.service';
 import { RegistryService } from 'src/registry/registry.service';
 import { RequestProvider } from 'src/users/user.provider';
@@ -16,6 +18,7 @@ export class ResponseCredentialingService {
     private readonly queryBus: QueryBus,
     private readonly requestProvider: RequestProvider,
     private readonly kudosService: MintKudosService,
+    private readonly poapService: PoapService,
     private readonly collectionRepository: CollectionRepository,
     private readonly logger: LoggingService,
     private readonly registryService: RegistryService,
@@ -152,6 +155,39 @@ export class ResponseCredentialingService {
       this.requestProvider.user.ethAddress,
     );
     return hasReceivedPayment;
+  }
+
+  async createPoap(
+    collectionId: string,
+    createPoapDto: CreatePOAPDto,
+    image: Express.Multer.File,
+  ) {
+    try {
+      const collection = await this.collectionRepository.findById(collectionId);
+      if (!collection) {
+        throw new InternalServerErrorException('Collection not found');
+      }
+      const res = await this.poapService.createPoapEvent(createPoapDto, image);
+      if (res.id) {
+        await this.collectionRepository.updateById(collection.id, {
+          formMetadata: {
+            ...(collection.formMetadata || {}),
+            poapEventId: res.id,
+            poapEventEditCode: res.editCode,
+          },
+        });
+      } else throw `Failed to create poap event`;
+      return true;
+    } catch (error) {
+      this.logger.error(
+        `Failed while creating poap with error: ${error}`,
+        collectionId,
+      );
+      throw new InternalServerErrorException(
+        `Failed while creating poap with error: ${error}`,
+        error,
+      );
+    }
   }
 }
 

@@ -9,7 +9,9 @@ import {
   Query,
   Request,
   SetMetadata,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { ApiTags } from '@nestjs/swagger';
@@ -105,6 +107,8 @@ import { OnboardToSpectProjectCommand } from './commands/default/impl';
 import { MappedItem } from 'src/common/interfaces';
 import { Property } from './types/types';
 import { WhitelistService } from './services/whitelist.service';
+import { CreatePOAPDto } from 'src/credentials/dto/create-credential.dto';
+import { AnyFilesInterceptor, FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('collection/v1')
 @ApiTags('collection.v1')
@@ -626,5 +630,16 @@ export class CollectionController {
   @Patch('/:id/claimSurveyTokens')
   async claimSurveyTokens(@Param() param: ObjectIdDto): Promise<boolean> {
     return await this.credentialingService.airdropSurveyToken(param.id);
+  }
+
+  @UseGuards(AdminAuthGuard)
+  @Patch('/:id/createPoap')
+  @UseInterceptors(FileInterceptor('file'))
+  async createPoap(
+    @Param() param: ObjectIdDto,
+    @Body() body: CreatePOAPDto,
+    @UploadedFile() file,
+  ): Promise<boolean> {
+    return await this.credentialingService.createPoap(param.id, body, file);
   }
 }

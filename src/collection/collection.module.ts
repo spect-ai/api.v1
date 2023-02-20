@@ -33,6 +33,7 @@ import { DataValidationService } from './validations/data-validation.service';
 import { RegistryService } from 'src/registry/registry.service';
 import { RegistryModule } from 'src/registry/registry.module';
 import { WhitelistService } from './services/whitelist.service';
+import { PoapService } from 'src/credentials/services/poap.service';
 
 @Module({
   imports: [
@@ -70,6 +71,7 @@ import { WhitelistService } from './services/whitelist.service';
     RegistryService,
     ResponseCredentialService,
     WhitelistService,
+    PoapService,
   ],
   exports: [CollectionModule, CollectionRepository],
 })
