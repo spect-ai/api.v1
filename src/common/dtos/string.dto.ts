@@ -162,3 +162,15 @@ export class OptionalLimitDto {
   @IsOptional()
   limit: number;
 }
+
+export class RequiredPoapIdDto {
+  @IsString()
+  @IsNotEmpty()
+  poapId: string;
+}
+
+export class RequiredClaimCodeDto {
+  @IsString()
+  @IsNotEmpty()
+  claimCode: string;
+}

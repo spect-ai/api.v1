@@ -189,6 +189,82 @@ export class ResponseCredentialingService {
       );
     }
   }
+
+  async claimPoap(collectionId: string, claimCode: string) {
+    try {
+      const collection = await this.collectionRepository.findById(collectionId);
+      if (!collection) {
+        throw new InternalServerErrorException('Collection not found');
+      }
+      const res = await this.poapService.claimPoap(
+        claimCode.slice(-6),
+        collection.formMetadata.poapEditCode,
+        this.requestProvider.user.ethAddress,
+      );
+      if (res.ok) {
+        const claimCodes = collection.formMetadata.claimCodes.filter(
+          (code) => code !== claimCode,
+        );
+        await this.collectionRepository.updateById(collection.id, {
+          formMetadata: {
+            ...(collection.formMetadata || {}),
+            claimCodes: claimCodes,
+          },
+        });
+      }
+      return res;
+    } catch (error) {
+      this.logger.error(
+        `Failed while claiming poap with error: ${error}`,
+        collectionId,
+      );
+      throw new InternalServerErrorException(
+        `Failed while claiming poap with error: ${error}`,
+        error,
+      );
+    }
+  }
+  async getClaimCode(collectionId: string) {
+    try {
+      console.log('form');
+      const collection = await this.collectionRepository.findById(collectionId);
+      if (!collection) {
+        throw new InternalServerErrorException('Collection not found');
+      }
+      if (collection.formMetadata.claimCodes.length === 0) {
+        throw new InternalServerErrorException('No claim codes left');
+      }
+      console.log('sdsdsd');
+      if (
+        !Object.values(collection.dataOwner).includes(
+          this.requestProvider.user.id,
+        )
+      )
+        throw new InternalServerErrorException(
+          'User has not submitted response',
+        );
+
+      const res = await this.poapService.hasPoap(
+        this.requestProvider.user.ethAddress,
+        collection.formMetadata.poapEventId,
+      );
+      console.log({ res });
+      if (res.statusCode !== 404) {
+        throw new InternalServerErrorException('User has already claimed poap');
+      }
+      console.log(collection.formMetadata.claimCodes[0]);
+      return collection.formMetadata.claimCodes[0];
+    } catch (error) {
+      this.logger.error(
+        `Failed while claiming poap with error: ${error}`,
+        collectionId,
+      );
+      throw new InternalServerErrorException(
+        `Failed while claiming poap with error: ${error}`,
+        error,
+      );
+    }
+  }
 }
 
 // TEMPFIX - Created this service without request provider so it can be called from handlers

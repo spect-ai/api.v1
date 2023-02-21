@@ -29,6 +29,7 @@ import { Circle } from 'src/circle/model/circle.model';
 import { ObjectIdDto } from 'src/common/dtos/object-id.dto';
 import {
   RequiredActivityUUIDDto,
+  RequiredClaimCodeDto,
   RequiredPropertyIdDto,
   RequiredSlugDto,
   RequiredUUIDDto,
@@ -98,6 +99,7 @@ import {
 } from './dto/voting.dto';
 import { Collection } from './model/collection.model';
 import {
+  GetCollectionByFilterQuery,
   GetCollectionByIdQuery,
   GetPrivateViewCollectionQuery,
   GetPublicViewCollectionQuery,
@@ -641,5 +643,20 @@ export class CollectionController {
     @UploadedFile() file,
   ): Promise<boolean> {
     return await this.credentialingService.createPoap(param.id, body, file);
+  }
+
+  @UseGuards(SessionAuthGuard)
+  @Patch('/:id/claimPoap')
+  async claimPoap(
+    @Param() param: ObjectIdDto,
+    @Body() body: RequiredClaimCodeDto,
+  ): Promise<boolean> {
+    return await this.credentialingService.claimPoap(param.id, body.claimCode);
+  }
+
+  @UseGuards(SessionAuthGuard)
+  @Get('/:id/claimCode')
+  async getClaimCode(@Param() param: ObjectIdDto): Promise<string> {
+    return await this.credentialingService.getClaimCode(param.id);
   }
 }

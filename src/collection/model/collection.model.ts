@@ -227,6 +227,11 @@ export interface FormMetadata {
   surveyToken?: Option;
   surveyTotalValue?: number;
   surveyLotteryWinner?: number;
+  claimCodes?: string[];
+  claimCode?: string;
+  poapDistributionEnabled?: boolean;
+  poapEventId?: string;
+  poapEditCode?: string;
 }
 
 export interface PaymentConfig {

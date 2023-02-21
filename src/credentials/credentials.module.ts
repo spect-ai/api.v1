@@ -11,6 +11,7 @@ import { Credentials } from './model/credentials.model';
 import { GitcoinPassportService } from './services/gitcoin-passport.service';
 import { MazuryService } from './services/mazury.service';
 import { MintKudosService } from './services/mintkudos.service';
+import { PoapService } from './services/poap.service';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { MintKudosService } from './services/mintkudos.service';
     GitcoinPassportService,
     CommonTools,
     MintKudosService,
+    PoapService,
   ],
   exports: [CredentialsService, CredentialsModule, GitcoinPassportService],
 })

@@ -141,29 +141,82 @@ export class PoapService {
     }
   }
 
-  async claimPoap(address: string, qrHash: string, secretCode: string) {
+  async claimPoap(claimCode: string, editCode: string, address: string) {
     try {
+      console.log({
+        claimCode,
+        editCode,
+        address,
+      });
       const options = {
         method: 'POST',
         headers: {
           accept: 'application/json',
-          authorization: `Bearer ${process.env.BEARER_TOKEN}`,
+          'content-type': 'application/json',
           'x-api-key': process.env.POAP_API_KEY,
         },
         body: JSON.stringify({
-          sendEmail: true,
+          secret: editCode,
           address,
-          secret: secretCode,
+          qr_hash: claimCode,
+          sendEmail: true,
         }),
       };
 
-      return await (
+      const res = await (
         await fetch(`https://api.poap.tech/actions/claim-qr`, options)
       ).json();
+      console.log({ res });
+      return res;
     } catch (e) {
       this.logger.error(e);
       throw new InternalServerErrorException(
         `Failed to claim POAP with error ${e}`,
+      );
+    }
+  }
+
+  async hasPoap(address: string, eventId: string) {
+    try {
+      const options = {
+        method: 'GET',
+        headers: {
+          accept: 'application/json',
+          'x-api-key': process.env.POAP_API_KEY,
+        },
+      };
+
+      return await (
+        await fetch(
+          `https://api.poap.tech/actions/scan/${address}/${eventId}`,
+          options,
+        )
+      ).json();
+    } catch (e) {
+      this.logger.error(e);
+      throw new InternalServerErrorException(
+        `Failed to check if user has POAP with error ${e}`,
+      );
+    }
+  }
+
+  async getPoapsByAddress(address: string) {
+    try {
+      const options = {
+        method: 'GET',
+        headers: {
+          accept: 'application/json',
+          'x-api-key': process.env.POAP_API_KEY,
+        },
+      };
+
+      return await (
+        await fetch(`https://api.poap.tech//actions/scan/${address}`, options)
+      ).json();
+    } catch (e) {
+      this.logger.error(e);
+      throw new InternalServerErrorException(
+        `Failed to get POAPs by address with error ${e}`,
       );
     }
   }

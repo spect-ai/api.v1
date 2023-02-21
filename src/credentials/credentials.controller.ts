@@ -14,15 +14,19 @@ import {
   OptionalArrayOfTags,
   OptionalLimitDto,
   OptionalOffsetDto,
+  RequiredClaimCodeDto,
   RequiredEthAddressDto,
   RequiredIssuerDto,
+  RequiredPoapIdDto,
 } from 'src/common/dtos/string.dto';
 import { Credential } from 'src/users/types/types';
 import { CredentialsService } from './credentials.service';
 import { CreateCredentialRequestDto } from './dto/create-credential.dto';
+import { PoapClaimDto } from './dto/mint-kudos.dto';
 import { Credentials } from './model/credentials.model';
 import { GitcoinPassportService } from './services/gitcoin-passport.service';
 import { MazuryService } from './services/mazury.service';
+import { PoapService } from './services/poap.service';
 
 @Controller('credentials/v1')
 @ApiTags('credentials.v1')
@@ -31,6 +35,7 @@ export class CredentialsController {
     private readonly credentialService: CredentialsService,
     private readonly mazuryService: MazuryService,
     private readonly passportService: GitcoinPassportService,
+    private readonly poapService: PoapService,
   ) {}
 
   @Get('/')
@@ -71,6 +76,20 @@ export class CredentialsController {
     @Query() param: RequiredEthAddressDto,
   ): Promise<any> {
     return await this.passportService.getByEthAddress(param.ethAddress);
+  }
+
+  @Get('/poap/:poapId')
+  async getPoapById(@Param() param: RequiredPoapIdDto): Promise<Credentials> {
+    return await this.poapService.getPoapById(param.poapId);
+  }
+
+  @Post('/claimPoap')
+  async claimPoap(@Body() body: PoapClaimDto): Promise<boolean> {
+    return await this.poapService.claimPoap(
+      body.claimCode,
+      body.editCode,
+      body.ethAddress,
+    );
   }
 
   @Get('/:id')
