@@ -16,5 +16,4 @@ export const QueryHandlers = [
   GetMultipleCollectionsQueryHandler,
   GetPrivateViewCollectionQueryHandler,
   GetPublicViewCollectionQueryHandler,
-  GetCollectionByFilterQueryHandler,
 ];

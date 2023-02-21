@@ -6,6 +6,7 @@ export class GetProfileQuery {
   constructor(
     public readonly filterQuery: FilterQuery<User>,
     public readonly caller: string,
+    public readonly overridePrivacy = false,
     public readonly customPopulate?: PopulatedUserFields,
     public readonly selectedFields?: Record<string, unknown>,
   ) {}

@@ -49,12 +49,11 @@ export class GetProfileQueryHandler implements IQueryHandler<GetProfileQuery> {
         null,
         publicProfileFields,
       )) as PrivateProfileResponseDto;
-      console.log({ query: query.filterQuery, user });
       if (!user) {
         throw `User with filter ${query.filterQuery} not found`;
       }
 
-      if (query.caller !== user.id) {
+      if (query.caller !== user.id && !query.overridePrivacy) {
         user = this.filterPrivateFields(user);
       }
       if (!user.lensHandle) {

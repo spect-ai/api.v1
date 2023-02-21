@@ -213,7 +213,8 @@ export class AddDataCommandHandler implements ICommandHandler<AddDataCommand> {
 
       if (
         collection.collectionType === 0 &&
-        collection.formMetadata?.surveyTokenId
+        (collection.formMetadata?.surveyTokenId ||
+          collection.formMetadata?.surveyTokenId === 0)
       ) {
         try {
           const res =

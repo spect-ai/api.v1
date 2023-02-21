@@ -26,6 +26,7 @@ export class VRFConsumerListener {
   ) {
     // Need to refactor update payment method before we can use this
     console.log('VRFConsumer Listener listening');
+    this.logger.setContext('VRFConsumerListener');
     if (process.env.ALCHEMY_API_KEY_POLYGON) {
       const { filterResponse, alchemy } = this.getWS(
         process.env.ALCHEMY_API_KEY_POLYGON,
@@ -43,8 +44,6 @@ export class VRFConsumerListener {
         '0xA0ef79e2bB29385106b2278Fa22b6BCdA8882761',
       );
       alchemy.ws.on(filterResponse, (log) => {
-        console.log({ log });
-        console.log(utils.id('RequestFulfilled(uint256,uint256[],uint256)'));
         this.decodeTransactionAndRecord(log);
       });
     }
@@ -66,7 +65,6 @@ export class VRFConsumerListener {
 
   private async decodeTransactionAndRecord(log: any) {
     try {
-      console.log({ log });
       if (
         log.topics[0] ===
         utils.id('RequestFulfilled(uint256,uint256[],uint256)')
@@ -76,14 +74,15 @@ export class VRFConsumerListener {
           log.data,
           log.topics,
         );
-        console.log({ decodedEvents });
         const requestId = decodedEvents[0].toString();
         const collection = await this.queryBus.execute(
           new GetCollectionByFilterQuery({
-            'formMetadata.requestId': requestId,
+            'formMetadata.surveyVRFRequestId': requestId,
           }),
         );
-
+        if (!collection) {
+          throw `No collection found for requestId ${requestId}`;
+        }
         const registry = await this.registryService.getRegistry();
 
         const provider = new ethers.providers.JsonRpcProvider(
@@ -101,7 +100,6 @@ export class VRFConsumerListener {
           collection?.formMetadata?.surveyTokenId,
         );
 
-        console.log({ lotteryWinner });
         await this.commandBus.execute(
           new UpdateCollectionCommand(
             {
@@ -118,15 +116,16 @@ export class VRFConsumerListener {
         const user = await this.queryBus.execute(
           new GetProfileQuery(
             {
-              ethAddress: lotteryWinner,
+              ethAddress: lotteryWinner.toLowerCase(),
             },
             'bot',
+            true,
           ),
         );
         if (user?.email) {
           try {
             const html = this.emailGeneratorService.generateEmailWithMessage(
-              `You have been picked as the winner of the lottery for filling out ${collection.name} survey`,
+              `You have been picked as the lottery winner for filling out ${collection.name} survey`,
               `https://circles.spect.network/r/${collection.slug}`,
             );
             const mail = {
@@ -145,7 +144,7 @@ export class VRFConsumerListener {
         }
       }
     } catch (e) {
-      this.logger.error(e.message);
+      this.logger.error(e);
     }
   }
 }

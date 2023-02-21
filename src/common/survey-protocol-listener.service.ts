@@ -20,6 +20,7 @@ export class SurveyProtocolListener {
   ) {
     // Need to refactor update payment method before we can use this
     console.log('Survey Protocol Listener listening');
+    this.logger.setContext('SurveyProtocolListener');
     if (process.env.ALCHEMY_API_KEY_POLYGON) {
       const { filterResponse, alchemy } = this.getWS(
         process.env.ALCHEMY_API_KEY_POLYGON,
@@ -34,7 +35,7 @@ export class SurveyProtocolListener {
       const { filterResponse, alchemy } = this.getWS(
         process.env.ALCHEMY_API_KEY_MUMBAI,
         Network.MATIC_MUMBAI,
-        '0x7eF12240354A0fFEdf646c90ab38b5E0eaCB0981',
+        '0xF71D6C1763fd49d2c1937d469ae7Aa3d1cf4e85f',
       );
       alchemy.ws.on(filterResponse, (log) => {
         this.decodeTransactionAndRecord(log);
@@ -58,11 +59,9 @@ export class SurveyProtocolListener {
 
   private async decodeTransactionAndRecord(log: any) {
     try {
-      console.log({ log });
       if (
         log.topics[0] === utils.id('ResponseAdded(uint256,address,uint256)')
       ) {
-        console.log('asas');
         const decodedEvents = this.iface.decodeEventLog(
           'ResponseAdded',
           log.data,
@@ -99,7 +98,6 @@ export class SurveyProtocolListener {
         signer,
       );
       const distribution = await surveyProtocol.distributionInfo(surveyId);
-      console.log({ distribution });
       if (
         distribution.distributionType !== 0 ||
         distribution.requestId?.toNumber() > 0
@@ -107,37 +105,41 @@ export class SurveyProtocolListener {
         return;
       }
       const conditions = await surveyProtocol.conditionInfo(surveyId);
-      console.log({ conditions });
-      if (responseCount < conditions.minTotalSupply) {
+      // Response count is the token id which is 0 indexed
+      if (responseCount + 1 < conditions.minTotalSupply) {
         return;
       }
 
       console.log('triggering random number generator');
 
-      await surveyProtocol.triggerRandomNumberGenerator(surveyId);
+      const tx = await surveyProtocol.triggerRandomNumberGenerator(surveyId);
+      await tx.wait();
       const distributionAfter = await surveyProtocol.distributionInfo(surveyId);
       console.log({ distributionAfter });
 
       const collection = await this.queryBus.execute(
         new GetCollectionByFilterQuery({
-          'formMetadata.surveyId': surveyId,
+          'formMetadata.surveyTokenId': surveyId,
         }),
       );
 
+      if (!collection) {
+        throw `Collection not found with surveyId ${surveyId}`;
+      }
       await this.commandBus.execute(
         new UpdateCollectionCommand(
           {
             formMetadata: {
               ...collection.formMetadata,
-              surveyVRFRequestId: distributionAfter.requestId,
+              surveyVRFRequestId: distributionAfter.requestId?.toString(),
             },
           },
           'bot',
-          collection.id,
+          collection._id?.toString(),
         ),
       );
     } catch (e) {
-      this.logger.error(e.message);
+      this.logger.error(e);
     }
   }
 }

@@ -117,7 +117,6 @@ export class GetCollectionByFilterQueryHandler
   constructor(
     private readonly collectionRepository: CollectionRepository,
     private readonly logger: LoggingService,
-    private readonly responseCredentialsService: ResponseCredentialingService,
   ) {
     this.logger.setContext('GetCollectionByFilterQueryHandler');
   }
@@ -221,6 +220,7 @@ export class GetPublicViewCollectionQueryHandler
         activityOrder = collectionToGet.dataActivityOrder[prevSlug];
         activity = collectionToGet.dataActivities[prevSlug];
       }
+
       const res =
         this.advancedAccessService.removePrivateFields(collectionToGet);
 
