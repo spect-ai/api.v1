@@ -84,7 +84,7 @@ export class UpdatePropertyCommandHandler
           }
         }
         // change property name in all views
-        collection.projectMetadata.viewOrder.forEach((viewId) => {
+        collection.projectMetadata.viewOrder?.forEach((viewId) => {
           const view = collection.projectMetadata.views[viewId];
           if (view.groupByColumn === propertyId)
             view.groupByColumn = updatePropertyCommandDto.name;
@@ -128,7 +128,7 @@ export class UpdatePropertyCommandHandler
       }
 
       // delete filter if property is there
-      collection.projectMetadata.viewOrder.forEach((viewId) => {
+      collection.projectMetadata.viewOrder?.forEach((viewId) => {
         const view = collection.projectMetadata.views[viewId];
         // delete view filters if the data field is the property name
         if (view.filters) {
