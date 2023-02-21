@@ -283,10 +283,16 @@ export class AddDataCommandHandler implements ICommandHandler<AddDataCommand> {
       }
     }
     // add payment data if it exists
-    if (collection.formMetadata?.paymentConfig) {
+    if (
+      collection.collectionType === 0 &&
+      collection.formMetadata?.paymentConfig
+    ) {
       filteredData['__payment__'] = data['__payment__'];
     }
-    if (collection.formMetadata.ceramicEnabled) {
+    if (
+      collection.collectionType === 0 &&
+      collection.formMetadata?.ceramicEnabled
+    ) {
       filteredData['__ceramic__'] = data['__ceramic__'];
     }
     if (collection.collectionType === 1) {
