@@ -36,6 +36,7 @@ import {
 import { StartVotingPeriodCommand } from 'src/collection/commands/data/impl/vote-data.command';
 import { JoinedCircleEvent } from 'src/circle/events/impl';
 import { AddPaymentsCommand } from 'src/circle/commands/payments/impl';
+import { Collection } from 'src/collection/model/collection.model';
 
 @Injectable()
 export class CommonActionService {
@@ -49,7 +50,7 @@ export class CommonActionService {
       new GetCircleByIdQuery(circleId),
     );
     if (!circle) throw new Error('Circle not found');
-    const collection = await this.queryBus.execute(
+    const collection: Collection = await this.queryBus.execute(
       new GetCollectionBySlugQuery(relevantIds.collectionSlug),
     );
     if (!collection) {
@@ -66,14 +67,22 @@ export class CommonActionService {
       ),
     );
 
-    if (!user) {
-      throw new Error('No user found for the given id');
+    let discordUserId;
+    const discordField = Object.values(collection.properties).find(
+      (property) => property.type === 'discord',
+    );
+    console.log({ discordField });
+    if (discordField) {
+      discordUserId =
+        collection.data[relevantIds.dataSlug][discordField.name]['id'];
+      console.log({ discordUserId });
     }
 
     return {
       circle,
       collection,
       user,
+      discordUserId,
     };
   }
 }
@@ -224,7 +233,7 @@ export class GiveDiscordRoleActionCommandHandler
   }
 
   async execute(command: GiveDiscordRoleActionCommand): Promise<any> {
-    const { action, caller, updatesContainer, relevantIds } = command;
+    const { action, updatesContainer, relevantIds } = command;
     try {
       console.log('GiveDiscordRoleActionCommandHandler');
       const circleId = action.data.circleId;
@@ -237,17 +246,19 @@ export class GiveDiscordRoleActionCommandHandler
         if (give) roles.push(role);
       }
       if (!roles || roles.length === 0) return;
-      const { circle, collection, user } =
+      const { circle, discordUserId } =
         await this.commonActionService.getCircleCollectionUsersFromRelevantIds(
           circleId,
           relevantIds,
         );
 
-      await this.discordService.giveRolesToUser(
-        circle.discordGuildId,
-        user.discordId,
-        roles,
-      );
+      if (discordUserId) {
+        await this.discordService.giveRolesToUser(
+          circle.discordGuildId,
+          discordUserId,
+          roles,
+        );
+      }
 
       return updatesContainer;
     } catch (err) {
@@ -277,7 +288,7 @@ export class CreateDiscordChannelActionCommandHandler
       if (!circleId) {
         throw new Error('No circleId provided in automation data');
       }
-      const { circle, collection, user } =
+      const { circle, collection, discordUserId } =
         await this.commonActionService.getCircleCollectionUsersFromRelevantIds(
           circleId,
           relevantIds,
@@ -304,8 +315,8 @@ export class CreateDiscordChannelActionCommandHandler
 
       const usersToAdd = [];
       if (action.data.addResponder) {
-        if (user.discordId) {
-          usersToAdd.push(user.discordId);
+        if (discordUserId) {
+          usersToAdd.push(discordUserId);
         }
       }
 
@@ -456,7 +467,7 @@ export class PostOnDiscordActionCommandHandler
   }
 
   async execute(command: PostOnDiscordActionCommand): Promise<any> {
-    const { action, caller, updatesContainer, relevantIds } = command;
+    const { action, updatesContainer, relevantIds } = command;
     try {
       console.log('PostOnDiscordActionCommandHandler');
 
@@ -475,7 +486,6 @@ export class PostOnDiscordActionCommandHandler
               : collection?.data?.[relevantIds.dataSlug]?.[f.value],
         }))
         .filter((f) => f.value !== undefined);
-
       await this.discordService.postCard(
         action.data.channel.value,
         action.data.message +
