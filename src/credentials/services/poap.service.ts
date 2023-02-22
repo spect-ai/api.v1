@@ -159,6 +159,9 @@ export class PoapService {
       }
 
       const qrHashes = await this.claimQrCode(poapEventId, editCode);
+      if (!qrHashes?.length) {
+        throw `QR hashes not foudn for event ${poapEventId}`;
+      }
       const unclaimedQrHash = qrHashes.find((qrHash) => !qrHash.claimed);
 
       if (!unclaimedQrHash) {
