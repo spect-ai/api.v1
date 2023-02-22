@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { CqrsModule } from '@nestjs/cqrs';
 import { TypegooseModule } from 'nestjs-typegoose';
+import { SessionAuthGuard } from 'src/auth/iron-session.guard';
 import { CommonTools } from 'src/common/common.service';
 import { LoggingService } from 'src/logging/logging.service';
 import { EthAddressModule } from 'src/_eth-address/_eth-address.module';
@@ -29,6 +30,7 @@ import { PoapService } from './services/poap.service';
     CommonTools,
     MintKudosService,
     PoapService,
+    SessionAuthGuard,
   ],
   exports: [CredentialsService, CredentialsModule, GitcoinPassportService],
 })

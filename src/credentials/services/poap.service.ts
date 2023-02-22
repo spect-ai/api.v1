@@ -69,7 +69,7 @@ export class PoapService {
     }
   }
 
-  async getPoapById(id: string) {
+  async getPoapById(id: string, address?: string) {
     try {
       const options = {
         method: 'GET',
@@ -79,9 +79,20 @@ export class PoapService {
         },
       };
 
-      return await (
+      const res = await (
         await fetch(`https://api.poap.tech/events/id/${id}`, options)
       ).json();
+      let claimed;
+      if (address) {
+        const hasPoapAlreadyRes = await this.hasPoap(address, id);
+        if (hasPoapAlreadyRes.statusCode !== 404) {
+          claimed = true;
+        }
+      }
+      return {
+        ...res,
+        claimed,
+      };
     } catch (e) {
       this.logger.error(e);
       throw new InternalServerErrorException(
@@ -106,7 +117,7 @@ export class PoapService {
       };
 
       return await (
-        await fetch(`https://api.poap.tech/events/${id}/qr-codes`, options)
+        await fetch(`https://api.poap.tech/event/${id}/qr-codes`, options)
       ).json();
     } catch (e) {
       this.logger.error(e);
@@ -116,7 +127,7 @@ export class PoapService {
     }
   }
 
-  async getActions(qrHash: string) {
+  async getClaimInfo(qrHash: string) {
     try {
       const options = {
         method: 'GET',
@@ -127,12 +138,11 @@ export class PoapService {
         },
       };
 
-      return await (
-        await fetch(
-          `https://api.poap.tech/actions/claim-qr?qr-hash=${qrHash}`,
-          options,
-        )
-      ).json();
+      const res = await fetch(
+        `https://api.poap.tech/actions/claim-qr?qr_hash=${qrHash}`,
+        options,
+      );
+      return await res.json();
     } catch (e) {
       this.logger.error(e);
       throw new InternalServerErrorException(
@@ -141,24 +151,36 @@ export class PoapService {
     }
   }
 
-  async claimPoap(claimCode: string, editCode: string, address: string) {
+  async claimPoap(poapEventId: string, editCode: string, address: string) {
     try {
-      console.log({
-        claimCode,
-        editCode,
-        address,
-      });
+      const hasPoapAlreadyRes = await this.hasPoap(address, poapEventId);
+      if (hasPoapAlreadyRes.statusCode !== 404) {
+        throw `User ${address} already has a POAP for event ${poapEventId}`;
+      }
+
+      const qrHashes = await this.claimQrCode(poapEventId, editCode);
+      const unclaimedQrHash = qrHashes.find((qrHash) => !qrHash.claimed);
+
+      if (!unclaimedQrHash) {
+        throw `All Poaps have been claimed for event ${poapEventId}`;
+      }
+      const claimInfo = await this.getClaimInfo(unclaimedQrHash.qr_hash);
+      if (!claimInfo) {
+        throw `Failed to get claim info for event ${poapEventId}`;
+      }
+      const claimSecret = claimInfo.secret;
       const options = {
         method: 'POST',
         headers: {
           accept: 'application/json',
           'content-type': 'application/json',
+          authorization: `Bearer ${process.env.BEARER_TOKEN}`,
           'x-api-key': process.env.POAP_API_KEY,
         },
         body: JSON.stringify({
-          secret: editCode,
+          secret: claimSecret,
           address,
-          qr_hash: claimCode,
+          qr_hash: unclaimedQrHash.qr_hash,
           sendEmail: true,
         }),
       };
@@ -166,7 +188,6 @@ export class PoapService {
       const res = await (
         await fetch(`https://api.poap.tech/actions/claim-qr`, options)
       ).json();
-      console.log({ res });
       return res;
     } catch (e) {
       this.logger.error(e);

@@ -647,16 +647,7 @@ export class CollectionController {
 
   @UseGuards(SessionAuthGuard)
   @Patch('/:id/claimPoap')
-  async claimPoap(
-    @Param() param: ObjectIdDto,
-    @Body() body: RequiredClaimCodeDto,
-  ): Promise<boolean> {
-    return await this.credentialingService.claimPoap(param.id, body.claimCode);
-  }
-
-  @UseGuards(SessionAuthGuard)
-  @Get('/:id/claimCode')
-  async getClaimCode(@Param() param: ObjectIdDto): Promise<string> {
-    return await this.credentialingService.getClaimCode(param.id);
+  async claimPoap(@Param() param: ObjectIdDto): Promise<boolean> {
+    return await this.credentialingService.claimPoap(param.id);
   }
 }

@@ -190,28 +190,23 @@ export class ResponseCredentialingService {
     }
   }
 
-  async claimPoap(collectionId: string, claimCode: string) {
+  async claimPoap(collectionId: string) {
     try {
       const collection = await this.collectionRepository.findById(collectionId);
       if (!collection) {
         throw new InternalServerErrorException('Collection not found');
       }
+      if (
+        !Object.values(collection.dataOwner).includes(
+          this.requestProvider.user.id,
+        )
+      )
+        throw 'User has not submitted a response';
       const res = await this.poapService.claimPoap(
-        claimCode.slice(-6),
+        collection.formMetadata.poapEventId,
         collection.formMetadata.poapEditCode,
         this.requestProvider.user.ethAddress,
       );
-      if (res.ok) {
-        const claimCodes = collection.formMetadata.claimCodes.filter(
-          (code) => code !== claimCode,
-        );
-        await this.collectionRepository.updateById(collection.id, {
-          formMetadata: {
-            ...(collection.formMetadata || {}),
-            claimCodes: claimCodes,
-          },
-        });
-      }
       return res;
     } catch (error) {
       this.logger.error(

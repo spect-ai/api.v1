@@ -72,7 +72,7 @@ export class AdvancedAccessService {
     collection.propertyOrder = collection.propertyOrder.filter(
       (property) => collection.properties[property],
     );
-    delete collection.formMetadata?.claimCodes;
+    delete collection.formMetadata?.poapEditCode;
 
     return collection;
   }

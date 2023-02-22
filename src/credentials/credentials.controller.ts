@@ -5,10 +5,14 @@ import {
   Param,
   Post,
   Query,
+  Request,
   UseGuards,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { AdminAuthGuard } from 'src/auth/iron-session.guard';
+import {
+  AdminAuthGuard,
+  PublicViewAuthGuard,
+} from 'src/auth/iron-session.guard';
 import { ObjectIdDto } from 'src/common/dtos/object-id.dto';
 import {
   OptionalArrayOfTags,
@@ -78,9 +82,16 @@ export class CredentialsController {
     return await this.passportService.getByEthAddress(param.ethAddress);
   }
 
+  @UseGuards(PublicViewAuthGuard)
   @Get('/poap/:poapId')
-  async getPoapById(@Param() param: RequiredPoapIdDto): Promise<Credentials> {
-    return await this.poapService.getPoapById(param.poapId);
+  async getPoapById(
+    @Param() param: RequiredPoapIdDto,
+    @Request() req,
+  ): Promise<Credentials> {
+    return await this.poapService.getPoapById(
+      param.poapId,
+      req.user?.ethAddress,
+    );
   }
 
   @Post('/claimPoap')
