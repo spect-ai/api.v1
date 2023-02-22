@@ -188,8 +188,7 @@ export class GetPublicViewCollectionQueryHandler
       const canFillForm =
         hasRole &&
         !formHasCredentialsButUserIsntConnected &&
-        hasPassedSybilCheck &&
-        !formRequiresDiscordButUserIsntConnected;
+        hasPassedSybilCheck;
 
       const previousResponses = [];
       if (collectionToGet.dataOwner)
