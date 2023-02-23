@@ -50,7 +50,7 @@ export class GetProfileQueryHandler implements IQueryHandler<GetProfileQuery> {
         publicProfileFields,
       )) as PrivateProfileResponseDto;
       if (!user) {
-        throw `User with filter ${query.filterQuery} not found`;
+        throw `User with filter ${JSON.stringify(query.filterQuery)} not found`;
       }
 
       if (query.caller !== user.id && !query.overridePrivacy) {

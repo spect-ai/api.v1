@@ -392,14 +392,20 @@ export class CreateCardActionCommandHandler
                 value.mapping.from.value
               ];
         } else if (value.type === 'responder') {
-          const dataOwner = await this.queryBus.execute(
-            new GetProfileQuery(
-              {
-                _id: fromCollection.dataOwner[relevantIds.dataSlug],
-              },
-              fromCollection.dataOwner[relevantIds.dataSlug],
-            ),
-          );
+          let dataOwner;
+          try {
+            dataOwner = await this.queryBus.execute(
+              new GetProfileQuery(
+                {
+                  _id: fromCollection.dataOwner[relevantIds.dataSlug],
+                },
+                fromCollection.dataOwner[relevantIds.dataSlug],
+              ),
+            );
+          } catch (err) {
+            console.log(err);
+            continue;
+          }
           if (toCollection.properties[value.mapping.to.value].type === 'user') {
             data[value.mapping.to.value] = {
               label: dataOwner.username,

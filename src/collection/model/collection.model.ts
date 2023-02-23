@@ -163,6 +163,11 @@ export interface FormMetadata {
   allowAnonymousResponses?: boolean;
 
   /**
+   * Responses are anonymous?
+   */
+  walletConnectionRequired?: boolean;
+
+  /**
    * The mintkudos token id to distribute when a person fills the form
    */
   mintkudosTokenId?: number;

@@ -56,8 +56,6 @@ export class UpdateDataCommandHandler
         return;
       }
 
-      console.log({ data });
-
       if (!collection) throw 'Collection does not exist';
       if (collection.collectionType === 0) {
         if (collection.formMetadata.active === false)
@@ -69,9 +67,9 @@ export class UpdateDataCommandHandler
         ) {
           throw 'Updating response is not allowed';
         }
-        if (!collection.dataOwner[dataSlug]) {
-          throw 'You are not the owner of this data';
-        }
+        // if (!collection.dataOwner[dataSlug]) {
+        //   throw 'You are not the owner of this data';
+        // }
       }
       let filteredData = data;
       if (view === 'public') {

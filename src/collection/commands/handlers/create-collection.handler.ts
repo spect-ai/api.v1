@@ -116,6 +116,7 @@ export class CreateCollectionCommandHandler
             multipleResponsesAllowed: false,
             updatingResponseAllowed: false,
             allowAnonymousResponses: false,
+            walletConnectionRequired: true,
           },
           projectMetadata: {
             viewOrder: [defaultViewId],

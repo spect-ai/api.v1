@@ -217,12 +217,11 @@ export class AddDataCommandHandler implements ICommandHandler<AddDataCommand> {
           collection.formMetadata?.surveyTokenId === 0)
       ) {
         try {
-          const res =
-            await this.responseCredentialService.airdropResponseReceiptNFT(
-              caller.ethAddress,
-              null,
-              collection,
-            );
+          await this.responseCredentialService.airdropResponseReceiptNFT(
+            caller.ethAddress,
+            null,
+            collection,
+          );
         } catch (e) {
           this.logger.error(
             `Failed to airdrop response receipt NFT for collection ${collection.id} with error ${e}`,

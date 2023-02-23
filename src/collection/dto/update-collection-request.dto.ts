@@ -8,7 +8,7 @@ import {
 } from 'class-validator';
 import { MappedItem } from 'src/common/interfaces';
 import { GuildRole } from 'src/common/types/role.type';
-import { PaymentConfig, ProjectMetadata } from '../model/collection.model';
+import { FormMetadata, ProjectMetadata } from '../model/collection.model';
 import { OpportunityInfo, Permissions } from '../types/types';
 import { Voting } from '../types/types';
 
@@ -99,21 +99,4 @@ export class UpdateCollectionDto {
   @IsBoolean()
   @IsOptional()
   archived: boolean;
-}
-
-interface FormMetadata {
-  messageOnSubmission: string;
-  multipleResponsesAllowed: boolean;
-  updatingResponseAllowed: boolean;
-  active: boolean;
-  sendConfirmationEmail: boolean;
-  logo: string;
-  cover: string;
-  sybilProtectionEnabled: boolean;
-  sybilProtectionScores: { [id: string]: number };
-  numOfKudos: number;
-  isAnOpportunity: boolean;
-  opportunityInfo: OpportunityInfo;
-  allowAnonymousResponses: boolean;
-  paymentConfig: PaymentConfig;
 }

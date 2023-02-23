@@ -63,10 +63,17 @@ export class GitcoinPassportService {
       .PassportVerifier;
 
     const verifier = new PassportVerifier(this.passportUrl);
-    const passport = await reader.getPassport(ethAddress);
-    if (!passport) {
-      return [];
+    let passport = await reader.getPassport(ethAddress);
+    console.log({ passport });
+    if (!passport || !passport.stamps) {
+      passport = await (
+        await fetch(
+          `https://api.scorer.gitcoin.co/ceramic-cache/stamp?address=${ethAddress}`,
+        )
+      ).json();
     }
+    console.log({ passport });
+    if (!passport?.stamps) return [];
     const stampsWithCredentials = [];
     for (const stamp of passport.stamps) {
       if (!stamp.credential) {
