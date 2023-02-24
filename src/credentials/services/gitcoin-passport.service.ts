@@ -1,5 +1,4 @@
 import { PassportReader } from '@gitcoinco/passport-sdk-reader';
-
 import { Injectable } from '@nestjs/common';
 import { CommonTools } from 'src/common/common.service';
 import { Credential, VerifiableCredential } from 'src/users/types/types';
@@ -31,19 +30,24 @@ export class GitcoinPassportService {
         issuer: stamp.issuer,
       };
     });
-    const reader = new PassportReader(this.passportUrl, '1');
-
-    const passport = await reader.getPassport(address);
+    const passport = await (
+      await fetch(
+        `https://api.scorer.gitcoin.co/ceramic-cache/stamp?address=${address}`,
+      )
+    ).json();
+    console.log({ passport });
     const PassportScorer = (await import('@gitcoinco/passport-sdk-scorer'))
       .PassportScorer;
     const stampsWithCredentials = [];
-    console.log({ passport: JSON.stringify(passport) });
     if (!passport?.stamps) return false;
     for (const stamp of passport.stamps) {
-      if (!stamp.credential) {
+      if (!stamp.stamp) {
         continue;
       }
-      stampsWithCredentials.push(stamp);
+      stampsWithCredentials.push({
+        ...stamp,
+        credential: stamp.stamp,
+      });
     }
     const scorer = new PassportScorer(passportScores, this.passportUrl);
     const score = await scorer.getScore(address, {
@@ -64,7 +68,7 @@ export class GitcoinPassportService {
 
     const verifier = new PassportVerifier(this.passportUrl);
     let passport = await reader.getPassport(ethAddress);
-    console.log({ passport });
+    console.log({ passportSDK: passport });
     if (!passport || !passport.stamps) {
       passport = await (
         await fetch(
@@ -72,7 +76,7 @@ export class GitcoinPassportService {
         )
       ).json();
     }
-    console.log({ passport });
+    console.log({ scorerAPI: passport });
     if (!passport?.stamps) return [];
     const stampsWithCredentials = [];
     for (const stamp of passport.stamps) {
