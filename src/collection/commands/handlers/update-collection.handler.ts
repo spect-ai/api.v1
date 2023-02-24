@@ -1,12 +1,44 @@
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { CommandHandler, ICommandHandler, QueryBus } from '@nestjs/cqrs';
 import { CollectionRepository } from 'src/collection/collection.repository';
 import { CollectionResponseDto } from 'src/collection/dto/collection-response.dto';
+import { UpdateCollectionDto } from 'src/collection/dto/update-collection-request.dto';
 import { GetPrivateViewCollectionQuery } from 'src/collection/queries';
 import { CommonTools } from 'src/common/common.service';
+import { PoapService } from 'src/credentials/services/poap.service';
+import { LoggingService } from 'src/logging/logging.service';
 import {
   UpdateCollectionByFilterCommand,
   UpdateCollectionCommand,
 } from '../impl/update-collection.command';
+
+@Injectable()
+export class UpdateValidationService {
+  constructor(
+    private readonly logger: LoggingService,
+    private readonly poapService: PoapService,
+  ) {
+    this.logger.setContext(UpdateValidationService.name);
+  }
+
+  async validateUpdateCollectionCommand(
+    updateCollectionDto: Partial<UpdateCollectionDto>,
+  ): Promise<void> {
+    if (!updateCollectionDto) {
+      throw new Error('UpdateCollectionDto is required');
+    }
+    if (updateCollectionDto.formMetadata?.poapEventId) {
+      const isValidSecretCode = await this.poapService.validateSecretCode(
+        updateCollectionDto.formMetadata.poapEventId,
+        updateCollectionDto.formMetadata.poapEditCode,
+      );
+
+      if (!isValidSecretCode?.valid) {
+        throw new Error('Invalid edit code');
+      }
+    }
+  }
+}
 
 @CommandHandler(UpdateCollectionCommand)
 export class UpdateCollectionCommandHandler
@@ -15,20 +47,31 @@ export class UpdateCollectionCommandHandler
   constructor(
     private readonly collectionRepository: CollectionRepository,
     private readonly queryBus: QueryBus,
-    private readonly commonTools: CommonTools,
-  ) {}
+    private readonly logger: LoggingService,
+    private readonly updateValidationService: UpdateValidationService,
+  ) {
+    this.logger.setContext(UpdateCollectionCommandHandler.name);
+  }
 
   async execute(
     command: UpdateCollectionCommand,
   ): Promise<CollectionResponseDto> {
-    const { updateCollectionDto, collectionId } = command;
-    const updatedCollection = await this.collectionRepository.updateById(
-      collectionId,
-      updateCollectionDto,
-    );
-    return await this.queryBus.execute(
-      new GetPrivateViewCollectionQuery(null, updatedCollection),
-    );
+    try {
+      const { updateCollectionDto, collectionId } = command;
+      await this.updateValidationService.validateUpdateCollectionCommand(
+        updateCollectionDto,
+      );
+      const updatedCollection = await this.collectionRepository.updateById(
+        collectionId,
+        updateCollectionDto,
+      );
+      return await this.queryBus.execute(
+        new GetPrivateViewCollectionQuery(null, updatedCollection),
+      );
+    } catch (e) {
+      this.logger.error(e);
+      throw new InternalServerErrorException(e);
+    }
   }
 }
 
@@ -39,19 +82,28 @@ export class UpdateCollectionByFilterCommandHandler
   constructor(
     private readonly collectionRepository: CollectionRepository,
     private readonly queryBus: QueryBus,
-    private readonly commonTools: CommonTools,
+    private readonly logger: LoggingService,
+    private readonly updateValidationService: UpdateValidationService,
   ) {}
 
   async execute(
     command: UpdateCollectionByFilterCommand,
   ): Promise<CollectionResponseDto> {
-    const { updateCollectionDto, filter } = command;
-    const updatedCollection = await this.collectionRepository.updateByFilter(
-      filter,
-      updateCollectionDto,
-    );
-    return await this.queryBus.execute(
-      new GetPrivateViewCollectionQuery(null, updatedCollection),
-    );
+    try {
+      const { updateCollectionDto, filter } = command;
+      await this.updateValidationService.validateUpdateCollectionCommand(
+        updateCollectionDto,
+      );
+      const updatedCollection = await this.collectionRepository.updateByFilter(
+        filter,
+        updateCollectionDto,
+      );
+      return await this.queryBus.execute(
+        new GetPrivateViewCollectionQuery(null, updatedCollection),
+      );
+    } catch (e) {
+      this.logger.error(e);
+      throw new InternalServerErrorException(e);
+    }
   }
 }

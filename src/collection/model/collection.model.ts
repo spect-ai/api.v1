@@ -234,7 +234,6 @@ export interface FormMetadata {
   surveyLotteryWinner?: number;
   claimCodes?: string[];
   claimCode?: string;
-  poapDistributionEnabled?: boolean;
   poapEventId?: string;
   poapEditCode?: string;
 }

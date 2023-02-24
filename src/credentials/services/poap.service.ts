@@ -17,8 +17,6 @@ export class PoapService {
     image: Express.Multer.File,
   ) {
     try {
-      console.log({ lsls: createPoapDto.name });
-
       const editCode = Math.floor(100000 + Math.random() * 900000);
       const endDate = new Date(createPoapDto.endDate);
       const expiryDate = new Date(endDate.setDate(endDate.getDate() + 360))
@@ -241,6 +239,32 @@ export class PoapService {
       this.logger.error(e);
       throw new InternalServerErrorException(
         `Failed to get POAPs by address with error ${e}`,
+      );
+    }
+  }
+
+  async validateSecretCode(poapEventId: string, editCode: string) {
+    try {
+      const options = {
+        method: 'POST',
+        headers: {
+          accept: 'application/json',
+          'content-type': 'application/json',
+          authorization: `Bearer ${process.env.BEARER_TOKEN}`,
+          'x-api-key': process.env.POAP_API_KEY,
+        },
+        body: JSON.stringify({
+          event_id: poapEventId,
+          secret_code: editCode,
+        }),
+      };
+
+      const res = await fetch(`https://api.poap.tech/event/validate`, options);
+      return await res.json();
+    } catch (e) {
+      this.logger.error(e);
+      throw new InternalServerErrorException(
+        `Failed to validate secret code with error ${e}`,
       );
     }
   }

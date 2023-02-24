@@ -13,6 +13,7 @@ import {
   AdminAuthGuard,
   PublicViewAuthGuard,
 } from 'src/auth/iron-session.guard';
+import { AuthTokenRefreshService } from 'src/common/authTokenRefresh.service';
 import { ObjectIdDto } from 'src/common/dtos/object-id.dto';
 import {
   OptionalArrayOfTags,
@@ -40,7 +41,13 @@ export class CredentialsController {
     private readonly mazuryService: MazuryService,
     private readonly passportService: GitcoinPassportService,
     private readonly poapService: PoapService,
+    private readonly authService: AuthTokenRefreshService,
   ) {}
+
+  @Post('/refreshAuth')
+  async refreshAuth() {
+    return this.authService.updateToken();
+  }
 
   @Get('/')
   async getAll() {

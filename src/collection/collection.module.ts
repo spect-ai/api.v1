@@ -34,6 +34,7 @@ import { RegistryService } from 'src/registry/registry.service';
 import { RegistryModule } from 'src/registry/registry.module';
 import { WhitelistService } from './services/whitelist.service';
 import { PoapService } from 'src/credentials/services/poap.service';
+import { UpdateValidationService } from './commands/handlers/update-collection.handler';
 
 @Module({
   imports: [
@@ -72,6 +73,7 @@ import { PoapService } from 'src/credentials/services/poap.service';
     ResponseCredentialService,
     WhitelistService,
     PoapService,
+    UpdateValidationService,
   ],
   exports: [CollectionModule, CollectionRepository],
 })
