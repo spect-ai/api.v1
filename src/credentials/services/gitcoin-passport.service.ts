@@ -1,9 +1,10 @@
 import { PassportReader } from '@gitcoinco/passport-sdk-reader';
 import { Injectable } from '@nestjs/common';
 import { CommonTools } from 'src/common/common.service';
-import { Credential, VerifiableCredential } from 'src/users/types/types';
+import { Credential } from 'src/users/types/types';
 import { CredentialsRepository } from '../credentials.repository';
 import { Credentials } from '../model/credentials.model';
+import fetch from 'node-fetch';
 
 @Injectable()
 export class GitcoinPassportService {
