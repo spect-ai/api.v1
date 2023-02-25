@@ -44,11 +44,6 @@ export class CredentialsController {
     private readonly authService: AuthTokenRefreshService,
   ) {}
 
-  @Post('/refreshAuth')
-  async refreshAuth() {
-    return this.authService.updateToken();
-  }
-
   @Get('/')
   async getAll() {
     return await this.credentialService.getAll();

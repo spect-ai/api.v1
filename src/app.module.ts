@@ -61,6 +61,9 @@ import { VRFConsumerListener } from './common/vrf-listener.service';
 import { EmailGeneratorService } from './notification/email-generatr.service';
 import { MailService } from './mail/mail.service';
 import { PoapService } from './credentials/services/poap.service';
+import { AuthTokenRefreshService } from './common/authTokenRefresh.service';
+import { EncryptionService } from './common/encryption.service';
+import { SecretModule } from './secretRegistry/secret.module';
 
 const databaseUrl = process.env.MONGO_URL
   ? `${process.env.MONGO_URL}/nest?authSource=admin&retryWrites=true&w=majority`
@@ -90,6 +93,7 @@ const databaseUrl = process.env.MONGO_URL
     MailModule,
     CredentialsModule,
     NotificationModule,
+    SecretModule,
   ],
   controllers: [
     AppController,
@@ -138,6 +142,8 @@ const databaseUrl = process.env.MONGO_URL
     EmailGeneratorService,
     MailService,
     PoapService,
+    AuthTokenRefreshService,
+    EncryptionService,
   ],
 })
 export class AppModule {}

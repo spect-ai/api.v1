@@ -4,7 +4,9 @@ import { TypegooseModule } from 'nestjs-typegoose';
 import { SessionAuthGuard } from 'src/auth/iron-session.guard';
 import { AuthTokenRefreshService } from 'src/common/authTokenRefresh.service';
 import { CommonTools } from 'src/common/common.service';
+import { EncryptionService } from 'src/common/encryption.service';
 import { LoggingService } from 'src/logging/logging.service';
+import { SecretModule } from 'src/secretRegistry/secret.module';
 import { EthAddressModule } from 'src/_eth-address/_eth-address.module';
 import { CredentialsController } from './credentials.controller';
 import { CredentialsRepository } from './credentials.repository';
@@ -20,6 +22,7 @@ import { PoapService } from './services/poap.service';
     TypegooseModule.forFeature([Credentials]),
     EthAddressModule,
     CqrsModule,
+    SecretModule,
   ],
   controllers: [CredentialsController],
   providers: [
@@ -33,6 +36,7 @@ import { PoapService } from './services/poap.service';
     PoapService,
     SessionAuthGuard,
     AuthTokenRefreshService,
+    EncryptionService,
   ],
   exports: [CredentialsService, CredentialsModule, GitcoinPassportService],
 })
