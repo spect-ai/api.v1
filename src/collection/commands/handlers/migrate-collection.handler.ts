@@ -388,31 +388,35 @@ export class MigrateAllCollectionsCommandHandler
     const allCollections = await this.collectionRepository.findAll();
 
     for (const collection of allCollections) {
-      if (
-        collection.permissions === undefined ||
-        collection.permissions?.manageSettings === undefined
-      ) {
-        console.log({ name: collection.name, id: collection.id });
-        const defaultPermissions = {
-          manageSettings: [],
-          updateResponsesManually: [],
-          viewResponses: [],
-          addComments: [],
-        };
+      // if (
+      //   collection.permissions === undefined ||
+      //   collection.permissions?.manageSettings === undefined
+      // ) {
+      //   console.log({ name: collection.name, id: collection.id });
+      //   const defaultPermissions = {
+      //     manageSettings: [],
+      //     updateResponsesManually: [],
+      //     viewResponses: [],
+      //     addComments: [],
+      //   };
 
-        const parentCircle = await this.queryBus.execute(
-          new GetCircleByIdQuery(collection.parents[0]),
-        );
+      //   const parentCircle = await this.queryBus.execute(
+      //     new GetCircleByIdQuery(collection.parents[0]),
+      //   );
 
-        Object.keys(parentCircle.roles).map((role) => {
-          if (parentCircle.roles[role].permissions.createNewForm) {
-            defaultPermissions.manageSettings.push(role);
-            defaultPermissions.updateResponsesManually.push(role);
-            defaultPermissions.viewResponses.push(role);
-            defaultPermissions.addComments.push(role);
-          }
-        });
-        collection.permissions = defaultPermissions;
+      //   Object.keys(parentCircle.roles).map((role) => {
+      //     if (parentCircle.roles[role].permissions.createNewForm) {
+      //       defaultPermissions.manageSettings.push(role);
+      //       defaultPermissions.updateResponsesManually.push(role);
+      //       defaultPermissions.viewResponses.push(role);
+      //       defaultPermissions.addComments.push(role);
+      //     }
+      //   });
+      //   collection.permissions = defaultPermissions;
+      //   await this.collectionRepository.updateById(collection.id, collection);
+      // }
+      if (collection.collectionType === 0) {
+        collection.formMetadata.walletConnectionRequired = true;
         await this.collectionRepository.updateById(collection.id, collection);
       }
     }
