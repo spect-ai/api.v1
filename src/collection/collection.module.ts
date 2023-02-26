@@ -34,6 +34,10 @@ import { RegistryService } from 'src/registry/registry.service';
 import { RegistryModule } from 'src/registry/registry.module';
 import { WhitelistService } from './services/whitelist.service';
 import { PoapService } from 'src/credentials/services/poap.service';
+import { UpdateValidationService } from './commands/handlers/update-collection.handler';
+import { AuthTokenRefreshService } from 'src/common/authTokenRefresh.service';
+import { EncryptionService } from 'src/common/encryption.service';
+import { SecretModule } from 'src/secretRegistry/secret.module';
 
 @Module({
   imports: [
@@ -45,6 +49,7 @@ import { PoapService } from 'src/credentials/services/poap.service';
     RealtimeModule,
     CredentialsModule,
     RegistryModule,
+    SecretModule,
   ],
   controllers: [CollectionController],
   providers: [
@@ -72,6 +77,9 @@ import { PoapService } from 'src/credentials/services/poap.service';
     ResponseCredentialService,
     WhitelistService,
     PoapService,
+    UpdateValidationService,
+    AuthTokenRefreshService,
+    EncryptionService,
   ],
   exports: [CollectionModule, CollectionRepository],
 })

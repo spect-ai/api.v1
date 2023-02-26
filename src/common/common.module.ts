@@ -7,9 +7,11 @@ import { GithubService } from './github.service';
 import { GuildxyzService } from './guildxyz.service';
 import { SlugService } from './slug.service';
 import { AuthTokenRefreshService } from './authTokenRefresh.service';
+import { EncryptionService } from './encryption.service';
+import { SecretModule } from 'src/secretRegistry/secret.module';
 
 @Module({
-  imports: [ScheduleModule.forRoot()],
+  imports: [ScheduleModule.forRoot(), SecretModule],
   controllers: [],
   providers: [
     SlugService,
@@ -19,6 +21,7 @@ import { AuthTokenRefreshService } from './authTokenRefresh.service';
     GuildxyzService,
     AuthTokenRefreshService,
     LoggingService,
+    EncryptionService,
   ],
   exports: [
     SlugService,

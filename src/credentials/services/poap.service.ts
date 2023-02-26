@@ -4,11 +4,16 @@ import { CreatePOAPDto } from '../dto/create-credential.dto';
 import * as FormData from 'form-data';
 import fetch from 'node-fetch';
 import { Readable } from 'stream';
+import { EncryptionService } from 'src/common/encryption.service';
+import { AuthTokenRefreshService } from 'src/common/authTokenRefresh.service';
 
 // TODO
 @Injectable()
 export class PoapService {
-  constructor(private readonly logger: LoggingService) {
+  constructor(
+    private readonly logger: LoggingService,
+    private readonly authTokenService: AuthTokenRefreshService,
+  ) {
     this.logger.setContext('PoapService');
   }
 
@@ -17,8 +22,6 @@ export class PoapService {
     image: Express.Multer.File,
   ) {
     try {
-      console.log({ lsls: createPoapDto.name });
-
       const editCode = Math.floor(100000 + Math.random() * 900000);
       const endDate = new Date(createPoapDto.endDate);
       const expiryDate = new Date(endDate.setDate(endDate.getDate() + 360))
@@ -103,12 +106,14 @@ export class PoapService {
 
   async claimQrCode(id: string, editCode: string) {
     try {
+      const accessToken = await this.authTokenService.getToken();
+
       const options = {
         method: 'POST',
         headers: {
           accept: 'application/json',
           'content-type': 'application/json',
-          authorization: `Bearer ${process.env.BEARER_TOKEN}`,
+          authorization: `Bearer ${accessToken}`,
           'x-api-key': process.env.POAP_API_KEY,
         },
         body: JSON.stringify({
@@ -129,11 +134,13 @@ export class PoapService {
 
   async getClaimInfo(qrHash: string) {
     try {
+      const accessToken = await this.authTokenService.getToken();
+
       const options = {
         method: 'GET',
         headers: {
           accept: 'application/json',
-          authorization: `Bearer ${process.env.BEARER_TOKEN}`,
+          authorization: `Bearer ${accessToken}`,
           'x-api-key': process.env.POAP_API_KEY,
         },
       };
@@ -171,13 +178,15 @@ export class PoapService {
       if (!claimInfo) {
         throw `Failed to get claim info for event ${poapEventId}`;
       }
+      const accessToken = await this.authTokenService.getToken();
+
       const claimSecret = claimInfo.secret;
       const options = {
         method: 'POST',
         headers: {
           accept: 'application/json',
           'content-type': 'application/json',
-          authorization: `Bearer ${process.env.BEARER_TOKEN}`,
+          authorization: `Bearer ${accessToken}`,
           'x-api-key': process.env.POAP_API_KEY,
         },
         body: JSON.stringify({
@@ -241,6 +250,34 @@ export class PoapService {
       this.logger.error(e);
       throw new InternalServerErrorException(
         `Failed to get POAPs by address with error ${e}`,
+      );
+    }
+  }
+
+  async validateSecretCode(poapEventId: string, editCode: string) {
+    try {
+      const accessToken = await this.authTokenService.getToken();
+
+      const options = {
+        method: 'POST',
+        headers: {
+          accept: 'application/json',
+          'content-type': 'application/json',
+          authorization: `Bearer ${accessToken}`,
+          'x-api-key': process.env.POAP_API_KEY,
+        },
+        body: JSON.stringify({
+          event_id: poapEventId,
+          secret_code: editCode,
+        }),
+      };
+
+      const res = await fetch(`https://api.poap.tech/event/validate`, options);
+      return await res.json();
+    } catch (e) {
+      this.logger.error(e);
+      throw new InternalServerErrorException(
+        `Failed to validate secret code with error ${e}`,
       );
     }
   }
