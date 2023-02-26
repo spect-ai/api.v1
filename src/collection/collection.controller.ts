@@ -268,7 +268,7 @@ export class CollectionController {
     );
   }
 
-  // @UseGuards(PublicViewAuthGuard)
+  @UseGuards(PublicViewAuthGuard)
   @Patch('/:id/addData')
   async addDataInForm(
     @Param() param: ObjectIdDto,

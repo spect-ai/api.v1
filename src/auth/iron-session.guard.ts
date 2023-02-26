@@ -75,8 +75,9 @@ export class PublicViewAuthGuard implements CanActivate {
       );
       return true;
     } catch (error) {
-      request.session.destroy();
-      throw new HttpException({ message: error }, 422);
+      return true;
+      // request.session.destroy();
+      // throw new HttpException({ message: error }, 422);
     }
   }
 }

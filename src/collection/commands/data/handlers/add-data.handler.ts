@@ -97,7 +97,6 @@ export class AddDataCommandHandler implements ICommandHandler<AddDataCommand> {
   async execute(command: AddDataCommand) {
     const { data, caller, collectionId, anon } = command;
     try {
-      console.log({ collectionId });
       const collection = await this.collectionRepository.findById(collectionId);
       if (!collection) throw 'Collection does not exist';
       if (collection.collectionType === 0) {
