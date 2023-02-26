@@ -237,7 +237,7 @@ export class CollectionController {
   @Patch('/:id/updateProperty')
   async updateProperty(
     @Param() param: ObjectIdDto,
-    @Query() propertyParam: RequiredPropertyIdDto,
+    // @Query() propertyParam: RequiredPropertyIdDto,
     @Body() updatePropertyDto: UpdatePropertyDto,
     @Request() req,
   ): Promise<Collection> {
@@ -246,7 +246,7 @@ export class CollectionController {
         updatePropertyDto,
         req.user?.id,
         param.id,
-        propertyParam.propertyId,
+        updatePropertyDto.propertyId,
       ),
     );
   }
@@ -256,7 +256,7 @@ export class CollectionController {
   @Patch('/:id/removeProperty')
   async removeProperty(
     @Param() param: ObjectIdDto,
-    @Query() propertyParam: RequiredPropertyIdDto,
+    @Body() propertyParam: RequiredPropertyIdDto,
     @Request() req,
   ): Promise<Collection> {
     return await this.commandBus.execute(

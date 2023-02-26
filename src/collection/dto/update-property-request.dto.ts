@@ -134,6 +134,8 @@ export class AddPropertyDto {
 }
 
 export class UpdatePropertyDto {
+  @IsString()
+  propertyId: string;
   /**
    * The name of the property
    */
