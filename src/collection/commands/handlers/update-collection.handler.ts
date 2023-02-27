@@ -3,6 +3,7 @@ import { CommandHandler, ICommandHandler, QueryBus } from '@nestjs/cqrs';
 import { CollectionRepository } from 'src/collection/collection.repository';
 import { CollectionResponseDto } from 'src/collection/dto/collection-response.dto';
 import { UpdateCollectionDto } from 'src/collection/dto/update-collection-request.dto';
+import { Collection } from 'src/collection/model/collection.model';
 import { GetPrivateViewCollectionQuery } from 'src/collection/queries';
 import { CommonTools } from 'src/common/common.service';
 import { PoapService } from 'src/credentials/services/poap.service';
@@ -23,11 +24,16 @@ export class UpdateValidationService {
 
   async validateUpdateCollectionCommand(
     updateCollectionDto: Partial<UpdateCollectionDto>,
+    collection: Collection,
   ): Promise<void> {
     if (!updateCollectionDto) {
       throw new Error('UpdateCollectionDto is required');
     }
-    if (updateCollectionDto.formMetadata?.poapEventId) {
+    if (
+      updateCollectionDto.formMetadata?.poapEventId &&
+      collection.formMetadata?.poapEventId !==
+        updateCollectionDto.formMetadata?.poapEventId
+    ) {
       const isValidSecretCode = await this.poapService.validateSecretCode(
         updateCollectionDto.formMetadata.poapEventId,
         updateCollectionDto.formMetadata.poapEditCode,
@@ -58,8 +64,10 @@ export class UpdateCollectionCommandHandler
   ): Promise<CollectionResponseDto> {
     try {
       const { updateCollectionDto, collectionId } = command;
+      const collection = await this.collectionRepository.findById(collectionId);
       await this.updateValidationService.validateUpdateCollectionCommand(
         updateCollectionDto,
+        collection,
       );
       const updatedCollection = await this.collectionRepository.updateById(
         collectionId,
@@ -91,8 +99,11 @@ export class UpdateCollectionByFilterCommandHandler
   ): Promise<CollectionResponseDto> {
     try {
       const { updateCollectionDto, filter } = command;
+      const collection = await this.collectionRepository.findOne(filter);
+
       await this.updateValidationService.validateUpdateCollectionCommand(
         updateCollectionDto,
+        collection,
       );
       const updatedCollection = await this.collectionRepository.updateByFilter(
         filter,
