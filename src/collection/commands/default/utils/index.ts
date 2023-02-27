@@ -77,3 +77,48 @@ export const getOnboardToSpectProjectDetails = (caller: string) => {
     dataActivityOrder: getOnboardToSpectActivityOrder(),
   };
 };
+
+export const getOnboardToSpectFormDetails = (caller: string) => {
+  return {
+    name: 'Your First Form on Spect',
+    properties: getProperties(),
+    propertyOrder: ['Title', 'Description', 'Status'],
+    permissions: {
+      manageSettings: ['steward'],
+      updateResponsesManually: ['steward'],
+      viewResponses: ['steward'],
+      addComments: ['steward'],
+    },
+    defaultView: 'table',
+    circleRolesToNotifyUponNewResponse: [],
+    circleRolesToNotifyUponUpdatedResponse: [],
+    voting: {
+      enabled: false,
+    },
+    collectionType: 0,
+    projectMetadata: {
+      views: {
+        '0x0': {
+          id: '0x0',
+          name: 'Default View',
+          type: 'grid',
+          filters: [],
+          sort: {
+            property: '',
+            direction: 'asc',
+          },
+        },
+      },
+      viewOrder: [viewId, '0x0'],
+    },
+    formMetadata: {
+      active: true,
+      messageOnSubmission: 'Thank you for submitting your response',
+      multipleResponsesAllowed: false,
+      updatingResponseAllowed: false,
+      allowAnonymousResponses: false,
+      walletConnectionRequired: true,
+    },
+    archived: false,
+  };
+};

@@ -609,7 +609,7 @@ export class CollectionController {
     @Body()
     body: {
       data: object[];
-      collectionName: string;
+      collectionId: string;
       collectionProperties: MappedItem<Property>;
       groupByColumn: string;
       circleId: string;
@@ -619,7 +619,7 @@ export class CollectionController {
     return await this.commandBus.execute(
       new ImportCommand(
         body.data,
-        body.collectionName,
+        body.collectionId,
         body.collectionProperties,
         body.groupByColumn,
         body.circleId,

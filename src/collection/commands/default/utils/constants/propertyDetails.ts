@@ -51,38 +51,38 @@ export const getProperties = () => {
       viewConditions: [],
       payWallOptions: {},
     },
-    Labels: {
-      name: 'Labels',
-      type: 'multiSelect',
-      isPartOfFormView: true,
-      description: '',
-      options: [
-        {
-          label: 'Feature',
-          value: labels.feature,
-        },
-        {
-          label: 'Workflow',
-          value: labels.workflow,
-        },
-        {
-          label: 'Setup',
-          value: labels.setup,
-        },
-        {
-          label: 'Video',
-          value: labels.video,
-        },
-        {
-          label: 'Guide',
-          value: labels.guide,
-        },
-      ],
-      rewardOptions: {},
-      required: false,
-      milestoneFields: [],
-      viewConditions: [],
-      payWallOptions: {},
-    },
+    // Labels: {
+    //   name: 'Labels',
+    //   type: 'multiSelect',
+    //   isPartOfFormView: true,
+    //   description: '',
+    //   options: [
+    //     {
+    //       label: 'Feature',
+    //       value: labels.feature,
+    //     },
+    //     {
+    //       label: 'Workflow',
+    //       value: labels.workflow,
+    //     },
+    //     {
+    //       label: 'Setup',
+    //       value: labels.setup,
+    //     },
+    //     {
+    //       label: 'Video',
+    //       value: labels.video,
+    //     },
+    //     {
+    //       label: 'Guide',
+    //       value: labels.guide,
+    //     },
+    //   ],
+    //   rewardOptions: {},
+    //   required: false,
+    //   milestoneFields: [],
+    //   viewConditions: [],
+    //   payWallOptions: {},
+    // },
   };
 };
