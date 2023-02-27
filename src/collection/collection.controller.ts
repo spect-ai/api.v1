@@ -122,6 +122,15 @@ export class CollectionController {
     private readonly whitelistService: WhitelistService,
   ) {}
 
+  @Get('/gm')
+  async gm(): Promise<boolean> {
+    return await this.queryBus.execute(
+      new GetCollectionByFilterQuery({
+        'formMetadata.surveyTokenId': 2,
+      }),
+    );
+  }
+
   @UseGuards(SessionAuthGuard)
   @Get('/isWhitelisted')
   async isWhitelisted(
