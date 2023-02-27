@@ -101,7 +101,7 @@ export const getOnboardToSpectFormDetails = (caller: string) => {
         '0x0': {
           id: '0x0',
           name: 'Default View',
-          type: 'grid',
+          type: 'form',
           filters: [],
           sort: {
             property: '',
@@ -109,7 +109,7 @@ export const getOnboardToSpectFormDetails = (caller: string) => {
           },
         },
       },
-      viewOrder: [viewId, '0x0'],
+      viewOrder: ['0x0'],
     },
     formMetadata: {
       active: true,
