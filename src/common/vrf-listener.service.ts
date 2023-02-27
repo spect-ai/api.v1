@@ -32,7 +32,7 @@ export class VRFConsumerListener {
       const { filterResponse, alchemy } = this.getWS(
         process.env.ALCHEMY_API_KEY_POLYGON,
         Network.MATIC_MAINNET,
-        '0xD38028814eC0AAD592c97dE015B6F7ee5c019B48',
+        '0xa80ed1Bfa30a8461aCa4830A240a10a355A547C8',
       );
       alchemy.ws.on(filterResponse, (log) => {
         this.decodeTransactionAndRecord(log, '137');

@@ -25,7 +25,7 @@ export class SurveyProtocolListener {
       const { filterResponse, alchemy } = this.getWS(
         process.env.ALCHEMY_API_KEY_POLYGON,
         Network.MATIC_MAINNET,
-        '0xD38028814eC0AAD592c97dE015B6F7ee5c019B48',
+        '0x9b51512FC5bFabC9A1855460e7fe57189E605499',
       );
       alchemy.ws.on(filterResponse, (log) => {
         this.decodeTransactionAndRecord(log);
