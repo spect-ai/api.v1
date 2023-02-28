@@ -48,6 +48,12 @@ export const vrfConsumerAbi = [
       {
         indexed: false,
         internalType: 'uint256',
+        name: 'surveyId',
+        type: 'uint256',
+      },
+      {
+        indexed: false,
+        internalType: 'uint256',
         name: 'requestId',
         type: 'uint256',
       },
@@ -379,7 +385,13 @@ export const vrfConsumerAbi = [
     type: 'function',
   },
   {
-    inputs: [],
+    inputs: [
+      {
+        internalType: 'uint256',
+        name: 'surveyId',
+        type: 'uint256',
+      },
+    ],
     name: 'requestRandomWords',
     outputs: [
       {
@@ -419,6 +431,11 @@ export const vrfConsumerAbi = [
     ],
     name: 's_requests',
     outputs: [
+      {
+        internalType: 'uint256',
+        name: 'surveyId',
+        type: 'uint256',
+      },
       {
         internalType: 'uint256',
         name: 'paid',

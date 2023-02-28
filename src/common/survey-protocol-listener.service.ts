@@ -25,7 +25,7 @@ export class SurveyProtocolListener {
       const { filterResponse, alchemy } = this.getWS(
         process.env.ALCHEMY_API_KEY_POLYGON,
         Network.MATIC_MAINNET,
-        '0xD38028814eC0AAD592c97dE015B6F7ee5c019B48',
+        '0x9b51512FC5bFabC9A1855460e7fe57189E605499',
       );
       alchemy.ws.on(filterResponse, (log) => {
         this.decodeTransactionAndRecord(log);
@@ -35,7 +35,7 @@ export class SurveyProtocolListener {
       const { filterResponse, alchemy } = this.getWS(
         process.env.ALCHEMY_API_KEY_MUMBAI,
         Network.MATIC_MUMBAI,
-        '0xF71D6C1763fd49d2c1937d469ae7Aa3d1cf4e85f',
+        '0x5CaD4E6E58cBc16a934F013081c7111E68c4FC51',
       );
       alchemy.ws.on(filterResponse, (log) => {
         this.decodeTransactionAndRecord(log);
@@ -113,31 +113,31 @@ export class SurveyProtocolListener {
       console.log('triggering random number generator');
 
       const tx = await surveyProtocol.triggerRandomNumberGenerator(surveyId);
-      await tx.wait();
-      const distributionAfter = await surveyProtocol.distributionInfo(surveyId);
-      console.log({ distributionAfter });
+      // console.log({ tx });
+      // const distributionAfter = await surveyProtocol.distributionInfo(surveyId);
+      // console.log({ distributionAfter });
 
-      const collection = await this.queryBus.execute(
-        new GetCollectionByFilterQuery({
-          'formMetadata.surveyTokenId': surveyId,
-        }),
-      );
+      // const collection = await this.queryBus.execute(
+      //   new GetCollectionByFilterQuery({
+      //     'formMetadata.surveyTokenId': surveyId,
+      //   }),
+      // );
 
-      if (!collection) {
-        throw `Collection not found with surveyId ${surveyId}`;
-      }
-      await this.commandBus.execute(
-        new UpdateCollectionCommand(
-          {
-            formMetadata: {
-              ...collection.formMetadata,
-              surveyVRFRequestId: distributionAfter.requestId?.toString(),
-            },
-          },
-          'bot',
-          collection._id?.toString(),
-        ),
-      );
+      // if (!collection) {
+      //   throw `Collection not found with surveyId ${surveyId}`;
+      // }
+      // await this.commandBus.execute(
+      //   new UpdateCollectionCommand(
+      //     {
+      //       formMetadata: {
+      //         ...collection.formMetadata,
+      //         surveyVRFRequestId: distributionAfter.requestId?.toString(),
+      //       },
+      //     },
+      //     'bot',
+      //     collection._id?.toString(),
+      //   ),
+      // );
     } catch (e) {
       this.logger.error(e);
     }
