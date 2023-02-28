@@ -19,6 +19,8 @@ import {
 } from '../impl';
 import { actionIdToCommandMapNew } from '../impl/take-action-v2.command';
 
+import mixpanel from 'mixpanel';
+
 @CommandHandler(PerformAutomationOnCollectionDataUpdateCommand)
 export class PerformAutomationOnCollectionDataUpdateCommandHandler
   implements ICommandHandler<PerformAutomationOnCollectionDataUpdateCommand>
@@ -260,6 +262,19 @@ export class PerformAutomationOnPaymentCancelledCommandHandler
         const { actions } = circle.automations[automationId];
         for (const action of actions) {
           const actionCommand = actionIdToCommandMapNew[action.type];
+          mixpanel.init(process.env.MIXPANEL_TOKEN || '', {
+            debug: true,
+            api_host: 'https://tracking.spect.network',
+          });
+          process.env.NODE_ENV === 'production' &&
+            mixpanel.track('Automation Triggered', {
+              automationId,
+              actionId: action.id,
+              actionType: action.type,
+              collectionSlug: collection.slug,
+              dataSlug,
+              circle: circle.slug,
+            });
           await this.commandBus.execute(
             new actionCommand(action, caller, dataContainer, updateContainer, {
               collectionSlug: collection.slug,
