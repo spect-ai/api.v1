@@ -4,6 +4,7 @@ import { Alchemy, Network } from 'alchemy-sdk';
 import { ethers, utils } from 'ethers';
 import { AbiCoder } from 'ethers/lib/utils';
 import { UpdateCollectionCommand } from 'src/collection/commands';
+import { Collection } from 'src/collection/model/collection.model';
 import { GetCollectionByFilterQuery } from 'src/collection/queries';
 import { LoggingService } from 'src/logging/logging.service';
 import { MailService } from 'src/mail/mail.service';
@@ -31,20 +32,20 @@ export class VRFConsumerListener {
       const { filterResponse, alchemy } = this.getWS(
         process.env.ALCHEMY_API_KEY_POLYGON,
         Network.MATIC_MAINNET,
-        '0xD38028814eC0AAD592c97dE015B6F7ee5c019B48',
+        '0xa80ed1Bfa30a8461aCa4830A240a10a355A547C8',
       );
       alchemy.ws.on(filterResponse, (log) => {
-        this.decodeTransactionAndRecord(log);
+        this.decodeTransactionAndRecord(log, '137');
       });
     }
     if (process.env.ALCHEMY_API_KEY_MUMBAI) {
       const { filterResponse, alchemy } = this.getWS(
         process.env.ALCHEMY_API_KEY_MUMBAI,
         Network.MATIC_MUMBAI,
-        '0xA0ef79e2bB29385106b2278Fa22b6BCdA8882761',
+        '0x3002C606938fab7c6Ce34EF4085392b4408a1c6e',
       );
       alchemy.ws.on(filterResponse, (log) => {
-        this.decodeTransactionAndRecord(log);
+        this.decodeTransactionAndRecord(log, '80001');
       });
     }
   }
@@ -58,60 +59,37 @@ export class VRFConsumerListener {
     // For some reason the filter is not working with mutliple topics
     const filterResponse = {
       address: vrfConsumerAddress,
-      topics: [utils.id('RequestFulfilled(uint256,uint256[],uint256)')],
+      topics: [utils.id('RequestFulfilled(uint256,uint256,uint256[],uint256)')],
     };
     return { filterResponse, alchemy };
   }
 
-  private async decodeTransactionAndRecord(log: any) {
+  private async decodeTransactionAndRecord(log: any, chainId: string) {
     try {
       if (
         log.topics[0] ===
-        utils.id('RequestFulfilled(uint256,uint256[],uint256)')
+        utils.id('RequestFulfilled(uint256,uint256,uint256[],uint256)')
       ) {
         const decodedEvents = this.iface.decodeEventLog(
           'RequestFulfilled',
           log.data,
           log.topics,
         );
-        const requestId = decodedEvents[0].toString();
-        const collection = await this.queryBus.execute(
-          new GetCollectionByFilterQuery({
-            'formMetadata.surveyVRFRequestId': requestId,
-          }),
-        );
-        if (!collection) {
-          throw `No collection found for requestId ${requestId}`;
-        }
-        const registry = await this.registryService.getRegistry();
+        const surveyId = decodedEvents[0];
 
+        const registry = await this.registryService.getRegistry();
         const provider = new ethers.providers.JsonRpcProvider(
-          registry['80001'].provider,
+          registry[chainId].provider,
         );
         const signer = new ethers.Wallet(process.env.PRIVATE_KEY, provider);
 
         const surveyProtocol = new ethers.Contract(
-          registry['80001'].surveyHubAddress,
+          registry[chainId].surveyHubAddress,
           surveyHubAbi,
           signer,
         );
 
-        const lotteryWinner = await surveyProtocol.findLotteryWinner(
-          collection?.formMetadata?.surveyTokenId,
-        );
-
-        await this.commandBus.execute(
-          new UpdateCollectionCommand(
-            {
-              formMetadata: {
-                ...collection.formMetadata,
-                surveyLotteryWinner: lotteryWinner,
-              },
-            },
-            'bot',
-            collection._id.toString(),
-          ),
-        );
+        const lotteryWinner = await surveyProtocol.findLotteryWinner(surveyId);
 
         const user = await this.queryBus.execute(
           new GetProfileQuery(
@@ -124,6 +102,14 @@ export class VRFConsumerListener {
         );
         if (user?.email) {
           try {
+            const collection = await this.queryBus.execute(
+              new GetCollectionByFilterQuery({
+                'formMetadata.surveyTokenId': parseInt(surveyId),
+              }),
+            );
+            if (!collection) {
+              throw `Collection not found for surveyId ${surveyId}`;
+            }
             const html = this.emailGeneratorService.generateEmailWithMessage(
               `You have been picked as the lottery winner for filling out ${collection.name} survey`,
               `https://circles.spect.network/r/${collection.slug}`,

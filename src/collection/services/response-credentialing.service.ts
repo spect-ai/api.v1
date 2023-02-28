@@ -312,10 +312,11 @@ export class ResponseCredentialService {
       );
 
       if (!hasResponseReceiptNFT) {
-        await surveyProtocol.addResponse(
+        const tx = await surveyProtocol.addResponse(
           collectionToUpdate?.formMetadata?.surveyTokenId,
           responderAddress,
         );
+        await tx.wait();
       }
       return true;
     } catch (error) {
