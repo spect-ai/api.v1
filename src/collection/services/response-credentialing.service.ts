@@ -142,20 +142,29 @@ export class ResponseCredentialingService {
         if (
           ['137', '80001'].includes(collection.formMetadata.surveyChain.value)
         ) {
+          const gasEstimate = await surveyProtocol.estimateGas.getPaidEther(
+            collection?.formMetadata?.surveyTokenId,
+            this.requestProvider.user.ethAddress,
+            {
+              maxFeePerGas,
+              maxPriorityFeePerGas,
+            },
+          );
           await surveyProtocol.getPaidEther(
             collection?.formMetadata?.surveyTokenId,
             this.requestProvider.user.ethAddress,
             {
               maxFeePerGas,
               maxPriorityFeePerGas,
+              gasLimit: Math.ceil(gasEstimate.toNumber() * 1.2),
             },
           );
         }
       } else {
         if (
           ['137', '80001'].includes(collection.formMetadata.surveyChain.value)
-        )
-          await surveyProtocol.getPaidToken(
+        ) {
+          const gasEstimate = await surveyProtocol.estimateGas.getPaidToken(
             collection?.formMetadata?.surveyTokenId,
             this.requestProvider.user.ethAddress,
             {
@@ -163,6 +172,16 @@ export class ResponseCredentialingService {
               maxPriorityFeePerGas,
             },
           );
+          await surveyProtocol.getPaidToken(
+            collection?.formMetadata?.surveyTokenId,
+            this.requestProvider.user.ethAddress,
+            {
+              maxFeePerGas,
+              maxPriorityFeePerGas,
+              gasLimit: Math.ceil(gasEstimate.toNumber() * 1.2),
+            },
+          );
+        }
       }
 
       return true;
@@ -299,6 +318,7 @@ export class ResponseCredentialService {
         collectionToUpdate?.formMetadata?.surveyTokenId,
         responderAddress,
       );
+      console.log({ hasResponseReceiptNFT });
       let maxFeePerGas = ethers.BigNumber.from(40000000000); // fallback to 40 gwei
       let maxPriorityFeePerGas = ethers.BigNumber.from(40000000000); // fallback to 40 gwei
       let tx;
@@ -320,12 +340,22 @@ export class ResponseCredentialService {
             Math.ceil(feeEstimate.maxPriorityFee + 25) + '',
             'gwei',
           );
-          console.log({ maxFeePerGas, maxPriorityFeePerGas });
+          const gasEstimate = await surveyProtocol.estimateGas.addResponse(
+            collectionToUpdate?.formMetadata?.surveyTokenId,
+            responderAddress,
+          );
+
+          console.log({
+            maxFeePerGas,
+            maxPriorityFeePerGas,
+            gasEstimate: gasEstimate.toNumber(),
+          });
 
           tx = await surveyProtocol.addResponse(
             collectionToUpdate?.formMetadata?.surveyTokenId,
             responderAddress,
             {
+              gasLimit: Math.ceil(gasEstimate.toNumber() * 1.2),
               maxFeePerGas,
               maxPriorityFeePerGas,
             } as ethers.Overrides,
