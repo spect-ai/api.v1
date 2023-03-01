@@ -22,6 +22,7 @@ import {
   RootAutomationsType,
   AutomationsIndexedByCollectionSlugType,
   PaymentDetails,
+  SidebarConfig,
 } from '../types';
 import { Option, SnapshotSpace } from 'src/collection/types/types';
 
@@ -307,6 +308,9 @@ export class Circle extends ProfileModel {
 
   @prop({ default: [] })
   paymentLabelOptions?: Option[];
+
+  @prop()
+  sidebarConfig?: SidebarConfig;
 }
 
 export class ExtendedCircle extends Circle {

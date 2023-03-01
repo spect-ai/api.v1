@@ -128,3 +128,11 @@ export type PaymentDetails = {
   collection?: Option;
   status: 'Pending' | 'Pending Signature' | 'Completed' | 'Cancelled';
 };
+
+export type SidebarConfig = {
+  showPayment: boolean;
+  showAutomation: boolean;
+  showGovernance: boolean;
+  showMembership: boolean;
+  showDiscussion: boolean;
+};

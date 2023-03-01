@@ -5344,6 +5344,14 @@ https-proxy-agent@5, https-proxy-agent@^5.0.0:
     agent-base "6"
     debug "4"
 
+https-proxy-agent@5.0.0:
+  version "5.0.0"
+  resolved "https://registry.yarnpkg.com/https-proxy-agent/-/https-proxy-agent-5.0.0.tgz#e2a90542abb68a762e0a0850f6c9edadfd8506b2"
+  integrity sha512-EkYm5BcKUGiduxzSt3Eppko+PiNWNEpa4ySk9vTC6wDsQJW9rHSa+UhGNJoRYp7bz6Ht1eaRIa6QaJqO5rCFbA==
+  dependencies:
+    agent-base "6"
+    debug "4"
+
 human-signals@^1.1.1:
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/human-signals/-/human-signals-1.1.1.tgz#c5b1cd14f50aeae09ab6c59fe63ba3395fe4dfa3"
@@ -6634,6 +6642,13 @@ minimist@^1.2.0, minimist@^1.2.5, minimist@^1.2.6:
   version "1.2.7"
   resolved "https://registry.yarnpkg.com/minimist/-/minimist-1.2.7.tgz#daa1c4d91f507390437c6a8bc01078e7000c4d18"
   integrity sha512-bzfL1YUZsP41gmu/qjrEk0Q6i2ix/cVeAhbCbqH9u3zYutS1cLg00qhrD0M2MVdCcx4Sc0UpP2eBWo9rotpq6g==
+
+mixpanel@^0.17.0:
+  version "0.17.0"
+  resolved "https://registry.yarnpkg.com/mixpanel/-/mixpanel-0.17.0.tgz#ec57b068598c620cf039a5e504fb37c97ebfe8ce"
+  integrity sha512-DY5WeOy/hmkPrNiiZugJpWR0iMuOwuj1a3u0bgwB2eUFRV6oIew/pIahhpawdbNjb+Bye4a8ID3gefeNPvL81g==
+  dependencies:
+    https-proxy-agent "5.0.0"
 
 mjml-accordion@4.13.0:
   version "4.13.0"

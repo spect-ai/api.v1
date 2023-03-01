@@ -13,7 +13,7 @@ import {
   DiscordToCircleRoles,
   GuildxyzToCircleRoles,
 } from '../model/circle.model';
-import { DiscordChannel, SafeAddresses } from '../types';
+import { DiscordChannel, SafeAddresses, SidebarConfig } from '../types';
 import { CreateCircleRequestDto } from './create-circle-request.dto';
 
 export class UpdateCircleRequestDto extends OmitType(CreateCircleRequestDto, [
@@ -168,6 +168,10 @@ export class UpdateCircleRequestDto extends OmitType(CreateCircleRequestDto, [
   @IsObject()
   @IsOptional()
   snapshot?: SnapshotSpace;
+
+  @IsObject()
+  @IsOptional()
+  sidebarConfig?: SidebarConfig;
 }
 
 export class UpdateCircleGithubRepoRequestDto {

@@ -27,15 +27,15 @@ export const getProperties = () => {
       type: 'singleSelect',
       options: [
         {
-          label: 'Beginner',
+          label: 'To Do',
           value: onboardToSpectStatus.beginner,
         },
         {
-          label: 'Intermediate',
+          label: 'In Progress',
           value: onboardToSpectStatus.intermediate,
         },
         {
-          label: 'Advanced',
+          label: 'Done',
           value: onboardToSpectStatus.advanced,
         },
       ],
@@ -43,7 +43,7 @@ export const getProperties = () => {
       rewardOptions: {},
       description: '',
       default: {
-        label: 'Beginner',
+        label: 'To Do',
         value: onboardToSpectStatus.beginner,
       },
       required: false,
@@ -51,38 +51,38 @@ export const getProperties = () => {
       viewConditions: [],
       payWallOptions: {},
     },
-    Labels: {
-      name: 'Labels',
-      type: 'multiSelect',
-      isPartOfFormView: true,
-      description: '',
-      options: [
-        {
-          label: 'Feature',
-          value: labels.feature,
-        },
-        {
-          label: 'Workflow',
-          value: labels.workflow,
-        },
-        {
-          label: 'Setup',
-          value: labels.setup,
-        },
-        {
-          label: 'Video',
-          value: labels.video,
-        },
-        {
-          label: 'Guide',
-          value: labels.guide,
-        },
-      ],
-      rewardOptions: {},
-      required: false,
-      milestoneFields: [],
-      viewConditions: [],
-      payWallOptions: {},
-    },
+    // Labels: {
+    //   name: 'Labels',
+    //   type: 'multiSelect',
+    //   isPartOfFormView: true,
+    //   description: '',
+    //   options: [
+    //     {
+    //       label: 'Feature',
+    //       value: labels.feature,
+    //     },
+    //     {
+    //       label: 'Workflow',
+    //       value: labels.workflow,
+    //     },
+    //     {
+    //       label: 'Setup',
+    //       value: labels.setup,
+    //     },
+    //     {
+    //       label: 'Video',
+    //       value: labels.video,
+    //     },
+    //     {
+    //       label: 'Guide',
+    //       value: labels.guide,
+    //     },
+    //   ],
+    //   rewardOptions: {},
+    //   required: false,
+    //   milestoneFields: [],
+    //   viewConditions: [],
+    //   payWallOptions: {},
+    // },
   };
 };

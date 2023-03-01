@@ -34,7 +34,7 @@ export class ImportCommandHandler implements ICommandHandler<ImportCommand> {
     try {
       const {
         data,
-        collectionName,
+        collectionId,
         collectionProperties,
         groupByColumn,
         caller,
@@ -42,7 +42,7 @@ export class ImportCommandHandler implements ICommandHandler<ImportCommand> {
       } = command;
       console.log({
         data,
-        collectionName,
+        collectionId,
         collectionProperties,
         groupByColumn,
       });
@@ -71,32 +71,34 @@ export class ImportCommandHandler implements ICommandHandler<ImportCommand> {
 
       const defaultViewId = '0x0';
 
-      const createdCollection = await this.collectionRepository.create({
-        collectionType: 1,
-        name: collectionName,
-        properties: collectionProperties,
-        propertyOrder: Object.keys(collectionProperties),
-        creator: caller,
-        parents: [circleId],
-        slug: uuidv4(),
-        permissions: defaultPermissions,
-        projectMetadata: {
-          viewOrder: [defaultViewId],
-          views: {
-            [defaultViewId]: {
-              id: defaultViewId,
-              name: 'Default View',
-              type: 'grid',
-              filters: [],
-              sort: {
-                property: '',
-                direction: 'asc',
+      const createdCollection = await this.collectionRepository.updateById(
+        collectionId,
+        {
+          collectionType: 1,
+          properties: collectionProperties,
+          propertyOrder: Object.keys(collectionProperties),
+          creator: caller,
+          parents: [circleId],
+          slug: uuidv4(),
+          permissions: defaultPermissions,
+          projectMetadata: {
+            viewOrder: [defaultViewId],
+            views: {
+              [defaultViewId]: {
+                id: defaultViewId,
+                name: 'Default View',
+                type: 'grid',
+                filters: [],
+                sort: {
+                  property: '',
+                  direction: 'asc',
+                },
               },
             },
+            cardOrders: {},
           },
-          cardOrders: {},
         },
-      });
+      );
 
       const updatedCollection: Collection = await this.commandBus.execute(
         new AddMultipleDataUsingAutomationCommand(data, createdCollection.id),
@@ -166,18 +168,8 @@ export class ImportCommandHandler implements ICommandHandler<ImportCommand> {
           caller,
         ),
       );
-
-      const updatedCircle = await this.commandBus.execute(
-        new CreateFolderCommand(parentCircle.id, {
-          name: 'Imported Project',
-          avatar: 'Imported Project',
-          contentIds: [createdCollection.id],
-        }),
-      );
-
       return {
         collection: updatedCollectionWithKanbanView,
-        circle: updatedCircle,
       };
     } catch (error) {
       this.logger.error(error);

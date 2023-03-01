@@ -9,7 +9,7 @@ import { UpdateCircleCommand } from 'src/circle/commands/impl/update-circle.comm
 import { CreateFolderCommand } from 'src/circle/commands/impl';
 import { RegistryService } from 'src/registry/registry.service';
 import { OnboardToSpectProjectCommand } from '../impl';
-import { getOnboardToSpectProjectDetails } from '../utils';
+import { getOnboardToSpectFormDetails } from '../utils';
 import { GetProfileQuery } from 'src/users/queries/impl';
 
 @CommandHandler(OnboardToSpectProjectCommand)
@@ -39,13 +39,13 @@ export class OnboardToSpectProjectCommandHandler
         ),
       );
 
-      // 1. Create Kanban project
-      const onboardingProjectDto = getOnboardToSpectProjectDetails(botUser.id);
-      const onboardingProject = await this.collectionRepository.create({
+      // const onboardingProjectDto = getOnboardToSpectProjectDetails(botUser.id);
+      const onboardingFormDto = getOnboardToSpectFormDetails(botUser.id);
+      const onboardingForm = await this.collectionRepository.create({
         creator: caller,
         parents: [id],
         slug: uuidv4(),
-        ...onboardingProjectDto,
+        ...onboardingFormDto,
       } as any);
 
       // 2. Update the circle
@@ -53,7 +53,7 @@ export class OnboardToSpectProjectCommandHandler
         new UpdateCircleCommand(
           id,
           {
-            collections: [onboardingProject.id],
+            collections: [onboardingForm.id],
           },
           caller,
         ),
@@ -64,7 +64,7 @@ export class OnboardToSpectProjectCommandHandler
         new CreateFolderCommand(id, {
           name: 'Welcome to Spect',
           avatar: 'All',
-          contentIds: [onboardingProject.id],
+          contentIds: [onboardingForm.id],
         }),
       );
 
