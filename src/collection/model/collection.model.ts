@@ -236,6 +236,11 @@ export interface FormMetadata {
   claimCode?: string;
   poapEventId?: string;
   poapEditCode?: string;
+  transactionHashes?: {
+    [userAddress: string]: {
+      [transactionType: string]: string;
+    };
+  };
 }
 
 export interface PaymentConfig {

@@ -2,6 +2,7 @@ import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { QueryBus } from '@nestjs/cqrs';
 import { ethers } from 'ethers';
 import { surveyHubAbi } from 'src/common/abis/surveyHub';
+import { GasPredictionService } from 'src/common/gas-prediction.service';
 import { CreatePOAPDto } from 'src/credentials/dto/create-credential.dto';
 import { MintKudosService } from 'src/credentials/services/mintkudos.service';
 import { PoapService } from 'src/credentials/services/poap.service';
@@ -22,6 +23,7 @@ export class ResponseCredentialingService {
     private readonly collectionRepository: CollectionRepository,
     private readonly logger: LoggingService,
     private readonly registryService: RegistryService,
+    private readonly gasPredictionService: GasPredictionService,
   ) {
     this.logger.setContext('ResponseCredentialingService');
   }
@@ -123,20 +125,79 @@ export class ResponseCredentialingService {
           'User has already received tokens',
         );
       }
-
+      let maxFeePerGas = ethers.BigNumber.from(40000000000); // fallback to 40 gwei
+      let maxPriorityFeePerGas = ethers.BigNumber.from(40000000000); // fallback to 40 gwei
+      const feeEstimate = await this.gasPredictionService.predictGas(
+        collection.formMetadata.surveyChain.value,
+      );
+      maxFeePerGas = ethers.utils.parseUnits(
+        Math.ceil(feeEstimate.maxFee) + '',
+        'gwei',
+      );
+      maxPriorityFeePerGas = ethers.utils.parseUnits(
+        Math.ceil(feeEstimate.maxPriorityFee) + '',
+        'gwei',
+      );
+      let tx;
       if (paymentToken === ethers.constants.AddressZero) {
-        await surveyProtocol.getPaidEther(
-          collection?.formMetadata?.surveyTokenId,
-          this.requestProvider.user.ethAddress,
-        );
+        if (
+          ['137', '80001'].includes(collection.formMetadata.surveyChain.value)
+        ) {
+          const gasEstimate = await surveyProtocol.estimateGas.getPaidEther(
+            collection?.formMetadata?.surveyTokenId,
+            this.requestProvider.user.ethAddress,
+            {
+              maxFeePerGas,
+              maxPriorityFeePerGas,
+            },
+          );
+          tx = await surveyProtocol.getPaidEther(
+            collection?.formMetadata?.surveyTokenId,
+            this.requestProvider.user.ethAddress,
+            {
+              maxFeePerGas,
+              maxPriorityFeePerGas,
+              gasLimit: Math.ceil(gasEstimate.toNumber() * 1.2),
+            },
+          );
+        }
       } else {
-        await surveyProtocol.getPaidToken(
-          collection?.formMetadata?.surveyTokenId,
-          this.requestProvider.user.ethAddress,
-        );
+        if (
+          ['137', '80001'].includes(collection.formMetadata.surveyChain.value)
+        ) {
+          const gasEstimate = await surveyProtocol.estimateGas.getPaidToken(
+            collection?.formMetadata?.surveyTokenId,
+            this.requestProvider.user.ethAddress,
+            {
+              maxFeePerGas,
+              maxPriorityFeePerGas,
+            },
+          );
+          tx = await surveyProtocol.getPaidToken(
+            collection?.formMetadata?.surveyTokenId,
+            this.requestProvider.user.ethAddress,
+            {
+              maxFeePerGas,
+              maxPriorityFeePerGas,
+              gasLimit: Math.ceil(gasEstimate.toNumber() * 1.2),
+            },
+          );
+        }
       }
 
-      return true;
+      await this.collectionRepository.updateById(collection.id, {
+        formMetadata: {
+          ...(collection.formMetadata || {}),
+          transactionHashes: {
+            [this.requestProvider.user.ethAddress]: {
+              ...(collection.formMetadata.transactionHashes || {}),
+              surveyTokenClaim: tx.hash,
+            },
+          },
+        },
+      });
+
+      return { transactionHash: tx.hash };
     } catch (error) {
       this.logger.error(
         `Failed while airdropping tokens with error: ${error}`,
@@ -219,47 +280,6 @@ export class ResponseCredentialingService {
       );
     }
   }
-  async getClaimCode(collectionId: string) {
-    try {
-      console.log('form');
-      const collection = await this.collectionRepository.findById(collectionId);
-      if (!collection) {
-        throw new InternalServerErrorException('Collection not found');
-      }
-      if (collection.formMetadata.claimCodes.length === 0) {
-        throw new InternalServerErrorException('No claim codes left');
-      }
-      console.log('sdsdsd');
-      if (
-        !Object.values(collection.dataOwner).includes(
-          this.requestProvider.user.id,
-        )
-      )
-        throw new InternalServerErrorException(
-          'User has not submitted response',
-        );
-
-      const res = await this.poapService.hasPoap(
-        this.requestProvider.user.ethAddress,
-        collection.formMetadata.poapEventId,
-      );
-      console.log({ res });
-      if (res.statusCode !== 404) {
-        throw new InternalServerErrorException('User has already claimed poap');
-      }
-      console.log(collection.formMetadata.claimCodes[0]);
-      return collection.formMetadata.claimCodes[0];
-    } catch (error) {
-      this.logger.error(
-        `Failed while claiming poap with error: ${error}`,
-        collectionId,
-      );
-      throw new InternalServerErrorException(
-        `Failed while claiming poap with error: ${error}`,
-        error,
-      );
-    }
-  }
 }
 
 // TEMPFIX - Created this service without request provider so it can be called from handlers
@@ -272,6 +292,7 @@ export class ResponseCredentialService {
     private readonly collectionRepository: CollectionRepository,
     private readonly logger: LoggingService,
     private readonly registryService: RegistryService,
+    private readonly gasPredictionService: GasPredictionService,
   ) {
     this.logger.setContext('ResponseCredentialingService');
   }
@@ -310,13 +331,50 @@ export class ResponseCredentialService {
         collectionToUpdate?.formMetadata?.surveyTokenId,
         responderAddress,
       );
-
+      console.log({ hasResponseReceiptNFT });
+      let maxFeePerGas = ethers.BigNumber.from(40000000000); // fallback to 40 gwei
+      let maxPriorityFeePerGas = ethers.BigNumber.from(40000000000); // fallback to 40 gwei
+      let tx;
       if (!hasResponseReceiptNFT) {
-        const tx = await surveyProtocol.addResponse(
-          collectionToUpdate?.formMetadata?.surveyTokenId,
-          responderAddress,
+        const feeEstimate = await this.gasPredictionService.predictGas(
+          collectionToUpdate.formMetadata.surveyChain.value,
         );
-        await tx.wait();
+        console.log({ feeEstimate });
+        if (
+          ['137', '80001'].includes(
+            collectionToUpdate.formMetadata.surveyChain.value,
+          )
+        ) {
+          maxFeePerGas = ethers.utils.parseUnits(
+            Math.ceil(feeEstimate.maxFee + 100) + '',
+            'gwei',
+          );
+          maxPriorityFeePerGas = ethers.utils.parseUnits(
+            Math.ceil(feeEstimate.maxPriorityFee + 25) + '',
+            'gwei',
+          );
+          const gasEstimate = await surveyProtocol.estimateGas.addResponse(
+            collectionToUpdate?.formMetadata?.surveyTokenId,
+            responderAddress,
+          );
+
+          console.log({
+            maxFeePerGas,
+            maxPriorityFeePerGas,
+            gasEstimate: gasEstimate.toNumber(),
+          });
+
+          tx = await surveyProtocol.addResponse(
+            collectionToUpdate?.formMetadata?.surveyTokenId,
+            responderAddress,
+            {
+              gasLimit: Math.ceil(gasEstimate.toNumber() * 1.2),
+              maxFeePerGas,
+              maxPriorityFeePerGas,
+            } as ethers.Overrides,
+          );
+          console.log({ tx });
+        }
       }
       return true;
     } catch (error) {

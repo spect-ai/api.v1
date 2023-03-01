@@ -9,10 +9,12 @@ import { SlugService } from './slug.service';
 import { AuthTokenRefreshService } from './authTokenRefresh.service';
 import { EncryptionService } from './encryption.service';
 import { SecretModule } from 'src/secretRegistry/secret.module';
+import { CommonController } from './common.controller';
+import { GasPredictionService } from './gas-prediction.service';
 
 @Module({
   imports: [ScheduleModule.forRoot(), SecretModule],
-  controllers: [],
+  controllers: [CommonController],
   providers: [
     SlugService,
     DiscordService,
@@ -22,6 +24,7 @@ import { SecretModule } from 'src/secretRegistry/secret.module';
     AuthTokenRefreshService,
     LoggingService,
     EncryptionService,
+    GasPredictionService,
   ],
   exports: [
     SlugService,
