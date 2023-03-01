@@ -64,6 +64,7 @@ import { PoapService } from './credentials/services/poap.service';
 import { AuthTokenRefreshService } from './common/authTokenRefresh.service';
 import { EncryptionService } from './common/encryption.service';
 import { SecretModule } from './secretRegistry/secret.module';
+import { GasPredictionService } from './common/gas-prediction.service';
 
 const databaseUrl = process.env.MONGO_URL
   ? `${process.env.MONGO_URL}/nest?authSource=admin&retryWrites=true&w=majority`
@@ -144,6 +145,7 @@ const databaseUrl = process.env.MONGO_URL
     PoapService,
     AuthTokenRefreshService,
     EncryptionService,
+    GasPredictionService,
   ],
 })
 export class AppModule {}

@@ -38,6 +38,7 @@ import { UpdateValidationService } from './commands/handlers/update-collection.h
 import { AuthTokenRefreshService } from 'src/common/authTokenRefresh.service';
 import { EncryptionService } from 'src/common/encryption.service';
 import { SecretModule } from 'src/secretRegistry/secret.module';
+import { GasPredictionService } from 'src/common/gas-prediction.service';
 
 @Module({
   imports: [
@@ -80,6 +81,7 @@ import { SecretModule } from 'src/secretRegistry/secret.module';
     UpdateValidationService,
     AuthTokenRefreshService,
     EncryptionService,
+    GasPredictionService,
   ],
   exports: [CollectionModule, CollectionRepository],
 })

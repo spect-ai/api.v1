@@ -103,7 +103,7 @@ export type PropertyType =
 
 export type Option = {
   label: string;
-  value: string | number;
+  value: string;
   data?: any;
 };
 
