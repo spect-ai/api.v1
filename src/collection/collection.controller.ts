@@ -122,15 +122,6 @@ export class CollectionController {
     private readonly whitelistService: WhitelistService,
   ) {}
 
-  @Get('/gm')
-  async gm(): Promise<boolean> {
-    return await this.queryBus.execute(
-      new GetCollectionByFilterQuery({
-        'formMetadata.surveyTokenId': 2,
-      }),
-    );
-  }
-
   @UseGuards(SessionAuthGuard)
   @Get('/isWhitelisted')
   async isWhitelisted(
@@ -639,7 +630,9 @@ export class CollectionController {
 
   @UseGuards(SessionAuthGuard)
   @Patch('/:id/claimSurveyTokens')
-  async claimSurveyTokens(@Param() param: ObjectIdDto): Promise<boolean> {
+  async claimSurveyTokens(@Param() param: ObjectIdDto): Promise<{
+    transactionHash: string;
+  }> {
     return await this.credentialingService.airdropSurveyToken(param.id);
   }
 

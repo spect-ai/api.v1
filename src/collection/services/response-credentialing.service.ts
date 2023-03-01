@@ -138,6 +138,7 @@ export class ResponseCredentialingService {
         Math.ceil(feeEstimate.maxPriorityFee) + '',
         'gwei',
       );
+      let tx;
       if (paymentToken === ethers.constants.AddressZero) {
         if (
           ['137', '80001'].includes(collection.formMetadata.surveyChain.value)
@@ -150,7 +151,7 @@ export class ResponseCredentialingService {
               maxPriorityFeePerGas,
             },
           );
-          await surveyProtocol.getPaidEther(
+          tx = await surveyProtocol.getPaidEther(
             collection?.formMetadata?.surveyTokenId,
             this.requestProvider.user.ethAddress,
             {
@@ -172,7 +173,7 @@ export class ResponseCredentialingService {
               maxPriorityFeePerGas,
             },
           );
-          await surveyProtocol.getPaidToken(
+          tx = await surveyProtocol.getPaidToken(
             collection?.formMetadata?.surveyTokenId,
             this.requestProvider.user.ethAddress,
             {
@@ -184,7 +185,19 @@ export class ResponseCredentialingService {
         }
       }
 
-      return true;
+      await this.collectionRepository.updateById(collection.id, {
+        formMetadata: {
+          ...(collection.formMetadata || {}),
+          transactionHashes: {
+            [this.requestProvider.user.ethAddress]: {
+              ...(collection.formMetadata.transactionHashes || {}),
+              surveyTokenClaim: tx.hash,
+            },
+          },
+        },
+      });
+
+      return { transactionHash: tx.hash };
     } catch (error) {
       this.logger.error(
         `Failed while airdropping tokens with error: ${error}`,

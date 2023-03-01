@@ -7,6 +7,8 @@ export class GasPredictionService {
     switch (chainId) {
       case '137':
         return await this.predictGasOnPolygon();
+      case '80001':
+        return await this.predictGasOnMumbai();
       case '1':
         return await this.predictGasOnEthereum();
       case '56':
@@ -16,6 +18,12 @@ export class GasPredictionService {
 
   async predictGasOnPolygon() {
     const response = await fetch('https://gasstation-mainnet.matic.network/v2');
+    const data = await response.json();
+    return data.fast;
+  }
+
+  async predictGasOnMumbai() {
+    const response = await fetch('https://gasstation-mumbai.matic.today/v2');
     const data = await response.json();
     return data.fast;
   }

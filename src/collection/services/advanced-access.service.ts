@@ -73,6 +73,7 @@ export class AdvancedAccessService {
       (property) => collection.properties[property],
     );
     delete collection.formMetadata?.poapEditCode;
+    delete collection.formMetadata?.transactionHashes;
 
     return collection;
   }

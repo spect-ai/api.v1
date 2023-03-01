@@ -211,7 +211,7 @@ export class GetPublicViewCollectionQueryHandler
         collectionToGet.formMetadata.numOfKudos >
           (collectionToGet.formMetadata.mintkudosClaimedBy?.length || 0);
 
-      const canClaimSurveyToken = collectionToGet.formMetadata.surveyTokenId;
+      const canClaimSurveyToken = false;
 
       let activityOrder, activity;
       if (previousResponses.length > 0) {
@@ -219,6 +219,9 @@ export class GetPublicViewCollectionQueryHandler
         activityOrder = collectionToGet.dataActivityOrder[prevSlug];
         activity = collectionToGet.dataActivities[prevSlug];
       }
+
+      const transactionHashesOfUser =
+        collectionToGet.formMetadata.transactionHashes?.[caller?.ethAddress];
 
       const res =
         this.advancedAccessService.removePrivateFields(collectionToGet);
@@ -233,6 +236,7 @@ export class GetPublicViewCollectionQueryHandler
           hasPassedSybilCheck,
           previousResponses,
           canClaimSurveyToken,
+          transactionHashesOfUser,
         },
         activity,
         activityOrder,
