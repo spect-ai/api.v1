@@ -41,7 +41,7 @@ export class CredentialsController {
     private readonly mazuryService: MazuryService,
     private readonly passportService: GitcoinPassportService,
     private readonly poapService: PoapService,
-    private readonly authService: AuthTokenRefreshService,
+    private readonly gitcoinPassportService: GitcoinPassportService,
   ) {}
 
   @Get('/')
@@ -108,6 +108,21 @@ export class CredentialsController {
   @Get('/:id')
   async getById(@Param() param: ObjectIdDto): Promise<Credentials> {
     return await this.credentialService.getById(param.id);
+  }
+
+  // Post request so that scores can be passed in as object
+  @Post('/:ethAddress/passportScoreAndStamps')
+  async getGtcPassportScoresAndStamps(
+    @Param() param: RequiredEthAddressDto,
+    @Body() body,
+  ): Promise<{
+    score: number;
+    mappedStampsWithCredentials: any;
+  }> {
+    return await this.gitcoinPassportService.getPassportStampsAndScore(
+      param.ethAddress,
+      body.scores,
+    );
   }
 
   @UseGuards(AdminAuthGuard)

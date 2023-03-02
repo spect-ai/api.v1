@@ -36,7 +36,6 @@ export class GitcoinPassportService {
         `https://api.scorer.gitcoin.co/ceramic-cache/stamp?address=${address}`,
       )
     ).json();
-    console.log({ passport });
     const PassportScorer = (await import('@gitcoinco/passport-sdk-scorer'))
       .PassportScorer;
     const stampsWithCredentials = [];
@@ -55,7 +54,6 @@ export class GitcoinPassportService {
       ...passport,
       stamps: stampsWithCredentials,
     });
-    console.log({ score, stamps: stampsWithCredentials });
     return score >= 100;
   }
 
@@ -69,7 +67,6 @@ export class GitcoinPassportService {
 
     const verifier = new PassportVerifier(this.passportUrl);
     let passport = await reader.getPassport(ethAddress);
-    console.log({ passportSDK: passport });
     if (!passport || !passport.stamps) {
       passport = await (
         await fetch(
@@ -77,7 +74,6 @@ export class GitcoinPassportService {
         )
       ).json();
     }
-    console.log({ scorerAPI: passport });
     if (!passport?.stamps) return [];
     const stampsWithCredentials = [];
     for (const stamp of passport.stamps) {
@@ -112,5 +108,58 @@ export class GitcoinPassportService {
     }
 
     return res;
+  }
+
+  async getPassportStampsAndScore(
+    ethAddress: string,
+    scores: { [key: string]: number },
+  ): Promise<any> {
+    const stamps = await this.getAll();
+    const passportScores = stamps.map((stamp) => {
+      return {
+        score: scores[stamp.id] ? scores[stamp.id] : 0,
+        provider: stamp.provider,
+        issuer: stamp.issuer,
+      };
+    });
+    const passport = await (
+      await fetch(
+        `https://api.scorer.gitcoin.co/ceramic-cache/stamp?address=${ethAddress}`,
+      )
+    ).json();
+    const PassportScorer = (await import('@gitcoinco/passport-sdk-scorer'))
+      .PassportScorer;
+    const stampsWithCredentials = [];
+    if (!passport?.stamps) return false;
+    for (const stamp of passport.stamps) {
+      if (!stamp.stamp) {
+        continue;
+      }
+      stampsWithCredentials.push({
+        ...stamp,
+        credential: stamp.stamp,
+      });
+    }
+
+    const mappedStampsWithCredentials = this.commonTools.objectify(
+      stampsWithCredentials,
+      'provider',
+    );
+    const scorer = new PassportScorer(passportScores, this.passportUrl);
+    const score = await scorer.getScore(ethAddress, {
+      ...passport,
+      stamps: stampsWithCredentials,
+    });
+
+    const resMappedStampsWithCredentials = {};
+    for (const stamp of stamps) {
+      if (mappedStampsWithCredentials[stamp.provider])
+        resMappedStampsWithCredentials[stamp.id] = true;
+    }
+
+    return {
+      mappedStampsWithCredentials: resMappedStampsWithCredentials,
+      score,
+    };
   }
 }
