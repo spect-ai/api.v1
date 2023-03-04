@@ -12,6 +12,7 @@ import { Circle } from 'src/circle/model/circle.model';
 import { SlugService } from 'src/common/slug.service';
 import { defaultCircleCreatorRoles, defaultCircleRoles } from 'src/constants';
 import { RolesService } from 'src/roles/roles.service';
+import { CreateFolderCommand } from '../impl';
 import {
   CreateCircleCommand,
   CreateClaimableCircleCommand,
@@ -59,11 +60,25 @@ export class CreateCircleCommandHandler
           roles: defaultCircleRoles,
           localRegistry: {},
           paymentAddress: caller.ethAddress,
+          sidebarConfig: {
+            showAutomation: false,
+            showGovernance: false,
+            showMembership: true,
+            showPayment: false,
+            showDiscussion: false,
+          },
         });
         await this.circlesRepository.updateById(parentCircle.id as string, {
           ...parentCircle,
           children: [...parentCircle.children, createdCircle],
         });
+        createdCircle = await this.commandBus.execute(
+          new CreateFolderCommand(createdCircle.id, {
+            name: 'Folder-0',
+            avatar: 'All',
+            contentIds: [],
+          }),
+        );
       } else {
         createdCircle = await this.circlesRepository.create({
           ...createCircleDto,
@@ -72,6 +87,13 @@ export class CreateCircleCommandHandler
           memberRoles: memberRoles,
           roles: defaultCircleRoles,
           localRegistry: {},
+          sidebarConfig: {
+            showAutomation: false,
+            showGovernance: false,
+            showMembership: true,
+            showPayment: false,
+            showDiscussion: false,
+          },
         });
       }
 

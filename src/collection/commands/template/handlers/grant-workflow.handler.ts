@@ -128,6 +128,13 @@ export class CreateGrantWorkflowCommandHandler
               milestone.id,
               grantee.id,
             ],
+            sidebarConfig: {
+              showAutomation: true,
+              showGovernance: true,
+              showPayment: true,
+              showMembership: true,
+              showDiscussion: true,
+            },
           },
           caller,
         ),
