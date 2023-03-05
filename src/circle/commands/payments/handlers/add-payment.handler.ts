@@ -148,11 +148,15 @@ export class AddPaymentsCommandHandler
         paymentIds.push(paymentId);
         dataSlugsPendingPayment.push(dataSlug);
       }
-      const updatedCircle = await this.circlesRepository.updateById(circleId, {
+      await this.circlesRepository.updateById(circleId, {
         pendingPayments: [...(pendingPayments || []), ...paymentIds],
         paymentDetails: {
           ...(circleToUpdate.paymentDetails || {}),
           ...newPaymentDetails,
+        },
+        sidebarConfig: {
+          ...(circleToUpdate.sidebarConfig || {}),
+          showPayment: true,
         },
       });
       const updatedCollection = await this.updateData(

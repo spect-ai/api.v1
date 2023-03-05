@@ -82,7 +82,11 @@ export const getOnboardToSpectFormDetails = (caller: string) => {
   return {
     name: 'Your First Form on Spect',
     properties: getProperties(),
-    propertyOrder: ['Title', 'Description', 'Status'],
+    propertyOrder: [
+      'What is your name?',
+      'Why do you want to join our team?',
+      'Status',
+    ],
     permissions: {
       manageSettings: ['steward'],
       updateResponsesManually: ['steward'],

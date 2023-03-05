@@ -67,6 +67,10 @@ export class AddAutomationCommandHandler
         createAutomationDto.triggerCollectionSlug,
         createAutomationDto,
       );
+      updates['sidebarConfig'] = {
+        ...(circle.sidebarConfig || {}),
+        showAutomation: true,
+      };
       const updatedCircle =
         await this.circlesRepository.updateCircleAndReturnWithPopulatedReferences(
           circleId,
