@@ -44,6 +44,16 @@ export class SurveyProtocolListener {
         this.decodeTransactionAndRecord(log, '80001');
       });
     }
+    if (process.env.ALCHEMY_API_KEY_GOERLI) {
+      const { filterResponse, alchemy } = this.getWS(
+        process.env.ALCHEMY_API_KEY_GOERLI,
+        Network.ETH_GOERLI,
+        '0x3B3aa0D59857753aFA6C41bDCC6a8E22553c3d95',
+      );
+      alchemy.ws.on(filterResponse, (log) => {
+        this.decodeTransactionAndRecord(log, '5');
+      });
+    }
   }
 
   private getWS(key: string, network: Network, surveyHubAddress: string) {
@@ -105,11 +115,11 @@ export class SurveyProtocolListener {
         signer,
       );
       const distribution = await surveyProtocol.distributionInfo(surveyId);
-
       if (distribution.distributionType === 1) {
         const collection = await this.queryBus.execute(
           new GetCollectionByFilterQuery({
             'formMetadata.surveyTokenId': surveyId,
+            'formMetadata.surveyChain.value': chainId.toString(),
           }),
         );
         if (collection) {
@@ -127,18 +137,22 @@ export class SurveyProtocolListener {
           return;
         }
 
-        console.log('triggering random number generator');
         let maxFeePerGas = ethers.BigNumber.from(40000000000); // fallback to 40 gwei
         let maxPriorityFeePerGas = ethers.BigNumber.from(40000000000); // fallback to 40 gwei
-        const feeEstimate = await this.gasPredictionService.predictGas(chainId);
-        maxFeePerGas = ethers.utils.parseUnits(
-          Math.ceil(feeEstimate.maxFee + 100) + '',
-          'gwei',
-        );
-        maxPriorityFeePerGas = ethers.utils.parseUnits(
-          Math.ceil(feeEstimate.maxPriorityFee + 25) + '',
-          'gwei',
-        );
+        if (['137', '80001'].includes(chainId)) {
+          const feeEstimate = await this.gasPredictionService.predictGas(
+            chainId,
+          );
+          maxFeePerGas = ethers.utils.parseUnits(
+            Math.ceil(feeEstimate.maxFee + 100) + '',
+            'gwei',
+          );
+          maxPriorityFeePerGas = ethers.utils.parseUnits(
+            Math.ceil(feeEstimate.maxPriorityFee + 25) + '',
+            'gwei',
+          );
+        }
+        console.log('triggering random number generator');
 
         const gasEstimate =
           await surveyProtocol.estimateGas.triggerRandomNumberGenerator(
