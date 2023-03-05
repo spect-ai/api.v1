@@ -48,8 +48,17 @@ export class VRFConsumerListener {
         this.decodeTransactionAndRecord(log, '80001');
       });
     }
+    if (process.env.ALCHEMY_API_KEY_GOERLI) {
+      const { filterResponse, alchemy } = this.getWS(
+        process.env.ALCHEMY_API_KEY_GOERLI,
+        Network.ETH_GOERLI,
+        '0x9796deb406fd76e9634069c50f2bdc51064eaf6e',
+      );
+      alchemy.ws.on(filterResponse, (log) => {
+        this.decodeTransactionAndRecord(log, '5');
+      });
+    }
   }
-
   private getWS(key: string, network: Network, vrfConsumerAddress: string) {
     const settings = {
       apiKey: key,
@@ -105,6 +114,7 @@ export class VRFConsumerListener {
             const collection = await this.queryBus.execute(
               new GetCollectionByFilterQuery({
                 'formMetadata.surveyTokenId': parseInt(surveyId),
+                'formMetadata.surveyChain.value': chainId.toString(),
               }),
             );
             if (!collection) {
