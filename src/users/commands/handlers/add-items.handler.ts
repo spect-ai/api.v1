@@ -45,10 +45,10 @@ export class AddItemCommandHandler implements ICommandHandler<AddItemsCommand> {
         `Failed adding item to user with error: ${error.message}`,
         command,
       );
-      throw new InternalServerErrorException(
-        'Failed adding item update',
-        error.message,
-      );
+      // throw new InternalServerErrorException(
+      //   'Failed adding item update',
+      //   error.message,
+      // );
     }
   }
 }
