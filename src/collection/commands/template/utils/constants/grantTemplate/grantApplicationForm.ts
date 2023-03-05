@@ -149,6 +149,17 @@ export const getGrantApplicationFormProperties = (registry) => {
       viewConditions: [],
       payWallOptions: {},
     },
+    ['Connect Discord']: {
+      name: 'Connect Discord',
+      type: 'discord',
+      isPartOfFormView: true,
+      description: 'Connect discord to get roles in the server',
+      rewardOptions: {},
+      required: false,
+      milestoneFields: [],
+      viewConditions: [],
+      payWallOptions: {},
+    },
   } as unknown as MappedItem<Property>;
   return properties;
 };
@@ -161,6 +172,7 @@ export const grantApplicationFormPropertyOrder = [
   'Email',
   'Milestones',
   'Total Reward',
+  'Connect Discord',
 ];
 
 export function getGrantWorkflowAutomations(
