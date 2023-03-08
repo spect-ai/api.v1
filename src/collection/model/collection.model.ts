@@ -241,6 +241,8 @@ export interface FormMetadata {
       [transactionType: string]: string;
     };
   };
+  minimumNumberOfAnswersThatNeedToMatch?: number;
+  responseData?: MappedItem<any>;
 }
 
 export interface PaymentConfig {

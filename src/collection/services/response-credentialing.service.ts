@@ -12,6 +12,7 @@ import { RequestProvider } from 'src/users/user.provider';
 import { CollectionRepository } from '../collection.repository';
 import { Collection } from '../model/collection.model';
 import { GetCollectionByIdQuery } from '../queries';
+import { AdvancedConditionService } from './advanced-condition.service';
 
 @Injectable()
 export class ResponseCredentialingService {
@@ -24,6 +25,7 @@ export class ResponseCredentialingService {
     private readonly logger: LoggingService,
     private readonly registryService: RegistryService,
     private readonly gasPredictionService: GasPredictionService,
+    private readonly advancedConditionService: AdvancedConditionService,
   ) {
     this.logger.setContext('ResponseCredentialingService');
   }
@@ -257,6 +259,31 @@ export class ResponseCredentialingService {
         )
       )
         throw 'User has not submitted a response';
+
+      if (collection.formMetadata?.minimumNumberOfAnswersThatNeedToMatch > 0) {
+        let slug;
+        for (const [dataSlug, owner] of Object.entries(collection.dataOwner)) {
+          if (owner === this.requestProvider.user.id) {
+            slug = dataSlug;
+          }
+        }
+        if (!slug)
+          throw new InternalServerErrorException(
+            'User has not submitted a response',
+          );
+
+        const canClaim =
+          this.advancedConditionService.hasMetResponseCountCondition(
+            collection,
+            collection.data[slug],
+          );
+
+        if (!canClaim)
+          throw new InternalServerErrorException(
+            'User has not met the minimum number of responses that need to match',
+          );
+      }
+
       const res = await this.poapService.claimPoap(
         collection.formMetadata.poapEventId,
         collection.formMetadata.poapEditCode,

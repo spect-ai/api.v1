@@ -65,6 +65,7 @@ import { AuthTokenRefreshService } from './common/authTokenRefresh.service';
 import { EncryptionService } from './common/encryption.service';
 import { SecretModule } from './secretRegistry/secret.module';
 import { GasPredictionService } from './common/gas-prediction.service';
+import { AdvancedConditionService } from './collection/services/advanced-condition.service';
 
 const databaseUrl = process.env.MONGO_URL
   ? `${process.env.MONGO_URL}/nest?authSource=admin&retryWrites=true&w=majority`
@@ -146,6 +147,7 @@ const databaseUrl = process.env.MONGO_URL
     AuthTokenRefreshService,
     EncryptionService,
     GasPredictionService,
+    AdvancedConditionService,
   ],
 })
 export class AppModule {}

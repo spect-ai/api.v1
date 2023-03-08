@@ -4,6 +4,7 @@ import { CollectionRepository } from 'src/collection/collection.repository';
 import { CollectionPublicResponseDto } from 'src/collection/dto/collection-response.dto';
 import { Collection } from 'src/collection/model/collection.model';
 import { AdvancedAccessService } from 'src/collection/services/advanced-access.service';
+import { AdvancedConditionService } from 'src/collection/services/advanced-condition.service';
 import { ResponseCredentialingService } from 'src/collection/services/response-credentialing.service';
 import { CommonTools } from 'src/common/common.service';
 import { LoggingService } from 'src/logging/logging.service';
@@ -149,6 +150,7 @@ export class GetPublicViewCollectionQueryHandler
     private readonly queryBus: QueryBus,
     private readonly advancedAccessService: AdvancedAccessService,
     private readonly logger: LoggingService,
+    private readonly advancedConditionService: AdvancedConditionService,
   ) {
     logger.setContext('GetPublicViewCollectionQueryHandler');
   }
@@ -213,6 +215,27 @@ export class GetPublicViewCollectionQueryHandler
 
       const canClaimSurveyToken = false;
 
+      let canClaimPoap = false;
+      if (collectionToGet.formMetadata.poapEventId) {
+        if (!collectionToGet.formMetadata.minimumNumberOfAnswersThatNeedToMatch)
+          canClaimPoap = true;
+        let slug;
+        for (const [dataSlug, owner] of Object.entries(
+          collectionToGet.dataOwner || {},
+        )) {
+          if (owner === caller?.id) {
+            slug = dataSlug;
+          }
+        }
+
+        if (slug)
+          canClaimPoap =
+            this.advancedConditionService.hasMetResponseCountCondition(
+              collectionToGet,
+              collectionToGet.data[slug],
+            );
+      }
+
       let activityOrder, activity;
       if (previousResponses.length > 0) {
         const prevSlug = previousResponses[previousResponses.length - 1].slug;
@@ -237,6 +260,7 @@ export class GetPublicViewCollectionQueryHandler
           previousResponses,
           canClaimSurveyToken,
           transactionHashesOfUser,
+          canClaimPoap,
         },
         activity,
         activityOrder,

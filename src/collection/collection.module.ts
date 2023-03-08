@@ -39,6 +39,7 @@ import { AuthTokenRefreshService } from 'src/common/authTokenRefresh.service';
 import { EncryptionService } from 'src/common/encryption.service';
 import { SecretModule } from 'src/secretRegistry/secret.module';
 import { GasPredictionService } from 'src/common/gas-prediction.service';
+import { AdvancedConditionService } from './services/advanced-condition.service';
 
 @Module({
   imports: [
@@ -82,6 +83,7 @@ import { GasPredictionService } from 'src/common/gas-prediction.service';
     AuthTokenRefreshService,
     EncryptionService,
     GasPredictionService,
+    AdvancedConditionService,
   ],
   exports: [CollectionModule, CollectionRepository],
 })
