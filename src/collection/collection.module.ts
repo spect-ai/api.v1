@@ -26,6 +26,7 @@ import { QueryHandlers } from './queries';
 import { ActivityBuilder, ActivityResolver } from './services/activity.service';
 import { AdvancedAccessService } from './services/advanced-access.service';
 import {
+  ClaimEligibilityService,
   ResponseCredentialingService,
   ResponseCredentialService,
 } from './services/response-credentialing.service';
@@ -83,6 +84,7 @@ import { AdvancedConditionService } from './services/advanced-condition.service'
     AuthTokenRefreshService,
     EncryptionService,
     GasPredictionService,
+    ClaimEligibilityService,
     AdvancedConditionService,
   ],
   exports: [CollectionModule, CollectionRepository],

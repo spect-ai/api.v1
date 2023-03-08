@@ -74,7 +74,8 @@ export class AdvancedAccessService {
     );
     delete collection.formMetadata?.poapEditCode;
     delete collection.formMetadata?.transactionHashes;
-    delete collection.formMetadata?.responseData;
+    delete collection.formMetadata?.responseDataForPoap;
+    delete collection.formMetadata?.responseDataForMintkudos;
     return collection;
   }
 }

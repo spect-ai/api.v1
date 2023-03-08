@@ -5,7 +5,10 @@ import { CollectionPublicResponseDto } from 'src/collection/dto/collection-respo
 import { Collection } from 'src/collection/model/collection.model';
 import { AdvancedAccessService } from 'src/collection/services/advanced-access.service';
 import { AdvancedConditionService } from 'src/collection/services/advanced-condition.service';
-import { ResponseCredentialingService } from 'src/collection/services/response-credentialing.service';
+import {
+  ClaimEligibilityService,
+  ResponseCredentialingService,
+} from 'src/collection/services/response-credentialing.service';
 import { CommonTools } from 'src/common/common.service';
 import { LoggingService } from 'src/logging/logging.service';
 import { GetMultipleUsersByIdsQuery } from 'src/users/queries/impl';
@@ -151,8 +154,19 @@ export class GetPublicViewCollectionQueryHandler
     private readonly advancedAccessService: AdvancedAccessService,
     private readonly logger: LoggingService,
     private readonly advancedConditionService: AdvancedConditionService,
+    private readonly claimEligibilityService: ClaimEligibilityService,
   ) {
     logger.setContext('GetPublicViewCollectionQueryHandler');
+  }
+
+  findDataSlugOfResponse(collection: Collection, responder: string) {
+    if (!collection.dataOwner || !responder) return;
+    for (const [dataSlug, owner] of Object.entries(collection.dataOwner)) {
+      if (owner === responder) {
+        return dataSlug;
+      }
+    }
+    return;
   }
 
   async execute(
@@ -183,10 +197,6 @@ export class GetPublicViewCollectionQueryHandler
         collectionToGet.formMetadata.mintkudosTokenId > 0 &&
         !caller;
 
-      const formRequiresDiscordButUserIsntConnected =
-        collectionToGet.formMetadata.discordConnectionRequired &&
-        !caller?.discordId;
-
       const canFillForm =
         hasRole &&
         !formHasCredentialsButUserIsntConnected &&
@@ -204,38 +214,19 @@ export class GetPublicViewCollectionQueryHandler
             });
           }
         }
-      const kudosClaimedByUser =
-        collectionToGet.formMetadata.mintkudosClaimedBy &&
-        collectionToGet.formMetadata.mintkudosClaimedBy.includes(caller?.id);
-      const canClaimKudos =
-        collectionToGet.formMetadata.mintkudosTokenId &&
-        !kudosClaimedByUser &&
-        collectionToGet.formMetadata.numOfKudos >
-          (collectionToGet.formMetadata.mintkudosClaimedBy?.length || 0);
+      const {
+        canClaim: canClaimKudos,
+        hasClaimed: hasClaimedKudos,
+        reason: reasonForKudos,
+      } = this.claimEligibilityService.canClaimKudos(
+        collectionToGet,
+        caller?.id,
+      );
 
       const canClaimSurveyToken = false;
 
-      let canClaimPoap = false;
-      if (collectionToGet.formMetadata.poapEventId) {
-        if (!collectionToGet.formMetadata.minimumNumberOfAnswersThatNeedToMatch)
-          canClaimPoap = true;
-        let slug;
-        for (const [dataSlug, owner] of Object.entries(
-          collectionToGet.dataOwner || {},
-        )) {
-          if (owner === caller?.id) {
-            slug = dataSlug;
-          }
-        }
-
-        if (slug)
-          canClaimPoap =
-            this.advancedConditionService.hasMetResponseCountCondition(
-              collectionToGet,
-              collectionToGet.data[slug],
-            );
-      }
-
+      const { canClaim: canClaimPoap, reason: reasonForPoap } =
+        this.claimEligibilityService.canClaimPoap(collectionToGet, caller?.id);
       let activityOrder, activity;
       if (previousResponses.length > 0) {
         const prevSlug = previousResponses[previousResponses.length - 1].slug;
@@ -249,6 +240,7 @@ export class GetPublicViewCollectionQueryHandler
       const res =
         this.advancedAccessService.removePrivateFields(collectionToGet);
 
+      console.log({ canClaimPoap, canClaimKudos });
       return {
         ...res,
         formMetadata: {
@@ -261,10 +253,10 @@ export class GetPublicViewCollectionQueryHandler
           canClaimSurveyToken,
           transactionHashesOfUser,
           canClaimPoap,
+          hasClaimedKudos,
         },
         activity,
         activityOrder,
-        kudosClaimedByUser,
       };
     } catch (error) {
       this.logger.logError(

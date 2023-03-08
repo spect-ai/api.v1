@@ -7,7 +7,12 @@ import { Option } from '../types/types';
 export class AdvancedConditionService {
   constructor(private readonly queryBus: QueryBus) {}
 
-  hasMetResponseCountCondition(collection: Collection, data: any) {
+  hasMetResponseCountCondition(
+    collection: Collection,
+    data: any,
+    responseData: any,
+    minimumMatchCount: number,
+  ) {
     if (!data) return false;
     let matchCount = 0;
     let canClaimPoap = false;
@@ -16,20 +21,17 @@ export class AdvancedConditionService {
       if (
         ['number', 'date'].includes(collection.properties[propertyName].type)
       ) {
-        if (collection.formMetadata.responseData[propertyName] === value) {
+        if (responseData[propertyName] === value) {
           matchCount++;
         }
       } else if (collection.properties[propertyName].type === 'singleSelect') {
-        if (
-          collection.formMetadata.responseData[propertyName].value ===
-          (value as Option)?.value
-        ) {
+        if (responseData[propertyName].value === (value as Option)?.value) {
           matchCount++;
         }
       } else if (collection.properties[propertyName].type === 'multiSelect') {
-        const responseDataValues = collection.formMetadata.responseData[
-          propertyName
-        ]?.map((v) => v.value);
+        const responseDataValues = responseData[propertyName]?.map(
+          (v) => v.value,
+        );
         const dataValues = (value as Option[]).map((v) => v.value);
 
         if (
@@ -41,10 +43,9 @@ export class AdvancedConditionService {
           matchCount++;
         }
       }
-      if (
-        matchCount >=
-        collection.formMetadata.minimumNumberOfAnswersThatNeedToMatch
-      ) {
+
+      console.log({ matchCount, propertyName });
+      if (matchCount >= minimumMatchCount) {
         canClaimPoap = true;
         break;
       }
