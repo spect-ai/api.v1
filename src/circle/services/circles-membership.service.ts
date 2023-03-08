@@ -3,6 +3,7 @@ import { CommandBus, EventBus } from '@nestjs/cqrs';
 import { GuildxyzService } from 'src/common/guildxyz.service';
 import { LoggingService } from 'src/logging/logging.service';
 import { RolesService } from 'src/roles/roles.service';
+import { GetCirclesCommand } from 'src/users/commands/metadata';
 import { RequestProvider } from 'src/users/user.provider';
 import { CirclesRepository } from '../circles.repository';
 import {
@@ -169,6 +170,7 @@ export class CircleMembershipService {
   ): Promise<void> {
     try {
       const guildIds = joinDto.guildData.map((guild) => guild.id);
+      console.log({ guildIds });
       if (guildIds?.length == 0) return;
       const guildCircles = await this.circlesRepository.findAll({
         $and: [
@@ -179,19 +181,24 @@ export class CircleMembershipService {
           },
         ],
       });
-
+      console.log({ guildCircles });
       if (guildCircles?.length == 0) return;
-      for (const i in guildCircles) {
+      for await (const circle of guildCircles) {
         if (
-          !guildCircles[i]?.members?.includes(this.requestProvider.user.id) &&
-          guildCircles[i]?.status.archived == false
+          !circle?.members?.includes(this.requestProvider.user.id) &&
+          circle?.status.archived == false
         ) {
-          const id = guildCircles?.[i]?.id;
+          const id = circle?.id;
+          console.log({ id });
           await this.commandBus.execute(
             new JoinUsingDiscordCommand(id, this.requestProvider.user),
           );
         }
       }
+      const circles = await this.commandBus.execute(
+        new GetCirclesCommand(this.requestProvider.user.id),
+      );
+      return circles;
     } catch (error) {
       this.logger.logError(
         `Failed joining Multiple circles using Discord with error: ${error.message}`,
