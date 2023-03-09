@@ -12,10 +12,17 @@ export class AdvancedConditionService {
     data: any,
     responseData: any,
     minimumMatchCount: number,
-  ) {
-    if (!data) return false;
+  ): {
+    canClaim: boolean;
+    matchCount: number;
+  } {
+    if (!data)
+      return {
+        canClaim: false,
+        matchCount: 0,
+      };
     let matchCount = 0;
-    let canClaimPoap = false;
+    let canClaim = false;
     for (const [propertyName, value] of Object.entries(data)) {
       if (!collection.properties[propertyName]) continue;
       if (
@@ -44,12 +51,14 @@ export class AdvancedConditionService {
         }
       }
 
-      console.log({ matchCount, propertyName });
       if (matchCount >= minimumMatchCount) {
-        canClaimPoap = true;
+        canClaim = true;
         break;
       }
     }
-    return canClaimPoap;
+    return {
+      canClaim,
+      matchCount,
+    };
   }
 }

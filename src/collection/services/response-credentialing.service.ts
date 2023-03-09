@@ -27,7 +27,14 @@ export class ClaimEligibilityService {
     canClaim: boolean;
     hasClaimed: boolean;
     reason: string;
+    matchCount?: number;
   } {
+    if (!collection.formMetadata.mintkudosTokenId)
+      return {
+        canClaim: false,
+        hasClaimed: false,
+        reason: 'Kudos doesnt exist',
+      };
     if (!claimee) {
       return {
         canClaim: false,
@@ -68,7 +75,7 @@ export class ClaimEligibilityService {
       collection.formMetadata
         ?.minimumNumberOfAnswersThatNeedToMatchForMintkudos > 0
     ) {
-      const canClaim =
+      const { canClaim, matchCount } =
         this.advancedConditionService.hasMetResponseCountCondition(
           collection,
           collection.data[slug],
@@ -82,6 +89,7 @@ export class ClaimEligibilityService {
           canClaim: false,
           hasClaimed: false,
           reason: 'User has not met the response count condition',
+          matchCount,
         };
       }
     }
@@ -99,7 +107,19 @@ export class ClaimEligibilityService {
   ): {
     canClaim: boolean;
     reason: string;
+    matchCount?: number;
   } {
+    if (!collection.formMetadata.poapEventId)
+      return {
+        canClaim: false,
+        reason: 'POAP event doesnt exist',
+      };
+    if (!claimee) {
+      return {
+        canClaim: false,
+        reason: 'User not logged in',
+      };
+    }
     let slug;
     for (const [dataSlug, owner] of Object.entries(
       collection.dataOwner || {},
@@ -119,7 +139,7 @@ export class ClaimEligibilityService {
     if (
       collection.formMetadata?.minimumNumberOfAnswersThatNeedToMatchForPoap > 0
     ) {
-      const canClaim =
+      const { canClaim, matchCount } =
         this.advancedConditionService.hasMetResponseCountCondition(
           collection,
           collection.data[slug],
@@ -131,6 +151,7 @@ export class ClaimEligibilityService {
         return {
           canClaim: false,
           reason: 'User has not met the response count condition',
+          matchCount,
         };
       }
     }

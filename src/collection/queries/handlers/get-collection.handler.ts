@@ -214,19 +214,17 @@ export class GetPublicViewCollectionQueryHandler
             });
           }
         }
-      const {
-        canClaim: canClaimKudos,
-        hasClaimed: hasClaimedKudos,
-        reason: reasonForKudos,
-      } = this.claimEligibilityService.canClaimKudos(
+      const canClaimResForKudos = this.claimEligibilityService.canClaimKudos(
         collectionToGet,
         caller?.id,
       );
 
       const canClaimSurveyToken = false;
 
-      const { canClaim: canClaimPoap, reason: reasonForPoap } =
-        this.claimEligibilityService.canClaimPoap(collectionToGet, caller?.id);
+      const canClaimResForPoap = this.claimEligibilityService.canClaimPoap(
+        collectionToGet,
+        caller?.id,
+      );
       let activityOrder, activity;
       if (previousResponses.length > 0) {
         const prevSlug = previousResponses[previousResponses.length - 1].slug;
@@ -240,20 +238,21 @@ export class GetPublicViewCollectionQueryHandler
       const res =
         this.advancedAccessService.removePrivateFields(collectionToGet);
 
-      console.log({ canClaimPoap, canClaimKudos });
       return {
         ...res,
         formMetadata: {
           ...res.formMetadata,
           canFillForm,
           hasRole,
-          canClaimKudos,
+          canClaimKudos: canClaimResForKudos.canClaim,
           hasPassedSybilCheck,
           previousResponses,
           canClaimSurveyToken,
           transactionHashesOfUser,
-          canClaimPoap,
-          hasClaimedKudos,
+          canClaimPoap: canClaimResForPoap.canClaim,
+          hasClaimedKudos: canClaimResForKudos.hasClaimed,
+          matchCountForPoap: canClaimResForPoap.matchCount,
+          matchCountForKudos: canClaimResForKudos.matchCount,
         },
         activity,
         activityOrder,
