@@ -49,7 +49,10 @@ import { CollectionController } from './collection/collection.controller';
 import { CollectionModule } from './collection/collection.module';
 import { RealtimeModule } from './realtime/realtime.module';
 import { ActivityResolver as CollectionDataActivityResolver } from './collection/services/activity.service';
-import { ResponseCredentialingService } from './collection/services/response-credentialing.service';
+import {
+  ClaimEligibilityService,
+  ResponseCredentialingService,
+} from './collection/services/response-credentialing.service';
 import { MailModule } from './mail/mail.module';
 import { CredentialsModule } from './credentials/credentials.module';
 import { AdvancedAccessService } from './collection/services/advanced-access.service';
@@ -65,6 +68,7 @@ import { AuthTokenRefreshService } from './common/authTokenRefresh.service';
 import { EncryptionService } from './common/encryption.service';
 import { SecretModule } from './secretRegistry/secret.module';
 import { GasPredictionService } from './common/gas-prediction.service';
+import { AdvancedConditionService } from './collection/services/advanced-condition.service';
 
 const databaseUrl = process.env.MONGO_URL
   ? `${process.env.MONGO_URL}/nest?authSource=admin&retryWrites=true&w=majority`
@@ -146,6 +150,8 @@ const databaseUrl = process.env.MONGO_URL
     AuthTokenRefreshService,
     EncryptionService,
     GasPredictionService,
+    ClaimEligibilityService,
+    AdvancedConditionService,
   ],
 })
 export class AppModule {}

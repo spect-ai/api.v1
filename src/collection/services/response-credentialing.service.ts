@@ -12,6 +12,134 @@ import { RequestProvider } from 'src/users/user.provider';
 import { CollectionRepository } from '../collection.repository';
 import { Collection } from '../model/collection.model';
 import { GetCollectionByIdQuery } from '../queries';
+import { AdvancedConditionService } from './advanced-condition.service';
+
+@Injectable()
+export class ClaimEligibilityService {
+  constructor(
+    private readonly advancedConditionService: AdvancedConditionService,
+  ) {}
+
+  canClaimKudos(
+    collection: Collection,
+    claimee: string,
+  ): {
+    canClaim: boolean;
+    hasClaimed: boolean;
+    reason: string;
+  } {
+    if (!claimee) {
+      return {
+        canClaim: false,
+        hasClaimed: false,
+        reason: 'User not logged in',
+      };
+    }
+
+    if (
+      collection.formMetadata.mintkudosClaimedBy &&
+      collection.formMetadata.mintkudosClaimedBy.includes(claimee)
+    ) {
+      return {
+        canClaim: false,
+        hasClaimed: true,
+        reason: 'User already claimed this kudos',
+      };
+    }
+
+    let slug;
+    for (const [dataSlug, owner] of Object.entries(
+      collection.dataOwner || {},
+    )) {
+      if (owner === claimee) {
+        slug = dataSlug;
+        break;
+      }
+    }
+
+    if (!slug) {
+      return {
+        canClaim: false,
+        hasClaimed: false,
+        reason: 'User has not submitted any response',
+      };
+    }
+    if (
+      collection.formMetadata
+        ?.minimumNumberOfAnswersThatNeedToMatchForMintkudos > 0
+    ) {
+      const canClaim =
+        this.advancedConditionService.hasMetResponseCountCondition(
+          collection,
+          collection.data[slug],
+          collection.formMetadata?.responseDataForMintkudos,
+          collection.formMetadata
+            ?.minimumNumberOfAnswersThatNeedToMatchForMintkudos,
+        );
+
+      if (!canClaim) {
+        return {
+          canClaim: false,
+          hasClaimed: false,
+          reason: 'User has not met the response count condition',
+        };
+      }
+    }
+
+    return {
+      canClaim: true,
+      hasClaimed: false,
+      reason: '',
+    };
+  }
+
+  canClaimPoap(
+    collection: Collection,
+    claimee: string,
+  ): {
+    canClaim: boolean;
+    reason: string;
+  } {
+    let slug;
+    for (const [dataSlug, owner] of Object.entries(
+      collection.dataOwner || {},
+    )) {
+      if (owner === claimee) {
+        slug = dataSlug;
+        break;
+      }
+    }
+
+    if (!slug)
+      return {
+        canClaim: false,
+        reason: 'User has not submitted a response',
+      };
+
+    if (
+      collection.formMetadata?.minimumNumberOfAnswersThatNeedToMatchForPoap > 0
+    ) {
+      const canClaim =
+        this.advancedConditionService.hasMetResponseCountCondition(
+          collection,
+          collection.data[slug],
+          collection.formMetadata?.responseDataForPoap,
+          collection.formMetadata?.minimumNumberOfAnswersThatNeedToMatchForPoap,
+        );
+
+      if (!canClaim) {
+        return {
+          canClaim: false,
+          reason: 'User has not met the response count condition',
+        };
+      }
+    }
+    return {
+      canClaim: true,
+      reason: '',
+    };
+  }
+}
 
 @Injectable()
 export class ResponseCredentialingService {
@@ -24,6 +152,8 @@ export class ResponseCredentialingService {
     private readonly logger: LoggingService,
     private readonly registryService: RegistryService,
     private readonly gasPredictionService: GasPredictionService,
+    private readonly advancedConditionService: AdvancedConditionService,
+    private readonly claimEligibilityService: ClaimEligibilityService,
   ) {
     this.logger.setContext('ResponseCredentialingService');
   }
@@ -37,32 +167,18 @@ export class ResponseCredentialingService {
         throw new InternalServerErrorException('Collection not found');
       }
 
-      if (
-        collection.mintkudosClaimedBy &&
-        collection.mintkudosClaimedBy.includes(this.requestProvider.user.id)
-      ) {
-        throw new InternalServerErrorException(
-          'User has already claimed kudos',
-        );
-      }
+      const { canClaim, reason } = this.claimEligibilityService.canClaimKudos(
+        collection,
+        this.requestProvider.user.id,
+      );
 
-      if (
-        !collection.dataOwner ||
-        !Object.values(collection.dataOwner)?.includes(
-          this.requestProvider.user.id,
-        )
-      ) {
-        throw new InternalServerErrorException(
-          'User has not submitted a response',
-        );
-      }
+      if (!canClaim) throw new InternalServerErrorException(reason);
 
       const operationId = await this.kudosService.airdropKudos(
         collection?.parents[0].id,
         collection.formMetadata.mintkudosTokenId,
         this.requestProvider.user.ethAddress,
       );
-      console.log('operationId', operationId);
       if (operationId) {
         const mintkudosClaimedBy = collection.mintkudosClaimedBy || [];
 
@@ -82,10 +198,7 @@ export class ResponseCredentialingService {
         `Failed while airdropping kudos with error: ${error}`,
         collectionId,
       );
-      throw new InternalServerErrorException(
-        'Failed while airdropping tokens with error: ${error}',
-        error.message,
-      );
+      throw new InternalServerErrorException('${error}');
     }
   }
 
@@ -251,12 +364,15 @@ export class ResponseCredentialingService {
       if (!collection) {
         throw new InternalServerErrorException('Collection not found');
       }
-      if (
-        !Object.values(collection.dataOwner).includes(
-          this.requestProvider.user.id,
-        )
-      )
-        throw 'User has not submitted a response';
+
+      const { canClaim, reason } = this.claimEligibilityService.canClaimPoap(
+        collection,
+        this.requestProvider.user.id,
+      );
+      if (!canClaim) {
+        throw new InternalServerErrorException(reason);
+      }
+
       const res = await this.poapService.claimPoap(
         collection.formMetadata.poapEventId,
         collection.formMetadata.poapEditCode,

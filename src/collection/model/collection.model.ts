@@ -242,6 +242,10 @@ export interface FormMetadata {
       [transactionType: string]: string;
     };
   };
+  minimumNumberOfAnswersThatNeedToMatchForPoap?: number;
+  responseDataForPoap?: MappedItem<any>;
+  minimumNumberOfAnswersThatNeedToMatchForMintkudos?: number;
+  responseDataForMintkudos?: MappedItem<any>;
 }
 
 export interface PaymentConfig {
