@@ -9,15 +9,15 @@ export const onboardToSpectStatus = {
 
 export const getProperties = () => {
   return {
-    Title: {
-      name: 'Title',
+    'What is your name?': {
+      name: 'What is your name?',
       type: 'shortText',
       default: '',
       isPartOfFormView: true,
       immutable: true,
     },
-    Description: {
-      name: 'Description',
+    'Why do you want to join our team?': {
+      name: 'Why do you want to join our team?',
       type: 'longText',
       default: '',
       isPartOfFormView: true,
