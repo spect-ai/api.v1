@@ -7,16 +7,7 @@ import mongodb from 'mongodb';
 import { DetailedUserPubliceResponseDto } from './dto/detailed-user-response.dto';
 import { FilterQuery, UpdateQuery } from 'mongoose';
 
-const defaultPopulate: PopulatedUserFields = {
-  bookmarks: {},
-  reviewingCards: {},
-  assignedCards: {},
-  reviewingClosedCards: {},
-  assignedClosedCards: {},
-  followedCircles: {},
-  followedUsers: {},
-  followedByUsers: {},
-};
+const defaultPopulate: PopulatedUserFields = {};
 
 @Injectable()
 export class UsersRepository extends BaseRepository<User> {
