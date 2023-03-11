@@ -2,6 +2,7 @@ import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
+import * as bodyParser from 'body-parser';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const ironSession = require('iron-session/express').ironSession;
 
@@ -47,6 +48,8 @@ async function bootstrap() {
       },
     }),
   );
+  app.use(bodyParser.json({ limit: '50mb' }));
+  app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
   await app.listen(process.env.PORT || 8080, '0.0.0.0');
 }
 bootstrap();
