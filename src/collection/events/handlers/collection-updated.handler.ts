@@ -37,6 +37,7 @@ export class CollectionUpdatedEventHandler
     try {
       console.log('CollectionUpdatedEvent');
       const { caller, collection, update } = event;
+      console.log({ collectionType: typeof collection, collection });
       const res = await WorkersKV.writeKey({
         key: collection.slug,
         value: JSON.stringify(collection),
