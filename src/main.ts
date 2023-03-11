@@ -42,6 +42,8 @@ async function bootstrap() {
       cookieOptions: {
         secure: process.env.NODE_ENV === 'production',
         sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+        domain:
+          process.env.NODE_ENV === 'production' ? 'spect.network' : undefined,
       },
     }),
   );
