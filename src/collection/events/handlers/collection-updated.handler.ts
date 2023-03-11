@@ -2,7 +2,7 @@ import { CommandBus, EventsHandler, IEventHandler } from '@nestjs/cqrs';
 import { LoggingService } from 'src/logging/logging.service';
 import { CollectionUpdatedEvent } from '../impl/collection-updated.event';
 import { PoapService } from 'src/credentials/services/poap.service';
-const WorkersKVREST = require('@sagi.io/workers-kv');
+// const WorkersKVREST = require('@sagi.io/workers-kv');
 import * as dotenv from 'dotenv';
 
 dotenv.config();
@@ -14,12 +14,12 @@ const namespaceId = process.env.CLOUDFLARE_NAMESPACE_ID;
 
 console.log({ cfAccountId, cfAuthKey, cfEmail, namespaceId });
 
-const WorkersKV = new WorkersKVREST({
-  cfAccountId,
-  cfAuthKey,
-  cfEmail,
-  namespaceId,
-});
+// const WorkersKV = new WorkersKVREST({
+//   cfAccountId,
+//   cfAuthKey,
+//   cfEmail,
+//   namespaceId,
+// });
 
 @EventsHandler(CollectionUpdatedEvent)
 export class CollectionUpdatedEventHandler
@@ -37,11 +37,11 @@ export class CollectionUpdatedEventHandler
     try {
       console.log('CollectionUpdatedEvent');
       const { caller, collection, update } = event;
-      const res = await WorkersKV.writeKey({
-        key: collection.slug,
-        value: JSON.stringify(collection),
-      });
-      console.log({ res });
+      // const res = await WorkersKV.writeKey({
+      //   key: collection.slug,
+      //   value: JSON.stringify(collection),
+      // });
+      //console.log({ res });
       this.logger.log(`Created Collection: ${collection.name}`);
     } catch (error) {
       this.logger.error(`${error.message}`);

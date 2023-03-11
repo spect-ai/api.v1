@@ -5,10 +5,8 @@ import {
   IsOptional,
   IsString,
 } from 'class-validator';
-import { Card } from 'src/card/model/card.model';
 import { Circle } from 'src/circle/model/circle.model';
-import { MappedItem, MappedPartialItem } from 'src/common/interfaces';
-import { Retro } from 'src/retro/models/retro.model';
+import { MappedPartialItem } from 'src/common/interfaces';
 import { User } from '../model/users.model';
 import { Activity, Notification } from '../types/types';
 
@@ -57,40 +55,6 @@ export class DetailedUserPubliceResponseDto {
   circles: string[];
 
   /**
-   * List of cards a user is currently assigned to
-   */
-  @IsArray()
-  @IsOptional()
-  assignedCards: string[];
-
-  /**
-   * List of cards a user is currently reviewing
-   */
-  @IsArray()
-  @IsOptional()
-  reviewingCards: string[];
-
-  /**
-   * List of cards a user was assigned to that have been closed
-   */
-  @IsArray()
-  @IsOptional()
-  assignedClosedCards: string[];
-
-  /**
-   * List of cards a user was reviewing that have been closed
-   */
-  @IsArray()
-  @IsOptional()
-  reviewingClosedCards: string[];
-
-  /**
-   * Card bookmarks for the user
-   */
-  @IsArray()
-  retro: string[];
-
-  /**
    * Activities taken by the user
    */
   @IsArray()
@@ -118,22 +82,10 @@ export class DetailedUserPubliceResponseDto {
   userDetails: MappedPartialItem<User>;
 
   /**
-   * Assciated card details
-   */
-  @IsObject()
-  cardDetails: MappedPartialItem<Card>;
-
-  /**
    * Assciated circle details
    */
   @IsObject()
   circleDetails: MappedPartialItem<Circle>;
-
-  /**
-   * Assciated retro details
-   */
-  @IsObject()
-  retroDetails: MappedPartialItem<Retro>;
 }
 
 export class DetailedUserPrivateResponseDto extends DetailedUserPubliceResponseDto {
@@ -160,10 +112,4 @@ export class DetailedUserPrivateResponseDto extends DetailedUserPubliceResponseD
    */
   @IsArray()
   notifications: Notification[];
-
-  /**
-   * Card bookmarks for the user
-   */
-  @IsArray()
-  bookmarks: string[];
 }

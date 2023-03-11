@@ -1,20 +1,15 @@
 import { HttpException, Injectable } from '@nestjs/common';
 import { IQueryHandler, QueryBus, QueryHandler } from '@nestjs/cqrs';
-import { GetMultipleCardsByIdsQuery } from 'src/card/queries/impl';
-import { MappedCard } from 'src/card/types/types';
+import { Circle } from 'src/circle/model/circle.model';
+import { GetMultipleCirclesQuery } from 'src/circle/queries/impl';
 import { CommonTools } from 'src/common/common.service';
-import {
-  Activity,
-  Notification,
-  PopulatedUserFields,
-  MappedUser,
-} from 'src/users/types/types';
+import { MappedItem } from 'src/common/interfaces';
 import {
   DetailedUserPrivateResponseDto,
   DetailedUserPubliceResponseDto,
 } from 'src/users/dto/detailed-user-response.dto';
 import { User } from 'src/users/model/users.model';
-import { RequestProvider } from 'src/users/user.provider';
+import { Activity, Notification } from 'src/users/types/types';
 import { UsersRepository } from '../../users.repository';
 import {
   GetMultipleUsersByFilterQuery,
@@ -23,12 +18,6 @@ import {
   GetUserByIdQuery,
   GetUserByUsernameQuery,
 } from '../impl';
-import { GetMultipleCirclesQuery } from 'src/circle/queries/impl';
-import { MappedItem } from 'src/common/interfaces';
-import { Circle } from 'src/circle/model/circle.model';
-import { Card } from 'src/card/model/card.model';
-import { GetMultipleRetrosQuery } from 'src/retro/queries/impl';
-import { Retro } from 'src/retro/models/retro.model';
 
 @Injectable()
 export class UserFieldResolver {
@@ -52,81 +41,6 @@ export class UserFieldResolver {
     }
 
     return ids;
-  }
-
-  async getObjectifiedCardDetails(user: User): Promise<MappedItem<Card>> {
-    let activityCardIds, notifCardIds: string[];
-    if (user.activities) {
-      activityCardIds = this.getContentReferences(user.activities, 'cards');
-    }
-
-    if (user.notifications) {
-      notifCardIds = this.getContentReferences(user.notifications, 'cards');
-    }
-
-    const cardIds = [
-      ...(user.assignedCards || []),
-      ...(user.reviewingCards || []),
-      ...(user.reviewingClosedCards || []),
-      ...(user.assignedClosedCards || []),
-      ...(user.bookmarks || []),
-      ...(activityCardIds || []),
-      ...(notifCardIds || []),
-    ];
-    if (user.activeApplications) {
-      cardIds.push(...user.activeApplications.map((app) => app.cardId));
-    }
-    if (user.pickedApplications) {
-      cardIds.push(...user.pickedApplications.map((app) => app.cardId));
-    }
-    if (user.rejectedApplications) {
-      cardIds.push(...user.rejectedApplications.map((app) => app.cardId));
-    }
-
-    const cards = await this.queryBus.execute(
-      new GetMultipleCardsByIdsQuery(
-        cardIds,
-        {
-          project: {
-            id: 1,
-            name: 1,
-            slug: 1,
-          },
-          assignee: {
-            id: 1,
-            avatar: 1,
-            username: 1,
-            ethAddress: 1,
-          },
-          reviewer: {
-            id: 1,
-            avatar: 1,
-            username: 1,
-            ethAddress: 1,
-          },
-          circle: {
-            id: 1,
-            name: 1,
-            avatar: 1,
-            slug: 1,
-          },
-        },
-        {
-          id: 1,
-          title: 1,
-          slug: 1,
-          assignee: 1,
-          reviewer: 1,
-          status: 1,
-          priority: 1,
-          deadline: 1,
-          startDate: 1,
-          labels: 1,
-        },
-      ),
-    );
-
-    return this.commonTools.objectify(cards, 'id');
   }
 
   async getObjectifiedUserDetails(user: User): Promise<MappedItem<User>> {
@@ -195,46 +109,6 @@ export class UserFieldResolver {
     return this.commonTools.objectify(circles, 'id');
   }
 
-  async getObjectifiedRetroDetails(user: User): Promise<MappedItem<Retro>> {
-    let activityCircleIds, notifCircleIds: string[];
-    if (user.activities) {
-      activityCircleIds = this.getContentReferences(user.activities, 'retro');
-    }
-
-    if (user.notifications) {
-      notifCircleIds = this.getContentReferences(user.notifications, 'retro');
-    }
-
-    const retroIds = [
-      ...(user.retro || []),
-      ...(activityCircleIds || []),
-      ...(notifCircleIds || []),
-    ];
-    const retros = await this.queryBus.execute(
-      new GetMultipleRetrosQuery(
-        {
-          _id: { $in: retroIds },
-        },
-        {
-          circle: {
-            name: 1,
-            avatar: 1,
-            memberRoles: 1,
-            slug: 1,
-          },
-        },
-        {
-          id: 1,
-          title: 1,
-          slug: 1,
-          status: 1,
-          parents: 1,
-        },
-      ),
-    );
-    return this.commonTools.objectify(retros, 'id');
-  }
-
   populateActor(user: DetailedUserPrivateResponseDto): any {
     if (!user.notifications) return user;
     const updatedNotifs = [];
@@ -269,16 +143,12 @@ export class UserFieldResolver {
   ): Promise<DetailedUserPrivateResponseDto> {
     return {
       ...user,
-      cardDetails: {
-        ...(await this.getObjectifiedCardDetails(user)),
-      },
       userDetails: {
         ...(await this.getObjectifiedUserDetails(user)),
       },
       circleDetails: {
         ...(await this.getObjectifiedCircleDetails(user)),
       },
-      retroDetails: { ...(await this.getObjectifiedRetroDetails(user)) },
     };
   }
 
@@ -286,23 +156,18 @@ export class UserFieldResolver {
     user: User,
   ): Promise<DetailedUserPubliceResponseDto> {
     delete user.notifications;
-    delete user.bookmarks;
     delete user.githubId;
     delete user.discordId;
     delete user.accounts;
     delete user.email;
     return {
       ...user,
-      cardDetails: {
-        ...(await this.getObjectifiedCardDetails(user)),
-      },
       userDetails: {
         ...(await this.getObjectifiedUserDetails(user)),
       },
       circleDetails: {
         ...(await this.getObjectifiedCircleDetails(user)),
       },
-      retroDetails: { ...(await this.getObjectifiedRetroDetails(user)) },
     };
   }
 }

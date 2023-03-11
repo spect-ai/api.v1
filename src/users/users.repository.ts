@@ -16,18 +16,12 @@ export class UsersRepository extends BaseRepository<User> {
   }
 
   async getUserDetailsByUserId(id: string): Promise<User> {
-    const user = await this.findById(id)
-      .populate('assignedCards')
-      .populate('reviewingCards')
-      .populate('circles');
+    const user = await this.findById(id).populate('circles');
     return user;
   }
 
   async getUserDetailsByUsername(username: string): Promise<User> {
-    const user = await this.findOne({ username })
-      .populate('assignedCards')
-      .populate('reviewingCards')
-      .populate('circles');
+    const user = await this.findOne({ username }).populate('circles');
     return user;
   }
 
@@ -37,8 +31,6 @@ export class UsersRepository extends BaseRepository<User> {
   ): Promise<DetailedUserPubliceResponseDto> {
     return await this.updateById(id, update)
       .populate('circles')
-      .populate('assignedCards')
-      .populate('reviewingCards')
       .populate('bookmarks');
   }
 

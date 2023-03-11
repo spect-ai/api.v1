@@ -7,41 +7,16 @@ import { CirclesModule } from './circle/circles.module';
 import { UsersModule } from './users/users.module';
 import { EthAddressModule } from './_eth-address/_eth-address.module';
 import { CommonModule } from './common/common.module';
-import { ProjectService } from './project/project.service';
-import { ProjectController } from './project/project.controller';
-import { ProjectModule } from './project/project.module';
-import { TemplatesService } from './template/templates.service';
-import { TemplatesModule } from './template/templates.module';
-import { RetroService } from './retro/retro.service';
-import { RetroModule } from './retro/retro.module';
 import { RegistryService } from './registry/registry.service';
 import { RegistryModule } from './registry/registry.module';
-import { CardsController } from './card/cards.controller';
-import { CardsService } from './card/cards.service';
-import { CardsModule } from './card/cards.module';
 import { RequestProvider } from './users/user.provider';
 import { IntegrationsModule } from './integrations/integrations.module';
-import { TemplatesController } from './template/templates.controller';
 import { RolesService } from './roles/roles.service';
 import { RegistryController } from './registry/registry.controller';
-import { ActionService } from './card/actions.service';
-import { ActivityBuilder } from './card/activity.builder';
-import { ApplicationService } from './card/application.cards.service';
-import { ActivityResolver } from './card/activity.resolver';
-import { WorkService } from './card/work.cards.service';
-import { CardValidationService } from './card/validation.cards.service';
-import { CommonUtility, ResponseBuilder } from './card/response.builder';
-import { CommentService } from './card/comments.cards.service';
-import { CardsProjectService } from './project/cards.project.service';
-import { CardsPaymentService } from './card/payment.cards.service';
 import { CircleRegistryService } from './circle/registry.circle.service';
-import { AutomationModule } from './automation/automation.module';
-import { WorkCommandHandler } from './card/handlers/work.command.handler';
 import { SessionAuthGuard } from './auth/iron-session.guard';
 import { CircleAuthGuard } from './auth/circle.guard';
-import { ProjectAuthGuard } from './auth/project.guard';
 import { CqrsModule } from '@nestjs/cqrs';
-import { CardNotificationService } from './users/notification/card-notification.service';
 import { LoggingService } from './logging/logging.service';
 import { ConfigModule } from '@nestjs/config';
 import { ContractListener } from './common/contract-listener.service';
@@ -84,14 +59,9 @@ const databaseUrl = process.env.MONGO_URL
     AuthModule,
     EthAddressModule,
     CommonModule,
-    ProjectModule,
-    TemplatesModule,
-    RetroModule,
     RegistryModule,
-    CardsModule,
     IntegrationsModule,
     RegistryModule,
-    AutomationModule,
     CqrsModule,
     CollectionModule,
     RealtimeModule,
@@ -100,41 +70,16 @@ const databaseUrl = process.env.MONGO_URL
     NotificationModule,
     SecretModule,
   ],
-  controllers: [
-    AppController,
-    ProjectController,
-    CardsController,
-    TemplatesController,
-    RegistryController,
-    CollectionController,
-  ],
+  controllers: [AppController, RegistryController, CollectionController],
   providers: [
     AppService,
-    ProjectService,
-    CardsProjectService,
-    TemplatesService,
-    RetroService,
     RegistryService,
-    CardsService,
     RequestProvider,
     RolesService,
     RegistryService,
-    ActionService,
-    ActivityBuilder,
-    ActivityResolver,
-    ApplicationService,
-    WorkService,
-    CardValidationService,
-    ResponseBuilder,
-    CommentService,
-    CardsPaymentService,
     CircleRegistryService,
-    WorkCommandHandler,
-    CommonUtility,
     SessionAuthGuard,
     CircleAuthGuard,
-    ProjectAuthGuard,
-    CardNotificationService,
     LoggingService,
     ContractListener,
     AdvancedAccessService,

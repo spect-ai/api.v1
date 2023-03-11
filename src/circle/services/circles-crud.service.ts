@@ -17,8 +17,6 @@ import {
   GetCircleBySlugQuery,
   GetMultipleCirclesQuery,
 } from '../queries/impl';
-import { Project } from 'src/project/model/project.model';
-import { Retro } from 'src/retro/models/retro.model';
 import { CirclesRepository } from 'src/circle/circles.repository';
 
 const getCirclePopulatedFields = {

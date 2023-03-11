@@ -1,35 +1,12 @@
-import { Card, ExtendedCard } from 'src/card/model/card.model';
-import { WorkThreadStatus } from 'src/card/types/types';
 import { Circle } from 'src/circle/model/circle.model';
 import { Collection } from 'src/collection/model/collection.model';
 import { MappedItem, MappedPartialItem } from 'src/common/interfaces';
 import { Status } from 'src/common/types/status.type';
-import { Project } from 'src/project/model/project.model';
-import { Retro } from 'src/retro/models/retro.model';
 import { User } from 'src/users/model/users.model';
-
-export type MultipleItemContainer = {
-  updates?: MappedPartialItem<Card | Retro | Project | Circle>;
-  cards?: MappedPartialItem<Card>;
-  projects?: MappedPartialItem<Project>;
-  circles?: MappedPartialItem<Circle>;
-  retros?: MappedPartialItem<Retro>;
-};
-
-export type PerformAutomationCommandContainer = {
-  automations: MappedItem<Automation>;
-  update?: Partial<Card | Retro | Project | Circle>;
-  card?: Card | ExtendedCard;
-  project?: Project;
-  circle?: Circle;
-  retro?: Retro;
-  misc?: any;
-};
 
 export type DataContainer = {
   collection?: MappedItem<Collection>;
   circle?: MappedItem<Circle>;
-  retro?: MappedItem<Retro>;
 };
 
 export type AutomationUpdatesContainer = {
@@ -81,7 +58,6 @@ export type CardTrigger = {
     | DeadlineChangeTrigger
     | StartDateChangeTrigger
     | BasicTrigger
-    | SubmissionTrigger
     | RevisionInstructionsTrigger
     | CardCreateTrigger;
 };
@@ -122,14 +98,6 @@ export type CardCreateTrigger = {
   columnId?: string;
   isParent?: boolean;
 };
-
-export type SubmissionTrigger = {
-  allHaveStatus?: WorkThreadStatus;
-  atLeastOneHasStatus?: WorkThreadStatus;
-  lastOneHasStatus?: WorkThreadStatus; // Always given by the last index of the array
-  firstOneHasStatus?: WorkThreadStatus; // Always given by the last index of the array
-};
-
 // eslint-disable-next-line @typescript-eslint/ban-types
 export type RevisionInstructionsTrigger = {};
 

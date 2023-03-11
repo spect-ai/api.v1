@@ -1,52 +1,8 @@
 import { IQueryHandler, QueryBus, QueryHandler } from '@nestjs/cqrs';
 import { GetCircleByIdQuery } from 'src/circle/queries/impl';
 import { LoggingService } from 'src/logging/logging.service';
-import {
-  GetTriggeredAutomationsQuery,
-  GetTriggeredCollectionAutomationsQuery,
-} from '../impl';
+import { GetTriggeredCollectionAutomationsQuery } from '../impl';
 import { triggerIdToQueryHandlerMapNew } from '../impl/is-triggered-v2.query';
-import { triggerIdToQueryHandlerMap } from '../impl/is-triggered.query';
-
-@QueryHandler(GetTriggeredAutomationsQuery)
-export class GetTriggeredAutomationsQueryHandler
-  implements IQueryHandler<GetTriggeredAutomationsQuery>
-{
-  constructor(
-    private readonly queryBus: QueryBus,
-    private readonly logger: LoggingService,
-  ) {
-    this.logger.setContext('GetTriggeredAutomationsQueryHandler');
-  }
-
-  async execute(query: GetTriggeredAutomationsQuery): Promise<string[]> {
-    try {
-      console.log('GetTriggeredAutomationsQueryHandler');
-
-      const { performAutomationCommandContainer, caller } = query;
-      const { automations } = performAutomationCommandContainer;
-      const triggeredAutomationIds = [];
-      for (const automation of Object.values(automations)) {
-        try {
-          const { trigger } = automation;
-          const query = triggerIdToQueryHandlerMap[trigger.id];
-          const res = await this.queryBus.execute(
-            new query(performAutomationCommandContainer, trigger),
-          );
-          if (res) {
-            triggeredAutomationIds.push(automation.id);
-          }
-        } catch (error) {
-          this.logger.error(error.message);
-        }
-      }
-
-      return triggeredAutomationIds;
-    } catch (e) {
-      this.logger.error(e.message);
-    }
-  }
-}
 
 @QueryHandler(GetTriggeredCollectionAutomationsQuery)
 export class GetTriggeredCollectionAutomationsQueryHandler

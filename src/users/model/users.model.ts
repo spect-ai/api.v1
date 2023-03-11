@@ -3,7 +3,6 @@ import { ProfileModel } from 'src/common/models/profile.model';
 import { useMongoosePlugin } from 'src/base/decorators/use-mongoose-plugins.decorator';
 import { Schema } from 'mongoose';
 import { Circle } from 'src/circle/model/circle.model';
-import { Card } from 'src/card/model/card.model';
 import {
   Activity,
   FormResponses,
@@ -14,7 +13,6 @@ import {
   NotificationV2,
   UserSubmittedApplication,
 } from '../types/types';
-import { Retro } from 'src/retro/models/retro.model';
 import { Collection } from 'src/collection/model/collection.model';
 
 @useMongoosePlugin()
@@ -98,30 +96,6 @@ export class User extends ProfileModel {
   collectionsSubmittedTo: string[];
 
   /**
-   * List of cards a user is currently assigned to
-   */
-  @prop({ ref: () => Card, type: Schema.Types.String, default: [] })
-  assignedCards: string[];
-
-  /**
-   * List of cards a user is currently reviewing
-   */
-  @prop({ ref: () => Card, type: Schema.Types.String, default: [] })
-  reviewingCards: string[];
-
-  /**
-   * List of cards a user was assigned to that have been closed
-   */
-  @prop({ ref: () => Card, type: Schema.Types.String, default: [] })
-  assignedClosedCards: string[];
-
-  /**
-   * List of cards a user was reviewing that have been closed
-   */
-  @prop({ ref: () => Card, type: Schema.Types.String, default: [] })
-  reviewingClosedCards: string[];
-
-  /**
    * Activities taken by the user
    */
   @prop({ default: [] })
@@ -158,12 +132,6 @@ export class User extends ProfileModel {
   rejectedApplications: UserSubmittedApplication[];
 
   /**
-   * Card bookmarks for the user
-   */
-  @prop({ ref: () => Card, type: Schema.Types.String, default: [] })
-  bookmarks: string[];
-
-  /**
    * Circles followed by the user
    */
   @prop({ ref: () => Circle, type: Schema.Types.String, default: [] })
@@ -180,12 +148,6 @@ export class User extends ProfileModel {
    */
   @prop({ ref: () => User, type: Schema.Types.String, default: [] })
   followedByUsers: string[];
-
-  /**
-   * Users following the user
-   */
-  @prop({ ref: () => Retro, type: Schema.Types.String, default: [] })
-  retro: string[];
 
   @prop({ default: [] })
   experiences?: LensExperience[];

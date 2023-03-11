@@ -9,7 +9,6 @@ import { CirclesRepository } from 'src/circle/circles.repository';
 import { DeleteCircleByIdCommand } from 'src/circle/commands/impl';
 import { GetCircleWithAllRelationsQuery } from 'src/circle/queries/impl';
 import { LoggingService } from 'src/logging/logging.service';
-import { ArchiveProjectCommand } from 'src/project/commands/impl';
 import { ArchiveCircleByIdCommand } from '../impl/archive-circle.command';
 
 @CommandHandler(ArchiveCircleByIdCommand)
@@ -42,15 +41,6 @@ export class ArchiveCircleByIdCommandHandler
       ];
       const circlesUpdates = {};
       for (const circleToArchive of circlesToArchive) {
-        for (const project of circleToArchive.projects) {
-          try {
-            this.commandBus.execute(
-              new ArchiveProjectCommand(project.toString()),
-            );
-          } catch (error) {
-            this.logger.error(error.message);
-          }
-        }
         circlesUpdates[circleToArchive.id] = {
           status: {
             ...(circleToArchive.status || {}),

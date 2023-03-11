@@ -7,8 +7,6 @@ import { ProfileModel } from 'src/common/models/profile.model';
 import { Activity } from 'src/common/types/activity.type';
 import { MemberRoles, Roles } from 'src/common/types/role.type';
 import { Status } from 'src/common/types/status.type';
-import { Project } from 'src/project/model/project.model';
-import { Retro } from 'src/retro/models/retro.model';
 import { User } from 'src/users/model/users.model';
 import { MappedItem } from 'src/common/interfaces';
 import {
@@ -83,20 +81,8 @@ export class Circle extends ProfileModel {
   /**
    * Projects in the circle
    */
-  @prop({ ref: () => Project, default: [] })
-  projects: ObjectId[];
-
-  /**
-   * Projects in the circle
-   */
   @prop({ ref: () => Collection, default: [] })
   collections: ObjectId[];
-
-  /**
-   * Retros in the circle
-   */
-  @prop({ ref: () => Retro, default: [] })
-  retro: ObjectId[];
 
   /**
    * Members in the circle

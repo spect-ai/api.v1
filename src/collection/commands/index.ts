@@ -41,10 +41,6 @@ import {
   UpdateCollectionByFilterCommandHandler,
   UpdateCollectionCommandHandler,
 } from './handlers/update-collection.handler';
-import {
-  MigrateAllCollectionsCommandHandler,
-  MigrateCollectionCommandHandler,
-} from './handlers/migrate-collection.handler';
 import { AddPropertyCommandHandler } from './properties/handlers/add-property.handler';
 import { RemovePropertyCommandHandler } from './properties/handlers/remove-property.handler';
 import { UpdatePropertyCommandHandler } from './properties/handlers/update-property.handler';
@@ -58,8 +54,6 @@ import { ImportCommandHandler } from './handlers/import.handler';
 export const CommandHandlers = [
   CreateCollectionCommandHandler,
   UpdateCollectionCommandHandler,
-  MigrateCollectionCommandHandler,
-  MigrateAllCollectionsCommandHandler,
   AddPropertyCommandHandler,
   UpdatePropertyCommandHandler,
   RemovePropertyCommandHandler,

@@ -3,15 +3,8 @@ import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { Alchemy, Network } from 'alchemy-sdk';
 import { utils } from 'ethers';
 import { AbiCoder } from 'ethers/lib/utils';
-import { UpdatePaymentCommand } from 'src/card/commands/impl';
-import {
-  UpdateMultiplePaymentsCommand,
-  UpdatePaymentsCommand,
-} from 'src/circle/commands/payments/impl';
-import { GetCircleByIdQuery } from 'src/circle/queries/impl';
+import { UpdateMultiplePaymentsCommand } from 'src/circle/commands/payments/impl';
 import { LoggingService } from 'src/logging/logging.service';
-import { RealtimeGateway } from 'src/realtime/realtime.gateway';
-import { UpdateRetroCommand } from 'src/retro/commands/impl';
 import { distributorAbi } from './abis/distributor';
 
 @Injectable()

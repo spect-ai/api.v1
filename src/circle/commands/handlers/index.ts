@@ -8,10 +8,6 @@ import {
   JoinWithoutInvitationCommandHandler,
 } from '../membership/handlers/join-circle.handler';
 import { RemoveFromCircleCommandHandler } from '../membership/handlers/remove-from-circle.handler';
-import {
-  RemoveProjectsCommandHandler,
-  RemoveProjectsFromMultipleCirclesCommandHandler,
-} from '../projects/handlers/remove-projects.handler';
 import { AddRoleCommandHandler } from '../roles/handlers/add-role.handler';
 import { RemoveRoleCommandHandler } from '../roles/handlers/remove-role.handler';
 import { UpdateRoleCommandHandler } from '../roles/handlers/update-role.handler';
@@ -26,10 +22,6 @@ import {
   UpdateCircleCommandHandler,
   UpdateMultipleCircleCommandHandler,
 } from './update-circle.handler';
-import {
-  AddProjectsCommandHandler,
-  AddProjectsToMultipleCirclesCommandHandler,
-} from '../projects/handlers/add-projects.handler';
 import { ArchiveCircleByIdCommandHandler } from '../archive/handlers/archive-circle.handler';
 import { WhitelistMemberAddressCommandHandler } from '../roles/handlers/whitelist-member-address.handler';
 import { CreateFolderCommandHandler } from '../folders/handlers/create-folder.handler';
@@ -51,10 +43,6 @@ import {
 } from '../payments/handlers/update-payment.handler';
 
 export const CommandHandlers = [
-  RemoveProjectsCommandHandler,
-  RemoveProjectsFromMultipleCirclesCommandHandler,
-  AddProjectsCommandHandler,
-  AddProjectsToMultipleCirclesCommandHandler,
   JoinUsingInvitationCommandHandler,
   JoinUsingDiscordCommandHandler,
   JoinUsingGuildxyzCommandHandler,

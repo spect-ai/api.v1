@@ -14,7 +14,7 @@ export class GetCirclesCommandHandler
     private readonly logger: LoggingService,
     private readonly queryBus: QueryBus,
   ) {
-    this.logger.setContext('AddEducationCommandHandler');
+    this.logger.setContext('GetCirclesCommandHandler');
   }
 
   async execute(command: GetCirclesCommand) {
@@ -39,15 +39,13 @@ export class GetCirclesCommandHandler
               gradient: 1,
             },
             memberRoles: 1,
-            projects: {
-              slug: 1,
-            },
             collections: {
               slug: 1,
             },
           },
         ),
       );
+      console.log({ circles });
       return circles.map((circle: any) => {
         return {
           name: circle.name,
@@ -57,7 +55,6 @@ export class GetCirclesCommandHandler
           avatar: circle.avatar || circle.parents[0]?.avatar,
           parents: circle.parents,
           gradient: circle.gradient || circle.parents[0]?.gradient,
-          projects: circle.projects,
           collections: circle.collections,
           memberRoles: circle.memberRoles,
         };

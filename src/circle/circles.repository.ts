@@ -5,8 +5,6 @@ import { BaseRepository } from 'src/base/base.repository';
 import { Circle, ExtendedCircle } from './model/circle.model';
 import { PopulatedCircleFields } from './types';
 import { CircleResponseDto } from './dto/detailed-circle-response.dto';
-import { Project } from 'src/project/model/project.model';
-import { Retro } from 'src/retro/models/retro.model';
 import { Collection } from 'src/collection/model/collection.model';
 
 const defaultPopulate: PopulatedCircleFields = {
@@ -23,12 +21,6 @@ const defaultPopulate: PopulatedCircleFields = {
     avatar: 1,
     paymentAddress: 1,
   },
-  projects: {
-    id: 1,
-    name: 1,
-    description: 1,
-    slug: 1,
-  },
   collections: {
     id: 1,
     name: 1,
@@ -40,14 +32,6 @@ const defaultPopulate: PopulatedCircleFields = {
       views: 1,
       viewOrder: 1,
     },
-  },
-  retro: {
-    title: 1,
-    slug: 1,
-    id: 1,
-    status: 1,
-    reward: 1,
-    members: 1,
   },
 };
 
@@ -65,9 +49,7 @@ export class CirclesRepository extends BaseRepository<Circle> {
     return await this.findById(id)
       .populate('parents')
       .populate('children')
-      .populate('projects')
       .populate('collections')
-      .populate('retro')
       .exec();
   }
 
@@ -75,9 +57,7 @@ export class CirclesRepository extends BaseRepository<Circle> {
     return await this.findOne({ slug: slug })
       .populate('parents')
       .populate('children')
-      .populate('projects')
       .populate('collections')
-      .populate('retro')
       .exec();
   }
 
@@ -88,9 +68,7 @@ export class CirclesRepository extends BaseRepository<Circle> {
     return await this.updateById(id, update)
       .populate('parents')
       .populate('children')
-      .populate('projects')
-      .populate('collections')
-      .populate('retro');
+      .populate('collections');
   }
 
   async getParentCirclesByUser(user: string): Promise<Circle[]> {
@@ -299,12 +277,6 @@ export class CirclesRepository extends BaseRepository<Circle> {
     circle: Circle,
   ): Promise<CircleResponseDto> {
     const projects = {};
-    if (circle?.projects) {
-      for (const populatedProject of circle?.projects) {
-        const project = populatedProject as unknown as Project;
-        projects[project.id] = project;
-      }
-    }
 
     const children = {};
     if (circle?.children) {
@@ -315,12 +287,6 @@ export class CirclesRepository extends BaseRepository<Circle> {
     }
 
     const retro = {};
-    if (circle?.retro) {
-      for (const populatedRetro of circle?.retro) {
-        const ret = populatedRetro as unknown as Retro;
-        retro[ret.id] = ret;
-      }
-    }
 
     const collections = {};
     if (circle?.collections) {
