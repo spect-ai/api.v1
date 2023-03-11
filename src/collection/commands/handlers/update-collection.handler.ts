@@ -1,8 +1,14 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
-import { CommandHandler, ICommandHandler, QueryBus } from '@nestjs/cqrs';
+import {
+  CommandHandler,
+  EventBus,
+  ICommandHandler,
+  QueryBus,
+} from '@nestjs/cqrs';
 import { CollectionRepository } from 'src/collection/collection.repository';
 import { CollectionResponseDto } from 'src/collection/dto/collection-response.dto';
 import { UpdateCollectionDto } from 'src/collection/dto/update-collection-request.dto';
+import { CollectionUpdatedEvent } from 'src/collection/events';
 import { Collection } from 'src/collection/model/collection.model';
 import { GetPrivateViewCollectionQuery } from 'src/collection/queries';
 import { CommonTools } from 'src/common/common.service';
@@ -53,6 +59,7 @@ export class UpdateCollectionCommandHandler
   constructor(
     private readonly collectionRepository: CollectionRepository,
     private readonly queryBus: QueryBus,
+    private readonly eventBus: EventBus,
     private readonly logger: LoggingService,
     private readonly updateValidationService: UpdateValidationService,
   ) {
@@ -73,6 +80,10 @@ export class UpdateCollectionCommandHandler
         collectionId,
         updateCollectionDto,
       );
+      this.eventBus.publish(
+        new CollectionUpdatedEvent(updatedCollection, null, null),
+      );
+
       return await this.queryBus.execute(
         new GetPrivateViewCollectionQuery(null, updatedCollection),
       );
