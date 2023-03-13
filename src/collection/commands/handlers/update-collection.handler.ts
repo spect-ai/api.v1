@@ -80,13 +80,14 @@ export class UpdateCollectionCommandHandler
         collectionId,
         updateCollectionDto,
       );
-      this.eventBus.publish(
-        new CollectionUpdatedEvent(updatedCollection, null, null),
-      );
 
-      return await this.queryBus.execute(
+      const pvtViewCollection = await this.queryBus.execute(
         new GetPrivateViewCollectionQuery(null, updatedCollection),
       );
+      this.eventBus.publish(
+        new CollectionUpdatedEvent(pvtViewCollection, null, null),
+      );
+      return pvtViewCollection;
     } catch (e) {
       this.logger.error(e);
       throw new InternalServerErrorException(e);

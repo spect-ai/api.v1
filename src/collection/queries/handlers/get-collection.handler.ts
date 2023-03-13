@@ -284,7 +284,6 @@ export class GetPrivateViewCollectionQueryHandler
 
   async execute(query: GetPrivateViewCollectionQuery): Promise<any> {
     try {
-      console.time('start');
       const { slug, collection } = query;
       let collectionToGet = collection;
       if (!collectionToGet) {
@@ -340,8 +339,6 @@ export class GetPrivateViewCollectionQueryHandler
           profiles.push(owner);
         }
         if (profiles.length > 0) {
-          console.time('2');
-
           profileInfo = await this.queryBus.execute(
             new GetMultipleUsersByIdsQuery(profiles, null, {
               username: 1,
@@ -349,10 +346,8 @@ export class GetPrivateViewCollectionQueryHandler
               ethAddress: 1,
             }),
           );
-          console.timeEnd('2');
         }
       }
-      console.timeEnd('start');
 
       return {
         ...collectionToGet,
