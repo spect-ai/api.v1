@@ -112,11 +112,12 @@ export class CreateCollectionCommandHandler
           formMetadata: {
             active: true,
             logo: parentCircle.avatar,
-            messageOnSubmission: 'Thank you for submitting your response',
+            messageOnSubmission: 'Thank you for submitting your response.',
             multipleResponsesAllowed: false,
             updatingResponseAllowed: false,
-            allowAnonymousResponses: false,
-            walletConnectionRequired: true,
+            allowAnonymousResponses: true,
+            walletConnectionRequired: false,
+            version: 1,
           },
           projectMetadata: {
             viewOrder: [defaultViewId],

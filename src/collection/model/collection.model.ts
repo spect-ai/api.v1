@@ -246,6 +246,7 @@ export interface FormMetadata {
   responseDataForPoap?: MappedItem<any>;
   minimumNumberOfAnswersThatNeedToMatchForMintkudos?: number;
   responseDataForMintkudos?: MappedItem<any>;
+  version?: number;
 }
 
 export interface PaymentConfig {
