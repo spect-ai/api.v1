@@ -13,6 +13,7 @@ import { MazuryService } from './services/mazury.service';
 import { Credential, VerifiableCredential } from 'src/users/types/types';
 import { KudosType, MazuryCredentialType } from './types/types';
 import { MintKudosService } from './services/mintkudos.service';
+import { PoapService } from './services/poap.service';
 
 @Injectable()
 export class CredentialsService {
@@ -21,6 +22,7 @@ export class CredentialsService {
     private readonly gitcoinService: GitcoinPassportService,
     private readonly mazuryService: MazuryService,
     private readonly kudosService: MintKudosService,
+    private readonly poapService: PoapService,
   ) {}
 
   async getAll(): Promise<Credentials[]> {
@@ -125,14 +127,8 @@ export class CredentialsService {
         limit,
       );
       return this.kudosService.mapToCredentials(credentials);
-    } else {
-      const credentials = await this.mazuryService.getCredentials(
-        address,
-        issuer,
-        offset,
-        limit,
-      );
-      return await this.mazuryService.mapToCredentials(credentials.results);
+    } else if (issuer === 'poap') {
+      return await this.poapService.getPoapsByAddress(address);
     }
   }
 }

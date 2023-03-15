@@ -242,7 +242,7 @@ export class PoapService {
       };
 
       return await (
-        await fetch(`https://api.poap.tech//actions/scan/${address}`, options)
+        await fetch(`https://api.poap.tech/actions/scan/${address}`, options)
       ).json();
     } catch (e) {
       this.logger.error(e);

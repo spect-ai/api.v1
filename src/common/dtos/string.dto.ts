@@ -8,6 +8,15 @@ import {
 } from 'class-validator';
 import { IsObjectId } from 'class-validator-mongo-object-id';
 
+export class OffsetLimitDto {
+  @IsNumber()
+  @IsOptional()
+  offset: number;
+
+  @IsNumber()
+  @IsOptional()
+  limit: number;
+}
 export class RequiredSlugDto {
   /**
    * Object Id
@@ -140,7 +149,7 @@ export class RequiredUsernameDto {
   username: string;
 }
 
-export class RequiredEthAddressDto {
+export class RequiredEthAddressDto extends OffsetLimitDto {
   @IsNotEmpty()
   @IsString()
   ethAddress: string;

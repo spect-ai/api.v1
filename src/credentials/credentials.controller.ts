@@ -64,16 +64,14 @@ export class CredentialsController {
   }
   @Get('/credentialsByAddressAndIssuer')
   async credentialsByAddressAndIssuer(
-    @Query() addressParam: RequiredEthAddressDto,
+    @Query() param: RequiredEthAddressDto,
     @Query() issuerParam: RequiredIssuerDto,
-    @Query() offsetParam: OptionalOffsetDto,
-    @Query() limitParam: OptionalLimitDto,
   ): Promise<Credential[]> {
     return await this.credentialService.getByAddressAndIssuer(
-      addressParam.ethAddress,
+      param.ethAddress,
       issuerParam.issuer,
-      offsetParam.offset,
-      limitParam.limit,
+      param.offset,
+      param.limit,
     );
   }
 
