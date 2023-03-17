@@ -37,15 +37,15 @@ export class CreateCollectionCommandHandler
       const { createCollectionDto, caller } = command;
 
       const properties = {
-        Title: {
-          name: 'Title',
+        'What is your name?': {
+          name: 'What is your name?',
           type: 'shortText',
           default: '',
           isPartOfFormView: true,
           immutable: true,
         },
-        Description: {
-          name: 'Description',
+        'Why do you want to join the team?': {
+          name: 'Why do you want to join the team?',
           type: 'longText',
           default: '',
           isPartOfFormView: true,
@@ -71,7 +71,11 @@ export class CreateCollectionCommandHandler
           isPartOfFormView: false,
         },
       } as MappedItem<Property>;
-      const propertyOrder = ['Title', 'Description', 'Status'];
+      const propertyOrder = [
+        'What is your name?',
+        'Why do you want to join the team?',
+        'Status',
+      ];
 
       const parentCircle: Circle = await this.queryBus.execute(
         new GetCircleByIdQuery(createCollectionDto.circleId, {}),
@@ -118,6 +122,34 @@ export class CreateCollectionCommandHandler
             allowAnonymousResponses: true,
             walletConnectionRequired: false,
             version: 1,
+            pages: {
+              start: {
+                id: 'start',
+                name: 'Welcome Page',
+                properties: [],
+              },
+              connect: {
+                id: 'connect',
+                name: 'Connect Wallet',
+                properties: [],
+              },
+              'page-1': {
+                id: 'page-1',
+                name: 'Page 1',
+                properties: [
+                  'What is your name?',
+                  'Why do you want to join the team?',
+                  'Status',
+                ],
+                movable: true,
+              },
+              submitted: {
+                id: 'submitted',
+                name: 'Submitted',
+                properties: [],
+              },
+            },
+            pageOrder: ['start', 'connect', 'page-1', 'submitted'],
           },
           projectMetadata: {
             viewOrder: [defaultViewId],
