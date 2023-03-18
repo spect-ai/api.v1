@@ -128,11 +128,6 @@ export class CreateCollectionCommandHandler
                 name: 'Welcome Page',
                 properties: [],
               },
-              connect: {
-                id: 'connect',
-                name: 'Connect Wallet',
-                properties: [],
-              },
               'page-1': {
                 id: 'page-1',
                 name: 'Page 1',
@@ -149,7 +144,7 @@ export class CreateCollectionCommandHandler
                 properties: [],
               },
             },
-            pageOrder: ['start', 'connect', 'page-1', 'submitted'],
+            pageOrder: ['start', 'page-1', 'submitted'],
           },
           projectMetadata: {
             viewOrder: [defaultViewId],
