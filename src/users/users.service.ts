@@ -249,7 +249,6 @@ export class UsersService {
       if (!user) {
         return [];
       }
-      console.log({ user });
       const circles = await Promise.all(
         user.circles.map(async (circleId) => {
           const circle = await this.queryBus.execute(

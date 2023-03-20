@@ -1,5 +1,6 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import fetch from 'node-fetch';
+import { async } from 'rxjs';
 import { Circle } from 'src/circle/model/circle.model';
 import { DiscordChannel } from 'src/circle/types';
 
@@ -131,6 +132,42 @@ export class DiscordService {
     if (res.ok) {
       const data = await res.json();
       return data;
+    }
+    return null;
+  }
+
+  async createThread(
+    guildId: string,
+    threadName: string,
+    channelId: string,
+    isPrivate: boolean,
+    usersToAdd: string[],
+    rolesToAdd: string[],
+    message: string,
+  ) {
+    console.log({ message });
+    const res = await fetch(
+      `${process.env.DISCORD_URI}/api/createDiscussionThread?guildId=${guildId}`,
+      {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        method: 'POST',
+        body: JSON.stringify({
+          threadName,
+          channelId,
+          isPrivate,
+          usersToAdd,
+          rolesToAdd,
+          message,
+        }),
+      },
+    );
+    console.log({ res });
+    if (res.ok) {
+      const data = await res.json();
+      console.log({ data });
+      return data.result;
     }
     return null;
   }

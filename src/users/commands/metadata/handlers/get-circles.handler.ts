@@ -20,7 +20,6 @@ export class GetCirclesCommandHandler
   async execute(command: GetCirclesCommand) {
     const { userId } = command;
     try {
-      console.log({ userId });
       const user = await this.userRepository.findById(userId);
       const circles = await this.queryBus.execute(
         new GetMultipleCirclesQuery(
@@ -45,7 +44,6 @@ export class GetCirclesCommandHandler
           },
         ),
       );
-      console.log({ circles });
       return circles.map((circle: any) => {
         return {
           name: circle.name,

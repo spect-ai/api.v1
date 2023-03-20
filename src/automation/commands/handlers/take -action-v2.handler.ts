@@ -16,7 +16,11 @@ import { MappedItem } from 'src/common/interfaces';
 import { LoggingService } from 'src/logging/logging.service';
 import { MailService } from 'src/mail/mail.service';
 import { EmailGeneratorService } from 'src/notification/email-generatr.service';
-import { GetProfileQuery, GetUserByFilterQuery } from 'src/users/queries/impl';
+import {
+  GetMultipleUsersByIdsQuery,
+  GetProfileQuery,
+  GetUserByFilterQuery,
+} from 'src/users/queries/impl';
 import {
   CreateCardActionCommand,
   CreateDiscordChannelActionCommand,
@@ -27,10 +31,12 @@ import {
   StartVotingPeriodActionCommand,
   CloseCardActionCommand,
   InitiatePendingPaymentActionCommand,
+  CreateDiscordThreadCommand,
 } from '../impl/take-action-v2.command';
 import {
   AddDataUsingAutomationCommand,
   AddMultipleDataUsingAutomationCommand,
+  UpdateCollectionCommand,
   UpdateDataUsingAutomationCommand,
 } from 'src/collection/commands';
 import { StartVotingPeriodCommand } from 'src/collection/commands/data/impl/vote-data.command';
@@ -500,6 +506,119 @@ export class PostOnDiscordActionCommandHandler
         action.data.url + relevantIds.dataSlug,
         action.data.message,
         fields,
+      );
+
+      return updatesContainer;
+    } catch (err) {
+      this.logger.error(err);
+    }
+  }
+}
+
+@CommandHandler(CreateDiscordThreadCommand)
+export class CreateDiscordThreadCommandHandler
+  implements ICommandHandler<PostOnDiscordActionCommand>
+{
+  constructor(
+    private readonly logger: LoggingService,
+    private readonly commandBus: CommandBus,
+    private readonly commonActionService: CommonActionService,
+    private readonly discordService: DiscordService,
+    private readonly queryBus: QueryBus,
+  ) {
+    this.logger.setContext(PostOnDiscordActionCommandHandler.name);
+  }
+
+  async execute(command: CreateDiscordThreadCommand): Promise<any> {
+    const { action, updatesContainer, relevantIds, caller } = command;
+    try {
+      const circleId = action.data.circleId;
+      if (!circleId) {
+        throw new Error('No circleId provided in automation data');
+      }
+      const { circle, collection, discordUserId } =
+        await this.commonActionService.getCircleCollectionUsersFromRelevantIds(
+          circleId,
+          relevantIds,
+        );
+
+      let threadName;
+      if (
+        action.data.threadNameType === 'value' &&
+        action.data.threadName?.value
+      ) {
+        threadName = action.data.threadName?.value;
+      } else if (
+        action.data.threadNameType === 'mapping' &&
+        action.data.threadName?.value
+      ) {
+        threadName =
+          collection.data[relevantIds.dataSlug][action.data.threadName.value];
+      }
+      const rolesToAdd = [];
+      if (action.data.rolesToAdd && typeof action.data.rolesToAdd === 'object')
+        for (const [role, give] of Object.entries(action.data.rolesToAdd)) {
+          if (give) rolesToAdd.push(role);
+        }
+
+      const usersToadd = [];
+      let discordIdsToAdd = [] as any;
+      if (action?.data?.stakeholdersToAdd?.length) {
+        for (const propertyName of action.data.stakeholdersToAdd) {
+          if (collection.properties[propertyName].type === 'user') {
+            usersToadd.push(
+              collection.data[relevantIds.dataSlug][propertyName]?.value,
+            );
+          } else if (
+            collection.properties[propertyName].type === 'user[]' &&
+            collection.data[relevantIds.dataSlug][propertyName]
+          ) {
+            usersToadd.push(
+              ...collection.data[relevantIds.dataSlug][propertyName]?.map(
+                (a) => a.value,
+              ),
+            );
+          }
+        }
+        if (usersToadd?.length) {
+          const users = await this.queryBus.execute(
+            new GetMultipleUsersByIdsQuery(usersToadd),
+          );
+          if (users?.length)
+            discordIdsToAdd = users
+              .filter((u) => u.discordId)
+              .map((u) => u.discordId);
+        }
+      }
+      const threadId = await this.discordService.createThread(
+        circle.discordGuildId,
+        threadName,
+        action.data.selectedChannel.value,
+        action.data.isPrivate,
+        discordIdsToAdd,
+        rolesToAdd,
+        `Gm folks, This thread is linked to the following ${
+          collection.collectionType === 0 ? 'response' : 'card'
+        }. https://circles.spect.network/${circle.slug}/r/${
+          collection.slug
+        }?cardSlug=${relevantIds.dataSlug}`,
+      );
+      await this.commandBus.execute(
+        new UpdateCollectionCommand(
+          {
+            discordThreadRef: {
+              ...collection.discordThreadRef,
+              [relevantIds.dataSlug]: {
+                threadId: threadId,
+                channelId: action.data.selectedChannel.value,
+                guildId: circle.discordGuildId,
+                private: action.data.isPrivate,
+              },
+            },
+          },
+          caller,
+          collection._id.toString(),
+        ),
       );
 
       return updatesContainer;

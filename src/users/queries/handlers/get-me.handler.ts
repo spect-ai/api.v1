@@ -44,7 +44,6 @@ export class GetMeQueryHandler implements IQueryHandler<GetMeQuery> {
         hideProfileFields,
       );
 
-      console.log({ user });
       if (!user) {
         throw `User with id ${caller} not found`;
       }

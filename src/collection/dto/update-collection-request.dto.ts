@@ -99,4 +99,15 @@ export class UpdateCollectionDto {
   @IsBoolean()
   @IsOptional()
   archived: boolean;
+
+  @IsObject()
+  @IsOptional()
+  discordThreadRef: {
+    [key: string]: {
+      threadId: string;
+      channelId: string;
+      guildId: string;
+      private: boolean;
+    };
+  };
 }

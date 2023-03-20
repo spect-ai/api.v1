@@ -143,6 +143,16 @@ export class Collection extends BaseModel {
 
   @prop({ default: false })
   archived?: boolean;
+
+  @prop({ default: {} })
+  discordThreadRef: {
+    [key: string]: {
+      threadId: string;
+      channelId: string;
+      guildId: string;
+      private: boolean;
+    };
+  };
 }
 
 export interface FormMetadata {

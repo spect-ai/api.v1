@@ -14,6 +14,7 @@ import {
   SendEmailActionCommandHandler,
   StartVotingPeriodActionCommandHandler,
   CloseCardActionCommandHandler,
+  CreateDiscordThreadCommandHandler,
 } from './take -action-v2.handler';
 
 export const CommandHandlers = [
@@ -30,4 +31,5 @@ export const CommandHandlers = [
   PostOnDiscordActionCommandHandler,
   CloseCardActionCommandHandler,
   InitiatePendingPaymentActionCommandHandler,
+  CreateDiscordThreadCommandHandler,
 ];
