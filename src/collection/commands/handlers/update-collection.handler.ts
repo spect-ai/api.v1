@@ -76,10 +76,38 @@ export class UpdateCollectionCommandHandler
         updateCollectionDto,
         collection,
       );
-      const updatedCollection = await this.collectionRepository.updateById(
+      let updatedCollection = await this.collectionRepository.updateById(
         collectionId,
         updateCollectionDto,
       );
+
+      if (
+        updateCollectionDto.formMetadata.walletConnectionRequired &&
+        !updatedCollection.formMetadata.pages['connect']
+      ) {
+        const { formMetadata } = updatedCollection;
+        updatedCollection = await this.collectionRepository.updateById(
+          collectionId,
+          {
+            formMetadata: {
+              ...formMetadata,
+              pages: {
+                ...formMetadata.pages,
+                ['connect']: {
+                  id: 'connect',
+                  name: 'Connect Wallet',
+                  properties: [],
+                },
+              },
+              pageOrder: [
+                ...formMetadata.pageOrder.slice(0, 1),
+                'connect',
+                ...formMetadata.pageOrder.slice(1),
+              ],
+            },
+          },
+        );
+      }
 
       const pvtViewCollection = await this.queryBus.execute(
         new GetPrivateViewCollectionQuery(null, updatedCollection),
