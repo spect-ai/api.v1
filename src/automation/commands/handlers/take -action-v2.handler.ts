@@ -32,6 +32,7 @@ import {
   CloseCardActionCommand,
   InitiatePendingPaymentActionCommand,
   CreateDiscordThreadCommand,
+  PostOnDiscordThreadCommand,
 } from '../impl/take-action-v2.command';
 import {
   AddDataUsingAutomationCommand,
@@ -636,6 +637,7 @@ export class CloseCardActionCommandHandler
     private readonly logger: LoggingService,
     private readonly commandBus: CommandBus,
     private readonly queryBus: QueryBus,
+    private readonly commonActionService: CommonActionService,
   ) {
     this.logger.setContext(CloseCardActionCommand.name);
   }
@@ -643,11 +645,15 @@ export class CloseCardActionCommandHandler
   async execute(command: CloseCardActionCommand): Promise<any> {
     const { action, caller, updatesContainer, relevantIds } = command;
     try {
-      const collection = await this.queryBus.execute(
-        new GetCollectionByFilterQuery({
-          slug: relevantIds.collectionSlug,
-        }),
-      );
+      const circleId = action.data.circleId;
+      if (!circleId) {
+        throw new Error('No circleId provided in automation data');
+      }
+      const { circle, collection, discordUserId } =
+        await this.commonActionService.getCircleCollectionUsersFromRelevantIds(
+          circleId,
+          relevantIds,
+        );
 
       await this.commandBus.execute(
         new UpdateDataUsingAutomationCommand(
@@ -657,6 +663,69 @@ export class CloseCardActionCommandHandler
           collection?.id,
           relevantIds.dataSlug,
         ),
+      );
+      return updatesContainer;
+    } catch (err) {
+      this.logger.error(err);
+    }
+  }
+}
+
+@CommandHandler(PostOnDiscordThreadCommand)
+export class PostOnDiscordThreadCommandHandler
+  implements ICommandHandler<PostOnDiscordThreadCommand>
+{
+  constructor(
+    private readonly logger: LoggingService,
+    private readonly discordService: DiscordService,
+    private readonly queryBus: QueryBus,
+    private readonly commonActionService: CommonActionService,
+  ) {
+    this.logger.setContext(PostOnDiscordThreadCommandHandler.name);
+  }
+
+  async execute(command: PostOnDiscordThreadCommand): Promise<any> {
+    const { action, caller, updatesContainer, relevantIds } = command;
+    console.log('PostOnDiscordThreadCommand');
+    try {
+      console.log({ updatesContainer, relevantIds });
+      const circleId = action.data.circleId;
+      if (!circleId) {
+        throw new Error('No circleId provided in automation data');
+      }
+      if (!action.data.message) return;
+
+      const { circle, collection, user } =
+        await this.commonActionService.getCircleCollectionUsersFromRelevantIds(
+          circleId,
+          relevantIds,
+        );
+
+      const threadRef =
+        collection.discordThreadRef &&
+        collection.discordThreadRef[relevantIds.dataSlug];
+      if (!threadRef) {
+        this.logger.error('No thread ref found');
+        return updatesContainer;
+      }
+
+      const fields = action.data.fields
+        ?.map((f) => ({
+          name: f.value,
+          value:
+            collection.properties?.[f.value]?.type === 'singleSelect'
+              ? collection?.data?.[relevantIds.dataSlug]?.[f.value]?.label
+              : collection?.data?.[relevantIds.dataSlug]?.[f.value],
+        }))
+        .filter((f) => f.value !== undefined);
+
+      const res = await this.discordService.postCard(
+        threadRef.channelId,
+        action.data.message,
+        `https://circles.spect.network/${circle.slug}/r/${collection.slug}?cardSlug=${relevantIds.dataSlug}`,
+        action.data.message,
+        fields,
+        threadRef.threadId,
       );
       return updatesContainer;
     } catch (err) {

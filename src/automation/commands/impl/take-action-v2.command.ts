@@ -26,6 +26,7 @@ export class PostOnDiscordActionCommand extends ActionCommand {}
 export class CreateDiscordThreadCommand extends ActionCommand {}
 export class CloseCardActionCommand extends ActionCommand {}
 export class InitiatePendingPaymentActionCommand extends ActionCommand {}
+export class PostOnDiscordThreadCommand extends ActionCommand {}
 
 export const actionIdToCommandMapNew = {
   sendEmail: SendEmailActionCommand,
@@ -33,6 +34,7 @@ export const actionIdToCommandMapNew = {
   createDiscordChannel: CreateDiscordChannelActionCommand,
   giveDiscordRole: GiveDiscordRoleActionCommand,
   createDiscordThread: CreateDiscordThreadCommand,
+  postOnDiscordThread: PostOnDiscordThreadCommand,
   createCard: CreateCardActionCommand,
   startVotingPeriod: StartVotingPeriodActionCommand,
   postOnDiscord: PostOnDiscordActionCommand,

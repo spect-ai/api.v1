@@ -113,6 +113,7 @@ export class DiscordService {
     url: string,
     message: string,
     fields: any,
+    threadId?: string,
   ) {
     const res = await fetch(`${process.env.DISCORD_URI}/api/postCard`, {
       headers: {
@@ -127,6 +128,7 @@ export class DiscordService {
           fields,
           msg: message,
         },
+        threadId,
       }),
     });
     if (res.ok) {
