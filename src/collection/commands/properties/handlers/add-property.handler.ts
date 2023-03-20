@@ -21,7 +21,7 @@ export class AddPropertyCommandHandler
   async execute(command: AddPropertyCommand): Promise<Collection> {
     try {
       console.log('AddPropertyCommandHandler');
-      const { addPropertyCommandDto, caller, collectionId } = command;
+      const { addPropertyCommandDto, caller, collectionId, pageId } = command;
       const collection = await this.collectionRepository.findById(collectionId);
       console.log(addPropertyCommandDto);
       if (addPropertyCommandDto.type === 'cardRelation') {
@@ -73,7 +73,7 @@ export class AddPropertyCommandHandler
 
       if (addPropertyCommandDto.name === 'slug')
         throw 'Cannot add property with name slug';
-      const updatedCollection = await this.collectionRepository.updateById(
+      let updatedCollection = await this.collectionRepository.updateById(
         collectionId,
         {
           properties: {
@@ -89,6 +89,28 @@ export class AddPropertyCommandHandler
           ],
         },
       );
+
+      if (collection.collectionType === 0) {
+        updatedCollection = await this.collectionRepository.updateById(
+          collectionId,
+          {
+            formMetadata: {
+              ...collection.formMetadata,
+              pages: {
+                ...collection.formMetadata.pages,
+                [pageId]: {
+                  ...collection.formMetadata.pages[pageId],
+                  properties: [
+                    ...(collection.formMetadata.pages[pageId].properties || []),
+                    addPropertyCommandDto.name,
+                  ],
+                },
+              },
+            },
+          },
+        );
+      }
+
       return await this.queryBus.execute(
         new GetPrivateViewCollectionQuery(null, updatedCollection),
       );

@@ -257,6 +257,15 @@ export interface FormMetadata {
   minimumNumberOfAnswersThatNeedToMatchForMintkudos?: number;
   responseDataForMintkudos?: MappedItem<any>;
   version?: number;
+  pages?: {
+    [pageId: string]: {
+      id: string;
+      name: string;
+      properties: string[];
+      movable?: boolean;
+    };
+  };
+  pageOrder?: string[];
 }
 
 export interface PaymentConfig {

@@ -29,7 +29,6 @@ import { Circle } from 'src/circle/model/circle.model';
 import { ObjectIdDto } from 'src/common/dtos/object-id.dto';
 import {
   RequiredActivityUUIDDto,
-  RequiredClaimCodeDto,
   RequiredPropertyIdDto,
   RequiredSlugDto,
   RequiredUUIDDto,
@@ -225,10 +224,16 @@ export class CollectionController {
   async addProperty(
     @Param() param: ObjectIdDto,
     @Body() addPropertyDto: AddPropertyDto,
+    @Query() query: { pageId?: string },
     @Request() req,
   ): Promise<Collection> {
     return await this.commandBus.execute(
-      new AddPropertyCommand(addPropertyDto, req.user?.id, param.id),
+      new AddPropertyCommand(
+        addPropertyDto,
+        req.user?.id,
+        param.id,
+        query.pageId,
+      ),
     );
   }
 

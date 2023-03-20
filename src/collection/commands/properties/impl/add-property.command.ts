@@ -5,5 +5,6 @@ export class AddPropertyCommand {
     public readonly addPropertyCommandDto: AddPropertyDto,
     public readonly caller: string,
     public readonly collectionId: string,
+    public readonly pageId: string,
   ) {}
 }
