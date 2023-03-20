@@ -235,7 +235,10 @@ export class CirclesCrudService {
       );
       const circleDetails =
         await this.circlesRepository.getCircleWithMinimalDetails(circle);
-      return circleDetails;
+      return this.filterPrivateProperties(
+        circleDetails,
+        this.requestProvider.user?.id,
+      );
     } catch (error) {
       this.logger.logError(
         `Failed circle creation with error: ${error.message}`,
