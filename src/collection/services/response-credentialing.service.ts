@@ -205,7 +205,7 @@ export class ResponseCredentialingService {
 
         await this.collectionRepository.updateById(collection.id, {
           formMetadata: {
-            ...(collection.formMetadata || {}),
+            ...collection.formMetadata,
             mintkudosClaimedBy: [
               ...mintkudosClaimedBy,
               this.requestProvider.user.id,

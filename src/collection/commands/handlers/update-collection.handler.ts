@@ -80,8 +80,8 @@ export class UpdateCollectionCommandHandler
         collectionId,
         updateCollectionDto,
       );
-
       if (
+        updateCollectionDto.formMetadata &&
         updateCollectionDto.formMetadata.walletConnectionRequired &&
         !updatedCollection.formMetadata.pages['connect']
       ) {
@@ -107,6 +107,69 @@ export class UpdateCollectionCommandHandler
             },
           },
         );
+      }
+
+      if (
+        updateCollectionDto.formMetadata &&
+        (updateCollectionDto.formMetadata.poapEventId ||
+          updateCollectionDto.formMetadata.surveyTokenId ||
+          updateCollectionDto.formMetadata.mintkudosTokenId) &&
+        !updatedCollection.formMetadata.pages['collect']
+      ) {
+        const { formMetadata } = updatedCollection;
+        updatedCollection = await this.collectionRepository.updateById(
+          collectionId,
+          {
+            formMetadata: {
+              ...formMetadata,
+              pages: {
+                ...formMetadata.pages,
+                ['collect']: {
+                  id: 'collect',
+                  name: 'Collect incentives',
+                  properties: [],
+                },
+              },
+              // add the page just before "submitted" page
+              pageOrder: [
+                ...formMetadata.pageOrder.slice(0, -1),
+                'collect',
+                ...formMetadata.pageOrder.slice(-1),
+              ],
+            },
+          },
+        );
+      }
+
+      if (
+        updateCollectionDto.formMetadata &&
+        (updateCollectionDto.formMetadata.mintkudosTokenId === null ||
+          updateCollectionDto.formMetadata.poapEventId === '') &&
+        updatedCollection.formMetadata.pages['collect']
+      ) {
+        const { formMetadata } = updatedCollection;
+        if (
+          !collection.formMetadata.mintkudosTokenId &&
+          !collection.formMetadata.poapEventId &&
+          !collection.formMetadata.surveyTokenId
+        ) {
+          updatedCollection = await this.collectionRepository.updateById(
+            collectionId,
+            {
+              formMetadata: {
+                ...formMetadata,
+                pages: {
+                  ...formMetadata.pages,
+                  collect: undefined,
+                },
+                // remove collect page
+                pageOrder: formMetadata.pageOrder.filter(
+                  (page) => page !== 'collect',
+                ),
+              },
+            },
+          );
+        }
       }
 
       const pvtViewCollection = await this.queryBus.execute(
