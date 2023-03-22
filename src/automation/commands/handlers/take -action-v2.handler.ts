@@ -109,8 +109,8 @@ export class SendEmailActionCommandHandler
 
   async execute(command: SendEmailActionCommand): Promise<any> {
     console.log('SendEmailActionCommandHandler');
+    const { action, caller, relevantIds, updatesContainer } = command;
     try {
-      const { action, caller, relevantIds } = command;
       const circleId = action.data.circleId;
       if (!circleId) {
         throw new Error('No circleId provided in automation data');
@@ -155,6 +155,7 @@ export class SendEmailActionCommandHandler
     } catch (err) {
       this.logger.error(err);
     }
+    return updatesContainer;
   }
 }
 
@@ -219,11 +220,10 @@ export class GiveRoleActionCommandHandler
       this.eventBus.publish(
         new JoinedCircleEvent(user._id.toString(), circleId, null),
       );
-
-      return updatesContainer;
     } catch (err) {
       this.logger.error(err);
     }
+    return updatesContainer;
   }
 }
 
@@ -266,11 +266,10 @@ export class GiveDiscordRoleActionCommandHandler
           roles,
         );
       }
-
-      return updatesContainer;
     } catch (err) {
       this.logger.error(err);
     }
+    return updatesContainer;
   }
 }
 
@@ -320,10 +319,39 @@ export class CreateDiscordChannelActionCommandHandler
           if (give) rolesToAdd.push(role);
         }
 
-      const usersToAdd = [];
+      const usersToadd = [];
+      let discordIdsToAdd = [] as any;
+
+      if (action?.data?.stakeholdersToAdd?.length) {
+        for (const propertyName of action.data.stakeholdersToAdd) {
+          if (collection.properties[propertyName].type === 'user') {
+            usersToadd.push(
+              collection.data[relevantIds.dataSlug][propertyName]?.value,
+            );
+          } else if (
+            collection.properties[propertyName].type === 'user[]' &&
+            collection.data[relevantIds.dataSlug][propertyName]
+          ) {
+            usersToadd.push(
+              ...collection.data[relevantIds.dataSlug][propertyName]?.map(
+                (a) => a.value,
+              ),
+            );
+          }
+        }
+        if (usersToadd?.length) {
+          const users = await this.queryBus.execute(
+            new GetMultipleUsersByIdsQuery(usersToadd),
+          );
+          if (users?.length)
+            discordIdsToAdd = users
+              .filter((u) => u.discordId)
+              .map((u) => u.discordId);
+        }
+      }
       if (action.data.addResponder) {
         if (discordUserId) {
-          usersToAdd.push(discordUserId);
+          discordIdsToAdd.push(discordUserId);
         }
       }
 
@@ -334,13 +362,12 @@ export class CreateDiscordChannelActionCommandHandler
           action.data.channelCategory.value,
           action.data.isPrivate,
           rolesToAdd,
-          usersToAdd,
+          discordIdsToAdd,
         );
-
-      return updatesContainer;
     } catch (err) {
       this.logger.error(err);
     }
+    return updatesContainer;
   }
 }
 
@@ -410,7 +437,7 @@ export class CreateCardActionCommandHandler
               ),
             );
           } catch (err) {
-            console.log(err);
+            this.logger.error(err);
             continue;
           }
           if (toCollection.properties[value.mapping.to.value].type === 'user') {
@@ -458,11 +485,10 @@ export class CreateCardActionCommandHandler
           action.data.selectedCollection.value,
         ),
       );
-
-      return updatesContainer;
     } catch (err) {
       this.logger.error(err);
     }
+    return updatesContainer;
   }
 }
 
@@ -483,7 +509,6 @@ export class PostOnDiscordActionCommandHandler
     const { action, updatesContainer, relevantIds } = command;
     try {
       console.log('PostOnDiscordActionCommandHandler');
-
       const collection = await this.queryBus.execute(
         new GetCollectionByFilterQuery({
           slug: relevantIds.collectionSlug,
@@ -499,6 +524,7 @@ export class PostOnDiscordActionCommandHandler
               : collection?.data?.[relevantIds.dataSlug]?.[f.value],
         }))
         .filter((f) => f.value !== undefined);
+
       await this.discordService.postCard(
         action.data.channel.value,
         action.data.message +
@@ -508,11 +534,10 @@ export class PostOnDiscordActionCommandHandler
         action.data.message,
         fields,
       );
-
-      return updatesContainer;
     } catch (err) {
       this.logger.error(err);
     }
+    return updatesContainer;
   }
 }
 
@@ -564,6 +589,7 @@ export class CreateDiscordThreadCommandHandler
 
       const usersToadd = [];
       let discordIdsToAdd = [] as any;
+
       if (action?.data?.stakeholdersToAdd?.length) {
         for (const propertyName of action.data.stakeholdersToAdd) {
           if (collection.properties[propertyName].type === 'user') {
@@ -589,6 +615,11 @@ export class CreateDiscordThreadCommandHandler
             discordIdsToAdd = users
               .filter((u) => u.discordId)
               .map((u) => u.discordId);
+        }
+      }
+      if (action.data.addResponder) {
+        if (discordUserId) {
+          discordIdsToAdd.push(discordUserId);
         }
       }
       const threadId = await this.discordService.createThread(
@@ -621,11 +652,11 @@ export class CreateDiscordThreadCommandHandler
           collection._id.toString(),
         ),
       );
-
-      return updatesContainer;
     } catch (err) {
       this.logger.error(err);
     }
+
+    return updatesContainer;
   }
 }
 
@@ -688,12 +719,11 @@ export class PostOnDiscordThreadCommandHandler
     const { action, caller, updatesContainer, relevantIds } = command;
     console.log('PostOnDiscordThreadCommand');
     try {
-      console.log({ updatesContainer, relevantIds });
       const circleId = action.data.circleId;
       if (!circleId) {
         throw new Error('No circleId provided in automation data');
       }
-      if (!action.data.message) return;
+      if (!action.data.message) throw 'Message is required';
 
       const { circle, collection, user } =
         await this.commonActionService.getCircleCollectionUsersFromRelevantIds(
@@ -727,10 +757,10 @@ export class PostOnDiscordThreadCommandHandler
         fields,
         threadRef.threadId,
       );
-      return updatesContainer;
     } catch (err) {
       this.logger.error(err);
     }
+    return updatesContainer;
   }
 }
 
@@ -754,7 +784,7 @@ export class InitiatePendingPaymentActionCommandHandler
         !action.data.rewardField ||
         !action.data.payeeField
       ) {
-        return updatesContainer;
+        throw `Initiate, rewardField and payeeField are required`;
       }
 
       const collection = await this.queryBus.execute(
@@ -782,10 +812,10 @@ export class InitiatePendingPaymentActionCommandHandler
           botUser,
         ),
       );
-      return updatesContainer;
     } catch (err) {
       this.logger.error(err);
     }
+    return updatesContainer;
   }
 }
 
@@ -816,9 +846,9 @@ export class StartVotingPeriodActionCommandHandler
           fromCollection._id.toString(),
         ),
       );
-      return updatesContainer;
     } catch (err) {
       this.logger.error(err);
     }
+    return updatesContainer;
   }
 }

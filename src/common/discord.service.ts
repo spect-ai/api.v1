@@ -7,6 +7,17 @@ import { DiscordChannel } from 'src/circle/types';
 // TODO
 @Injectable()
 export class DiscordService {
+  async isConnected(guildId: string): Promise<boolean> {
+    const res = await fetch(
+      `${process.env.DISCORD_URI}/api/guildExists?guildId=${guildId}`,
+    );
+    if (res.ok) {
+      const data = await res.json();
+      return data;
+    }
+    return false;
+  }
+
   async getDiscordRole(discordId: string, guildId: string): Promise<string[]> {
     console.log({ discordId, guildId });
     try {
@@ -22,33 +33,6 @@ export class DiscordService {
     }
 
     throw new InternalServerErrorException();
-  }
-
-  async postNotificationOnNewCircle(
-    circle: Circle,
-    channels: DiscordChannel[],
-    guildId: string,
-    url: string,
-  ) {
-    const res = await fetch(
-      `${process.env.DISCORD_URI}/api/postNotificationOnNewCircle?guildId=${guildId}`,
-      {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        method: 'POST',
-        body: JSON.stringify({
-          circle,
-          channels,
-          url,
-        }),
-      },
-    );
-    if (res.ok) {
-      const data = await res.json();
-      return data;
-    }
-    return null;
   }
 
   async giveRolesToUser(
@@ -115,6 +99,7 @@ export class DiscordService {
     fields: any,
     threadId?: string,
   ) {
+    console.log('posting');
     const res = await fetch(`${process.env.DISCORD_URI}/api/postCard`, {
       headers: {
         'Content-Type': 'application/json',
@@ -131,8 +116,10 @@ export class DiscordService {
         threadId,
       }),
     });
+    console.log({ resss: res });
     if (res.ok) {
       const data = await res.json();
+      console.log({ data });
       return data;
     }
     return null;

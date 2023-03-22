@@ -82,7 +82,7 @@ export class UpdateCollectionCommandHandler
       );
 
       if (
-        updateCollectionDto.formMetadata.walletConnectionRequired &&
+        updateCollectionDto.formMetadata?.walletConnectionRequired &&
         !updatedCollection.formMetadata.pages['connect']
       ) {
         const { formMetadata } = updatedCollection;
