@@ -34,16 +34,16 @@ export class SurveyProtocolListener {
         this.decodeTransactionAndRecord(log, '137');
       });
     }
-    if (process.env.ALCHEMY_API_KEY_MUMBAI) {
-      const { filterResponse, alchemy } = this.getWS(
-        process.env.ALCHEMY_API_KEY_MUMBAI,
-        Network.MATIC_MUMBAI,
-        '0x5CaD4E6E58cBc16a934F013081c7111E68c4FC51',
-      );
-      alchemy.ws.on(filterResponse, (log) => {
-        this.decodeTransactionAndRecord(log, '80001');
-      });
-    }
+    // if (process.env.ALCHEMY_API_KEY_MUMBAI) {
+    //   const { filterResponse, alchemy } = this.getWS(
+    //     process.env.ALCHEMY_API_KEY_MUMBAI,
+    //     Network.MATIC_MUMBAI,
+    //     '0x5CaD4E6E58cBc16a934F013081c7111E68c4FC51',
+    //   );
+    //   alchemy.ws.on(filterResponse, (log) => {
+    //     this.decodeTransactionAndRecord(log, '80001');
+    //   });
+    // }
     if (process.env.ALCHEMY_API_KEY_GOERLI) {
       const { filterResponse, alchemy } = this.getWS(
         process.env.ALCHEMY_API_KEY_GOERLI,

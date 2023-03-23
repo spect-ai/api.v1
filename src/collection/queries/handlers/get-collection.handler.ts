@@ -172,8 +172,9 @@ export class GetPublicViewCollectionQueryHandler
   async execute(
     query: GetPublicViewCollectionQuery,
   ): Promise<CollectionPublicResponseDto> {
+    const { caller, slug, collection } = query;
+
     try {
-      const { caller, slug, collection } = query;
       let collectionToGet = collection;
       if (!collectionToGet) {
         collectionToGet = await this.queryBus.execute(
@@ -259,7 +260,7 @@ export class GetPublicViewCollectionQueryHandler
       };
     } catch (error) {
       this.logger.logError(
-        `Failed while getting public collection with error: ${error.message}`,
+        `Failed while getting public collection with id ${collection?.id} with error: ${error.message}`,
         query,
       );
       throw new InternalServerErrorException(
@@ -283,8 +284,9 @@ export class GetPrivateViewCollectionQueryHandler
   }
 
   async execute(query: GetPrivateViewCollectionQuery): Promise<any> {
+    const { slug, collection } = query;
+
     try {
-      const { slug, collection } = query;
       let collectionToGet = collection;
       if (!collectionToGet) {
         collectionToGet = await this.queryBus.execute(
@@ -355,7 +357,9 @@ export class GetPrivateViewCollectionQueryHandler
       };
     } catch (error) {
       this.logger.logError(
-        `Failed while getting private collection with error: ${error.message}`,
+        `Failed while getting private collection with slug ${
+          slug || collection?.slug
+        } error: ${error.message}`,
         query,
       );
       throw new InternalServerErrorException(

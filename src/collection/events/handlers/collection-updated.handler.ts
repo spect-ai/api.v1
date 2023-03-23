@@ -20,7 +20,9 @@ export class CollectionUpdatedEventHandler
       console.log('CollectionUpdatedEvent');
       const { caller, collection, update } = event;
 
-      this.logger.log(`Created Collection: ${collection.name}`);
+      this.logger.log(
+        `Updated Collection ${collection.name} of id ${collection?.id}`,
+      );
     } catch (error) {
       this.logger.error(`${error.message}`);
     }
