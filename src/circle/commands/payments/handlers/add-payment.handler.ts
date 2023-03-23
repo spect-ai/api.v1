@@ -60,13 +60,13 @@ export class AddPaymentsCommandHandler
 
       const pendingPayments = circleToUpdate.pendingPayments;
       const rewardFieldToPayOn =
-        collection.projectMetadata.payments.rewardField;
+        collection.projectMetadata.payments?.rewardField;
       if (!rewardFieldToPayOn) {
         throw new InternalServerErrorException(
           `Reward property doesnt exist in collection ${addPaymentsDto.collectionId}`,
         );
       }
-      const rewardPaidTo = collection.projectMetadata.payments.payeeField;
+      const rewardPaidTo = collection.projectMetadata.payments?.payeeField;
       if (!rewardPaidTo) {
         throw new InternalServerErrorException(
           `User[], user or ethAddress property doesnt exist in collection ${addPaymentsDto.collectionId}`,
