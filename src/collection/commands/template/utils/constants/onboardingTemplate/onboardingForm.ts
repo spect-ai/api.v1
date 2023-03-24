@@ -126,6 +126,7 @@ export const onboardingFormProperties = {
   ['Twitter']: {
     name: 'Twitter',
     type: 'shortText',
+    isPartOfFormView: true,
     options: [
       {
         label: 'Option 1',

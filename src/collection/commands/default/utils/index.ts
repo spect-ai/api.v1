@@ -120,8 +120,31 @@ export const getOnboardToSpectFormDetails = (caller: string) => {
       messageOnSubmission: 'Thank you for submitting your response',
       multipleResponsesAllowed: false,
       updatingResponseAllowed: false,
-      allowAnonymousResponses: false,
-      walletConnectionRequired: true,
+      allowAnonymousResponses: true,
+      walletConnectionRequired: false,
+      pages: {
+        start: {
+          id: 'start',
+          name: 'Welcome Page',
+          properties: [],
+        },
+        'page-1': {
+          id: 'page-1',
+          name: 'Page 1',
+          properties: [
+            'What is your name?',
+            'Why do you want to join our team?',
+            'Status',
+          ],
+          movable: true,
+        },
+        submitted: {
+          id: 'submitted',
+          name: 'Submitted',
+          properties: [],
+        },
+      },
+      pageOrder: ['start', 'page-1', 'submitted'],
     },
     archived: false,
   };

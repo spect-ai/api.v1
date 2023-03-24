@@ -2,7 +2,6 @@ import { InternalServerErrorException } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { Circle } from 'src/circle/model/circle.model';
 import { LoggingService } from 'src/logging/logging.service';
-import { CreateGrantWorkflowCommand } from '../impl/index';
 import { v4 as uuidv4 } from 'uuid';
 import { CollectionRepository } from 'src/collection/collection.repository';
 import { QueryBus, CommandBus } from '@nestjs/cqrs';

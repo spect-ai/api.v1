@@ -44,8 +44,8 @@ export class CreateCollectionCommandHandler
           isPartOfFormView: true,
           immutable: true,
         },
-        'Why do you want to join the team?': {
-          name: 'Why do you want to join the team?',
+        'Why do you want to join our team?': {
+          name: 'Why do you want to join our team?',
           type: 'longText',
           default: '',
           isPartOfFormView: true,
@@ -73,7 +73,7 @@ export class CreateCollectionCommandHandler
       } as MappedItem<Property>;
       const propertyOrder = [
         'What is your name?',
-        'Why do you want to join the team?',
+        'Why do you want to join our team?',
         'Status',
       ];
 
@@ -133,7 +133,7 @@ export class CreateCollectionCommandHandler
                 name: 'Page 1',
                 properties: [
                   'What is your name?',
-                  'Why do you want to join the team?',
+                  'Why do you want to join our team?',
                   'Status',
                 ],
                 movable: true,

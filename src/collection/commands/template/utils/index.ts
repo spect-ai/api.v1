@@ -69,6 +69,50 @@ export const getGrantApplicationFormDetails = (
       multipleResponsesAllowed: false,
       updatingResponseAllowed: true,
       allowAnonymousResponses: false,
+      walletConnectionRequired: true,
+      pages: {
+        ['start']: {
+          id: 'start',
+          name: 'Welcome Page',
+          properties: [],
+        },
+        ['connect']: {
+          id: 'connect',
+          name: 'Connect Wallet',
+          properties: [],
+        },
+        'page-1': {
+          id: 'page-1',
+          name: 'Project',
+          properties: ['Project Name', 'About your Project', 'Status'],
+          movable: true,
+        },
+        'page-2': {
+          id: 'page-2',
+          name: 'Team Info',
+          properties: ['About the Team', 'Email', 'Connect Discord'],
+          movable: true,
+        },
+        'page-3': {
+          id: 'page-3',
+          name: 'Grant Details',
+          properties: ['Milestones', 'Total Reward'],
+          movable: true,
+        },
+        ['submitted']: {
+          id: 'submitted',
+          name: 'Submitted',
+          properties: [],
+        },
+      },
+      pageOrder: [
+        'start',
+        'connect',
+        'page-1',
+        'page-2',
+        'page-3',
+        'submitted',
+      ],
     },
     projectMetadata: {
       viewOrder: [defaultViewId],
@@ -189,6 +233,45 @@ export const getOnboardingFormDetails = (circle: Circle) => {
       multipleResponsesAllowed: false,
       updatingResponseAllowed: false,
       allowAnonymousResponses: false,
+      walletConnectionRequired: true,
+      pages: {
+        ['start']: {
+          id: 'start',
+          name: 'Welcome Page',
+          properties: [],
+        },
+        ['connect']: {
+          id: 'connect',
+          name: 'Connect Wallet',
+          properties: [],
+        },
+        'page-1': {
+          id: 'page-1',
+          name: 'Onboarding',
+          properties: [
+            'What should we call you?',
+            'Why do you want to onboard to the DAO?',
+            'Status',
+          ],
+          movable: true,
+        },
+        'page-2': {
+          id: 'page-2',
+          name: 'Contact Info',
+          properties: [
+            'What area do you intend to be active in?',
+            'Connect Discord',
+            'Twitter',
+          ],
+          movable: true,
+        },
+        ['submitted']: {
+          id: 'submitted',
+          name: 'Submitted',
+          properties: [],
+        },
+      },
+      pageOrder: ['start', 'connect', 'page-1', 'page-2', 'submitted'],
     },
     projectMetadata: {
       viewOrder: [defaultViewId],
