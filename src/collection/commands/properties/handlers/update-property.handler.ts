@@ -90,6 +90,21 @@ export class UpdatePropertyCommandHandler
             view.groupByColumn = updatePropertyCommandDto.name;
           collection.projectMetadata.views[viewId] = view;
         });
+
+        // change the property name in the page it contains
+        if (collection.formMetadata.pages) {
+          for (const [id, page] of Object.entries(
+            collection.formMetadata.pages,
+          )) {
+            if (page.properties) {
+              const idx = page.properties.indexOf(propertyId);
+              if (idx > -1) {
+                page.properties[idx] = updatePropertyCommandDto.name;
+              }
+            }
+            collection.formMetadata.pages[id] = page;
+          }
+        }
       }
 
       // Update data where an option label is changed
@@ -178,6 +193,7 @@ export class UpdatePropertyCommandHandler
           propertyOrder: collection.propertyOrder,
           data: collection.data,
           projectMetadata: collection.projectMetadata,
+          formMetadata: collection.formMetadata,
         },
       );
 
