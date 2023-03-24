@@ -676,16 +676,12 @@ export class CloseCardActionCommandHandler
   async execute(command: CloseCardActionCommand): Promise<any> {
     const { action, caller, updatesContainer, relevantIds } = command;
     try {
-      const circleId = action.data.circleId;
-      if (!circleId) {
-        throw new Error('No circleId provided in automation data');
+      const collection = await this.queryBus.execute(
+        new GetCollectionBySlugQuery(relevantIds.collectionSlug),
+      );
+      if (!collection) {
+        throw `Collection with slug ${relevantIds.collectionSlug} not found`;
       }
-      const { circle, collection, discordUserId } =
-        await this.commonActionService.getCircleCollectionUsersFromRelevantIds(
-          circleId,
-          relevantIds,
-        );
-
       await this.commandBus.execute(
         new UpdateDataUsingAutomationCommand(
           {
@@ -695,10 +691,10 @@ export class CloseCardActionCommandHandler
           relevantIds.dataSlug,
         ),
       );
-      return updatesContainer;
     } catch (err) {
       this.logger.error(err);
     }
+    return updatesContainer;
   }
 }
 

@@ -38,16 +38,16 @@ export class VRFConsumerListener {
         this.decodeTransactionAndRecord(log, '137');
       });
     }
-    if (process.env.ALCHEMY_API_KEY_MUMBAI) {
-      const { filterResponse, alchemy } = this.getWS(
-        process.env.ALCHEMY_API_KEY_MUMBAI,
-        Network.MATIC_MUMBAI,
-        '0x3002C606938fab7c6Ce34EF4085392b4408a1c6e',
-      );
-      alchemy.ws.on(filterResponse, (log) => {
-        this.decodeTransactionAndRecord(log, '80001');
-      });
-    }
+    // if (process.env.ALCHEMY_API_KEY_MUMBAI) {
+    //   const { filterResponse, alchemy } = this.getWS(
+    //     process.env.ALCHEMY_API_KEY_MUMBAI,
+    //     Network.MATIC_MUMBAI,
+    //     '0x3002C606938fab7c6Ce34EF4085392b4408a1c6e',
+    //   );
+    //   alchemy.ws.on(filterResponse, (log) => {
+    //     this.decodeTransactionAndRecord(log, '80001');
+    //   });
+    // }
     if (process.env.ALCHEMY_API_KEY_GOERLI) {
       const { filterResponse, alchemy } = this.getWS(
         process.env.ALCHEMY_API_KEY_GOERLI,
