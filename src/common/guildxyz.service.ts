@@ -2,10 +2,15 @@ import { guild } from '@guildxyz/sdk';
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { User } from 'src/users/model/users.model';
 import fetch from 'node-fetch';
+import { LoggingService } from 'src/logging/logging.service';
 
 // TODO
 @Injectable()
 export class GuildxyzService {
+  constructor(private readonly logger: LoggingService) {
+    this.logger.setContext('GuildxyzService');
+  }
+
   async getGuildxyzRole(
     guildId: number,
     user: User,
@@ -15,14 +20,13 @@ export class GuildxyzService {
       roleId: number;
     }[]
   > {
-    console.log({ guildId });
-    console.log(user.ethAddress);
     try {
       const res = await guild.getUserAccess(guildId || 0, user.ethAddress);
-      console.log({ res });
       return res;
     } catch (e) {
-      console.log({ e });
+      this.logger.logError(
+        `Failed to get guild roles for user ${user?.ethAddress} & guild with id ${guildId} with error ${e}`,
+      );
     }
 
     throw new InternalServerErrorException();
@@ -36,10 +40,11 @@ export class GuildxyzService {
         return data;
       }
     } catch (e) {
-      console.log({ e });
+      this.logger.logError(
+        `Failed to get guild of id ${guildId} with error ${e}`,
+      );
+      throw new InternalServerErrorException();
     }
-
-    throw new InternalServerErrorException();
   }
 
   async getGuildMemberships(ethAddress: string) {
