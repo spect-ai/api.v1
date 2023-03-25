@@ -11,7 +11,6 @@ import { UpdateCollectionDto } from 'src/collection/dto/update-collection-reques
 import { CollectionUpdatedEvent } from 'src/collection/events';
 import { Collection } from 'src/collection/model/collection.model';
 import { GetPrivateViewCollectionQuery } from 'src/collection/queries';
-import { CommonTools } from 'src/common/common.service';
 import { PoapService } from 'src/credentials/services/poap.service';
 import { LoggingService } from 'src/logging/logging.service';
 import {
