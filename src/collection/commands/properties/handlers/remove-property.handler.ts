@@ -63,6 +63,17 @@ export class RemovePropertyCommandHandler
         }
       }
 
+      // remove from all the pages
+      if (collection.formMetadata?.pages) {
+        for (const [id, page] of Object.entries(
+          collection.formMetadata.pages,
+        )) {
+          if (page.properties) {
+            page.properties = page.properties.filter((p) => p !== propertyId);
+          }
+        }
+      }
+
       const updatedCollection = await this.collectionRepository.updateById(
         collectionId,
         {
@@ -70,6 +81,7 @@ export class RemovePropertyCommandHandler
           propertyOrder: collection.propertyOrder,
           data: collection.data,
           projectMetadata: collection.projectMetadata,
+          formMetadata: collection.formMetadata,
         },
       );
       return await this.queryBus.execute(
