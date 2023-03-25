@@ -53,19 +53,23 @@ export class LoggingService extends ConsoleLogger {
     request?: any,
     ...optionalParams: [...any, string?]
   ): Promise<void> {
-    const bodySizeInBytes = new TextEncoder().encode(request.body).length;
-    this.error(message, {
-      ...optionalParams,
-      request: request
-        ? {
-            method: request.method,
-            url: request.url,
-            body: bodySizeInBytes < 500000 ? request.body : '', // 500kb
-            query: request.query,
-            params: request.params,
-            caller: request.user?.id,
-          }
-        : {},
-    });
+    try {
+      const bodySizeInBytes = new TextEncoder().encode(request.body).length;
+      this.error(message, {
+        ...optionalParams,
+        request: request
+          ? {
+              method: request.method,
+              url: request.url,
+              body: bodySizeInBytes < 500000 ? request.body : '', // 500kb
+              query: request.query,
+              params: request.params,
+              caller: request.user?.id,
+            }
+          : {},
+      });
+    } catch (err) {
+      console.log(err);
+    }
   }
 }
