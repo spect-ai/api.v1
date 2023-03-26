@@ -32,19 +32,19 @@ export class ContractListener {
         this.decodeTransactionAndRecord(log, '137');
       });
     }
-    // if (process.env.ALCHEMY_API_KEY_MUMBAI) {
-    //   const { filterEth, filterTokens, filterToken, alchemy } = this.getWS(
-    //     process.env.ALCHEMY_API_KEY_MUMBAI,
-    //     Network.MATIC_MUMBAI,
-    //     '0x2De899142D9B74273EE1e70Ca7AD31A6EF7fCAaE',
-    //   );
-    //   alchemy.ws.on(filterEth, (log) => {
-    //     this.decodeTransactionAndRecord(log, '80001');
-    //   });
-    //   alchemy.ws.on(filterTokens, (log) => {
-    //     this.decodeTransactionAndRecord(log, '80001');
-    //   });
-    // }
+    if (process.env.ALCHEMY_API_KEY_MUMBAI) {
+      const { filterEth, filterTokens, filterToken, alchemy } = this.getWS(
+        process.env.ALCHEMY_API_KEY_MUMBAI,
+        Network.MATIC_MUMBAI,
+        '0x2De899142D9B74273EE1e70Ca7AD31A6EF7fCAaE',
+      );
+      alchemy.ws.on(filterEth, (log) => {
+        this.decodeTransactionAndRecord(log, '80001');
+      });
+      alchemy.ws.on(filterTokens, (log) => {
+        this.decodeTransactionAndRecord(log, '80001');
+      });
+    }
 
     if (process.env.ALCHEMY_API_KEY_OPTIMISM) {
       const { filterEth, filterTokens, filterToken, alchemy } = this.getWS(
