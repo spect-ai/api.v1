@@ -54,7 +54,9 @@ export class LoggingService extends ConsoleLogger {
     ...optionalParams: [...any, string?]
   ): Promise<void> {
     try {
-      const bodySizeInBytes = new TextEncoder().encode(request.body).length;
+      const bodySizeInBytes = request
+        ? new TextEncoder().encode(request.body).length
+        : 0;
       this.error(message, {
         ...optionalParams,
         request: request

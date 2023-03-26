@@ -45,6 +45,7 @@ import { SecretModule } from './secretRegistry/secret.module';
 import { GasPredictionService } from './common/gas-prediction.service';
 import { AdvancedConditionService } from './collection/services/advanced-condition.service';
 import { AutomationModule } from './automation/automation.module';
+import { LinkDiscordService } from './collection/services/link-discord.service';
 
 const databaseUrl = process.env.MONGO_URL
   ? `${process.env.MONGO_URL}/nest?authSource=admin&retryWrites=true&w=majority`
@@ -99,6 +100,7 @@ const databaseUrl = process.env.MONGO_URL
     GasPredictionService,
     ClaimEligibilityService,
     AdvancedConditionService,
+    LinkDiscordService,
   ],
 })
 export class AppModule {}

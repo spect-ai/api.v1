@@ -78,11 +78,9 @@ export class CommonActionService {
     const discordField = Object.values(collection.properties).find(
       (property) => property.type === 'discord',
     );
-    console.log({ discordField });
     if (discordField) {
       discordUserId =
         collection.data[relevantIds.dataSlug][discordField.name]['id'];
-      console.log({ discordUserId });
     }
 
     return {
@@ -655,7 +653,6 @@ export class CreateDiscordThreadCommandHandler
     } catch (err) {
       this.logger.error(err);
     }
-
     return updatesContainer;
   }
 }

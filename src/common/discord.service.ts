@@ -134,7 +134,6 @@ export class DiscordService {
     rolesToAdd: string[],
     message: string,
   ) {
-    console.log({ message });
     const res = await fetch(
       `${process.env.DISCORD_URI}/api/createDiscussionThread?guildId=${guildId}`,
       {
@@ -152,7 +151,6 @@ export class DiscordService {
         }),
       },
     );
-    console.log({ res });
     if (res.ok) {
       const data = await res.json();
       console.log({ data });

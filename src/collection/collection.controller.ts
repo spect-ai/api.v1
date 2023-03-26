@@ -14,6 +14,7 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiTags } from '@nestjs/swagger';
 import {
   CollectionAuthGuard,
@@ -33,6 +34,8 @@ import {
   RequiredSlugDto,
   RequiredUUIDDto,
 } from 'src/common/dtos/string.dto';
+import { MappedItem } from 'src/common/interfaces';
+import { CreatePOAPDto } from 'src/credentials/dto/create-credential.dto';
 import {
   AddCommentCommand,
   AddPropertyCommand,
@@ -55,10 +58,11 @@ import {
 import { UpdateDataCommand } from './commands/data/impl/update-data.command';
 import {
   EndVotingPeriodCommand,
+  RecordSnapshotProposalCommand,
   StartVotingPeriodCommand,
   VoteDataCommand,
-  RecordSnapshotProposalCommand,
 } from './commands/data/impl/vote-data.command';
+import { OnboardToSpectProjectCommand } from './commands/default/impl';
 import {
   CreateGrantWorkflowCommand,
   KanbanProjectCommand,
@@ -73,11 +77,12 @@ import {
   MigrateCollectionDto,
 } from './dto/create-collection-request.dto';
 import { CreateCollectionResponseDto } from './dto/create-collection-response.dto';
-import { RemoveDataDto } from './dto/remove.data-request.dto';
 import {
   TemplateIdDto,
   UseTemplateDto,
 } from './dto/grant-workflow-template.dto';
+import { LinkDiscordDto } from './dto/link-discord.dto';
+import { RemoveDataDto } from './dto/remove.data-request.dto';
 import { UpdateCollectionDto } from './dto/update-collection-request.dto';
 import {
   AddCommentDto,
@@ -98,18 +103,14 @@ import {
 } from './dto/voting.dto';
 import { Collection } from './model/collection.model';
 import {
-  GetCollectionByFilterQuery,
   GetCollectionByIdQuery,
   GetPrivateViewCollectionQuery,
   GetPublicViewCollectionQuery,
 } from './queries/impl/get-collection.query';
+import { LinkDiscordService } from './services/link-discord.service';
 import { ResponseCredentialingService } from './services/response-credentialing.service';
-import { OnboardToSpectProjectCommand } from './commands/default/impl';
-import { MappedItem } from 'src/common/interfaces';
-import { Property } from './types/types';
 import { WhitelistService } from './services/whitelist.service';
-import { CreatePOAPDto } from 'src/credentials/dto/create-credential.dto';
-import { AnyFilesInterceptor, FileInterceptor } from '@nestjs/platform-express';
+import { Property } from './types/types';
 
 @Controller('collection/v1')
 @ApiTags('collection.v1')
@@ -119,6 +120,7 @@ export class CollectionController {
     private readonly queryBus: QueryBus,
     private readonly credentialingService: ResponseCredentialingService,
     private readonly whitelistService: WhitelistService,
+    private readonly linkDiscordService: LinkDiscordService,
   ) {}
 
   @UseGuards(SessionAuthGuard)
@@ -656,5 +658,22 @@ export class CollectionController {
   @Patch('/:id/claimPoap')
   async claimPoap(@Param() param: ObjectIdDto): Promise<boolean> {
     return await this.credentialingService.claimPoap(param.id);
+  }
+
+  @SetMetadata('permissions', ['manageSettings'])
+  @UseGuards(CollectionAuthGuard)
+  @Patch('/:id/linkDiscord')
+  async linkDiscord(
+    @Param() param: ObjectIdDto,
+    @Body() body: LinkDiscordDto,
+    @Query() query: RequiredUUIDDto,
+    @Request() req,
+  ): Promise<Collection> {
+    return await this.linkDiscordService.linkThread(
+      param.id,
+      query.dataId,
+      body,
+      req.user,
+    );
   }
 }

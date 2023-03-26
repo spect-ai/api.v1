@@ -41,6 +41,7 @@ import { EncryptionService } from 'src/common/encryption.service';
 import { SecretModule } from 'src/secretRegistry/secret.module';
 import { GasPredictionService } from 'src/common/gas-prediction.service';
 import { AdvancedConditionService } from './services/advanced-condition.service';
+import { LinkDiscordService } from './services/link-discord.service';
 
 @Module({
   imports: [
@@ -86,6 +87,7 @@ import { AdvancedConditionService } from './services/advanced-condition.service'
     GasPredictionService,
     ClaimEligibilityService,
     AdvancedConditionService,
+    LinkDiscordService,
   ],
   exports: [CollectionModule, CollectionRepository],
 })
