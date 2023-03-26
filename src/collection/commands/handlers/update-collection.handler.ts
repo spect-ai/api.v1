@@ -79,9 +79,18 @@ export class UpdateCollectionCommandHandler
         collectionId,
         updateCollectionDto,
       );
+
+      const { formMetadata } = updateCollectionDto;
+
       if (
-        updateCollectionDto.formMetadata?.walletConnectionRequired &&
-        !updatedCollection.formMetadata.pages['connect']
+        formMetadata &&
+        !formMetadata.pages['connect'] &&
+        (formMetadata.sybilProtectionEnabled ||
+          formMetadata.poapEditCode ||
+          formMetadata.mintkudosTokenId ||
+          formMetadata.surveyTokenId ||
+          formMetadata.formRoleGating ||
+          !formMetadata.allowAnonymousResponses)
       ) {
         const { formMetadata } = updatedCollection;
         updatedCollection = await this.collectionRepository.updateById(
@@ -102,6 +111,34 @@ export class UpdateCollectionCommandHandler
                 'connect',
                 ...formMetadata.pageOrder.slice(1),
               ],
+            },
+          },
+        );
+      }
+
+      if (
+        formMetadata &&
+        formMetadata.pages['connect'] &&
+        !formMetadata.sybilProtectionEnabled &&
+        !formMetadata.poapEditCode &&
+        !formMetadata.mintkudosTokenId &&
+        !formMetadata.surveyTokenId &&
+        !formMetadata.formRoleGating &&
+        formMetadata.allowAnonymousResponses
+      ) {
+        const { formMetadata } = updatedCollection;
+        updatedCollection = await this.collectionRepository.updateById(
+          collectionId,
+          {
+            formMetadata: {
+              ...formMetadata,
+              pages: {
+                ...formMetadata.pages,
+                ['connect']: undefined,
+              },
+              pageOrder: formMetadata.pageOrder.filter(
+                (page) => page !== 'connect',
+              ),
             },
           },
         );
