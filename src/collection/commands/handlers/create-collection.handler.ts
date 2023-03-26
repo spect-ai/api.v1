@@ -36,7 +36,7 @@ export class CreateCollectionCommandHandler
     try {
       const { createCollectionDto, caller } = command;
 
-      const properties = {
+      const formProperties = {
         'What is your name?': {
           name: 'What is your name?',
           type: 'shortText',
@@ -71,11 +71,49 @@ export class CreateCollectionCommandHandler
           isPartOfFormView: false,
         },
       } as MappedItem<Property>;
-      const propertyOrder = [
+      const formPropertyOrder = [
         'What is your name?',
         'Why do you want to join our team?',
         'Status',
       ];
+
+      const projectProperties = {
+        Title: {
+          name: 'Title',
+          type: 'shortText',
+          default: '',
+          isPartOfFormView: true,
+          immutable: true,
+        },
+        Description: {
+          name: 'Description',
+          type: 'longText',
+          default: '',
+          isPartOfFormView: true,
+        },
+        Status: {
+          name: 'Status',
+          type: 'singleSelect',
+          default: {},
+          options: [
+            {
+              label: 'To Do',
+              value: uuidv4(),
+            },
+            {
+              label: 'In Progress',
+              value: uuidv4(),
+            },
+            {
+              label: 'Done',
+              value: uuidv4(),
+            },
+          ],
+          isPartOfFormView: false,
+        },
+      } as MappedItem<Property>;
+
+      const projectPropertyOrder = ['Title', 'Description', 'Status'];
 
       const parentCircle: Circle = await this.queryBus.execute(
         new GetCircleByIdQuery(createCollectionDto.circleId, {}),
@@ -107,8 +145,8 @@ export class CreateCollectionCommandHandler
         const defaultViewId = '0x0';
         createdCollection = await this.collectionRepository.create({
           ...createCollectionDto,
-          properties,
-          propertyOrder,
+          properties: formProperties,
+          propertyOrder: formPropertyOrder,
           creator: caller,
           parents: [createCollectionDto.circleId],
           slug: uuidv4(),
@@ -167,8 +205,8 @@ export class CreateCollectionCommandHandler
         const defaultViewId = '0x0';
         createdCollection = await this.collectionRepository.create({
           ...createCollectionDto,
-          properties,
-          propertyOrder,
+          properties: projectProperties,
+          propertyOrder: projectPropertyOrder,
           creator: caller,
           parents: [createCollectionDto.circleId],
           slug: uuidv4(),
