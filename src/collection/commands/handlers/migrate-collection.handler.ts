@@ -12,7 +12,11 @@ export class MigrateAllCollectionsCommandHandler
     const allCollections = await this.collectionRepository.findAll();
 
     for (const collection of allCollections) {
-      if (collection.collectionType === 0 && !collection.formMetadata.pages) {
+      if (
+        collection.collectionType === 0 &&
+        collection.formMetadata &&
+        !collection.formMetadata.pages
+      ) {
         const pages = {
           start: {
             id: 'start',
@@ -33,14 +37,12 @@ export class MigrateAllCollectionsCommandHandler
         };
         const pageOrder = ['start', 'page-1', 'submitted'];
 
-        if (collection.formMetadata.walletConnectionRequired) {
-          pages['connect'] = {
-            id: 'connect',
-            name: 'Connect Wallet',
-            properties: [],
-          };
-          pageOrder.splice(1, 0, 'connect');
-        }
+        pages['connect'] = {
+          id: 'connect',
+          name: 'Connect Wallet',
+          properties: [],
+        };
+        pageOrder.splice(1, 0, 'connect');
 
         if (
           collection.formMetadata.poapEventId ||
@@ -57,8 +59,8 @@ export class MigrateAllCollectionsCommandHandler
 
         collection.formMetadata.pages = pages;
         collection.formMetadata.pageOrder = pageOrder;
+        collection.formMetadata.allowAnonymousResponses = false;
       }
-
       await this.collectionRepository.updateById(collection.id, collection);
     }
 

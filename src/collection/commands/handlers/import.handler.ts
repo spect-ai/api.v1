@@ -14,7 +14,6 @@ import { Circle } from 'src/circle/model/circle.model';
 import { GetCircleByIdQuery } from 'src/circle/queries/impl';
 import { AddMultipleDataUsingAutomationCommand } from '../data/impl/add-data.command';
 import { UpdateCircleCommand } from 'src/circle/commands/impl/update-circle.command';
-import { CreateFolderCommand } from 'src/circle/commands/impl';
 import { Collection } from 'src/collection/model/collection.model';
 import { UpdateCollectionCommand } from '../impl/update-collection.command';
 
