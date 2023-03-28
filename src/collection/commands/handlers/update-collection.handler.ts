@@ -70,7 +70,11 @@ export class UpdateCollectionCommandHandler
   ): Promise<CollectionResponseDto> {
     try {
       const { updateCollectionDto, collectionId } = command;
+      const { formMetadata } = updateCollectionDto;
       const collection = await this.collectionRepository.findById(collectionId);
+      if (formMetadata && (!formMetadata.pages || !formMetadata.pageOrder)) {
+        throw new InternalServerErrorException('Form metadata is invalid');
+      }
       await this.updateValidationService.validateUpdateCollectionCommand(
         updateCollectionDto,
         collection,
@@ -79,12 +83,6 @@ export class UpdateCollectionCommandHandler
         collectionId,
         updateCollectionDto,
       );
-
-      const { formMetadata } = updateCollectionDto;
-
-      if (formMetadata && (!formMetadata.pages || !formMetadata.pageOrder)) {
-        throw new InternalServerErrorException('Form metadata is invalid');
-      }
 
       if (
         formMetadata &&
