@@ -82,6 +82,10 @@ export class UpdateCollectionCommandHandler
 
       const { formMetadata } = updateCollectionDto;
 
+      if (formMetadata && (!formMetadata.pages || !formMetadata.pageOrder)) {
+        throw new InternalServerErrorException('Form metadata is invalid');
+      }
+
       if (
         formMetadata &&
         !formMetadata.pages['connect'] &&
