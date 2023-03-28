@@ -7,6 +7,7 @@ import {
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { CircleAuthGuard } from 'src/auth/circle.guard';
+import { PublicViewAuthGuard } from 'src/auth/iron-session.guard';
 import { ObjectIdDto } from 'src/common/dtos/object-id.dto';
 import { GuildxyzService } from 'src/common/guildxyz.service';
 import { LoggingService } from 'src/logging/logging.service';
@@ -23,7 +24,7 @@ export class CircleExternalController {
     this.logger.setContext('CircleExternalController');
   }
 
-  @UseGuards(CircleAuthGuard)
+  @UseGuards(PublicViewAuthGuard)
   @Get('/:id/guild')
   async getPrivateCircleProperties(@Param() param: ObjectIdDto) {
     try {
