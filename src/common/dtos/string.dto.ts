@@ -183,3 +183,15 @@ export class RequiredClaimCodeDto {
   @IsNotEmpty()
   claimCode: string;
 }
+
+export class RequiredDiscordIdDto {
+  @IsString()
+  @IsNotEmpty()
+  discordId: string;
+}
+
+export class RequiredDiscordChannelIdDto {
+  @IsString()
+  @IsNotEmpty()
+  channelId: string;
+}

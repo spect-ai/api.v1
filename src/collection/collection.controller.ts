@@ -30,6 +30,8 @@ import { Circle } from 'src/circle/model/circle.model';
 import { ObjectIdDto } from 'src/common/dtos/object-id.dto';
 import {
   RequiredActivityUUIDDto,
+  RequiredDiscordChannelIdDto,
+  RequiredDiscordIdDto,
   RequiredPropertyIdDto,
   RequiredSlugDto,
   RequiredUUIDDto,
@@ -55,6 +57,7 @@ import {
   RemoveDataCommand,
   RemoveMultipleDataCommand,
 } from './commands/data/impl/remove-data.command';
+import { SaveDraftFromDiscordCommand } from './commands/data/impl/save-draft.command';
 import { UpdateDataCommand } from './commands/data/impl/update-data.command';
 import {
   EndVotingPeriodCommand,
@@ -81,7 +84,11 @@ import {
   TemplateIdDto,
   UseTemplateDto,
 } from './dto/grant-workflow-template.dto';
-import { LinkDiscordDto } from './dto/link-discord.dto';
+import {
+  LinkDiscordDto,
+  LinkDiscordToCollectionDto,
+  NextFieldRequestDto,
+} from './dto/link-discord.dto';
 import { RemoveDataDto } from './dto/remove.data-request.dto';
 import { UpdateCollectionDto } from './dto/update-collection-request.dto';
 import {
@@ -102,6 +109,7 @@ import {
   StartVotingPeriodRequestDto,
 } from './dto/voting.dto';
 import { Collection } from './model/collection.model';
+import { GetNextFieldQuery } from './queries';
 import {
   GetCollectionByIdQuery,
   GetPrivateViewCollectionQuery,
@@ -674,6 +682,59 @@ export class CollectionController {
       query.dataId,
       body,
       req.user,
+    );
+  }
+
+  @SetMetadata('permissions', ['manageSettings'])
+  @UseGuards(CollectionAuthGuard)
+  @Patch('/:id/linkDiscordThreadToCollection')
+  async linkDiscordThreadToCollection(
+    @Param() param: ObjectIdDto,
+    @Body() body: LinkDiscordToCollectionDto,
+    @Request() req,
+  ): Promise<Collection> {
+    return await this.linkDiscordService.linkThreadToCollection(
+      param.id,
+      body,
+      req.user,
+    );
+  }
+
+  @UseGuards(PublicViewAuthGuard)
+  @Patch('/:channelId/saveDraft')
+  async saveDraft(
+    @Param() param: RequiredDiscordChannelIdDto,
+    @Query() query: RequiredDiscordIdDto,
+    @Body()
+    body: {
+      data: object;
+    },
+    @Request() req,
+  ): Promise<Collection> {
+    console.log({ body });
+    return await this.commandBus.execute(
+      new SaveDraftFromDiscordCommand(
+        body.data,
+        query.discordId,
+        param.channelId,
+      ),
+    );
+  }
+
+  @UseGuards(PublicViewAuthGuard)
+  @Get('/:channelId/nextField')
+  async nextField(
+    @Param() param: RequiredDiscordChannelIdDto,
+    @Query() query: RequiredDiscordIdDto,
+    @Request() req,
+  ): Promise<Collection> {
+    return await this.queryBus.execute(
+      new GetNextFieldQuery(
+        query.discordId,
+        'discordId',
+        null,
+        param.channelId,
+      ),
     );
   }
 }

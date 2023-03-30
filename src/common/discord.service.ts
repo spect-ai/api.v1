@@ -133,6 +133,7 @@ export class DiscordService {
     usersToAdd: string[],
     rolesToAdd: string[],
     message: string,
+    isForm?: boolean,
   ) {
     const res = await fetch(
       `${process.env.DISCORD_URI}/api/createDiscussionThread?guildId=${guildId}`,
@@ -148,6 +149,7 @@ export class DiscordService {
           usersToAdd,
           rolesToAdd,
           message,
+          isForm,
         }),
       },
     );

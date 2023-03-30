@@ -153,6 +153,14 @@ export class Collection extends BaseModel {
       private: boolean;
     };
   };
+
+  @prop({ default: {} })
+  collectionLevelDiscordThreadRef: {
+    threadId: string;
+    channelId: string;
+    guildId: string;
+    private: boolean;
+  };
 }
 
 export interface FormMetadata {
@@ -266,6 +274,12 @@ export interface FormMetadata {
     };
   };
   pageOrder?: string[];
+
+  drafts?: {
+    [userId: string]: {
+      data: object;
+    };
+  };
 }
 
 export interface PaymentConfig {
