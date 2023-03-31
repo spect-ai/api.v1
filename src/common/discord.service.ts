@@ -1,12 +1,12 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import fetch from 'node-fetch';
-import { async } from 'rxjs';
-import { Circle } from 'src/circle/model/circle.model';
-import { DiscordChannel } from 'src/circle/types';
+import { EncryptionService } from './encryption.service';
 
 // TODO
 @Injectable()
 export class DiscordService {
+  constructor(private readonly encryptionService: EncryptionService) {}
+
   async isConnected(guildId: string): Promise<boolean> {
     const res = await fetch(
       `${process.env.DISCORD_URI}/api/guildExists?guildId=${guildId}`,
@@ -50,6 +50,7 @@ export class DiscordService {
         body: JSON.stringify({
           roleIds,
           userId: discordUserId,
+          secret: this.encryptionService.encrypt(process.env.API_SECRET),
         }),
       },
     );
@@ -81,6 +82,7 @@ export class DiscordService {
           isPrivate,
           rolesToAdd,
           usersToAdd,
+          secret: this.encryptionService.encrypt(process.env.API_SECRET),
         }),
       },
     );
@@ -114,6 +116,7 @@ export class DiscordService {
           msg: message,
         },
         threadId,
+        secret: this.encryptionService.encrypt(process.env.API_SECRET),
       }),
     });
     console.log({ resss: res });
@@ -148,6 +151,7 @@ export class DiscordService {
           usersToAdd,
           rolesToAdd,
           message,
+          secret: this.encryptionService.encrypt(process.env.API_SECRET),
         }),
       },
     );
