@@ -1,8 +1,6 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import fetch from 'node-fetch';
-import { CirclesPrivateRepository } from 'src/circle/circles-private.repository';
-import { CirclesRepository } from 'src/circle/circles.repository';
 import {
   GetCircleByIdQuery,
   GetPrivateCircleByCircleIdQuery,
@@ -15,9 +13,7 @@ import {
 } from '../dto/mint-kudos.dto';
 import { v4 as uuidv4 } from 'uuid';
 import * as FormData from 'form-data';
-import { Express } from 'express';
-import { Multer } from 'multer';
-import { Credential, SoulboundCredential } from 'src/users/types/types';
+import { Credential } from 'src/users/types/types';
 
 export type nftTypes = {
   name: string;
@@ -34,6 +30,8 @@ export type AddedNFTTypeResponse = {
 import { Readable } from 'stream';
 import { KudosType } from '../types/types';
 import { UpdateCircleCommand } from 'src/circle/commands/impl/update-circle.command';
+import { GetSpaceCollectionsCommand } from 'src/circle/commands/impl';
+import { Collection } from 'src/collection/model/collection.model';
 
 // TODO
 @Injectable()
@@ -281,6 +279,37 @@ export class MintKudosService {
     );
     const data = await res.json();
     return data.data;
+  }
+
+  async getSpaceKudos(spaceId: string) {
+    const res = await this.commandBus.execute(
+      new GetSpaceCollectionsCommand(spaceId),
+    );
+    const spaceKudos = [];
+    for await (const collection of res as Collection[]) {
+      if (collection.formMetadata?.mintkudosTokenId) {
+        const kudo = await this.getKudosById(
+          collection.formMetadata.mintkudosTokenId,
+        );
+        spaceKudos.push(kudo);
+      }
+    }
+
+    return spaceKudos;
+  }
+
+  async getKudosById(id: number) {
+    const kudo = await (
+      await fetch(`${process.env.MINTKUDOS_URL}/v1/tokens/${id}`)
+    ).json();
+    return {
+      id: kudo.tokenId.toString(),
+      name: kudo.headline,
+      description: kudo.description,
+      imageUri: kudo.imageUrl,
+      type: 'soulbound',
+      service: 'kudos',
+    };
   }
 
   mapToCredentials(kudos: KudosType[]): Credential[] {

@@ -1,7 +1,5 @@
 import { Inject, Injectable, Scope } from '@nestjs/common';
 import { REQUEST } from '@nestjs/core';
-import { Ref } from '@typegoose/typegoose';
-import { Types } from 'mongoose';
 import { Circle } from 'src/circle/model/circle.model';
 import { User } from 'src/users/model/users.model';
 

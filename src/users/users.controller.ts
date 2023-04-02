@@ -4,6 +4,7 @@ import {
   Get,
   Param,
   Patch,
+  Post,
   Query,
   Request,
   UseGuards,
@@ -29,6 +30,7 @@ import {
   RemoveExperienceCommand,
   UpdateExperienceCommand,
 } from './commands/experience';
+import { GetTokenMetadataCommand, GetTokensCommand } from './commands/impl';
 import { ReadNotificationCommand } from './commands/notifications/impl';
 import { DetailedUserPubliceResponseDto } from './dto/detailed-user-response.dto';
 import { AddEducationDto, UpdateEducationDto } from './dto/education.dto';
@@ -198,5 +200,38 @@ export class UsersController {
       }
     }
     return i;
+  }
+
+  @UseGuards(SessionAuthGuard)
+  @Get('/getTokenBalances/:chainId/:tokenType/:circleId')
+  async getTokenBalances(
+    @Request() req,
+    @Param('chainId') chainId: string,
+    @Param('tokenType') tokenType: string,
+    @Param('circleId') circleId: string,
+  ) {
+    return await this.commandBus.execute(
+      new GetTokensCommand(req.user, chainId, tokenType, circleId),
+    );
+  }
+
+  @Post('/getTokenMetadata')
+  async getTokenMetadata(
+    @Body()
+    body: {
+      chainId: string;
+      tokenType: string;
+      tokenAddress: string;
+      tokenId?: string;
+    },
+  ) {
+    return await this.commandBus.execute(
+      new GetTokenMetadataCommand(
+        body.chainId,
+        body.tokenType,
+        body.tokenAddress,
+        body.tokenId,
+      ),
+    );
   }
 }

@@ -42,6 +42,7 @@ import { SecretModule } from 'src/secretRegistry/secret.module';
 import { GasPredictionService } from 'src/common/gas-prediction.service';
 import { AdvancedConditionService } from './services/advanced-condition.service';
 import { LinkDiscordService } from './services/link-discord.service';
+import { CirclesCollectionService } from 'src/circle/services/circle-collection.service';
 
 @Module({
   imports: [
@@ -87,6 +88,7 @@ import { LinkDiscordService } from './services/link-discord.service';
     GasPredictionService,
     ClaimEligibilityService,
     AdvancedConditionService,
+    CirclesCollectionService,
     LinkDiscordService,
   ],
   exports: [CollectionModule, CollectionRepository],
