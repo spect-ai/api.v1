@@ -46,14 +46,13 @@ import { GasPredictionService } from './common/gas-prediction.service';
 import { AdvancedConditionService } from './collection/services/advanced-condition.service';
 import { AutomationModule } from './automation/automation.module';
 import { LinkDiscordService } from './collection/services/link-discord.service';
-import { CirclesCollectionService } from './circle/services/circle-collection.service';
+
+import * as dotenv from 'dotenv';
+dotenv.config();
 
 const databaseUrl = process.env.MONGO_URL
   ? `${process.env.MONGO_URL}/nest?authSource=admin&retryWrites=true&w=majority`
-  : 'mongodb://mongo:WEOOZ2SeylJIo3mf9C0i@containers-us-west-153.railway.app:6418/nest?authSource=admin&retryWrites=true&w=majority';
-
-// mongodb://mongo:GbcYglhDFKNeBXYBRksQ@containers-us-west-144.railway.app:5724 (PROD)
-// mongodb://mongo:WEOOZ2SeylJIo3mf9C0i@containers-us-west-153.railway.app:6418
+  : 'mongodb://localhost:27017/nest';
 @Module({
   imports: [
     TypegooseModule.forRoot(databaseUrl),
