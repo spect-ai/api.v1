@@ -151,7 +151,7 @@ export class AddDataCommandHandler implements ICommandHandler<AddDataCommand> {
 
       filteredData['slug'] = uuidv4();
 
-      if (collection.formMetadata.lookup?.tokens?.length) {
+      if (collection.formMetadata?.lookup?.tokens?.length) {
         const res = await this.commandBus.execute(
           new CheckUserTokensCommand(
             caller,
