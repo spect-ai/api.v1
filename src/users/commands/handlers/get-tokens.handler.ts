@@ -210,10 +210,15 @@ async function getUserNFTs(chainId: string, user: User) {
 }
 
 async function getNFTs(alchemy: Alchemy, ethAddress: string) {
-  const nfts = await alchemy.nft.getNftsForOwner(ethAddress, {
-    excludeFilters: [NftExcludeFilters.SPAM, NftExcludeFilters.AIRDROPS],
-  });
-  return nfts.ownedNfts || [];
+  try {
+    const nfts = await alchemy.nft.getNftsForOwner(ethAddress, {
+      excludeFilters: [NftExcludeFilters.SPAM, NftExcludeFilters.AIRDROPS],
+    });
+    return nfts.ownedNfts || [];
+  } catch (err) {
+    const nfts = await alchemy.nft.getNftsForOwner(ethAddress);
+    return nfts.ownedNfts || [];
+  }
 }
 
 async function getTokenBalance(
