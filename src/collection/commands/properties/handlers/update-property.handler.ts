@@ -92,7 +92,7 @@ export class UpdatePropertyCommandHandler
         });
 
         // change the property name in the page it contains
-        if (collection.formMetadata.pages) {
+        if (collection.collectionType === 0 && collection.formMetadata.pages) {
           for (const [id, page] of Object.entries(
             collection.formMetadata.pages,
           )) {
