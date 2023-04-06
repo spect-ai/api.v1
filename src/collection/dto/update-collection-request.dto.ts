@@ -114,9 +114,10 @@ export class UpdateCollectionDto {
   @IsObject()
   @IsOptional()
   collectionLevelDiscordThreadRef: {
-    threadId: string;
     channelId: string;
     guildId: string;
     private: boolean;
+    threadId?: string;
+    messageId?: string;
   };
 }

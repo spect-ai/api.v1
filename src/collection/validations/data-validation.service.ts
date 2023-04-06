@@ -8,6 +8,7 @@ import { ethers } from 'ethers';
 import mongoose from 'mongoose';
 import { QueryBus } from '@nestjs/cqrs';
 import { HasSatisfiedDataConditionsQuery } from 'src/automation/queries/impl';
+import { isValidDateString } from 'src/common/validators/isDateString.validator';
 
 @Injectable()
 export class DataValidationService {
@@ -84,6 +85,7 @@ export class DataValidationService {
     properties: MappedItem<Property>,
   ): boolean {
     for (const [propertyId, data] of Object.entries(dataObj)) {
+      console.log({ propertyId, data });
       if (data === null) continue;
       if (
         propertyId === '__payment__' ||
@@ -93,21 +95,20 @@ export class DataValidationService {
         continue;
       if (['shortText', 'longText'].includes(properties[propertyId].type)) {
         if (typeof data !== 'string') {
-          throw Error("Data type should be 'string'");
+          throw "Data type should be 'string'";
         }
       } else if (['singleSelect'].includes(properties[propertyId].type)) {
         if (typeof data !== 'object') return false;
         if (Object.keys(data)?.length && (!data['value'] || !data['label']))
-          throw Error("Single select data type doesn't match");
+          throw "Single select data type doesn't match";
       } else if (['multiSelect'].includes(properties[propertyId].type)) {
         if (!Array.isArray(data)) return false;
         for (const elem of data) {
           if (!elem['value'] || !elem['label'])
-            throw Error("Multi select data type doesn't match");
+            throw "Multi select data type doesn't match";
         }
       } else if (['number'].includes(properties[propertyId].type)) {
-        if (typeof data !== 'number')
-          throw Error("Data type should be 'number'");
+        if (typeof data !== 'number') throw "Data type should be 'number'";
       } else if (['reward'].includes(properties[propertyId].type)) {
         if (data && data['value']) {
           if (
@@ -119,21 +120,21 @@ export class DataValidationService {
             typeof data['token']['label'] !== 'string' ||
             typeof data['token']['value'] !== 'string'
           )
-            throw new Error("Reward data type doesn't match");
+            throw "Reward data type doesn't match";
         }
       }
       // else if (['ethAddress'].includes(properties[propertyId].type)) {
       //   if (data && !ethers.utils.isAddress(data))
-      //     throw new Error('Invalid ethereum address');
+      //     throw 'Invalid ethereum address';
       // }
       else if (['user'].includes(properties[propertyId].type)) {
         if (data && data.value && !mongoose.isValidObjectId(data.value))
-          throw new Error('Invalid user');
+          throw 'Invalid user';
       } else if (['user[]'].includes(properties[propertyId].type)) {
         if (data)
           for (const user of data)
             if (!mongoose.isValidObjectId(user.value))
-              throw new Error('Invalid multi user data type');
+              throw 'Invalid multi user data type';
       } else if (['email'].includes(properties[propertyId].type)) {
         if (
           data &&
@@ -143,7 +144,7 @@ export class DataValidationService {
               /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
             )
         )
-          throw new Error('Invalid email address');
+          throw 'Invalid email address';
       } else if (['milestone'].includes(properties[propertyId].type)) {
         if (data)
           for (const milestone of data) {
@@ -159,7 +160,7 @@ export class DataValidationService {
                 typeof reward['token']['label'] !== 'string' ||
                 typeof reward['token']['value'] !== 'string'
               )
-                throw new Error("Milestone data type doesn't match");
+                throw "Milestone data type doesn't match";
             }
           }
       } else if (['singleURL'].includes(properties[propertyId].type)) {
@@ -169,7 +170,7 @@ export class DataValidationService {
             .toLowerCase()
             .match(/((?:https?:\/\/|www\.)(?:[-a-z0-9]+\.)*[-a-z0-9]+.*)/i)
         )
-          throw new Error('Invalid URL');
+          throw 'Invalid URL';
       } else if (['multiURL'].includes(properties[propertyId].type)) {
         if (data)
           for (const url of data) {
@@ -179,7 +180,7 @@ export class DataValidationService {
                 .toLowerCase()
                 .match(/((?:https?:\/\/|www\.)(?:[-a-z0-9]+\.)*[-a-z0-9]+.*)/i)
             )
-              throw new Error('Invalid URL(s)');
+              throw 'Invalid URL(s)';
           }
       } else if (['payWall'].includes(properties[propertyId].type)) {
         if (data) {
@@ -194,10 +195,16 @@ export class DataValidationService {
               typeof payment['txnHash'] !== 'string' ||
               typeof payment['paid'] !== 'boolean'
             ) {
-              throw new Error("Paywall data type doesn't match");
+              throw "Paywall data type doesn't match";
             }
           }
         }
+      } else if (['ethAddress'].includes(properties[propertyId].type)) {
+        if (data)
+          if (!ethers.utils.isAddress(data) && !data.endsWith('.eth'))
+            throw 'Invalid ethereum address';
+      } else if (['date'].includes(properties[propertyId].type)) {
+        if (data) if (!isValidDateString(data)) throw 'Invalid date';
       }
     }
     return true;
@@ -211,6 +218,34 @@ export class DataValidationService {
     for (const [propertyId, property] of Object.entries(
       collection.properties,
     )) {
+      let satisfiedConditions = true;
+      if (property.viewConditions)
+        satisfiedConditions = await this.queryBus.execute(
+          new HasSatisfiedDataConditionsQuery(
+            collection,
+            dataObj || {},
+            property.viewConditions,
+          ),
+        );
+      if (property.required && satisfiedConditions) {
+        if (
+          operation === 'update' &&
+          propertyId in dataObj &&
+          !dataObj[propertyId]
+        ) {
+          return false;
+        } else if (operation === 'add' && !dataObj[propertyId]) return false;
+      }
+    }
+    return true;
+  }
+
+  async validateRequiredFieldForFieldsThatExist(
+    collection: Collection,
+    dataObj: object,
+    operation: 'update' | 'add',
+  ): Promise<boolean> {
+    for (const [propertyId, property] of Object.entries(dataObj)) {
       let satisfiedConditions = true;
       if (property.viewConditions)
         satisfiedConditions = await this.queryBus.execute(

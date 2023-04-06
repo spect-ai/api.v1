@@ -283,6 +283,13 @@ export class MintKudosService {
     return data.data;
   }
 
+  async getKudosById(id: number): Promise<KudosType> {
+    const kudo = await (
+      await fetch(`${process.env.MINTKUDOS_HOST}/v1/tokens/${id}`)
+    ).json();
+    return kudo;
+  }
+
   mapToCredentials(kudos: KudosType[]): Credential[] {
     if (!kudos) {
       return [];

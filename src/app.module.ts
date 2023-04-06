@@ -46,6 +46,8 @@ import { GasPredictionService } from './common/gas-prediction.service';
 import { AdvancedConditionService } from './collection/services/advanced-condition.service';
 import { AutomationModule } from './automation/automation.module';
 import { LinkDiscordService } from './collection/services/link-discord.service';
+import { LookupModule } from './lookup/lookup.module';
+import { SurveyTokenService } from './credentials/services/survey-token.service';
 
 const databaseUrl = process.env.MONGO_URL
   ? `${process.env.MONGO_URL}/nest?authSource=admin&retryWrites=true&w=majority`
@@ -72,6 +74,7 @@ const databaseUrl = process.env.MONGO_URL
     NotificationModule,
     SecretModule,
     AutomationModule,
+    LookupModule,
   ],
   controllers: [AppController, RegistryController, CollectionController],
   providers: [
@@ -101,6 +104,7 @@ const databaseUrl = process.env.MONGO_URL
     ClaimEligibilityService,
     AdvancedConditionService,
     LinkDiscordService,
+    SurveyTokenService,
   ],
 })
 export class AppModule {}

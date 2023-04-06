@@ -53,7 +53,10 @@ import { OnboardToSpectProjectCommandHandler } from './default/handlers/onboard-
 
 import { ImportCommandHandler } from './handlers/import.handler';
 import { MigrateAllCollectionsCommandHandler } from './handlers/migrate-collection.handler';
-import { SaveDraftCommandHandler } from './data/handlers/save-draft.handler';
+import {
+  SaveAndPostSocialsCommandHandler,
+  SaveDraftCommandHandler,
+} from './data/handlers/save-draft.handler';
 
 export const CommandHandlers = [
   CreateCollectionCommandHandler,
@@ -84,4 +87,5 @@ export const CommandHandlers = [
   UpdateCollectionByFilterCommandHandler,
   MigrateAllCollectionsCommandHandler,
   SaveDraftCommandHandler,
+  SaveAndPostSocialsCommandHandler,
 ];

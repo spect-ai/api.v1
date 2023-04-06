@@ -42,6 +42,8 @@ import { SecretModule } from 'src/secretRegistry/secret.module';
 import { GasPredictionService } from 'src/common/gas-prediction.service';
 import { AdvancedConditionService } from './services/advanced-condition.service';
 import { LinkDiscordService } from './services/link-discord.service';
+import { LookupModule } from 'src/lookup/lookup.module';
+import { SurveyTokenService } from 'src/credentials/services/survey-token.service';
 
 @Module({
   imports: [
@@ -54,6 +56,7 @@ import { LinkDiscordService } from './services/link-discord.service';
     CredentialsModule,
     RegistryModule,
     SecretModule,
+    LookupModule,
   ],
   controllers: [CollectionController],
   providers: [
@@ -88,6 +91,7 @@ import { LinkDiscordService } from './services/link-discord.service';
     ClaimEligibilityService,
     AdvancedConditionService,
     LinkDiscordService,
+    SurveyTokenService,
   ],
   exports: [CollectionModule, CollectionRepository],
 })

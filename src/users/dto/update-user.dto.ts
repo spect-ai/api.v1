@@ -17,7 +17,7 @@ export class UpdateUserDto extends PartialType(User) {
    */
   @IsString()
   @IsOptional()
-  username: string;
+  username?: string;
 
   /**
    * Bio of the user

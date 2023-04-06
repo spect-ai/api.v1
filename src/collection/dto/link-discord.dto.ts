@@ -24,6 +24,19 @@ export class LinkDiscordDto {
   readonly stakeholdersToAdd: string[];
 }
 
+export class LinkDiscordThreadToDataDto {
+  @IsString()
+  readonly threadId: string;
+
+  @IsString()
+  @IsString()
+  readonly guildId: string;
+
+  @IsOptional()
+  @IsBoolean()
+  readonly isPrivate: object;
+}
+
 export class LinkDiscordToCollectionDto {
   @IsString()
   readonly threadName: string;

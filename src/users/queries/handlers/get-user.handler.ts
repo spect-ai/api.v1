@@ -237,9 +237,10 @@ export class GetUserByFilterQueryHandler
 
   async execute(
     query: GetUserByFilterQuery,
-  ): Promise<DetailedUserPubliceResponseDto> {
+  ): Promise<DetailedUserPubliceResponseDto | User> {
     const user = await this.userRepository.findOne(query.filter);
     if (!user) throw new HttpException('User not found', 404);
+    if (query.dontResolve) return user;
     return await this.fieldResolver.resolve(user, query.caller);
   }
 }

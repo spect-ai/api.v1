@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  NotFoundException,
   Param,
   Patch,
   Post,
@@ -32,6 +33,7 @@ import {
   RequiredActivityUUIDDto,
   RequiredDiscordChannelIdDto,
   RequiredDiscordIdDto,
+  RequiredDiscordMessageIdDto,
   RequiredPropertyIdDto,
   RequiredSlugDto,
   RequiredUUIDDto,
@@ -57,7 +59,10 @@ import {
   RemoveDataCommand,
   RemoveMultipleDataCommand,
 } from './commands/data/impl/remove-data.command';
-import { SaveDraftFromDiscordCommand } from './commands/data/impl/save-draft.command';
+import {
+  SaveAndPostSocialsCommand,
+  SaveDraftFromDiscordCommand,
+} from './commands/data/impl/save-draft.command';
 import { UpdateDataCommand } from './commands/data/impl/update-data.command';
 import {
   EndVotingPeriodCommand,
@@ -87,9 +92,11 @@ import {
 import {
   LinkDiscordDto,
   LinkDiscordToCollectionDto,
+  LinkDiscordThreadToDataDto,
   NextFieldRequestDto,
 } from './dto/link-discord.dto';
 import { RemoveDataDto } from './dto/remove.data-request.dto';
+import { SocialsDto } from './dto/socials.dto';
 import { UpdateCollectionDto } from './dto/update-collection-request.dto';
 import {
   AddCommentDto,
@@ -111,6 +118,7 @@ import {
 import { Collection } from './model/collection.model';
 import { GetNextFieldQuery } from './queries';
 import {
+  GetCollectionByFilterQuery,
   GetCollectionByIdQuery,
   GetPrivateViewCollectionQuery,
   GetPublicViewCollectionQuery,
@@ -677,7 +685,7 @@ export class CollectionController {
     @Query() query: RequiredUUIDDto,
     @Request() req,
   ): Promise<Collection> {
-    return await this.linkDiscordService.linkThread(
+    return await this.linkDiscordService.createAndlinkThread(
       param.id,
       query.dataId,
       body,
@@ -701,23 +709,46 @@ export class CollectionController {
   }
 
   @UseGuards(PublicViewAuthGuard)
+  @Patch('/:messageId/linkDiscordThreadToCollectionData')
+  async linkDiscordThreadToCollectionData(
+    @Param() param: RequiredDiscordMessageIdDto,
+    @Query() query: RequiredDiscordIdDto,
+    @Body() body: LinkDiscordThreadToDataDto,
+    @Request() req,
+  ): Promise<boolean> {
+    return await this.linkDiscordService.linkThreadToData(
+      param.messageId,
+      query.discordId,
+      body,
+    );
+  }
+
+  @SetMetadata('permissions', ['manageSettings'])
+  @UseGuards(CollectionAuthGuard)
+  @Patch('/:id/postFormMessage')
+  async postFormMessage(
+    @Param() param: ObjectIdDto,
+    @Body() body: RequiredDiscordChannelIdDto,
+    @Request() req,
+  ): Promise<Collection> {
+    return await this.linkDiscordService.postForm(
+      param.id,
+      body.channelId,
+      req.user,
+    );
+  }
+
+  @UseGuards(PublicViewAuthGuard)
   @Patch('/:channelId/saveDraft')
   async saveDraft(
     @Param() param: RequiredDiscordChannelIdDto,
     @Query() query: RequiredDiscordIdDto,
     @Body()
-    body: {
-      data: object;
-    },
+    body: object,
     @Request() req,
   ): Promise<Collection> {
-    console.log({ body });
     return await this.commandBus.execute(
-      new SaveDraftFromDiscordCommand(
-        body.data,
-        query.discordId,
-        param.channelId,
-      ),
+      new SaveDraftFromDiscordCommand(body, query.discordId, param.channelId),
     );
   }
 
@@ -734,7 +765,48 @@ export class CollectionController {
         'discordId',
         null,
         param.channelId,
+        null,
       ),
+    );
+  }
+
+  @UseGuards(PublicViewAuthGuard)
+  @Get('/:channelId/firstField')
+  async firstField(
+    @Param() param: RequiredDiscordChannelIdDto,
+    @Query() query: RequiredDiscordIdDto,
+    @Request() req,
+  ): Promise<Collection> {
+    console.log({ param, query });
+    const collection = await this.queryBus.execute(
+      new GetCollectionByFilterQuery({
+        'collectionLevelDiscordThreadRef.messageId': param.channelId,
+      }),
+    );
+    if (!collection) throw new NotFoundException('Collection not found');
+    return await this.queryBus.execute(
+      new GetNextFieldQuery(
+        query.discordId,
+        'discordId',
+        null,
+        null,
+        collection,
+      ),
+    );
+  }
+
+  @UseGuards(SessionAuthGuard)
+  @Patch('/:channelId/saveAndPostSocials')
+  async saveAndPostSocials(
+    @Param() param: RequiredDiscordChannelIdDto,
+    @Body()
+    body: SocialsDto,
+    @Request() req,
+  ): Promise<Collection> {
+    console.log({ param, body });
+
+    return await this.commandBus.execute(
+      new SaveAndPostSocialsCommand(body, param.channelId, req.user),
     );
   }
 }

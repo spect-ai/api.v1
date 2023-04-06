@@ -156,10 +156,11 @@ export class Collection extends BaseModel {
 
   @prop({ default: {} })
   collectionLevelDiscordThreadRef: {
-    threadId: string;
     channelId: string;
     guildId: string;
     private: boolean;
+    threadId?: string;
+    messageId?: string;
   };
 }
 

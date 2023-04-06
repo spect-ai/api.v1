@@ -1,23 +1,27 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { QueryBus } from '@nestjs/cqrs';
-import { ethers } from 'ethers';
+import { BigNumber, ethers } from 'ethers';
 import { surveyHubAbi } from 'src/common/abis/surveyHub';
 import { GasPredictionService } from 'src/common/gas-prediction.service';
 import { CreatePOAPDto } from 'src/credentials/dto/create-credential.dto';
 import { MintKudosService } from 'src/credentials/services/mintkudos.service';
 import { PoapService } from 'src/credentials/services/poap.service';
+import { SurveyTokenService } from 'src/credentials/services/survey-token.service';
 import { LoggingService } from 'src/logging/logging.service';
 import { RegistryService } from 'src/registry/registry.service';
 import { RequestProvider } from 'src/users/user.provider';
 import { CollectionRepository } from '../collection.repository';
 import { Collection } from '../model/collection.model';
 import { GetCollectionByIdQuery } from '../queries';
+import { SurveyTokenDistributionInfo } from '../types/types';
 import { AdvancedConditionService } from './advanced-condition.service';
 
 @Injectable()
 export class ClaimEligibilityService {
   constructor(
     private readonly advancedConditionService: AdvancedConditionService,
+    private readonly registryService: RegistryService,
+    private readonly surveyTokenService: SurveyTokenService,
   ) {}
 
   canClaimKudos(
@@ -157,6 +161,55 @@ export class ClaimEligibilityService {
     }
     return {
       canClaim: true,
+      reason: '',
+    };
+  }
+
+  async canClaimErc20(
+    collection: Collection,
+    claimeeAddress: string,
+  ): Promise<{ canClaim: boolean; hasClaimed: boolean; reason: string }> {
+    const registry = await this.registryService.getRegistry();
+    const surveyChainId = collection.formMetadata.surveyChain?.value;
+    const surveyId = collection.formMetadata.surveyTokenId;
+    const distributionInfo =
+      (await this.surveyTokenService.getSurveyDistributionInfo(
+        surveyChainId,
+        surveyId,
+        registry,
+      )) as SurveyTokenDistributionInfo;
+
+    const balanceInEscrow = (await this.surveyTokenService.getEscrowBalance(
+      surveyChainId,
+      surveyId,
+      registry,
+    )) as BigNumber;
+    const insufficientEscrowBalance =
+      distributionInfo?.distributionType === 0
+        ? balanceInEscrow.toString() === '0'
+        : balanceInEscrow.lt(distributionInfo?.amountPerResponse || 0);
+
+    const hasClaimed = await this.surveyTokenService.hasClaimedSurveyToken(
+      surveyChainId,
+      surveyId,
+      claimeeAddress,
+      registry,
+    );
+
+    const canClaim = !hasClaimed && !insufficientEscrowBalance;
+    await this.surveyTokenService.isEligibleToClaimSurveyToken(
+      surveyChainId,
+      surveyId,
+      claimeeAddress,
+      distributionInfo.distributionType,
+      registry,
+      distributionInfo.requestId?.toString(),
+    );
+    console.log({ hasClaimed, canClaim });
+
+    return {
+      canClaim,
+      hasClaimed,
       reason: '',
     };
   }

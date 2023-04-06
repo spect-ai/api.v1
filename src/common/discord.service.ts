@@ -1,8 +1,6 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import fetch from 'node-fetch';
-import { async } from 'rxjs';
-import { Circle } from 'src/circle/model/circle.model';
-import { DiscordChannel } from 'src/circle/types';
+import { Property } from 'src/collection/types/types';
 
 // TODO
 @Injectable()
@@ -123,6 +121,54 @@ export class DiscordService {
       return data;
     }
     return null;
+  }
+
+  async postForm(channelId: string, title: string, description: string) {
+    const res = await fetch(`${process.env.DISCORD_URI}/api/postForm`, {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      method: 'POST',
+      body: JSON.stringify({
+        channelId,
+        title,
+        description,
+      }),
+    });
+    if (res.ok) {
+      const data = await res.json();
+      console.log({ data });
+      return data;
+    }
+    return null;
+  }
+
+  async postSocials(
+    channelId: string,
+    socials: Property,
+    nextField: Property,
+    discordUserId: string,
+  ) {
+    const res = await fetch(`${process.env.DISCORD_URI}/api/postSocials`, {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      method: 'POST',
+      body: JSON.stringify({
+        channelId,
+        socials,
+        nextField,
+        discordUserId: discordUserId,
+      }),
+    });
+
+    const data = await res.json();
+    console.log({ data });
+
+    if (res.ok) {
+      return data;
+    }
+    throw `${data.message}`;
   }
 
   async createThread(
