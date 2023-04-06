@@ -7,5 +7,6 @@ export class GetNextFieldQuery {
     public readonly slug?: string,
     public readonly discordChannelId?: string,
     public readonly collection?: Collection,
+    public readonly populateData?: boolean,
   ) {}
 }

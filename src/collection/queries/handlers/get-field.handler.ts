@@ -295,6 +295,7 @@ export class GetNextFieldQueryHandler
       callerId,
       discordChannelId,
       callerIdType,
+      populateData,
     } = query;
     try {
       let collection = collectionToFetch;
@@ -303,7 +304,6 @@ export class GetNextFieldQueryHandler
           new GetCollectionBySlugQuery(slug),
         );
       }
-      console.log({ discordChannelId });
       if (!collection && discordChannelId) {
         const lookedUpData = await this.lookupRepository.findOne({
           key: discordChannelId,
@@ -328,6 +328,14 @@ export class GetNextFieldQueryHandler
           draftSubmittedByUser,
           callerId,
         );
+
+      console.log({ populateData });
+      if (!populateData) {
+        return {
+          type: nextField,
+          name: nextField === 'readonlyAtEnd' ? 'readonlyAtEnd' : 'nextField',
+        };
+      }
       if (nextField) {
         if (nextField === 'readonlyAtEnd')
           return {

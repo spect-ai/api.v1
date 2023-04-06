@@ -766,6 +766,7 @@ export class CollectionController {
         null,
         param.channelId,
         null,
+        query.populateFields === 'true' ? true : false,
       ),
     );
   }
@@ -791,6 +792,7 @@ export class CollectionController {
         null,
         null,
         collection,
+        query.populateFields === 'true' ? true : false,
       ),
     );
   }

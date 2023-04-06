@@ -1,5 +1,6 @@
 import {
   IsArray,
+  IsBoolean,
   IsNotEmpty,
   IsNumber,
   IsOptional,
@@ -198,6 +199,10 @@ export class RequiredDiscordIdDto {
   @IsString()
   @IsOptional()
   discordUsername: string;
+
+  @IsString()
+  @IsOptional()
+  populateFields: string;
 }
 
 export class RequiredDiscordChannelIdDto {
