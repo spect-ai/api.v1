@@ -2,6 +2,7 @@ import { forwardRef, Module } from '@nestjs/common';
 import { CqrsModule } from '@nestjs/cqrs';
 import { CommonTools } from 'src/common/common.service';
 import { DiscordService } from 'src/common/discord.service';
+import { EncryptionService } from 'src/common/encryption.service';
 import { GuildxyzService } from 'src/common/guildxyz.service';
 import { LoggingService } from 'src/logging/logging.service';
 import { MailService } from 'src/mail/mail.service';
@@ -27,6 +28,7 @@ import { QueryHandlers } from './queries/handlers';
     CommonActionService,
     EmailGeneratorService,
     DiscordService,
+    EncryptionService,
     GuildxyzService,
   ],
 })

@@ -281,6 +281,19 @@ export interface FormMetadata {
       data: object;
     };
   };
+  lookup?: {
+    tokens: {
+      tokenType: 'erc20' | 'erc721' | 'erc1155';
+      contractAddress: string;
+      metadata: {
+        name: string;
+        image: string;
+      };
+      tokenId?: number;
+      chainId: number;
+    }[];
+    snapshot: number;
+  };
 }
 
 export interface PaymentConfig {

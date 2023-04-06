@@ -41,6 +41,8 @@ import {
   UpdateMultiplePaymentsCommandHandler,
   UpdatePaymentCommandHandler,
 } from '../payments/handlers/update-payment.handler';
+import { GetSpaceCollectionsCommandHandler } from './get-space-collections.handler';
+import { GetRegistryCommandHandler } from './get-registry.handler';
 
 export const CommandHandlers = [
   JoinUsingInvitationCommandHandler,
@@ -76,4 +78,6 @@ export const CommandHandlers = [
   UpdatePaymentCommandHandler,
   AddManualPaymentsCommandHandler,
   UpdateMultiplePaymentsCommandHandler,
+  GetSpaceCollectionsCommandHandler,
+  GetRegistryCommandHandler,
 ];

@@ -4,8 +4,10 @@ import { CreatePOAPDto } from '../dto/create-credential.dto';
 import * as FormData from 'form-data';
 import fetch from 'node-fetch';
 import { Readable } from 'stream';
-import { EncryptionService } from 'src/common/encryption.service';
 import { AuthTokenRefreshService } from 'src/common/authTokenRefresh.service';
+import { CommandBus } from '@nestjs/cqrs';
+import { GetSpaceCollectionsCommand } from 'src/circle/commands/impl';
+import { Collection } from 'src/collection/model/collection.model';
 
 // TODO
 @Injectable()
@@ -13,6 +15,7 @@ export class PoapService {
   constructor(
     private readonly logger: LoggingService,
     private readonly authTokenService: AuthTokenRefreshService,
+    private readonly commandBus: CommandBus,
   ) {
     this.logger.setContext('PoapService');
   }
@@ -96,6 +99,28 @@ export class PoapService {
         ...res,
         claimed,
       };
+    } catch (e) {
+      this.logger.error(e);
+      throw new InternalServerErrorException(
+        `Failed to get POAP event with error ${e}`,
+      );
+    }
+  }
+
+  async getPoapInfoById(id: string) {
+    try {
+      const options = {
+        method: 'GET',
+        headers: {
+          accept: 'application/json',
+          'x-api-key': process.env.POAP_API_KEY,
+        },
+      };
+
+      const res = await (
+        await fetch(`https://api.poap.tech/events/id/${id}`, options)
+      ).json();
+      return res;
     } catch (e) {
       this.logger.error(e);
       throw new InternalServerErrorException(
@@ -250,6 +275,27 @@ export class PoapService {
         `Failed to get POAPs by address with error ${e}`,
       );
     }
+  }
+
+  async getSpacePoaps(spaceId: string) {
+    const res = await this.commandBus.execute(
+      new GetSpaceCollectionsCommand(spaceId),
+    );
+    const spacePoaps = [];
+    for await (const collection of res as Collection[]) {
+      if (collection.formMetadata?.poapEventId) {
+        const poap = await this.getPoapInfoById(
+          collection.formMetadata.poapEventId,
+        );
+        spacePoaps.push({
+          event: {
+            ...poap,
+          },
+        });
+      }
+    }
+
+    return spacePoaps;
   }
 
   async validateSecretCode(poapEventId: string, editCode: string) {

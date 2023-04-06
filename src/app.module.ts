@@ -49,6 +49,9 @@ import { LinkDiscordService } from './collection/services/link-discord.service';
 import { LookupModule } from './lookup/lookup.module';
 import { SurveyTokenService } from './credentials/services/survey-token.service';
 
+import * as dotenv from 'dotenv';
+dotenv.config();
+
 const databaseUrl = process.env.MONGO_URL
   ? `${process.env.MONGO_URL}/nest?authSource=admin&retryWrites=true&w=majority`
   : 'mongodb://localhost:27017/nest';

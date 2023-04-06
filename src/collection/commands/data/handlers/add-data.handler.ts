@@ -1,5 +1,6 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import {
+  CommandBus,
   CommandHandler,
   EventBus,
   ICommandHandler,
@@ -25,10 +26,8 @@ import {
 } from 'src/collection/queries';
 import { GetProfileQuery } from 'src/users/queries/impl';
 import { HasSatisfiedDataConditionsQuery } from 'src/automation/queries/impl';
-import {
-  ResponseCredentialingService,
-  ResponseCredentialService,
-} from 'src/collection/services/response-credentialing.service';
+import { ResponseCredentialService } from 'src/collection/services/response-credentialing.service';
+import { CheckUserTokensCommand } from 'src/users/commands/impl';
 
 @Injectable()
 export class ActivityOnAddData {
@@ -84,6 +83,7 @@ export class AddDataCommandHandler implements ICommandHandler<AddDataCommand> {
   constructor(
     private readonly collectionRepository: CollectionRepository,
     private readonly queryBus: QueryBus,
+    private readonly commandBus: CommandBus,
     private readonly eventBus: EventBus,
     private readonly logger: LoggingService,
     private readonly validationService: DataValidationService,
@@ -150,6 +150,16 @@ export class AddDataCommandHandler implements ICommandHandler<AddDataCommand> {
       }
 
       filteredData['slug'] = uuidv4();
+
+      if (collection.formMetadata?.lookup?.tokens?.length) {
+        const res = await this.commandBus.execute(
+          new CheckUserTokensCommand(
+            caller,
+            collection.formMetadata.lookup.tokens,
+          ),
+        );
+        filteredData['__lookup__'] = res;
+      }
 
       /** Disabling activity for forms as it doesnt quite make sense yet */
       const { dataActivities, dataActivityOrder } =

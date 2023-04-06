@@ -1,4 +1,4 @@
-import { forwardRef, Module } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { CqrsModule } from '@nestjs/cqrs';
 import { TypegooseModule } from 'nestjs-typegoose';
 import { EventHandlers } from './events/handlers';
@@ -21,9 +21,20 @@ import { MailService } from 'src/mail/mail.service';
 import { LensService } from './external/lens.service';
 import { UsersControllerV1 } from './users-v1.controller';
 import { RealtimeGateway } from 'src/realtime/realtime.gateway';
+import { PoapService } from 'src/credentials/services/poap.service';
+import { MintKudosService } from 'src/credentials/services/mintkudos.service';
+import { AuthTokenRefreshService } from 'src/common/authTokenRefresh.service';
+import { EncryptionService } from 'src/common/encryption.service';
+import { SecretModule } from 'src/secretRegistry/secret.module';
+import { CirclesCollectionService } from 'src/circle/services/circle-collection.service';
 
 @Module({
-  imports: [TypegooseModule.forFeature([User]), EthAddressModule, CqrsModule],
+  imports: [
+    TypegooseModule.forFeature([User]),
+    EthAddressModule,
+    CqrsModule,
+    SecretModule,
+  ],
   controllers: [UsersController, UsersControllerV1],
   providers: [
     UsersService,
@@ -39,6 +50,11 @@ import { RealtimeGateway } from 'src/realtime/realtime.gateway';
     LoggingService,
     MailService,
     LensService,
+    PoapService,
+    MintKudosService,
+    AuthTokenRefreshService,
+    EncryptionService,
+    CirclesCollectionService,
     RealtimeGateway,
   ],
   exports: [UsersService, UsersRepository, UsersModule],

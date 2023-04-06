@@ -44,6 +44,7 @@ import { AdvancedConditionService } from './services/advanced-condition.service'
 import { LinkDiscordService } from './services/link-discord.service';
 import { LookupModule } from 'src/lookup/lookup.module';
 import { SurveyTokenService } from 'src/credentials/services/survey-token.service';
+import { CirclesCollectionService } from 'src/circle/services/circle-collection.service';
 
 @Module({
   imports: [
@@ -90,6 +91,7 @@ import { SurveyTokenService } from 'src/credentials/services/survey-token.servic
     GasPredictionService,
     ClaimEligibilityService,
     AdvancedConditionService,
+    CirclesCollectionService,
     LinkDiscordService,
     SurveyTokenService,
   ],
