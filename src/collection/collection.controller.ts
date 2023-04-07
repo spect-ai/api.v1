@@ -40,6 +40,7 @@ import {
 } from 'src/common/dtos/string.dto';
 import { MappedItem } from 'src/common/interfaces';
 import { CreatePOAPDto } from 'src/credentials/dto/create-credential.dto';
+import { KudosResponseDto } from 'src/credentials/dto/mint-kudos.dto';
 import {
   AddCommentCommand,
   AddPropertyCommand,
@@ -104,6 +105,7 @@ import {
 } from './dto/update-comments-request.dto';
 import {
   AddDataDto,
+  SaveDraftDto,
   UpdateDataDto,
   VoteDataDto,
 } from './dto/update-data-request.dto';
@@ -519,7 +521,9 @@ export class CollectionController {
 
   @UseGuards(SessionAuthGuard)
   @Patch('/:id/airdropKudos')
-  async airdropKudos(@Param() param: ObjectIdDto): Promise<object> {
+  async airdropKudos(
+    @Param() param: ObjectIdDto,
+  ): Promise<{ operationId: string }> {
     return await this.credentialingService.airdropMintkudosToken(param.id);
   }
 
@@ -744,11 +748,16 @@ export class CollectionController {
     @Param() param: RequiredDiscordChannelIdDto,
     @Query() query: RequiredDiscordIdDto,
     @Body()
-    body: object,
+    body: SaveDraftDto,
     @Request() req,
   ): Promise<Collection> {
     return await this.commandBus.execute(
-      new SaveDraftFromDiscordCommand(body, query.discordId, param.channelId),
+      new SaveDraftFromDiscordCommand(
+        body.data,
+        query.discordId,
+        param.channelId,
+        body.skip,
+      ),
     );
   }
 
@@ -801,14 +810,50 @@ export class CollectionController {
   @Patch('/:channelId/saveAndPostSocials')
   async saveAndPostSocials(
     @Param() param: RequiredDiscordChannelIdDto,
-    @Body()
-    body: SocialsDto,
+    @Body() body: SocialsDto,
     @Request() req,
   ): Promise<Collection> {
-    console.log({ param, body });
-
     return await this.commandBus.execute(
       new SaveAndPostSocialsCommand(body, param.channelId, req.user),
+    );
+  }
+
+  @UseGuards(PublicViewAuthGuard)
+  @Patch('/:channelId/claimPoapFromBot')
+  async claimPoapFromBot(
+    @Param() param: RequiredDiscordChannelIdDto,
+    @Query() query: RequiredDiscordIdDto,
+  ): Promise<Collection> {
+    console.log({ param, query });
+    return await this.credentialingService.claimPoapFromBot(
+      query.discordId,
+      param.channelId,
+    );
+  }
+
+  @UseGuards(PublicViewAuthGuard)
+  @Patch('/:channelId/claimKudosFromBot')
+  async claimKudosFromBot(
+    @Param() param: RequiredDiscordChannelIdDto,
+    @Query() query: RequiredDiscordIdDto,
+  ): Promise<{ operationId: string }> {
+    console.log({ param, query });
+    return await this.credentialingService.claimKudosFromBot(
+      query.discordId,
+      param.channelId,
+    );
+  }
+
+  @UseGuards(PublicViewAuthGuard)
+  @Patch('/:channelId/claimERC20FromBot')
+  async claimERC20FromBot(
+    @Param() param: RequiredDiscordChannelIdDto,
+    @Query() query: RequiredDiscordIdDto,
+  ): Promise<{ transactionHash: string }> {
+    console.log({ param, query });
+    return await this.credentialingService.claimERC20FromBot(
+      query.discordId,
+      param.channelId,
     );
   }
 }

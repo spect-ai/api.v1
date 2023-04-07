@@ -281,6 +281,11 @@ export interface FormMetadata {
       data: object;
     };
   };
+  skippedFormFields?: {
+    [userId: string]: {
+      field: boolean;
+    };
+  };
   lookup?: {
     tokens: {
       tokenType: 'erc20' | 'erc721' | 'erc1155';

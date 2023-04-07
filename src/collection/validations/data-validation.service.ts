@@ -200,9 +200,12 @@ export class DataValidationService {
           }
         }
       } else if (['ethAddress'].includes(properties[propertyId].type)) {
-        if (data)
-          if (!ethers.utils.isAddress(data) && !data.endsWith('.eth'))
+        if (data) {
+          const validEns =
+            data.endsWith('.eth') && data.replace('.eth', '').length >= 3;
+          if (!ethers.utils.isAddress(data) && !validEns)
             throw 'Invalid ethereum address';
+        }
       } else if (['date'].includes(properties[propertyId].type)) {
         if (data) if (!isValidDateString(data)) throw 'Invalid date';
       }

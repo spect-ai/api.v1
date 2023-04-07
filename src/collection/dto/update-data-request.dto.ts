@@ -22,3 +22,13 @@ export class VoteDataDto {
 }
 
 export class ArchiveDataDto {}
+
+export class SaveDraftDto {
+  @IsObject()
+  @IsNotEmpty()
+  readonly data: object;
+
+  @IsObject()
+  @IsOptional()
+  readonly skip: { [key: string]: boolean };
+}

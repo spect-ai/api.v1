@@ -6,6 +6,7 @@ export class SaveDraftFromDiscordCommand {
     public readonly data: object,
     public readonly callerDiscordId: string,
     public readonly channelId: string,
+    public readonly skip?: { [key: string]: boolean },
   ) {}
 }
 

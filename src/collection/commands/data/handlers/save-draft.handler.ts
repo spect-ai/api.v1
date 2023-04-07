@@ -47,7 +47,7 @@ export class SaveDraftCommandHandler
   }
 
   async execute(command: SaveDraftFromDiscordCommand) {
-    const { data, channelId, callerDiscordId } = command;
+    const { data, channelId, callerDiscordId, skip } = command;
     try {
       console.log({ data, channelId, callerDiscordId });
       const lookedUpData = await this.lookupRepository.findOne({
@@ -64,37 +64,54 @@ export class SaveDraftCommandHandler
         throw 'Collection is inactive';
 
       // Preprocess data
-      const updates = {};
+      const formFieldUpdates = {};
       for (const [key, val] of Object.entries(data)) {
         const property = collection.properties[key];
         console.log({ property });
-        if (property) {
+        if (property && property.isPartOfFormView) {
           if (property.type === 'number') {
-            updates[key] = parseFloat(val);
-          } else updates[key] = val;
+            formFieldUpdates[key] = parseFloat(val);
+          } else formFieldUpdates[key] = val;
         }
       }
-      console.log({ updates });
 
-      if (Object.entries(updates).length === 0) throw 'No valid updates';
+      const skippedFormFields = {};
+      for (const [key, val] of Object.entries(skip || {})) {
+        const property = collection.properties[key];
+        if (property && property.isPartOfFormView) {
+          skippedFormFields[key] = val;
+        }
+      }
 
-      const validationPassed = await this.validationService.validate(
-        updates,
-        'add',
-        true,
-        collection,
-      );
-      if (!validationPassed) throw 'Validation failed';
+      if (
+        Object.entries(formFieldUpdates).length === 0 &&
+        !data['captcha'] &&
+        Object.keys(skippedFormFields).length === 0
+      )
+        throw 'No valid updates';
 
-      const requiredFieldValidationPassed =
-        await this.validationService.validateRequiredFieldForFieldsThatExist(
-          collection,
-          updates,
+      if (Object.entries(formFieldUpdates).length > 0) {
+        const validationPassed = await this.validationService.validate(
+          formFieldUpdates,
           'add',
+          true,
+          collection,
         );
-      if (!requiredFieldValidationPassed)
-        throw 'Required field validation failed';
+        if (!validationPassed) throw 'Validation failed';
 
+        const requiredFieldValidationPassed =
+          await this.validationService.validateRequiredFieldForFieldsThatExist(
+            collection,
+            formFieldUpdates,
+            'add',
+          );
+        if (!requiredFieldValidationPassed)
+          throw 'Required field validation failed';
+      }
+
+      if (data['captcha']) {
+        formFieldUpdates['captcha'] = data['captcha'];
+      }
       const res = await this.collectionRepository.updateById(collection.id, {
         formMetadata: {
           ...collection.formMetadata,
@@ -102,17 +119,43 @@ export class SaveDraftCommandHandler
             ...(collection.formMetadata.drafts || {}),
             [callerDiscordId]: {
               ...(collection.formMetadata.drafts?.[callerDiscordId] || {}),
-              ...updates,
+              ...formFieldUpdates,
+            },
+          },
+          skippedFormFields: {
+            ...(collection.formMetadata.skippedFormFields || {}),
+            [callerDiscordId]: {
+              ...(collection.formMetadata.skippedFormFields?.[
+                callerDiscordId
+              ] || {}),
+              ...skippedFormFields,
             },
           },
         },
       });
       const nextField = await this.queryBus.execute(
-        new GetNextFieldQuery(callerDiscordId, 'discordId', null, null, res),
+        new GetNextFieldQuery(
+          callerDiscordId,
+          'discordId',
+          null,
+          null,
+          res,
+          true,
+        ),
       );
       console.log({ nextField });
       if (nextField.name === 'readonlyAtEnd') {
         /** Disabling activity for forms as it doesnt quite make sense yet */
+        const filteredDrafts = Object.entries(
+          res.formMetadata.drafts?.[callerDiscordId] || {},
+        ).filter(([key, val]) =>
+          [
+            'captcha',
+            'roleGating',
+            'sybilProtection',
+            'connectWallet',
+          ].includes(key),
+        );
         const slug = uuid();
         const data = {
           ...collection.data,
@@ -127,10 +170,7 @@ export class SaveDraftCommandHandler
         const updatedCollection = await this.collectionRepository.updateById(
           collection.id,
           {
-            data: {
-              ...collection.data,
-              [slug]: res.formMetadata.drafts[callerDiscordId],
-            },
+            data,
             dataActivities,
             dataActivityOrder,
             dataOwner: {

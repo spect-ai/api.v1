@@ -1,4 +1,8 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { QueryBus } from '@nestjs/cqrs';
 import { BigNumber, ethers } from 'ethers';
 import { surveyHubAbi } from 'src/common/abis/surveyHub';
@@ -8,7 +12,9 @@ import { MintKudosService } from 'src/credentials/services/mintkudos.service';
 import { PoapService } from 'src/credentials/services/poap.service';
 import { SurveyTokenService } from 'src/credentials/services/survey-token.service';
 import { LoggingService } from 'src/logging/logging.service';
+import { LookupRepository } from 'src/lookup/lookup.repository';
 import { RegistryService } from 'src/registry/registry.service';
+import { GetUserByFilterQuery } from 'src/users/queries/impl';
 import { RequestProvider } from 'src/users/user.provider';
 import { CollectionRepository } from '../collection.repository';
 import { Collection } from '../model/collection.model';
@@ -228,6 +234,7 @@ export class ResponseCredentialingService {
     private readonly gasPredictionService: GasPredictionService,
     private readonly advancedConditionService: AdvancedConditionService,
     private readonly claimEligibilityService: ClaimEligibilityService,
+    private readonly lookupRepository: LookupRepository,
   ) {
     this.logger.setContext('ResponseCredentialingService');
   }
@@ -254,7 +261,8 @@ export class ResponseCredentialingService {
         this.requestProvider.user.ethAddress,
       );
       if (operationId) {
-        const mintkudosClaimedBy = collection.mintkudosClaimedBy || [];
+        const mintkudosClaimedBy =
+          collection.formMetadata.mintkudosClaimedBy || [];
 
         await this.collectionRepository.updateById(collection.id, {
           formMetadata: {
@@ -266,7 +274,7 @@ export class ResponseCredentialingService {
           },
         });
       }
-      return operationId;
+      return { operationId };
     } catch (error) {
       this.logger.error(
         `Failed while airdropping kudos with error: ${error}`,
@@ -459,6 +467,281 @@ export class ResponseCredentialingService {
         collectionId,
       );
       throw new InternalServerErrorException(`${error}`);
+    }
+  }
+
+  async claimPoapFromBot(discordId: string, threadId: string) {
+    try {
+      const lookedUpData = await this.lookupRepository.findOne({
+        key: threadId,
+        keyType: 'discordThreadId',
+      });
+      if (!lookedUpData.collectionId) {
+        throw new InternalServerErrorException(
+          'Thread was not indexed in lookup',
+        );
+      }
+      const collection = await this.collectionRepository.findById(
+        lookedUpData.collectionId,
+      );
+      if (!collection) {
+        throw new NotFoundException('Collection not found');
+      }
+
+      const user = await this.queryBus.execute(
+        new GetUserByFilterQuery(
+          {
+            discordId,
+          },
+          '',
+          true,
+        ),
+      );
+      if (!user || !user.ethAddress) {
+        throw new NotFoundException('EthAddress of user not found');
+      }
+
+      const res = await this.poapService.claimPoap(
+        collection.formMetadata.poapEventId,
+        collection.formMetadata.poapEditCode,
+        user.ethAddress,
+      );
+      if (!res.id)
+        throw new InternalServerErrorException(`Failed to claim poap`);
+
+      await this.collectionRepository.updateById(collection.id, {
+        formMetadata: {
+          ...(collection.formMetadata || {}),
+          drafts: {
+            ...(collection.formMetadata.drafts || {}),
+            [discordId]: {
+              ...(collection.formMetadata.drafts?.[discordId] || {}),
+              poapClaimed: true,
+            },
+          },
+        },
+      });
+
+      return res;
+    } catch (error) {
+      this.logger.error(
+        `Failed while claiming poap with error: ${error}`,
+        threadId,
+      );
+      throw error;
+    }
+  }
+
+  async claimKudosFromBot(discordId: string, threadId: string) {
+    try {
+      const lookedUpData = await this.lookupRepository.findOne({
+        key: threadId,
+        keyType: 'discordThreadId',
+      });
+      if (!lookedUpData.collectionId) {
+        throw new InternalServerErrorException(
+          'Thread was not indexed in lookup',
+        );
+      }
+      const collection = await this.collectionRepository.findById(
+        lookedUpData.collectionId,
+      );
+      if (!collection) {
+        throw new NotFoundException('Collection not found');
+      }
+
+      const user = await this.queryBus.execute(
+        new GetUserByFilterQuery(
+          {
+            discordId,
+          },
+          '',
+          true,
+        ),
+      );
+      if (!user || !user.ethAddress) {
+        throw new NotFoundException('EthAddress of user not found');
+      }
+
+      if (!collection.formMetadata.mintkudosTokenId)
+        throw 'No mintkudos token id found';
+      const operationId = await this.kudosService.airdropKudos(
+        collection.parents[0],
+        collection.formMetadata.mintkudosTokenId.toString(),
+        user.ethAddress,
+      );
+      console.log({ operationId });
+      if (!operationId)
+        throw new InternalServerErrorException(`Failed to claim kudos`);
+
+      await this.collectionRepository.updateById(collection.id, {
+        formMetadata: {
+          ...(collection.formMetadata || {}),
+          drafts: {
+            ...(collection.formMetadata.drafts || {}),
+            [discordId]: {
+              ...(collection.formMetadata.drafts?.[discordId] || {}),
+              kudosClaimed: true,
+            },
+          },
+          mintkudosClaimedBy: [
+            ...(collection.formMetadata.mintkudosClaimedBy || []),
+            this.requestProvider.user.id,
+          ],
+        },
+      });
+
+      return { operationId };
+    } catch (error) {
+      this.logger.error(
+        `Failed while claiming poap with error: ${error}`,
+        threadId,
+      );
+      throw error;
+    }
+  }
+
+  async claimERC20FromBot(discordId: string, threadId: string) {
+    try {
+      const lookedUpData = await this.lookupRepository.findOne({
+        key: threadId,
+        keyType: 'discordThreadId',
+      });
+      if (!lookedUpData.collectionId) {
+        throw new InternalServerErrorException(
+          'Thread was not indexed in lookup',
+        );
+      }
+      const collection = await this.collectionRepository.findById(
+        lookedUpData.collectionId,
+      );
+      if (!collection) {
+        throw new NotFoundException('Collection not found');
+      }
+
+      const user = await this.queryBus.execute(
+        new GetUserByFilterQuery(
+          {
+            discordId,
+          },
+          '',
+          true,
+        ),
+      );
+      if (!user || !user.ethAddress) {
+        throw new NotFoundException('EthAddress of user not found');
+      }
+
+      const registry = await this.registryService.getRegistry();
+      const provider = new ethers.providers.JsonRpcProvider(
+        registry[collection.formMetadata.surveyChain.value].provider,
+      );
+      const signer = new ethers.Wallet(process.env.PRIVATE_KEY, provider);
+
+      const surveyProtocol = new ethers.Contract(
+        registry[collection.formMetadata.surveyChain.value].surveyHubAddress,
+        surveyHubAbi,
+        signer,
+      );
+
+      const paymentToken = await surveyProtocol.paymentToken(
+        collection?.formMetadata?.surveyTokenId,
+      );
+      //const paymentToken = ethers.constants.AddressZero;
+
+      const hasReceivedPayment = await surveyProtocol.hasReceivedPayment(
+        collection?.formMetadata?.surveyTokenId,
+        user.ethAddress,
+      );
+      //const hasReceivedPayment = false;
+      if (hasReceivedPayment) {
+        throw new InternalServerErrorException(
+          'User has already received tokens',
+        );
+      }
+      let maxFeePerGas = ethers.BigNumber.from(40000000000); // fallback to 40 gwei
+      let maxPriorityFeePerGas = ethers.BigNumber.from(40000000000); // fallback to 40 gwei
+      if (
+        ['137', '80001'].includes(collection.formMetadata.surveyChain.value)
+      ) {
+        const feeEstimate = await this.gasPredictionService.predictGas(
+          collection.formMetadata.surveyChain.value,
+        );
+        maxFeePerGas = ethers.utils.parseUnits(
+          Math.ceil(feeEstimate.maxFee) + '',
+          'gwei',
+        );
+        maxPriorityFeePerGas = ethers.utils.parseUnits(
+          Math.ceil(feeEstimate.maxPriorityFee) + '',
+          'gwei',
+        );
+      }
+      let tx;
+      if (paymentToken === ethers.constants.AddressZero) {
+        const gasEstimate = await surveyProtocol.estimateGas.getPaidEther(
+          collection?.formMetadata?.surveyTokenId,
+          user.ethAddress,
+          {
+            maxFeePerGas,
+            maxPriorityFeePerGas,
+          },
+        );
+        tx = await surveyProtocol.getPaidEther(
+          collection?.formMetadata?.surveyTokenId,
+          user.ethAddress,
+          {
+            maxFeePerGas,
+            maxPriorityFeePerGas,
+            gasLimit: Math.ceil(gasEstimate.toNumber() * 1.2),
+          },
+        );
+      } else {
+        const gasEstimate = await surveyProtocol.estimateGas.getPaidToken(
+          collection?.formMetadata?.surveyTokenId,
+          user.ethAddress,
+          {
+            maxFeePerGas,
+            maxPriorityFeePerGas,
+          },
+        );
+
+        tx = await surveyProtocol.getPaidToken(
+          collection?.formMetadata?.surveyTokenId,
+          user.ethAddress,
+          {
+            maxFeePerGas,
+            maxPriorityFeePerGas,
+            gasLimit: Math.ceil(gasEstimate.toNumber() * 1.2),
+          },
+        );
+      }
+
+      await this.collectionRepository.updateById(collection.id, {
+        formMetadata: {
+          ...(collection.formMetadata || {}),
+          transactionHashes: {
+            [user.ethAddress]: {
+              ...(collection.formMetadata.transactionHashes || {}),
+              surveyTokenClaim: tx.hash,
+            },
+          },
+          drafts: {
+            ...(collection.formMetadata.drafts || {}),
+            [discordId]: {
+              ...(collection.formMetadata.drafts?.[discordId] || {}),
+              erc20Claimed: true,
+            },
+          },
+        },
+      });
+
+      return { transactionHash: tx.hash };
+    } catch (error) {
+      this.logger.error(
+        `Failed while claiming poap with error: ${error}`,
+        threadId,
+      );
+      throw error;
     }
   }
 }

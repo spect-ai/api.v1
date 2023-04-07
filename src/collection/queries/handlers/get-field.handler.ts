@@ -49,10 +49,10 @@ export class GetNextFieldQueryHandler
     ethAddress?: string;
   }> {
     const { properties, propertyOrder } = collection;
-
+    const updates = {} as { [key: string]: any };
     if (
       collection.formMetadata.captchaEnabled &&
-      !draftSubmittedByUser?.hasPassedCaptcha
+      !draftSubmittedByUser?.captcha
     ) {
       return {
         field: 'captcha',
@@ -61,7 +61,6 @@ export class GetNextFieldQueryHandler
 
     let user;
     if (collection.formMetadata.pageOrder.includes('connect')) {
-      console.log({ discordId });
       try {
         user = await this.queryBus.execute(
           new GetUserByFilterQuery(
@@ -78,6 +77,7 @@ export class GetNextFieldQueryHandler
             ethAddress: null,
           };
         }
+        updates['connectWallet'] = user.ethAddress;
       } catch (e) {
         return {
           field: 'connectWallet',
@@ -88,7 +88,8 @@ export class GetNextFieldQueryHandler
 
     if (
       collection.formMetadata.sybilProtectionEnabled &&
-      !draftSubmittedByUser?.hasPassedSybilCheck
+      !draftSubmittedByUser?.hasPassedSybilCheck &&
+      !collection.formMetadata.drafts?.[discordId]?.['sybilProtection']
     ) {
       const hasPassedSybilCheck =
         await this.advancedAccessService.hasPassedSybilProtection(
@@ -101,11 +102,13 @@ export class GetNextFieldQueryHandler
           ethAddress: user.ethAddress,
         };
       }
+      updates['sybilProtection'] = true;
     }
 
     if (
       collection.formMetadata.formRoleGating?.length &&
-      !draftSubmittedByUser?.hasPassedRoleGating
+      !draftSubmittedByUser?.hasPassedRoleGating &&
+      !collection.formMetadata.drafts?.[discordId]?.['roleGating']
     ) {
       const hasRoleToAccessForm =
         await this.advancedAccessService.hasRoleToAccessForm(collection, user);
@@ -115,6 +118,22 @@ export class GetNextFieldQueryHandler
           ethAddress: user.ethAddress,
         };
       }
+      updates['roleGating'] = true;
+    }
+
+    if (Object.keys(updates).length) {
+      await this.collectionRepository.updateById(collection.id, {
+        formMetadata: {
+          ...collection.formMetadata,
+          drafts: {
+            ...(collection.formMetadata.drafts || {}),
+            [discordId]: {
+              ...(collection.formMetadata.drafts?.[discordId] || {}),
+              ...updates,
+            },
+          },
+        },
+      });
     }
     for (const page of collection.formMetadata.pageOrder) {
       for (const propertyId of collection.formMetadata.pages[page].properties) {
@@ -125,6 +144,10 @@ export class GetNextFieldQueryHandler
             field: propertyId,
             ethAddress: user?.ethAddress,
           };
+        if (
+          collection.formMetadata.skippedFormFields?.[discordId]?.[propertyId]
+        )
+          continue;
         const property = properties[propertyId];
         if (!property.isPartOfFormView) continue;
         if (draftSubmittedByUser[propertyId]) {
@@ -165,7 +188,7 @@ export class GetNextFieldQueryHandler
     if (
       collection.formMetadata.poapEventId &&
       collection.formMetadata.poapEditCode &&
-      !draftSubmittedByUser?.hasClaimedPoap
+      !collection.formMetadata?.drafts?.[discordId]?.['poapClaimed']
     ) {
       return {
         field: 'poap',
@@ -175,7 +198,7 @@ export class GetNextFieldQueryHandler
 
     if (
       collection.formMetadata.mintkudosTokenId &&
-      !draftSubmittedByUser?.hasClaimedKudos
+      !collection.formMetadata?.drafts?.[discordId]?.['kudosClaimed']
     ) {
       return {
         field: 'kudos',
@@ -185,7 +208,7 @@ export class GetNextFieldQueryHandler
 
     if (
       collection.formMetadata.surveyTokenId &&
-      !draftSubmittedByUser?.hasClaimedSurveyToken
+      !collection.formMetadata?.drafts?.[discordId]?.['erc20Claimed']
     ) {
       return {
         field: 'erc20',
@@ -241,17 +264,19 @@ export class GetNextFieldQueryHandler
     return `https://guild.xyz/${guild.urlName}`;
   }
 
-  async poap(collection: Collection, callerId: string) {
+  async poap(collection: Collection, callerId: string, callerAddress: string) {
     const canClaimResForPoap = this.claimEligibilityService.canClaimPoap(
       collection,
       callerId,
     );
-    const { poap, claimed: hasClaimed } = await this.poapService.getPoapById(
+    const poap = await this.poapService.getPoapById(
       collection.formMetadata.poapEventId,
+      callerAddress,
     );
     return {
-      canClaim: canClaimResForPoap,
-      hasClaimed,
+      canClaim: canClaimResForPoap.canClaim && !poap.hasClaimed,
+      responseMatchCount: canClaimResForPoap.matchCount,
+      hasClaimed: poap.hasClaimed,
       poap,
       responseCount:
         collection.formMetadata.minimumNumberOfAnswersThatNeedToMatchForPoap,
@@ -269,6 +294,7 @@ export class GetNextFieldQueryHandler
       canClaim: res.canClaim,
       hasClaimed: res.hasClaimed,
       kudos,
+      responseMatchCount: res.matchCount,
       responseCount:
         collection.formMetadata
           .minimumNumberOfAnswersThatNeedToMatchForMintkudos,
@@ -376,7 +402,7 @@ export class GetNextFieldQueryHandler
           return {
             type: 'poap',
             name: `You're eligible for a POAP!`,
-            poap: await this.poap(collection, callerId),
+            poap: await this.poap(collection, callerId, callerAddress),
           };
         } else if (nextField === 'kudos') {
           return {
