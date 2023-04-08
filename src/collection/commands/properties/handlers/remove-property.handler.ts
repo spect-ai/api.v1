@@ -85,7 +85,7 @@ export class RemovePropertyCommandHandler
         },
       );
       return await this.queryBus.execute(
-        new GetPrivateViewCollectionQuery(null, updatedCollection),
+        new GetPrivateViewCollectionQuery(updatedCollection.slug),
       );
     } catch (error) {
       this.logger.error(

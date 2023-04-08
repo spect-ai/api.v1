@@ -214,7 +214,7 @@ export class UpdateCollectionCommandHandler
       }
 
       const pvtViewCollection = await this.queryBus.execute(
-        new GetPrivateViewCollectionQuery(null, updatedCollection),
+        new GetPrivateViewCollectionQuery(updatedCollection.slug),
       );
       this.eventBus.publish(
         new CollectionUpdatedEvent(pvtViewCollection, null, null),
@@ -254,7 +254,7 @@ export class UpdateCollectionByFilterCommandHandler
         updateCollectionDto,
       );
       return await this.queryBus.execute(
-        new GetPrivateViewCollectionQuery(null, updatedCollection),
+        new GetPrivateViewCollectionQuery(updatedCollection.slug),
       );
     } catch (e) {
       this.logger.error(e);

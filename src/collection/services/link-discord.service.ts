@@ -58,7 +58,7 @@ export class LinkDiscordService {
         ),
       );
       return await this.queryBus.execute(
-        new GetPrivateViewCollectionQuery(collection.slug, null),
+        new GetPrivateViewCollectionQuery(collection.slug),
       );
     } catch (e) {
       console.log(e);

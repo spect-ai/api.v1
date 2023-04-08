@@ -141,7 +141,7 @@ export class UpdateDataCommandHandler
         return publicView;
       }
       return await await this.queryBus.execute(
-        new GetPrivateViewCollectionQuery(collection.slug, updatedCollection),
+        new GetPrivateViewCollectionQuery(collection.slug),
       );
     } catch (err) {
       this.logger.error(

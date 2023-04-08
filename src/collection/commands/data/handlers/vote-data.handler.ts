@@ -165,7 +165,7 @@ export class VoteDataCommandHandler
       }
 
       return await await this.queryBus.execute(
-        new GetPrivateViewCollectionQuery(collection.slug, updatedCollection),
+        new GetPrivateViewCollectionQuery(collection.slug),
       );
     } catch (err) {
       this.logger.error(
@@ -250,7 +250,7 @@ export class StartVotingPeriodCommandHandler
       );
 
       return await await this.queryBus.execute(
-        new GetPrivateViewCollectionQuery(collection.slug, updatedCollection),
+        new GetPrivateViewCollectionQuery(collection.slug),
       );
     } catch (err) {
       this.logger.error(
@@ -322,7 +322,7 @@ export class EndVotingPeriodCommandHandler
         );
       }
       return await await this.queryBus.execute(
-        new GetPrivateViewCollectionQuery(collection.slug, updatedCollection),
+        new GetPrivateViewCollectionQuery(collection.slug),
       );
     } catch (err) {
       this.logger.error(
@@ -386,7 +386,7 @@ export class RecordSnapshotProposalCommandHandler
       );
 
       return await await this.queryBus.execute(
-        new GetPrivateViewCollectionQuery(collection.slug, updatedCollection),
+        new GetPrivateViewCollectionQuery(collection.slug),
       );
     } catch (err) {
       this.logger.error(
