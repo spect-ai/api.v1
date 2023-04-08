@@ -28,6 +28,7 @@ import { UpdateUserCommand } from 'src/users/commands/impl';
 import { DiscordService } from 'src/common/discord.service';
 import { SocialsDto } from 'src/collection/dto/socials.dto';
 import { User } from 'src/users/model/users.model';
+import { GetUserByFilterQuery } from 'src/users/queries/impl';
 
 @CommandHandler(SaveDraftFromDiscordCommand)
 export class SaveDraftCommandHandler
@@ -207,28 +208,33 @@ export class SaveAndPostSocialsCommandHandler
       return {
         ethAddress: caller.ethAddress,
       };
-    } else if (nextFieldType === 'github') {
-      return {
-        githubId: socialsDto.githubId,
-        githubUsername: socialsDto.githubUsername,
-      };
-    } else if (nextFieldType === 'discord') {
-      return {
-        discordId: socialsDto.discordId,
-        discordUsername: socialsDto.discordUsername,
-      };
-    } else if (nextFieldType === 'telegram') {
-      return {
-        telegramId: socialsDto.telegramId,
-        telegramUsername: socialsDto.telegramUsername,
-      };
+    } else if (['github', 'telegram', 'discord'].includes(nextFieldType)) {
+      if (
+        nextFieldType === 'github' &&
+        (!socialsDto.github?.id || !socialsDto.github?.username)
+      ) {
+        throw 'Github Id or username not provided';
+      }
+      if (
+        nextFieldType === 'telegram' &&
+        (!socialsDto.telegram?.id || !socialsDto.telegram?.username)
+      ) {
+        throw 'Telegram Id or username not provided';
+      }
+      if (
+        nextFieldType === 'discord' &&
+        (!socialsDto.discord?.id || !socialsDto.discord?.username)
+      ) {
+        throw 'Discord Id or username not provided';
+      }
+      return socialsDto[nextFieldType];
     }
   }
 
   async execute(command: SaveAndPostSocialsCommand) {
     const { socialsDto, channelId, caller } = command;
     try {
-      if (!caller.discordId && !socialsDto.discordId)
+      if (!socialsDto.discordId)
         throw 'No discord Id provided, cannot get next field';
       const lookedUpData = await this.lookupRepository.findOne({
         key: channelId,
@@ -247,50 +253,72 @@ export class SaveAndPostSocialsCommandHandler
           null,
           null,
           collection,
+          true,
         ),
       );
+      console.log({ nextField, socialsDto });
 
       const nextFieldVal = this.getVal(nextField.type, socialsDto, caller);
-
-      if (['github', 'discord', 'telegram'].includes(nextField.name)) {
+      console.log({ nextFieldVal });
+      if (['github', 'discord', 'telegram'].includes(nextField.type)) {
+        console.log('asasasasasas');
+        const updatedDraft = {
+          ...(collection.formMetadata.drafts || {}),
+          [socialsDto.discordId]: {
+            ...(collection.formMetadata.drafts?.[socialsDto.discordId] || {}),
+            [nextField.name]: nextFieldVal,
+          },
+        };
+        console.log({ updatedDraft, colId: collection.id });
         const res = await this.collectionRepository.updateById(collection.id, {
           formMetadata: {
             ...collection.formMetadata,
-            drafts: {
-              ...(collection.formMetadata.drafts || {}),
-              [socialsDto.discordId || caller.discordId]: {
-                ...(collection.formMetadata.drafts?.[
-                  socialsDto.discordId || caller.discordId
-                ] || {}),
-                [nextField.name]: nextFieldVal,
-              },
-            },
+            drafts: updatedDraft,
           },
         });
+
+        console.log({ draft: res.formMetadata.drafts[socialsDto.discordId] });
       }
 
-      const userUpdates = {};
-      for (const [key, val] of Object.entries(socialsDto)) {
-        if (caller[key] !== val) {
-          userUpdates[key] = val;
+      // Add to user data (should never cause failure in form data update)
+      try {
+        let callingUser = caller;
+        if (!callingUser) {
+          callingUser = await this.queryBus.execute(
+            new GetUserByFilterQuery(
+              {
+                discordId: socialsDto.discordId,
+              },
+              '',
+              true,
+            ),
+          );
         }
+        const userUpdates = {};
+        for (const [key, val] of Object.entries(socialsDto)) {
+          if (callingUser[key] !== val) {
+            userUpdates[key] = val;
+          }
+        }
+        if (Object.keys(userUpdates).length > 0) {
+          await this.commandBus.execute(
+            new UpdateUserCommand(userUpdates, callingUser),
+          );
+        }
+      } catch (err) {
+        console.log({ err });
       }
-      if (Object.keys(userUpdates).length > 0) {
-        const res = await this.commandBus.execute(
-          new UpdateUserCommand(userUpdates, caller),
-        );
-      }
+
       const nextToNextField = await this.queryBus.execute(
         new GetNextFieldQuery(
-          socialsDto.discordId || caller.discordId,
+          socialsDto.discordId,
           'discordId',
+          collection.slug,
           null,
           null,
-          collection,
+          true,
         ),
       );
-
-      console.log({ nextField, nextFieldVal });
       await this.discordService.postSocials(
         channelId,
         {
@@ -298,10 +326,10 @@ export class SaveAndPostSocialsCommandHandler
           value: nextFieldVal,
         },
         nextToNextField,
-        socialsDto.discordId || caller.discordId,
+        socialsDto.discordId,
       );
 
-      return true;
+      return { success: true };
     } catch (err) {
       console.log({ err });
       throw new HttpException(err, HttpStatus.INTERNAL_SERVER_ERROR);

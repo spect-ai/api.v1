@@ -1,35 +1,29 @@
-import { IsOptional, IsString } from 'class-validator';
+import { IsNotEmpty, IsObject, IsOptional, IsString } from 'class-validator';
 
 export class SocialsDto {
   @IsOptional()
-  @IsString()
-  readonly telegramId: string;
+  @IsObject()
+  readonly telegram: {
+    id: string;
+    username: string;
+    first_name: string;
+  };
 
   @IsOptional()
-  @IsString()
-  readonly telegramUsername: string;
+  @IsObject()
+  readonly github: {
+    id: string;
+    username: string;
+  };
 
-  @IsOptional()
-  @IsString()
-  readonly githubId: string;
-
-  @IsOptional()
-  @IsString()
-  readonly githubUsername: string;
-
-  @IsOptional()
-  @IsString()
-  readonly githubAvatar: string;
-
-  @IsOptional()
+  @IsNotEmpty()
   @IsString()
   readonly discordId: string;
 
   @IsOptional()
-  @IsString()
-  readonly discordUsername: string;
-
-  @IsOptional()
-  @IsString()
-  readonly discordAvatar: string;
+  @IsObject()
+  readonly discord: {
+    id: string;
+    username: string;
+  };
 }

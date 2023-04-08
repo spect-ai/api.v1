@@ -121,6 +121,7 @@ export class GetNextFieldQueryHandler
       updates['roleGating'] = true;
     }
 
+    // TODO: This is BAD. Need to refactor this so we dont do writes on get calls. It is necessary now to prevent long wait times while checking for sybil, role etc
     if (Object.keys(updates).length) {
       await this.collectionRepository.updateById(collection.id, {
         formMetadata: {
@@ -358,8 +359,8 @@ export class GetNextFieldQueryHandler
       console.log({ populateData });
       if (!populateData) {
         return {
-          type: nextField,
-          name: nextField === 'readonlyAtEnd' ? 'readonlyAtEnd' : 'nextField',
+          type: collection.properties[nextField]?.type || nextField,
+          name: nextField === 'readonlyAtEnd' ? 'readonlyAtEnd' : nextField,
         };
       }
       if (nextField) {
