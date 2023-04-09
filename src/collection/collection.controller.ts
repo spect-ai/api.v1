@@ -125,6 +125,7 @@ import {
   GetPrivateViewCollectionQuery,
   GetPublicViewCollectionQuery,
 } from './queries/impl/get-collection.query';
+import { GetCollectionService } from './services/get-collection.service';
 import { LinkDiscordService } from './services/link-discord.service';
 import { ResponseCredentialingService } from './services/response-credentialing.service';
 import { WhitelistService } from './services/whitelist.service';
@@ -139,6 +140,7 @@ export class CollectionController {
     private readonly credentialingService: ResponseCredentialingService,
     private readonly whitelistService: WhitelistService,
     private readonly linkDiscordService: LinkDiscordService,
+    private readonly getCollectionService: GetCollectionService,
   ) {}
 
   @UseGuards(SessionAuthGuard)
@@ -854,6 +856,26 @@ export class CollectionController {
     return await this.credentialingService.claimERC20FromBot(
       query.discordId,
       param.channelId,
+    );
+  }
+
+  @UseGuards(PublicViewAuthGuard)
+  @Get('/:channelId/collection')
+  async getCollectionByChannelId(
+    @Param() param: RequiredDiscordChannelIdDto,
+  ): Promise<Collection> {
+    return await this.getCollectionService.getCollectionFromAnyId(
+      null,
+      null,
+      param.channelId,
+      {
+        parents: {
+          slug: 1,
+          name: 1,
+          id: 1,
+          _id: 1,
+        },
+      },
     );
   }
 }
