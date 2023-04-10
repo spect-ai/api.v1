@@ -66,13 +66,48 @@ export class SaveDraftCommandHandler
 
       // Preprocess data
       const formFieldUpdates = {};
+      let rewardFields = {} as {
+        [key: string]: {
+          chain: {
+            label: string;
+            value: string;
+          };
+          token: {
+            label: string;
+            value: string;
+          };
+          value: number;
+        };
+      };
+      let milestoneFields = {} as {
+        [key: string]: {
+          title: string;
+          description: string;
+          dueDate: string;
+          reward: {
+            chain: {
+              label: string;
+              value: string;
+            };
+            token: {
+              label: string;
+              value: string;
+            };
+            value: number;
+          };
+        };
+      };
+
       for (const [key, val] of Object.entries(data)) {
         const property = collection.properties[key];
-        console.log({ property });
         if (property && property.isPartOfFormView) {
           if (property.type === 'number') {
             formFieldUpdates[key] = parseFloat(val);
-          } else formFieldUpdates[key] = val;
+          } else if (property && property.type === 'reward')
+            rewardFields[key] = val;
+          else if (property && property.type === 'milestone')
+            milestoneFields[key] = val;
+          else formFieldUpdates[key] = val;
         }
       }
 
@@ -87,7 +122,9 @@ export class SaveDraftCommandHandler
       if (
         Object.entries(formFieldUpdates).length === 0 &&
         !data['captcha'] &&
-        Object.keys(skippedFormFields).length === 0
+        Object.keys(skippedFormFields).length === 0 &&
+        Object.keys(rewardFields).length === 0 &&
+        Object.keys(milestoneFields).length === 0
       )
         throw 'No valid updates';
 
@@ -110,9 +147,39 @@ export class SaveDraftCommandHandler
           throw 'Required field validation failed';
       }
 
+      if (Object.keys(rewardFields).length > 0) {
+        for (const [key, val] of Object.entries(rewardFields)) {
+          rewardFields = {
+            ...rewardFields,
+            [key]: {
+              ...(collection.formMetadata.drafts?.[callerDiscordId]?.[key] ||
+                {}),
+              ...val,
+            },
+          };
+        }
+        this.validationService.validatePartialRewardData(rewardFields);
+      }
+
+      if (Object.keys(milestoneFields).length > 0) {
+        for (const [key, val] of Object.entries(milestoneFields)) {
+          milestoneFields = {
+            ...milestoneFields,
+            [key]: {
+              ...(collection.formMetadata.drafts?.[callerDiscordId]?.[key] ||
+                {}),
+              ...val,
+            },
+          };
+        }
+        this.validationService.validatePartialMilestoneData(milestoneFields);
+      }
+
       if (data['captcha']) {
         formFieldUpdates['captcha'] = data['captcha'];
       }
+
+      console.log({ formFieldUpdates });
       const res = await this.collectionRepository.updateById(collection.id, {
         formMetadata: {
           ...collection.formMetadata,
@@ -121,6 +188,8 @@ export class SaveDraftCommandHandler
             [callerDiscordId]: {
               ...(collection.formMetadata.drafts?.[callerDiscordId] || {}),
               ...formFieldUpdates,
+              ...rewardFields,
+              ...milestoneFields,
             },
           },
           skippedFormFields: {
@@ -261,7 +330,6 @@ export class SaveAndPostSocialsCommandHandler
       const nextFieldVal = this.getVal(nextField.type, socialsDto, caller);
       console.log({ nextFieldVal });
       if (['github', 'discord', 'telegram'].includes(nextField.type)) {
-        console.log('asasasasasas');
         const updatedDraft = {
           ...(collection.formMetadata.drafts || {}),
           [socialsDto.discordId]: {

@@ -6,6 +6,7 @@ import { GuildxyzService } from 'src/common/guildxyz.service';
 import { CredentialsService } from 'src/credentials/credentials.service';
 import { GitcoinPassportService } from 'src/credentials/services/gitcoin-passport.service';
 import { User } from 'src/users/model/users.model';
+import { GetUserByFilterQuery } from 'src/users/queries/impl';
 import { Collection } from '../model/collection.model';
 
 @Injectable()
@@ -16,6 +17,42 @@ export class AdvancedAccessService {
     private readonly credentialService: GitcoinPassportService,
     private readonly commonTools: CommonTools,
   ) {}
+
+  async requiresWalletConnect(collection: Collection): Promise<boolean> {
+    if (
+      collection.formMetadata.mintkudosTokenId ||
+      collection.formMetadata.poapEventId ||
+      collection.formMetadata.formRoleGating ||
+      collection.formMetadata.sybilProtectionEnabled ||
+      !collection.formMetadata.allowAnonymousResponses
+    ) {
+      return true;
+    }
+    return false;
+  }
+
+  async hasLinkedWalletToDiscord(
+    collection: Collection,
+    callerDiscordId: string,
+  ): Promise<boolean> {
+    if (collection.formMetadata.drafts?.[callerDiscordId]?.['connectedWallet'])
+      return true;
+    const user = await this.queryBus.execute(
+      new GetUserByFilterQuery(
+        {
+          discordId: callerDiscordId,
+        },
+        '',
+        true,
+      ),
+    );
+
+    if (user?.ethAddress) {
+      return true;
+    }
+
+    return false;
+  }
 
   async hasRoleToAccessForm(collection: Collection, caller?: User) {
     console.log({ caller: caller?.id });
