@@ -281,6 +281,9 @@ export interface FormMetadata {
       data: object;
     };
   };
+  currentField?: {
+    [userId: string]: string;
+  };
   skippedFormFields?: {
     [userId: string]: {
       field: boolean;

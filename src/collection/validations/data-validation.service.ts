@@ -270,4 +270,63 @@ export class DataValidationService {
     }
     return true;
   }
+
+  validatePartialRewardData(rewardFields: { [key: string]: object }): boolean {
+    for (const data of Object.values(rewardFields)) {
+      if (data) {
+        if (
+          data['chain'] &&
+          (!data['chain']['label'] || !data['chain']['value'])
+        ) {
+          throw "Chain data type doesn't match";
+        }
+        if (
+          data['token'] &&
+          (!data['token']['label'] || !data['token']['value'])
+        ) {
+          throw "Token data type doesn't match";
+        }
+        if (data['value'] && typeof data['value'] !== 'number') {
+          throw "Value data type doesn't match";
+        }
+      }
+    }
+
+    return true;
+  }
+
+  validatePartialMilestoneData(milestoneFields: {
+    [key: string]: object;
+  }): boolean {
+    for (const data of Object.values(milestoneFields)) {
+      console.log({ data });
+      if (data) {
+        if (!data['title']) return false;
+        if (data['dueDate'] && !isValidDateString(data['dueDate'])) {
+          console.log({ valid: isValidDateString(data['dueDate']) });
+          throw 'Invalid date';
+        }
+        const reward = data['reward'];
+        if (reward) {
+          if (
+            reward['chain'] &&
+            (!reward['chain']['label'] || !reward['chain']['value'])
+          ) {
+            throw "Chain data type doesn't match";
+          }
+          if (
+            reward['token'] &&
+            (!reward['token']['label'] || !reward['token']['value'])
+          ) {
+            throw "Token data type doesn't match";
+          }
+          if (reward['value'] && typeof reward['value'] !== 'number') {
+            throw "Value data type doesn't match";
+          }
+        }
+      }
+    }
+
+    return true;
+  }
 }

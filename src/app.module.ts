@@ -50,6 +50,7 @@ import { LookupModule } from './lookup/lookup.module';
 import { SurveyTokenService } from './credentials/services/survey-token.service';
 
 import * as dotenv from 'dotenv';
+import { GetCollectionService } from './collection/services/get-collection.service';
 dotenv.config();
 
 const databaseUrl = process.env.MONGO_URL
@@ -108,6 +109,7 @@ const databaseUrl = process.env.MONGO_URL
     AdvancedConditionService,
     LinkDiscordService,
     SurveyTokenService,
+    GetCollectionService,
   ],
 })
 export class AppModule {}

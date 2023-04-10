@@ -13,6 +13,8 @@ import { MintKudosService } from 'src/credentials/services/mintkudos.service';
 import { PoapService } from 'src/credentials/services/poap.service';
 import { LoggingService } from 'src/logging/logging.service';
 import { LookupRepository } from 'src/lookup/lookup.repository';
+import { TokenDetails } from 'src/registry/model/registry.model';
+import { RegistryService } from 'src/registry/registry.service';
 import { GetUserByFilterQuery } from 'src/users/queries/impl';
 import {
   GetCollectionByFilterQuery,
@@ -36,8 +38,66 @@ export class GetNextFieldQueryHandler
     private readonly poapService: PoapService,
     private readonly kudosService: MintKudosService,
     private readonly claimEligibilityService: ClaimEligibilityService,
+    private readonly registryService: RegistryService,
   ) {
     this.logger.setContext('GetNextFieldQueryHandler');
+  }
+
+  rewardFieldCompleted(
+    propertyId: string,
+    draftSubmittedByUser: any,
+    collection: Collection,
+  ) {
+    if (collection.properties[propertyId].type !== 'reward') return true;
+    const reward = draftSubmittedByUser[propertyId];
+    if (reward.chain && reward.token && reward.value) return true;
+    return false;
+  }
+
+  milestoneFieldCompleted(
+    propertyId: string,
+    draftSubmittedByUser: any,
+    collection: Collection,
+  ) {
+    if (collection.properties[propertyId].type !== 'milestone') return true;
+    const milestone = draftSubmittedByUser[propertyId];
+    if (
+      milestone &&
+      milestone.title &&
+      milestone.description &&
+      milestone.dueDate &&
+      milestone.reward?.chain &&
+      milestone.reward?.token &&
+      milestone.reward?.value
+    )
+      return true;
+    return false;
+  }
+
+  fetchIncompleteRewardField(value: any) {
+    if (!value?.chain) {
+      return 'chain';
+    } else if (!value?.token) return 'token';
+    else if (!value?.value) {
+      return 'value';
+    }
+    return null;
+  }
+
+  fetchIncompleteMilestoneField(value: any) {
+    if (!value?.title) {
+      return 'title';
+    } else if (!value?.description) return 'description';
+    else if (!value?.dueDate) {
+      return 'dueDate';
+    } else if (!value?.reward?.chain) {
+      return 'chain';
+    } else if (!value?.reward?.token) {
+      return 'token';
+    } else if (!value?.reward?.value) {
+      return 'value';
+    }
+    return null;
   }
 
   async fetchNextValidFieldFromCollection(
@@ -47,6 +107,7 @@ export class GetNextFieldQueryHandler
   ): Promise<{
     field: string;
     ethAddress?: string;
+    subField?: string;
   }> {
     const { properties, propertyOrder } = collection;
     const updates = {} as { [key: string]: any };
@@ -121,6 +182,7 @@ export class GetNextFieldQueryHandler
       updates['roleGating'] = true;
     }
 
+    // TODO: This is BAD. Need to refactor this so we dont do writes on get calls. It is necessary now to prevent long wait times while checking for sybil, role etc
     if (Object.keys(updates).length) {
       await this.collectionRepository.updateById(collection.id, {
         formMetadata: {
@@ -148,9 +210,23 @@ export class GetNextFieldQueryHandler
           collection.formMetadata.skippedFormFields?.[discordId]?.[propertyId]
         )
           continue;
+
         const property = properties[propertyId];
         if (!property.isPartOfFormView) continue;
-        if (draftSubmittedByUser[propertyId]) {
+
+        if (
+          draftSubmittedByUser[propertyId] &&
+          this.rewardFieldCompleted(
+            propertyId,
+            draftSubmittedByUser,
+            collection,
+          ) &&
+          this.milestoneFieldCompleted(
+            propertyId,
+            draftSubmittedByUser,
+            collection,
+          )
+        ) {
           continue;
         } else if (property.viewConditions) {
           const viewConditions = property.viewConditions;
@@ -162,6 +238,19 @@ export class GetNextFieldQueryHandler
             ),
           );
           if (satisfied) {
+            if (collection.properties[propertyId].type === 'reward') {
+              const incompleteField = this.fetchIncompleteRewardField(
+                draftSubmittedByUser[propertyId],
+              );
+              if (incompleteField) {
+                return {
+                  field: propertyId,
+                  ethAddress: user?.ethAddress,
+                  subField: incompleteField,
+                };
+              }
+            }
+
             return {
               field: propertyId,
               ethAddress: user?.ethAddress,
@@ -348,18 +437,21 @@ export class GetNextFieldQueryHandler
         collection.formMetadata.drafts &&
         collection.formMetadata.drafts[callerId];
 
-      const { field: nextField, ethAddress: callerAddress } =
-        await this.fetchNextValidFieldFromCollection(
-          collection,
-          draftSubmittedByUser,
-          callerId,
-        );
+      const {
+        field: nextField,
+        ethAddress: callerAddress,
+        subField,
+      } = await this.fetchNextValidFieldFromCollection(
+        collection,
+        draftSubmittedByUser,
+        callerId,
+      );
 
       console.log({ populateData });
       if (!populateData) {
         return {
-          type: nextField,
-          name: nextField === 'readonlyAtEnd' ? 'readonlyAtEnd' : 'nextField',
+          type: collection.properties[nextField]?.type || nextField,
+          name: nextField === 'readonlyAtEnd' ? 'readonlyAtEnd' : nextField,
         };
       }
       if (nextField) {
@@ -417,17 +509,42 @@ export class GetNextFieldQueryHandler
             erc20: await this.erc20(collection, callerAddress),
           };
         }
-
-        if (
-          ['user', 'user[]'].includes(collection.properties[nextField].type)
-        ) {
+        const returnedField = collection.properties[nextField];
+        if (['user', 'user[]'].includes(returnedField.type)) {
           const populatedMemberDetails = await this.populateMemberDetails(
             collection,
           );
-          collection.properties[nextField].options = populatedMemberDetails;
+          returnedField.options = populatedMemberDetails;
         }
+        if (['reward'].includes(returnedField.type)) {
+          console.log({ subField });
+          returnedField['subField'] = subField;
+          if (subField === 'chain') {
+            returnedField.options = Object.values(
+              returnedField.rewardOptions,
+            ).map((chain) => {
+              return {
+                label: chain.name,
+                value: chain.chainId,
+              };
+            });
+          } else if (subField === 'token') {
+            const tokens = returnedField.rewardOptions[
+              returnedField.type === 'reward'
+                ? draftSubmittedByUser[nextField].chain?.value
+                : draftSubmittedByUser[nextField].reward.chain?.value
+            ].tokenDetails as TokenDetails;
+            returnedField.options = Object.values(tokens).map((token) => {
+              return {
+                label: token.name,
+                value: token.address,
+              };
+            });
+          }
+        }
+        console.log({ returnedField });
 
-        return collection.properties[nextField];
+        return returnedField;
       }
       return null;
     } catch (err) {

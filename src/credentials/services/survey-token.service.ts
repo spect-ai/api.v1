@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ethers } from 'ethers';
 import { surveyHubAbi } from 'src/common/abis/surveyHub';
-import { readContract } from '@wagmi/core';
 import { RegistryService } from 'src/registry/registry.service';
 import { Registry } from 'src/registry/model/registry.model';
 import { RegistryResponseDto } from 'src/registry/dto/detailed-registry-response.dto';

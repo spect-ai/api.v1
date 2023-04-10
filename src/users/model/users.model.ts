@@ -168,5 +168,8 @@ export class User extends ProfileModel {
   lensHandle?: string;
 
   @prop()
-  telegramId?: string;
+  telegram?: {
+    id: string;
+    username: string;
+  };
 }
