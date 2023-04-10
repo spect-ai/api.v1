@@ -32,6 +32,7 @@ export class GetUserByFilterQuery {
   constructor(
     public readonly filter: FilterQuery<User>,
     public readonly caller: string,
+    public readonly dontResolve?: boolean,
     public readonly customPopulate?: PopulatedUserFields,
     public readonly selectedFields?: Record<string, unknown>,
   ) {}

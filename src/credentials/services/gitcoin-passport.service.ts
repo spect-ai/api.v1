@@ -162,4 +162,65 @@ export class GitcoinPassportService {
       score,
     };
   }
+
+  async getDetailedPassportStampsWithTotalScore(
+    ethAddress: string,
+    scores: { [key: string]: number },
+  ): Promise<any> {
+    const stamps = await this.getAll();
+    const passportScores = stamps.map((stamp) => {
+      return {
+        score: scores[stamp.id] ? scores[stamp.id] : 0,
+        provider: stamp.provider,
+        issuer: stamp.issuer,
+      };
+    });
+    const passport = await (
+      await fetch(
+        `https://api.scorer.gitcoin.co/ceramic-cache/stamp?address=${ethAddress}`,
+      )
+    ).json();
+    const PassportScorer = (await import('@gitcoinco/passport-sdk-scorer'))
+      .PassportScorer;
+    if (!passport?.stamps) return false;
+    const stampsWithCredentials = [];
+
+    for (const stamp of passport.stamps) {
+      if (!stamp.stamp) {
+        continue;
+      }
+      stampsWithCredentials.push({
+        ...stamp,
+        credential: stamp.stamp,
+      });
+    }
+    const detailedPassportWithAllStamps = [];
+    const mappedStampsWithCredentials = this.commonTools.objectify(
+      stampsWithCredentials,
+      'provider',
+    );
+    for (const stamp of stamps) {
+      detailedPassportWithAllStamps.push({
+        ...stamp,
+        hasStamp: !!mappedStampsWithCredentials[stamp.provider],
+        score: scores[stamp.id] ? scores[stamp.id] : 0,
+      });
+    }
+
+    const detailedPassportWithAllStampsSortedByScore =
+      detailedPassportWithAllStamps
+        .filter((stamp) => stamp.score > 0)
+        .sort((a, b) => b.score - a.score);
+
+    const scorer = new PassportScorer(passportScores, this.passportUrl);
+    const score = await scorer.getScore(ethAddress, {
+      ...passport,
+      stamps: stampsWithCredentials,
+    });
+
+    return {
+      detailedPassportWithAllStamps: detailedPassportWithAllStampsSortedByScore,
+      score,
+    };
+  }
 }

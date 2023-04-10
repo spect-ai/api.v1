@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  NotFoundException,
   Param,
   Patch,
   Post,
@@ -30,12 +31,16 @@ import { Circle } from 'src/circle/model/circle.model';
 import { ObjectIdDto } from 'src/common/dtos/object-id.dto';
 import {
   RequiredActivityUUIDDto,
+  RequiredDiscordChannelIdDto,
+  RequiredDiscordIdDto,
+  RequiredDiscordMessageIdDto,
   RequiredPropertyIdDto,
   RequiredSlugDto,
   RequiredUUIDDto,
 } from 'src/common/dtos/string.dto';
 import { MappedItem } from 'src/common/interfaces';
 import { CreatePOAPDto } from 'src/credentials/dto/create-credential.dto';
+import { KudosResponseDto } from 'src/credentials/dto/mint-kudos.dto';
 import {
   AddCommentCommand,
   AddPropertyCommand,
@@ -55,6 +60,10 @@ import {
   RemoveDataCommand,
   RemoveMultipleDataCommand,
 } from './commands/data/impl/remove-data.command';
+import {
+  SaveAndPostSocialsCommand,
+  SaveDraftFromDiscordCommand,
+} from './commands/data/impl/save-draft.command';
 import { UpdateDataCommand } from './commands/data/impl/update-data.command';
 import {
   EndVotingPeriodCommand,
@@ -81,8 +90,14 @@ import {
   TemplateIdDto,
   UseTemplateDto,
 } from './dto/grant-workflow-template.dto';
-import { LinkDiscordDto } from './dto/link-discord.dto';
+import {
+  LinkDiscordDto,
+  LinkDiscordToCollectionDto,
+  LinkDiscordThreadToDataDto,
+  NextFieldRequestDto,
+} from './dto/link-discord.dto';
 import { RemoveDataDto } from './dto/remove.data-request.dto';
+import { SocialsDto } from './dto/socials.dto';
 import { UpdateCollectionDto } from './dto/update-collection-request.dto';
 import {
   AddCommentDto,
@@ -90,6 +105,7 @@ import {
 } from './dto/update-comments-request.dto';
 import {
   AddDataDto,
+  SaveDraftDto,
   UpdateDataDto,
   VoteDataDto,
 } from './dto/update-data-request.dto';
@@ -102,7 +118,9 @@ import {
   StartVotingPeriodRequestDto,
 } from './dto/voting.dto';
 import { Collection } from './model/collection.model';
+import { GetNextFieldQuery } from './queries';
 import {
+  GetCollectionByFilterQuery,
   GetCollectionByIdQuery,
   GetPrivateViewCollectionQuery,
   GetPublicViewCollectionQuery,
@@ -503,7 +521,9 @@ export class CollectionController {
 
   @UseGuards(SessionAuthGuard)
   @Patch('/:id/airdropKudos')
-  async airdropKudos(@Param() param: ObjectIdDto): Promise<object> {
+  async airdropKudos(
+    @Param() param: ObjectIdDto,
+  ): Promise<{ operationId: string }> {
     return await this.credentialingService.airdropMintkudosToken(param.id);
   }
 
@@ -669,11 +689,171 @@ export class CollectionController {
     @Query() query: RequiredUUIDDto,
     @Request() req,
   ): Promise<Collection> {
-    return await this.linkDiscordService.linkThread(
+    return await this.linkDiscordService.createAndlinkThread(
       param.id,
       query.dataId,
       body,
       req.user,
+    );
+  }
+
+  @SetMetadata('permissions', ['manageSettings'])
+  @UseGuards(CollectionAuthGuard)
+  @Patch('/:id/linkDiscordThreadToCollection')
+  async linkDiscordThreadToCollection(
+    @Param() param: ObjectIdDto,
+    @Body() body: LinkDiscordToCollectionDto,
+    @Request() req,
+  ): Promise<Collection> {
+    return await this.linkDiscordService.linkThreadToCollection(
+      param.id,
+      body,
+      req.user,
+    );
+  }
+
+  @UseGuards(PublicViewAuthGuard)
+  @Patch('/:messageId/linkDiscordThreadToCollectionData')
+  async linkDiscordThreadToCollectionData(
+    @Param() param: RequiredDiscordMessageIdDto,
+    @Query() query: RequiredDiscordIdDto,
+    @Body() body: LinkDiscordThreadToDataDto,
+    @Request() req,
+  ): Promise<boolean> {
+    return await this.linkDiscordService.linkThreadToData(
+      param.messageId,
+      query.discordId,
+      body,
+    );
+  }
+
+  @SetMetadata('permissions', ['manageSettings'])
+  @UseGuards(CollectionAuthGuard)
+  @Patch('/:id/postFormMessage')
+  async postFormMessage(
+    @Param() param: ObjectIdDto,
+    @Body() body: RequiredDiscordChannelIdDto,
+    @Request() req,
+  ): Promise<Collection> {
+    return await this.linkDiscordService.postForm(
+      param.id,
+      body.channelId,
+      req.user,
+    );
+  }
+
+  @UseGuards(PublicViewAuthGuard)
+  @Patch('/:channelId/saveDraft')
+  async saveDraft(
+    @Param() param: RequiredDiscordChannelIdDto,
+    @Query() query: RequiredDiscordIdDto,
+    @Body()
+    body: SaveDraftDto,
+    @Request() req,
+  ): Promise<Collection> {
+    return await this.commandBus.execute(
+      new SaveDraftFromDiscordCommand(
+        body.data,
+        query.discordId,
+        param.channelId,
+        body.skip,
+      ),
+    );
+  }
+
+  @UseGuards(PublicViewAuthGuard)
+  @Get('/:channelId/nextField')
+  async nextField(
+    @Param() param: RequiredDiscordChannelIdDto,
+    @Query() query: RequiredDiscordIdDto,
+    @Request() req,
+  ): Promise<Collection> {
+    return await this.queryBus.execute(
+      new GetNextFieldQuery(
+        query.discordId,
+        'discordId',
+        null,
+        param.channelId,
+        null,
+        query.populateFields === 'true' ? true : false,
+      ),
+    );
+  }
+
+  @UseGuards(PublicViewAuthGuard)
+  @Get('/:channelId/firstField')
+  async firstField(
+    @Param() param: RequiredDiscordChannelIdDto,
+    @Query() query: RequiredDiscordIdDto,
+    @Request() req,
+  ): Promise<Collection> {
+    console.log({ param, query });
+    const collection = await this.queryBus.execute(
+      new GetCollectionByFilterQuery({
+        'collectionLevelDiscordThreadRef.messageId': param.channelId,
+      }),
+    );
+    if (!collection) throw new NotFoundException('Collection not found');
+    return await this.queryBus.execute(
+      new GetNextFieldQuery(
+        query.discordId,
+        'discordId',
+        null,
+        null,
+        collection,
+        query.populateFields === 'true' ? true : false,
+      ),
+    );
+  }
+
+  @UseGuards(SessionAuthGuard)
+  @Patch('/:channelId/saveAndPostSocials')
+  async saveAndPostSocials(
+    @Param() param: RequiredDiscordChannelIdDto,
+    @Body() body: SocialsDto,
+    @Request() req,
+  ): Promise<Collection> {
+    return await this.commandBus.execute(
+      new SaveAndPostSocialsCommand(body, param.channelId, req.user),
+    );
+  }
+
+  @UseGuards(PublicViewAuthGuard)
+  @Patch('/:channelId/claimPoapFromBot')
+  async claimPoapFromBot(
+    @Param() param: RequiredDiscordChannelIdDto,
+    @Query() query: RequiredDiscordIdDto,
+  ): Promise<Collection> {
+    console.log({ param, query });
+    return await this.credentialingService.claimPoapFromBot(
+      query.discordId,
+      param.channelId,
+    );
+  }
+
+  @UseGuards(PublicViewAuthGuard)
+  @Patch('/:channelId/claimKudosFromBot')
+  async claimKudosFromBot(
+    @Param() param: RequiredDiscordChannelIdDto,
+    @Query() query: RequiredDiscordIdDto,
+  ): Promise<{ operationId: string }> {
+    console.log({ param, query });
+    return await this.credentialingService.claimKudosFromBot(
+      query.discordId,
+      param.channelId,
+    );
+  }
+
+  @UseGuards(PublicViewAuthGuard)
+  @Patch('/:channelId/claimERC20FromBot')
+  async claimERC20FromBot(
+    @Param() param: RequiredDiscordChannelIdDto,
+    @Query() query: RequiredDiscordIdDto,
+  ): Promise<{ transactionHash: string }> {
+    console.log({ param, query });
+    return await this.credentialingService.claimERC20FromBot(
+      query.discordId,
+      param.channelId,
     );
   }
 }

@@ -42,6 +42,8 @@ import { SecretModule } from 'src/secretRegistry/secret.module';
 import { GasPredictionService } from 'src/common/gas-prediction.service';
 import { AdvancedConditionService } from './services/advanced-condition.service';
 import { LinkDiscordService } from './services/link-discord.service';
+import { LookupModule } from 'src/lookup/lookup.module';
+import { SurveyTokenService } from 'src/credentials/services/survey-token.service';
 import { CirclesCollectionService } from 'src/circle/services/circle-collection.service';
 
 @Module({
@@ -55,6 +57,7 @@ import { CirclesCollectionService } from 'src/circle/services/circle-collection.
     CredentialsModule,
     RegistryModule,
     SecretModule,
+    LookupModule,
   ],
   controllers: [CollectionController],
   providers: [
@@ -90,6 +93,7 @@ import { CirclesCollectionService } from 'src/circle/services/circle-collection.
     AdvancedConditionService,
     CirclesCollectionService,
     LinkDiscordService,
+    SurveyTokenService,
   ],
   exports: [CollectionModule, CollectionRepository],
 })

@@ -11,6 +11,7 @@ import { UpdateEducationCommandHandler } from '../education/handlers/update-educ
 import { GetCirclesCommandHandler } from '../metadata/handlers/get-circles.handler';
 import { GetResponsesCommandHandler } from '../metadata/handlers/get-responses.handler';
 import { SetUnreadNotificationsCommandHandler } from '../notifications/handlers/set-unread-notifications.handler';
+import { UpdateUserCommandHandler } from './update-user.handler';
 import {
   CheckUserTokensCommandHandler,
   GetTokenMetadataCommandHandler,
@@ -31,6 +32,7 @@ export const CommandHandlers = [
   GetCirclesCommandHandler,
   GetResponsesCommandHandler,
   SetUnreadNotificationsCommandHandler,
+  UpdateUserCommandHandler,
   GetTokensCommandHandler,
   CheckUserTokensCommandHandler,
   GetTokenMetadataCommandHandler,

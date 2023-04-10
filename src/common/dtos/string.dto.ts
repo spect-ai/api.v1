@@ -1,5 +1,6 @@
 import {
   IsArray,
+  IsBoolean,
   IsNotEmpty,
   IsNumber,
   IsOptional,
@@ -182,4 +183,30 @@ export class RequiredClaimCodeDto {
   @IsString()
   @IsNotEmpty()
   claimCode: string;
+}
+
+export class RequiredDiscordMessageIdDto {
+  @IsString()
+  @IsNotEmpty()
+  messageId: string;
+}
+
+export class RequiredDiscordIdDto {
+  @IsString()
+  @IsNotEmpty()
+  discordId: string;
+
+  @IsString()
+  @IsOptional()
+  discordUsername: string;
+
+  @IsString()
+  @IsOptional()
+  populateFields: string;
+}
+
+export class RequiredDiscordChannelIdDto {
+  @IsString()
+  @IsNotEmpty()
+  channelId: string;
 }

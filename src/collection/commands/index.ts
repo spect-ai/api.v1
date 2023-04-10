@@ -13,6 +13,7 @@ export * from './comments/impl/add-comment.command';
 export * from './comments/impl/update-comment.command';
 export * from './comments/impl/remove-comment.command';
 export * from './impl/migrate-collection.command';
+export * from './data/impl/save-draft.command';
 
 import { AddCommentCommandHandler } from './comments/handlers/add-comment.handler';
 import { RemoveCommentCommandHandler } from './comments/handlers/remove-comment.handler';
@@ -52,6 +53,10 @@ import { OnboardToSpectProjectCommandHandler } from './default/handlers/onboard-
 
 import { ImportCommandHandler } from './handlers/import.handler';
 import { MigrateAllCollectionsCommandHandler } from './handlers/migrate-collection.handler';
+import {
+  SaveAndPostSocialsCommandHandler,
+  SaveDraftCommandHandler,
+} from './data/handlers/save-draft.handler';
 
 export const CommandHandlers = [
   CreateCollectionCommandHandler,
@@ -81,4 +86,6 @@ export const CommandHandlers = [
   ImportCommandHandler,
   UpdateCollectionByFilterCommandHandler,
   MigrateAllCollectionsCommandHandler,
+  SaveDraftCommandHandler,
+  SaveAndPostSocialsCommandHandler,
 ];

@@ -110,4 +110,14 @@ export class UpdateCollectionDto {
       private: boolean;
     };
   };
+
+  @IsObject()
+  @IsOptional()
+  collectionLevelDiscordThreadRef: {
+    channelId: string;
+    guildId: string;
+    private: boolean;
+    threadId?: string;
+    messageId?: string;
+  };
 }

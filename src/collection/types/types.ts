@@ -179,3 +179,16 @@ export type Voting = {
   periodsOnCollection?: MappedItem<VotingPeriod>;
   snapshot?: { [key: string]: SnapshotVoting };
 };
+
+export type SurveyTokenDistributionInfo = {
+  amountPerResponse?: string;
+  distributionType?: 0 | 1;
+  tokenAddress: string; // if type is 1, timestap after which lottery is distributed
+  requestId: string;
+  supplySnapshot: number;
+};
+
+export type SurveyTokenConditionInfo = {
+  timestamp: number;
+  minTotalSupply: number;
+};

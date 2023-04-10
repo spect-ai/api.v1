@@ -127,7 +127,7 @@ export class MintKudosService {
     circleId: string,
     tokenId: string,
     ethAddress: string,
-  ): Promise<KudosResponseDto> {
+  ): Promise<string> {
     const encodedString = await this.getEncodedString(circleId);
     const res = await fetch(
       `${process.env.MINTKUDOS_URL}/v1/tokens/${tokenId}/airdrop`,

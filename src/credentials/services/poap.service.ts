@@ -228,7 +228,7 @@ export class PoapService {
       return res;
     } catch (e) {
       this.logger.error(`Failed to claim POAP with error ${e}`);
-      throw new InternalServerErrorException(`${e}`);
+      throw e;
     }
   }
 

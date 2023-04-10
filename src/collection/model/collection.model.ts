@@ -153,6 +153,15 @@ export class Collection extends BaseModel {
       private: boolean;
     };
   };
+
+  @prop({ default: {} })
+  collectionLevelDiscordThreadRef: {
+    channelId: string;
+    guildId: string;
+    private: boolean;
+    threadId?: string;
+    messageId?: string;
+  };
 }
 
 export interface FormMetadata {
@@ -266,6 +275,17 @@ export interface FormMetadata {
     };
   };
   pageOrder?: string[];
+
+  drafts?: {
+    [userId: string]: {
+      data: object;
+    };
+  };
+  skippedFormFields?: {
+    [userId: string]: {
+      field: boolean;
+    };
+  };
   lookup?: {
     tokens: {
       tokenType: 'erc20' | 'erc721' | 'erc1155';

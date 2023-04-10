@@ -1,24 +1,9 @@
-import {
-  registerDecorator,
-  ValidationArguments,
-  ValidationOptions,
-} from 'class-validator';
-import moment from 'moment';
-
-export function isTest(
-  validationOptions?: ValidationOptions,
-): PropertyDecorator {
-  return (object: object, propertyName: string) => {
-    registerDecorator({
-      name: 'isTest',
-      target: object.constructor,
-      propertyName,
-      options: validationOptions,
-      validator: {
-        validate(value: any, args: ValidationArguments) {
-          return false;
-        },
-      },
-    });
-  };
+export function isValidDateString(dateString?: string): boolean {
+  const [year, month, day] = dateString.split('-').map(Number);
+  const date = new Date(year, month - 1, day);
+  return (
+    date.getFullYear() === year &&
+    date.getMonth() === month - 1 &&
+    date.getDate() === day
+  );
 }
