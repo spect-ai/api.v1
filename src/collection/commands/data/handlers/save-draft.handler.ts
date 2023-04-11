@@ -16,6 +16,7 @@ import { DataValidationService } from 'src/collection/validations/data-validatio
 import { LoggingService } from 'src/logging/logging.service';
 import { AddDataUsingAutomationCommand } from '../impl/add-data.command';
 import {
+  SaveAndPostPaymentCommand,
   SaveAndPostSocialsCommand,
   SaveDraftFromDiscordCommand,
 } from '../impl/save-draft.command';
@@ -218,19 +219,21 @@ export class SaveDraftCommandHandler
         /** Disabling activity for forms as it doesnt quite make sense yet */
         const filteredDrafts = Object.entries(
           res.formMetadata.drafts?.[callerDiscordId] || {},
-        ).filter(([key, val]) =>
-          [
-            'captcha',
-            'roleGating',
-            'sybilProtection',
-            'connectWallet',
-          ].includes(key),
+        ).filter(
+          ([key, val]) =>
+            ![
+              'captcha',
+              'roleGating',
+              'sybilProtection',
+              'connectWallet',
+              'kudosClaimed',
+            ].includes(key),
         );
         const slug = uuid();
         const data = {
           ...collection.data,
           [slug]: {
-            ...res.formMetadata.drafts[callerDiscordId],
+            ...filteredDrafts,
             slug,
           },
         };
@@ -395,6 +398,91 @@ export class SaveAndPostSocialsCommandHandler
         },
         nextToNextField,
         socialsDto.discordId,
+      );
+
+      return { success: true };
+    } catch (err) {
+      console.log({ err });
+      throw new HttpException(err, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+}
+
+@CommandHandler(SaveAndPostPaymentCommand)
+export class SaveAndPostPaymentCommandHandler
+  implements ICommandHandler<SaveAndPostPaymentCommand>
+{
+  constructor(
+    private readonly queryBus: QueryBus,
+    private readonly commandBus: CommandBus,
+    private readonly discordService: DiscordService,
+    private readonly lookupRepository: LookupRepository,
+    private readonly collectionRepository: CollectionRepository,
+  ) {}
+
+  async execute(command: SaveAndPostPaymentCommand) {
+    const { formPaymentDto, channelId, caller, discordUserId } = command;
+    try {
+      if (!discordUserId) throw 'No discord Id provided, cannot get next field';
+      const lookedUpData = await this.lookupRepository.findOne({
+        key: channelId,
+        keyType: 'discordThreadId',
+      });
+      if (!lookedUpData?.collectionId)
+        throw 'Collection hasnt been indexed with the given threadId';
+      const collection = await this.collectionRepository.findById(
+        lookedUpData.collectionId,
+      );
+      if (!collection) throw new NotFoundException('Collection not found');
+      const nextField = await this.queryBus.execute(
+        new GetNextFieldQuery(
+          discordUserId,
+          'discordId',
+          null,
+          null,
+          collection,
+          true,
+        ),
+      );
+
+      if (['paywall'].includes(nextField.type)) {
+        const updatedDraft = {
+          ...(collection.formMetadata.drafts || {}),
+          [discordUserId]: {
+            ...(collection.formMetadata.drafts?.[discordUserId] || {}),
+            __payment__: {
+              ...formPaymentDto,
+              paid: true,
+            },
+          },
+        };
+        console.log({ updatedDraft, colId: collection.id });
+        const res = await this.collectionRepository.updateById(collection.id, {
+          formMetadata: {
+            ...collection.formMetadata,
+            drafts: updatedDraft,
+          },
+        });
+      }
+
+      const nextToNextField = await this.queryBus.execute(
+        new GetNextFieldQuery(
+          discordUserId,
+          'discordId',
+          collection.slug,
+          null,
+          null,
+          true,
+        ),
+      );
+      await this.discordService.postFormPayment(
+        channelId,
+        {
+          ...nextField,
+          value: formPaymentDto,
+        },
+        nextToNextField,
+        discordUserId,
       );
 
       return { success: true };

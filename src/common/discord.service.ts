@@ -177,6 +177,34 @@ export class DiscordService {
     throw `${data.message}`;
   }
 
+  async postFormPayment(
+    channelId: string,
+    paymentProperty: Property,
+    nextField: Property,
+    discordUserId: string,
+  ) {
+    const res = await fetch(`${process.env.DISCORD_URI}/api/postFormPayment`, {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      method: 'POST',
+      body: JSON.stringify({
+        channelId,
+        paymentProperty,
+        nextField,
+        discordUserId,
+      }),
+    });
+
+    const data = await res.json();
+    console.log({ data });
+
+    if (res.ok) {
+      return data;
+    }
+    throw `${data.message}`;
+  }
+
   async createThread(
     guildId: string,
     threadName: string,

@@ -199,8 +199,6 @@ export class GetNextFieldQueryHandler
     }
     for (const page of collection.formMetadata.pageOrder) {
       for (const propertyId of collection.formMetadata.pages[page].properties) {
-        console.log({ propertyId });
-
         if (!draftSubmittedByUser)
           return {
             field: propertyId,
@@ -266,7 +264,7 @@ export class GetNextFieldQueryHandler
 
     if (
       collection.formMetadata.paymentConfig &&
-      !draftSubmittedByUser?.paymentConfig
+      !draftSubmittedByUser?.__payment__
     ) {
       return {
         field: 'paywall',
@@ -447,7 +445,6 @@ export class GetNextFieldQueryHandler
         callerId,
       );
 
-      console.log({ populateData });
       if (!populateData) {
         return {
           type: collection.properties[nextField]?.type || nextField,
@@ -489,6 +486,7 @@ export class GetNextFieldQueryHandler
           return {
             type: 'paywall',
             name: 'Please complete the paywall to continue',
+            paymentConfig: collection.formMetadata.paymentConfig,
           };
         } else if (nextField === 'poap') {
           return {
@@ -517,7 +515,6 @@ export class GetNextFieldQueryHandler
           returnedField.options = populatedMemberDetails;
         }
         if (['reward'].includes(returnedField.type)) {
-          console.log({ subField });
           returnedField['subField'] = subField;
           if (subField === 'chain') {
             returnedField.options = Object.values(

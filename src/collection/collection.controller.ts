@@ -61,6 +61,7 @@ import {
   RemoveMultipleDataCommand,
 } from './commands/data/impl/remove-data.command';
 import {
+  SaveAndPostPaymentCommand,
   SaveAndPostSocialsCommand,
   SaveDraftFromDiscordCommand,
 } from './commands/data/impl/save-draft.command';
@@ -86,6 +87,7 @@ import {
   MigrateCollectionDto,
 } from './dto/create-collection-request.dto';
 import { CreateCollectionResponseDto } from './dto/create-collection-response.dto';
+import { FormPaymentDto } from './dto/form-payment.dto';
 import {
   TemplateIdDto,
   UseTemplateDto,
@@ -817,6 +819,24 @@ export class CollectionController {
   ): Promise<Collection> {
     return await this.commandBus.execute(
       new SaveAndPostSocialsCommand(body, param.channelId, req.user),
+    );
+  }
+
+  @UseGuards(SessionAuthGuard)
+  @Patch('/:channelId/saveAndPostPayment')
+  async saveAndPostPayment(
+    @Param() param: RequiredDiscordChannelIdDto,
+    @Body() body: FormPaymentDto,
+    @Query() query: RequiredDiscordIdDto,
+    @Request() req,
+  ): Promise<Collection> {
+    return await this.commandBus.execute(
+      new SaveAndPostPaymentCommand(
+        body,
+        param.channelId,
+        query.discordId,
+        req.user,
+      ),
     );
   }
 
