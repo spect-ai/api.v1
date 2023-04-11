@@ -18,6 +18,7 @@ const supportedNetworks = [
   '100',
   '56',
   '80001',
+  '5',
 ];
 
 @ValidatorConstraint({ name: 'validConditions', async: false })

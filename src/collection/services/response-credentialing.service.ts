@@ -21,6 +21,7 @@ import { Collection } from '../model/collection.model';
 import { GetCollectionByIdQuery } from '../queries';
 import { SurveyTokenDistributionInfo } from '../types/types';
 import { AdvancedConditionService } from './advanced-condition.service';
+import { GetCollectionService } from './get-collection.service';
 
 @Injectable()
 export class ClaimEligibilityService {
@@ -235,6 +236,7 @@ export class ResponseCredentialingService {
     private readonly advancedConditionService: AdvancedConditionService,
     private readonly claimEligibilityService: ClaimEligibilityService,
     private readonly lookupRepository: LookupRepository,
+    private readonly getCollectionService: GetCollectionService,
   ) {
     this.logger.setContext('ResponseCredentialingService');
   }
@@ -472,21 +474,11 @@ export class ResponseCredentialingService {
 
   async claimPoapFromBot(discordId: string, threadId: string) {
     try {
-      const lookedUpData = await this.lookupRepository.findOne({
-        key: threadId,
-        keyType: 'discordThreadId',
-      });
-      if (!lookedUpData.collectionId) {
-        throw new InternalServerErrorException(
-          'Thread was not indexed in lookup',
-        );
-      }
-      const collection = await this.collectionRepository.findById(
-        lookedUpData.collectionId,
+      const collection = await this.getCollectionService.getCollectionFromAnyId(
+        null,
+        null,
+        threadId,
       );
-      if (!collection) {
-        throw new NotFoundException('Collection not found');
-      }
 
       const user = await this.queryBus.execute(
         new GetUserByFilterQuery(
@@ -534,21 +526,14 @@ export class ResponseCredentialingService {
 
   async claimKudosFromBot(discordId: string, threadId: string) {
     try {
-      const lookedUpData = await this.lookupRepository.findOne({
-        key: threadId,
-        keyType: 'discordThreadId',
-      });
-      if (!lookedUpData.collectionId) {
-        throw new InternalServerErrorException(
-          'Thread was not indexed in lookup',
-        );
-      }
-      const collection = await this.collectionRepository.findById(
-        lookedUpData.collectionId,
+      const collection = await this.getCollectionService.getCollectionFromAnyId(
+        null,
+        null,
+        threadId,
       );
-      if (!collection) {
-        throw new NotFoundException('Collection not found');
-      }
+
+      if (!collection.formMetadata.mintkudosTokenId)
+        throw 'No mintkudos token id found';
 
       const user = await this.queryBus.execute(
         new GetUserByFilterQuery(
@@ -563,8 +548,6 @@ export class ResponseCredentialingService {
         throw new NotFoundException('EthAddress of user not found');
       }
 
-      if (!collection.formMetadata.mintkudosTokenId)
-        throw 'No mintkudos token id found';
       const operationId = await this.kudosService.airdropKudos(
         collection.parents[0],
         collection.formMetadata.mintkudosTokenId.toString(),
@@ -586,7 +569,7 @@ export class ResponseCredentialingService {
           },
           mintkudosClaimedBy: [
             ...(collection.formMetadata.mintkudosClaimedBy || []),
-            this.requestProvider.user.id,
+            user.ethAddress,
           ],
         },
       });
@@ -603,21 +586,11 @@ export class ResponseCredentialingService {
 
   async claimERC20FromBot(discordId: string, threadId: string) {
     try {
-      const lookedUpData = await this.lookupRepository.findOne({
-        key: threadId,
-        keyType: 'discordThreadId',
-      });
-      if (!lookedUpData.collectionId) {
-        throw new InternalServerErrorException(
-          'Thread was not indexed in lookup',
-        );
-      }
-      const collection = await this.collectionRepository.findById(
-        lookedUpData.collectionId,
+      const collection = await this.getCollectionService.getCollectionFromAnyId(
+        null,
+        null,
+        threadId,
       );
-      if (!collection) {
-        throw new NotFoundException('Collection not found');
-      }
 
       const user = await this.queryBus.execute(
         new GetUserByFilterQuery(

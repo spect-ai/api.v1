@@ -30,6 +30,7 @@ import { DiscordService } from 'src/common/discord.service';
 import { SocialsDto } from 'src/collection/dto/socials.dto';
 import { User } from 'src/users/model/users.model';
 import { GetUserByFilterQuery } from 'src/users/queries/impl';
+import { isUUID } from 'class-validator';
 
 @CommandHandler(SaveDraftFromDiscordCommand)
 export class SaveDraftCommandHandler
@@ -80,40 +81,49 @@ export class SaveDraftCommandHandler
           value: number;
         };
       };
-      let milestoneFields = {} as {
-        [key: string]: {
-          title: string;
-          description: string;
-          dueDate: string;
-          reward: {
-            chain: {
-              label: string;
-              value: string;
-            };
-            token: {
-              label: string;
-              value: string;
-            };
-            value: number;
-          };
-        };
-      };
 
-      for (const [key, val] of Object.entries(data)) {
+      // eslint-disable-next-line prefer-const
+      for (let [key, val] of Object.entries(data)) {
+        if (isUUID(key) && collection.formMetadata.idLookup?.[key])
+          key = collection.formMetadata.idLookup[key];
+        console.log({ key });
         const property = collection.properties[key];
         if (property && property.isPartOfFormView) {
           if (property.type === 'number') {
             formFieldUpdates[key] = parseFloat(val);
-          } else if (property && property.type === 'reward')
+          } else if (property.type === 'reward') {
+            if (val['chain']) {
+              const chain = collection.formMetadata.idLookup?.[val['chain']];
+              console.log({ chain });
+              if (!chain) throw 'Invalid chain';
+              val['chain'] = chain;
+            }
+            if (val['token']) {
+              const token = collection.formMetadata.idLookup?.[val['token']];
+              if (!token) throw 'Invalid token';
+              val['token'] = token;
+            }
             rewardFields[key] = val;
-          else if (property && property.type === 'milestone')
-            milestoneFields[key] = val;
-          else formFieldUpdates[key] = val;
+          } else if (['singleSelect', 'user'].includes(property.type)) {
+            const option = collection.formMetadata.idLookup?.[val];
+            if (!option) throw 'Invalid optionId';
+            formFieldUpdates[key] = option;
+          } else if (['multiSelect', 'user'].includes(property.type)) {
+            const options = val.map((optionId: string) => {
+              const option = collection.formMetadata.idLookup?.[optionId];
+              if (!option) throw 'Invalid optionId';
+              return option;
+            });
+            formFieldUpdates[key] = options;
+          } else formFieldUpdates[key] = val;
         }
       }
 
       const skippedFormFields = {};
-      for (const [key, val] of Object.entries(skip || {})) {
+      // eslint-disable-next-line prefer-const
+      for (let [key, val] of Object.entries(skip || {})) {
+        if (collection.formMetadata.idLookup?.[key])
+          key = collection.formMetadata.idLookup[key];
         const property = collection.properties[key];
         if (property && property.isPartOfFormView) {
           skippedFormFields[key] = val;
@@ -124,8 +134,7 @@ export class SaveDraftCommandHandler
         Object.entries(formFieldUpdates).length === 0 &&
         !data['captcha'] &&
         Object.keys(skippedFormFields).length === 0 &&
-        Object.keys(rewardFields).length === 0 &&
-        Object.keys(milestoneFields).length === 0
+        Object.keys(rewardFields).length === 0
       )
         throw 'No valid updates';
 
@@ -162,20 +171,6 @@ export class SaveDraftCommandHandler
         this.validationService.validatePartialRewardData(rewardFields);
       }
 
-      if (Object.keys(milestoneFields).length > 0) {
-        for (const [key, val] of Object.entries(milestoneFields)) {
-          milestoneFields = {
-            ...milestoneFields,
-            [key]: {
-              ...(collection.formMetadata.drafts?.[callerDiscordId]?.[key] ||
-                {}),
-              ...val,
-            },
-          };
-        }
-        this.validationService.validatePartialMilestoneData(milestoneFields);
-      }
-
       if (data['captcha']) {
         formFieldUpdates['captcha'] = data['captcha'];
       }
@@ -190,7 +185,6 @@ export class SaveDraftCommandHandler
               ...(collection.formMetadata.drafts?.[callerDiscordId] || {}),
               ...formFieldUpdates,
               ...rewardFields,
-              ...milestoneFields,
             },
           },
           skippedFormFields: {
@@ -217,23 +211,12 @@ export class SaveDraftCommandHandler
       console.log({ nextField });
       if (nextField.name === 'readonlyAtEnd') {
         /** Disabling activity for forms as it doesnt quite make sense yet */
-        const filteredDrafts = Object.entries(
-          res.formMetadata.drafts?.[callerDiscordId] || {},
-        ).filter(
-          ([key, val]) =>
-            ![
-              'captcha',
-              'roleGating',
-              'sybilProtection',
-              'connectWallet',
-              'kudosClaimed',
-            ].includes(key),
-        );
+
         const slug = uuid();
         const data = {
           ...collection.data,
           [slug]: {
-            ...filteredDrafts,
+            ...res.formMetadata.drafts[callerDiscordId],
             slug,
           },
         };

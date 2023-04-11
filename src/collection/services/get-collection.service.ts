@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { LookupRepository } from 'src/lookup/lookup.repository';
 import { CollectionRepository } from '../collection.repository';
 import { Collection } from '../model/collection.model';
@@ -41,6 +41,10 @@ export class GetCollectionService {
         customPopulate,
         selectedFields,
       );
+    }
+
+    if (!collection) {
+      throw new NotFoundException('Collection not found');
     }
   }
 }

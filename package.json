@@ -76,7 +76,8 @@
     "rimraf": "^3.0.2",
     "rxjs": "^7.2.0",
     "siwe": "^1.1.6",
-    "url-slug": "^3.0.4"
+    "url-slug": "^3.0.4",
+    "uuid": "^9.0.0"
   },
   "devDependencies": {
     "@nestjs/cli": "^8.0.0",
