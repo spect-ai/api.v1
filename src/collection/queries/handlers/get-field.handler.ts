@@ -413,8 +413,10 @@ export class GetNextFieldQueryHandler
     return {
       canClaim: res.canClaim,
       hasClaimed: res.hasClaimed,
-      surveyToken: collection.formMetadata.surveyToken,
-      surveyChain: collection.formMetadata.surveyChain,
+      token: collection.formMetadata.surveyToken,
+      chain: collection.formMetadata.surveyChain,
+      value: res.value,
+      reason: res.reason,
     };
   }
 

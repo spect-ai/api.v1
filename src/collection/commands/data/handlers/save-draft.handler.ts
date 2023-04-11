@@ -31,6 +31,7 @@ import { SocialsDto } from 'src/collection/dto/socials.dto';
 import { User } from 'src/users/model/users.model';
 import { GetUserByFilterQuery } from 'src/users/queries/impl';
 import { isUUID } from 'class-validator';
+import { ResponseCredentialService } from 'src/collection/services/response-credentialing.service';
 
 @CommandHandler(SaveDraftFromDiscordCommand)
 export class SaveDraftCommandHandler
@@ -43,7 +44,7 @@ export class SaveDraftCommandHandler
     private readonly logger: LoggingService,
     private readonly activityOnAddData: ActivityOnAddData,
     private readonly validationService: DataValidationService,
-    private readonly advancedAccessService: AdvancedAccessService,
+    private readonly responseCredentialService: ResponseCredentialService,
     private readonly lookupRepository: LookupRepository,
   ) {
     this.logger.setContext('AddDataCommandHandler');
@@ -205,11 +206,14 @@ export class SaveDraftCommandHandler
           null,
           null,
           res,
-          true,
+          false,
         ),
       );
-      console.log({ nextField });
-      if (nextField.name === 'readonlyAtEnd') {
+      if (
+        (['poap', 'kudos', 'erc20'].includes(nextField?.type) ||
+          nextField.name === 'readonlyAtEnd') &&
+        !collection.formMetadata.drafts?.[callerDiscordId]?.['saved']
+      ) {
         /** Disabling activity for forms as it doesnt quite make sense yet */
 
         const slug = uuid();
@@ -222,7 +226,33 @@ export class SaveDraftCommandHandler
         };
         const { dataActivities, dataActivityOrder } =
           this.activityOnAddData.getActivity(collection, data[slug], null);
-        console.log({ dataActivities, dataActivityOrder });
+        console.log({ dataActivities, dataActivityOrder, data });
+        if (
+          collection.collectionType === 0 &&
+          (collection.formMetadata?.surveyTokenId ||
+            collection.formMetadata?.surveyTokenId === 0)
+        ) {
+          const user = await this.queryBus.execute(
+            new GetUserByFilterQuery(
+              {
+                discordId: callerDiscordId,
+              },
+              '',
+              true,
+            ),
+          );
+          try {
+            await this.responseCredentialService.airdropResponseReceiptNFT(
+              user.ethAddress,
+              null,
+              collection,
+            );
+          } catch (e) {
+            this.logger.error(
+              `Failed to airdrop response receipt NFT for collection ${collection.id} with error ${e}`,
+            );
+          }
+        }
         const updatedCollection = await this.collectionRepository.updateById(
           collection.id,
           {
@@ -233,12 +263,33 @@ export class SaveDraftCommandHandler
               ...(collection.dataOwner || {}),
               [slug]: callerDiscordId,
             },
+            formMetadata: {
+              ...collection.formMetadata,
+              drafts: {
+                ...(collection.formMetadata.drafts || {}),
+                [callerDiscordId]: {
+                  ...(collection.formMetadata.drafts?.[callerDiscordId] || {}),
+                  saved: true,
+                },
+              },
+            },
           },
         );
         console.log('succ');
         this.eventBus.publish(new DataAddedEvent(collection, data, null));
       }
-      return nextField;
+
+      const returnedField = await this.queryBus.execute(
+        new GetNextFieldQuery(
+          callerDiscordId,
+          'discordId',
+          null,
+          null,
+          res,
+          true,
+        ),
+      );
+      return returnedField;
     } catch (err) {
       this.logger.logError(`Saving draft failed with error ${err}`);
       throw new HttpException(err, HttpStatus.INTERNAL_SERVER_ERROR);

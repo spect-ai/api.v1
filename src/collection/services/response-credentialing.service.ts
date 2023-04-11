@@ -175,7 +175,12 @@ export class ClaimEligibilityService {
   async canClaimErc20(
     collection: Collection,
     claimeeAddress: string,
-  ): Promise<{ canClaim: boolean; hasClaimed: boolean; reason: string }> {
+  ): Promise<{
+    canClaim: boolean;
+    hasClaimed: boolean;
+    reason: string;
+    value?: number;
+  }> {
     const registry = await this.registryService.getRegistry();
     const surveyChainId = collection.formMetadata.surveyChain?.value;
     const surveyId = collection.formMetadata.surveyTokenId;
@@ -186,11 +191,13 @@ export class ClaimEligibilityService {
         registry,
       )) as SurveyTokenDistributionInfo;
 
+    console.log({ distributionInfo });
     const balanceInEscrow = (await this.surveyTokenService.getEscrowBalance(
       surveyChainId,
       surveyId,
       registry,
     )) as BigNumber;
+    console.log({ balanceInEscrow });
     const insufficientEscrowBalance =
       distributionInfo?.distributionType === 0
         ? balanceInEscrow.toString() === '0'
@@ -202,22 +209,32 @@ export class ClaimEligibilityService {
       claimeeAddress,
       registry,
     );
-
-    const canClaim = !hasClaimed && !insufficientEscrowBalance;
-    await this.surveyTokenService.isEligibleToClaimSurveyToken(
-      surveyChainId,
-      surveyId,
-      claimeeAddress,
-      distributionInfo.distributionType,
-      registry,
-      distributionInfo.requestId?.toString(),
-    );
+    console.log({ hasClaimed });
+    const canClaim =
+      !hasClaimed &&
+      !insufficientEscrowBalance &&
+      (await this.surveyTokenService.isEligibleToClaimSurveyToken(
+        surveyChainId,
+        surveyId,
+        claimeeAddress,
+        distributionInfo.distributionType,
+        registry,
+        distributionInfo.requestId?.toString(),
+      ));
     console.log({ hasClaimed, canClaim });
 
     return {
       canClaim,
       hasClaimed,
       reason: '',
+      value:
+        distributionInfo?.distributionType === 0
+          ? parseFloat(
+              ethers.utils.formatEther(
+                distributionInfo?.amountPerResponse.toString(),
+              ),
+            )
+          : parseFloat(ethers.utils.formatEther(balanceInEscrow.toString())),
     };
   }
 }
