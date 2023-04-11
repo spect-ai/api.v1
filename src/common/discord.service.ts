@@ -1,39 +1,43 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import fetch from 'node-fetch';
 import { Property } from 'src/collection/types/types';
+import { LoggingService } from 'src/logging/logging.service';
 import { EncryptionService } from './encryption.service';
 
 // TODO
 @Injectable()
 export class DiscordService {
-  constructor(private readonly encryptionService: EncryptionService) {}
+  constructor(
+    private readonly encryptionService: EncryptionService,
+    private readonly logger: LoggingService,
+  ) {
+    this.logger.setContext('DiscordService');
+  }
 
   async isConnected(guildId: string): Promise<boolean> {
-    const res = await fetch(
-      `${process.env.DISCORD_URI}/api/guildExists?guildId=${guildId}`,
-    );
-    if (res.ok) {
-      const data = await res.json();
-      return data;
+    try {
+      return await (
+        await fetch(
+          `${process.env.DISCORD_URI}/api/guildExists?guildId=${guildId}`,
+        )
+      ).json();
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
     }
-    return false;
   }
 
   async getDiscordRole(discordId: string, guildId: string): Promise<string[]> {
-    console.log({ discordId, guildId });
     try {
-      const res = await fetch(
-        `${process.env.DISCORD_URI}/api/userRoles?userId=${discordId}&guildId=${guildId}`,
-      );
-      if (res.ok) {
-        const json = await res.json();
-        return json.guildRoles;
-      }
+      return await (
+        await fetch(
+          `${process.env.DISCORD_URI}/api/userRoles?userId=${discordId}&guildId=${guildId}`,
+        )
+      ).json().guildRoles;
     } catch (e) {
-      console.log({ e });
+      this.logger.error(e);
+      throw e;
     }
-
-    throw new InternalServerErrorException();
   }
 
   async giveRolesToUser(
@@ -41,25 +45,27 @@ export class DiscordService {
     discordUserId: string,
     roleIds: string[],
   ) {
-    const res = await fetch(
-      `${process.env.DISCORD_URI}/api/giveRoles?guildId=${guildId}`,
-      {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        method: 'POST',
-        body: JSON.stringify({
-          roleIds,
-          userId: discordUserId,
-          secret: this.encryptionService.encrypt(process.env.API_SECRET),
-        }),
-      },
-    );
-    if (res.ok) {
-      const data = await res.json();
-      return data;
+    try {
+      return await (
+        await fetch(
+          `${process.env.DISCORD_URI}/api/giveRoles?guildId=${guildId}`,
+          {
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            method: 'POST',
+            body: JSON.stringify({
+              roleIds,
+              userId: discordUserId,
+              secret: this.encryptionService.encrypt(process.env.API_SECRET),
+            }),
+          },
+        )
+      ).json();
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
     }
-    return null;
   }
 
   async createChannel(
@@ -70,28 +76,30 @@ export class DiscordService {
     rolesToAdd?: string[],
     usersToAdd?: string[],
   ) {
-    const res = await fetch(
-      `${process.env.DISCORD_URI}/api/createChannel?guildId=${guildId}`,
-      {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        method: 'POST',
-        body: JSON.stringify({
-          channelName,
-          parentId,
-          isPrivate,
-          rolesToAdd,
-          usersToAdd,
-          secret: this.encryptionService.encrypt(process.env.API_SECRET),
-        }),
-      },
-    );
-    if (res.ok) {
-      const data = await res.json();
-      return data;
+    try {
+      return await (
+        await fetch(
+          `${process.env.DISCORD_URI}/api/createChannel?guildId=${guildId}`,
+          {
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            method: 'POST',
+            body: JSON.stringify({
+              channelName,
+              parentId,
+              isPrivate,
+              rolesToAdd,
+              usersToAdd,
+              secret: this.encryptionService.encrypt(process.env.API_SECRET),
+            }),
+          },
+        )
+      ).json();
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
     }
-    return null;
   }
 
   async postCard(
@@ -102,51 +110,51 @@ export class DiscordService {
     fields: any,
     threadId?: string,
   ) {
-    console.log('posting');
-    const res = await fetch(`${process.env.DISCORD_URI}/api/postCard`, {
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      method: 'POST',
-      body: JSON.stringify({
-        channelId,
-        card: {
-          url,
-          title,
-          fields,
-          msg: message,
-        },
-        threadId,
-        secret: this.encryptionService.encrypt(process.env.API_SECRET),
-      }),
-    });
-    console.log({ resss: res });
-    if (res.ok) {
-      const data = await res.json();
-      console.log({ data });
-      return data;
+    try {
+      return await (
+        await fetch(`${process.env.DISCORD_URI}/api/postCard`, {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          method: 'POST',
+          body: JSON.stringify({
+            channelId,
+            card: {
+              url,
+              title,
+              fields,
+              msg: message,
+            },
+            threadId,
+            secret: this.encryptionService.encrypt(process.env.API_SECRET),
+          }),
+        })
+      ).json();
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
     }
-    return null;
   }
 
   async postForm(channelId: string, title: string, description: string) {
-    const res = await fetch(`${process.env.DISCORD_URI}/api/postForm`, {
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      method: 'POST',
-      body: JSON.stringify({
-        channelId,
-        title,
-        description,
-      }),
-    });
-    if (res.ok) {
-      const data = await res.json();
-      console.log({ data });
-      return data;
+    try {
+      return await (
+        await fetch(`${process.env.DISCORD_URI}/api/postForm`, {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          method: 'POST',
+          body: JSON.stringify({
+            channelId,
+            title,
+            description,
+          }),
+        })
+      ).json();
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
     }
-    return null;
   }
 
   async postSocials(
@@ -155,26 +163,25 @@ export class DiscordService {
     nextField: Property,
     discordUserId: string,
   ) {
-    const res = await fetch(`${process.env.DISCORD_URI}/api/postSocials`, {
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      method: 'POST',
-      body: JSON.stringify({
-        channelId,
-        socials,
-        nextField,
-        discordUserId: discordUserId,
-      }),
-    });
-
-    const data = await res.json();
-    console.log({ data });
-
-    if (res.ok) {
-      return data;
+    try {
+      return await (
+        await fetch(`${process.env.DISCORD_URI}/api/postSocials`, {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          method: 'POST',
+          body: JSON.stringify({
+            channelId,
+            socials,
+            nextField,
+            discordUserId: discordUserId,
+          }),
+        })
+      ).json();
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
     }
-    throw `${data.message}`;
   }
 
   async postFormPayment(
@@ -183,26 +190,25 @@ export class DiscordService {
     nextField: Property,
     discordUserId: string,
   ) {
-    const res = await fetch(`${process.env.DISCORD_URI}/api/postFormPayment`, {
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      method: 'POST',
-      body: JSON.stringify({
-        channelId,
-        paymentProperty,
-        nextField,
-        discordUserId,
-      }),
-    });
-
-    const data = await res.json();
-    console.log({ data });
-
-    if (res.ok) {
-      return data;
+    try {
+      return await (
+        await fetch(`${process.env.DISCORD_URI}/api/postFormPayment`, {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          method: 'POST',
+          body: JSON.stringify({
+            channelId,
+            paymentProperty,
+            nextField,
+            discordUserId,
+          }),
+        })
+      ).json();
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
     }
-    throw `${data.message}`;
   }
 
   async createThread(
@@ -215,30 +221,31 @@ export class DiscordService {
     message: string,
     isForm?: boolean,
   ) {
-    const res = await fetch(
-      `${process.env.DISCORD_URI}/api/createDiscussionThread?guildId=${guildId}`,
-      {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        method: 'POST',
-        body: JSON.stringify({
-          threadName,
-          channelId,
-          isPrivate,
-          usersToAdd,
-          rolesToAdd,
-          message,
-          isForm,
-          secret: this.encryptionService.encrypt(process.env.API_SECRET),
-        }),
-      },
-    );
-    if (res.ok) {
-      const data = await res.json();
-      console.log({ data });
-      return data.result;
+    try {
+      return await (
+        await fetch(
+          `${process.env.DISCORD_URI}/api/createDiscussionThread?guildId=${guildId}`,
+          {
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            method: 'POST',
+            body: JSON.stringify({
+              threadName,
+              channelId,
+              isPrivate,
+              usersToAdd,
+              rolesToAdd,
+              message,
+              isForm,
+              secret: this.encryptionService.encrypt(process.env.API_SECRET),
+            }),
+          },
+        )
+      ).json().result;
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
     }
-    return null;
   }
 }
