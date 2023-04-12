@@ -113,7 +113,7 @@ export class SaveDraftCommandHandler
             const option = collection.formMetadata.idLookup?.[val];
             if (!option) throw 'Invalid optionId';
             formFieldUpdates[key] = option;
-          } else if (['multiSelect', 'user'].includes(property.type)) {
+          } else if (['multiSelect', 'user[]'].includes(property.type)) {
             const options = val.map((optionId: string) => {
               const option = collection.formMetadata.idLookup?.[optionId];
               if (!option) throw 'Invalid optionId';
@@ -331,7 +331,6 @@ export class SaveAndPostSocialsCommandHandler
       console.log({ nextField, socialsDto });
 
       const nextFieldVal = this.getVal(nextField.type, socialsDto, caller);
-      console.log({ nextFieldVal });
       if (['github', 'discord', 'telegram'].includes(nextField.type)) {
         const updatedDraft = {
           ...(collection.formMetadata.drafts || {}),
@@ -340,15 +339,12 @@ export class SaveAndPostSocialsCommandHandler
             [nextField.name]: nextFieldVal,
           },
         };
-        console.log({ updatedDraft, colId: collection.id });
         const res = await this.collectionRepository.updateById(collection.id, {
           formMetadata: {
             ...collection.formMetadata,
             drafts: updatedDraft,
           },
         });
-
-        console.log({ draft: res.formMetadata.drafts[socialsDto.discordId] });
       }
 
       // Add to user data (should never cause failure in form data update)
@@ -420,7 +416,6 @@ export class SaveAndPostSocialsCommandHandler
         } catch (err) {
           console.log({ warning: err });
         }
-        console.log({ id: user });
 
         const res = await this.commandBus.execute(
           new AddDataCommand(

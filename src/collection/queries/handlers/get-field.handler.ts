@@ -345,11 +345,17 @@ export class GetNextFieldQueryHandler
       for (const userId of userIds) {
         const member = memberDetails[userId];
         if (member) {
-          populatedMemberDetails.push(member);
+          populatedMemberDetails.push({
+            value: member.id,
+            label: member.username,
+          });
         }
       }
     } else {
-      populatedMemberDetails = circle.members;
+      populatedMemberDetails = circle.members.map((member) => ({
+        value: member.id,
+        label: member.username,
+      }));
     }
     return populatedMemberDetails;
   }
