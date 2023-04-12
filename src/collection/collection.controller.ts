@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  InternalServerErrorException,
   NotFoundException,
   Param,
   Patch,
@@ -61,6 +62,7 @@ import {
   RemoveMultipleDataCommand,
 } from './commands/data/impl/remove-data.command';
 import {
+  SaveAndPostPaymentCommand,
   SaveAndPostSocialsCommand,
   SaveDraftFromDiscordCommand,
 } from './commands/data/impl/save-draft.command';
@@ -86,6 +88,7 @@ import {
   MigrateCollectionDto,
 } from './dto/create-collection-request.dto';
 import { CreateCollectionResponseDto } from './dto/create-collection-response.dto';
+import { FormPaymentDto } from './dto/form-payment.dto';
 import {
   TemplateIdDto,
   UseTemplateDto,
@@ -820,6 +823,24 @@ export class CollectionController {
     );
   }
 
+  @UseGuards(SessionAuthGuard)
+  @Patch('/:channelId/saveAndPostPayment')
+  async saveAndPostPayment(
+    @Param() param: RequiredDiscordChannelIdDto,
+    @Body() body: FormPaymentDto,
+    @Query() query: RequiredDiscordIdDto,
+    @Request() req,
+  ): Promise<Collection> {
+    return await this.commandBus.execute(
+      new SaveAndPostPaymentCommand(
+        body,
+        param.channelId,
+        query.discordId,
+        req.user,
+      ),
+    );
+  }
+
   @UseGuards(PublicViewAuthGuard)
   @Patch('/:channelId/claimPoapFromBot')
   async claimPoapFromBot(
@@ -839,7 +860,6 @@ export class CollectionController {
     @Param() param: RequiredDiscordChannelIdDto,
     @Query() query: RequiredDiscordIdDto,
   ): Promise<{ operationId: string }> {
-    console.log({ param, query });
     return await this.credentialingService.claimKudosFromBot(
       query.discordId,
       param.channelId,
@@ -852,7 +872,6 @@ export class CollectionController {
     @Param() param: RequiredDiscordChannelIdDto,
     @Query() query: RequiredDiscordIdDto,
   ): Promise<{ transactionHash: string }> {
-    console.log({ param, query });
     return await this.credentialingService.claimERC20FromBot(
       query.discordId,
       param.channelId,

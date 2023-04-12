@@ -302,6 +302,11 @@ export interface FormMetadata {
     }[];
     snapshot: number;
   };
+
+  // for finding options, users using discord interaction custom ids
+  idLookup?: {
+    [id: string]: any;
+  };
 }
 
 export interface PaymentConfig {

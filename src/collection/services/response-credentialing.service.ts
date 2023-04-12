@@ -21,6 +21,7 @@ import { Collection } from '../model/collection.model';
 import { GetCollectionByIdQuery } from '../queries';
 import { SurveyTokenDistributionInfo } from '../types/types';
 import { AdvancedConditionService } from './advanced-condition.service';
+import { GetCollectionService } from './get-collection.service';
 
 @Injectable()
 export class ClaimEligibilityService {
@@ -174,7 +175,12 @@ export class ClaimEligibilityService {
   async canClaimErc20(
     collection: Collection,
     claimeeAddress: string,
-  ): Promise<{ canClaim: boolean; hasClaimed: boolean; reason: string }> {
+  ): Promise<{
+    canClaim: boolean;
+    hasClaimed: boolean;
+    reason: string;
+    value?: number;
+  }> {
     const registry = await this.registryService.getRegistry();
     const surveyChainId = collection.formMetadata.surveyChain?.value;
     const surveyId = collection.formMetadata.surveyTokenId;
@@ -185,11 +191,13 @@ export class ClaimEligibilityService {
         registry,
       )) as SurveyTokenDistributionInfo;
 
+    console.log({ distributionInfo });
     const balanceInEscrow = (await this.surveyTokenService.getEscrowBalance(
       surveyChainId,
       surveyId,
       registry,
     )) as BigNumber;
+    console.log({ balanceInEscrow });
     const insufficientEscrowBalance =
       distributionInfo?.distributionType === 0
         ? balanceInEscrow.toString() === '0'
@@ -201,22 +209,32 @@ export class ClaimEligibilityService {
       claimeeAddress,
       registry,
     );
-
-    const canClaim = !hasClaimed && !insufficientEscrowBalance;
-    await this.surveyTokenService.isEligibleToClaimSurveyToken(
-      surveyChainId,
-      surveyId,
-      claimeeAddress,
-      distributionInfo.distributionType,
-      registry,
-      distributionInfo.requestId?.toString(),
-    );
+    console.log({ hasClaimed });
+    const canClaim =
+      !hasClaimed &&
+      !insufficientEscrowBalance &&
+      (await this.surveyTokenService.isEligibleToClaimSurveyToken(
+        surveyChainId,
+        surveyId,
+        claimeeAddress,
+        distributionInfo.distributionType,
+        registry,
+        distributionInfo.requestId?.toString(),
+      ));
     console.log({ hasClaimed, canClaim });
 
     return {
       canClaim,
       hasClaimed,
       reason: '',
+      value:
+        distributionInfo?.distributionType === 0
+          ? parseFloat(
+              ethers.utils.formatEther(
+                distributionInfo?.amountPerResponse.toString(),
+              ),
+            )
+          : parseFloat(ethers.utils.formatEther(balanceInEscrow.toString())),
     };
   }
 }
@@ -235,6 +253,7 @@ export class ResponseCredentialingService {
     private readonly advancedConditionService: AdvancedConditionService,
     private readonly claimEligibilityService: ClaimEligibilityService,
     private readonly lookupRepository: LookupRepository,
+    private readonly getCollectionService: GetCollectionService,
   ) {
     this.logger.setContext('ResponseCredentialingService');
   }
@@ -472,21 +491,11 @@ export class ResponseCredentialingService {
 
   async claimPoapFromBot(discordId: string, threadId: string) {
     try {
-      const lookedUpData = await this.lookupRepository.findOne({
-        key: threadId,
-        keyType: 'discordThreadId',
-      });
-      if (!lookedUpData.collectionId) {
-        throw new InternalServerErrorException(
-          'Thread was not indexed in lookup',
-        );
-      }
-      const collection = await this.collectionRepository.findById(
-        lookedUpData.collectionId,
+      const collection = await this.getCollectionService.getCollectionFromAnyId(
+        null,
+        null,
+        threadId,
       );
-      if (!collection) {
-        throw new NotFoundException('Collection not found');
-      }
 
       const user = await this.queryBus.execute(
         new GetUserByFilterQuery(
@@ -534,21 +543,14 @@ export class ResponseCredentialingService {
 
   async claimKudosFromBot(discordId: string, threadId: string) {
     try {
-      const lookedUpData = await this.lookupRepository.findOne({
-        key: threadId,
-        keyType: 'discordThreadId',
-      });
-      if (!lookedUpData.collectionId) {
-        throw new InternalServerErrorException(
-          'Thread was not indexed in lookup',
-        );
-      }
-      const collection = await this.collectionRepository.findById(
-        lookedUpData.collectionId,
+      const collection = await this.getCollectionService.getCollectionFromAnyId(
+        null,
+        null,
+        threadId,
       );
-      if (!collection) {
-        throw new NotFoundException('Collection not found');
-      }
+
+      if (!collection.formMetadata.mintkudosTokenId)
+        throw 'No mintkudos token id found';
 
       const user = await this.queryBus.execute(
         new GetUserByFilterQuery(
@@ -563,8 +565,6 @@ export class ResponseCredentialingService {
         throw new NotFoundException('EthAddress of user not found');
       }
 
-      if (!collection.formMetadata.mintkudosTokenId)
-        throw 'No mintkudos token id found';
       const operationId = await this.kudosService.airdropKudos(
         collection.parents[0],
         collection.formMetadata.mintkudosTokenId.toString(),
@@ -586,7 +586,7 @@ export class ResponseCredentialingService {
           },
           mintkudosClaimedBy: [
             ...(collection.formMetadata.mintkudosClaimedBy || []),
-            this.requestProvider.user.id,
+            user.ethAddress,
           ],
         },
       });
@@ -603,21 +603,11 @@ export class ResponseCredentialingService {
 
   async claimERC20FromBot(discordId: string, threadId: string) {
     try {
-      const lookedUpData = await this.lookupRepository.findOne({
-        key: threadId,
-        keyType: 'discordThreadId',
-      });
-      if (!lookedUpData.collectionId) {
-        throw new InternalServerErrorException(
-          'Thread was not indexed in lookup',
-        );
-      }
-      const collection = await this.collectionRepository.findById(
-        lookedUpData.collectionId,
+      const collection = await this.getCollectionService.getCollectionFromAnyId(
+        null,
+        null,
+        threadId,
       );
-      if (!collection) {
-        throw new NotFoundException('Collection not found');
-      }
 
       const user = await this.queryBus.execute(
         new GetUserByFilterQuery(

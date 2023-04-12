@@ -6,6 +6,7 @@ import { CollectionRepository } from 'src/collection/collection.repository';
 import { Collection } from 'src/collection/model/collection.model';
 import { AdvancedAccessService } from 'src/collection/services/advanced-access.service';
 import { ClaimEligibilityService } from 'src/collection/services/response-credentialing.service';
+import { Option, Property } from 'src/collection/types/types';
 import { CommonTools } from 'src/common/common.service';
 import { GuildxyzService } from 'src/common/guildxyz.service';
 import { GitcoinPassportService } from 'src/credentials/services/gitcoin-passport.service';
@@ -21,6 +22,7 @@ import {
   GetCollectionBySlugQuery,
 } from '../impl/get-collection.query';
 import { GetNextFieldQuery } from '../impl/get-field.query';
+import { v4 as uuidv4 } from 'uuid';
 
 @QueryHandler(GetNextFieldQuery)
 export class GetNextFieldQueryHandler
@@ -54,27 +56,8 @@ export class GetNextFieldQueryHandler
     return false;
   }
 
-  milestoneFieldCompleted(
-    propertyId: string,
-    draftSubmittedByUser: any,
-    collection: Collection,
-  ) {
-    if (collection.properties[propertyId].type !== 'milestone') return true;
-    const milestone = draftSubmittedByUser[propertyId];
-    if (
-      milestone &&
-      milestone.title &&
-      milestone.description &&
-      milestone.dueDate &&
-      milestone.reward?.chain &&
-      milestone.reward?.token &&
-      milestone.reward?.value
-    )
-      return true;
-    return false;
-  }
-
   fetchIncompleteRewardField(value: any) {
+    console.log({ value });
     if (!value?.chain) {
       return 'chain';
     } else if (!value?.token) return 'token';
@@ -84,26 +67,70 @@ export class GetNextFieldQueryHandler
     return null;
   }
 
-  fetchIncompleteMilestoneField(value: any) {
-    if (!value?.title) {
-      return 'title';
-    } else if (!value?.description) return 'description';
-    else if (!value?.dueDate) {
-      return 'dueDate';
-    } else if (!value?.reward?.chain) {
-      return 'chain';
-    } else if (!value?.reward?.token) {
-      return 'token';
-    } else if (!value?.reward?.value) {
-      return 'value';
-    }
-    return null;
+  async addOptionIdsToLookup(
+    options: Option[],
+    collection: Collection,
+    idLookup?: { [key: string]: any },
+  ) {
+    const lookupUpdates = {};
+    const returnedOptions = [];
+    options.forEach((option) => {
+      const id = uuidv4();
+      lookupUpdates[id] = option;
+
+      returnedOptions.push({
+        ...option,
+        id: id,
+      });
+    });
+
+    const idLookupUpdates = {
+      ...(idLookup || collection.formMetadata.idLookup || {}),
+      ...lookupUpdates,
+    };
+    await this.collectionRepository.updateById(collection.id, {
+      formMetadata: {
+        ...collection.formMetadata,
+        idLookup: idLookupUpdates,
+      },
+    });
+
+    return { returnedOptions, idLookupUpdates };
+  }
+
+  async addFieldsToLookup(
+    property: Property,
+    collection: Collection,
+    idLookup?: { [key: string]: any },
+  ) {
+    const idLookupsVals = Object.values(collection.formMetadata.idLookup || {});
+    const propNameIdx = idLookupsVals.indexOf(property.name);
+    console.log({ propNameIdx });
+    if (propNameIdx !== -1)
+      return {
+        id: Object.keys(collection.formMetadata.idLookup || {})[propNameIdx],
+        updatedLookups: collection.formMetadata.idLookup,
+      };
+
+    const id = uuidv4();
+    const updatedLookups = {
+      ...(idLookup || collection.formMetadata.idLookup || {}),
+      [id]: property.name,
+    };
+    await this.collectionRepository.updateById(collection.id, {
+      formMetadata: {
+        ...collection.formMetadata,
+        idLookup: updatedLookups,
+      },
+    });
+
+    return { id, updatedLookups };
   }
 
   async fetchNextValidFieldFromCollection(
     collection: Collection,
-    draftSubmittedByUser: any,
     discordId: string,
+    draftSubmittedByUser: any,
   ): Promise<{
     field: string;
     ethAddress?: string;
@@ -113,7 +140,7 @@ export class GetNextFieldQueryHandler
     const updates = {} as { [key: string]: any };
     if (
       collection.formMetadata.captchaEnabled &&
-      !draftSubmittedByUser?.captcha
+      !draftSubmittedByUser.captcha
     ) {
       return {
         field: 'captcha',
@@ -149,7 +176,7 @@ export class GetNextFieldQueryHandler
 
     if (
       collection.formMetadata.sybilProtectionEnabled &&
-      !draftSubmittedByUser?.hasPassedSybilCheck &&
+      !draftSubmittedByUser.hasPassedSybilCheck &&
       !collection.formMetadata.drafts?.[discordId]?.['sybilProtection']
     ) {
       const hasPassedSybilCheck =
@@ -168,7 +195,7 @@ export class GetNextFieldQueryHandler
 
     if (
       collection.formMetadata.formRoleGating?.length &&
-      !draftSubmittedByUser?.hasPassedRoleGating &&
+      !draftSubmittedByUser.hasPassedRoleGating &&
       !collection.formMetadata.drafts?.[discordId]?.['roleGating']
     ) {
       const hasRoleToAccessForm =
@@ -200,12 +227,6 @@ export class GetNextFieldQueryHandler
     for (const page of collection.formMetadata.pageOrder) {
       for (const propertyId of collection.formMetadata.pages[page].properties) {
         console.log({ propertyId });
-
-        if (!draftSubmittedByUser)
-          return {
-            field: propertyId,
-            ethAddress: user?.ethAddress,
-          };
         if (
           collection.formMetadata.skippedFormFields?.[discordId]?.[propertyId]
         )
@@ -220,23 +241,21 @@ export class GetNextFieldQueryHandler
             propertyId,
             draftSubmittedByUser,
             collection,
-          ) &&
-          this.milestoneFieldCompleted(
-            propertyId,
-            draftSubmittedByUser,
-            collection,
           )
         ) {
           continue;
-        } else if (property.viewConditions) {
-          const viewConditions = property.viewConditions;
-          const satisfied = await this.queryBus.execute(
-            new HasSatisfiedDataConditionsQuery(
-              collection,
-              draftSubmittedByUser,
-              viewConditions,
-            ),
-          );
+        } else {
+          let satisfied = true;
+          if (property.viewConditions) {
+            const viewConditions = property.viewConditions;
+            satisfied = await this.queryBus.execute(
+              new HasSatisfiedDataConditionsQuery(
+                collection,
+                draftSubmittedByUser,
+                viewConditions,
+              ),
+            );
+          }
           if (satisfied) {
             if (collection.properties[propertyId].type === 'reward') {
               const incompleteField = this.fetchIncompleteRewardField(
@@ -256,17 +275,13 @@ export class GetNextFieldQueryHandler
               ethAddress: user?.ethAddress,
             };
           }
-        } else
-          return {
-            field: propertyId,
-            ethAddress: user?.ethAddress,
-          };
+        }
       }
     }
 
     if (
       collection.formMetadata.paymentConfig &&
-      !draftSubmittedByUser?.paymentConfig
+      !draftSubmittedByUser?.__payment__
     ) {
       return {
         field: 'paywall',
@@ -398,8 +413,10 @@ export class GetNextFieldQueryHandler
     return {
       canClaim: res.canClaim,
       hasClaimed: res.hasClaimed,
-      surveyToken: collection.formMetadata.surveyToken,
-      surveyChain: collection.formMetadata.surveyChain,
+      token: collection.formMetadata.surveyToken,
+      chain: collection.formMetadata.surveyChain,
+      value: res.value,
+      reason: res.reason,
     };
   }
 
@@ -434,8 +451,9 @@ export class GetNextFieldQueryHandler
         throw new NotFoundException('Collection not found');
       }
       const draftSubmittedByUser =
-        collection.formMetadata.drafts &&
-        collection.formMetadata.drafts[callerId];
+        (collection.formMetadata.drafts &&
+          collection.formMetadata.drafts[callerId]) ||
+        {};
 
       const {
         field: nextField,
@@ -443,11 +461,10 @@ export class GetNextFieldQueryHandler
         subField,
       } = await this.fetchNextValidFieldFromCollection(
         collection,
-        draftSubmittedByUser,
         callerId,
+        draftSubmittedByUser,
       );
 
-      console.log({ populateData });
       if (!populateData) {
         return {
           type: collection.properties[nextField]?.type || nextField,
@@ -489,6 +506,7 @@ export class GetNextFieldQueryHandler
           return {
             type: 'paywall',
             name: 'Please complete the paywall to continue',
+            paymentConfig: collection.formMetadata.paymentConfig,
           };
         } else if (nextField === 'poap') {
           return {
@@ -510,6 +528,11 @@ export class GetNextFieldQueryHandler
           };
         }
         const returnedField = collection.properties[nextField];
+        const lookupAdditionRes = await this.addFieldsToLookup(
+          returnedField,
+          collection,
+        );
+        returnedField.id = lookupAdditionRes.id;
         if (['user', 'user[]'].includes(returnedField.type)) {
           const populatedMemberDetails = await this.populateMemberDetails(
             collection,
@@ -517,7 +540,6 @@ export class GetNextFieldQueryHandler
           returnedField.options = populatedMemberDetails;
         }
         if (['reward'].includes(returnedField.type)) {
-          console.log({ subField });
           returnedField['subField'] = subField;
           if (subField === 'chain') {
             returnedField.options = Object.values(
@@ -542,8 +564,20 @@ export class GetNextFieldQueryHandler
             });
           }
         }
-        console.log({ returnedField });
-
+        if (
+          ['reward', 'user', 'user[]', 'singleSelect', 'multiSelect'].includes(
+            returnedField.type,
+          )
+        ) {
+          if (returnedField.options) {
+            const res = await this.addOptionIdsToLookup(
+              returnedField.options,
+              collection,
+              lookupAdditionRes.updatedLookups,
+            );
+            returnedField.options = res.returnedOptions;
+          }
+        }
         return returnedField;
       }
       return null;

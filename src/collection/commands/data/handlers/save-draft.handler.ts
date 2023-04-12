@@ -16,6 +16,7 @@ import { DataValidationService } from 'src/collection/validations/data-validatio
 import { LoggingService } from 'src/logging/logging.service';
 import { AddDataUsingAutomationCommand } from '../impl/add-data.command';
 import {
+  SaveAndPostPaymentCommand,
   SaveAndPostSocialsCommand,
   SaveDraftFromDiscordCommand,
 } from '../impl/save-draft.command';
@@ -29,6 +30,8 @@ import { DiscordService } from 'src/common/discord.service';
 import { SocialsDto } from 'src/collection/dto/socials.dto';
 import { User } from 'src/users/model/users.model';
 import { GetUserByFilterQuery } from 'src/users/queries/impl';
+import { isUUID } from 'class-validator';
+import { ResponseCredentialService } from 'src/collection/services/response-credentialing.service';
 
 @CommandHandler(SaveDraftFromDiscordCommand)
 export class SaveDraftCommandHandler
@@ -41,7 +44,7 @@ export class SaveDraftCommandHandler
     private readonly logger: LoggingService,
     private readonly activityOnAddData: ActivityOnAddData,
     private readonly validationService: DataValidationService,
-    private readonly advancedAccessService: AdvancedAccessService,
+    private readonly responseCredentialService: ResponseCredentialService,
     private readonly lookupRepository: LookupRepository,
   ) {
     this.logger.setContext('AddDataCommandHandler');
@@ -79,40 +82,49 @@ export class SaveDraftCommandHandler
           value: number;
         };
       };
-      let milestoneFields = {} as {
-        [key: string]: {
-          title: string;
-          description: string;
-          dueDate: string;
-          reward: {
-            chain: {
-              label: string;
-              value: string;
-            };
-            token: {
-              label: string;
-              value: string;
-            };
-            value: number;
-          };
-        };
-      };
 
-      for (const [key, val] of Object.entries(data)) {
+      // eslint-disable-next-line prefer-const
+      for (let [key, val] of Object.entries(data)) {
+        if (isUUID(key) && collection.formMetadata.idLookup?.[key])
+          key = collection.formMetadata.idLookup[key];
+        console.log({ key });
         const property = collection.properties[key];
         if (property && property.isPartOfFormView) {
           if (property.type === 'number') {
             formFieldUpdates[key] = parseFloat(val);
-          } else if (property && property.type === 'reward')
+          } else if (property.type === 'reward') {
+            if (val['chain']) {
+              const chain = collection.formMetadata.idLookup?.[val['chain']];
+              console.log({ chain });
+              if (!chain) throw 'Invalid chain';
+              val['chain'] = chain;
+            }
+            if (val['token']) {
+              const token = collection.formMetadata.idLookup?.[val['token']];
+              if (!token) throw 'Invalid token';
+              val['token'] = token;
+            }
             rewardFields[key] = val;
-          else if (property && property.type === 'milestone')
-            milestoneFields[key] = val;
-          else formFieldUpdates[key] = val;
+          } else if (['singleSelect', 'user'].includes(property.type)) {
+            const option = collection.formMetadata.idLookup?.[val];
+            if (!option) throw 'Invalid optionId';
+            formFieldUpdates[key] = option;
+          } else if (['multiSelect', 'user'].includes(property.type)) {
+            const options = val.map((optionId: string) => {
+              const option = collection.formMetadata.idLookup?.[optionId];
+              if (!option) throw 'Invalid optionId';
+              return option;
+            });
+            formFieldUpdates[key] = options;
+          } else formFieldUpdates[key] = val;
         }
       }
 
       const skippedFormFields = {};
-      for (const [key, val] of Object.entries(skip || {})) {
+      // eslint-disable-next-line prefer-const
+      for (let [key, val] of Object.entries(skip || {})) {
+        if (collection.formMetadata.idLookup?.[key])
+          key = collection.formMetadata.idLookup[key];
         const property = collection.properties[key];
         if (property && property.isPartOfFormView) {
           skippedFormFields[key] = val;
@@ -123,8 +135,7 @@ export class SaveDraftCommandHandler
         Object.entries(formFieldUpdates).length === 0 &&
         !data['captcha'] &&
         Object.keys(skippedFormFields).length === 0 &&
-        Object.keys(rewardFields).length === 0 &&
-        Object.keys(milestoneFields).length === 0
+        Object.keys(rewardFields).length === 0
       )
         throw 'No valid updates';
 
@@ -161,20 +172,6 @@ export class SaveDraftCommandHandler
         this.validationService.validatePartialRewardData(rewardFields);
       }
 
-      if (Object.keys(milestoneFields).length > 0) {
-        for (const [key, val] of Object.entries(milestoneFields)) {
-          milestoneFields = {
-            ...milestoneFields,
-            [key]: {
-              ...(collection.formMetadata.drafts?.[callerDiscordId]?.[key] ||
-                {}),
-              ...val,
-            },
-          };
-        }
-        this.validationService.validatePartialMilestoneData(milestoneFields);
-      }
-
       if (data['captcha']) {
         formFieldUpdates['captcha'] = data['captcha'];
       }
@@ -189,7 +186,6 @@ export class SaveDraftCommandHandler
               ...(collection.formMetadata.drafts?.[callerDiscordId] || {}),
               ...formFieldUpdates,
               ...rewardFields,
-              ...milestoneFields,
             },
           },
           skippedFormFields: {
@@ -210,22 +206,16 @@ export class SaveDraftCommandHandler
           null,
           null,
           res,
-          true,
+          false,
         ),
       );
-      console.log({ nextField });
-      if (nextField.name === 'readonlyAtEnd') {
+      if (
+        (['poap', 'kudos', 'erc20'].includes(nextField?.type) ||
+          nextField.name === 'readonlyAtEnd') &&
+        !collection.formMetadata.drafts?.[callerDiscordId]?.['saved']
+      ) {
         /** Disabling activity for forms as it doesnt quite make sense yet */
-        const filteredDrafts = Object.entries(
-          res.formMetadata.drafts?.[callerDiscordId] || {},
-        ).filter(([key, val]) =>
-          [
-            'captcha',
-            'roleGating',
-            'sybilProtection',
-            'connectWallet',
-          ].includes(key),
-        );
+
         const slug = uuid();
         const data = {
           ...collection.data,
@@ -236,7 +226,33 @@ export class SaveDraftCommandHandler
         };
         const { dataActivities, dataActivityOrder } =
           this.activityOnAddData.getActivity(collection, data[slug], null);
-        console.log({ dataActivities, dataActivityOrder });
+        console.log({ dataActivities, dataActivityOrder, data });
+        if (
+          collection.collectionType === 0 &&
+          (collection.formMetadata?.surveyTokenId ||
+            collection.formMetadata?.surveyTokenId === 0)
+        ) {
+          const user = await this.queryBus.execute(
+            new GetUserByFilterQuery(
+              {
+                discordId: callerDiscordId,
+              },
+              '',
+              true,
+            ),
+          );
+          try {
+            await this.responseCredentialService.airdropResponseReceiptNFT(
+              user.ethAddress,
+              null,
+              collection,
+            );
+          } catch (e) {
+            this.logger.error(
+              `Failed to airdrop response receipt NFT for collection ${collection.id} with error ${e}`,
+            );
+          }
+        }
         const updatedCollection = await this.collectionRepository.updateById(
           collection.id,
           {
@@ -247,12 +263,33 @@ export class SaveDraftCommandHandler
               ...(collection.dataOwner || {}),
               [slug]: callerDiscordId,
             },
+            formMetadata: {
+              ...collection.formMetadata,
+              drafts: {
+                ...(collection.formMetadata.drafts || {}),
+                [callerDiscordId]: {
+                  ...(collection.formMetadata.drafts?.[callerDiscordId] || {}),
+                  saved: true,
+                },
+              },
+            },
           },
         );
         console.log('succ');
         this.eventBus.publish(new DataAddedEvent(collection, data, null));
       }
-      return nextField;
+
+      const returnedField = await this.queryBus.execute(
+        new GetNextFieldQuery(
+          callerDiscordId,
+          'discordId',
+          null,
+          null,
+          res,
+          true,
+        ),
+      );
+      return returnedField;
     } catch (err) {
       this.logger.logError(`Saving draft failed with error ${err}`);
       throw new HttpException(err, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -395,6 +432,91 @@ export class SaveAndPostSocialsCommandHandler
         },
         nextToNextField,
         socialsDto.discordId,
+      );
+
+      return { success: true };
+    } catch (err) {
+      console.log({ err });
+      throw new HttpException(err, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+}
+
+@CommandHandler(SaveAndPostPaymentCommand)
+export class SaveAndPostPaymentCommandHandler
+  implements ICommandHandler<SaveAndPostPaymentCommand>
+{
+  constructor(
+    private readonly queryBus: QueryBus,
+    private readonly commandBus: CommandBus,
+    private readonly discordService: DiscordService,
+    private readonly lookupRepository: LookupRepository,
+    private readonly collectionRepository: CollectionRepository,
+  ) {}
+
+  async execute(command: SaveAndPostPaymentCommand) {
+    const { formPaymentDto, channelId, caller, discordUserId } = command;
+    try {
+      if (!discordUserId) throw 'No discord Id provided, cannot get next field';
+      const lookedUpData = await this.lookupRepository.findOne({
+        key: channelId,
+        keyType: 'discordThreadId',
+      });
+      if (!lookedUpData?.collectionId)
+        throw 'Collection hasnt been indexed with the given threadId';
+      const collection = await this.collectionRepository.findById(
+        lookedUpData.collectionId,
+      );
+      if (!collection) throw new NotFoundException('Collection not found');
+      const nextField = await this.queryBus.execute(
+        new GetNextFieldQuery(
+          discordUserId,
+          'discordId',
+          null,
+          null,
+          collection,
+          true,
+        ),
+      );
+
+      if (['paywall'].includes(nextField.type)) {
+        const updatedDraft = {
+          ...(collection.formMetadata.drafts || {}),
+          [discordUserId]: {
+            ...(collection.formMetadata.drafts?.[discordUserId] || {}),
+            __payment__: {
+              ...formPaymentDto,
+              paid: true,
+            },
+          },
+        };
+        console.log({ updatedDraft, colId: collection.id });
+        const res = await this.collectionRepository.updateById(collection.id, {
+          formMetadata: {
+            ...collection.formMetadata,
+            drafts: updatedDraft,
+          },
+        });
+      }
+
+      const nextToNextField = await this.queryBus.execute(
+        new GetNextFieldQuery(
+          discordUserId,
+          'discordId',
+          collection.slug,
+          null,
+          null,
+          true,
+        ),
+      );
+      await this.discordService.postFormPayment(
+        channelId,
+        {
+          ...nextField,
+          value: formPaymentDto,
+        },
+        nextToNextField,
+        discordUserId,
       );
 
       return { success: true };

@@ -113,6 +113,8 @@ export class AdvancedAccessService {
     delete collection.formMetadata?.transactionHashes;
     delete collection.formMetadata?.responseDataForPoap;
     delete collection.formMetadata?.responseDataForMintkudos;
+    delete collection.formMetadata?.idLookup;
+    delete collection.formMetadata?.drafts;
     return collection;
   }
 }

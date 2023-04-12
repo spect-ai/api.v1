@@ -202,6 +202,7 @@ export class LinkDiscordService {
     } catch (e) {
       console.log(e);
       this.logger.logError(`Failed posting form with error ${e}`);
+      throw e;
     }
   }
 }
