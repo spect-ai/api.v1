@@ -204,7 +204,7 @@ export class DataValidationService {
           const validEns =
             data.endsWith('.eth') && data.replace('.eth', '').length >= 3;
           if (!ethers.utils.isAddress(data) && !validEns)
-            throw 'Invalid ethereum address';
+            throw 'Invalid ethereum address or ens';
         }
       } else if (['date'].includes(properties[propertyId].type)) {
         if (data) if (!isValidDateString(data)) throw 'Invalid date';

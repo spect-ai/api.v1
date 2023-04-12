@@ -495,6 +495,7 @@ export class ResponseCredentialingService {
         null,
         null,
         threadId,
+        {},
       );
 
       const user = await this.queryBus.execute(
@@ -547,6 +548,7 @@ export class ResponseCredentialingService {
         null,
         null,
         threadId,
+        {},
       );
 
       if (!collection.formMetadata.mintkudosTokenId)
@@ -607,6 +609,7 @@ export class ResponseCredentialingService {
         null,
         null,
         threadId,
+        {},
       );
 
       const user = await this.queryBus.execute(

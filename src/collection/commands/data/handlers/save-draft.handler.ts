@@ -92,6 +92,7 @@ export class SaveDraftCommandHandler
         if (property && property.isPartOfFormView) {
           if (property.type === 'number') {
             formFieldUpdates[key] = parseFloat(val);
+            if (isNaN(formFieldUpdates[key])) throw 'Invalid number';
           } else if (property.type === 'reward') {
             if (val['chain']) {
               const chain = collection.formMetadata.idLookup?.[val['chain']];
@@ -126,7 +127,7 @@ export class SaveDraftCommandHandler
         if (collection.formMetadata.idLookup?.[key])
           key = collection.formMetadata.idLookup[key];
         const property = collection.properties[key];
-        if (property && property.isPartOfFormView) {
+        if ((property && property.isPartOfFormView) || key === 'paywall') {
           skippedFormFields[key] = val;
         }
       }
@@ -210,9 +211,9 @@ export class SaveDraftCommandHandler
         ),
       );
       if (
-        (['poap', 'kudos', 'erc20'].includes(nextField?.type) ||
-          nextField.name === 'readonlyAtEnd') &&
-        !collection.formMetadata.drafts?.[callerDiscordId]?.['saved']
+        ['poap', 'kudos', 'erc20'].includes(nextField?.type) ||
+        (nextField.name === 'readonlyAtEnd' &&
+          !collection.formMetadata.drafts?.[callerDiscordId]?.['saved'])
       ) {
         /** Disabling activity for forms as it doesnt quite make sense yet */
 

@@ -99,7 +99,9 @@ export class GetNextFieldQueryHandler
   }
 
   async addFieldsToLookup(
-    property: Property,
+    property: {
+      name: string;
+    },
     collection: Collection,
     idLookup?: { [key: string]: any },
   ) {
@@ -281,7 +283,8 @@ export class GetNextFieldQueryHandler
 
     if (
       collection.formMetadata.paymentConfig &&
-      !draftSubmittedByUser?.__payment__
+      !draftSubmittedByUser?.__payment__ &&
+      !collection.formMetadata.skippedFormFields?.[discordId]?.['paywall']
     ) {
       return {
         field: 'paywall',
@@ -503,10 +506,15 @@ export class GetNextFieldQueryHandler
             name: 'Please complete the captcha to continue',
           };
         } else if (nextField === 'paywall') {
-          return {
+          const paywallField = {
             type: 'paywall',
-            name: 'Please complete the paywall to continue',
+            name: 'paywall',
             paymentConfig: collection.formMetadata.paymentConfig,
+          };
+          const res = await this.addFieldsToLookup(paywallField, collection);
+          return {
+            ...paywallField,
+            id: res.id,
           };
         } else if (nextField === 'poap') {
           return {

@@ -791,7 +791,11 @@ export class CollectionController {
     @Param() param: RequiredDiscordChannelIdDto,
     @Query() query: RequiredDiscordIdDto,
     @Request() req,
-  ): Promise<Collection> {
+  ): Promise<{
+    field: Property;
+    formName: string;
+    active: boolean;
+  }> {
     console.log({ param, query });
     const collection = await this.queryBus.execute(
       new GetCollectionByFilterQuery({
@@ -799,16 +803,20 @@ export class CollectionController {
       }),
     );
     if (!collection) throw new NotFoundException('Collection not found');
-    return await this.queryBus.execute(
-      new GetNextFieldQuery(
-        query.discordId,
-        'discordId',
-        null,
-        null,
-        collection,
-        query.populateFields === 'true' ? true : false,
+    return {
+      field: await this.queryBus.execute(
+        new GetNextFieldQuery(
+          query.discordId,
+          'discordId',
+          null,
+          null,
+          collection,
+          query.populateFields === 'true' ? true : false,
+        ),
       ),
-    );
+      formName: collection.name,
+      active: collection.formMetadata.active,
+    };
   }
 
   @UseGuards(SessionAuthGuard)
