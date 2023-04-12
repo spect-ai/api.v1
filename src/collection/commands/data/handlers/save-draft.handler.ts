@@ -51,7 +51,7 @@ export class SaveDraftCommandHandler
     private readonly lookupRepository: LookupRepository,
     private readonly commandBus: CommandBus,
   ) {
-    this.logger.setContext('AddDataCommandHandler');
+    this.logger.setContext('SaveDraftCommandHandler');
   }
 
   async execute(command: SaveDraftFromDiscordCommand) {
@@ -218,22 +218,27 @@ export class SaveDraftCommandHandler
         (nextField.name === 'readonlyAtEnd' &&
           !collection.formMetadata.drafts?.[callerDiscordId]?.['saved'])
       ) {
-        const user = await this.queryBus.execute(
-          new GetUserByFilterQuery(
-            {
-              discordId: callerDiscordId,
-            },
-            '',
-            true,
-          ),
-        );
+        let user;
+        try {
+          user = await this.queryBus.execute(
+            new GetUserByFilterQuery(
+              {
+                discordId: callerDiscordId,
+              },
+              '',
+              true,
+            ),
+          );
+        } catch (err) {
+          console.log({ warning: err });
+        }
 
         const res = await this.commandBus.execute(
           new AddDataCommand(
             collection.formMetadata.drafts?.[callerDiscordId],
             user,
             collection.id,
-            false,
+            collection.formMetadata.allowAnonymousResponses,
             false,
             false,
           ),
@@ -400,22 +405,29 @@ export class SaveAndPostSocialsCommandHandler
         (nextToNextField.name === 'readonlyAtEnd' &&
           !collection.formMetadata.drafts?.[socialsDto.discordId]?.['saved'])
       ) {
-        const user = await this.queryBus.execute(
-          new GetUserByFilterQuery(
-            {
-              discordId: socialsDto.discordId,
-            },
-            '',
-            true,
-          ),
-        );
+        let user;
+        console.log('saving...');
+        try {
+          user = await this.queryBus.execute(
+            new GetUserByFilterQuery(
+              {
+                discordId: socialsDto.discordId,
+              },
+              '',
+              true,
+            ),
+          );
+        } catch (err) {
+          console.log({ warning: err });
+        }
+        console.log({ id: user });
 
         const res = await this.commandBus.execute(
           new AddDataCommand(
             collection.formMetadata.drafts?.[socialsDto.discordId],
             user,
             collection.id,
-            false,
+            collection.formMetadata.allowAnonymousResponses,
             false,
             false,
           ),
@@ -512,22 +524,27 @@ export class SaveAndPostPaymentCommandHandler
         (nextToNextField.name === 'readonlyAtEnd' &&
           !collection.formMetadata.drafts?.[discordUserId]?.['saved'])
       ) {
-        const user = await this.queryBus.execute(
-          new GetUserByFilterQuery(
-            {
-              discordId: discordUserId,
-            },
-            '',
-            true,
-          ),
-        );
+        let user;
+        try {
+          user = await this.queryBus.execute(
+            new GetUserByFilterQuery(
+              {
+                discordId: discordUserId,
+              },
+              '',
+              true,
+            ),
+          );
+        } catch (err) {
+          console.log({ warning: err });
+        }
 
         const res = await this.commandBus.execute(
           new AddDataCommand(
             collection.formMetadata.drafts?.[discordUserId],
             user,
             collection.id,
-            false,
+            collection.formMetadata.allowAnonymousResponses,
             false,
             false,
           ),
