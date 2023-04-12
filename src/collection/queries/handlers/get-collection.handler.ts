@@ -5,10 +5,7 @@ import { CollectionPublicResponseDto } from 'src/collection/dto/collection-respo
 import { Collection } from 'src/collection/model/collection.model';
 import { AdvancedAccessService } from 'src/collection/services/advanced-access.service';
 import { AdvancedConditionService } from 'src/collection/services/advanced-condition.service';
-import {
-  ClaimEligibilityService,
-  ResponseCredentialingService,
-} from 'src/collection/services/response-credentialing.service';
+import { ClaimEligibilityService } from 'src/collection/services/response-credentialing.service';
 import { CommonTools } from 'src/common/common.service';
 import { LoggingService } from 'src/logging/logging.service';
 import { GetMultipleUsersByIdsQuery } from 'src/users/queries/impl';
@@ -285,7 +282,6 @@ export class GetPrivateViewCollectionQueryHandler
 
   async execute(query: GetPrivateViewCollectionQuery): Promise<any> {
     const { slug, collection } = query;
-
     try {
       let collectionToGet = collection;
       if (!collectionToGet) {
@@ -357,7 +353,6 @@ export class GetPrivateViewCollectionQueryHandler
           );
         }
       }
-
       return {
         ...collectionToGet,
         profiles: this.commonTools.objectify(profileInfo, 'id'),

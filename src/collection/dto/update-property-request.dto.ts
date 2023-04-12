@@ -56,6 +56,7 @@ export class AddPropertyDto {
     'twitter',
     'github',
     'telegram',
+    'readonly',
   ])
   @IsNotEmpty()
   type: PropertyType;
@@ -163,6 +164,7 @@ export class UpdatePropertyDto {
     'twitter',
     'github',
     'telegram',
+    'readonly',
   ])
   @IsOptional()
   type: PropertyType;

@@ -81,7 +81,7 @@ export class AddCommentCommandHandler
         );
       else
         return await this.queryBus.execute(
-          new GetPrivateViewCollectionQuery(null, updatedCollection),
+          new GetPrivateViewCollectionQuery(updatedCollection.slug),
         );
     } catch (err) {
       this.logger.error(
