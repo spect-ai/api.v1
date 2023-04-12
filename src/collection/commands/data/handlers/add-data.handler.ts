@@ -95,7 +95,14 @@ export class AddDataCommandHandler implements ICommandHandler<AddDataCommand> {
   }
 
   async execute(command: AddDataCommand) {
-    const { data, caller, collectionId, anon, validateAccess } = command;
+    const {
+      data,
+      caller,
+      collectionId,
+      anon,
+      validateAccess,
+      callerDiscordId,
+    } = command;
     try {
       const collection = await this.collectionRepository.findById(collectionId);
       if (!collection) throw 'Collection does not exist';

@@ -474,6 +474,7 @@ export class SaveAndPostPaymentCommandHandler
         ),
       );
 
+      let updatedCollection;
       if (['paywall'].includes(nextField.type)) {
         const updatedDraft = {
           ...(collection.formMetadata.drafts || {}),
@@ -486,12 +487,15 @@ export class SaveAndPostPaymentCommandHandler
           },
         };
         console.log({ updatedDraft, colId: collection.id });
-        const res = await this.collectionRepository.updateById(collection.id, {
-          formMetadata: {
-            ...collection.formMetadata,
-            drafts: updatedDraft,
+        updatedCollection = await this.collectionRepository.updateById(
+          collection.id,
+          {
+            formMetadata: {
+              ...collection.formMetadata,
+              drafts: updatedDraft,
+            },
           },
-        });
+        );
       }
 
       const nextToNextField = await this.queryBus.execute(
@@ -536,7 +540,7 @@ export class SaveAndPostPaymentCommandHandler
 
         const res = await this.commandBus.execute(
           new AddDataCommand(
-            collection.formMetadata.drafts?.[discordUserId],
+            updatedCollection.formMetadata.drafts?.[discordUserId],
             user,
             collection.id,
             collection.formMetadata.allowAnonymousResponses,
