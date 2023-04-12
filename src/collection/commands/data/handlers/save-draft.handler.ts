@@ -14,7 +14,10 @@ import { GetNextFieldQuery } from 'src/collection/queries';
 import { AdvancedAccessService } from 'src/collection/services/advanced-access.service';
 import { DataValidationService } from 'src/collection/validations/data-validation.service';
 import { LoggingService } from 'src/logging/logging.service';
-import { AddDataUsingAutomationCommand } from '../impl/add-data.command';
+import {
+  AddDataCommand,
+  AddDataUsingAutomationCommand,
+} from '../impl/add-data.command';
 import {
   SaveAndPostPaymentCommand,
   SaveAndPostSocialsCommand,
@@ -46,6 +49,7 @@ export class SaveDraftCommandHandler
     private readonly validationService: DataValidationService,
     private readonly responseCredentialService: ResponseCredentialService,
     private readonly lookupRepository: LookupRepository,
+    private readonly commandBus: CommandBus,
   ) {
     this.logger.setContext('AddDataCommandHandler');
   }
@@ -87,7 +91,6 @@ export class SaveDraftCommandHandler
       for (let [key, val] of Object.entries(data)) {
         if (isUUID(key) && collection.formMetadata.idLookup?.[key])
           key = collection.formMetadata.idLookup[key];
-        console.log({ key });
         const property = collection.properties[key];
         if (property && property.isPartOfFormView) {
           if (property.type === 'number') {
@@ -215,69 +218,26 @@ export class SaveDraftCommandHandler
         (nextField.name === 'readonlyAtEnd' &&
           !collection.formMetadata.drafts?.[callerDiscordId]?.['saved'])
       ) {
-        /** Disabling activity for forms as it doesnt quite make sense yet */
-
-        const slug = uuid();
-        const data = {
-          ...collection.data,
-          [slug]: {
-            ...res.formMetadata.drafts[callerDiscordId],
-            slug,
-          },
-        };
-        const { dataActivities, dataActivityOrder } =
-          this.activityOnAddData.getActivity(collection, data[slug], null);
-        console.log({ dataActivities, dataActivityOrder, data });
-        if (
-          collection.collectionType === 0 &&
-          (collection.formMetadata?.surveyTokenId ||
-            collection.formMetadata?.surveyTokenId === 0)
-        ) {
-          const user = await this.queryBus.execute(
-            new GetUserByFilterQuery(
-              {
-                discordId: callerDiscordId,
-              },
-              '',
-              true,
-            ),
-          );
-          try {
-            await this.responseCredentialService.airdropResponseReceiptNFT(
-              user.ethAddress,
-              null,
-              collection,
-            );
-          } catch (e) {
-            this.logger.error(
-              `Failed to airdrop response receipt NFT for collection ${collection.id} with error ${e}`,
-            );
-          }
-        }
-        const updatedCollection = await this.collectionRepository.updateById(
-          collection.id,
-          {
-            data,
-            dataActivities,
-            dataActivityOrder,
-            dataOwner: {
-              ...(collection.dataOwner || {}),
-              [slug]: callerDiscordId,
+        const user = await this.queryBus.execute(
+          new GetUserByFilterQuery(
+            {
+              discordId: callerDiscordId,
             },
-            formMetadata: {
-              ...collection.formMetadata,
-              drafts: {
-                ...(collection.formMetadata.drafts || {}),
-                [callerDiscordId]: {
-                  ...(collection.formMetadata.drafts?.[callerDiscordId] || {}),
-                  saved: true,
-                },
-              },
-            },
-          },
+            '',
+            true,
+          ),
         );
-        console.log('succ');
-        this.eventBus.publish(new DataAddedEvent(collection, data, null));
+
+        const res = await this.commandBus.execute(
+          new AddDataCommand(
+            collection.formMetadata.drafts?.[callerDiscordId],
+            user,
+            collection.id,
+            false,
+            false,
+            false,
+          ),
+        );
       }
 
       const returnedField = await this.queryBus.execute(
@@ -435,6 +395,33 @@ export class SaveAndPostSocialsCommandHandler
         socialsDto.discordId,
       );
 
+      if (
+        ['poap', 'kudos', 'erc20'].includes(nextToNextField?.type) ||
+        (nextToNextField.name === 'readonlyAtEnd' &&
+          !collection.formMetadata.drafts?.[socialsDto.discordId]?.['saved'])
+      ) {
+        const user = await this.queryBus.execute(
+          new GetUserByFilterQuery(
+            {
+              discordId: socialsDto.discordId,
+            },
+            '',
+            true,
+          ),
+        );
+
+        const res = await this.commandBus.execute(
+          new AddDataCommand(
+            collection.formMetadata.drafts?.[socialsDto.discordId],
+            user,
+            collection.id,
+            false,
+            false,
+            false,
+          ),
+        );
+      }
+
       return { success: true };
     } catch (err) {
       console.log({ err });
@@ -519,6 +506,33 @@ export class SaveAndPostPaymentCommandHandler
         nextToNextField,
         discordUserId,
       );
+
+      if (
+        ['poap', 'kudos', 'erc20'].includes(nextToNextField?.type) ||
+        (nextToNextField.name === 'readonlyAtEnd' &&
+          !collection.formMetadata.drafts?.[discordUserId]?.['saved'])
+      ) {
+        const user = await this.queryBus.execute(
+          new GetUserByFilterQuery(
+            {
+              discordId: discordUserId,
+            },
+            '',
+            true,
+          ),
+        );
+
+        const res = await this.commandBus.execute(
+          new AddDataCommand(
+            collection.formMetadata.drafts?.[discordUserId],
+            user,
+            collection.id,
+            false,
+            false,
+            false,
+          ),
+        );
+      }
 
       return { success: true };
     } catch (err) {

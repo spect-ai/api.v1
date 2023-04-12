@@ -95,7 +95,7 @@ export class AddDataCommandHandler implements ICommandHandler<AddDataCommand> {
   }
 
   async execute(command: AddDataCommand) {
-    const { data, caller, collectionId, anon } = command;
+    const { data, caller, collectionId, anon, validateAccess } = command;
     try {
       const collection = await this.collectionRepository.findById(collectionId);
       if (!collection) throw 'Collection does not exist';
@@ -109,20 +109,23 @@ export class AddDataCommandHandler implements ICommandHandler<AddDataCommand> {
         ) {
           throw 'User has already submitted a response';
         }
-        const hasPassedSybilCheck =
-          await this.advancedAccessService.hasPassedSybilProtection(
+
+        if (validateAccess) {
+          const hasPassedSybilCheck =
+            await this.advancedAccessService.hasPassedSybilProtection(
+              collection,
+              caller,
+            );
+          if (!hasPassedSybilCheck) throw 'User has not passed sybil check';
+          const hasRole = await this.advancedAccessService.hasRoleToAccessForm(
             collection,
             caller,
           );
-        if (!hasPassedSybilCheck) throw 'User has not passed sybil check';
-        const hasRole = await this.advancedAccessService.hasRoleToAccessForm(
-          collection,
-          caller,
-        );
-        if (!hasPassedSybilCheck) throw 'User has not passed sybil check';
+          if (!hasPassedSybilCheck) throw 'User has not passed sybil check';
 
-        if (!hasRole)
-          throw 'User does not have access to add data this collection';
+          if (!hasRole)
+            throw 'User does not have access to add data this collection';
+        }
       }
 
       let filteredData =
