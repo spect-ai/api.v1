@@ -73,7 +73,6 @@ export class DataValidationService {
       )
         continue;
       if (!properties[propertyId]) {
-        console.log({ propertyId, data });
         return false;
       }
     }
@@ -85,7 +84,6 @@ export class DataValidationService {
     properties: MappedItem<Property>,
   ): boolean {
     for (const [propertyId, data] of Object.entries(dataObj)) {
-      console.log({ propertyId, data });
       if (data === null) continue;
       if (
         propertyId === '__payment__' ||
@@ -299,7 +297,6 @@ export class DataValidationService {
     [key: string]: object;
   }): boolean {
     for (const data of Object.values(milestoneFields)) {
-      console.log({ data });
       if (data) {
         if (!data['title']) return false;
         if (data['dueDate'] && !isValidDateString(data['dueDate'])) {

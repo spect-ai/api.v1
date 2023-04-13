@@ -57,7 +57,6 @@ export class SaveDraftCommandHandler
   async execute(command: SaveDraftFromDiscordCommand) {
     const { data, channelId, callerDiscordId, skip } = command;
     try {
-      console.log({ data, channelId, callerDiscordId });
       const lookedUpData = await this.lookupRepository.findOne({
         key: channelId,
         keyType: 'discordThreadId',
@@ -89,7 +88,7 @@ export class SaveDraftCommandHandler
 
       // eslint-disable-next-line prefer-const
       for (let [key, val] of Object.entries(data)) {
-        if (isUUID(key) && collection.formMetadata.idLookup?.[key])
+        if (collection.formMetadata.idLookup?.[key])
           key = collection.formMetadata.idLookup[key];
         const property = collection.properties[key];
         if (property && property.isPartOfFormView) {
@@ -99,7 +98,6 @@ export class SaveDraftCommandHandler
           } else if (property.type === 'reward') {
             if (val['chain']) {
               const chain = collection.formMetadata.idLookup?.[val['chain']];
-              console.log({ chain });
               if (!chain) throw 'Invalid chain';
               val['chain'] = chain;
             }
@@ -109,21 +107,44 @@ export class SaveDraftCommandHandler
               val['token'] = token;
             }
             rewardFields[key] = val;
-          } else if (['singleSelect', 'user'].includes(property.type)) {
+          } else if (['user'].includes(property.type)) {
             const option = collection.formMetadata.idLookup?.[val];
             if (!option) throw 'Invalid optionId';
             formFieldUpdates[key] = option;
-          } else if (['multiSelect', 'user[]'].includes(property.type)) {
+          } else if (['user[]'].includes(property.type)) {
             const options = val.map((optionId: string) => {
               const option = collection.formMetadata.idLookup?.[optionId];
               if (!option) throw 'Invalid optionId';
               return option;
             });
             formFieldUpdates[key] = options;
+          } else if (['singleSelect'].includes(property.type)) {
+            let option;
+            if (val.custom) {
+              option = {
+                label: val.value,
+                value: '__custom__',
+              };
+            } else option = collection.formMetadata.idLookup?.[val.optionId];
+            if (!option) throw 'Invalid optionId';
+            formFieldUpdates[key] = option;
+          } else if (['multiSelect'].includes(property.type)) {
+            const options = val.map((option: any) => {
+              if (option.custom) {
+                return {
+                  label: option.value,
+                  value: '__custom__',
+                };
+              } else {
+                const opt = collection.formMetadata.idLookup?.[option.optionId];
+                if (!opt) throw 'Invalid optionId';
+                return opt;
+              }
+            });
+            formFieldUpdates[key] = options;
           } else formFieldUpdates[key] = val;
         }
       }
-
       const skippedFormFields = {};
       // eslint-disable-next-line prefer-const
       for (let [key, val] of Object.entries(skip || {})) {
@@ -180,36 +201,38 @@ export class SaveDraftCommandHandler
         formFieldUpdates['captcha'] = data['captcha'];
       }
 
-      console.log({ formFieldUpdates });
-      const res = await this.collectionRepository.updateById(collection.id, {
-        formMetadata: {
-          ...collection.formMetadata,
-          drafts: {
-            ...(collection.formMetadata.drafts || {}),
-            [callerDiscordId]: {
-              ...(collection.formMetadata.drafts?.[callerDiscordId] || {}),
-              ...formFieldUpdates,
-              ...rewardFields,
+      const updatedCollection = await this.collectionRepository.updateById(
+        collection.id,
+        {
+          formMetadata: {
+            ...collection.formMetadata,
+            drafts: {
+              ...(collection.formMetadata.drafts || {}),
+              [callerDiscordId]: {
+                ...(collection.formMetadata.drafts?.[callerDiscordId] || {}),
+                ...formFieldUpdates,
+                ...rewardFields,
+              },
             },
-          },
-          skippedFormFields: {
-            ...(collection.formMetadata.skippedFormFields || {}),
-            [callerDiscordId]: {
-              ...(collection.formMetadata.skippedFormFields?.[
-                callerDiscordId
-              ] || {}),
-              ...skippedFormFields,
+            skippedFormFields: {
+              ...(collection.formMetadata.skippedFormFields || {}),
+              [callerDiscordId]: {
+                ...(collection.formMetadata.skippedFormFields?.[
+                  callerDiscordId
+                ] || {}),
+                ...skippedFormFields,
+              },
             },
           },
         },
-      });
+      );
       const nextField = await this.queryBus.execute(
         new GetNextFieldQuery(
           callerDiscordId,
           'discordId',
           null,
           null,
-          res,
+          updatedCollection,
           false,
         ),
       );
@@ -235,12 +258,14 @@ export class SaveDraftCommandHandler
 
         const res = await this.commandBus.execute(
           new AddDataCommand(
-            collection.formMetadata.drafts?.[callerDiscordId],
+            updatedCollection.formMetadata.drafts?.[callerDiscordId] ||
+              collection.formMetadata.drafts?.[callerDiscordId],
             user,
             collection.id,
             collection.formMetadata.allowAnonymousResponses,
             false,
             false,
+            callerDiscordId,
           ),
         );
       }
@@ -251,7 +276,7 @@ export class SaveDraftCommandHandler
           'discordId',
           null,
           null,
-          res,
+          updatedCollection,
           true,
         ),
       );
@@ -328,9 +353,9 @@ export class SaveAndPostSocialsCommandHandler
           true,
         ),
       );
-      console.log({ nextField, socialsDto });
 
       const nextFieldVal = this.getVal(nextField.type, socialsDto, caller);
+      let updatedCollection;
       if (['github', 'discord', 'telegram'].includes(nextField.type)) {
         const updatedDraft = {
           ...(collection.formMetadata.drafts || {}),
@@ -339,12 +364,15 @@ export class SaveAndPostSocialsCommandHandler
             [nextField.name]: nextFieldVal,
           },
         };
-        const res = await this.collectionRepository.updateById(collection.id, {
-          formMetadata: {
-            ...collection.formMetadata,
-            drafts: updatedDraft,
+        const updatedCollection = await this.collectionRepository.updateById(
+          collection.id,
+          {
+            formMetadata: {
+              ...collection.formMetadata,
+              drafts: updatedDraft,
+            },
           },
-        });
+        );
       }
 
       // Add to user data (should never cause failure in form data update)
@@ -402,7 +430,6 @@ export class SaveAndPostSocialsCommandHandler
           !collection.formMetadata.drafts?.[socialsDto.discordId]?.['saved'])
       ) {
         let user;
-        console.log('saving...');
         try {
           user = await this.queryBus.execute(
             new GetUserByFilterQuery(
@@ -419,7 +446,8 @@ export class SaveAndPostSocialsCommandHandler
 
         const res = await this.commandBus.execute(
           new AddDataCommand(
-            collection.formMetadata.drafts?.[socialsDto.discordId],
+            updatedCollection.formMetadata.drafts?.[socialsDto.discordId] ||
+              collection.formMetadata.drafts?.[socialsDto.discordId],
             user,
             collection.id,
             collection.formMetadata.allowAnonymousResponses,
@@ -486,7 +514,6 @@ export class SaveAndPostPaymentCommandHandler
             },
           },
         };
-        console.log({ updatedDraft, colId: collection.id });
         updatedCollection = await this.collectionRepository.updateById(
           collection.id,
           {

@@ -57,7 +57,6 @@ export class GetNextFieldQueryHandler
   }
 
   fetchIncompleteRewardField(value: any) {
-    console.log({ value });
     if (!value?.chain) {
       return 'chain';
     } else if (!value?.token) return 'token';
@@ -75,12 +74,11 @@ export class GetNextFieldQueryHandler
     const lookupUpdates = {};
     const returnedOptions = [];
     options.forEach((option) => {
-      const id = uuidv4();
-      lookupUpdates[id] = option;
+      lookupUpdates[option.value] = option;
 
       returnedOptions.push({
         ...option,
-        id: id,
+        id: option.value,
       });
     });
 
@@ -107,7 +105,6 @@ export class GetNextFieldQueryHandler
   ) {
     const idLookupsVals = Object.values(collection.formMetadata.idLookup || {});
     const propNameIdx = idLookupsVals.indexOf(property.name);
-    console.log({ propNameIdx });
     if (propNameIdx !== -1)
       return {
         id: Object.keys(collection.formMetadata.idLookup || {})[propNameIdx],
@@ -228,7 +225,6 @@ export class GetNextFieldQueryHandler
     }
     for (const page of collection.formMetadata.pageOrder) {
       for (const propertyId of collection.formMetadata.pages[page].properties) {
-        console.log({ propertyId });
         if (
           collection.formMetadata.skippedFormFields?.[discordId]?.[propertyId]
         )
@@ -578,6 +574,15 @@ export class GetNextFieldQueryHandler
             });
           }
         }
+        if (['singleSelect'].includes(returnedField.type)) {
+          if (returnedField.allowCustom) {
+            returnedField.options.push({
+              label: 'Other',
+              value: 'other',
+            });
+          }
+        }
+
         if (
           ['reward', 'user', 'user[]', 'singleSelect', 'multiSelect'].includes(
             returnedField.type,
