@@ -1,4 +1,9 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Injectable,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { LoggingService } from 'src/logging/logging.service';
 import { CreatePOAPDto } from '../dto/create-credential.dto';
 import * as FormData from 'form-data';
@@ -187,7 +192,13 @@ export class PoapService {
     try {
       const hasPoapAlreadyRes = await this.hasPoap(address, poapEventId);
       if (hasPoapAlreadyRes.statusCode !== 404) {
-        throw `User ${address} already has a POAP for event ${poapEventId}`;
+        throw new HttpException(
+          {
+            errorCode: 'POAP_ALREADY_CLAIMED',
+            message: `User with address ${address} already has a POAP for event ${poapEventId}`,
+          },
+          HttpStatus.BAD_REQUEST,
+        );
       }
 
       const qrHashes = await this.claimQrCode(poapEventId, editCode);

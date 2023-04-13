@@ -1,4 +1,8 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import {
+  HttpException,
+  Injectable,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import fetch from 'node-fetch';
 import { Property } from 'src/collection/types/types';
 import { LoggingService } from 'src/logging/logging.service';
@@ -136,22 +140,32 @@ export class DiscordService {
     }
   }
 
-  async postForm(channelId: string, title: string, description: string) {
+  async postForm(channelId: string, name: string, description: string) {
     try {
-      return await (
-        await fetch(`${process.env.DISCORD_URI}/api/postForm`, {
-          headers: {
-            'Content-Type': 'application/json',
+      const res = await fetch(`${process.env.DISCORD_URI}/api/forms`, {
+        headers: {
+          'Content-Type': 'application/json',
+          secret: this.encryptionService.encrypt(process.env.API_SECRET),
+        },
+        method: 'POST',
+        body: JSON.stringify({
+          channelId,
+          name,
+          description,
+        }),
+      });
+      const json = await res.json();
+      if (res.status !== 200) {
+        throw new HttpException(
+          {
+            message: json.message || json.errors || 'Internal Server Error',
           },
-          method: 'POST',
-          body: JSON.stringify({
-            channelId,
-            title,
-            description,
-          }),
-        })
-      ).json();
+          res.status || InternalServerErrorException,
+        );
+      }
+      return json;
     } catch (e) {
+      console.log({ e });
       this.logger.error(e);
       throw e;
     }
@@ -164,20 +178,33 @@ export class DiscordService {
     discordUserId: string,
   ) {
     try {
-      return await (
-        await fetch(`${process.env.DISCORD_URI}/api/postSocials`, {
-          headers: {
-            'Content-Type': 'application/json',
+      console.log({ channelId, socials, nextField, discordUserId });
+      const res = await fetch(`${process.env.DISCORD_URI}/api/forms/socials`, {
+        headers: {
+          'Content-Type': 'application/json',
+          secret: this.encryptionService.encrypt(process.env.API_SECRET),
+        },
+        method: 'POST',
+        body: JSON.stringify({
+          channelId,
+          currField: socials,
+          nextField,
+          discordUserId,
+        }),
+      });
+
+      console.log({ res });
+
+      const json = await res.json();
+      if (res.status !== 200) {
+        throw new HttpException(
+          {
+            message: json.message || json.errors || 'Internal Server Error',
           },
-          method: 'POST',
-          body: JSON.stringify({
-            channelId,
-            socials,
-            nextField,
-            discordUserId: discordUserId,
-          }),
-        })
-      ).json();
+          res.status || InternalServerErrorException,
+        );
+      }
+      return json;
     } catch (e) {
       this.logger.error(e);
       throw e;
@@ -191,20 +218,30 @@ export class DiscordService {
     discordUserId: string,
   ) {
     try {
-      return await (
-        await fetch(`${process.env.DISCORD_URI}/api/postFormPayment`, {
-          headers: {
-            'Content-Type': 'application/json',
+      const res = await fetch(`${process.env.DISCORD_URI}/api/forms/payment`, {
+        headers: {
+          'Content-Type': 'application/json',
+          secret: this.encryptionService.encrypt(process.env.API_SECRET),
+        },
+        method: 'POST',
+        body: JSON.stringify({
+          channelId,
+          currField: paymentProperty,
+          nextField,
+          discordUserId,
+        }),
+      });
+
+      const json = await res.json();
+      if (res.status !== 200) {
+        throw new HttpException(
+          {
+            message: json.message || json.errors || 'Internal Server Error',
           },
-          method: 'POST',
-          body: JSON.stringify({
-            channelId,
-            paymentProperty,
-            nextField,
-            discordUserId,
-          }),
-        })
-      ).json();
+          res.status || InternalServerErrorException,
+        );
+      }
+      return json;
     } catch (e) {
       this.logger.error(e);
       throw e;

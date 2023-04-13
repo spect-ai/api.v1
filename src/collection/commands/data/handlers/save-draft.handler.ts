@@ -108,12 +108,12 @@ export class SaveDraftCommandHandler
             }
             rewardFields[key] = val;
           } else if (['user'].includes(property.type)) {
-            const option = collection.formMetadata.idLookup?.[val];
+            const option = collection.formMetadata.idLookup?.[val.optionId];
             if (!option) throw 'Invalid optionId';
             formFieldUpdates[key] = option;
           } else if (['user[]'].includes(property.type)) {
-            const options = val.map((optionId: string) => {
-              const option = collection.formMetadata.idLookup?.[optionId];
+            const options = val.map((opt: any) => {
+              const option = collection.formMetadata.idLookup?.[opt.optionId];
               if (!option) throw 'Invalid optionId';
               return option;
             });
@@ -151,7 +151,10 @@ export class SaveDraftCommandHandler
         if (collection.formMetadata.idLookup?.[key])
           key = collection.formMetadata.idLookup[key];
         const property = collection.properties[key];
-        if ((property && property.isPartOfFormView) || key === 'paywall') {
+        if (
+          (property && property.isPartOfFormView) ||
+          ['paywall', 'poap', 'kudos', 'erc20'].includes(key)
+        ) {
           skippedFormFields[key] = val;
         }
       }
@@ -255,19 +258,24 @@ export class SaveDraftCommandHandler
         } catch (err) {
           console.log({ warning: err });
         }
-
-        const res = await this.commandBus.execute(
-          new AddDataCommand(
-            updatedCollection.formMetadata.drafts?.[callerDiscordId] ||
-              collection.formMetadata.drafts?.[callerDiscordId],
-            user,
-            collection.id,
-            collection.formMetadata.allowAnonymousResponses,
-            false,
-            false,
-            callerDiscordId,
-          ),
-        );
+        if (
+          collection.formMetadata.multipleResponsesAllowed ||
+          !collection.dataOwner ||
+          !Object.values(collection.dataOwner)?.includes(user?.id)
+        ) {
+          const res = await this.commandBus.execute(
+            new AddDataCommand(
+              updatedCollection.formMetadata.drafts?.[callerDiscordId] ||
+                collection.formMetadata.drafts?.[callerDiscordId],
+              user,
+              collection.id,
+              collection.formMetadata.allowAnonymousResponses,
+              false,
+              false,
+              callerDiscordId,
+            ),
+          );
+        }
       }
 
       const returnedField = await this.queryBus.execute(
@@ -444,17 +452,23 @@ export class SaveAndPostSocialsCommandHandler
           console.log({ warning: err });
         }
 
-        const res = await this.commandBus.execute(
-          new AddDataCommand(
-            updatedCollection.formMetadata.drafts?.[socialsDto.discordId] ||
-              collection.formMetadata.drafts?.[socialsDto.discordId],
-            user,
-            collection.id,
-            collection.formMetadata.allowAnonymousResponses,
-            false,
-            false,
-          ),
-        );
+        if (
+          collection.formMetadata.multipleResponsesAllowed ||
+          !collection.dataOwner ||
+          !Object.values(collection.dataOwner)?.includes(user?.id)
+        ) {
+          const res = await this.commandBus.execute(
+            new AddDataCommand(
+              updatedCollection.formMetadata.drafts?.[socialsDto.discordId] ||
+                collection.formMetadata.drafts?.[socialsDto.discordId],
+              user,
+              collection.id,
+              collection.formMetadata.allowAnonymousResponses,
+              false,
+              false,
+            ),
+          );
+        }
       }
 
       return { success: true };
@@ -564,17 +578,22 @@ export class SaveAndPostPaymentCommandHandler
         } catch (err) {
           console.log({ warning: err });
         }
-
-        const res = await this.commandBus.execute(
-          new AddDataCommand(
-            updatedCollection.formMetadata.drafts?.[discordUserId],
-            user,
-            collection.id,
-            collection.formMetadata.allowAnonymousResponses,
-            false,
-            false,
-          ),
-        );
+        if (
+          collection.formMetadata.multipleResponsesAllowed ||
+          !collection.dataOwner ||
+          !Object.values(collection.dataOwner)?.includes(user?.id)
+        ) {
+          const res = await this.commandBus.execute(
+            new AddDataCommand(
+              updatedCollection.formMetadata.drafts?.[discordUserId],
+              user,
+              collection.id,
+              collection.formMetadata.allowAnonymousResponses,
+              false,
+              false,
+            ),
+          );
+        }
       }
 
       return { success: true };

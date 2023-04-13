@@ -291,7 +291,8 @@ export class GetNextFieldQueryHandler
     if (
       collection.formMetadata.poapEventId &&
       collection.formMetadata.poapEditCode &&
-      !collection.formMetadata?.drafts?.[discordId]?.['poapClaimed']
+      !collection.formMetadata?.drafts?.[discordId]?.['poapClaimed'] &&
+      !collection.formMetadata.skippedFormFields?.[discordId]?.['poap']
     ) {
       return {
         field: 'poap',
