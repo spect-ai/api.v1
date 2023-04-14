@@ -95,14 +95,8 @@ export class AddDataCommandHandler implements ICommandHandler<AddDataCommand> {
   }
 
   async execute(command: AddDataCommand) {
-    const {
-      data,
-      caller,
-      collectionId,
-      anon,
-      validateAccess,
-      callerDiscordId,
-    } = command;
+    const { data, caller, collectionId, anon, validateAccess, validateData } =
+      command;
     try {
       const collection = await this.collectionRepository.findById(collectionId);
       if (!collection) throw 'Collection does not exist';
@@ -142,14 +136,16 @@ export class AddDataCommandHandler implements ICommandHandler<AddDataCommand> {
         );
       filteredData = await this.filterUndefinedValues(filteredData);
 
-      const validData = await this.validationService.validate(
-        filteredData,
-        'add',
-        false,
-        collection,
-      );
-      if (!validData) {
-        throw new Error(`Data invalid`);
+      if (validateData) {
+        const validData = await this.validationService.validate(
+          filteredData,
+          'add',
+          false,
+          collection,
+        );
+        if (!validData) {
+          throw new Error(`Data invalid`);
+        }
       }
       for (const [propertyId, property] of Object.entries(
         collection.properties,

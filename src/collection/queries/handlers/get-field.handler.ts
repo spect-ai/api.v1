@@ -231,8 +231,11 @@ export class GetNextFieldQueryHandler
           continue;
 
         const property = properties[propertyId];
-        if (!property.isPartOfFormView) continue;
-
+        if (
+          !property.isPartOfFormView ||
+          ['milestone', 'multiURL'].includes(property.type)
+        )
+          continue;
         if (
           draftSubmittedByUser[propertyId] &&
           this.rewardFieldCompleted(

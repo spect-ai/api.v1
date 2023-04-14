@@ -272,7 +272,7 @@ export class SaveDraftCommandHandler
               collection.formMetadata.allowAnonymousResponses,
               false,
               false,
-              callerDiscordId,
+              false,
             ),
           );
         }
@@ -469,6 +469,7 @@ export class SaveAndPostSocialsCommandHandler
               collection.formMetadata.allowAnonymousResponses,
               false,
               false,
+              false,
             ),
           );
         }
@@ -598,6 +599,7 @@ export class SaveAndPostPaymentCommandHandler
               user,
               collection.id,
               collection.formMetadata.allowAnonymousResponses,
+              false,
               false,
               false,
             ),

@@ -8,7 +8,7 @@ export class AddDataCommand {
     public readonly anon: boolean,
     public readonly onlyIfForm?: boolean,
     public readonly validateAccess = true,
-    public readonly callerDiscordId?: string,
+    public readonly validateData = true,
   ) {}
 }
 
