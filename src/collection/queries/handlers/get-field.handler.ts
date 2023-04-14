@@ -1,4 +1,4 @@
-import { NotFoundException } from '@nestjs/common';
+import { HttpException, HttpStatus, NotFoundException } from '@nestjs/common';
 import { IQueryHandler, QueryBus, QueryHandler } from '@nestjs/cqrs';
 import { HasSatisfiedDataConditionsQuery } from 'src/automation/queries/impl';
 import { GetCircleByIdQuery } from 'src/circle/queries/impl';
@@ -448,11 +448,19 @@ export class GetNextFieldQueryHandler
           keyType: 'discordThreadId',
         });
         if (!lookedUpData?.collectionId)
-          throw 'Collection hasnt been indexed with the given threadId';
+          throw new HttpException(
+            {
+              errorCode: 10290,
+              message: 'Collection hasnt been indexed with the given threadId',
+            },
+            HttpStatus.BAD_REQUEST,
+          );
+
         collection = await this.collectionRepository.findById(
           lookedUpData.collectionId,
         );
       }
+
       if (!collection) {
         throw new NotFoundException('Collection not found');
       }
@@ -602,7 +610,9 @@ export class GetNextFieldQueryHandler
       }
       return null;
     } catch (err) {
-      this.logger.logError(`Error in GetNextFieldQueryHandler ${err}`);
+      this.logger.logError(
+        `Error while getting next field in collection slug: ${slug}, callerId: ${callerId}, discord channel id: ${discordChannelId}, error: ${err}`,
+      );
       throw err;
     }
   }

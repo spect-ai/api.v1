@@ -290,7 +290,9 @@ export class SaveDraftCommandHandler
       );
       return returnedField;
     } catch (err) {
-      this.logger.logError(`Saving draft failed with error ${err}`);
+      this.logger.logError(
+        `Saving draft failed on channelId: ${channelId}, callerId: ${callerDiscordId}, data: ${data} with error ${err}`,
+      );
       throw new HttpException(err, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
@@ -306,6 +308,7 @@ export class SaveAndPostSocialsCommandHandler
     private readonly discordService: DiscordService,
     private readonly lookupRepository: LookupRepository,
     private readonly collectionRepository: CollectionRepository,
+    private readonly logger: LoggingService,
   ) {}
 
   getVal(nextFieldType: string, socialsDto: SocialsDto, caller: User) {
@@ -474,6 +477,9 @@ export class SaveAndPostSocialsCommandHandler
       return { success: true };
     } catch (err) {
       console.log({ err });
+      this.logger.error(
+        `Failed while saving and posting socials on Discord with ${err}`,
+      );
       throw new HttpException(err, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
@@ -489,7 +495,10 @@ export class SaveAndPostPaymentCommandHandler
     private readonly discordService: DiscordService,
     private readonly lookupRepository: LookupRepository,
     private readonly collectionRepository: CollectionRepository,
-  ) {}
+    private readonly logger: LoggingService,
+  ) {
+    this.logger.setContext(SaveAndPostPaymentCommandHandler.name);
+  }
 
   async execute(command: SaveAndPostPaymentCommand) {
     const { formPaymentDto, channelId, caller, discordUserId } = command;
@@ -599,6 +608,9 @@ export class SaveAndPostPaymentCommandHandler
       return { success: true };
     } catch (err) {
       console.log({ err });
+      this.logger.error(
+        `Failed while saving and posting payment on Discord with ${err}`,
+      );
       throw new HttpException(err, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
