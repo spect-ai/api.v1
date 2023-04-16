@@ -6,6 +6,7 @@ import {
   IsOptional,
   IsString,
   IsUUID,
+  IsUrl,
 } from 'class-validator';
 import { IsObjectId } from 'class-validator-mongo-object-id';
 
@@ -209,4 +210,9 @@ export class RequiredDiscordChannelIdDto {
   @IsString()
   @IsNotEmpty()
   channelId: string;
+}
+export class RequiredUrlDto {
+  @IsUrl()
+  @IsNotEmpty()
+  url: string;
 }
