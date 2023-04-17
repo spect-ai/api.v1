@@ -17,6 +17,8 @@ export class HasSatisfiedDataConditionsQueryHandler
       const comparatorValue = comparator?.value;
       const property = collection.properties[propertyId];
 
+      if (!property) return true;
+
       switch (property.type) {
         case 'shortText':
         case 'longText':
