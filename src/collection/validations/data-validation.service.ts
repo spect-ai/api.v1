@@ -219,8 +219,9 @@ export class DataValidationService {
     for (const [propertyId, property] of Object.entries(
       collection.properties,
     )) {
+      if (property.type === 'readonly') continue;
       let satisfiedConditions = true;
-      if (property.viewConditions)
+      if (property.viewConditions?.length) {
         satisfiedConditions = await this.queryBus.execute(
           new HasSatisfiedDataConditionsQuery(
             collection,
@@ -228,6 +229,7 @@ export class DataValidationService {
             property.viewConditions,
           ),
         );
+      }
       if (property.required && satisfiedConditions) {
         if (
           operation === 'update' &&
@@ -235,7 +237,9 @@ export class DataValidationService {
           !dataObj[propertyId]
         ) {
           return false;
-        } else if (operation === 'add' && !dataObj[propertyId]) return false;
+        } else if (operation === 'add' && !dataObj[propertyId]) {
+          return false;
+        }
       }
     }
     return true;
