@@ -16,6 +16,7 @@ import { AddMultipleDataUsingAutomationCommand } from '../data/impl/add-data.com
 import { UpdateCircleCommand } from 'src/circle/commands/impl/update-circle.command';
 import { Collection } from 'src/collection/model/collection.model';
 import { UpdateCollectionCommand } from '../impl/update-collection.command';
+import { Permissions } from 'src/collection/types/types';
 
 @CommandHandler(ImportCommand)
 export class ImportCommandHandler implements ICommandHandler<ImportCommand> {
@@ -52,11 +53,12 @@ export class ImportCommandHandler implements ICommandHandler<ImportCommand> {
 
       if (!parentCircle) throw `Circle with id ${circleId} not found`;
       // give default permissions to roles which have createForm permission
-      const defaultPermissions = {
+      const defaultPermissions: Permissions = {
         manageSettings: [],
         updateResponsesManually: [],
         viewResponses: [],
         addComments: [],
+        addAndEditFields: [],
       };
 
       Object.keys(parentCircle.roles).map((role) => {
@@ -65,6 +67,7 @@ export class ImportCommandHandler implements ICommandHandler<ImportCommand> {
           defaultPermissions.updateResponsesManually.push(role);
           defaultPermissions.viewResponses.push(role);
           defaultPermissions.addComments.push(role);
+          defaultPermissions.addAndEditFields.push(role);
         }
       });
 

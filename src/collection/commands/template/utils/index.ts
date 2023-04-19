@@ -25,15 +25,17 @@ import {
   onboardingProjectProperties,
   onboardingProjectPropertyOrder,
 } from './constants/onboardingTemplate/onboardingProject';
+import { Permissions } from 'src/collection/types/types';
 
 const defaultViewId = '0x0';
 
-const getDefaultPermissions = (circle: Circle) => {
+const getDefaultPermissions = (circle: Circle): Permissions => {
   const defaultPermissions = {
     manageSettings: [],
     updateResponsesManually: [],
     viewResponses: [],
     addComments: [],
+    addAndEditFields: [],
   };
 
   Object.keys(circle.roles).map((role) => {
@@ -42,6 +44,7 @@ const getDefaultPermissions = (circle: Circle) => {
       defaultPermissions.updateResponsesManually.push(role);
       defaultPermissions.viewResponses.push(role);
       defaultPermissions.addComments.push(role);
+      defaultPermissions.addAndEditFields.push(role);
     }
   });
 
