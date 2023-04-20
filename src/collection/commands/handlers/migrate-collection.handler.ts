@@ -9,58 +9,63 @@ export class MigrateAllCollectionsCommandHandler
   constructor(private readonly collectionRepository: CollectionRepository) {}
 
   async execute(command: MigrateAllCollectionsCommand) {
-    const allCollections = await this.collectionRepository.findAll();
+    const allCollections = [
+      await this.collectionRepository.findById('643e65003b8a21ed1914f16b'),
+    ];
 
     for (const collection of allCollections) {
-      if (
-        collection.collectionType === 0 &&
-        collection.formMetadata &&
-        !collection.formMetadata.pages
-      ) {
-        const pages = {
-          start: {
-            id: 'start',
-            name: 'Welcome Page',
-            properties: [],
-          },
-          'page-1': {
-            id: 'page-1',
-            name: 'Page 1',
-            properties: collection.propertyOrder,
-            movable: true,
-          },
-          submitted: {
-            id: 'submitted',
-            name: 'Submitted',
-            properties: [],
-          },
-        };
-        const pageOrder = ['start', 'page-1', 'submitted'];
+      // if (
+      //   collection.collectionType === 0 &&
+      //   collection.formMetadata &&
+      //   !collection.formMetadata.pages
+      // ) {
+      //   const pages = {
+      //     start: {
+      //       id: 'start',
+      //       name: 'Welcome Page',
+      //       properties: [],
+      //     },
+      //     'page-1': {
+      //       id: 'page-1',
+      //       name: 'Page 1',
+      //       properties: collection.propertyOrder,
+      //       movable: true,
+      //     },
+      //     submitted: {
+      //       id: 'submitted',
+      //       name: 'Submitted',
+      //       properties: [],
+      //     },
+      //   };
+      //   const pageOrder = ['start', 'page-1', 'submitted'];
 
-        pages['connect'] = {
-          id: 'connect',
-          name: 'Connect Wallet',
-          properties: [],
-        };
-        pageOrder.splice(1, 0, 'connect');
+      //   pages['connect'] = {
+      //     id: 'connect',
+      //     name: 'Connect Wallet',
+      //     properties: [],
+      //   };
+      //   pageOrder.splice(1, 0, 'connect');
 
-        if (
-          collection.formMetadata.poapEventId ||
-          collection.formMetadata.surveyTokenId ||
-          collection.formMetadata.mintkudosTokenId
-        ) {
-          pages['collect'] = {
-            id: 'collect',
-            name: 'Collect Incentives',
-            properties: [],
-          };
-          pageOrder.splice(-1, 0, 'collect');
-        }
+      //   if (
+      //     collection.formMetadata.poapEventId ||
+      //     collection.formMetadata.surveyTokenId ||
+      //     collection.formMetadata.mintkudosTokenId
+      //   ) {
+      //     pages['collect'] = {
+      //       id: 'collect',
+      //       name: 'Collect Incentives',
+      //       properties: [],
+      //     };
+      //     pageOrder.splice(-1, 0, 'collect');
+      //   }
 
-        collection.formMetadata.pages = pages;
-        collection.formMetadata.pageOrder = pageOrder;
-        collection.formMetadata.allowAnonymousResponses = false;
-      }
+      //   collection.formMetadata.pages = pages;
+      //   collection.formMetadata.pageOrder = pageOrder;
+      //   collection.formMetadata.allowAnonymousResponses = false;
+      // }
+      collection.permissions.addAndEditFields = [
+        ...collection.permissions.manageSettings,
+      ];
       await this.collectionRepository.updateById(collection.id, collection);
     }
 

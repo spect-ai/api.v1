@@ -22,18 +22,6 @@ export class Permissions {
   manageCircleSettings: boolean;
 
   @IsBoolean()
-  createNewProject: boolean;
-
-  @IsBoolean()
-  manageProjectSettings: boolean;
-
-  @IsBoolean()
-  createNewRetro: boolean;
-
-  @IsBoolean()
-  endRetroManually: boolean;
-
-  @IsBoolean()
   managePaymentOptions: boolean;
 
   @IsBoolean()
@@ -53,31 +41,6 @@ export class Permissions {
 
   @IsBoolean()
   createNewForm: boolean;
-
-  @ValidateNested()
-  @Type(() => CardTypeBasedPermissions)
-  @IsNotEmpty()
-  manageCardProperties: CardTypeBasedPermissions;
-
-  @ValidateNested()
-  @Type(() => CardTypeBasedPermissions)
-  @IsNotEmpty()
-  createNewCard: CardTypeBasedPermissions;
-
-  @ValidateNested()
-  @Type(() => CardTypeBasedPermissions)
-  @IsNotEmpty()
-  manageRewards: CardTypeBasedPermissions;
-
-  @ValidateNested()
-  @Type(() => CardTypeBasedPermissions)
-  @IsNotEmpty()
-  reviewWork: CardTypeBasedPermissions;
-
-  @ValidateNested()
-  @Type(() => CardTypeBasedPermissions)
-  @IsNotEmpty()
-  canClaim: CardTypeBasedPermissions;
 }
 
 export class AddRoleDto {
