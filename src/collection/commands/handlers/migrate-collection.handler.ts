@@ -9,11 +9,13 @@ export class MigrateAllCollectionsCommandHandler
   constructor(private readonly collectionRepository: CollectionRepository) {}
 
   async execute(command: MigrateAllCollectionsCommand) {
-    const allCollections = [
-      await this.collectionRepository.findById('643e65003b8a21ed1914f16b'),
-    ];
+    const allCollections = await this.collectionRepository.findAll();
 
     for (const collection of allCollections) {
+      if (!collection.permissions?.manageSettings) continue;
+      // if (collection.permissions.) continue;
+
+      console.log({ collection: collection.id });
       // if (
       //   collection.collectionType === 0 &&
       //   collection.formMetadata &&
@@ -63,9 +65,6 @@ export class MigrateAllCollectionsCommandHandler
       //   collection.formMetadata.pageOrder = pageOrder;
       //   collection.formMetadata.allowAnonymousResponses = false;
       // }
-      collection.permissions.addAndEditFields = [
-        ...collection.permissions.manageSettings,
-      ];
       await this.collectionRepository.updateById(collection.id, collection);
     }
 
