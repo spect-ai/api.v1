@@ -105,7 +105,6 @@ export class LinkDiscordService {
         [],
         [],
         collection.description || "Let's get started!",
-        true,
       );
       await this.commandBus.execute(
         new UpdateCollectionCommand(

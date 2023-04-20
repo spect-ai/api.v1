@@ -206,6 +206,18 @@ export class DataValidationService {
         }
       } else if (['date'].includes(properties[propertyId].type)) {
         if (data) if (!isValidDateString(data)) throw 'Invalid date';
+      } else if (['discord'].includes(properties[propertyId].type)) {
+        if (data) {
+          console.log({ data });
+          if (typeof data === 'string') {
+            if (!data.match(/#\d{4}$/))
+              throw "Discord data type doesn't match, must end with # and 4 digits";
+          } else if (typeof data === 'object') {
+            if (!data.id || !data.username || !data.discriminator)
+              throw "Discord data type doesn't match, must contain id, username and discriminator";
+          } else
+            throw "Internal error: Discord data type doesn't match, must be object or string";
+        }
       }
     }
     return true;
