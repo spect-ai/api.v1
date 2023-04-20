@@ -146,10 +146,7 @@ export class UpdateDataCommandHandler
       this.logger.error(
         `Failed updating data in collection with collection Id ${collectionId} with error ${err}`,
       );
-      throw new InternalServerErrorException(
-        `Failed updating data in collection to collection Id ${collectionId} with error ${err}`,
-        err.message,
-      );
+      throw new InternalServerErrorException(`${err}`);
     }
   }
 

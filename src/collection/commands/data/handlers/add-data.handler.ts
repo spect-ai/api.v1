@@ -262,9 +262,7 @@ export class AddDataCommandHandler implements ICommandHandler<AddDataCommand> {
       this.logger.error(
         `Failed adding data to collection Id ${collectionId} with error ${err}`,
       );
-      throw new InternalServerErrorException(
-        `Failed adding data to collection Id ${collectionId} with error ${err}`,
-      );
+      throw new InternalServerErrorException(`${err}`);
     }
   }
 

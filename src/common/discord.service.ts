@@ -38,23 +38,27 @@ export class DiscordService {
 
   async giveRolesToUser(
     guildId: string,
-    discordUserId: string,
     roleIds: string[],
+    discordUserId?: string,
+    discordUsername?: string,
+    discordDiscriminator?: string,
   ) {
     try {
-      const res = await fetch(
-        `${process.env.DISCORD_URI}/api/guilds/${guildId}/roles/give?userId=${discordUserId}`,
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            secret: this.encryptionService.encrypt(process.env.API_SECRET),
-          },
-          method: 'POST',
-          body: JSON.stringify({
-            roleIds,
-          }),
+      let url;
+      if (discordUserId)
+        url = `${process.env.DISCORD_URI}/api/guilds/${guildId}/roles/give?userId=${discordUserId}`;
+      else if (discordUsername && discordDiscriminator)
+        url = `${process.env.DISCORD_URI}/api/guilds/${guildId}/roles/give?username=${discordUsername}&discriminator=${discordDiscriminator}`;
+      const res = await fetch(url, {
+        headers: {
+          'Content-Type': 'application/json',
+          secret: this.encryptionService.encrypt(process.env.API_SECRET),
         },
-      );
+        method: 'POST',
+        body: JSON.stringify({
+          roleIds,
+        }),
+      });
 
       const json = await res.json();
       if (res.status !== 200) {

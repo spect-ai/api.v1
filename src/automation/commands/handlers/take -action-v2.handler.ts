@@ -252,7 +252,7 @@ export class GiveDiscordRoleActionCommandHandler
         if (give) roles.push(role);
       }
       if (!roles || roles.length === 0) return;
-      const { circle, discordUserId } =
+      const { circle, collection, discordUserId } =
         await this.commonActionService.getCircleCollectionUsersFromRelevantIds(
           circleId,
           relevantIds,
@@ -261,9 +261,34 @@ export class GiveDiscordRoleActionCommandHandler
       if (discordUserId) {
         await this.discordService.giveRolesToUser(
           circle.discordGuildId,
-          discordUserId,
           roles,
+          discordUserId,
         );
+      } else {
+        const discordField = Object.values(collection.properties).find(
+          (property) => property.type === 'discord',
+        );
+        if (discordField) {
+          const val = collection.data[relevantIds.dataSlug][discordField.name];
+          let discordUsername, discordDiscriminator;
+          if (typeof val === 'string') {
+            const split = val.split('#');
+            discordUsername = split[0];
+            discordDiscriminator = split[1];
+          } else if (typeof val === 'object') {
+            discordUsername = val.username;
+            discordDiscriminator = val.discriminator;
+          }
+          if (discordUsername && discordDiscriminator) {
+            await this.discordService.giveRolesToUser(
+              circle.discordGuildId,
+              roles,
+              null,
+              discordUsername,
+              discordDiscriminator,
+            );
+          }
+        }
       }
     } catch (err) {
       this.logger.error(err);
