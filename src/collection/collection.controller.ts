@@ -243,7 +243,7 @@ export class CollectionController {
     );
   }
 
-  @SetMetadata('permissions', ['manageSettings'])
+  @SetMetadata('permissions', ['addAndEditFields'])
   @UseGuards(CollectionAuthGuard)
   @Patch('/:id/addProperty')
   async addProperty(
@@ -262,7 +262,7 @@ export class CollectionController {
     );
   }
 
-  @SetMetadata('permissions', ['manageSettings'])
+  @SetMetadata('permissions', ['addAndEditFields'])
   @UseGuards(CollectionAuthGuard)
   @Patch('/:id/updateProperty')
   async updateProperty(
@@ -281,7 +281,7 @@ export class CollectionController {
     );
   }
 
-  @SetMetadata('permissions', ['manageSettings'])
+  @SetMetadata('permissions', ['addAndEditFields'])
   @UseGuards(CollectionAuthGuard)
   @Patch('/:id/removeProperty')
   async removeProperty(

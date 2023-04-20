@@ -10,7 +10,7 @@ import { Collection } from 'src/collection/model/collection.model';
 import { CreateCollectionCommand } from '../impl/create-collection.command';
 import { v4 as uuidv4 } from 'uuid';
 import { MappedItem } from 'src/common/interfaces';
-import { Property } from 'src/collection/types/types';
+import { Permissions, Property } from 'src/collection/types/types';
 import { GetCircleByIdQuery } from 'src/circle/queries/impl';
 import { UpdateCircleCommand } from 'src/circle/commands/impl/update-circle.command';
 import { LoggingService } from 'src/logging/logging.service';
@@ -125,11 +125,12 @@ export class CreateCollectionCommandHandler
       let createdCollection;
 
       // give default permissions to roles which have createForm permission
-      const defaultPermissions = {
+      const defaultPermissions: Permissions = {
         manageSettings: [],
         updateResponsesManually: [],
         viewResponses: [],
         addComments: [],
+        addAndEditFields: [],
       };
 
       Object.keys(parentCircle.roles).map((role) => {
@@ -138,6 +139,7 @@ export class CreateCollectionCommandHandler
           defaultPermissions.updateResponsesManually.push(role);
           defaultPermissions.viewResponses.push(role);
           defaultPermissions.addComments.push(role);
+          defaultPermissions.addAndEditFields.push(role);
         }
       });
 

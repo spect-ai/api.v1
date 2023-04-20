@@ -9,25 +9,33 @@ import {
   getOnboardToSpectData,
 } from './constants/cardDetails';
 import { getProperties } from './constants/propertyDetails';
+import { Collection } from 'src/collection/model/collection.model';
 
 const viewId = uuidv4();
 
-export const getOnboardToSpectProjectDetails = (caller: string) => {
+export const getOnboardToSpectProjectDetails = (
+  caller: string,
+): Partial<Collection> => {
   return {
     name: 'Onboard to Spect',
-    properties: getProperties(),
+    properties: getProperties() as any,
     propertyOrder: ['Title', 'Description', 'Status', 'Labels'],
     permissions: {
       manageSettings: ['steward'],
       updateResponsesManually: ['steward'],
       viewResponses: ['steward'],
       addComments: ['steward'],
+      addAndEditFields: ['steward'],
     },
     defaultView: 'table',
     circleRolesToNotifyUponNewResponse: [],
     circleRolesToNotifyUponUpdatedResponse: [],
     voting: {
       enabled: false,
+      votingType: {
+        label: '',
+        value: '',
+      },
     },
     collectionType: 1,
     projectMetadata: {
@@ -43,6 +51,7 @@ export const getOnboardToSpectProjectDetails = (caller: string) => {
           },
         },
         [viewId]: {
+          id: viewId,
           name: 'Tutorials',
           type: 'kanban',
           groupByColumn: 'Status',
@@ -68,7 +77,6 @@ export const getOnboardToSpectProjectDetails = (caller: string) => {
           [cardSlugs.card3, cardSlugs.card4],
         ],
       },
-      payments: {},
     },
     archived: false,
     data: getOnboardToSpectData(),
@@ -78,10 +86,12 @@ export const getOnboardToSpectProjectDetails = (caller: string) => {
   };
 };
 
-export const getOnboardToSpectFormDetails = (caller: string) => {
+export const getOnboardToSpectFormDetails = (
+  caller: string,
+): Partial<Collection> => {
   return {
     name: 'Your First Form on Spect',
-    properties: getProperties(),
+    properties: getProperties() as any,
     propertyOrder: [
       'What is your name?',
       'Why do you want to join our team?',
@@ -92,12 +102,17 @@ export const getOnboardToSpectFormDetails = (caller: string) => {
       updateResponsesManually: ['steward'],
       viewResponses: ['steward'],
       addComments: ['steward'],
+      addAndEditFields: ['steward'],
     },
     defaultView: 'table',
     circleRolesToNotifyUponNewResponse: [],
     circleRolesToNotifyUponUpdatedResponse: [],
     voting: {
       enabled: false,
+      votingType: {
+        label: '',
+        value: '',
+      },
     },
     collectionType: 0,
     projectMetadata: {
@@ -114,6 +129,7 @@ export const getOnboardToSpectFormDetails = (caller: string) => {
         },
       },
       viewOrder: ['0x0'],
+      cardOrders: {},
     },
     formMetadata: {
       active: true,

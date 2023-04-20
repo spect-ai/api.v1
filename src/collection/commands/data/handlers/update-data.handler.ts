@@ -112,7 +112,6 @@ export class UpdateDataCommandHandler
           dataActivityOrder,
         },
       );
-      console.log(updatedCollection.data[dataSlug]);
       const propertyName = Object.keys(data)[0];
       if (
         collection.collectionType === 1 &&
@@ -204,9 +203,13 @@ export class UpdateDataCommandHandler
       columns.findIndex(
         (column) => column.value === update[propertyName]?.value,
       ) + 1;
-    const newSourceColumnOrder = Array.from(cardColumnOrder[sourceColumnIndex]);
+    const newSourceColumnOrder = Array.from(
+      cardColumnOrder[sourceColumnIndex] || [],
+    );
     newSourceColumnOrder.splice(newSourceColumnOrder.indexOf(slug), 1);
-    const newDestColumnOrder = Array.from(cardColumnOrder[destColumnIndex]);
+    const newDestColumnOrder = Array.from(
+      cardColumnOrder[destColumnIndex] || [],
+    );
     newDestColumnOrder.splice(0, 0, slug);
     const newCardColumnOrder = Array.from(cardColumnOrder);
     newCardColumnOrder[sourceColumnIndex] = newSourceColumnOrder;
