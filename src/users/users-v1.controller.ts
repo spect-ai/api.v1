@@ -31,6 +31,7 @@ import {
   GetUnreadNotificationsQuery,
 } from './queries/impl';
 import { UsersService } from './users.service';
+import { ConnectDiscordCommand } from './commands/impl';
 
 @Controller('user/v1')
 @ApiTags('user.v1')
@@ -127,5 +128,11 @@ export class UsersControllerV1 {
   @Patch('/notifications/unread')
   setUnreadNotifications(@Request() req) {
     return this.commandBus.execute(new SetUnreadNotificationsCommand(req.user));
+  }
+
+  @UseGuards(SessionAuthGuard)
+  @Get('/connectDiscord')
+  connectDiscord(@Request() req, @Query('code') code: string) {
+    return this.commandBus.execute(new ConnectDiscordCommand(req.user, code));
   }
 }

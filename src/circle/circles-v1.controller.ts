@@ -54,6 +54,7 @@ import { SafeAddress } from './dto/safe-request.dto';
 import {
   AddWhitelistedAddressRequestDto,
   UpdateCircleRequestDto,
+  WhitelistAddressRequestDto,
 } from './dto/update-circle-request.dto';
 import { UpdateMemberRolesDto } from './dto/update-member-role.dto';
 import { Circle } from './model/circle.model';
@@ -304,7 +305,7 @@ export class CircleV1Controller {
     );
   }
 
-  @SetMetadata('permissions', ['managePaymentOptions'])
+  @SetMetadata('permissions', ['manageRoles'])
   @UseGuards(CircleAuthGuard)
   @Patch('/:id/removeRole')
   async removeRole(
@@ -632,6 +633,19 @@ export class CircleV1Controller {
         },
         request.user,
       ),
+    );
+  }
+
+  @SetMetadata('permissions', ['managePaymentOptions'])
+  @UseGuards(CircleAuthGuard)
+  @Patch('/:id/whitelistAddresses')
+  async updateWhitelistedAddresses(
+    @Param() param: ObjectIdDto,
+    @Body() updateCircleRequestDto: WhitelistAddressRequestDto,
+  ): Promise<CircleResponseDto> {
+    return await this.circleCrudService.update(
+      param.id,
+      updateCircleRequestDto,
     );
   }
 

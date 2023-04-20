@@ -73,7 +73,7 @@ export class ConnectUserResponseDto {
    * Discord Integration user id
    * @example "123456789"
    */
-  discordId: string;
+  // discordId: string;
 
   /**
    * Email of user
