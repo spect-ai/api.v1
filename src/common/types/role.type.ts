@@ -7,10 +7,6 @@ export type CardTypeToPermissionMap = {
 export type CirclePermission = {
   createNewCircle: boolean;
   manageCircleSettings: boolean;
-  createNewProject: boolean;
-  manageProjectSettings: boolean;
-  createNewRetro: boolean;
-  endRetroManually: boolean;
   managePaymentOptions: boolean;
   makePayment: boolean;
   inviteMembers: boolean;
@@ -18,13 +14,6 @@ export type CirclePermission = {
   manageMembers: boolean;
   distributeCredentials: boolean;
   createNewForm: boolean;
-  manageFormSettings: boolean;
-  updateFormResponsesManually: boolean;
-  manageRewards: CardTypeToPermissionMap;
-  manageCardProperties: CardTypeToPermissionMap;
-  createNewCard: CardTypeToPermissionMap;
-  reviewWork: CardTypeToPermissionMap;
-  canClaim: CardTypeToPermissionMap;
 };
 
 export type RoleProvider = {

@@ -13,7 +13,6 @@ import {
   BlacklistRegistry,
   DiscordChannel,
   LocalRegistry,
-  SafeAddresses,
   WhitelistedMembershipAddresses,
   Folder,
   AutomationType,
@@ -21,6 +20,7 @@ import {
   AutomationsIndexedByCollectionSlugType,
   PaymentDetails,
   SidebarConfig,
+  Addresses,
 } from '../types';
 import { Option, SnapshotSpace } from 'src/collection/types/types';
 
@@ -204,7 +204,13 @@ export class Circle extends ProfileModel {
    * Address of safe on different networks
    */
   @prop()
-  safeAddresses: SafeAddresses;
+  safeAddresses: Addresses;
+
+  /**
+   * Whitlisted addresses of the circle
+   */
+  @prop()
+  whitelistedAddresses: Addresses;
 
   /**
    * The status of the circle

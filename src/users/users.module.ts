@@ -27,6 +27,7 @@ import { AuthTokenRefreshService } from 'src/common/authTokenRefresh.service';
 import { EncryptionService } from 'src/common/encryption.service';
 import { SecretModule } from 'src/secretRegistry/secret.module';
 import { CirclesCollectionService } from 'src/circle/services/circle-collection.service';
+import { CirclesModule } from 'src/circle/circles.module';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { CirclesCollectionService } from 'src/circle/services/circle-collection.
     EthAddressModule,
     CqrsModule,
     SecretModule,
+    CirclesModule,
   ],
   controllers: [UsersController, UsersControllerV1],
   providers: [

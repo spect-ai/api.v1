@@ -17,6 +17,7 @@ import {
   GetTokenMetadataCommandHandler,
   GetTokensCommandHandler,
 } from './get-tokens.handler';
+import { ConnectDiscordCommandHandler } from './connect-discord.handler';
 
 export const CommandHandlers = [
   AddItemCommandHandler,
@@ -36,4 +37,5 @@ export const CommandHandlers = [
   GetTokensCommandHandler,
   CheckUserTokensCommandHandler,
   GetTokenMetadataCommandHandler,
+  ConnectDiscordCommandHandler,
 ];

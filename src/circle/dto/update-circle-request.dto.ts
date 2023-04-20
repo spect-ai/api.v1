@@ -13,7 +13,7 @@ import {
   DiscordToCircleRoles,
   GuildxyzToCircleRoles,
 } from '../model/circle.model';
-import { DiscordChannel, SafeAddresses, SidebarConfig } from '../types';
+import { Addresses, DiscordChannel, SidebarConfig } from '../types';
 import { CreateCircleRequestDto } from './create-circle-request.dto';
 
 export class UpdateCircleRequestDto extends OmitType(CreateCircleRequestDto, [
@@ -94,9 +94,13 @@ export class UpdateCircleRequestDto extends OmitType(CreateCircleRequestDto, [
   /**
    * Gradient color of the circle
    */
-  @IsObject()
-  @IsOptional()
-  safeAddresses?: SafeAddresses;
+  // @IsObject()
+  // @IsOptional()
+  // safeAddresses?: Addresses;
+
+  // @IsObject()
+  // @IsOptional()
+  // whitelistedAddresses?: Addresses;
 
   /**
    * A list of labels that the circle uses
@@ -123,9 +127,9 @@ export class UpdateCircleRequestDto extends OmitType(CreateCircleRequestDto, [
   /**
    * Payment address of the circle
    */
-  @IsString()
-  @IsOptional()
-  paymentAddress?: string;
+  // @IsString()
+  // @IsOptional()
+  // paymentAddress?: string;
 
   /**
    * Discord Channel to get notifications on when grant is approved
@@ -193,4 +197,10 @@ export class AddWhitelistedAddressRequestDto {
    */
   @IsArray()
   roles: string[];
+}
+
+export class WhitelistAddressRequestDto {
+  @IsObject()
+  @IsOptional()
+  whitelistedAddresses?: Addresses;
 }

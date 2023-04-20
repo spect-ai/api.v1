@@ -42,7 +42,7 @@ export type PopulatedCircleFields = {
   memberRoles?: number;
 };
 
-export type SafeAddresses = {
+export type Addresses = {
   [chaninId: string]: string[];
 };
 

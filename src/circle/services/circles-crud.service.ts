@@ -10,7 +10,10 @@ import {
   DetailedCircleResponseDto,
   CircleResponseDto,
 } from '../dto/detailed-circle-response.dto';
-import { UpdateCircleRequestDto } from '../dto/update-circle-request.dto';
+import {
+  UpdateCircleRequestDto,
+  WhitelistAddressRequestDto,
+} from '../dto/update-circle-request.dto';
 import { Circle } from '../model/circle.model';
 import {
   GetCircleByFilterQuery,
@@ -223,7 +226,7 @@ export class CirclesCrudService {
 
   async update(
     id: string,
-    createCircleDto: UpdateCircleRequestDto,
+    createCircleDto: UpdateCircleRequestDto | WhitelistAddressRequestDto,
   ): Promise<CircleResponseDto> {
     try {
       const circle = await this.commandBus.execute(

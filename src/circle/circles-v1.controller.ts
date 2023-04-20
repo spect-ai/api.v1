@@ -54,6 +54,7 @@ import { SafeAddress } from './dto/safe-request.dto';
 import {
   AddWhitelistedAddressRequestDto,
   UpdateCircleRequestDto,
+  WhitelistAddressRequestDto,
 } from './dto/update-circle-request.dto';
 import { UpdateMemberRolesDto } from './dto/update-member-role.dto';
 import { Circle } from './model/circle.model';
@@ -127,6 +128,52 @@ export class CircleV1Controller {
     } catch (error) {
       console.log(error);
       return {};
+    }
+  }
+
+  @UseGuards(AdminAuthGuard)
+  @Patch('/migrateRoles')
+  async migrateRoles() {
+    const circles = [
+      await this.circleRepository.findById('64314c1300d02a8e83a24ab1'),
+    ];
+    for (const circle of circles) {
+      const roles = circle.roles;
+      for (const [roleId, role] of Object.entries(roles)) {
+        for (const [permissionId, permission] of Object.entries(
+          role.permissions,
+        )) {
+          if (
+            [
+              'createNewCircle',
+              'manageCircleSettings',
+              'managePaymentOptions',
+              'makePayment',
+              'inviteMembers',
+              'manageRoles',
+              'manageMembers',
+              'distributeCredentials',
+              'createNewForm',
+            ].includes(permissionId)
+          ) {
+            continue;
+          } else {
+            delete role.permissions[permissionId];
+          }
+        }
+        // if (!role.permissions['createNewForm']) {
+        //   permissions['createNewForm'] = permissions['createNewProject'];
+        // }
+        // if (!role.permissions['distributeCredentials']) {
+        //   permissions['distributeCredentials'] = permissions['makePayment'];
+        // }
+        // console.log({ permissions: role.permissions });
+        roles[roleId] = role;
+      }
+
+      await this.circleRepository.updateById(circle.id, {
+        roles,
+      });
     }
   }
 
@@ -304,7 +351,7 @@ export class CircleV1Controller {
     );
   }
 
-  @SetMetadata('permissions', ['managePaymentOptions'])
+  @SetMetadata('permissions', ['manageRoles'])
   @UseGuards(CircleAuthGuard)
   @Patch('/:id/removeRole')
   async removeRole(
@@ -635,41 +682,54 @@ export class CircleV1Controller {
     );
   }
 
-  @UseGuards(AdminAuthGuard)
-  @Patch('/:id/migrateRoles')
-  async migrateRoles() {
-    const circles = await this.circleRepository.findAll();
-    for (const circle of circles) {
-      const roles = circle.roles;
-      for (const [roleId, role] of Object.entries(roles)) {
-        const permissions = {};
-        for (const [permissionId, permission] of Object.entries(
-          role.permissions,
-        )) {
-          if (
-            permissionId === 'manageFormSettings' ||
-            permissionId === 'updateFormResponsesManually'
-          ) {
-            continue;
-          }
-          permissions[permissionId] = permission;
-        }
-        if (!role.permissions['createNewForm']) {
-          permissions['createNewForm'] = permissions['createNewProject'];
-        }
-        if (!role.permissions['distributeCredentials']) {
-          permissions['distributeCredentials'] = permissions['makePayment'];
-        }
-
-        roles[roleId] = {
-          ...role,
-          permissions,
-        };
-      }
-
-      await this.circleRepository.updateById(circle.id, {
-        roles,
-      });
-    }
+  @SetMetadata('permissions', ['managePaymentOptions'])
+  @UseGuards(CircleAuthGuard)
+  @Patch('/:id/whitelistAddresses')
+  async updateWhitelistedAddresses(
+    @Param() param: ObjectIdDto,
+    @Body() updateCircleRequestDto: WhitelistAddressRequestDto,
+  ): Promise<CircleResponseDto> {
+    return await this.circleCrudService.update(
+      param.id,
+      updateCircleRequestDto,
+    );
   }
+
+  // @UseGuards(AdminAuthGuard)
+  // @Patch('/:id/migrateRoles')
+  // async migrateRoles() {
+  //   const circles = await this.circleRepository.findAll();
+  //   for (const circle of circles) {
+  //     const roles = circle.roles;
+  //     for (const [roleId, role] of Object.entries(roles)) {
+  //       const permissions = {};
+  //       for (const [permissionId, permission] of Object.entries(
+  //         role.permissions,
+  //       )) {
+  //         if (
+  //           permissionId === 'manageFormSettings' ||
+  //           permissionId === 'updateFormResponsesManually'
+  //         ) {
+  //           continue;
+  //         }
+  //         permissions[permissionId] = permission;
+  //       }
+  //       if (!role.permissions['createNewForm']) {
+  //         permissions['createNewForm'] = permissions['createNewProject'];
+  //       }
+  //       if (!role.permissions['distributeCredentials']) {
+  //         permissions['distributeCredentials'] = permissions['makePayment'];
+  //       }
+
+  //       roles[roleId] = {
+  //         ...role,
+  //         permissions,
+  //       };
+  //     }
+
+  //     await this.circleRepository.updateById(circle.id, {
+  //       roles,
+  //     });
+  //   }
+  // }
 }
