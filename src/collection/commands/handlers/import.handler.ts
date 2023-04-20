@@ -58,7 +58,6 @@ export class ImportCommandHandler implements ICommandHandler<ImportCommand> {
         updateResponsesManually: [],
         viewResponses: [],
         addComments: [],
-        addAndEditFields: [],
       };
 
       Object.keys(parentCircle.roles).map((role) => {
@@ -67,7 +66,6 @@ export class ImportCommandHandler implements ICommandHandler<ImportCommand> {
           defaultPermissions.updateResponsesManually.push(role);
           defaultPermissions.viewResponses.push(role);
           defaultPermissions.addComments.push(role);
-          defaultPermissions.addAndEditFields.push(role);
         }
       });
 

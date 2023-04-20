@@ -5,7 +5,6 @@ export type Permissions = {
   updateResponsesManually: string[];
   viewResponses: string[];
   addComments: string[];
-  addAndEditFields: string[];
 };
 
 export type TokenModel = {

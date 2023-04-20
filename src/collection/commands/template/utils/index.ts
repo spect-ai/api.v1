@@ -35,7 +35,6 @@ const getDefaultPermissions = (circle: Circle): Permissions => {
     updateResponsesManually: [],
     viewResponses: [],
     addComments: [],
-    addAndEditFields: [],
   };
 
   Object.keys(circle.roles).map((role) => {
@@ -44,7 +43,6 @@ const getDefaultPermissions = (circle: Circle): Permissions => {
       defaultPermissions.updateResponsesManually.push(role);
       defaultPermissions.viewResponses.push(role);
       defaultPermissions.addComments.push(role);
-      defaultPermissions.addAndEditFields.push(role);
     }
   });
 

@@ -130,7 +130,6 @@ export class CreateCollectionCommandHandler
         updateResponsesManually: [],
         viewResponses: [],
         addComments: [],
-        addAndEditFields: [],
       };
 
       Object.keys(parentCircle.roles).map((role) => {
@@ -139,7 +138,6 @@ export class CreateCollectionCommandHandler
           defaultPermissions.updateResponsesManually.push(role);
           defaultPermissions.viewResponses.push(role);
           defaultPermissions.addComments.push(role);
-          defaultPermissions.addAndEditFields.push(role);
         }
       });
 
