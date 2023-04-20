@@ -80,7 +80,7 @@ export class CommonActionService {
     );
     if (discordField) {
       discordUserId =
-        collection.data[relevantIds.dataSlug][discordField.name]['id'];
+        collection.data[relevantIds.dataSlug][discordField.name]?.['id'];
     }
 
     return {
@@ -130,6 +130,7 @@ export class SendEmailActionCommandHandler
       }
       for (const email of emails) {
         if (!email) continue;
+        console.log('Sending email to ', email);
         try {
           const html = this.emailGeneratorService.generateEmailWithMessage(
             action.data.message,
@@ -139,7 +140,7 @@ export class SendEmailActionCommandHandler
           const mail = {
             to: `${email}`,
             from: {
-              name: 'Spect Notifications',
+              name: `A message from ${circle.name ? circle.name : 'Spect'}`,
               email: process.env.NOTIFICATION_EMAIL,
             }, // Fill it with your validated email on SendGrid account
             html,
@@ -398,7 +399,6 @@ export class CreateCardActionCommandHandler
 
       const data = {};
       let milestoneFields = {} as { [key: string]: string[][] };
-
       for (const value of action.data.values) {
         if (value.type === 'default') {
           data[value.default.field.value] = value.default.value;
@@ -523,13 +523,10 @@ export class PostOnDiscordActionCommandHandler
         }))
         .filter((f) => f.value !== undefined);
 
-      await this.discordService.postCard(
+      await this.discordService.postData(
         action.data.channel.value,
-        action.data.message +
-          ' : ' +
-          collection.data[relevantIds.dataSlug][action.data.title.value],
-        action.data.url + relevantIds.dataSlug,
         action.data.message,
+        action.data.url + relevantIds.dataSlug,
         fields,
       );
     } catch (err) {
@@ -742,13 +739,11 @@ export class PostOnDiscordThreadCommandHandler
         }))
         .filter((f) => f.value !== undefined);
 
-      const res = await this.discordService.postCard(
-        threadRef.channelId,
+      const res = await this.discordService.postData(
+        threadRef.threadId,
         action.data.message,
         `https://circles.spect.network/${circle.slug}/r/${collection.slug}?cardSlug=${relevantIds.dataSlug}`,
-        action.data.message,
         fields,
-        threadRef.threadId,
       );
     } catch (err) {
       this.logger.error(err);

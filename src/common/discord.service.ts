@@ -18,26 +18,18 @@ export class DiscordService {
     this.logger.setContext('DiscordService');
   }
 
-  async isConnected(guildId: string): Promise<boolean> {
-    try {
-      return await (
-        await fetch(
-          `${process.env.DISCORD_URI}/api/guildExists?guildId=${guildId}`,
-        )
-      ).json();
-    } catch (e) {
-      this.logger.error(e);
-      throw e;
-    }
-  }
-
   async getDiscordRole(discordId: string, guildId: string): Promise<string[]> {
     try {
       return await (
         await fetch(
-          `${process.env.DISCORD_URI}/api/userRoles?userId=${discordId}&guildId=${guildId}`,
+          `${process.env.DISCORD_URI}/api/user/${discordId}/roles?guildId=${guildId}`,
+          {
+            headers: {
+              secret: this.encryptionService.encrypt(process.env.API_SECRET),
+            },
+          },
         )
-      ).json().guildRoles;
+      ).json();
     } catch (e) {
       this.logger.error(e);
       throw e;
@@ -50,22 +42,25 @@ export class DiscordService {
     roleIds: string[],
   ) {
     try {
-      return await (
-        await fetch(
-          `${process.env.DISCORD_URI}/api/giveRoles?guildId=${guildId}`,
-          {
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            method: 'POST',
-            body: JSON.stringify({
-              roleIds,
-              userId: discordUserId,
-              secret: this.encryptionService.encrypt(process.env.API_SECRET),
-            }),
+      const res = await fetch(
+        `${process.env.DISCORD_URI}/api/guilds/${guildId}/roles/give?userId=${discordUserId}`,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            secret: this.encryptionService.encrypt(process.env.API_SECRET),
           },
-        )
-      ).json();
+          method: 'POST',
+          body: JSON.stringify({
+            roleIds,
+          }),
+        },
+      );
+
+      const json = await res.json();
+      if (res.status !== 200) {
+        throw new HttpException(json.message, res.status);
+      }
+      return json;
     } catch (e) {
       this.logger.error(e);
       throw e;
@@ -74,66 +69,68 @@ export class DiscordService {
 
   async createChannel(
     guildId: string,
-    channelName: string,
+    name: string,
     parentId?: string,
     isPrivate?: boolean,
     rolesToAdd?: string[],
     usersToAdd?: string[],
   ) {
     try {
-      return await (
-        await fetch(
-          `${process.env.DISCORD_URI}/api/createChannel?guildId=${guildId}`,
-          {
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            method: 'POST',
-            body: JSON.stringify({
-              channelName,
-              parentId,
-              isPrivate,
-              rolesToAdd,
-              usersToAdd,
-              secret: this.encryptionService.encrypt(process.env.API_SECRET),
-            }),
+      console.log({ rolesToAdd, usersToAdd });
+      const res = await fetch(
+        `${process.env.DISCORD_URI}/api/channels?guildId=${guildId}`,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            secret: this.encryptionService.encrypt(process.env.API_SECRET),
           },
-        )
-      ).json();
+          method: 'POST',
+          body: JSON.stringify({
+            name,
+            type: 'textChannel',
+            parentId,
+            isPrivate,
+            rolesToAdd: [],
+            usersToAdd: [],
+          }),
+        },
+      );
+
+      const json = await res.json();
+      console.log({ json: json.errors });
+      if (res.status !== 200) {
+        throw new HttpException(json.message, res.status);
+      }
+      return json;
     } catch (e) {
       this.logger.error(e);
       throw e;
     }
   }
 
-  async postCard(
-    channelId: string,
-    title: string,
-    url: string,
-    message: string,
-    fields: any,
-    threadId?: string,
-  ) {
+  async postData(channelId: string, title: string, url: string, fields: any) {
     try {
-      return await (
-        await fetch(`${process.env.DISCORD_URI}/api/postCard`, {
+      const res = await fetch(
+        `${process.env.DISCORD_URI}/api/collections/data?channelId=${channelId}`,
+        {
           headers: {
             'Content-Type': 'application/json',
+            secret: this.encryptionService.encrypt(process.env.API_SECRET),
           },
           method: 'POST',
           body: JSON.stringify({
-            channelId,
-            card: {
-              url,
-              title,
-              fields,
-              msg: message,
-            },
-            threadId,
-            secret: this.encryptionService.encrypt(process.env.API_SECRET),
+            url,
+            title,
+            fields,
           }),
-        })
-      ).json();
+        },
+      );
+
+      const json = await res.json();
+      if (res.status !== 200) {
+        throw new HttpException(json.message, res.status);
+      }
+      return json;
     } catch (e) {
       this.logger.error(e);
       throw e;
@@ -156,12 +153,7 @@ export class DiscordService {
       });
       const json = await res.json();
       if (res.status !== 200) {
-        throw new HttpException(
-          {
-            message: json.message || json.errors || 'Internal Server Error',
-          },
-          res.status || InternalServerErrorException,
-        );
+        throw new HttpException(json.message, res.status);
       }
       return json;
     } catch (e) {
@@ -197,12 +189,7 @@ export class DiscordService {
 
       const json = await res.json();
       if (res.status !== 200) {
-        throw new HttpException(
-          {
-            message: json.message || json.errors || 'Internal Server Error',
-          },
-          res.status || InternalServerErrorException,
-        );
+        throw new HttpException(json.message, res.status);
       }
       return json;
     } catch (e) {
@@ -234,12 +221,7 @@ export class DiscordService {
 
       const json = await res.json();
       if (res.status !== 200) {
-        throw new HttpException(
-          {
-            message: json.message || json.errors || 'Internal Server Error',
-          },
-          res.status || InternalServerErrorException,
-        );
+        throw new HttpException(json.message, res.status);
       }
       return json;
     } catch (e) {
@@ -250,36 +232,40 @@ export class DiscordService {
 
   async createThread(
     guildId: string,
-    threadName: string,
+    name: string,
     channelId: string,
     isPrivate: boolean,
     usersToAdd: string[],
     rolesToAdd: string[],
     message: string,
-    isForm?: boolean,
   ) {
     try {
-      return await (
-        await fetch(
-          `${process.env.DISCORD_URI}/api/createDiscussionThread?guildId=${guildId}`,
-          {
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            method: 'POST',
-            body: JSON.stringify({
-              threadName,
-              channelId,
-              isPrivate,
-              usersToAdd,
-              rolesToAdd,
-              message,
-              isForm,
-              secret: this.encryptionService.encrypt(process.env.API_SECRET),
-            }),
+      console.log({ message });
+      const res = await fetch(
+        `${process.env.DISCORD_URI}/api/channels?guildId=${guildId}&parentId=${channelId}`,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            secret: this.encryptionService.encrypt(process.env.API_SECRET),
           },
-        )
-      ).json().result;
+          method: 'POST',
+          body: JSON.stringify({
+            name,
+            type: 'thread',
+            isPrivate,
+            usersToAdd,
+            rolesToAdd,
+            firstMessage: message || 'card',
+          }),
+        },
+      );
+
+      const json = await res.json();
+      console.log({ json: json });
+      if (res.status !== 200) {
+        throw new HttpException(json.message, res.status);
+      }
+      return json;
     } catch (e) {
       this.logger.error(e);
       throw e;
