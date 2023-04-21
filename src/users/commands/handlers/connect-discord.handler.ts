@@ -4,8 +4,8 @@ import { UsersRepository } from 'src/users/users.repository';
 import { LoggingService } from 'src/logging/logging.service';
 import { ConnectDiscordCommand } from '../impl/connect-discord.command';
 import { CirclesRepository } from 'src/circle/circles.repository';
-import { JoinUsingDiscordCommand } from 'src/circle/commands/impl';
 import { InternalServerErrorException } from '@nestjs/common';
+import fetch from 'node-fetch';
 
 @CommandHandler(ConnectDiscordCommand)
 export class ConnectDiscordCommandHandler
