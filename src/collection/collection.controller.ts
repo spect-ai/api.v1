@@ -47,6 +47,7 @@ import {
   AddPropertyCommand,
   CreateCollectionCommand,
   DeleteCollectionCommand,
+  GetChangelogCommand,
   ImportCommand,
   MigrateAllCollectionsCommand,
   MigrateProjectCommand,
@@ -145,6 +146,11 @@ export class CollectionController {
     private readonly linkDiscordService: LinkDiscordService,
     private readonly getCollectionService: GetCollectionService,
   ) {}
+
+  @Get('/changelog')
+  async getChangelog(): Promise<CreateCollectionResponseDto> {
+    return await this.commandBus.execute(new GetChangelogCommand());
+  }
 
   @UseGuards(SessionAuthGuard)
   @Get('/isWhitelisted')

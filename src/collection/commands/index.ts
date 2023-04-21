@@ -3,6 +3,7 @@ export * from './impl/update-collection.command';
 export * from './impl/delete-collection.command';
 export * from './impl/migrate-collection.command';
 export * from './impl/import.command';
+export * from './impl/get-changelog.command';
 export * from './properties/impl/add-property.command';
 export * from './properties/impl/update-property.command';
 export * from './properties/impl/remove-property.command';
@@ -58,6 +59,7 @@ import {
   SaveAndPostSocialsCommandHandler,
   SaveDraftCommandHandler,
 } from './data/handlers/save-draft.handler';
+import { GetChangelogCommandHandler } from './handlers/get-changelog.handler';
 
 export const CommandHandlers = [
   CreateCollectionCommandHandler,
@@ -90,4 +92,5 @@ export const CommandHandlers = [
   SaveDraftCommandHandler,
   SaveAndPostSocialsCommandHandler,
   SaveAndPostPaymentCommandHandler,
+  GetChangelogCommandHandler,
 ];
