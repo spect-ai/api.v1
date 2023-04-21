@@ -25,13 +25,6 @@ export class ConnectDiscordCommandHandler
       console.log('ConnectDiscordCommandHandler');
       const { user, code } = command;
 
-      console.log({
-        s: process.env.DISCORD_CLIENT_ID,
-        v: process.env.DISCORD_CLIENT_SECRET,
-        f: process.env.DISCORD_REDIRECT_URI,
-        c: code,
-      });
-
       const oauthResult = await fetch('https://discord.com/api/oauth2/token', {
         method: 'POST',
         body: new URLSearchParams({
@@ -48,7 +41,6 @@ export class ConnectDiscordCommandHandler
       });
 
       const oauthData: any = await oauthResult.json();
-      console.log({ oauthData });
       const userResult = await fetch('https://discord.com/api/users/@me', {
         headers: {
           authorization: `${oauthData.token_type} ${oauthData.access_token}`,
@@ -103,7 +95,7 @@ export class ConnectDiscordCommandHandler
       //   console.log(error);
       // }
 
-      const profile = this.userRepository.updateById(user.id, {
+      const profile = await this.userRepository.updateById(user.id, {
         discordId: userData.id,
         discordUsername: userData.username + '#' + userData.discriminator,
       });
