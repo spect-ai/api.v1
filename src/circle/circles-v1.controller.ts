@@ -134,10 +134,9 @@ export class CircleV1Controller {
   @UseGuards(AdminAuthGuard)
   @Patch('/migrateRoles')
   async migrateRoles() {
-    const circles = [
-      await this.circleRepository.findById('64314c1300d02a8e83a24ab1'),
-    ];
+    const circles = await this.circleRepository.findAll();
     for (const circle of circles) {
+      console.log({ circle: circle.id });
       const roles = circle.roles;
       for (const [roleId, role] of Object.entries(roles)) {
         for (const [permissionId, permission] of Object.entries(
