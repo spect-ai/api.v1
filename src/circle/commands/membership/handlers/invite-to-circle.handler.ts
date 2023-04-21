@@ -25,9 +25,30 @@ export class InviteToCircleCommandHandler
           `Could not find circle with id ${id}`,
         );
       }
+
+      const rolesRanking = Object.keys(circleToUpdate.roles);
+      const callerRole = circleToUpdate.memberRoles[caller.id];
+      const highestRole = rolesRanking
+        .map((role) => {
+          console.log({ role });
+          if (callerRole.includes(role)) {
+            console.log('includes');
+            return role;
+          }
+        })
+        .filter((role) => role)[0];
+      const callerRoleIndex = rolesRanking.indexOf(highestRole);
+      const inviteRoleIndex = rolesRanking.indexOf(newInvite.roles[0]);
+
+      if (callerRoleIndex > inviteRoleIndex) {
+        throw new InternalServerErrorException(
+          `You can only invite someone with a lower role than you`,
+        );
+      }
+
       const invites = circleToUpdate.invites;
       const inviteId = uuidv4();
-      const updatedCircle = await this.circlesRepository.updateById(id, {
+      await this.circlesRepository.updateById(id, {
         invites: [
           ...invites,
           {
