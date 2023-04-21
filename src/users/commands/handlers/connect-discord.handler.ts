@@ -25,6 +25,13 @@ export class ConnectDiscordCommandHandler
       console.log('ConnectDiscordCommandHandler');
       const { user, code } = command;
 
+      console.log({
+        s: process.env.DISCORD_CLIENT_ID,
+        v: process.env.DISCORD_CLIENT_SECRET,
+        f: process.env.DISCORD_REDIRECT_URI,
+        c: code,
+      });
+
       const oauthResult = await fetch('https://discord.com/api/oauth2/token', {
         method: 'POST',
         body: new URLSearchParams({
