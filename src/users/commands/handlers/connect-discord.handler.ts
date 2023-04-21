@@ -20,12 +20,10 @@ export class ConnectDiscordCommandHandler
     this.logger.setContext('ConnectDiscordCommandHandler');
   }
 
-  async execute(command: ConnectDiscordCommand): Promise<User> {
+  async execute(command: ConnectDiscordCommand) {
     try {
       console.log('ConnectDiscordCommandHandler');
       const { user, code } = command;
-      console.log({ user, code });
-      console.log('hello');
 
       const oauthResult = await fetch('https://discord.com/api/oauth2/token', {
         method: 'POST',
@@ -41,8 +39,6 @@ export class ConnectDiscordCommandHandler
           'Content-Type': 'application/x-www-form-urlencoded',
         },
       });
-      console.log('hi');
-      console.log({ oauthResult });
 
       const oauthData: any = await oauthResult.json();
       console.log({ oauthData });
@@ -60,13 +56,10 @@ export class ConnectDiscordCommandHandler
           },
         },
       );
-      console.log('hi');
-
       const guildData = await userGuilds.json();
       const userData = await userResult.json();
 
       let userToUpdate = user;
-      console.log('hi');
 
       if (!userToUpdate)
         userToUpdate = await this.userRepository.findById(user.id);
@@ -102,13 +95,15 @@ export class ConnectDiscordCommandHandler
       // } catch (error) {
       //   console.log(error);
       // }
-      console.log('hi');
 
-      console.log({ userData });
-      return await this.userRepository.updateById(user.id, {
+      const profile = this.userRepository.updateById(user.id, {
         discordId: userData.id,
         discordUsername: userData.username + '#' + userData.discriminator,
       });
+      return {
+        profile,
+        userData,
+      };
     } catch (error) {
       console.error(error);
       this.logger.error(`Failed connecting discord: ${error}`, command);
