@@ -39,12 +39,17 @@ export class ConnectDiscordCommandHandler
         },
       });
 
+      console.log({ oauthResult });
+
       const oauthData: any = await oauthResult.json();
+
+      console.log({ oauthData });
       const userResult = await fetch('https://discord.com/api/users/@me', {
         headers: {
           authorization: `${oauthData.token_type} ${oauthData.access_token}`,
         },
       });
+
       const userGuilds = await fetch(
         'https://discord.com/api/users/@me/guilds',
         {
@@ -56,41 +61,43 @@ export class ConnectDiscordCommandHandler
       const guildData = await userGuilds.json();
       const userData = await userResult.json();
 
+      console.log({ userData });
+
       let userToUpdate = user;
       if (!userToUpdate)
         userToUpdate = await this.userRepository.findById(user.id);
       if (!userToUpdate) throw new Error('User not found');
 
-      try {
-        const guildIds = guildData.map((guild) => guild.id);
-        console.log({ guildIds });
-        if (guildIds?.length == 0) return;
-        const guildCircles = await this.circlesRepository.findAll({
-          $and: [
-            {
-              discordGuildId: { $in: guildIds },
-              discordToCircleRoles: { $exists: true },
-              private: false,
-            },
-          ],
-        });
-        console.log({ guildCircles });
-        if (guildCircles?.length == 0) return;
-        for await (const circle of guildCircles) {
-          if (
-            !circle?.members?.includes(user.id) &&
-            circle?.status.archived == false
-          ) {
-            const id = circle?.id;
-            console.log({ id });
-            await this.commandBus.execute(
-              new JoinUsingDiscordCommand(id, user),
-            );
-          }
-        }
-      } catch (error) {
-        console.log(error);
-      }
+      // try {
+      //   const guildIds = guildData.map((guild) => guild.id);
+      //   console.log({ guildIds });
+      //   if (guildIds?.length == 0) return;
+      //   const guildCircles = await this.circlesRepository.findAll({
+      //     $and: [
+      //       {
+      //         discordGuildId: { $in: guildIds },
+      //         discordToCircleRoles: { $exists: true },
+      //         private: false,
+      //       },
+      //     ],
+      //   });
+      //   console.log({ guildCircles });
+      //   if (guildCircles?.length == 0) return;
+      //   for await (const circle of guildCircles) {
+      //     if (
+      //       !circle?.members?.includes(user.id) &&
+      //       circle?.status.archived == false
+      //     ) {
+      //       const id = circle?.id;
+      //       console.log({ id });
+      //       await this.commandBus.execute(
+      //         new JoinUsingDiscordCommand(id, user),
+      //       );
+      //     }
+      //   }
+      // } catch (error) {
+      //   console.log(error);
+      // }
 
       return await this.userRepository.updateById(user.id, {
         discordId: userData.id,
