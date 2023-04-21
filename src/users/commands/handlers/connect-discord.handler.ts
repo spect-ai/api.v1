@@ -5,6 +5,7 @@ import { LoggingService } from 'src/logging/logging.service';
 import { ConnectDiscordCommand } from '../impl/connect-discord.command';
 import { CirclesRepository } from 'src/circle/circles.repository';
 import { JoinUsingDiscordCommand } from 'src/circle/commands/impl';
+import { InternalServerErrorException } from '@nestjs/common';
 
 @CommandHandler(ConnectDiscordCommand)
 export class ConnectDiscordCommandHandler
@@ -39,11 +40,7 @@ export class ConnectDiscordCommandHandler
         },
       });
 
-      console.log({ oauthResult });
-
       const oauthData: any = await oauthResult.json();
-
-      console.log({ oauthData });
       const userResult = await fetch('https://discord.com/api/users/@me', {
         headers: {
           authorization: `${oauthData.token_type} ${oauthData.access_token}`,
@@ -60,8 +57,6 @@ export class ConnectDiscordCommandHandler
       );
       const guildData = await userGuilds.json();
       const userData = await userResult.json();
-
-      console.log({ userData });
 
       let userToUpdate = user;
       if (!userToUpdate)
@@ -107,9 +102,11 @@ export class ConnectDiscordCommandHandler
             : userData.username + '#' + userData.discriminator,
       });
     } catch (error) {
-      this.logger.error(
-        `Failed adding item to user with error: ${error}`,
-        command,
+      console.error(error);
+      this.logger.error(`Failed connecting discord: ${error}`, command);
+      throw new InternalServerErrorException(
+        'Failed connecting discord',
+        error,
       );
     }
   }
