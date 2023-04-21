@@ -42,7 +42,7 @@ export class InviteToCircleCommandHandler
 
       if (callerRoleIndex > inviteRoleIndex) {
         throw new InternalServerErrorException(
-          `You can only invite someone with a lower role than you`,
+          `You can only invite someone with a same or lower role than you`,
         );
       }
 
