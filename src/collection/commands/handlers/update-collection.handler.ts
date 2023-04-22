@@ -17,6 +17,8 @@ import {
   UpdateCollectionByFilterCommand,
   UpdateCollectionCommand,
 } from '../impl/update-collection.command';
+import { GetCircleByIdQuery } from 'src/circle/queries/impl';
+import { Circle } from 'src/circle/model/circle.model';
 
 @Injectable()
 export class UpdateValidationService {
@@ -79,6 +81,26 @@ export class UpdateCollectionCommandHandler
       ) {
         throw new InternalServerErrorException('Form metadata is invalid');
       }
+
+      if (formMetadata && formMetadata.paymentConfig) {
+        console.log({ parent: collection.parents });
+        const circle: Circle = await this.queryBus.execute(
+          new GetCircleByIdQuery(collection.parents[0]),
+        );
+        const whitelistedAddresses = circle.whitelistedAddresses;
+        console.log({ whitelistedAddresses });
+        Object.values(formMetadata.paymentConfig.networks).map((network) => {
+          const receiverAddress = network.receiverAddress;
+          if (
+            !whitelistedAddresses[network.chainId].includes(receiverAddress)
+          ) {
+            throw new InternalServerErrorException({
+              message: `Receiver address ${receiverAddress} is not whitelisted`,
+            });
+          }
+        });
+      }
+
       await this.updateValidationService.validateUpdateCollectionCommand(
         updateCollectionDto,
         collection,
