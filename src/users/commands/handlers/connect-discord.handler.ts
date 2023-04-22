@@ -24,6 +24,7 @@ export class ConnectDiscordCommandHandler
     try {
       console.log('ConnectDiscordCommandHandler');
       const { user, code } = command;
+      console.log({ user, code });
 
       const oauthResult = await fetch('https://discord.com/api/oauth2/token', {
         method: 'POST',
@@ -41,6 +42,7 @@ export class ConnectDiscordCommandHandler
       });
 
       const oauthData: any = await oauthResult.json();
+      console.log({ oauthData });
       const userResult = await fetch('https://discord.com/api/users/@me', {
         headers: {
           authorization: `${oauthData.token_type} ${oauthData.access_token}`,
