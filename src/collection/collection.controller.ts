@@ -825,7 +825,7 @@ export class CollectionController {
     };
   }
 
-  @UseGuards(SessionAuthGuard)
+  @UseGuards(PublicViewAuthGuard)
   @Patch('/:channelId/saveAndPostSocials')
   async saveAndPostSocials(
     @Param() param: RequiredDiscordChannelIdDto,

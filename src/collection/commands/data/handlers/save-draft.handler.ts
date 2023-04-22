@@ -365,7 +365,6 @@ export class SaveAndPostSocialsCommandHandler
         };
       } else {
         nextField = collection.properties[decodedPropertName];
-        console.log({ nextField });
         if (!nextField) throw new NotFoundException('Property not found');
         if (!['github', 'telegram'].includes(nextField.type))
           throw new NotFoundException(
@@ -386,8 +385,8 @@ export class SaveAndPostSocialsCommandHandler
       if (['github', 'discord', 'telegram'].includes(nextField.type)) {
         const updatedDraft = {
           ...(collection.formMetadata.drafts || {}),
-          [socialsDto.discordId]: {
-            ...(collection.formMetadata.drafts?.[socialsDto.discordId] || {}),
+          [discordId]: {
+            ...(collection.formMetadata.drafts?.[discordId] || {}),
             [nextField.name]: nextFieldVal,
           },
         };
@@ -404,7 +403,7 @@ export class SaveAndPostSocialsCommandHandler
 
       const nextToNextField = await this.queryBus.execute(
         new GetNextFieldQuery(
-          socialsDto.discordId,
+          discordId,
           'discordId',
           collection.slug,
           null,
@@ -419,21 +418,21 @@ export class SaveAndPostSocialsCommandHandler
           value: nextFieldVal,
         } as Property,
         nextToNextField,
-        socialsDto.discordId,
+        discordId,
       );
 
       // Save draft to data if next field is readonlyAtEnd or poap/kudos/erc20
       if (
         ['poap', 'kudos', 'erc20'].includes(nextToNextField?.type) ||
         (nextToNextField.name === 'readonlyAtEnd' &&
-          !collection.formMetadata.drafts?.[socialsDto.discordId]?.['saved'])
+          !collection.formMetadata.drafts?.[discordId]?.['saved'])
       ) {
         let user;
         try {
           user = await this.queryBus.execute(
             new GetUserByFilterQuery(
               {
-                discordId: socialsDto.discordId,
+                discordId: discordId,
               },
               '',
               true,
@@ -450,8 +449,8 @@ export class SaveAndPostSocialsCommandHandler
         ) {
           const res = await this.commandBus.execute(
             new AddDataCommand(
-              updatedCollection.formMetadata.drafts?.[socialsDto.discordId] ||
-                collection.formMetadata.drafts?.[socialsDto.discordId],
+              updatedCollection.formMetadata.drafts?.[discordId] ||
+                collection.formMetadata.drafts?.[discordId],
               user,
               collection.id,
               collection.formMetadata.allowAnonymousResponses,
