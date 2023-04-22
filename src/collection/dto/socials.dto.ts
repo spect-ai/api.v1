@@ -1,4 +1,10 @@
-import { IsNotEmpty, IsObject, IsOptional, IsString } from 'class-validator';
+import {
+  IsIn,
+  IsNotEmpty,
+  IsObject,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 
 export class SocialsDto {
   @IsOptional()
@@ -26,4 +32,7 @@ export class SocialsDto {
     id: string;
     username: string;
   };
+
+  @IsString()
+  readonly propertyName: string;
 }

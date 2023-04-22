@@ -35,6 +35,7 @@ import { User } from 'src/users/model/users.model';
 import { GetUserByFilterQuery } from 'src/users/queries/impl';
 import { isUUID } from 'class-validator';
 import { ResponseCredentialService } from 'src/collection/services/response-credentialing.service';
+import { Property } from 'src/collection/types/types';
 
 @CommandHandler(SaveDraftFromDiscordCommand)
 export class SaveDraftCommandHandler
@@ -341,9 +342,8 @@ export class SaveAndPostSocialsCommandHandler
 
   async execute(command: SaveAndPostSocialsCommand) {
     const { socialsDto, channelId, caller } = command;
+    console.log({ socialsDto, channelId, ds: caller.discordId });
     try {
-      if (!socialsDto.discordId)
-        throw 'No discord Id provided, cannot get next field';
       const lookedUpData = await this.lookupRepository.findOne({
         key: channelId,
         keyType: 'discordThreadId',
@@ -354,16 +354,32 @@ export class SaveAndPostSocialsCommandHandler
         lookedUpData.collectionId,
       );
       if (!collection) throw new NotFoundException('Collection not found');
-      const nextField = await this.queryBus.execute(
-        new GetNextFieldQuery(
-          socialsDto.discordId || caller.discordId,
-          'discordId',
-          null,
-          null,
-          collection,
-          true,
-        ),
-      );
+
+      let nextField;
+      const decodedPropertName = decodeURIComponent(socialsDto.propertyName);
+      console.log({ decodedPropertName });
+      if (decodedPropertName === 'connectWallet') {
+        nextField = {
+          type: 'connectWallet',
+          name: 'connectWallet',
+        };
+      } else {
+        nextField = collection.properties[decodedPropertName];
+        console.log({ nextField });
+        if (!nextField) throw new NotFoundException('Property not found');
+        if (!['github', 'telegram'].includes(nextField.type))
+          throw new NotFoundException(
+            'Property must be of type github, telegram, connectWallet',
+          );
+      }
+      let discordId;
+      if ((nextField as any).type === 'connectWallet') {
+        discordId = caller.discordId;
+      } else {
+        discordId = socialsDto.discordId;
+      }
+
+      if (!discordId) throw 'Discord Id not found';
 
       const nextFieldVal = this.getVal(nextField.type, socialsDto, caller);
       let updatedCollection;
@@ -375,7 +391,7 @@ export class SaveAndPostSocialsCommandHandler
             [nextField.name]: nextFieldVal,
           },
         };
-        const updatedCollection = await this.collectionRepository.updateById(
+        updatedCollection = await this.collectionRepository.updateById(
           collection.id,
           {
             formMetadata: {
@@ -384,35 +400,6 @@ export class SaveAndPostSocialsCommandHandler
             },
           },
         );
-      }
-
-      // Add to user data (should never cause failure in form data update)
-      try {
-        let callingUser = caller;
-        if (!callingUser) {
-          callingUser = await this.queryBus.execute(
-            new GetUserByFilterQuery(
-              {
-                discordId: socialsDto.discordId,
-              },
-              '',
-              true,
-            ),
-          );
-        }
-        const userUpdates = {};
-        for (const [key, val] of Object.entries(socialsDto)) {
-          if (callingUser[key] !== val) {
-            userUpdates[key] = val;
-          }
-        }
-        if (Object.keys(userUpdates).length > 0) {
-          await this.commandBus.execute(
-            new UpdateUserCommand(userUpdates, callingUser),
-          );
-        }
-      } catch (err) {
-        console.log({ err });
       }
 
       const nextToNextField = await this.queryBus.execute(
@@ -430,11 +417,12 @@ export class SaveAndPostSocialsCommandHandler
         {
           ...nextField,
           value: nextFieldVal,
-        },
+        } as Property,
         nextToNextField,
         socialsDto.discordId,
       );
 
+      // Save draft to data if next field is readonlyAtEnd or poap/kudos/erc20
       if (
         ['poap', 'kudos', 'erc20'].includes(nextToNextField?.type) ||
         (nextToNextField.name === 'readonlyAtEnd' &&

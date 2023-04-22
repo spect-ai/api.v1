@@ -649,7 +649,7 @@ export class CreateDiscordThreadCommandHandler
         action.data.isPrivate,
         discordIdsToAdd,
         rolesToAdd,
-        `Gm folks, This thread is linked to the following ${
+        `Gm folks, this thread is linked to the following ${
           collection.collectionType === 0 ? 'response' : 'card'
         }. https://circles.spect.network/${circle.slug}/r/${
           collection.slug
