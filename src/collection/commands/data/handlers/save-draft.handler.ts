@@ -342,7 +342,6 @@ export class SaveAndPostSocialsCommandHandler
 
   async execute(command: SaveAndPostSocialsCommand) {
     const { socialsDto, channelId, caller } = command;
-    console.log({ socialsDto, channelId, ds: caller.discordId });
     try {
       const lookedUpData = await this.lookupRepository.findOne({
         key: channelId,

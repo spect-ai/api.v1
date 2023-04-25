@@ -495,6 +495,10 @@ export class GetNextFieldQueryHandler
             readonlyValue: collection.formMetadata.messageOnSubmission,
             name: 'readonlyAtEnd',
             type: 'readonly',
+            multipleResponseEnabled:
+              collection.formMetadata.multipleResponsesAllowed,
+            updateResponseEnabled:
+              collection.formMetadata.updatingResponseAllowed,
           };
         else if (nextField === 'connectWallet') {
           return {

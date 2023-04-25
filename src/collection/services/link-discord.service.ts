@@ -156,7 +156,9 @@ export class LinkDiscordService {
         keyType: 'discordThreadId',
         collectionId: collection.id,
       });
-      return true;
+      return {
+        success: true,
+      };
     } catch (e) {
       console.log(e);
       this.logger.logError(`Failed linking discord with error ${e}`);

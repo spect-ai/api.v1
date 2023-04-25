@@ -15,6 +15,7 @@ export * from './comments/impl/update-comment.command';
 export * from './comments/impl/remove-comment.command';
 export * from './impl/migrate-collection.command';
 export * from './data/impl/save-draft.command';
+export * from './data/impl/delete-draft.command';
 
 import { AddCommentCommandHandler } from './comments/handlers/add-comment.handler';
 import { RemoveCommentCommandHandler } from './comments/handlers/remove-comment.handler';
@@ -60,6 +61,7 @@ import {
   SaveDraftCommandHandler,
 } from './data/handlers/save-draft.handler';
 import { GetChangelogCommandHandler } from './handlers/get-changelog.handler';
+import { DeleteDraftCommandHandler } from './data/handlers/delete-draft.handler';
 
 export const CommandHandlers = [
   CreateCollectionCommandHandler,
@@ -93,4 +95,5 @@ export const CommandHandlers = [
   SaveAndPostSocialsCommandHandler,
   SaveAndPostPaymentCommandHandler,
   GetChangelogCommandHandler,
+  DeleteDraftCommandHandler,
 ];

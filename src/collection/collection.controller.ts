@@ -134,6 +134,8 @@ import { LinkDiscordService } from './services/link-discord.service';
 import { ResponseCredentialingService } from './services/response-credentialing.service';
 import { WhitelistService } from './services/whitelist.service';
 import { Property } from './types/types';
+import { BotAuthGuard } from 'src/auth/bot.guard';
+import { DeleteDraftCommand } from './commands/data/impl/delete-draft.command';
 
 @Controller('collection/v1')
 @ApiTags('collection.v1')
@@ -730,7 +732,9 @@ export class CollectionController {
     @Query() query: RequiredDiscordIdDto,
     @Body() body: LinkDiscordThreadToDataDto,
     @Request() req,
-  ): Promise<boolean> {
+  ): Promise<{
+    success: boolean;
+  }> {
     return await this.linkDiscordService.linkThreadToData(
       param.messageId,
       query.discordId,
@@ -753,7 +757,7 @@ export class CollectionController {
     );
   }
 
-  @UseGuards(PublicViewAuthGuard)
+  @UseGuards(BotAuthGuard)
   @Patch('/:channelId/saveDraft')
   async saveDraft(
     @Param() param: RequiredDiscordChannelIdDto,
@@ -772,7 +776,19 @@ export class CollectionController {
     );
   }
 
-  @UseGuards(PublicViewAuthGuard)
+  @UseGuards(BotAuthGuard)
+  @Patch('/:channelId/deleteDraft')
+  async deleteDraft(
+    @Param() param: RequiredDiscordChannelIdDto,
+    @Query() query: RequiredDiscordIdDto,
+    @Request() req,
+  ): Promise<Collection> {
+    return await this.commandBus.execute(
+      new DeleteDraftCommand(query.discordId, param.channelId),
+    );
+  }
+
+  @UseGuards(BotAuthGuard)
   @Get('/:channelId/nextField')
   async nextField(
     @Param() param: RequiredDiscordChannelIdDto,
@@ -791,7 +807,7 @@ export class CollectionController {
     );
   }
 
-  @UseGuards(PublicViewAuthGuard)
+  @UseGuards(BotAuthGuard)
   @Get('/:channelId/firstField')
   async firstField(
     @Param() param: RequiredDiscordChannelIdDto,
@@ -855,7 +871,7 @@ export class CollectionController {
     );
   }
 
-  @UseGuards(PublicViewAuthGuard)
+  @UseGuards(BotAuthGuard)
   @Patch('/:channelId/claimPoapFromBot')
   async claimPoapFromBot(
     @Param() param: RequiredDiscordChannelIdDto,
@@ -868,7 +884,7 @@ export class CollectionController {
     );
   }
 
-  @UseGuards(PublicViewAuthGuard)
+  @UseGuards(BotAuthGuard)
   @Patch('/:channelId/claimKudosFromBot')
   async claimKudosFromBot(
     @Param() param: RequiredDiscordChannelIdDto,
@@ -880,7 +896,7 @@ export class CollectionController {
     );
   }
 
-  @UseGuards(PublicViewAuthGuard)
+  @UseGuards(BotAuthGuard)
   @Patch('/:channelId/claimERC20FromBot')
   async claimERC20FromBot(
     @Param() param: RequiredDiscordChannelIdDto,
