@@ -145,8 +145,8 @@ export class CreateCollectionCommandHandler
         const defaultViewId = '0x0';
         createdCollection = await this.collectionRepository.create({
           ...createCollectionDto,
-          properties: formProperties,
-          propertyOrder: formPropertyOrder,
+          // properties: formProperties,
+          // propertyOrder: formPropertyOrder,
           creator: caller,
           parents: [createCollectionDto.circleId],
           slug: uuidv4(),
@@ -170,9 +170,9 @@ export class CreateCollectionCommandHandler
                 id: 'page-1',
                 name: 'Page 1',
                 properties: [
-                  'What is your name?',
-                  'Why do you want to join our team?',
-                  'Status',
+                  // 'What is your name?',
+                  // 'Why do you want to join our team?',
+                  // 'Status',
                 ],
                 movable: true,
               },

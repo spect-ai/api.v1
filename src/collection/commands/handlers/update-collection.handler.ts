@@ -111,6 +111,7 @@ export class UpdateCollectionCommandHandler
       );
 
       if (
+        collection.collectionType === 0 &&
         formMetadata &&
         !formMetadata.pages['connect'] &&
         (formMetadata.sybilProtectionEnabled ||
@@ -145,6 +146,7 @@ export class UpdateCollectionCommandHandler
       }
 
       if (
+        collection.collectionType === 0 &&
         formMetadata &&
         formMetadata.pages['connect'] &&
         !formMetadata.sybilProtectionEnabled &&
