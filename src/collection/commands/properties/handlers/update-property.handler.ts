@@ -96,7 +96,7 @@ export class UpdatePropertyCommandHandler
           for (const [id, page] of Object.entries(
             collection.formMetadata.pages,
           )) {
-            if (page.properties) {
+            if (page?.properties) {
               const idx = page.properties.indexOf(propertyId);
               if (idx > -1) {
                 page.properties[idx] = updatePropertyCommandDto.name;
