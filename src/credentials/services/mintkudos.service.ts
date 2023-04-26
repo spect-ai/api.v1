@@ -143,8 +143,13 @@ export class MintKudosService {
         }),
       },
     );
-    const operationId = res.headers.get('Location');
-    return operationId;
+    if (res.ok) {
+      const operationId = res.headers.get('Location');
+      return operationId;
+    } else {
+      const error = await res.json();
+      throw error;
+    }
   }
 
   async getCommunityKudosDesigns(id: string): Promise<nftTypes> {

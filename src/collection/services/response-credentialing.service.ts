@@ -299,7 +299,7 @@ export class ResponseCredentialingService {
         `Failed while airdropping kudos with error: ${error}`,
         collectionId,
       );
-      throw new InternalServerErrorException('${error}');
+      throw error;
     }
   }
 
@@ -595,11 +595,12 @@ export class ResponseCredentialingService {
 
       return { operationId };
     } catch (error) {
+      console.log({ error });
       this.logger.error(
-        `Failed while claiming poap with error: ${error}`,
+        `Failed while claiming poap with error: ${error?.error || error}`,
         threadId,
       );
-      throw error;
+      throw new InternalServerErrorException(`${error?.error || error}`);
     }
   }
 
