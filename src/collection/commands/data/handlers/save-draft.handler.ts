@@ -284,9 +284,9 @@ export class SaveDraftCommandHandler
         new GetNextFieldQuery(
           callerDiscordId,
           'discordId',
+          updatedCollection.slug,
           null,
           null,
-          updatedCollection,
           true,
         ),
       );
