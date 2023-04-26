@@ -274,6 +274,7 @@ export class SaveDraftCommandHandler
               false,
               false,
               false,
+              callerDiscordId,
             ),
           );
         }
@@ -456,6 +457,7 @@ export class SaveAndPostSocialsCommandHandler
               false,
               false,
               false,
+              discordId,
             ),
           );
         }
@@ -588,6 +590,7 @@ export class SaveAndPostPaymentCommandHandler
               false,
               false,
               false,
+              discordUserId,
             ),
           );
         }

@@ -137,6 +137,7 @@ export class GetNextFieldQueryHandler
   }> {
     const { properties, propertyOrder } = collection;
     const updates = {} as { [key: string]: any };
+
     if (
       collection.formMetadata.captchaEnabled &&
       !draftSubmittedByUser.captcha
@@ -176,7 +177,8 @@ export class GetNextFieldQueryHandler
     if (
       collection.formMetadata.sybilProtectionEnabled &&
       !draftSubmittedByUser.hasPassedSybilCheck &&
-      !collection.formMetadata.drafts?.[discordId]?.['sybilProtection']
+      !collection.formMetadata.drafts?.[discordId]?.['sybilProtection'] &&
+      !collection.formMetadata.drafts?.[discordId]?.saved
     ) {
       const hasPassedSybilCheck =
         await this.advancedAccessService.hasPassedSybilProtection(
@@ -195,7 +197,8 @@ export class GetNextFieldQueryHandler
     if (
       collection.formMetadata.formRoleGating?.length &&
       !draftSubmittedByUser.hasPassedRoleGating &&
-      !collection.formMetadata.drafts?.[discordId]?.['roleGating']
+      !collection.formMetadata.drafts?.[discordId]?.['roleGating'] &&
+      !collection.formMetadata.drafts?.[discordId]?.saved
     ) {
       const hasRoleToAccessForm =
         await this.advancedAccessService.hasRoleToAccessForm(collection, user);
@@ -223,67 +226,71 @@ export class GetNextFieldQueryHandler
         },
       });
     }
-    for (const page of collection.formMetadata.pageOrder) {
-      for (const propertyId of collection.formMetadata.pages[page].properties) {
-        if (
-          collection.formMetadata.skippedFormFields?.[discordId]?.[propertyId]
-        )
-          continue;
 
-        const property = properties[propertyId];
-        if (
-          !property.isPartOfFormView ||
-          ['milestone', 'multiURL'].includes(property.type)
-        )
-          continue;
-        if (
-          draftSubmittedByUser[propertyId] &&
-          this.rewardFieldCompleted(
-            propertyId,
-            draftSubmittedByUser,
-            collection,
+    if (!collection.formMetadata.drafts?.[discordId]?.saved)
+      for (const page of collection.formMetadata.pageOrder) {
+        for (const propertyId of collection.formMetadata.pages[page]
+          .properties) {
+          if (
+            collection.formMetadata.skippedFormFields?.[discordId]?.[propertyId]
           )
-        ) {
-          continue;
-        } else {
-          let satisfied = true;
-          if (property.viewConditions) {
-            const viewConditions = property.viewConditions;
-            satisfied = await this.queryBus.execute(
-              new HasSatisfiedDataConditionsQuery(
-                collection,
-                draftSubmittedByUser,
-                viewConditions,
-              ),
-            );
-          }
-          if (satisfied) {
-            if (collection.properties[propertyId].type === 'reward') {
-              const incompleteField = this.fetchIncompleteRewardField(
-                draftSubmittedByUser[propertyId],
-              );
-              if (incompleteField) {
-                return {
-                  field: propertyId,
-                  ethAddress: user?.ethAddress,
-                  subField: incompleteField,
-                };
-              }
-            }
+            continue;
 
-            return {
-              field: propertyId,
-              ethAddress: user?.ethAddress,
-            };
+          const property = properties[propertyId];
+          if (
+            !property.isPartOfFormView ||
+            ['milestone', 'multiURL'].includes(property.type)
+          )
+            continue;
+          if (
+            draftSubmittedByUser[propertyId] &&
+            this.rewardFieldCompleted(
+              propertyId,
+              draftSubmittedByUser,
+              collection,
+            )
+          ) {
+            continue;
+          } else {
+            let satisfied = true;
+            if (property.viewConditions) {
+              const viewConditions = property.viewConditions;
+              satisfied = await this.queryBus.execute(
+                new HasSatisfiedDataConditionsQuery(
+                  collection,
+                  draftSubmittedByUser,
+                  viewConditions,
+                ),
+              );
+            }
+            if (satisfied) {
+              if (collection.properties[propertyId].type === 'reward') {
+                const incompleteField = this.fetchIncompleteRewardField(
+                  draftSubmittedByUser[propertyId],
+                );
+                if (incompleteField) {
+                  return {
+                    field: propertyId,
+                    ethAddress: user?.ethAddress,
+                    subField: incompleteField,
+                  };
+                }
+              }
+
+              return {
+                field: propertyId,
+                ethAddress: user?.ethAddress,
+              };
+            }
           }
         }
       }
-    }
 
     if (
       collection.formMetadata.paymentConfig &&
       !draftSubmittedByUser?.__payment__ &&
-      !collection.formMetadata.skippedFormFields?.[discordId]?.['paywall']
+      !collection.formMetadata.skippedFormFields?.[discordId]?.['paywall'] &&
+      !collection.formMetadata.drafts?.[discordId]?.saved
     ) {
       return {
         field: 'paywall',
@@ -305,7 +312,8 @@ export class GetNextFieldQueryHandler
 
     if (
       collection.formMetadata.mintkudosTokenId &&
-      !collection.formMetadata?.drafts?.[discordId]?.['kudosClaimed']
+      !collection.formMetadata?.drafts?.[discordId]?.['kudosClaimed'] &&
+      !collection.formMetadata.skippedFormFields?.[discordId]?.['kudos']
     ) {
       return {
         field: 'kudos',
@@ -315,7 +323,8 @@ export class GetNextFieldQueryHandler
 
     if (
       collection.formMetadata.surveyTokenId &&
-      !collection.formMetadata?.drafts?.[discordId]?.['erc20Claimed']
+      !collection.formMetadata?.drafts?.[discordId]?.['erc20Claimed'] &&
+      !collection.formMetadata.skippedFormFields?.[discordId]?.['erc20']
     ) {
       return {
         field: 'erc20',
@@ -389,16 +398,16 @@ export class GetNextFieldQueryHandler
     return {
       canClaim: canClaimResForPoap.canClaim && !poap.hasClaimed,
       responseMatchCount: canClaimResForPoap.matchCount,
-      hasClaimed: poap.hasClaimed,
+      hasClaimed: poap.claimed,
       poap,
       responseCount:
         collection.formMetadata.minimumNumberOfAnswersThatNeedToMatchForPoap,
     };
   }
-  async kudos(collection: Collection, callerId: string) {
+  async kudos(collection: Collection, callerAddress: string) {
     const res = this.claimEligibilityService.canClaimKudos(
       collection,
-      callerId,
+      callerAddress,
     );
     const kudos = await this.kudosService.getKudosById(
       collection.formMetadata.mintkudosTokenId,
@@ -544,7 +553,7 @@ export class GetNextFieldQueryHandler
           return {
             type: 'kudos',
             name: 'You are eligible for a Kudos!',
-            kudos: await this.kudos(collection, callerId),
+            kudos: await this.kudos(collection, callerAddress),
           };
         } else if (nextField === 'erc20') {
           return {

@@ -95,8 +95,15 @@ export class AddDataCommandHandler implements ICommandHandler<AddDataCommand> {
   }
 
   async execute(command: AddDataCommand) {
-    const { data, caller, collectionId, anon, validateAccess, validateData } =
-      command;
+    const {
+      data,
+      caller,
+      collectionId,
+      anon,
+      validateAccess,
+      validateData,
+      discordId,
+    } = command;
     try {
       const collection = await this.collectionRepository.findById(collectionId);
       if (!collection) throw 'Collection does not exist';
@@ -202,6 +209,19 @@ export class AddDataCommandHandler implements ICommandHandler<AddDataCommand> {
         });
       }
 
+      let formMetadata = collection.formMetadata;
+      if (discordId) {
+        formMetadata = {
+          ...formMetadata,
+          drafts: {
+            ...(formMetadata?.drafts || {}),
+            [discordId]: {
+              ...(formMetadata?.drafts?.[discordId] || {}),
+              saved: true,
+            },
+          },
+        };
+      }
       const updatedCollection = await this.collectionRepository.updateById(
         collectionId,
         {
@@ -219,6 +239,7 @@ export class AddDataCommandHandler implements ICommandHandler<AddDataCommand> {
             ...collection.projectMetadata,
             cardOrders,
           },
+          formMetadata,
         },
       );
 

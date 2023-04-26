@@ -278,7 +278,7 @@ export interface FormMetadata {
 
   drafts?: {
     [userId: string]: {
-      data: object;
+      [key: string]: any;
     };
   };
   currentField?: {
