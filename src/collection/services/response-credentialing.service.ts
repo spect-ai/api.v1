@@ -40,6 +40,7 @@ export class ClaimEligibilityService {
     reason: string;
     matchCount?: number;
   } {
+    console.log({ claimee });
     if (!collection.formMetadata.mintkudosTokenId)
       return {
         canClaim: false,
@@ -82,11 +83,13 @@ export class ClaimEligibilityService {
         reason: 'User has not submitted any response',
       };
     }
+
+    let matchCount;
     if (
       collection.formMetadata
         ?.minimumNumberOfAnswersThatNeedToMatchForMintkudos > 0
     ) {
-      const { canClaim, matchCount } =
+      const conditionRes =
         this.advancedConditionService.hasMetResponseCountCondition(
           collection,
           collection.data[slug],
@@ -94,8 +97,8 @@ export class ClaimEligibilityService {
           collection.formMetadata
             ?.minimumNumberOfAnswersThatNeedToMatchForMintkudos,
         );
-
-      if (!canClaim) {
+      matchCount = conditionRes.matchCount;
+      if (!conditionRes.canClaim) {
         return {
           canClaim: false,
           hasClaimed: false,
@@ -109,6 +112,7 @@ export class ClaimEligibilityService {
       canClaim: true,
       hasClaimed: false,
       reason: '',
+      matchCount,
     };
   }
 
@@ -147,10 +151,11 @@ export class ClaimEligibilityService {
         reason: 'User has not submitted a response',
       };
 
+    let matchCount;
     if (
       collection.formMetadata?.minimumNumberOfAnswersThatNeedToMatchForPoap > 0
     ) {
-      const { canClaim, matchCount } =
+      const conditionRes =
         this.advancedConditionService.hasMetResponseCountCondition(
           collection,
           collection.data[slug],
@@ -158,7 +163,8 @@ export class ClaimEligibilityService {
           collection.formMetadata?.minimumNumberOfAnswersThatNeedToMatchForPoap,
         );
 
-      if (!canClaim) {
+      matchCount = conditionRes.matchCount;
+      if (!conditionRes.canClaim) {
         return {
           canClaim: false,
           reason: 'User has not met the response count condition',
@@ -169,6 +175,7 @@ export class ClaimEligibilityService {
     return {
       canClaim: true,
       reason: '',
+      matchCount,
     };
   }
 
@@ -588,7 +595,7 @@ export class ResponseCredentialingService {
           },
           mintkudosClaimedBy: [
             ...(collection.formMetadata.mintkudosClaimedBy || []),
-            user.ethAddress,
+            user.id,
           ],
         },
       });

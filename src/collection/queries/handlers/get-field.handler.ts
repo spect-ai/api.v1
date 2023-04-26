@@ -134,6 +134,7 @@ export class GetNextFieldQueryHandler
     field: string;
     ethAddress?: string;
     subField?: string;
+    userId?: string;
   }> {
     const { properties, propertyOrder } = collection;
     const updates = {} as { [key: string]: any };
@@ -307,6 +308,7 @@ export class GetNextFieldQueryHandler
       return {
         field: 'poap',
         ethAddress: user?.ethAddress,
+        userId: user?.id,
       };
     }
 
@@ -318,6 +320,7 @@ export class GetNextFieldQueryHandler
       return {
         field: 'kudos',
         ethAddress: user?.ethAddress,
+        userId: user?.id,
       };
     }
 
@@ -329,6 +332,7 @@ export class GetNextFieldQueryHandler
       return {
         field: 'erc20',
         ethAddress: user?.ethAddress,
+        userId: user?.id,
       };
     }
 
@@ -391,23 +395,25 @@ export class GetNextFieldQueryHandler
       collection,
       callerId,
     );
+    console.log({ canClaimResForPoap });
     const poap = await this.poapService.getPoapById(
       collection.formMetadata.poapEventId,
       callerAddress,
     );
+
     return {
       canClaim: canClaimResForPoap.canClaim && !poap.hasClaimed,
       responseMatchCount: canClaimResForPoap.matchCount,
       hasClaimed: poap.claimed,
       poap,
-      responseCount:
+      responseMatchCountToQualify:
         collection.formMetadata.minimumNumberOfAnswersThatNeedToMatchForPoap,
     };
   }
-  async kudos(collection: Collection, callerAddress: string) {
+  async kudos(collection: Collection, callerId: string) {
     const res = this.claimEligibilityService.canClaimKudos(
       collection,
-      callerAddress,
+      callerId,
     );
     const kudos = await this.kudosService.getKudosById(
       collection.formMetadata.mintkudosTokenId,
@@ -417,7 +423,7 @@ export class GetNextFieldQueryHandler
       hasClaimed: res.hasClaimed,
       kudos,
       responseMatchCount: res.matchCount,
-      responseCount:
+      responseMatchCountToQualify:
         collection.formMetadata
           .minimumNumberOfAnswersThatNeedToMatchForMintkudos,
     };
@@ -485,6 +491,7 @@ export class GetNextFieldQueryHandler
         field: nextField,
         ethAddress: callerAddress,
         subField,
+        userId,
       } = await this.fetchNextValidFieldFromCollection(
         collection,
         callerId,
@@ -547,13 +554,13 @@ export class GetNextFieldQueryHandler
           return {
             type: 'poap',
             name: `You're eligible for a POAP!`,
-            poap: await this.poap(collection, callerId, callerAddress),
+            poap: await this.poap(collection, userId, callerAddress),
           };
         } else if (nextField === 'kudos') {
           return {
             type: 'kudos',
             name: 'You are eligible for a Kudos!',
-            kudos: await this.kudos(collection, callerAddress),
+            kudos: await this.kudos(collection, userId),
           };
         } else if (nextField === 'erc20') {
           return {
