@@ -303,6 +303,9 @@ export class Circle extends ProfileModel {
 
   @prop()
   sidebarConfig?: SidebarConfig;
+
+  @prop()
+  version: number;
 }
 
 export class ExtendedCircle extends Circle {

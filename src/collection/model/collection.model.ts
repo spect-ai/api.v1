@@ -168,6 +168,9 @@ export class Collection extends BaseModel {
     threadId?: string;
     messageId?: string;
   };
+
+  @prop()
+  version: number;
 }
 
 export interface FormMetadata {
