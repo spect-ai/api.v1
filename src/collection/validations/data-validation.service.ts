@@ -205,7 +205,11 @@ export class DataValidationService {
             throw 'Invalid ethereum address or ens';
         }
       } else if (['date'].includes(properties[propertyId].type)) {
-        if (data) if (!isValidDateString(data)) throw 'Invalid date';
+        if (data) {
+          if (!isValidDateString(data)) {
+            throw 'Invalid date';
+          }
+        }
       } else if (['discord'].includes(properties[propertyId].type)) {
         if (data) {
           console.log({ data });
@@ -231,7 +235,7 @@ export class DataValidationService {
     for (const [propertyId, property] of Object.entries(
       collection.properties,
     )) {
-      if (property.type === 'readonly') continue;
+      if (property.type === 'readonly' || !property.isPartOfFormView) continue;
       let satisfiedConditions = true;
       if (property.viewConditions?.length) {
         satisfiedConditions = await this.queryBus.execute(

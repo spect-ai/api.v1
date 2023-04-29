@@ -140,11 +140,11 @@ export class UpdateCollectionCommandHandler
                 'connect',
                 ...formMetadata.pageOrder.slice(1),
               ],
+              allowAnonymousResponses: false,
             },
           },
         );
       }
-
       if (
         collection.collectionType === 0 &&
         formMetadata &&
@@ -153,7 +153,7 @@ export class UpdateCollectionCommandHandler
         !formMetadata.poapEditCode &&
         !formMetadata.mintkudosTokenId &&
         !formMetadata.surveyTokenId &&
-        !formMetadata.formRoleGating &&
+        !formMetadata.formRoleGating?.length &&
         formMetadata.allowAnonymousResponses
       ) {
         const { formMetadata } = updatedCollection;
@@ -169,6 +169,7 @@ export class UpdateCollectionCommandHandler
               pageOrder: formMetadata.pageOrder.filter(
                 (page) => page !== 'connect',
               ),
+              allowAnonymousResponses: true,
             },
           },
         );

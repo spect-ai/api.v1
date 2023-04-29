@@ -1,4 +1,7 @@
-import { applicationFormStatus } from '../grantApplicationForm';
+import {
+  applicationFormStatus,
+  grantApplicationFormPropertyOrder,
+} from '../grantApplicationForm';
 import {
   getGranteeCollectionProperties,
   granteeCollectionPropertyOrder,
@@ -20,7 +23,7 @@ export const automationForAcceptedGrants = (
       subType: 'singleSelect',
       name: '"Status" changes',
       data: {
-        fieldName: 'Status',
+        fieldName: grantApplicationFormPropertyOrder[0],
         fieldType: 'singleSelect',
         to: [
           {
@@ -62,14 +65,14 @@ export const automationForAcceptedGrants = (
               mapping: {
                 to: {
                   label: 'Title',
-                  value: 'Title',
+                  value: granteeCollectionPropertyOrder[0],
                   data: {
                     type: 'shortText',
                   },
                 },
                 from: {
                   label: 'Project Name',
-                  value: 'Project Name',
+                  value: grantApplicationFormPropertyOrder[1],
                 },
               },
             },
@@ -78,14 +81,14 @@ export const automationForAcceptedGrants = (
               mapping: {
                 to: {
                   label: 'Description',
-                  value: 'Description',
+                  value: granteeCollectionPropertyOrder[1],
                   data: {
                     type: 'longText',
                   },
                 },
                 from: {
                   label: 'About your Project',
-                  value: 'About your Project',
+                  value: grantApplicationFormPropertyOrder[2],
                 },
               },
             },
@@ -94,14 +97,14 @@ export const automationForAcceptedGrants = (
               mapping: {
                 to: {
                   label: 'Team Info',
-                  value: 'Team Info',
+                  value: granteeCollectionPropertyOrder[6],
                   data: {
                     type: 'longText',
                   },
                 },
                 from: {
                   label: 'About the Team',
-                  value: 'About the Team',
+                  value: grantApplicationFormPropertyOrder[5],
                 },
               },
             },
@@ -110,14 +113,14 @@ export const automationForAcceptedGrants = (
               mapping: {
                 to: {
                   label: 'Email',
-                  value: 'Email',
+                  value: granteeCollectionPropertyOrder[3],
                   data: {
                     type: 'email',
                   },
                 },
                 from: {
                   label: 'Email',
-                  value: 'Email',
+                  value: grantApplicationFormPropertyOrder[3],
                 },
               },
             },
@@ -126,14 +129,14 @@ export const automationForAcceptedGrants = (
               mapping: {
                 to: {
                   label: 'Total Reward',
-                  value: 'Total Reward',
+                  value: granteeCollectionPropertyOrder[5],
                   data: {
                     type: 'reward',
                   },
                 },
                 from: {
                   label: 'Total Reward',
-                  value: 'Total Reward',
+                  value: grantApplicationFormPropertyOrder[6],
                 },
               },
             },
@@ -142,14 +145,14 @@ export const automationForAcceptedGrants = (
               mapping: {
                 to: {
                   label: 'Milestones',
-                  value: 'Milestones',
+                  value: granteeCollectionPropertyOrder[4],
                   data: {
                     type: 'milestone',
                   },
                 },
                 from: {
                   label: 'Milestones',
-                  value: 'Milestones',
+                  value: grantApplicationFormPropertyOrder[4],
                 },
               },
             },
@@ -158,7 +161,7 @@ export const automationForAcceptedGrants = (
               mapping: {
                 to: {
                   label: 'Assignee',
-                  value: 'Assignee',
+                  value: granteeCollectionPropertyOrder[7],
                   data: {
                     type: 'user[]',
                   },
@@ -170,7 +173,7 @@ export const automationForAcceptedGrants = (
               default: {
                 field: {
                   label: 'Status',
-                  value: 'Status',
+                  value: granteeCollectionPropertyOrder[2],
                   data: {
                     type: 'singleSelect',
                   },

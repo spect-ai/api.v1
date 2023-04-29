@@ -1,4 +1,7 @@
-import { applicationFormStatus } from '../grantApplicationForm';
+import {
+  applicationFormStatus,
+  grantApplicationFormPropertyOrder,
+} from '../grantApplicationForm';
 
 export const automationOfNotificationWhenAccepted = (
   circleId: string,
@@ -29,7 +32,7 @@ export const automationOfNotificationWhenAccepted = (
       subType: 'singleSelect',
       name: '"Status" changes',
       data: {
-        fieldName: 'Status',
+        fieldName: grantApplicationFormPropertyOrder[0],
         fieldType: 'singleSelect',
         to: [
           {

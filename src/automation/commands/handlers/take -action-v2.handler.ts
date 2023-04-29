@@ -540,7 +540,7 @@ export class PostOnDiscordActionCommandHandler
 
       const fields = action.data.fields
         ?.map((f) => ({
-          name: f.value,
+          name: f.label,
           value:
             collection.properties?.[f.value]?.type === 'singleSelect'
               ? collection?.data?.[relevantIds.dataSlug]?.[f.value]?.label

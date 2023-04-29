@@ -3,9 +3,7 @@ import {
   HttpStatus,
   Injectable,
   InternalServerErrorException,
-  Logger,
 } from '@nestjs/common';
-import moment from 'moment';
 import { ObjectId } from 'mongoose';
 import { CommonTools } from 'src/common/common.service';
 import { DiscordService } from 'src/common/discord.service';
@@ -16,7 +14,6 @@ import { LoggingService } from 'src/logging/logging.service';
 import { RegistryService } from 'src/registry/registry.service';
 import { RolesService } from 'src/roles/roles.service';
 import { RequestProvider } from 'src/users/user.provider';
-import { v4 as uuidv4 } from 'uuid';
 import { CirclesRepository } from './circles.repository';
 import { DetailedCircleResponseDto } from './dto/detailed-circle-response.dto';
 import { UpdateCircleRequestDto } from './dto/update-circle-request.dto';

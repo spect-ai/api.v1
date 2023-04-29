@@ -44,6 +44,12 @@ export class Collection extends BaseModel {
   /**
    * Properties in the collection
    */
+  @prop()
+  legacyProperties: MappedItem<Property>;
+
+  /**
+   * Properties in the collection
+   */
   @prop({ default: [] })
   propertyOrder: string[];
 

@@ -105,7 +105,7 @@ export class RequiredPaymentIdDto {
 
 export class RequiredPropertyIdDto {
   @IsNotEmpty()
-  @IsString()
+  @IsUUID()
   propertyId: string;
 }
 

@@ -9,6 +9,7 @@ import {
   IsObject,
   IsOptional,
   IsString,
+  IsUUID,
   ValidateNested,
 } from 'class-validator';
 import {
@@ -31,6 +32,9 @@ export class OptionModel {
 }
 
 export class AddPropertyDto {
+  @IsUUID()
+  id: string;
+
   @IsString()
   @Optional()
   name: string;
@@ -135,8 +139,8 @@ export class AddPropertyDto {
 }
 
 export class UpdatePropertyDto {
-  @IsString()
-  propertyId: string;
+  @IsUUID()
+  id: string;
   /**
    * The name of the property
    */

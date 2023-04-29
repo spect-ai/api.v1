@@ -21,9 +21,8 @@ export class AddPropertyCommandHandler
   async execute(command: AddPropertyCommand): Promise<Collection> {
     try {
       console.log('AddPropertyCommandHandler');
-      const { addPropertyCommandDto, caller, collectionId, pageId } = command;
+      const { addPropertyCommandDto, collectionId, pageId } = command;
       const collection = await this.collectionRepository.findById(collectionId);
-      console.log(addPropertyCommandDto);
       if (addPropertyCommandDto.type === 'cardRelation') {
         console.log({ addPropertyCommandDto });
         const parentRelationpProperty =
@@ -65,27 +64,25 @@ export class AddPropertyCommandHandler
           new GetPrivateViewCollectionQuery(updatedCollection.slug),
         );
       }
-      if (
-        collection.properties &&
-        collection.properties[addPropertyCommandDto.name]
-      )
-        throw 'Cannot add property with duplicate name';
+      // if (
+      //   collection.properties &&
+      //   collection.properties[addPropertyCommandDto.name]
+      // )
+      //   throw 'Cannot add property with duplicate name';
 
-      if (addPropertyCommandDto.name === 'slug')
-        throw 'Cannot add property with name slug';
       let updatedCollection = await this.collectionRepository.updateById(
         collectionId,
         {
           properties: {
             ...collection.properties,
-            [addPropertyCommandDto.name]: {
+            [addPropertyCommandDto.id]: {
               ...addPropertyCommandDto,
               isPartOfFormView: addPropertyCommandDto.isPartOfFormView || true,
             },
           },
           propertyOrder: [
             ...(collection.propertyOrder || []),
-            addPropertyCommandDto.name,
+            addPropertyCommandDto.id,
           ],
         },
       );
@@ -102,7 +99,7 @@ export class AddPropertyCommandHandler
                   ...collection.formMetadata.pages[pageId],
                   properties: [
                     ...(collection.formMetadata.pages[pageId].properties || []),
-                    addPropertyCommandDto.name,
+                    addPropertyCommandDto.id,
                   ],
                 },
               },

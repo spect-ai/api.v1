@@ -74,6 +74,16 @@ export class RemovePropertyCommandHandler
         }
       }
 
+      // remove from responseDataForMintKuods if present and respondeDataForPoap
+      if (collection.formMetadata?.responseDataForMintkudos?.[propertyId]) {
+        delete collection.formMetadata.responseDataForMintkudos[propertyId];
+        collection.formMetadata.minimumNumberOfAnswersThatNeedToMatchForMintkudos -= 1;
+      }
+      if (collection.formMetadata?.responseDataForPoap?.[propertyId]) {
+        delete collection.formMetadata.responseDataForPoap[propertyId];
+        collection.formMetadata.minimumNumberOfAnswersThatNeedToMatchForPoap -= 1;
+      }
+
       const updatedCollection = await this.collectionRepository.updateById(
         collectionId,
         {

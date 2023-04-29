@@ -1,70 +1,228 @@
-import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
+import { CommandHandler, ICommandHandler, QueryBus } from '@nestjs/cqrs';
 import { CollectionRepository } from 'src/collection/collection.repository';
 import { MigrateAllCollectionsCommand } from '../impl/migrate-collection.command';
+import { v4 as uuid } from 'uuid';
+import { GetCircleBySlugQuery } from 'src/circle/queries/impl';
+import { Circle } from 'src/circle/model/circle.model';
+import { GetCollectionBySlugQuery } from 'src/collection/queries';
+import { Collection } from 'src/collection/model/collection.model';
+import { CirclesRepository } from 'src/circle/circles.repository';
 
 @CommandHandler(MigrateAllCollectionsCommand)
 export class MigrateAllCollectionsCommandHandler
   implements ICommandHandler<MigrateAllCollectionsCommand>
 {
-  constructor(private readonly collectionRepository: CollectionRepository) {}
+  constructor(
+    private readonly collectionRepository: CollectionRepository,
+    private readonly circleRepository: CirclesRepository,
+    private readonly queryBus: QueryBus,
+  ) {}
 
   async execute(command: MigrateAllCollectionsCommand) {
-    const allCollections = await this.collectionRepository.findAll();
+    const circle: Circle = await this.queryBus.execute(
+      new GetCircleBySlugQuery('dsada-2'),
+    );
+
+    for await (const automation of Object.values(circle.automations)) {
+      const triggerCollection = await this.queryBus.execute(
+        new GetCollectionBySlugQuery(automation.triggerCollectionSlug),
+      );
+      if (automation.trigger.data?.fieldName) {
+        automation.trigger.data.fieldName =
+          triggerCollection.legacyProperties[
+            automation.trigger.data.fieldName
+          ].id;
+      }
+      console.log({ id: automation.id });
+      for await (const action of automation.actions) {
+        console.log({ action: action.id });
+        if (action.id === 'createCard') {
+          const selectedCollection: Collection =
+            await this.collectionRepository.findById(
+              action.data.selectedCollection.value,
+            );
+          action.data.selectedCollection.data = {
+            colectionType: selectedCollection.collectionType,
+            id: selectedCollection.id,
+            name: selectedCollection.name,
+            properties: selectedCollection.properties,
+            propertyOrder: selectedCollection.propertyOrder,
+            slug: selectedCollection.slug,
+          };
+          action.data.values.map((value) => {
+            if (value.type === 'mapping') {
+              if (value.mapping.from.data?.fieldType === 'milestone') {
+                value.mapping.from.value =
+                  triggerCollection.legacyProperties[
+                    value.mapping.from.data.fieldName
+                  ].id;
+              } else {
+                value.mapping.from.value =
+                  triggerCollection.legacyProperties[
+                    value.mapping.from.value
+                  ].id;
+              }
+              if (value.mapping.from.data?.fieldName) {
+                value.mapping.from.data.fieldName =
+                  triggerCollection.legacyProperties[
+                    value.mapping.from.data.fieldName
+                  ].id;
+              }
+              value.mapping.to.value =
+                selectedCollection.legacyProperties[value.mapping.to.value].id;
+              if (value.mapping.to.data?.fieldName) {
+                value.mapping.to.data.fieldName =
+                  selectedCollection.legacyProperties[
+                    value.mapping.to.data.fieldName
+                  ].id;
+              }
+            } else if (value.type === 'responder') {
+              value.mapping.to.value =
+                selectedCollection.legacyProperties[value.mapping.to.value].id;
+            } else if (value.type === 'default') {
+              value.default.field.value =
+                selectedCollection.legacyProperties[
+                  value.default.field.value
+                ].id;
+            }
+          });
+        } else if (
+          action.id === 'createDiscordThread' &&
+          action.data.threadNameType === 'mapping'
+        ) {
+          action.data.threadName.value =
+            triggerCollection.legacyProperties[action.data.threadName.value].id;
+        } else if (action.id === 'postOnDiscord') {
+          action.data.fields?.map((field) => {
+            field.value = triggerCollection.legacyProperties[field.value].id;
+          });
+        } else if (
+          action.id === 'createDiscordChannel' &&
+          action.data.channelNameType === 'mapping'
+        ) {
+          action.data.channelName.value =
+            triggerCollection.legacyProperties[
+              action.data.channelName.value
+            ].id;
+        }
+      }
+
+      for (const condition of automation.conditions) {
+        condition.data.field.value =
+          triggerCollection.legacyProperties[condition.data.field.value].id;
+      }
+    }
+
+    console.log('updating circle');
+
+    const res = await this.circleRepository.updateById(circle.id, circle);
+    return res;
+
+    const allCollections = [
+      await this.collectionRepository.findById('644cf207b586ba631b1a6f21'),
+    ];
 
     for (const collection of allCollections) {
-      if (!collection.permissions?.manageSettings) continue;
-      // if (collection.permissions.) continue;
+      // deep copy of properties
+      collection.legacyProperties = JSON.parse(
+        JSON.stringify(collection.properties),
+      );
+      const propMapping = collection.propertyOrder.reduce((acc, curr) => {
+        if (
+          collection.collectionType === 1 &&
+          (curr === 'Title' || curr === 'Description')
+        ) {
+          acc[curr] = curr;
+        } else {
+          acc[curr] = uuid();
+        }
+        return acc;
+      }, {});
 
-      console.log({ collection: collection.id });
-      // if (
-      //   collection.collectionType === 0 &&
-      //   collection.formMetadata &&
-      //   !collection.formMetadata.pages
-      // ) {
-      //   const pages = {
-      //     start: {
-      //       id: 'start',
-      //       name: 'Welcome Page',
-      //       properties: [],
-      //     },
-      //     'page-1': {
-      //       id: 'page-1',
-      //       name: 'Page 1',
-      //       properties: collection.propertyOrder,
-      //       movable: true,
-      //     },
-      //     submitted: {
-      //       id: 'submitted',
-      //       name: 'Submitted',
-      //       properties: [],
-      //     },
-      //   };
-      //   const pageOrder = ['start', 'page-1', 'submitted'];
+      Object.keys(collection.properties).forEach((key) => {
+        console.log({ key, propMapping: propMapping[key] });
+        collection.properties[propMapping[key]] = {
+          ...collection.properties[key],
+          id: propMapping[key],
+        };
+        collection.legacyProperties[key].id = propMapping[key];
 
-      //   pages['connect'] = {
-      //     id: 'connect',
-      //     name: 'Connect Wallet',
-      //     properties: [],
-      //   };
-      //   pageOrder.splice(1, 0, 'connect');
+        if (
+          collection.collectionType === 1 &&
+          (key === 'Title' || key === 'Description')
+        ) {
+          return;
+        }
+        delete collection.properties[key];
+      });
 
-      //   if (
-      //     collection.formMetadata.poapEventId ||
-      //     collection.formMetadata.surveyTokenId ||
-      //     collection.formMetadata.mintkudosTokenId
-      //   ) {
-      //     pages['collect'] = {
-      //       id: 'collect',
-      //       name: 'Collect Incentives',
-      //       properties: [],
-      //     };
-      //     pageOrder.splice(-1, 0, 'collect');
-      //   }
+      collection.propertyOrder = collection.propertyOrder.map(
+        (prop) => propMapping[prop],
+      );
 
-      //   collection.formMetadata.pages = pages;
-      //   collection.formMetadata.pageOrder = pageOrder;
-      //   collection.formMetadata.allowAnonymousResponses = false;
-      // }
+      Object.keys(collection.data).forEach((key) => {
+        Object.keys(collection.data[key]).forEach((dataKey) => {
+          if (!propMapping[dataKey]) return;
+          collection.data[key][propMapping[dataKey]] =
+            collection.data[key][dataKey];
+          if (
+            collection.collectionType === 1 &&
+            (dataKey === 'Title' || dataKey === 'Description')
+          ) {
+            return;
+          }
+          delete collection.data[key][dataKey];
+        });
+      });
+
+      if (collection.collectionType === 0) {
+        Object.keys(collection.formMetadata.pages).forEach((key) => {
+          collection.formMetadata.pages[key].properties =
+            collection.formMetadata.pages[key].properties.map(
+              (prop) => propMapping[prop],
+            );
+        });
+
+        if (collection.formMetadata.responseDataForMintkudos) {
+          Object.keys(collection.formMetadata.responseDataForMintkudos).forEach(
+            (key) => {
+              collection.formMetadata.responseDataForMintkudos[
+                propMapping[key]
+              ] = collection.formMetadata.responseDataForMintkudos[key];
+              delete collection.formMetadata.responseDataForMintkudos[key];
+            },
+          );
+        }
+
+        if (collection.formMetadata.responseDataForPoap) {
+          Object.keys(collection.formMetadata.responseDataForPoap).forEach(
+            (key) => {
+              collection.formMetadata.responseDataForPoap[propMapping[key]] =
+                collection.formMetadata.responseDataForPoap[key];
+              delete collection.formMetadata.responseDataForPoap[key];
+            },
+          );
+        }
+      } else {
+        Object.keys(collection.projectMetadata.cardOrders).map((key) => {
+          collection.projectMetadata.cardOrders[propMapping[key]] =
+            collection.projectMetadata.cardOrders[key];
+          delete collection.projectMetadata.cardOrders[key];
+        });
+
+        collection.projectMetadata.viewOrder.map((view) => {
+          collection.projectMetadata.views[view].groupByColumn =
+            propMapping[collection.projectMetadata.views[view].groupByColumn];
+
+          collection.projectMetadata.views[view].sort.property =
+            propMapping[collection.projectMetadata.views[view].sort.property];
+
+          collection.projectMetadata.views[view].filters.map((filter) => {
+            filter.data.field.value = propMapping[filter.data.field.value];
+          });
+        });
+      }
+
       await this.collectionRepository.updateById(collection.id, collection);
     }
 

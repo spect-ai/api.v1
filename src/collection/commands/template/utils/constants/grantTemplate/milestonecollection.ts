@@ -11,20 +11,23 @@ export const mileStoneStatus = {
 
 export const getMilestoneProperties = (registry) => {
   const props = {
-    Title: {
+    [milestonePropertyOrder[0]]: {
+      id: milestonePropertyOrder[0],
       name: 'Title',
       type: 'shortText',
       default: '',
       isPartOfFormView: true,
       immutable: true,
     },
-    Description: {
+    [milestonePropertyOrder[1]]: {
+      id: milestonePropertyOrder[1],
       name: 'Description',
       type: 'longText',
       default: '',
       isPartOfFormView: true,
     },
-    Status: {
+    [milestonePropertyOrder[2]]: {
+      id: milestonePropertyOrder[2],
       name: 'Status',
       type: 'singleSelect',
       options: [
@@ -47,7 +50,8 @@ export const getMilestoneProperties = (registry) => {
       ],
       isPartOfFormView: false,
     },
-    Reward: {
+    [milestonePropertyOrder[3]]: {
+      id: milestonePropertyOrder[3],
       name: 'Reward',
       type: 'reward',
       rewardOptions: registry,
@@ -58,7 +62,8 @@ export const getMilestoneProperties = (registry) => {
       viewConditions: [],
       payWallOptions: {},
     },
-    'Due Date': {
+    [milestonePropertyOrder[4]]: {
+      id: milestonePropertyOrder[4],
       name: 'Due Date',
       type: 'date',
       isPartOfFormView: true,
@@ -69,7 +74,8 @@ export const getMilestoneProperties = (registry) => {
       viewConditions: [],
       payWallOptions: {},
     },
-    'Project Name': {
+    [milestonePropertyOrder[5]]: {
+      id: milestonePropertyOrder[5],
       name: 'Project Name',
       type: 'shortText',
       isPartOfFormView: true,
@@ -80,7 +86,8 @@ export const getMilestoneProperties = (registry) => {
       viewConditions: [],
       payWallOptions: {},
     },
-    Assignee: {
+    [milestonePropertyOrder[6]]: {
+      id: milestonePropertyOrder[6],
       name: 'Assignee',
       type: 'user[]',
       isPartOfFormView: true,
@@ -98,9 +105,9 @@ export const getMilestoneProperties = (registry) => {
 export const milestonePropertyOrder = [
   'Title',
   'Description',
-  'Status',
-  'Reward',
-  'Due Date',
-  'Project Name',
-  'Assignee',
+  uuidv4(),
+  uuidv4(),
+  uuidv4(),
+  uuidv4(),
+  uuidv4(),
 ];

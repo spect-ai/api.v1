@@ -10,20 +10,23 @@ export const granteeStatus = {
 
 export const getGranteeCollectionProperties = (registry) => {
   const props = {
-    Title: {
+    [granteeCollectionPropertyOrder[0]]: {
+      id: granteeCollectionPropertyOrder[0],
       name: 'Title',
       type: 'shortText',
       default: '',
       isPartOfFormView: true,
       immutable: true,
     },
-    Description: {
+    [granteeCollectionPropertyOrder[1]]: {
+      id: granteeCollectionPropertyOrder[1],
       name: 'Description',
       type: 'longText',
       default: '',
       isPartOfFormView: true,
     },
-    Status: {
+    [granteeCollectionPropertyOrder[2]]: {
+      id: granteeCollectionPropertyOrder[2],
       name: 'Status',
       type: 'singleSelect',
       options: [
@@ -48,7 +51,8 @@ export const getGranteeCollectionProperties = (registry) => {
       viewConditions: [],
       payWallOptions: {},
     },
-    Email: {
+    [granteeCollectionPropertyOrder[3]]: {
+      id: granteeCollectionPropertyOrder[3],
       name: 'Email',
       type: 'email',
       isPartOfFormView: true,
@@ -59,7 +63,8 @@ export const getGranteeCollectionProperties = (registry) => {
       viewConditions: [],
       payWallOptions: {},
     },
-    Milestones: {
+    [granteeCollectionPropertyOrder[4]]: {
+      id: granteeCollectionPropertyOrder[4],
       name: 'Milestones',
       type: 'milestone',
       isPartOfFormView: true,
@@ -70,7 +75,8 @@ export const getGranteeCollectionProperties = (registry) => {
       viewConditions: [],
       payWallOptions: {},
     },
-    'Total Reward': {
+    [granteeCollectionPropertyOrder[5]]: {
+      id: granteeCollectionPropertyOrder[5],
       name: 'Total Reward',
       type: 'reward',
       isPartOfFormView: true,
@@ -81,7 +87,8 @@ export const getGranteeCollectionProperties = (registry) => {
       viewConditions: [],
       payWallOptions: {},
     },
-    'Team Info': {
+    [granteeCollectionPropertyOrder[6]]: {
+      id: granteeCollectionPropertyOrder[6],
       name: 'Team Info',
       type: 'longText',
       isPartOfFormView: true,
@@ -92,7 +99,8 @@ export const getGranteeCollectionProperties = (registry) => {
       viewConditions: [],
       payWallOptions: {},
     },
-    Assignee: {
+    [granteeCollectionPropertyOrder[7]]: {
+      id: granteeCollectionPropertyOrder[7],
       name: 'Assignee',
       type: 'user[]',
       isPartOfFormView: true,
@@ -110,10 +118,10 @@ export const getGranteeCollectionProperties = (registry) => {
 export const granteeCollectionPropertyOrder = [
   'Title',
   'Description',
-  'Status',
-  'Email',
-  'Milestones',
-  'Total Reward',
-  'Team Info',
-  'Assignee',
+  uuidv4(),
+  uuidv4(),
+  uuidv4(),
+  uuidv4(),
+  uuidv4(),
+  uuidv4(),
 ];

@@ -1,6 +1,5 @@
 import { Circle } from 'src/circle/model/circle.model';
 import { Registry } from 'src/registry/model/registry.model';
-import { v4 as uuidv4 } from 'uuid';
 import {
   getGrantApplicationFormProperties,
   grantApplicationFormPropertyOrder,
@@ -55,14 +54,13 @@ export const getGrantApplicationFormDetails = (
     [k: string]: Registry;
   },
 ) => {
-  const formPermissions = getDefaultPermissions(circle);
-  const onboardingFormDetails = {
+  return {
     name: 'Application Form',
     collectionType: 0,
     description: ' ',
     properties: getGrantApplicationFormProperties(registry),
     propertyOrder: grantApplicationFormPropertyOrder,
-    permissions: formPermissions,
+    permissions: getDefaultPermissions(circle),
     formMetadata: {
       active: true,
       logo: circle.avatar,
@@ -85,19 +83,30 @@ export const getGrantApplicationFormDetails = (
         'page-1': {
           id: 'page-1',
           name: 'Project',
-          properties: ['Project Name', 'About your Project', 'Status'],
+          properties: [
+            grantApplicationFormPropertyOrder[0],
+            grantApplicationFormPropertyOrder[1],
+            grantApplicationFormPropertyOrder[2],
+          ],
           movable: true,
         },
         'page-2': {
           id: 'page-2',
           name: 'Team Info',
-          properties: ['About the Team', 'Email', 'Connect Discord'],
+          properties: [
+            grantApplicationFormPropertyOrder[3],
+            grantApplicationFormPropertyOrder[4],
+            grantApplicationFormPropertyOrder[5],
+          ],
           movable: true,
         },
         'page-3': {
           id: 'page-3',
           name: 'Grant Details',
-          properties: ['Milestones', 'Total Reward'],
+          properties: [
+            grantApplicationFormPropertyOrder[6],
+            grantApplicationFormPropertyOrder[7],
+          ],
           movable: true,
         },
         ['submitted']: {
@@ -132,7 +141,6 @@ export const getGrantApplicationFormDetails = (
       cardOrders: {},
     },
   };
-  return onboardingFormDetails;
 };
 
 export const getMilestoneCollectionDetails = (
@@ -163,7 +171,7 @@ export const getMilestoneCollectionDetails = (
           id: milstoneViewId,
           name: 'Milestones',
           type: 'kanban',
-          groupByColumn: 'Status',
+          groupByColumn: milestonePropertyOrder[2],
           filters: [],
           sort: {
             property: '',
@@ -173,11 +181,11 @@ export const getMilestoneCollectionDetails = (
       },
       viewOrder: [milstoneViewId, '0x0'],
       cardOrders: {
-        Status: [[], [], [], []],
+        [milestonePropertyOrder[2]]: [[], [], [], []],
       },
       payments: {
-        rewardField: 'Reward',
-        payeeField: 'Assignee',
+        rewardField: [milestonePropertyOrder[3]],
+        payeeField: [milestonePropertyOrder[6]],
       },
     },
   };
@@ -206,12 +214,9 @@ export const getGranteeCollectionDto = (circle, granteeViewId, registry) => {
         },
       },
       viewOrder: ['0x0'],
-      cardOrders: {
-        Status: [[], [], [], []],
-      },
       payments: {
-        rewardField: 'Total Reward',
-        payeeField: 'Assignee',
+        rewardField: granteeCollectionPropertyOrder[5],
+        payeeField: granteeCollectionPropertyOrder[7],
       },
     },
   };
