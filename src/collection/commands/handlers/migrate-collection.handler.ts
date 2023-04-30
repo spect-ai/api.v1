@@ -19,7 +19,9 @@ export class MigrateAllCollectionsCommandHandler
   ) {}
 
   async execute(command: MigrateAllCollectionsCommand) {
-    const allCircles = await this.circleRepository.findAll();
+    const allCircles = [
+      await this.circleRepository.findById('64416403a8bd094272eb8cff'),
+    ];
 
     for await (const circle of allCircles) {
       if (circle.version === 2) continue;
@@ -60,6 +62,18 @@ export class MigrateAllCollectionsCommandHandler
               ...collection.properties[key],
               id: propMapping[key],
             };
+            if (
+              collection.properties[propMapping[key]].viewConditions?.length > 0
+            ) {
+              collection.properties[propMapping[key]].viewConditions.map(
+                (condition) => {
+                  if (condition.data?.field?.value) {
+                    condition.data.field.value =
+                      propMapping[condition.data.field.value];
+                  }
+                },
+              );
+            }
             collection.legacyProperties[key].id = propMapping[key];
 
             if (
