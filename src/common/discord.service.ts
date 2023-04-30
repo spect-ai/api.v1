@@ -18,6 +18,81 @@ export class DiscordService {
     this.logger.setContext('DiscordService');
   }
 
+  async verifyDiscordAndGetUser(code: string): Promise<{
+    id: string;
+    username: string;
+    avatar: string;
+    discriminator: string;
+  }> {
+    try {
+      const oauthResult = await fetch('https://discord.com/api/oauth2/token', {
+        method: 'POST',
+        body: new URLSearchParams({
+          client_id: process.env.DISCORD_CLIENT_ID as string,
+          client_secret: process.env.DISCORD_CLIENT_SECRET as string,
+          code: code as string,
+          grant_type: 'authorization_code',
+          redirect_uri: `${process.env.DISCORD_REDIRECT_URI}/linkDiscord`,
+          scope: 'guilds',
+        }),
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+      });
+
+      if (oauthResult.status !== 200)
+        throw new HttpException(
+          'Failed Discord verification',
+          oauthResult.status,
+        );
+
+      const oauthData: any = await oauthResult.json();
+      const userResult = await fetch('https://discord.com/api/users/@me', {
+        headers: {
+          authorization: `${oauthData.token_type} ${oauthData.access_token}`,
+        },
+      });
+
+      if (userResult.status !== 200)
+        throw new HttpException('Failed fetching user', userResult.status);
+
+      const userData = await userResult.json();
+      return userData;
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
+    }
+  }
+
+  async hasDiscordRole(
+    discordId: string,
+    guildId: string,
+    roleIds: string[],
+  ): Promise<boolean> {
+    try {
+      const res = await fetch(
+        `${process.env.DISCORD_URI}/api/guilds/${guildId}/hasAtleastOneRole?userId=${discordId}`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            secret: this.encryptionService.encrypt(process.env.API_SECRET),
+          },
+          body: JSON.stringify({
+            roleIds,
+          }),
+        },
+      );
+      const data = await res.json();
+      if (res.status !== 200) throw new HttpException(data.message, res.status);
+
+      return data.hasAtLeastOneRole;
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
+    }
+  }
+
   async getDiscordRole(discordId: string, guildId: string): Promise<string[]> {
     try {
       return await (

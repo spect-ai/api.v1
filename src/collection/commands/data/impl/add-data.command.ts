@@ -10,6 +10,7 @@ export class AddDataCommand {
     public readonly validateAccess = true,
     public readonly validateData = true,
     public readonly discordId?: string,
+    public readonly verificationToken?: string,
   ) {}
 }
 

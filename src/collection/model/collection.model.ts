@@ -307,6 +307,16 @@ export interface FormMetadata {
   idLookup?: {
     [id: string]: any;
   };
+
+  discordRoleGating?: {
+    id: string;
+    name: string;
+  }[];
+
+  verificationTokens?: {
+    // can be a discord user id or a spect user id or any other unique id of responder
+    [id: string]: string;
+  };
 }
 
 export interface PaymentConfig {

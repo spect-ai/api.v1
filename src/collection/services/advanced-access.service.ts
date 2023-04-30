@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { QueryBus } from '@nestjs/cqrs';
+import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { GetCircleByIdQuery } from 'src/circle/queries/impl';
 import { CommonTools } from 'src/common/common.service';
 import { GuildxyzService } from 'src/common/guildxyz.service';
@@ -8,6 +8,11 @@ import { GitcoinPassportService } from 'src/credentials/services/gitcoin-passpor
 import { User } from 'src/users/model/users.model';
 import { GetUserByFilterQuery } from 'src/users/queries/impl';
 import { Collection } from '../model/collection.model';
+import { GetCollectionByIdQuery } from '../queries';
+import { DiscordService } from 'src/common/discord.service';
+import { v4 as uuidv4 } from 'uuid';
+import { UpdateCollectionCommand } from '../commands';
+import { CollectionRepository } from '../collection.repository';
 
 @Injectable()
 export class AdvancedAccessService {
@@ -15,7 +20,8 @@ export class AdvancedAccessService {
     private readonly queryBus: QueryBus,
     private readonly guildxyzService: GuildxyzService,
     private readonly credentialService: GitcoinPassportService,
-    private readonly commonTools: CommonTools,
+    private readonly discordService: DiscordService,
+    private readonly collectionRepository: CollectionRepository,
   ) {}
 
   async requiresWalletConnect(collection: Collection): Promise<boolean> {
@@ -100,6 +106,63 @@ export class AdvancedAccessService {
     );
   }
 
+  async generateAccessConfirmationTokenForDiscordRoleGatedForms(
+    collectionId: string,
+    code: string,
+  ) {
+    const userData = await this.discordService.verifyDiscordAndGetUser(code);
+    const collection = (await this.queryBus.execute(
+      new GetCollectionByIdQuery(collectionId, {}),
+    )) as Collection;
+    if (!collection)
+      throw new Error('Collection not found while verifying access');
+    const circle = await this.queryBus.execute(
+      new GetCircleByIdQuery(collection.parents[0]),
+    );
+    if (!circle) throw new Error('Circle not found while verifying access');
+    const discordGuildId = circle?.discordGuildId;
+    if (!discordGuildId) throw new Error('Discord guild not set up for circle');
+    const hasRole = await this.discordService.hasDiscordRole(
+      userData.id,
+      discordGuildId,
+      collection.formMetadata.discordRoleGating?.map((role) => role.id) || [],
+    );
+    let verificationToken;
+    if (hasRole) {
+      verificationToken = uuidv4();
+      await this.collectionRepository.updateById(collectionId, {
+        formMetadata: {
+          ...collection.formMetadata,
+          verificationTokens: {
+            ...(collection.formMetadata.verificationTokens || {}),
+            [userData.id]: verificationToken,
+          },
+        },
+      });
+    }
+
+    return {
+      verificationToken,
+      userData,
+    };
+  }
+
+  async hasDiscordRoleToAccessForm(
+    collection: Collection,
+    callerDiscordId: string,
+  ): Promise<boolean> {
+    const circle = await this.queryBus.execute(
+      new GetCircleByIdQuery(collection.parents[0]),
+    );
+    if (!circle) throw new Error('Circle not found while verifying access');
+    const hasRole = await this.discordService.hasDiscordRole(
+      callerDiscordId,
+      circle?.discordGuildId,
+      collection.formMetadata.discordRoleGating?.map((role) => role.id) || [],
+    );
+    return hasRole;
+  }
+
   removePrivateFields(collection: Collection): any {
     delete collection.dataOwner;
     delete collection.data;
@@ -115,6 +178,7 @@ export class AdvancedAccessService {
     delete collection.formMetadata?.responseDataForMintkudos;
     delete collection.formMetadata?.idLookup;
     delete collection.formMetadata?.drafts;
+    delete collection.formMetadata?.verificationTokens;
     return collection;
   }
 }

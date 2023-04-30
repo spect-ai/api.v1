@@ -136,6 +136,7 @@ import { WhitelistService } from './services/whitelist.service';
 import { Property } from './types/types';
 import { BotAuthGuard } from 'src/auth/bot.guard';
 import { DeleteDraftCommand } from './commands/data/impl/delete-draft.command';
+import { AdvancedAccessService } from './services/advanced-access.service';
 
 @Controller('collection/v1')
 @ApiTags('collection.v1')
@@ -147,6 +148,7 @@ export class CollectionController {
     private readonly whitelistService: WhitelistService,
     private readonly linkDiscordService: LinkDiscordService,
     private readonly getCollectionService: GetCollectionService,
+    private readonly advancedAccessService: AdvancedAccessService,
   ) {}
 
   @Get('/changelog')
@@ -311,6 +313,7 @@ export class CollectionController {
   async addDataInForm(
     @Param() param: ObjectIdDto,
     @Body() addDataDto: AddDataDto,
+    @Query('verificationToken') verificationToken: string,
     @Request() req,
   ): Promise<Collection> {
     return await this.commandBus.execute(
@@ -320,6 +323,10 @@ export class CollectionController {
         param.id,
         addDataDto.anon,
         true,
+        true,
+        true,
+        null,
+        verificationToken,
       ),
     );
   }
@@ -908,6 +915,7 @@ export class CollectionController {
     );
   }
 
+  // TODO: Protect this
   @UseGuards(PublicViewAuthGuard)
   @Get('/:channelId/collection')
   async getCollectionByChannelId(
@@ -925,6 +933,26 @@ export class CollectionController {
           _id: 1,
         },
       },
+    );
+  }
+
+  @UseGuards(PublicViewAuthGuard)
+  @Post('/:id/verifyAccess')
+  async verifyAccess(
+    @Param() param: ObjectIdDto,
+    @Query('code') code: string,
+  ): Promise<{
+    verificationToken?: string;
+    disordUser?: {
+      id: string;
+      username: string;
+      discriminator: string;
+      avatar: string;
+    };
+  }> {
+    return await this.advancedAccessService.generateAccessConfirmationTokenForDiscordRoleGatedForms(
+      param.id,
+      code,
     );
   }
 }

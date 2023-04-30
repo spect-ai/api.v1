@@ -212,8 +212,27 @@ export class GetNextFieldQueryHandler
       updates['roleGating'] = true;
     }
 
-    // TODO: This is BAD. Need to refactor this so we dont do writes on get calls. It is necessary now to prevent long wait times while checking for sybil, role etc
+    if (
+      collection.formMetadata.discordRoleGating?.length &&
+      !draftSubmittedByUser.hasPassedDiscordRoleGating &&
+      !collection.formMetadata.drafts?.[discordId]?.['discordRoleGating'] &&
+      !collection.formMetadata.drafts?.[discordId]?.saved
+    ) {
+      const hasRoleToAccessForm =
+        await this.advancedAccessService.hasDiscordRoleToAccessForm(
+          collection,
+          discordId,
+        );
+      if (!hasRoleToAccessForm) {
+        return {
+          field: 'discordRoleGating',
+          ethAddress: user?.ethAddress,
+        };
+      }
+      updates['discordRoleGating'] = true;
+    }
     if (Object.keys(updates).length) {
+      // TODO: This is BAD. Need to refactor this so we dont do writes on get calls. It is necessary now to prevent long wait times while checking for sybil, role etc
       await this.collectionRepository.updateById(collection.id, {
         formMetadata: {
           ...collection.formMetadata,
@@ -533,6 +552,12 @@ export class GetNextFieldQueryHandler
             name: 'Please complete the role gating to continue',
             guildRoles: collection.formMetadata.formRoleGating,
             guildUrl: await this.guildUrl(collection),
+          };
+        } else if (nextField === 'discordRoleGating') {
+          return {
+            type: 'discordRoleGating',
+            name: 'Please complete the role gating to continue',
+            guildRoles: collection.formMetadata.discordRoleGating,
           };
         } else if (nextField === 'captcha') {
           return {

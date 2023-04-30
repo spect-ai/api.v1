@@ -103,10 +103,13 @@ export class AddDataCommandHandler implements ICommandHandler<AddDataCommand> {
       validateAccess,
       validateData,
       discordId,
+      verificationToken,
     } = command;
     try {
       const collection = await this.collectionRepository.findById(collectionId);
       if (!collection) throw 'Collection does not exist';
+      let verificationUserUniqueId;
+
       if (collection.collectionType === 0) {
         if (collection.formMetadata.active === false)
           throw 'Collection is inactive';
@@ -119,6 +122,24 @@ export class AddDataCommandHandler implements ICommandHandler<AddDataCommand> {
         }
 
         if (validateAccess) {
+          if (collection.formMetadata.discordRoleGating?.length) {
+            if (!verificationToken && !discordId)
+              throw 'No verification token or discord id provided';
+            if (verificationToken)
+              for (const [key, verifiToken] of Object.entries(
+                collection.formMetadata.verificationTokens,
+              )) {
+                if (verifiToken === verificationToken) {
+                  verificationUserUniqueId = key;
+                  break;
+                }
+              }
+          } else if (discordId) {
+            await this.advancedAccessService.hasDiscordRoleToAccessForm(
+              collection,
+              discordId,
+            );
+          }
           const hasPassedSybilCheck =
             await this.advancedAccessService.hasPassedSybilProtection(
               collection,
@@ -219,6 +240,15 @@ export class AddDataCommandHandler implements ICommandHandler<AddDataCommand> {
               ...(formMetadata?.drafts?.[discordId] || {}),
               saved: true,
             },
+          },
+        };
+      }
+      if (verificationUserUniqueId) {
+        formMetadata = {
+          ...formMetadata,
+          verificationTokens: {
+            ...(formMetadata?.verificationTokens || {}),
+            [verificationUserUniqueId]: null,
           },
         };
       }

@@ -237,6 +237,60 @@ export class UpdateCollectionCommandHandler
         }
       }
 
+      if (
+        collection.collectionType === 0 &&
+        formMetadata &&
+        !formMetadata.pages['connectDiscord'] &&
+        formMetadata.discordRoleGating
+      ) {
+        const { formMetadata } = updatedCollection;
+        updatedCollection = await this.collectionRepository.updateById(
+          collectionId,
+          {
+            formMetadata: {
+              ...formMetadata,
+              pages: {
+                ...formMetadata.pages,
+                ['connectDiscord']: {
+                  id: 'connectDiscord',
+                  name: 'Connect Discord',
+                  properties: [],
+                },
+              },
+              pageOrder: [
+                ...formMetadata.pageOrder.slice(0, 1),
+                'connectDiscord',
+                ...formMetadata.pageOrder.slice(1),
+              ],
+            },
+          },
+        );
+      }
+
+      if (
+        collection.collectionType === 0 &&
+        formMetadata &&
+        formMetadata.pages['connectDiscord'] &&
+        !formMetadata.discordRoleGating?.length
+      ) {
+        const { formMetadata } = updatedCollection;
+        updatedCollection = await this.collectionRepository.updateById(
+          collectionId,
+          {
+            formMetadata: {
+              ...formMetadata,
+              pages: {
+                ...formMetadata.pages,
+                ['connectDiscord']: undefined,
+              },
+              pageOrder: formMetadata.pageOrder.filter(
+                (page) => page !== 'connectDiscord',
+              ),
+            },
+          },
+        );
+      }
+
       const pvtViewCollection = await this.queryBus.execute(
         new GetPrivateViewCollectionQuery(updatedCollection.slug),
       );
