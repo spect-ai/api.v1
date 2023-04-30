@@ -23,8 +23,7 @@ export class UpdatePropertyCommandHandler
   async execute(command: UpdatePropertyCommand): Promise<Collection> {
     try {
       console.log('UpdatePropertyCommandHandler');
-      const { updatePropertyCommandDto, caller, collectionId, propertyId } =
-        command;
+      const { updatePropertyCommandDto, collectionId, propertyId } = command;
       const collection = await this.collectionRepository.findById(collectionId);
 
       if (!collection.properties || !collection.properties[propertyId])
@@ -66,46 +65,46 @@ export class UpdatePropertyCommandHandler
       }
 
       // check if property name changed
-      if (
-        updatePropertyCommandDto.name &&
-        updatePropertyCommandDto.name !== propertyId
-      ) {
-        if (collection.projectMetadata.cardOrders) {
-          for (const [id, cardOrder] of Object.entries(
-            collection.projectMetadata.cardOrders,
-          )) {
-            if (id === propertyId) {
-              console.log('updated group by column');
-              collection.projectMetadata.cardOrders[
-                updatePropertyCommandDto.name
-              ] = cardOrder;
-              delete collection.projectMetadata.cardOrders[id];
-            }
-          }
-        }
-        // change property name in all views
-        collection.projectMetadata.viewOrder?.forEach((viewId) => {
-          const view = collection.projectMetadata.views[viewId];
-          if (view.groupByColumn === propertyId)
-            view.groupByColumn = updatePropertyCommandDto.name;
-          collection.projectMetadata.views[viewId] = view;
-        });
+      // if (
+      //   updatePropertyCommandDto.name &&
+      //   updatePropertyCommandDto.name !== propertyId
+      // ) {
+      //   if (collection.projectMetadata.cardOrders) {
+      //     for (const [id, cardOrder] of Object.entries(
+      //       collection.projectMetadata.cardOrders,
+      //     )) {
+      //       if (id === propertyId) {
+      //         console.log('updated group by column');
+      //         collection.projectMetadata.cardOrders[
+      //           updatePropertyCommandDto.name
+      //         ] = cardOrder;
+      //         delete collection.projectMetadata.cardOrders[id];
+      //       }
+      //     }
+      //   }
+      //   // change property name in all views
+      //   collection.projectMetadata.viewOrder?.forEach((viewId) => {
+      //     const view = collection.projectMetadata.views[viewId];
+      //     if (view.groupByColumn === propertyId)
+      //       view.groupByColumn = updatePropertyCommandDto.name;
+      //     collection.projectMetadata.views[viewId] = view;
+      //   });
 
-        // change the property name in the page it contains
-        if (collection.collectionType === 0 && collection.formMetadata.pages) {
-          for (const [id, page] of Object.entries(
-            collection.formMetadata.pages,
-          )) {
-            if (page?.properties) {
-              const idx = page.properties.indexOf(propertyId);
-              if (idx > -1) {
-                page.properties[idx] = updatePropertyCommandDto.name;
-              }
-            }
-            collection.formMetadata.pages[id] = page;
-          }
-        }
-      }
+      //   // change the property name in the page it contains
+      //   if (collection.collectionType === 0 && collection.formMetadata.pages) {
+      //     for (const [id, page] of Object.entries(
+      //       collection.formMetadata.pages,
+      //     )) {
+      //       if (page?.properties) {
+      //         const idx = page.properties.indexOf(propertyId);
+      //         if (idx > -1) {
+      //           page.properties[idx] = updatePropertyCommandDto.name;
+      //         }
+      //       }
+      //       collection.formMetadata.pages[id] = page;
+      //     }
+      //   }
+      // }
 
       // Update data where an option label is changed
       if (
@@ -162,27 +161,34 @@ export class UpdatePropertyCommandHandler
         collection.data,
       );
 
-      const propId = updatePropertyCommandDto.name
-        ? updatePropertyCommandDto.name
-        : propertyId;
-      if (
-        updatePropertyCommandDto.name &&
-        updatePropertyCommandDto.name !== propertyId
-      ) {
-        if (collection.properties[updatePropertyCommandDto.name])
-          throw `Property already existss`;
-        if (collection.data)
-          for (const [id, data] of Object.entries(collection.data)) {
-            data[updatePropertyCommandDto.name] = data[propertyId];
-            delete data[propertyId];
-          }
+      // if (updatePropertyCommandDto.name) {
+      //   if (collection.data)
+      //     for (const [id, data] of Object.entries(collection.data)) {
+      //       data[updatePropertyCommandDto.name] = data[propertyId];
+      //       delete data[propertyId];
+      //     }
 
-        delete collection.properties[propertyId];
-        const idx = collection.propertyOrder.indexOf(propertyId);
-        collection.propertyOrder[idx] = updatePropertyCommandDto.name;
+      //   delete collection.properties[propertyId];
+      //   const idx = collection.propertyOrder.indexOf(propertyId);
+      //   collection.propertyOrder[idx] = updatePropertyCommandDto.name;
+      // }
+
+      if (
+        collection.collectionType === 0 &&
+        updatePropertyCommandDto.isPartOfFormView === false
+      ) {
+        // remove from responseDataForMintKuods if present and respondeDataForPoap
+        if (collection.formMetadata?.responseDataForMintkudos?.[propertyId]) {
+          delete collection.formMetadata.responseDataForMintkudos[propertyId];
+          collection.formMetadata.minimumNumberOfAnswersThatNeedToMatchForMintkudos -= 1;
+        }
+        if (collection.formMetadata?.responseDataForPoap?.[propertyId]) {
+          delete collection.formMetadata.responseDataForPoap[propertyId];
+          collection.formMetadata.minimumNumberOfAnswersThatNeedToMatchForPoap -= 1;
+        }
       }
 
-      collection.properties[propId] = {
+      collection.properties[propertyId] = {
         ...collection.properties[propertyId],
         ...updatePropertyCommandDto,
       };
@@ -228,10 +234,8 @@ export class UpdatePropertyCommandHandler
           case 'number':
             const result = { ...dataObj };
             for (const [id, data] of Object.entries(dataObj)) {
-              if (!isNaN(data[prevProperty.name])) {
-                result[id][newProperty.name] = parseFloat(
-                  data[prevProperty.name],
-                );
+              if (!isNaN(data[prevProperty.id])) {
+                result[id][newProperty.id] = parseFloat(data[prevProperty.id]);
               } else {
                 delete result[id][newProperty.type];
               }
@@ -247,7 +251,7 @@ export class UpdatePropertyCommandHandler
         ) {
           const result = { ...dataObj };
           for (const [id, data] of Object.entries(dataObj)) {
-            result[id][newProperty.type] = data[prevProperty.name].toString();
+            result[id][newProperty.type] = data[prevProperty.id].toString();
           }
           return result;
         }
@@ -264,8 +268,8 @@ export class UpdatePropertyCommandHandler
         if (newProperty.type === 'multiSelect') {
           const result = { ...dataObj };
           for (const [id, data] of Object.entries(dataObj)) {
-            if (data[prevProperty.name]) {
-              result[id][newProperty.name] = [data[prevProperty.name]];
+            if (data[prevProperty.id]) {
+              result[id][newProperty.id] = [data[prevProperty.id]];
             }
           }
           return result;
@@ -275,8 +279,8 @@ export class UpdatePropertyCommandHandler
         if (newProperty.type === 'user[]') {
           const result = { ...dataObj };
           for (const [id, data] of Object.entries(dataObj)) {
-            if (data[prevProperty.name]) {
-              result[id][newProperty.name] = [data[prevProperty.name]];
+            if (data[prevProperty.id]) {
+              result[id][newProperty.id] = [data[prevProperty.id]];
             }
           }
           return result;
@@ -298,7 +302,7 @@ export class UpdatePropertyCommandHandler
 
   clearAllData(property: Property, dataObj: MappedItem<object>) {
     for (const [id, data] of Object.entries(dataObj)) {
-      delete data[property.name];
+      delete data[property.id];
     }
     return dataObj;
   }

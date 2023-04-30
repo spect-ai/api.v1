@@ -15,7 +15,8 @@ export const applicationFormStatus = {
 
 export const getGrantApplicationFormProperties = (registry) => {
   const properties = {
-    Status: {
+    [grantApplicationFormPropertyOrder[0]]: {
+      id: grantApplicationFormPropertyOrder[0],
       name: 'Status',
       type: 'singleSelect',
       options: [
@@ -44,7 +45,8 @@ export const getGrantApplicationFormProperties = (registry) => {
       viewConditions: [],
       payWallOptions: {},
     },
-    ['Project Name']: {
+    [grantApplicationFormPropertyOrder[1]]: {
+      id: grantApplicationFormPropertyOrder[1],
       name: 'Project Name',
       type: 'shortText',
       options: [
@@ -62,7 +64,8 @@ export const getGrantApplicationFormProperties = (registry) => {
       viewConditions: [],
       payWallOptions: {},
     },
-    ['About your Project']: {
+    [grantApplicationFormPropertyOrder[2]]: {
+      id: grantApplicationFormPropertyOrder[2],
       name: 'About your Project',
       type: 'longText',
       options: [
@@ -80,7 +83,8 @@ export const getGrantApplicationFormProperties = (registry) => {
       viewConditions: [],
       payWallOptions: {},
     },
-    Email: {
+    [grantApplicationFormPropertyOrder[3]]: {
+      id: grantApplicationFormPropertyOrder[3],
       name: 'Email',
       type: 'email',
       isPartOfFormView: true,
@@ -97,7 +101,8 @@ export const getGrantApplicationFormProperties = (registry) => {
       viewConditions: [],
       payWallOptions: {},
     },
-    Milestones: {
+    [grantApplicationFormPropertyOrder[4]]: {
+      id: grantApplicationFormPropertyOrder[4],
       name: 'Milestones',
       type: 'milestone',
       isPartOfFormView: true,
@@ -115,7 +120,8 @@ export const getGrantApplicationFormProperties = (registry) => {
       viewConditions: [],
       payWallOptions: {},
     },
-    ['About the Team']: {
+    [grantApplicationFormPropertyOrder[5]]: {
+      id: grantApplicationFormPropertyOrder[5],
       name: 'About the Team',
       type: 'longText',
       options: [
@@ -132,7 +138,8 @@ export const getGrantApplicationFormProperties = (registry) => {
       viewConditions: [],
       payWallOptions: {},
     },
-    ['Total Reward']: {
+    [grantApplicationFormPropertyOrder[6]]: {
+      id: grantApplicationFormPropertyOrder[6],
       name: 'Total Reward',
       type: 'reward',
       isPartOfFormView: true,
@@ -149,7 +156,8 @@ export const getGrantApplicationFormProperties = (registry) => {
       viewConditions: [],
       payWallOptions: {},
     },
-    ['Connect Discord']: {
+    [grantApplicationFormPropertyOrder[7]]: {
+      id: grantApplicationFormPropertyOrder[7],
       name: 'Connect Discord',
       type: 'discord',
       isPartOfFormView: true,
@@ -164,16 +172,9 @@ export const getGrantApplicationFormProperties = (registry) => {
   return properties;
 };
 
-export const grantApplicationFormPropertyOrder = [
-  'Project Name',
-  'About your Project',
-  'Status',
-  'About the Team',
-  'Email',
-  'Milestones',
-  'Total Reward',
-  'Connect Discord',
-];
+export const grantApplicationFormPropertyOrder = Array.from({ length: 8 }, () =>
+  uuidv4(),
+);
 
 export function getGrantWorkflowAutomations(
   circleId: string,

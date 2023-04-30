@@ -144,7 +144,6 @@ export class UpdateCollectionCommandHandler
           },
         );
       }
-
       if (
         collection.collectionType === 0 &&
         formMetadata &&
@@ -153,7 +152,7 @@ export class UpdateCollectionCommandHandler
         !formMetadata.poapEditCode &&
         !formMetadata.mintkudosTokenId &&
         !formMetadata.surveyTokenId &&
-        !formMetadata.formRoleGating &&
+        !formMetadata.formRoleGating?.length &&
         formMetadata.allowAnonymousResponses
       ) {
         const { formMetadata } = updatedCollection;

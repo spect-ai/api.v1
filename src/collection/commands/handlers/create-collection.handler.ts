@@ -36,21 +36,26 @@ export class CreateCollectionCommandHandler
     try {
       const { createCollectionDto, caller } = command;
 
+      const formPropertyOrder = [uuidv4(), uuidv4(), uuidv4()];
+
       const formProperties = {
-        'What is your name?': {
+        [formPropertyOrder[0]]: {
+          id: formPropertyOrder[0],
           name: 'What is your name?',
           type: 'shortText',
           default: '',
           isPartOfFormView: true,
           immutable: true,
         },
-        'Why do you want to join our team?': {
+        [formPropertyOrder[1]]: {
+          id: formPropertyOrder[1],
           name: 'Why do you want to join our team?',
           type: 'longText',
           default: '',
           isPartOfFormView: true,
         },
-        Status: {
+        [formPropertyOrder[2]]: {
+          id: formPropertyOrder[2],
           name: 'Status',
           type: 'singleSelect',
           default: {},
@@ -71,27 +76,27 @@ export class CreateCollectionCommandHandler
           isPartOfFormView: false,
         },
       } as MappedItem<Property>;
-      const formPropertyOrder = [
-        'What is your name?',
-        'Why do you want to join our team?',
-        'Status',
-      ];
+
+      const projectPropertyOrder = ['Title', 'Description', uuidv4()];
 
       const projectProperties = {
-        Title: {
+        [projectPropertyOrder[0]]: {
+          id: projectPropertyOrder[0],
           name: 'Title',
           type: 'shortText',
           default: '',
           isPartOfFormView: true,
           immutable: true,
         },
-        Description: {
+        [projectPropertyOrder[1]]: {
+          id: projectPropertyOrder[1],
           name: 'Description',
           type: 'longText',
           default: '',
           isPartOfFormView: true,
         },
-        Status: {
+        [projectPropertyOrder[2]]: {
+          id: projectPropertyOrder[2],
           name: 'Status',
           type: 'singleSelect',
           default: {},
@@ -112,8 +117,6 @@ export class CreateCollectionCommandHandler
           isPartOfFormView: false,
         },
       } as MappedItem<Property>;
-
-      const projectPropertyOrder = ['Title', 'Description', 'Status'];
 
       const parentCircle: Circle = await this.queryBus.execute(
         new GetCircleByIdQuery(createCollectionDto.circleId, {}),

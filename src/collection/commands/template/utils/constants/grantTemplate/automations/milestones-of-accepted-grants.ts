@@ -1,4 +1,7 @@
-import { applicationFormStatus } from '../grantApplicationForm';
+import {
+  applicationFormStatus,
+  grantApplicationFormPropertyOrder,
+} from '../grantApplicationForm';
 import {
   getMilestoneProperties,
   milestonePropertyOrder,
@@ -20,7 +23,7 @@ export const automationForMilestonesOfAcceptedGrants = (
       subType: 'singleSelect',
       name: '"Status" changes',
       data: {
-        fieldName: 'Status',
+        fieldName: grantApplicationFormPropertyOrder[0],
         fieldType: 'singleSelect',
         to: [
           {
@@ -62,18 +65,18 @@ export const automationForMilestonesOfAcceptedGrants = (
               mapping: {
                 to: {
                   label: 'Title',
-                  value: 'Title',
+                  value: milestonePropertyOrder[0],
                   data: {
                     type: 'shortText',
                   },
                 },
                 from: {
                   label: 'Milestones title',
-                  value: 'Milestones.title',
+                  value: grantApplicationFormPropertyOrder[4],
                   data: {
                     type: 'shortText',
                     fieldType: 'milestone',
-                    fieldName: 'Milestones',
+                    fieldName: grantApplicationFormPropertyOrder[4],
                     subFieldName: 'title',
                   },
                 },
@@ -84,18 +87,18 @@ export const automationForMilestonesOfAcceptedGrants = (
               mapping: {
                 to: {
                   label: 'Description',
-                  value: 'Description',
+                  value: milestonePropertyOrder[1],
                   data: {
                     type: 'longText',
                   },
                 },
                 from: {
                   label: 'Milestones description',
-                  value: 'Milestones.description',
+                  value: grantApplicationFormPropertyOrder[4],
                   data: {
                     type: 'longText',
                     fieldType: 'milestone',
-                    fieldName: 'Milestones',
+                    fieldName: grantApplicationFormPropertyOrder[4],
                     subFieldName: 'description',
                   },
                 },
@@ -106,18 +109,18 @@ export const automationForMilestonesOfAcceptedGrants = (
               mapping: {
                 to: {
                   label: 'Due Date',
-                  value: 'Due Date',
+                  value: milestonePropertyOrder[4],
                   data: {
                     type: 'date',
                   },
                 },
                 from: {
                   label: 'Milestones date',
-                  value: 'Milestones.date',
+                  value: grantApplicationFormPropertyOrder[4],
                   data: {
                     type: 'date',
                     fieldType: 'milestone',
-                    fieldName: 'Milestones',
+                    fieldName: grantApplicationFormPropertyOrder[4],
                     subFieldName: 'dueDate',
                   },
                 },
@@ -128,18 +131,18 @@ export const automationForMilestonesOfAcceptedGrants = (
               mapping: {
                 to: {
                   label: 'Reward',
-                  value: 'Reward',
+                  value: milestonePropertyOrder[3],
                   data: {
                     type: 'reward',
                   },
                 },
                 from: {
                   label: 'Milestones reward',
-                  value: 'Milestones.reward',
+                  value: grantApplicationFormPropertyOrder[4],
                   data: {
                     type: 'reward',
                     fieldType: 'milestone',
-                    fieldName: 'Milestones',
+                    fieldName: grantApplicationFormPropertyOrder[4],
                     subFieldName: 'reward',
                   },
                 },
@@ -150,14 +153,14 @@ export const automationForMilestonesOfAcceptedGrants = (
               mapping: {
                 to: {
                   label: 'Project Name',
-                  value: 'Project Name',
+                  value: milestonePropertyOrder[5],
                   data: {
                     type: 'shortText',
                   },
                 },
                 from: {
                   label: 'Project Name',
-                  value: 'Project Name',
+                  value: grantApplicationFormPropertyOrder[1],
                 },
               },
             },
@@ -166,7 +169,7 @@ export const automationForMilestonesOfAcceptedGrants = (
               mapping: {
                 to: {
                   label: 'Assignee',
-                  value: 'Assignee',
+                  value: milestonePropertyOrder[6],
                   data: {
                     type: 'user[]',
                   },
@@ -178,7 +181,7 @@ export const automationForMilestonesOfAcceptedGrants = (
               default: {
                 field: {
                   label: 'Status',
-                  value: 'Status',
+                  value: milestonePropertyOrder[2],
                   data: {
                     type: 'singleSelect',
                   },

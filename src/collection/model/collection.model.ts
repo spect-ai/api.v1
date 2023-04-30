@@ -44,6 +44,12 @@ export class Collection extends BaseModel {
   /**
    * Properties in the collection
    */
+  @prop()
+  legacyProperties: MappedItem<Property>;
+
+  /**
+   * Properties in the collection
+   */
   @prop({ default: [] })
   propertyOrder: string[];
 
@@ -162,6 +168,9 @@ export class Collection extends BaseModel {
     threadId?: string;
     messageId?: string;
   };
+
+  @prop()
+  version: number;
 }
 
 export interface FormMetadata {

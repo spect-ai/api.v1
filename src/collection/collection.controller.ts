@@ -286,7 +286,7 @@ export class CollectionController {
         updatePropertyDto,
         req.user?.id,
         param.id,
-        updatePropertyDto.propertyId,
+        updatePropertyDto.id,
       ),
     );
   }

@@ -1,4 +1,7 @@
-import { applicationFormStatus } from '../grantApplicationForm';
+import {
+  applicationFormStatus,
+  grantApplicationFormPropertyOrder,
+} from '../grantApplicationForm';
 
 export const automationWhenRejected = (circleId, triggerSlug) => {
   const automation = {
@@ -10,7 +13,7 @@ export const automationWhenRejected = (circleId, triggerSlug) => {
       subType: 'singleSelect',
       name: '"Status" changes',
       data: {
-        fieldName: 'Status',
+        fieldName: grantApplicationFormPropertyOrder[0],
         fieldType: 'singleSelect',
         from: [
           {

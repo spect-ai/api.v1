@@ -6,7 +6,7 @@ import { CollectionRepository } from 'src/collection/collection.repository';
 import { Collection } from 'src/collection/model/collection.model';
 import { AdvancedAccessService } from 'src/collection/services/advanced-access.service';
 import { ClaimEligibilityService } from 'src/collection/services/response-credentialing.service';
-import { Option, Property } from 'src/collection/types/types';
+import { Option, Property, PropertyType } from 'src/collection/types/types';
 import { CommonTools } from 'src/common/common.service';
 import { GuildxyzService } from 'src/common/guildxyz.service';
 import { GitcoinPassportService } from 'src/credentials/services/gitcoin-passport.service';
@@ -97,9 +97,7 @@ export class GetNextFieldQueryHandler
   }
 
   async addFieldsToLookup(
-    property: {
-      name: string;
-    },
+    property: Partial<Property>,
     collection: Collection,
     idLookup?: { [key: string]: any },
   ) {
@@ -566,7 +564,7 @@ export class GetNextFieldQueryHandler
           };
         } else if (nextField === 'paywall') {
           const paywallField = {
-            type: 'paywall',
+            type: 'paywall' as PropertyType,
             name: 'paywall',
             paymentConfig: collection.formMetadata.paymentConfig,
           };
@@ -595,11 +593,11 @@ export class GetNextFieldQueryHandler
           };
         }
         const returnedField = collection.properties[nextField];
-        const lookupAdditionRes = await this.addFieldsToLookup(
-          returnedField,
-          collection,
-        );
-        returnedField.id = lookupAdditionRes.id;
+        // const lookupAdditionRes = await this.addFieldsToLookup(
+        //   returnedField,
+        //   collection,
+        // );
+        // returnedField.id = lookupAdditionRes.id;
         if (['user', 'user[]'].includes(returnedField.type)) {
           const populatedMemberDetails = await this.populateMemberDetails(
             collection,
@@ -649,7 +647,7 @@ export class GetNextFieldQueryHandler
             const res = await this.addOptionIdsToLookup(
               returnedField.options,
               collection,
-              lookupAdditionRes.updatedLookups,
+              // lookupAdditionRes.updatedLookups,
             );
             returnedField.options = res.returnedOptions;
           }

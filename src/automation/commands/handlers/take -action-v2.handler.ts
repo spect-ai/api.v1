@@ -269,7 +269,7 @@ export class GiveDiscordRoleActionCommandHandler
           (property) => property.type === 'discord',
         );
         if (discordField) {
-          const val = collection.data[relevantIds.dataSlug][discordField.name];
+          const val = collection.data[relevantIds.dataSlug][discordField.id];
           let discordUsername, discordDiscriminator;
           if (typeof val === 'string') {
             const split = val.split('#');
@@ -540,7 +540,7 @@ export class PostOnDiscordActionCommandHandler
 
       const fields = action.data.fields
         ?.map((f) => ({
-          name: f.value,
+          name: f.label,
           value:
             collection.properties?.[f.value]?.type === 'singleSelect'
               ? collection?.data?.[relevantIds.dataSlug]?.[f.value]?.label
