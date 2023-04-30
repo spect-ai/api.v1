@@ -269,7 +269,7 @@ export class GiveDiscordRoleActionCommandHandler
           (property) => property.type === 'discord',
         );
         if (discordField) {
-          const val = collection.data[relevantIds.dataSlug][discordField.name];
+          const val = collection.data[relevantIds.dataSlug][discordField.id];
           let discordUsername, discordDiscriminator;
           if (typeof val === 'string') {
             const split = val.split('#');
