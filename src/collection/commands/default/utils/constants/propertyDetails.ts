@@ -6,22 +6,27 @@ export const onboardToSpectStatus = {
   advanced: uuidv4(),
 };
 
+export const propertyOrder = [uuidv4(), uuidv4(), uuidv4()];
+
 export const getProperties = () => {
   return {
-    'What is your name?': {
+    [propertyOrder[0]]: {
+      id: propertyOrder[0],
       name: 'What is your name?',
       type: 'shortText',
       default: '',
       isPartOfFormView: true,
       immutable: true,
     },
-    'Why do you want to join our team?': {
+    [propertyOrder[1]]: {
+      id: propertyOrder[1],
       name: 'Why do you want to join our team?',
       type: 'longText',
       default: '',
       isPartOfFormView: true,
     },
-    Status: {
+    [propertyOrder[2]]: {
+      id: propertyOrder[2],
       name: 'Status',
       type: 'singleSelect',
       options: [
@@ -50,38 +55,5 @@ export const getProperties = () => {
       viewConditions: [],
       payWallOptions: {},
     },
-    // Labels: {
-    //   name: 'Labels',
-    //   type: 'multiSelect',
-    //   isPartOfFormView: true,
-    //   description: '',
-    //   options: [
-    //     {
-    //       label: 'Feature',
-    //       value: labels.feature,
-    //     },
-    //     {
-    //       label: 'Workflow',
-    //       value: labels.workflow,
-    //     },
-    //     {
-    //       label: 'Setup',
-    //       value: labels.setup,
-    //     },
-    //     {
-    //       label: 'Video',
-    //       value: labels.video,
-    //     },
-    //     {
-    //       label: 'Guide',
-    //       value: labels.guide,
-    //     },
-    //   ],
-    //   rewardOptions: {},
-    //   required: false,
-    //   milestoneFields: [],
-    //   viewConditions: [],
-    //   payWallOptions: {},
-    // },
   };
 };

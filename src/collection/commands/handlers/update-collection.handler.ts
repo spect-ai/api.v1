@@ -140,7 +140,6 @@ export class UpdateCollectionCommandHandler
                 'connect',
                 ...formMetadata.pageOrder.slice(1),
               ],
-              allowAnonymousResponses: false,
             },
           },
         );
@@ -169,7 +168,6 @@ export class UpdateCollectionCommandHandler
               pageOrder: formMetadata.pageOrder.filter(
                 (page) => page !== 'connect',
               ),
-              allowAnonymousResponses: true,
             },
           },
         );

@@ -8,7 +8,7 @@ import {
   getDataOwners,
   getOnboardToSpectData,
 } from './constants/cardDetails';
-import { getProperties } from './constants/propertyDetails';
+import { getProperties, propertyOrder } from './constants/propertyDetails';
 import { Collection } from 'src/collection/model/collection.model';
 
 const viewId = uuidv4();
@@ -91,11 +91,7 @@ export const getOnboardToSpectFormDetails = (
   return {
     name: 'Your First Form on Spect',
     properties: getProperties() as any,
-    propertyOrder: [
-      'What is your name?',
-      'Why do you want to join our team?',
-      'Status',
-    ],
+    propertyOrder: propertyOrder,
     permissions: {
       manageSettings: ['steward'],
       updateResponsesManually: ['steward'],
@@ -145,11 +141,7 @@ export const getOnboardToSpectFormDetails = (
         'page-1': {
           id: 'page-1',
           name: 'Page 1',
-          properties: [
-            'What is your name?',
-            'Why do you want to join our team?',
-            'Status',
-          ],
+          properties: propertyOrder,
           movable: true,
         },
         submitted: {
