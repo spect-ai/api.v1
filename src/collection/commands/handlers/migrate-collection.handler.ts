@@ -19,10 +19,7 @@ export class MigrateAllCollectionsCommandHandler
   ) {}
 
   async execute(command: MigrateAllCollectionsCommand) {
-    const allCircles = [
-      await this.circleRepository.findById('64416403a8bd094272eb8cff'),
-    ];
-
+    const allCircles = await this.circleRepository.findAll();
     for await (const circle of allCircles) {
       if (circle.version === 2) continue;
       console.log('------------Migrating circle----------: ', circle.name);
