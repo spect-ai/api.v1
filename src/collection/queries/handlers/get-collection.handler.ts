@@ -328,13 +328,19 @@ export class GetPrivateViewCollectionQueryHandler
       }
 
       let profileInfo = [];
+      const filteredResponsesNonAnon = Object.entries(
+        collectionToGet.data,
+      ).filter(([key, value]) => {
+        return (value as any)?.anonymous !== true;
+      });
 
       if (collectionToGet.dataOwner) {
         const profiles = [];
         for (const [dataSlug, owner] of Object.entries(
           collectionToGet.dataOwner,
         )) {
-          profiles.push(owner);
+          if (filteredResponsesNonAnon && filteredResponsesNonAnon[dataSlug])
+            profiles.push(owner);
         }
         if (profiles.length > 0) {
           profileInfo = await this.queryBus.execute(
