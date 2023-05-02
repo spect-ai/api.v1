@@ -326,6 +326,17 @@ export interface FormMetadata {
     // can be a discord user id or a spect user id or any other unique id of responder
     [id: string]: string;
   };
+  charts?: {
+    [chartId: string]: {
+      id: string;
+      name: string;
+      type: 'bar' | 'pie' | 'line' | 'doughnut';
+      fields: string[];
+      filters?: Condition[];
+    };
+  };
+
+  chartOrder?: string[];
 }
 
 export interface PaymentConfig {

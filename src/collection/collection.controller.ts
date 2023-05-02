@@ -122,7 +122,7 @@ import {
   StartVotingPeriodRequestDto,
 } from './dto/voting.dto';
 import { Collection } from './model/collection.model';
-import { GetNextFieldQuery } from './queries';
+import { GetFormAnalyticsBySlugQuery, GetNextFieldQuery } from './queries';
 import {
   GetCollectionByFilterQuery,
   GetCollectionByIdQuery,
@@ -714,6 +714,14 @@ export class CollectionController {
       query.dataId,
       body,
       req.user,
+    );
+  }
+
+  @UseGuards(PublicViewAuthGuard)
+  @Get('/:slug/embedCharts')
+  async getEmbedCharts(@Param() param: RequiredSlugDto): Promise<Collection> {
+    return await this.queryBus.execute(
+      new GetFormAnalyticsBySlugQuery(param.slug),
     );
   }
 

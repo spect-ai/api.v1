@@ -1,6 +1,8 @@
 export * from './impl/get-collection.query';
 export * from './impl/get-field.query';
+export * from './impl/get-analytics.query';
 
+import { GetFormAnalyticsBySlugQueryHandler } from './handlers/get-analytics.handler';
 import {
   GetCollectionByFilterQueryHandler,
   GetCollectionByIdQueryHandler,
@@ -19,4 +21,5 @@ export const QueryHandlers = [
   GetPrivateViewCollectionQueryHandler,
   GetPublicViewCollectionQueryHandler,
   GetNextFieldQueryHandler,
+  GetFormAnalyticsBySlugQueryHandler,
 ];
