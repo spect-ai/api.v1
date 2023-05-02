@@ -316,6 +316,18 @@ export interface FormMetadata {
   idLookup?: {
     [id: string]: any;
   };
+
+  charts?: {
+    [chartId: string]: {
+      id: string;
+      name: string;
+      type: 'bar' | 'pie' | 'line' | 'doughnut';
+      fields: string[];
+      filters?: Condition[];
+    };
+  };
+
+  chartOrder?: string[];
 }
 
 export interface PaymentConfig {

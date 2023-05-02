@@ -31,6 +31,38 @@ export class UpdatePropertyCommandHandler
 
       if (updatePropertyCommandDto.name === 'slug')
         throw 'Cannot add property with name slug';
+
+      // dont allow property to be immutable after some data has been added
+      if (
+        updatePropertyCommandDto.immutable &&
+        collection.data &&
+        Object.values(collection.data).some((a) => a[propertyId])
+      )
+        throw 'Cannot make a property immutable after data has been added';
+
+      // dont allow immutabality to be changed
+      if (
+        updatePropertyCommandDto.immutable === false &&
+        collection.properties[propertyId].immutable
+      )
+        throw 'Cannot change immutability of an immutable property, you can delete the property and add it again';
+
+      if (
+        updatePropertyCommandDto.isPartOfFormView === false &&
+        collection.properties[propertyId].immutable
+      ) {
+        throw 'Cannot remove a property from a form view if it is immutable, you can delete the property and add it again';
+      }
+
+      // clear data if field is immutable
+      if (collection.properties[propertyId].immutable) {
+        if (collection.data) {
+          for (const [id, data] of Object.entries(collection.data)) {
+            delete data[propertyId];
+          }
+        }
+      }
+
       // Clear data where an option is removed
       if (updatePropertyCommandDto.options) {
         const optionValueSet = new Set([
@@ -57,7 +89,6 @@ export class UpdatePropertyCommandHandler
                 data[propertyId] = data[propertyId]?.filter((a) =>
                   optionValueSet.has(a.value),
                 );
-                console.log({ d2: data[propertyId] });
               }
             }
           }

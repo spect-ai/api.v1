@@ -136,6 +136,10 @@ export class AddPropertyDto {
   @IsNumber()
   @IsOptional()
   maxSelections: number;
+
+  @IsBoolean()
+  @IsOptional()
+  immutable: boolean;
 }
 
 export class UpdatePropertyDto {
@@ -242,4 +246,8 @@ export class UpdatePropertyDto {
   @IsNumber()
   @IsOptional()
   maxSelections: number;
+
+  @IsBoolean()
+  @IsOptional()
+  immutable: boolean;
 }
