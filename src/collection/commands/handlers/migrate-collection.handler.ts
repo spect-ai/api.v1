@@ -19,10 +19,7 @@ export class MigrateAllCollectionsCommandHandler
   ) {}
 
   async execute(command: MigrateAllCollectionsCommand) {
-    const allCircles = [
-      await this.circleRepository.findById('64416403a8bd094272eb8cff'),
-    ];
-
+    const allCircles = await this.circleRepository.findAll();
     for await (const circle of allCircles) {
       if (circle.version === 2) continue;
       console.log('------------Migrating circle----------: ', circle.name);
@@ -262,10 +259,10 @@ export class MigrateAllCollectionsCommandHandler
             action.data.threadName.value =
               triggerCollection.legacyProperties[
                 action.data.threadName.value
-              ].id;
+              ]?.id;
           } else if (action.id === 'postOnDiscord') {
             action.data.fields?.map((field) => {
-              field.value = triggerCollection.legacyProperties[field.value].id;
+              field.value = triggerCollection.legacyProperties[field.value]?.id;
             });
           } else if (
             action.id === 'createDiscordChannel' &&
@@ -274,13 +271,13 @@ export class MigrateAllCollectionsCommandHandler
             action.data.channelName.value =
               triggerCollection.legacyProperties[
                 action.data.channelName.value
-              ].id;
+              ]?.id;
           }
         }
 
         for (const condition of automation.conditions) {
           condition.data.field.value =
-            triggerCollection.legacyProperties[condition.data.field.value].id;
+            triggerCollection.legacyProperties[condition.data.field.value]?.id;
         }
       }
 
