@@ -329,7 +329,7 @@ export class GetPrivateViewCollectionQueryHandler
 
       let profileInfo = [];
       const filteredResponsesNonAnon = Object.entries(
-        collectionToGet.data,
+        collectionToGet.data || {},
       ).filter(([key, value]) => {
         return (value as any)?.anonymous !== true;
       });
