@@ -21,12 +21,13 @@ export class GetFormAnalyticsBySlugQueryHandler
         query.slug,
       );
       // only send form metadata
-      const { formMetadata, data, properties } = collection;
+      const { formMetadata, data, properties, name } = collection;
 
       return {
         formMetadata,
         data,
         properties,
+        name,
       };
     } catch (error) {
       this.logger.error(

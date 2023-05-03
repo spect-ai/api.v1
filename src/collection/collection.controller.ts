@@ -25,6 +25,7 @@ import {
 } from 'src/auth/collection.guard';
 import {
   AdminAuthGuard,
+  FrontendServerGuard,
   PublicViewAuthGuard,
   SessionAuthGuard,
 } from 'src/auth/iron-session.guard';
@@ -717,7 +718,7 @@ export class CollectionController {
     );
   }
 
-  @UseGuards(PublicViewAuthGuard)
+  @UseGuards(FrontendServerGuard)
   @Get('/:slug/embedCharts')
   async getEmbedCharts(@Param() param: RequiredSlugDto): Promise<Collection> {
     return await this.queryBus.execute(
