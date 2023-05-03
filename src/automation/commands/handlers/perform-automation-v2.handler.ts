@@ -41,6 +41,15 @@ export class PerformAutomationOnCollectionDataUpdateCommandHandler
     try {
       const { collection, dataUpdate, circle, caller, dataSlug } = command;
 
+      const dataContainer = {};
+      const updateContainer = {
+        collection: {},
+        circle: {},
+        user: {},
+      };
+
+      if (collection?.archived) return updateContainer;
+
       const triggeredAutomations = await this.queryBus.execute(
         new GetTriggeredCollectionAutomationsQuery(
           collection,
@@ -51,12 +60,6 @@ export class PerformAutomationOnCollectionDataUpdateCommandHandler
         ),
       );
 
-      const dataContainer = {};
-      const updateContainer = {
-        collection: {},
-        circle: {},
-        user: {},
-      };
       for (const automationId of triggeredAutomations) {
         const { actions } = circle.automations[automationId];
         for (const action of actions) {
@@ -98,6 +101,15 @@ export class PerformAutomationOnCollectionDataAddCommandHandler
     try {
       const { collection, data, dataSlug, circle, caller } = command;
 
+      const dataContainer = {};
+      const updateContainer = {
+        collection: {},
+        circle: {},
+        retro: {},
+      };
+
+      if (collection?.archived) return updateContainer;
+
       const automationIds =
         circle.automationsIndexedByCollection?.[collection?.slug];
       const triggeredAutomations =
@@ -107,12 +119,6 @@ export class PerformAutomationOnCollectionDataAddCommandHandler
             !circle.automations[automationId].disabled,
         ) || [];
 
-      const dataContainer = {};
-      const updateContainer = {
-        collection: {},
-        circle: {},
-        retro: {},
-      };
       const triggeredAutomationsSatisfiedConditions = [];
       for (const automationId of triggeredAutomations) {
         const { conditions } = circle.automations[automationId];
@@ -165,6 +171,15 @@ export class PerformAutomationOnPaymentCompleteCommandHandler
     try {
       const { collection, data, dataSlug, circle, caller } = command;
 
+      const dataContainer = {};
+      const updateContainer = {
+        collection: {},
+        circle: {},
+        retro: {},
+      };
+
+      if (collection?.archived) return updateContainer;
+
       const automationIds =
         circle.automationsIndexedByCollection?.[collection?.slug];
       const triggeredAutomations =
@@ -174,12 +189,6 @@ export class PerformAutomationOnPaymentCompleteCommandHandler
               'completedPayment' && !circle.automations[automationId].disabled,
         ) || [];
 
-      const dataContainer = {};
-      const updateContainer = {
-        collection: {},
-        circle: {},
-        retro: {},
-      };
       const triggeredAutomationsSatisfiedConditions = [];
       for (const automationId of triggeredAutomations) {
         const { conditions } = circle.automations[automationId];
@@ -232,6 +241,15 @@ export class PerformAutomationOnPaymentCancelledCommandHandler
     try {
       const { collection, data, dataSlug, circle, caller } = command;
 
+      const dataContainer = {};
+      const updateContainer = {
+        collection: {},
+        circle: {},
+        retro: {},
+      };
+
+      if (collection?.archived) return updateContainer;
+
       const automationIds =
         circle.automationsIndexedByCollection?.[collection?.slug];
       const triggeredAutomations =
@@ -241,12 +259,6 @@ export class PerformAutomationOnPaymentCancelledCommandHandler
               'cancelledPayment' && !circle.automations[automationId].disabled,
         ) || [];
 
-      const dataContainer = {};
-      const updateContainer = {
-        collection: {},
-        circle: {},
-        retro: {},
-      };
       const triggeredAutomationsSatisfiedConditions = [];
       for (const automationId of triggeredAutomations) {
         const { conditions } = circle.automations[automationId];
