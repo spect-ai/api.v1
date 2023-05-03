@@ -539,14 +539,16 @@ export class PostOnDiscordActionCommandHandler
       );
 
       const fields = action.data.fields
-        ?.map((f) => ({
-          name: f.label,
-          value:
-            collection.properties?.[f.value]?.type === 'singleSelect'
-              ? collection?.data?.[relevantIds.dataSlug]?.[f.value]?.label
-              : collection?.data?.[relevantIds.dataSlug]?.[f.value],
-        }))
-        .filter((f) => f.value !== undefined);
+        ? action.data.fields
+            .map((f) => ({
+              name: f.label,
+              value:
+                collection.properties?.[f.value]?.type === 'singleSelect'
+                  ? collection?.data?.[relevantIds.dataSlug]?.[f.value]?.label
+                  : collection?.data?.[relevantIds.dataSlug]?.[f.value],
+            }))
+            .filter((f) => f.value !== undefined)
+        : [];
 
       await this.discordService.postData(
         action.data.channel.value,
