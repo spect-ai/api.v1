@@ -16,7 +16,6 @@ export const getProperties = () => {
       type: 'shortText',
       default: '',
       isPartOfFormView: true,
-      immutable: true,
     },
     [propertyOrder[1]]: {
       id: propertyOrder[1],

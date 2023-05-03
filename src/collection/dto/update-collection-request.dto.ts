@@ -9,7 +9,7 @@ import {
 import { MappedItem } from 'src/common/interfaces';
 import { GuildRole } from 'src/common/types/role.type';
 import { FormMetadata, ProjectMetadata } from '../model/collection.model';
-import { OpportunityInfo, Permissions } from '../types/types';
+import { Permissions } from '../types/types';
 import { Voting } from '../types/types';
 
 export class UpdateCollectionDto {

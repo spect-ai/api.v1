@@ -120,3 +120,21 @@ export class ConnectedGithubAuthGuard implements CanActivate {
     }
   }
 }
+
+@Injectable()
+export class FrontendServerGuard implements CanActivate {
+  async canActivate(context: ExecutionContext): Promise<boolean> {
+    const request = context.switchToHttp().getRequest();
+    try {
+      // get secret key from request header
+      const secretKey = request.headers['x-secret-key'];
+      // check if secret key is valid
+      if (secretKey !== process.env.FRONTEND_SECRET_KEY) {
+        return false;
+      }
+      return true;
+    } catch (error) {
+      return true;
+    }
+  }
+}

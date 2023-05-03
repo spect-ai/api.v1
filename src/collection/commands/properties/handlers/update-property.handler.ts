@@ -7,6 +7,8 @@ import { LoggingService } from 'src/logging/logging.service';
 import { UpdatePropertyCommand } from '../impl/update-property.command';
 import { Property } from 'src/collection/types/types';
 import { GetPrivateViewCollectionQuery } from 'src/collection/queries';
+import { ActivityBuilder } from 'src/collection/services/activity.service';
+import { v4 as uuidV4 } from 'uuid';
 
 @CommandHandler(UpdatePropertyCommand)
 export class UpdatePropertyCommandHandler
@@ -16,6 +18,7 @@ export class UpdatePropertyCommandHandler
     private readonly collectionRepository: CollectionRepository,
     private readonly logger: LoggingService,
     private readonly queryBus: QueryBus,
+    private readonly activityBuilder: ActivityBuilder,
   ) {
     this.logger.setContext('UpdatePropertyCommandHandler');
   }
@@ -23,7 +26,8 @@ export class UpdatePropertyCommandHandler
   async execute(command: UpdatePropertyCommand): Promise<Collection> {
     try {
       console.log('UpdatePropertyCommandHandler');
-      const { updatePropertyCommandDto, collectionId, propertyId } = command;
+      const { updatePropertyCommandDto, collectionId, propertyId, caller } =
+        command;
       const collection = await this.collectionRepository.findById(collectionId);
 
       if (!collection.properties || !collection.properties[propertyId])
@@ -35,6 +39,7 @@ export class UpdatePropertyCommandHandler
       // dont allow property to be immutable after some data has been added
       if (
         updatePropertyCommandDto.immutable &&
+        collection.properties[propertyId].immutable === false &&
         collection.data &&
         Object.values(collection.data).some((a) => a[propertyId])
       )
@@ -58,7 +63,24 @@ export class UpdatePropertyCommandHandler
       if (collection.properties[propertyId].immutable) {
         if (collection.data) {
           for (const [id, data] of Object.entries(collection.data)) {
-            delete data[propertyId];
+            if (data[propertyId]) {
+              delete data[propertyId];
+              const activityId = uuidV4();
+              const timestamp = new Date();
+              collection.dataActivityOrder[id].push(activityId);
+              collection.dataActivities[id][activityId] = {
+                content: `Deleted ${collection.properties[propertyId].name} data because immutable property was updated`,
+                ref: {
+                  actor: {
+                    id: caller,
+                    refType: 'user',
+                  },
+                },
+                timestamp,
+                comment: false,
+                imageRef: `${collection.properties[propertyId].type}Update`,
+              };
+            }
           }
         }
       }
@@ -231,6 +253,8 @@ export class UpdatePropertyCommandHandler
           data: collection.data,
           projectMetadata: collection.projectMetadata,
           formMetadata: collection.formMetadata,
+          dataActivities: collection.dataActivities,
+          dataActivityOrder: collection.dataActivityOrder,
         },
       );
 
