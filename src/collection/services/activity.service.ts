@@ -165,6 +165,7 @@ export class ActivityBuilder {
     const activities = [] as Activity[];
     const timestamp = new Date();
     for (const [propertyId, data] of Object.entries(dataUpdateObj)) {
+      if (propertyId === 'slug' || propertyId === 'anonymous') continue;
       if (propertyId === '__cardStatus__') {
         const { content, ref } = this.cardStatusActivity(
           propertyId,
@@ -183,7 +184,6 @@ export class ActivityBuilder {
           });
         break;
       }
-
       if (
         [
           'shortText',
@@ -192,7 +192,7 @@ export class ActivityBuilder {
           'email',
           'singleURL',
           'multiURL',
-        ].includes(collection.properties[propertyId].type)
+        ].includes(collection.properties[propertyId]?.type)
       ) {
         const { content, ref } = this.simpleFieldActivity(
           propertyId,
