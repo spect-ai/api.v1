@@ -36,50 +36,52 @@ export class UpdatePropertyCommandHandler
       if (updatePropertyCommandDto.name === 'slug')
         throw 'Cannot add property with name slug';
 
-      // dont allow property to be immutable after some data has been added
-      if (
-        updatePropertyCommandDto.immutable &&
-        collection.properties[propertyId].immutable === false &&
-        collection.data &&
-        Object.values(collection.data).some((a) => a[propertyId])
-      )
-        throw 'Cannot make a property immutable after data has been added';
+      if (collection.collectionType === 0) {
+        // dont allow property to be immutable after some data has been added
+        if (
+          updatePropertyCommandDto.immutable &&
+          collection.properties[propertyId].immutable === false &&
+          collection.data &&
+          Object.values(collection.data).some((a) => a[propertyId])
+        )
+          throw 'Cannot make a property immutable after data has been added';
 
-      // dont allow immutabality to be changed
-      if (
-        updatePropertyCommandDto.immutable === false &&
-        collection.properties[propertyId].immutable
-      )
-        throw 'Cannot change immutability of an immutable property, you can delete the property and add it again';
+        // dont allow immutabality to be changed
+        if (
+          updatePropertyCommandDto.immutable === false &&
+          collection.properties[propertyId].immutable
+        )
+          throw 'Cannot change immutability of an immutable property, you can delete the property and add it again';
 
-      if (
-        updatePropertyCommandDto.isPartOfFormView === false &&
-        collection.properties[propertyId].immutable
-      ) {
-        throw 'Cannot remove a property from a form view if it is immutable, you can delete the property and add it again';
-      }
+        if (
+          updatePropertyCommandDto.isPartOfFormView === false &&
+          collection.properties[propertyId].immutable
+        ) {
+          throw 'Cannot remove a property from a form view if it is immutable, you can delete the property and add it again';
+        }
 
-      // clear data if field is immutable
-      if (collection.properties[propertyId].immutable) {
-        if (collection.data) {
-          for (const [id, data] of Object.entries(collection.data)) {
-            if (data[propertyId]) {
-              delete data[propertyId];
-              const activityId = uuidV4();
-              const timestamp = new Date();
-              collection.dataActivityOrder[id].push(activityId);
-              collection.dataActivities[id][activityId] = {
-                content: `Deleted ${collection.properties[propertyId].name} data because immutable property was updated`,
-                ref: {
-                  actor: {
-                    id: caller,
-                    refType: 'user',
+        // clear data if field is immutable
+        if (collection.properties[propertyId].immutable) {
+          if (collection.data) {
+            for (const [id, data] of Object.entries(collection.data)) {
+              if (data[propertyId]) {
+                delete data[propertyId];
+                const activityId = uuidV4();
+                const timestamp = new Date();
+                collection.dataActivityOrder[id].push(activityId);
+                collection.dataActivities[id][activityId] = {
+                  content: `Deleted ${collection.properties[propertyId].name} data because immutable property was updated`,
+                  ref: {
+                    actor: {
+                      id: caller,
+                      refType: 'user',
+                    },
                   },
-                },
-                timestamp,
-                comment: false,
-                imageRef: `${collection.properties[propertyId].type}Update`,
-              };
+                  timestamp,
+                  comment: false,
+                  imageRef: `${collection.properties[propertyId].type}Update`,
+                };
+              }
             }
           }
         }
