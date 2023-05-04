@@ -328,12 +328,16 @@ export class GetPrivateViewCollectionQueryHandler
       }
 
       let profileInfo = [];
-      const filteredResponsesNonAnon = Object.entries(
-        collectionToGet.data || {},
-      ).filter(([key, value]) => {
-        return (value as any)?.anonymous !== true;
-      });
 
+      const filteredResponsesNonAnon = {};
+      if (collectionToGet.data) {
+        for (const [dataSlug, data] of Object.entries(collectionToGet.data)) {
+          if (!(data as any)?.anonymous) {
+            filteredResponsesNonAnon[dataSlug] = true;
+          }
+        }
+      }
+      console.log({ filteredResponsesNonAnon });
       if (collectionToGet.dataOwner) {
         const profiles = [];
         for (const [dataSlug, owner] of Object.entries(
@@ -341,6 +345,7 @@ export class GetPrivateViewCollectionQueryHandler
         )) {
           if (filteredResponsesNonAnon && filteredResponsesNonAnon[dataSlug])
             profiles.push(owner);
+          else delete collectionToGet.dataOwner[dataSlug];
         }
         if (profiles.length > 0) {
           profileInfo = await this.queryBus.execute(
