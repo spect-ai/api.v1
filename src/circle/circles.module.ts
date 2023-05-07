@@ -76,6 +76,11 @@ import { EncryptionService } from 'src/common/encryption.service';
     RealtimeGateway,
     EncryptionService,
   ],
-  exports: [CirclesService, CirclesRepository, CirclesModule],
+  exports: [
+    CirclesService,
+    CirclesRepository,
+    CirclesModule,
+    CirclesPrivateRepository,
+  ],
 })
 export class CirclesModule {}

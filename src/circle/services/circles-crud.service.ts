@@ -21,6 +21,7 @@ import {
   GetMultipleCirclesQuery,
 } from '../queries/impl';
 import { CirclesRepository } from 'src/circle/circles.repository';
+import { CirclesPrivateRepository } from '../circles-private.repository';
 
 const getCirclePopulatedFields = {
   projects: {
@@ -77,6 +78,7 @@ const propertiesToReturnInPrivateCircle = new Set([
 export class CirclesCrudService {
   constructor(
     private readonly circlesRepository: CirclesRepository,
+    private readonly circlePrivateRepository: CirclesPrivateRepository,
     private readonly requestProvider: RequestProvider,
     private readonly logger: LoggingService,
     private readonly commandBus: CommandBus,
@@ -139,17 +141,32 @@ export class CirclesCrudService {
     if (this.requestProvider.user?.id) return res;
   }
 
-  private filterPrivateProperties(
+  private async filterPrivateProperties(
     circle: CircleResponseDto,
     caller?: string,
-  ): CircleResponseDto {
+  ): Promise<CircleResponseDto> {
     if (circle.private && (!caller || !circle.members.includes(caller))) {
       Object.keys(circle).forEach((item) => {
         if (!propertiesToReturnInPrivateCircle.has(item)) delete circle[item];
       });
       (circle as CircleResponseDto).unauthorized = true;
+    } else {
+      delete (circle as CircleResponseDto).invites;
     }
-    return circle;
+
+    let hasSetupZealy = false;
+    try {
+      hasSetupZealy = await this.circlePrivateRepository.exists({
+        circleId: circle.id,
+      });
+    } catch (e) {
+      hasSetupZealy = false;
+    }
+
+    return {
+      ...circle,
+      hasSetupZealy,
+    };
   }
 
   async getById(id: string): Promise<CircleResponseDto> {
@@ -165,7 +182,7 @@ export class CirclesCrudService {
       );
       const circleDetails =
         await this.circlesRepository.getCircleWithMinimalDetails(circle);
-      return this.filterPrivateProperties(
+      return await this.filterPrivateProperties(
         circleDetails,
         this.requestProvider.user?.id,
       );
@@ -188,7 +205,8 @@ export class CirclesCrudService {
       );
       const circleDetails =
         await this.circlesRepository.getCircleWithMinimalDetails(circle);
-      return this.filterPrivateProperties(
+
+      return await this.filterPrivateProperties(
         circleDetails,
         this.requestProvider.user?.id,
       );
@@ -238,7 +256,7 @@ export class CirclesCrudService {
       );
       const circleDetails =
         await this.circlesRepository.getCircleWithMinimalDetails(circle);
-      return this.filterPrivateProperties(
+      return await this.filterPrivateProperties(
         circleDetails,
         this.requestProvider.user?.id,
       );

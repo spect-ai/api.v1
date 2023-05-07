@@ -83,12 +83,10 @@ export class UpdateCollectionCommandHandler
       }
 
       if (formMetadata && formMetadata.paymentConfig) {
-        console.log({ parent: collection.parents });
         const circle: Circle = await this.queryBus.execute(
           new GetCircleByIdQuery(collection.parents[0]),
         );
         const whitelistedAddresses = circle.whitelistedAddresses;
-        console.log({ whitelistedAddresses });
         Object.values(formMetadata.paymentConfig.networks).map((network) => {
           const receiverAddress = network.receiverAddress;
           if (
@@ -119,6 +117,7 @@ export class UpdateCollectionCommandHandler
           formMetadata.mintkudosTokenId ||
           formMetadata.surveyTokenId ||
           formMetadata.formRoleGating ||
+          formMetadata.zealyXP > 0 ||
           !formMetadata.allowAnonymousResponses)
       ) {
         const { formMetadata } = updatedCollection;
@@ -153,6 +152,7 @@ export class UpdateCollectionCommandHandler
         !formMetadata.mintkudosTokenId &&
         !formMetadata.surveyTokenId &&
         !formMetadata.formRoleGating?.length &&
+        !formMetadata.zealyXP &&
         formMetadata.allowAnonymousResponses
       ) {
         const { formMetadata } = updatedCollection;
@@ -177,7 +177,8 @@ export class UpdateCollectionCommandHandler
         updateCollectionDto.formMetadata &&
         (updateCollectionDto.formMetadata.poapEventId ||
           updateCollectionDto.formMetadata.surveyTokenId ||
-          updateCollectionDto.formMetadata.mintkudosTokenId) &&
+          updateCollectionDto.formMetadata.mintkudosTokenId ||
+          formMetadata.zealyXP > 0) &&
         !updatedCollection.formMetadata.pages['collect']
       ) {
         const { formMetadata } = updatedCollection;
@@ -208,7 +209,8 @@ export class UpdateCollectionCommandHandler
       if (
         updateCollectionDto.formMetadata &&
         (updateCollectionDto.formMetadata.mintkudosTokenId === null ||
-          updateCollectionDto.formMetadata.poapEventId === '') &&
+          updateCollectionDto.formMetadata.poapEventId === '' ||
+          !formMetadata.zealyXP) &&
         updatedCollection.formMetadata.pages['collect']
       ) {
         const { formMetadata } = updatedCollection;

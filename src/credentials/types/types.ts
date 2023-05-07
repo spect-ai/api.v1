@@ -35,3 +35,20 @@ export type KudosType = {
   claimStatus: string;
   communityId: string;
 };
+
+export type ZealyUserType = {
+  id: string;
+  name: string;
+  discordHandle: string;
+  twitterUsername: string;
+  addresses: {
+    blockchain: string;
+    address: string;
+  }[];
+  avatar: string;
+  xp: number;
+  level: number;
+  rank: number;
+  createdAt: Date;
+  updatedAt: Date;
+};

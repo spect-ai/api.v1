@@ -276,8 +276,6 @@ export class CirclesRepository extends BaseRepository<Circle> {
   async getCircleWithMinimalDetails(
     circle: Circle,
   ): Promise<CircleResponseDto> {
-    const projects = {};
-
     const children = {};
     if (circle?.children) {
       for (const populatedchild of circle?.children) {
@@ -285,8 +283,6 @@ export class CirclesRepository extends BaseRepository<Circle> {
         children[child.id] = child;
       }
     }
-
-    const retro = {};
 
     const collections = {};
     if (circle?.collections) {
@@ -306,9 +302,7 @@ export class CirclesRepository extends BaseRepository<Circle> {
 
     return {
       ...circle,
-      projects,
       children,
-      retro,
       collections,
     };
   }

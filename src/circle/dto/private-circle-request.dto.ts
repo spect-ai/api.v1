@@ -22,4 +22,12 @@ export class UpdatePrivateCircleRequestDto {
   @IsString()
   @IsOptional()
   mintkudosCommunityId?: string;
+
+  @IsString()
+  @IsOptional()
+  zealyApiKey?: string;
+
+  @IsString()
+  @IsOptional()
+  zealySubdomain?: string;
 }

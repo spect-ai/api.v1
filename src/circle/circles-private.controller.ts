@@ -52,30 +52,29 @@ export class CirclePrivateController {
   async updatePrivateCircleProperties(
     @Param() param: ObjectIdDto,
     @Body() updatePrivateCircleRequestDto: UpdatePrivateCircleRequestDto,
-  ): Promise<boolean> {
+  ): Promise<CirclePrivate> {
     try {
       const res = await this.circlesPrivateRepository.findOne({
         circleId: param.id,
       });
       if (!res) {
-        await this.circlesPrivateRepository.create({
+        return await this.circlesPrivateRepository.create({
           ...updatePrivateCircleRequestDto,
           circleId: param.id,
         });
       } else {
-        await this.circlesPrivateRepository.updateByFilter(
+        return await this.circlesPrivateRepository.updateByFilter(
           {
             circleId: param.id,
           },
           updatePrivateCircleRequestDto,
         );
       }
-      return true;
     } catch (e) {
       // TODO: Distinguish between DocumentNotFound error and other errors correctly, silent errors are not good
       console.log(e);
       this.logger.error(`Failed updating mint kudos`);
-      return false;
+      throw new InternalServerErrorException(e);
     }
   }
 }

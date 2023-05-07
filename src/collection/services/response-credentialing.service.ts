@@ -1,4 +1,6 @@
 import {
+  HttpException,
+  HttpStatus,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
@@ -22,6 +24,8 @@ import { GetCollectionByIdQuery } from '../queries';
 import { SurveyTokenDistributionInfo } from '../types/types';
 import { AdvancedConditionService } from './advanced-condition.service';
 import { GetCollectionService } from './get-collection.service';
+import { ZealyService } from 'src/credentials/services/zealy.service';
+import { User } from 'src/users/model/users.model';
 
 @Injectable()
 export class ClaimEligibilityService {
@@ -29,6 +33,8 @@ export class ClaimEligibilityService {
     private readonly advancedConditionService: AdvancedConditionService,
     private readonly registryService: RegistryService,
     private readonly surveyTokenService: SurveyTokenService,
+    private readonly zealyService: ZealyService,
+    private readonly collectionRepository: CollectionRepository,
   ) {}
 
   canClaimKudos(
@@ -244,6 +250,140 @@ export class ClaimEligibilityService {
           : parseFloat(ethers.utils.formatEther(balanceInEscrow.toString())),
     };
   }
+
+  canClaimZealyXp(
+    collection: Collection,
+    claimee: string,
+    zealyUserId: string,
+  ): {
+    canClaimXp: number;
+    hasClaimedXp?: boolean;
+    reason: string;
+  } {
+    if (!collection.formMetadata.zealyXP)
+      return {
+        canClaimXp: 0,
+        reason: 'Zealy Xp doesnt exist',
+      };
+    if (!claimee) {
+      return {
+        canClaimXp: 0,
+        reason: 'User not logged in',
+      };
+    }
+
+    if (collection.formMetadata.zealyClaimedBy?.includes(zealyUserId)) {
+      return {
+        canClaimXp: 0,
+        hasClaimedXp: true,
+        reason: 'User has already claimed XP',
+      };
+    }
+    let slug;
+    for (const [dataSlug, owner] of Object.entries(
+      collection.dataOwner || {},
+    )) {
+      if (owner === claimee) {
+        slug = dataSlug;
+      }
+    }
+
+    if (!slug) {
+      return {
+        canClaimXp: 0,
+        reason: 'User has not submitted any response',
+      };
+    }
+
+    let totalClaimableXP = 0;
+    for (const [propertyId, correctResponse] of Object.entries(
+      collection.formMetadata.responseDataForZealy || {},
+    )) {
+      const response = collection.data[slug][propertyId] as any;
+      if (
+        ['number', 'date'].includes(collection.properties[propertyId].type) &&
+        response === correctResponse
+      ) {
+        totalClaimableXP +=
+          collection.formMetadata.zealyXpPerField?.[propertyId] || 0;
+      } else if (collection.properties[propertyId].type === 'singleSelect') {
+        if (response?.value === correctResponse?.value) {
+          totalClaimableXP +=
+            collection.formMetadata.zealyXpPerField?.[propertyId || 0];
+        }
+      } else if (collection.properties[propertyId].type === 'multiSelect') {
+        const responseDataValues = correctResponse?.map((v) => v?.value);
+        const dataValues = response.map((v) => v?.value);
+        console.log({ responseDataValues, dataValues });
+        if (
+          responseDataValues &&
+          dataValues &&
+          responseDataValues.length === dataValues.length &&
+          responseDataValues.every((v) => dataValues.includes(v))
+        ) {
+          totalClaimableXP +=
+            collection.formMetadata.zealyXpPerField?.[propertyId] || 0;
+        }
+      }
+    }
+
+    return {
+      canClaimXp: totalClaimableXP,
+      hasClaimedXp: false,
+      reason: '',
+    };
+  }
+
+  async canClaimZealy(
+    collectionId: string,
+    user: User,
+  ): Promise<{
+    canClaimXp: number;
+    hasClaimedXp?: boolean;
+    reason: string;
+  }> {
+    try {
+      const collection = await this.collectionRepository.findById(collectionId);
+      let zealyUser;
+      try {
+        zealyUser = await this.zealyService.getUser(
+          collection.parents[0],
+          null,
+          user.ethAddress,
+        );
+      } catch (e) {
+        console.log({ e });
+      }
+
+      try {
+        console.log({ d: user.discordId });
+        if (!zealyUser && user.discordId) {
+          zealyUser = await this.zealyService.getUser(
+            collection.parents[0],
+            user.discordId,
+            null,
+          );
+        }
+      } catch (e) {
+        console.log({ e });
+      }
+
+      if (!zealyUser) {
+        throw new HttpException(
+          {
+            message: 'Zealy user not found',
+            errorCode: 'ZEALY_USER_NOT_FOUND',
+          },
+          HttpStatus.NOT_FOUND,
+        );
+      }
+
+      return this.canClaimZealyXp(collection, user.id, zealyUser.id);
+    } catch (e) {
+      console.log({ e });
+      throw e;
+    }
+  }
 }
 
 @Injectable()
@@ -261,6 +401,7 @@ export class ResponseCredentialingService {
     private readonly claimEligibilityService: ClaimEligibilityService,
     private readonly lookupRepository: LookupRepository,
     private readonly getCollectionService: GetCollectionService,
+    private readonly zealyService: ZealyService,
   ) {
     this.logger.setContext('ResponseCredentialingService');
   }
@@ -493,6 +634,176 @@ export class ResponseCredentialingService {
         collectionId,
       );
       throw new InternalServerErrorException(`${error}`);
+    }
+  }
+
+  async claimZealyXp(collectionId: string) {
+    try {
+      const collection = await this.collectionRepository.findById(collectionId);
+      if (!collection) {
+        throw new InternalServerErrorException('Collection not found');
+      }
+
+      let zealyUser;
+
+      try {
+        zealyUser = await this.zealyService.getUser(
+          collection.parents[0],
+          null,
+          this.requestProvider.user.ethAddress,
+        );
+      } catch (e) {
+        console.log(e);
+      }
+
+      try {
+        if (!zealyUser && this.requestProvider.user.discordId) {
+          zealyUser = await this.zealyService.getUser(
+            collection.parents[0],
+            this.requestProvider.user.discordId,
+          );
+        }
+      } catch (e) {
+        console.log(e);
+      }
+
+      if (!zealyUser) {
+        throw new HttpException(
+          {
+            message: 'Zealy user not found',
+            errorCode: 'ZEALY_USER_NOT_FOUND',
+          },
+          HttpStatus.NOT_FOUND,
+        );
+      }
+
+      const { canClaimXp, reason } =
+        this.claimEligibilityService.canClaimZealyXp(
+          collection,
+          this.requestProvider.user.id,
+          zealyUser.id,
+        );
+      if (!canClaimXp) {
+        throw new InternalServerErrorException(reason);
+      }
+
+      const res = await this.zealyService.claimXp(
+        collection.parents[0],
+        zealyUser.id,
+        canClaimXp,
+        collection.name,
+      );
+
+      await this.collectionRepository.updateById(collection.id, {
+        formMetadata: {
+          ...(collection.formMetadata || {}),
+          zealyClaimedBy: [
+            ...(collection.formMetadata.zealyClaimedBy || []),
+            zealyUser.id,
+          ],
+        },
+      });
+
+      return res;
+    } catch (error) {
+      this.logger.error(
+        `Failed while claiming poap with error: ${error}`,
+        collectionId,
+      );
+      throw new InternalServerErrorException(`${error}`);
+    }
+  }
+
+  async claimZealyXpFromBot(discordId: string, threadId: string) {
+    try {
+      const collection = await this.getCollectionService.getCollectionFromAnyId(
+        null,
+        null,
+        threadId,
+        {},
+      );
+
+      let zealyUser;
+      try {
+        zealyUser = await this.zealyService.getUser(
+          collection.parents[0],
+          discordId,
+        );
+      } catch (e) {
+        console.log(e);
+      }
+      try {
+        if (!zealyUser) {
+          const user = await this.queryBus.execute(
+            new GetUserByFilterQuery(
+              {
+                discordId,
+              },
+              '',
+              true,
+            ),
+          );
+          zealyUser = await this.zealyService.getUser(
+            collection.parents[0],
+            null,
+            user.ethAddress,
+          );
+        }
+      } catch (e) {
+        console.log(e);
+      }
+
+      if (!zealyUser) {
+        throw new HttpException(
+          {
+            message: 'Zealy user not found',
+            errorCode: 'ZEALY_USER_NOT_FOUND',
+          },
+          HttpStatus.NOT_FOUND,
+        );
+      }
+      const { canClaimXp, reason } =
+        this.claimEligibilityService.canClaimZealyXp(
+          collection,
+          this.requestProvider.user.id,
+          zealyUser.id,
+        );
+      if (!canClaimXp) {
+        throw new InternalServerErrorException(reason);
+      }
+
+      const res = await this.zealyService.claimXp(
+        collection.parents[0],
+        zealyUser.id,
+        canClaimXp,
+        collection.name,
+      );
+      if (!res.id) throw new InternalServerErrorException(`Failed to claim xp`);
+
+      await this.collectionRepository.updateById(collection.id, {
+        formMetadata: {
+          ...(collection.formMetadata || {}),
+          drafts: {
+            ...(collection.formMetadata.drafts || {}),
+            [discordId]: {
+              ...(collection.formMetadata.drafts?.[discordId] || {}),
+              zealyClaimed: true,
+            },
+          },
+          zealyClaimedBy: [
+            ...(collection.formMetadata.zealyClaimedBy || []),
+            zealyUser.id,
+          ],
+        },
+      });
+
+      return res;
+    } catch (error) {
+      this.logger.error(
+        `Failed while claiming poap with error: ${error}`,
+        threadId,
+      );
+      throw error;
     }
   }
 

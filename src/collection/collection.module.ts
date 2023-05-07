@@ -46,6 +46,7 @@ import { LookupModule } from 'src/lookup/lookup.module';
 import { SurveyTokenService } from 'src/credentials/services/survey-token.service';
 import { CirclesCollectionService } from 'src/circle/services/circle-collection.service';
 import { GetCollectionService } from './services/get-collection.service';
+import { ZealyService } from 'src/credentials/services/zealy.service';
 
 @Module({
   imports: [
@@ -96,6 +97,7 @@ import { GetCollectionService } from './services/get-collection.service';
     LinkDiscordService,
     SurveyTokenService,
     GetCollectionService,
+    ZealyService,
   ],
   exports: [CollectionModule, CollectionRepository],
 })

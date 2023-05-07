@@ -17,6 +17,7 @@ import {
   GetPrivateViewCollectionQuery,
   GetPublicViewCollectionQuery,
 } from '../impl/get-collection.query';
+import { CirclesPrivateRepository } from 'src/circle/circles-private.repository';
 
 @QueryHandler(GetCollectionByIdQuery)
 export class GetCollectionByIdQueryHandler
@@ -150,7 +151,7 @@ export class GetPublicViewCollectionQueryHandler
     private readonly queryBus: QueryBus,
     private readonly advancedAccessService: AdvancedAccessService,
     private readonly logger: LoggingService,
-    private readonly advancedConditionService: AdvancedConditionService,
+    private readonly circlePrivateRepository: CirclesPrivateRepository,
     private readonly claimEligibilityService: ClaimEligibilityService,
   ) {
     logger.setContext('GetPublicViewCollectionQueryHandler');
@@ -223,6 +224,26 @@ export class GetPublicViewCollectionQueryHandler
         collectionToGet,
         caller?.id,
       );
+
+      const canClaimResForZealy = this.claimEligibilityService.canClaimZealyXp(
+        collectionToGet,
+        caller?.id,
+        'just checking, not claiming',
+      );
+      let zealySubdomain;
+      if (canClaimResForZealy?.canClaimXp) {
+        try {
+          const privateCredentials = await this.circlePrivateRepository.findOne(
+            {
+              circleId: (collectionToGet.parents[0] as any).id,
+            },
+          );
+          zealySubdomain = privateCredentials?.zealySubdomain;
+        } catch (e) {
+          console.log(e);
+        }
+      }
+
       let activityOrder, activity;
       if (previousResponses.length > 0) {
         const prevSlug = previousResponses[previousResponses.length - 1].slug;
@@ -251,6 +272,15 @@ export class GetPublicViewCollectionQueryHandler
           hasClaimedKudos: canClaimResForKudos.hasClaimed,
           matchCountForPoap: canClaimResForPoap.matchCount,
           matchCountForKudos: canClaimResForKudos.matchCount,
+          canClaimZealy: canClaimResForZealy.canClaimXp,
+          hasClaimedZealy: canClaimResForZealy.hasClaimedXp,
+          zealySubdomain,
+          currentPage:
+            canClaimResForKudos.canClaim ||
+            canClaimResForZealy.canClaimXp ||
+            canClaimResForPoap.canClaim
+              ? 'collect'
+              : undefined,
         },
         activity,
         activityOrder,

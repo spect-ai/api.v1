@@ -6,7 +6,7 @@ import {
   ValidateNested,
 } from 'class-validator';
 import { ObjectId } from 'mongoose';
-import { Circle } from '../model/circle.model';
+import { Circle, Invite } from '../model/circle.model';
 import { Payment } from 'src/common/models/payment.model';
 import { Status } from 'src/common/types/status.type';
 import { SnapshotSpace } from 'src/collection/types/types';
@@ -158,6 +158,13 @@ type MinimalRetro = {
 
 export class CircleResponseDto {
   /**
+   * The id of the circle
+   */
+  @IsString()
+  @IsNotEmpty()
+  id: string;
+
+  /**
    * The name of the circle
    */
   @IsString()
@@ -276,4 +283,7 @@ export class CircleResponseDto {
    */
   @IsObject()
   snapshot?: SnapshotSpace;
+
+  invites: Invite[];
+  hasSetupZealy?: boolean;
 }

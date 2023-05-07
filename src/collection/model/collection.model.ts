@@ -337,6 +337,10 @@ export interface FormMetadata {
   };
 
   chartOrder?: string[];
+  zealyXP?: number;
+  zealyXpPerField?: MappedItem<number>;
+  responseDataForZealy?: MappedItem<any>;
+  zealyClaimedBy?: string[];
 }
 
 export interface PaymentConfig {

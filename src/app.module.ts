@@ -51,6 +51,7 @@ import { SurveyTokenService } from './credentials/services/survey-token.service'
 
 import * as dotenv from 'dotenv';
 import { GetCollectionService } from './collection/services/get-collection.service';
+import { ZealyService } from './credentials/services/zealy.service';
 dotenv.config();
 
 const databaseUrl = process.env.MONGO_URL
@@ -110,6 +111,7 @@ const databaseUrl = process.env.MONGO_URL
     LinkDiscordService,
     SurveyTokenService,
     GetCollectionService,
+    ZealyService,
   ],
 })
 export class AppModule {}

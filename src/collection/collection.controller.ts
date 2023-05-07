@@ -132,7 +132,10 @@ import {
 } from './queries/impl/get-collection.query';
 import { GetCollectionService } from './services/get-collection.service';
 import { LinkDiscordService } from './services/link-discord.service';
-import { ResponseCredentialingService } from './services/response-credentialing.service';
+import {
+  ClaimEligibilityService,
+  ResponseCredentialingService,
+} from './services/response-credentialing.service';
 import { WhitelistService } from './services/whitelist.service';
 import { Property } from './types/types';
 import { BotAuthGuard } from 'src/auth/bot.guard';
@@ -150,6 +153,7 @@ export class CollectionController {
     private readonly linkDiscordService: LinkDiscordService,
     private readonly getCollectionService: GetCollectionService,
     private readonly advancedAccessService: AdvancedAccessService,
+    private readonly claimEligibilityService: ClaimEligibilityService,
   ) {}
 
   @Get('/changelog')
@@ -701,6 +705,25 @@ export class CollectionController {
     return await this.credentialingService.claimPoap(param.id);
   }
 
+  @UseGuards(SessionAuthGuard)
+  @Patch('/:id/claimZealyXp')
+  async claimZealyXp(@Param() param: ObjectIdDto): Promise<boolean> {
+    return await this.credentialingService.claimZealyXp(param.id);
+  }
+
+  @UseGuards(SessionAuthGuard)
+  @Get('/:id/canClaimZealyXp')
+  async canClaimZealy(
+    @Param() param: ObjectIdDto,
+    @Request() req,
+  ): Promise<{
+    canClaimXp: number;
+    hasClaimedXp?: boolean;
+    reason: string;
+  }> {
+    return await this.claimEligibilityService.canClaimZealy(param.id, req.user);
+  }
+
   @SetMetadata('permissions', ['manageSettings'])
   @UseGuards(CollectionAuthGuard)
   @Patch('/:id/linkDiscord')
@@ -907,6 +930,18 @@ export class CollectionController {
     @Query() query: RequiredDiscordIdDto,
   ): Promise<{ operationId: string }> {
     return await this.credentialingService.claimKudosFromBot(
+      query.discordId,
+      param.channelId,
+    );
+  }
+
+  @UseGuards(BotAuthGuard)
+  @Patch('/:channelId/claimZealyXpFromBot')
+  async claimZealyXpFromBot(
+    @Param() param: RequiredDiscordChannelIdDto,
+    @Query() query: RequiredDiscordIdDto,
+  ): Promise<boolean> {
+    return await this.credentialingService.claimZealyXpFromBot(
       query.discordId,
       param.channelId,
     );

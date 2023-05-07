@@ -18,6 +18,18 @@ export class CirclePrivate extends BaseModel {
   mintkudosCommunityId: string;
 
   /**
+   * The api key
+   */
+  @prop({ default: '' })
+  zealyApiKey: string;
+
+  /**
+   * The community Id
+   */
+  @prop({ default: '' })
+  zealySubdomain: string;
+
+  /**
    * Parent Ids of the circle
    */
   @prop({ ref: () => Circle, default: [] })
