@@ -23,6 +23,8 @@ import {
 } from '../impl/get-collection.query';
 import { GetNextFieldQuery } from '../impl/get-field.query';
 import { v4 as uuidv4 } from 'uuid';
+import { ZealyService } from 'src/credentials/services/zealy.service';
+import { CirclesPrivateRepository } from 'src/circle/circles-private.repository';
 
 @QueryHandler(GetNextFieldQuery)
 export class GetNextFieldQueryHandler
@@ -41,6 +43,8 @@ export class GetNextFieldQueryHandler
     private readonly kudosService: MintKudosService,
     private readonly claimEligibilityService: ClaimEligibilityService,
     private readonly registryService: RegistryService,
+    private readonly zealyService: ZealyService,
+    private readonly circlePrivateRepository: CirclesPrivateRepository,
   ) {
     this.logger.setContext('GetNextFieldQueryHandler');
   }
@@ -342,6 +346,18 @@ export class GetNextFieldQueryHandler
     }
 
     if (
+      collection.formMetadata.zealyXP &&
+      !collection.formMetadata?.drafts?.[discordId]?.['zealyClaimed'] &&
+      !collection.formMetadata.skippedFormFields?.[discordId]?.['zealyXp']
+    ) {
+      return {
+        field: 'zealyXp',
+        ethAddress: user?.ethAddress,
+        userId: user?.id,
+      };
+    }
+
+    if (
       collection.formMetadata.surveyTokenId &&
       !collection.formMetadata?.drafts?.[discordId]?.['erc20Claimed'] &&
       !collection.formMetadata.skippedFormFields?.[discordId]?.['erc20']
@@ -445,6 +461,62 @@ export class GetNextFieldQueryHandler
           .minimumNumberOfAnswersThatNeedToMatchForMintkudos,
     };
   }
+  async zealyXp(
+    collection: Collection,
+    callerId: string,
+    callerAddress: string,
+    callerDiscordId: string,
+  ) {
+    let zealyUser;
+    console.log({ callerAddress, p: collection.parents[0] });
+    try {
+      zealyUser = await this.zealyService.getUser(
+        (collection.parents[0] as any).id,
+        null,
+        callerAddress,
+      );
+    } catch (e) {
+      console.log(e);
+    }
+
+    try {
+      if (!zealyUser && callerDiscordId) {
+        zealyUser = await this.zealyService.getUser(
+          collection.parents[0],
+          callerDiscordId,
+        );
+      }
+    } catch (e) {
+      console.log(e);
+    }
+
+    console.log({ zealyUser });
+
+    if (!zealyUser) {
+      const privateCredentials = await this.circlePrivateRepository.findOne({
+        circleId: (collection.parents[0] as any).id,
+      });
+      const zealySubdomain = privateCredentials?.zealySubdomain;
+      return {
+        canClaim: 0,
+        hasClaimed: false,
+        userExists: false,
+        zealySubdomain,
+      };
+    }
+
+    const res = this.claimEligibilityService.canClaimZealyXp(
+      collection,
+      callerId,
+      zealyUser.id,
+    );
+
+    return {
+      canClaim: res.canClaimXp,
+      hasClaimed: res.hasClaimedXp,
+      userExists: true,
+    };
+  }
 
   async erc20(collection: Collection, callerAddress: string) {
     const res = await this.claimEligibilityService.canClaimErc20(
@@ -521,6 +593,8 @@ export class GetNextFieldQueryHandler
           name: nextField === 'readonlyAtEnd' ? 'readonlyAtEnd' : nextField,
         };
       }
+
+      console.log({ nextField });
       if (nextField) {
         if (nextField === 'readonlyAtEnd')
           return {
@@ -590,6 +664,17 @@ export class GetNextFieldQueryHandler
             type: 'erc20',
             name: 'You are eligible for an ERC20 token!',
             erc20: await this.erc20(collection, callerAddress),
+          };
+        } else if (nextField === 'zealyXp') {
+          return {
+            type: 'zealyXp',
+            name: 'You are eligible for Zealy XP!',
+            zealyXp: await this.zealyXp(
+              collection,
+              userId,
+              callerAddress,
+              callerId,
+            ),
           };
         }
         const returnedField = collection.properties[nextField];

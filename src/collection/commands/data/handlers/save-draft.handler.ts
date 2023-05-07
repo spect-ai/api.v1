@@ -154,7 +154,7 @@ export class SaveDraftCommandHandler
         const property = collection.properties[key];
         if (
           (property && property.isPartOfFormView) ||
-          ['paywall', 'poap', 'kudos', 'erc20'].includes(key)
+          ['paywall', 'poap', 'kudos', 'erc20', 'zealyXp'].includes(key)
         ) {
           skippedFormFields[key] = val;
         }
@@ -241,7 +241,7 @@ export class SaveDraftCommandHandler
         ),
       );
       if (
-        ['poap', 'kudos', 'erc20'].includes(nextField?.type) ||
+        ['poap', 'kudos', 'erc20', 'zealyXp'].includes(nextField?.type) ||
         (nextField.name === 'readonlyAtEnd' &&
           !collection.formMetadata.drafts?.[callerDiscordId]?.['saved'])
       ) {
@@ -423,7 +423,7 @@ export class SaveAndPostSocialsCommandHandler
 
       // Save draft to data if next field is readonlyAtEnd or poap/kudos/erc20
       if (
-        ['poap', 'kudos', 'erc20'].includes(nextToNextField?.type) ||
+        ['poap', 'kudos', 'erc20', 'zealyXp'].includes(nextToNextField?.type) ||
         (nextToNextField.name === 'readonlyAtEnd' &&
           !collection.formMetadata.drafts?.[discordId]?.['saved'])
       ) {
@@ -558,7 +558,7 @@ export class SaveAndPostPaymentCommandHandler
       );
 
       if (
-        ['poap', 'kudos', 'erc20'].includes(nextToNextField?.type) ||
+        ['poap', 'kudos', 'erc20', 'zealyXp'].includes(nextToNextField?.type) ||
         (nextToNextField.name === 'readonlyAtEnd' &&
           !collection.formMetadata.drafts?.[discordUserId]?.['saved'])
       ) {

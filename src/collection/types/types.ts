@@ -115,6 +115,12 @@ export type Condition = {
   data: any;
 };
 
+export type ConditionGroup = {
+  id: string;
+  operator: 'and' | 'or';
+  conditions: Condition[];
+};
+
 export type ComparisonCondition = 'greaterThanOrEqualTo' | 'lessThanOrEqualTo';
 
 export type PopulatedCollectionFields = {

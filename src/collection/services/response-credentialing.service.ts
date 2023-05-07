@@ -356,7 +356,6 @@ export class ClaimEligibilityService {
       }
 
       try {
-        console.log({ d: user.discordId });
         if (!zealyUser && user.discordId) {
           zealyUser = await this.zealyService.getUser(
             collection.parents[0],
@@ -723,6 +722,18 @@ export class ResponseCredentialingService {
         {},
       );
 
+      const user = await this.queryBus.execute(
+        new GetUserByFilterQuery(
+          {
+            discordId,
+          },
+          '',
+          true,
+        ),
+      );
+
+      if (!user) throw new Error('User not linked to discord');
+
       let zealyUser;
       try {
         zealyUser = await this.zealyService.getUser(
@@ -734,15 +745,6 @@ export class ResponseCredentialingService {
       }
       try {
         if (!zealyUser) {
-          const user = await this.queryBus.execute(
-            new GetUserByFilterQuery(
-              {
-                discordId,
-              },
-              '',
-              true,
-            ),
-          );
           zealyUser = await this.zealyService.getUser(
             collection.parents[0],
             null,
@@ -765,7 +767,7 @@ export class ResponseCredentialingService {
       const { canClaimXp, reason } =
         this.claimEligibilityService.canClaimZealyXp(
           collection,
-          this.requestProvider.user.id,
+          user.id,
           zealyUser.id,
         );
       if (!canClaimXp) {
