@@ -318,8 +318,7 @@ export class ClaimEligibilityService {
           }
         } else if (collection.properties[propertyId].type === 'multiSelect') {
           const responseDataValues = correctResponse?.map((v) => v?.value);
-          const dataValues = response.map((v) => v?.value);
-          console.log({ responseDataValues, dataValues });
+          const dataValues = response?.map((v) => v?.value);
           if (
             responseDataValues &&
             dataValues &&
