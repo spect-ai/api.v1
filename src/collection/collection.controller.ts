@@ -965,7 +965,7 @@ export class CollectionController {
   async getCollectionByChannelId(
     @Param() param: RequiredDiscordChannelIdDto,
   ): Promise<Collection> {
-    return await this.getCollectionService.getCollectionFromAnyId(
+    const res = await this.getCollectionService.getCollectionFromAnyId(
       null,
       null,
       param.channelId,
@@ -978,6 +978,8 @@ export class CollectionController {
         },
       },
     );
+
+    return this.advancedAccessService.removePrivateFields(res);
   }
 
   @UseGuards(PublicViewAuthGuard)
