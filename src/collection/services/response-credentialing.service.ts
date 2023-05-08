@@ -296,37 +296,49 @@ export class ClaimEligibilityService {
     }
 
     let totalClaimableXP = 0;
-    for (const [propertyId, correctResponse] of Object.entries(
-      collection.formMetadata.responseDataForZealy || {},
-    )) {
-      const response = collection.data[slug][propertyId] as any;
-      if (
-        ['number', 'date'].includes(collection.properties[propertyId].type) &&
-        response === correctResponse
-      ) {
-        totalClaimableXP +=
-          collection.formMetadata.zealyXpPerField?.[propertyId] || 0;
-      } else if (collection.properties[propertyId].type === 'singleSelect') {
-        if (response?.value === correctResponse?.value) {
-          totalClaimableXP +=
-            collection.formMetadata.zealyXpPerField?.[propertyId || 0];
-        }
-      } else if (collection.properties[propertyId].type === 'multiSelect') {
-        const responseDataValues = correctResponse?.map((v) => v?.value);
-        const dataValues = response.map((v) => v?.value);
-        console.log({ responseDataValues, dataValues });
+    if (
+      Object.values(collection.formMetadata.zealyXpPerField || {}).some(
+        (a) => a > 0,
+      )
+    )
+      for (const [propertyId, correctResponse] of Object.entries(
+        collection.formMetadata.responseDataForZealy || {},
+      )) {
+        const response = collection.data[slug][propertyId] as any;
         if (
-          responseDataValues &&
-          dataValues &&
-          responseDataValues.length === dataValues.length &&
-          responseDataValues.every((v) => dataValues.includes(v))
+          ['number', 'date'].includes(collection.properties[propertyId].type) &&
+          response === correctResponse
         ) {
           totalClaimableXP +=
             collection.formMetadata.zealyXpPerField?.[propertyId] || 0;
+        } else if (collection.properties[propertyId].type === 'singleSelect') {
+          if (response?.value === correctResponse?.value) {
+            totalClaimableXP +=
+              collection.formMetadata.zealyXpPerField?.[propertyId || 0];
+          }
+        } else if (collection.properties[propertyId].type === 'multiSelect') {
+          const responseDataValues = correctResponse?.map((v) => v?.value);
+          const dataValues = response.map((v) => v?.value);
+          console.log({ responseDataValues, dataValues });
+          if (
+            responseDataValues &&
+            dataValues &&
+            responseDataValues.length === dataValues.length &&
+            responseDataValues.every((v) => dataValues.includes(v))
+          ) {
+            totalClaimableXP +=
+              collection.formMetadata.zealyXpPerField?.[propertyId] || 0;
+          }
         }
       }
+    else if (collection.formMetadata.zealyXP) {
+      totalClaimableXP = collection.formMetadata.zealyXP;
+    } else {
+      return {
+        canClaimXp: 0,
+        reason: 'No XP set for this collection',
+      };
     }
-
     return {
       canClaimXp: totalClaimableXP,
       hasClaimedXp: false,
