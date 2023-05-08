@@ -7,5 +7,6 @@ export class UpdateMemberRolesCommand {
     public readonly userId: string,
     public readonly id?: string,
     public readonly circle?: Circle,
+    public readonly skipMutabilityCheck?: boolean,
   ) {}
 }

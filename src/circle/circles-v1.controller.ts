@@ -313,16 +313,30 @@ export class CircleV1Controller {
     @Param() param: ObjectIdDto,
     @Query() memberDto: MemberDto,
   ): Promise<CircleResponseDto> {
-    return await this.circleMembershipService.removeMember(
+    return await this.circleMembershipService.updateMemberRoles(
       param.id,
       memberDto.member,
+      {
+        roles: ['__removed__'],
+      },
+      true,
     );
   }
 
   @UseGuards(SessionAuthGuard)
   @Patch('/:id/leave')
-  async leave(@Param() param: ObjectIdDto): Promise<CircleResponseDto> {
-    return await this.circleMembershipService.leave(param.id);
+  async leave(
+    @Param() param: ObjectIdDto,
+    @Request() request,
+  ): Promise<CircleResponseDto> {
+    return await this.circleMembershipService.updateMemberRoles(
+      param.id,
+      request.user.id,
+      {
+        roles: ['__left__'],
+      },
+      true,
+    );
   }
 
   @SetMetadata('permissions', ['manageRoles'])

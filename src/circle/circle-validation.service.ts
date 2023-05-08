@@ -8,7 +8,11 @@ export class CircleValidationService {
 
   validateNewMember(circle: Circle, newMember: string) {
     const members = circle.members.map((m) => m.toString());
-    if (members.includes(newMember)) {
+    if (
+      members.includes(newMember) &&
+      !circle.memberRoles[newMember].includes('__left__') &&
+      !circle.memberRoles[newMember].includes('__removed__')
+    ) {
       throw new HttpException(
         'You are already a member of this circle',
         HttpStatus.INTERNAL_SERVER_ERROR,
@@ -27,12 +31,24 @@ export class CircleValidationService {
   }
 
   validateRolesExistInCircle(circle: Circle, roles: string[]) {
-    const rolesAreSubset = roles.every((role) =>
-      Object.keys(circle.roles).includes(role),
+    const rolesAreSubset = roles.every(
+      (role) =>
+        Object.keys(circle.roles).includes(role) ||
+        ['__removed__', '__left__'].includes(role),
     );
     if (!rolesAreSubset) {
       throw new HttpException(
         'Roles are not a subset of existing roles in the circle',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  validateRolesAreMutable(circle: Circle, roles: string[]) {
+    const rolesAreMutable = roles.every((role) => circle.roles[role].mutable);
+    if (!rolesAreMutable) {
+      throw new HttpException(
+        'Roles are not mutable',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }

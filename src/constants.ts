@@ -185,3 +185,47 @@ export const permissionToPermissionNameMap = {
   updateFormResponsesManually: 'Update Form Responses Manually',
   createNewCard: 'Create New Card',
 } as const;
+
+export const roleWithNoPermission = (roleName: string) => {
+  return {
+    name: roleName,
+    description: `${roleName} role`,
+    selfAssignable: false,
+    mutable: false,
+    permissions: {
+      createNewCircle: false,
+      manageCircleSettings: false,
+      createNewProject: false,
+      manageProjectSettings: false,
+      createNewRetro: false,
+      endRetroManually: false,
+      managePaymentOptions: false,
+      makePayment: false,
+      inviteMembers: false,
+      manageRoles: false,
+      manageMembers: false,
+      distributeCredentials: false,
+      createNewForm: false,
+      manageCardProperties: {
+        Task: false,
+        Bounty: false,
+      },
+      createNewCard: {
+        Task: false,
+        Bounty: false,
+      },
+      manageRewards: {
+        Task: false,
+        Bounty: false,
+      },
+      reviewWork: {
+        Task: false,
+        Bounty: false,
+      },
+      canClaim: {
+        Task: false,
+        Bounty: false,
+      },
+    } as CirclePermission,
+  };
+};

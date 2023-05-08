@@ -59,7 +59,9 @@ export class JoinUsingInvitationCommandHandler
         await this.circlesRepository.updateCircleAndReturnWithPopulatedReferences(
           id,
           {
-            members: [...circle.members, caller.id],
+            members: circle.members?.includes(caller.id)
+              ? circle.members
+              : [...circle.members, caller.id],
             memberRoles: {
               ...circle.memberRoles,
               [caller.id]: invite.roles,
@@ -111,7 +113,9 @@ export class JoinUsingDiscordCommandHandler
         await this.circlesRepository.updateCircleAndReturnWithPopulatedReferences(
           id,
           {
-            members: [...circle.members, caller.id],
+            members: circle.members?.includes(caller.id)
+              ? circle.members
+              : [...circle.members, caller.id],
             memberRoles: {
               ...circle.memberRoles,
               [caller.id]: role,
@@ -161,7 +165,9 @@ export class JoinUsingGuildxyzCommandHandler
         await this.circlesRepository.updateCircleAndReturnWithPopulatedReferences(
           id,
           {
-            members: [...circle.members, caller.id],
+            members: circle.members?.includes(caller.id)
+              ? circle.members
+              : [...circle.members, caller.id],
             memberRoles: {
               ...circle.memberRoles,
               [caller.id]: role,
@@ -207,7 +213,9 @@ export class JoinAsWhitelistedAddressCommandHandler
         await this.circlesRepository.updateCircleAndReturnWithPopulatedReferences(
           id,
           {
-            members: [...circle.members, caller.id],
+            members: circle.members?.includes(caller.id)
+              ? circle.members
+              : [...circle.members, caller.id],
             memberRoles: {
               ...circle.memberRoles,
               [caller.id]: circle.whitelistedMemberAddresses[caller.ethAddress],
@@ -289,7 +297,9 @@ export class JoinWithoutInvitationCommandHandler
         await this.circlesRepository.updateCircleAndReturnWithPopulatedReferences(
           id,
           {
-            members: [...circle.members, caller.id],
+            members: circle.members?.includes(caller.id)
+              ? circle.members
+              : [...circle.members, caller.id],
             memberRoles: {
               ...circle.memberRoles,
               [caller.id]: [

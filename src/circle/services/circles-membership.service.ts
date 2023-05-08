@@ -236,6 +236,7 @@ export class CircleMembershipService {
     id: string,
     member: string,
     updateMemberRolesDto: UpdateMemberRolesDto,
+    skipMutabilityCheck?: boolean,
   ): Promise<CircleResponseDto> {
     try {
       const circle = await this.commandBus.execute(
@@ -244,6 +245,7 @@ export class CircleMembershipService {
           member,
           id,
           this.requestProvider.circle,
+          skipMutabilityCheck,
         ),
       );
       return await this.circlesRepository.getCircleWithMinimalDetails(circle);

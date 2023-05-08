@@ -89,7 +89,8 @@ export class CirclesService {
       const memberRoles = circle.memberRoles && circle.memberRoles[userId];
       if (memberRoles) {
         for (const memberRole of memberRoles) {
-          userPermissions.push(circle.roles[memberRole].permissions);
+          if (!['__removed__', '__left__'].includes(memberRole))
+            userPermissions.push(circle.roles[memberRole].permissions);
         }
       }
     }
@@ -217,10 +218,7 @@ export class CirclesService {
         `Failed updating member roles with error: ${error.message}`,
         this.requestProvider,
       );
-      throw new InternalServerErrorException(
-        'Failed updating member roles',
-        error.message,
-      );
+      throw new InternalServerErrorException(error.message);
     }
   }
 }
