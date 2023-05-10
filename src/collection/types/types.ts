@@ -118,7 +118,9 @@ export type Condition = {
 export type ConditionGroup = {
   id: string;
   operator: 'and' | 'or';
-  conditions: Condition[];
+  conditions: { [id: string]: Condition };
+  conditionGroups?: { [id: string]: ConditionGroup };
+  order: string[];
 };
 
 export type ComparisonCondition = 'greaterThanOrEqualTo' | 'lessThanOrEqualTo';

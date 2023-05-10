@@ -14,6 +14,7 @@ import {
   Permissions,
   Condition,
   Option,
+  ConditionGroup,
 } from '../types/types';
 
 @useMongoosePlugin()
@@ -371,6 +372,7 @@ export interface ProjectMetadata {
       type: 'grid' | 'kanban' | 'gantt' | 'list' | 'form';
       groupByColumn?: string;
       filters?: Condition[];
+      advancedFilters?: ConditionGroup;
       sort?: {
         property: string;
         direction: 'asc' | 'desc';
