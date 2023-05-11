@@ -19,6 +19,7 @@ import {
   UserType,
   Condition,
   CardRelationOptions,
+  ConditionGroup,
 } from '../types/types';
 import { IsValidPaywallOptions } from '../validations/paywall-validation.service';
 import { IsValidRewardOptions } from '../validations/reward-validations.service';
@@ -238,6 +239,13 @@ export class UpdatePropertyDto {
   @IsArray()
   @IsOptional()
   viewConditions?: Condition[];
+
+  /**
+   * Conditions to show this field
+   */
+  @IsObject()
+  @IsOptional()
+  advancedConditions?: ConditionGroup;
 
   @IsBoolean()
   @IsOptional()

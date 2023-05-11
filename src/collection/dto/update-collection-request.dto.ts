@@ -9,7 +9,7 @@ import {
 import { MappedItem } from 'src/common/interfaces';
 import { GuildRole } from 'src/common/types/role.type';
 import { FormMetadata, ProjectMetadata } from '../model/collection.model';
-import { Permissions } from '../types/types';
+import { Permissions, Property } from '../types/types';
 import { Voting } from '../types/types';
 
 export class UpdateCollectionDto {
@@ -67,6 +67,13 @@ export class UpdateCollectionDto {
   @IsArray()
   @IsOptional()
   propertyOrder: string[];
+
+  /**
+   * The updated property order
+   */
+  @IsObject()
+  @IsOptional()
+  properties: MappedItem<Property>;
 
   @IsObject()
   @IsOptional()

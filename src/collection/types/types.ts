@@ -71,6 +71,7 @@ export type Property = {
   payWallOptions?: PayWallOptions;
   description?: string;
   viewConditions?: Condition[];
+  advancedConditions?: ConditionGroup;
   cardRelationOptions?: CardRelationOptions;
   internal?: boolean;
   maxSelections?: number;

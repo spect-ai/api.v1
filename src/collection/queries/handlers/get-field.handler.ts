@@ -1,6 +1,7 @@
 import { HttpException, HttpStatus, NotFoundException } from '@nestjs/common';
 import { IQueryHandler, QueryBus, QueryHandler } from '@nestjs/cqrs';
-import { HasSatisfiedDataConditionsQuery } from 'src/automation/queries/impl';
+import { HasSatisfiedAdvancedDataConditionsQuery } from 'src/automation/queries/impl';
+import { CirclesPrivateRepository } from 'src/circle/circles-private.repository';
 import { GetCircleByIdQuery } from 'src/circle/queries/impl';
 import { CollectionRepository } from 'src/collection/collection.repository';
 import { Collection } from 'src/collection/model/collection.model';
@@ -12,19 +13,15 @@ import { GuildxyzService } from 'src/common/guildxyz.service';
 import { GitcoinPassportService } from 'src/credentials/services/gitcoin-passport.service';
 import { MintKudosService } from 'src/credentials/services/mintkudos.service';
 import { PoapService } from 'src/credentials/services/poap.service';
+import { ZealyService } from 'src/credentials/services/zealy.service';
 import { LoggingService } from 'src/logging/logging.service';
 import { LookupRepository } from 'src/lookup/lookup.repository';
 import { TokenDetails } from 'src/registry/model/registry.model';
 import { RegistryService } from 'src/registry/registry.service';
 import { GetUserByFilterQuery } from 'src/users/queries/impl';
-import {
-  GetCollectionByFilterQuery,
-  GetCollectionBySlugQuery,
-} from '../impl/get-collection.query';
-import { GetNextFieldQuery } from '../impl/get-field.query';
 import { v4 as uuidv4 } from 'uuid';
-import { ZealyService } from 'src/credentials/services/zealy.service';
-import { CirclesPrivateRepository } from 'src/circle/circles-private.repository';
+import { GetCollectionBySlugQuery } from '../impl/get-collection.query';
+import { GetNextFieldQuery } from '../impl/get-field.query';
 
 @QueryHandler(GetNextFieldQuery)
 export class GetNextFieldQueryHandler
@@ -275,13 +272,12 @@ export class GetNextFieldQueryHandler
             continue;
           } else {
             let satisfied = true;
-            if (property.viewConditions) {
-              const viewConditions = property.viewConditions;
+            if (property.advancedConditions) {
               satisfied = await this.queryBus.execute(
-                new HasSatisfiedDataConditionsQuery(
+                new HasSatisfiedAdvancedDataConditionsQuery(
                   collection,
                   draftSubmittedByUser,
-                  viewConditions,
+                  property.advancedConditions,
                 ),
               );
             }

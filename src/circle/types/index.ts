@@ -1,4 +1,4 @@
-import { Option } from 'src/collection/types/types';
+import { ConditionGroup, Option } from 'src/collection/types/types';
 import { Chain } from 'src/common/models/chain.model';
 import { Token } from 'src/common/models/token.model';
 import { TokenInfo } from 'src/registry/model/registry.model';
@@ -93,6 +93,7 @@ export type Automation = {
   trigger: Trigger;
   actions: Action[];
   conditions?: Condition[];
+  advancedConditions?: ConditionGroup;
   triggerCategory: 'collection' | 'root';
   triggerCollectionSlug?: string;
   disabled?: boolean;
