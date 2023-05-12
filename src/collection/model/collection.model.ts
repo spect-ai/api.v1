@@ -342,6 +342,26 @@ export interface FormMetadata {
   zealyXpPerField?: MappedItem<number>;
   responseDataForZealy?: MappedItem<any>;
   zealyClaimedBy?: string[];
+
+  pageVisitMetricsForUniqueUser?: {
+    [pageId: string]: number;
+  };
+
+  pageVisitMetricsForAllUser?: {
+    [pageId: string]: number;
+  };
+
+  pageVisitMetricsByUser?: {
+    [userIp: string]: string[];
+  };
+
+  totalTimeSpentMetricsOnPage?: {
+    [pageId: string]: number;
+  };
+
+  totalTimeSpentMetricsOnPageForCompletedResponses?: {
+    [pageId: string]: number;
+  };
 }
 
 export interface PaymentConfig {

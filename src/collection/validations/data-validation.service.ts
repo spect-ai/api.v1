@@ -212,7 +212,6 @@ export class DataValidationService {
         }
       } else if (['discord'].includes(properties[propertyId].type)) {
         if (data) {
-          console.log({ data });
           if (typeof data === 'string') {
             if (!data.match(/#\d{4}$/))
               throw "Discord data type doesn't match, must end with # and 4 digits";
