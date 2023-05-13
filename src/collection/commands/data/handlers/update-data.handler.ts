@@ -41,6 +41,8 @@ export class UpdateDataCommandHandler
     const { data, caller, collectionId, dataSlug, view } = command;
     try {
       const collection = await this.collectionRepository.findById(collectionId);
+      if (!collection) throw 'Collection does not exist';
+
       // remove all properties from the upadte which are same as the existing data
       for (const [key, value] of Object.entries(data)) {
         if (
@@ -55,7 +57,6 @@ export class UpdateDataCommandHandler
         return;
       }
 
-      if (!collection) throw 'Collection does not exist';
       if (collection.collectionType === 0) {
         if (collection.formMetadata.active === false)
           throw 'Collection is inactive';

@@ -244,9 +244,9 @@ export class HasSatisfiedAdvancedDataConditionsQueryHandler
 {
   constructor(private readonly queryBus: QueryBus) {}
 
-  async execute(
+  hasSatisfiedAdvancedDataConditions(
     query: HasSatisfiedAdvancedDataConditionsQuery,
-  ): Promise<boolean> {
+  ) {
     const { collection, data, rootConditionGroup } = query;
     const { id, operator, conditions, conditionGroups, order } =
       rootConditionGroup;
@@ -258,11 +258,9 @@ export class HasSatisfiedAdvancedDataConditionsQueryHandler
           const { field, comparator, value } = condition.data;
           const propertyId = field?.value;
           const comparatorValue = comparator?.value;
-          console.log({ properties });
           const property = properties[propertyId];
           if (!property) return true;
           if (!data) return false;
-          console.log({ data, property, propertyId, value, comparatorValue });
           const res = satisfiesCondition(
             data,
             property,
@@ -270,26 +268,15 @@ export class HasSatisfiedAdvancedDataConditionsQueryHandler
             value,
             comparatorValue,
           );
-          console.log({ res });
           return res;
         } else {
           const conditionGroup = conditionGroups?.[oid];
           if (conditionGroup) {
-            this.queryBus
-              .execute(
-                new HasSatisfiedAdvancedDataConditionsQuery(
-                  collection,
-                  data,
-                  conditionGroup,
-                ),
-              )
-              .then((res) => {
-                return res;
-              })
-              .catch((err) => {
-                console.log(err);
-                return false;
-              });
+            return this.hasSatisfiedAdvancedDataConditions({
+              collection,
+              data,
+              rootConditionGroup: conditionGroup,
+            });
           } else {
             return false;
           }
@@ -315,21 +302,11 @@ export class HasSatisfiedAdvancedDataConditionsQueryHandler
         } else {
           const conditionGroup = conditionGroups?.[oid];
           if (conditionGroup) {
-            return this.queryBus
-              .execute(
-                new HasSatisfiedAdvancedDataConditionsQuery(
-                  collection,
-                  data,
-                  conditionGroup,
-                ),
-              )
-              .then((res) => {
-                return res;
-              })
-              .catch((err) => {
-                console.log(err);
-                return false;
-              });
+            return this.hasSatisfiedAdvancedDataConditions({
+              collection,
+              data,
+              rootConditionGroup: conditionGroup,
+            });
           } else {
             return false;
           }
@@ -337,5 +314,11 @@ export class HasSatisfiedAdvancedDataConditionsQueryHandler
       });
     }
     return true;
+  }
+
+  async execute(
+    query: HasSatisfiedAdvancedDataConditionsQuery,
+  ): Promise<boolean> {
+    return this.hasSatisfiedAdvancedDataConditions(query);
   }
 }
