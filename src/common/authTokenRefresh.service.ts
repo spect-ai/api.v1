@@ -61,4 +61,13 @@ export class AuthTokenRefreshService {
   handleCron() {
     this.updateToken();
   }
+
+  @Cron(CronExpression.EVERY_5_MINUTES)
+  fetchForm() {
+    fetch(
+      'https://circles.spect.network/r/3c3cab39-4ecf-4230-83cb-157954d5283d',
+    ).then((res) => {
+      console.log({ fetched: res.status });
+    });
+  }
 }
