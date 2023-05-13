@@ -143,7 +143,7 @@ async function getTokens(alchemy: Alchemy, ethAddress: string) {
     return Number(token.tokenBalance) !== 0;
   });
   const tokenBalances = [];
-  for await (let token of nonZeroBalances) {
+  for await (const token of nonZeroBalances) {
     let balance = Number(token.tokenBalance);
     const metadata = await alchemy.core.getTokenMetadata(token.contractAddress);
 
@@ -397,11 +397,19 @@ async function getNFTBalanceHelper(
   contractAddress: string,
   tokenId: string,
 ) {
-  const owners = await alchemy.nft.getOwnersForNft(contractAddress, tokenId);
-  const balance = owners.owners.filter(
-    (owner) => owner === ownerAddress,
-  ).length;
-  return balance;
+  if (!tokenId) {
+    const owners = await alchemy.nft.getNftsForOwner(ownerAddress, {
+      contractAddresses: [contractAddress],
+    });
+    const balance = owners.ownedNfts.length;
+    return balance;
+  } else {
+    const owners = await alchemy.nft.getOwnersForNft(contractAddress, tokenId);
+    const balance = owners.owners.filter(
+      (owner) => owner === ownerAddress,
+    ).length;
+    return balance;
+  }
 }
 
 @CommandHandler(CheckUserTokensCommand)
@@ -435,7 +443,7 @@ export class CheckUserTokensCommandHandler
           token.chainId.toString(),
           user.ethAddress,
           token.contractAddress,
-          token.tokenId.toString(),
+          token.tokenId?.toString(),
           token.tokenType,
         );
         userBalances.push({
@@ -500,10 +508,11 @@ export class GetTokenMetadataCommandHandler
           if (tokenType === 'erc20') {
             return await alchemy.core.getTokenMetadata(tokenAddress);
           } else if (tokenType === 'nft') {
-            return await alchemy.nft.getNftMetadata(
-              tokenAddress,
-              tokenId || '0',
-            );
+            if (!tokenId) {
+              return await alchemy.nft.getContractMetadata(tokenAddress);
+            } else {
+              return await alchemy.nft.getNftMetadata(tokenAddress, tokenId);
+            }
           }
         case '137':
           console.log('MATIC');
@@ -515,7 +524,11 @@ export class GetTokenMetadataCommandHandler
           if (tokenType === 'erc20') {
             return await alchemyMatic.core.getTokenMetadata(tokenAddress);
           } else if (tokenType === 'nft') {
-            return await alchemyMatic.nft.getNftMetadata(tokenAddress, tokenId);
+            if (!tokenId) {
+              return await alchemy.nft.getContractMetadata(tokenAddress);
+            } else {
+              return await alchemy.nft.getNftMetadata(tokenAddress, tokenId);
+            }
           }
         case '80001':
           console.log('MUMBAI');
@@ -527,10 +540,11 @@ export class GetTokenMetadataCommandHandler
           if (tokenType === 'erc20') {
             return await alchemyMumbai.core.getTokenMetadata(tokenAddress);
           } else if (tokenType === 'nft') {
-            return await alchemyMumbai.nft.getNftMetadata(
-              tokenAddress,
-              tokenId,
-            );
+            if (!tokenId) {
+              return await alchemy.nft.getContractMetadata(tokenAddress);
+            } else {
+              return await alchemy.nft.getNftMetadata(tokenAddress, tokenId);
+            }
           }
         case '10':
           console.log('OPTIMISM');
@@ -542,10 +556,11 @@ export class GetTokenMetadataCommandHandler
           if (tokenType === 'erc20') {
             return await alchemyOptimism.core.getTokenMetadata(tokenAddress);
           } else if (tokenType === 'nft') {
-            return await alchemyOptimism.nft.getNftMetadata(
-              tokenAddress,
-              tokenId,
-            );
+            if (!tokenId) {
+              return await alchemy.nft.getContractMetadata(tokenAddress);
+            } else {
+              return await alchemy.nft.getNftMetadata(tokenAddress, tokenId);
+            }
           }
         case '42161':
           console.log('ARBITRUM');
@@ -557,10 +572,11 @@ export class GetTokenMetadataCommandHandler
           if (tokenType === 'erc20') {
             return await alchemyArbitrum.core.getTokenMetadata(tokenAddress);
           } else if (tokenType === 'nft') {
-            return await alchemyArbitrum.nft.getNftMetadata(
-              tokenAddress,
-              tokenId,
-            );
+            if (!tokenId) {
+              return await alchemy.nft.getContractMetadata(tokenAddress);
+            } else {
+              return await alchemy.nft.getNftMetadata(tokenAddress, tokenId);
+            }
           }
 
         default:
