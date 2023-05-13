@@ -3,7 +3,6 @@ import {
   Controller,
   Delete,
   Get,
-  InternalServerErrorException,
   NotFoundException,
   Param,
   Patch,
@@ -18,6 +17,7 @@ import {
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiTags } from '@nestjs/swagger';
+import { BotAuthGuard } from 'src/auth/bot.guard';
 import {
   CollectionAuthGuard,
   CreateNewCollectionAuthGuard,
@@ -42,7 +42,7 @@ import {
 } from 'src/common/dtos/string.dto';
 import { MappedItem } from 'src/common/interfaces';
 import { CreatePOAPDto } from 'src/credentials/dto/create-credential.dto';
-import { KudosResponseDto } from 'src/credentials/dto/mint-kudos.dto';
+import { v4 as uuidv4 } from 'uuid';
 import {
   AddCommentCommand,
   AddPropertyCommand,
@@ -56,9 +56,12 @@ import {
   RemovePropertyCommand,
   UpdateCollectionCommand,
   UpdateCommentCommand,
+  UpdatePageVisitMetricsCommand,
   UpdatePropertyCommand,
+  UpdateTimeSpentMetricsCommand,
 } from './commands';
 import { AddDataCommand } from './commands/data/impl/add-data.command';
+import { DeleteDraftCommand } from './commands/data/impl/delete-draft.command';
 import {
   RemoveDataCommand,
   RemoveMultipleDataCommand,
@@ -97,9 +100,8 @@ import {
 } from './dto/grant-workflow-template.dto';
 import {
   LinkDiscordDto,
-  LinkDiscordToCollectionDto,
   LinkDiscordThreadToDataDto,
-  NextFieldRequestDto,
+  LinkDiscordToCollectionDto,
 } from './dto/link-discord.dto';
 import { RemoveDataDto } from './dto/remove.data-request.dto';
 import { SocialsDto } from './dto/socials.dto';
@@ -115,6 +117,10 @@ import {
   VoteDataDto,
 } from './dto/update-data-request.dto';
 import {
+  UpdatePageVisitMetricsDto,
+  UpdateTimeSpentMetricsDto,
+} from './dto/update-metrics.dto';
+import {
   AddPropertyDto,
   UpdatePropertyDto,
 } from './dto/update-property-request.dto';
@@ -123,13 +129,19 @@ import {
   StartVotingPeriodRequestDto,
 } from './dto/voting.dto';
 import { Collection } from './model/collection.model';
-import { GetFormAnalyticsBySlugQuery, GetNextFieldQuery } from './queries';
+import {
+  GetFormAnalyticsBySlugQuery,
+  GetNextFieldQuery,
+  GetResponseMetricsQuery,
+} from './queries';
 import {
   GetCollectionByFilterQuery,
   GetCollectionByIdQuery,
+  GetMultipleCollectionsQuery,
   GetPrivateViewCollectionQuery,
   GetPublicViewCollectionQuery,
 } from './queries/impl/get-collection.query';
+import { AdvancedAccessService } from './services/advanced-access.service';
 import { GetCollectionService } from './services/get-collection.service';
 import { LinkDiscordService } from './services/link-discord.service';
 import {
@@ -137,10 +149,7 @@ import {
   ResponseCredentialingService,
 } from './services/response-credentialing.service';
 import { WhitelistService } from './services/whitelist.service';
-import { Property } from './types/types';
-import { BotAuthGuard } from 'src/auth/bot.guard';
-import { DeleteDraftCommand } from './commands/data/impl/delete-draft.command';
-import { AdvancedAccessService } from './services/advanced-access.service';
+import { ConditionGroup, Property } from './types/types';
 
 @Controller('collection/v1')
 @ApiTags('collection.v1')
@@ -1000,5 +1009,40 @@ export class CollectionController {
       param.id,
       code,
     );
+  }
+
+  @UseGuards(PublicViewAuthGuard)
+  @Patch('/:id/updateMetrics')
+  async updateMetrics(
+    @Param() param: ObjectIdDto,
+    @Body() body: UpdatePageVisitMetricsDto,
+    @Request() req,
+  ): Promise<void> {
+    return await this.commandBus.execute(
+      new UpdatePageVisitMetricsCommand(param.id, body, req.ip),
+    );
+  }
+
+  @UseGuards(PublicViewAuthGuard)
+  @Patch('/:id/updateTimeSpentMetrics')
+  async updateTimeSpentMetrics(
+    @Param() param: ObjectIdDto,
+    @Body() body: UpdateTimeSpentMetricsDto,
+    @Request() req,
+  ): Promise<void> {
+    console.log({ param, body });
+    return await this.commandBus.execute(
+      new UpdateTimeSpentMetricsCommand(param.id, body),
+    );
+  }
+
+  @SetMetadata('permissions', ['manageSettings'])
+  @UseGuards(CollectionAuthGuard)
+  @Get('/:id/responseMetrics')
+  async responseMetrics(
+    @Param() param: ObjectIdDto,
+    @Request() req,
+  ): Promise<void> {
+    return await this.queryBus.execute(new GetResponseMetricsQuery(param.id));
   }
 }

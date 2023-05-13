@@ -61,22 +61,7 @@ export class GetResponseMetricsQueryHandler
       const collection = await this.collectionRepository.findById(query.id);
       // only send form metadata
       const { formMetadata } = collection;
-      let averageTimeSpent = 0;
-      if (formMetadata.totalTimeSpentMetricsOnPage) {
-        let totalTimeSpent = 0;
-        for (const [key, value] of Object.entries(
-          formMetadata.totalTimeSpentMetricsOnPage || {},
-        )) {
-          totalTimeSpent += value;
-        }
-        averageTimeSpent =
-          totalTimeSpent /
-          Object.keys(formMetadata.totalTimeSpentMetricsOnPage).length;
-      }
-
-      const totalViews = formMetadata.pageVisitMetricsForAllUser['start'];
-      const totalSubmitted = Object.keys(collection.data || {})?.length || 0;
-      const completionRate = (totalSubmitted / totalViews) * 100;
+      const averageTimeSpent = 0;
 
       let pageId;
       for (const p of collection.formMetadata.pageOrder) {
@@ -85,17 +70,25 @@ export class GetResponseMetricsQueryHandler
         break;
       }
       const totalStarted =
-        collection.formMetadata.pageVisitMetricsForAllUser[pageId] || 0;
+        collection.formMetadata.pageVisitMetricsForAllUser?.[pageId] || 0;
+      const totalViews =
+        formMetadata.pageVisitMetricsForAllUser?.['start'] || 0;
+      const totalSubmitted = Object.keys(collection.data || {})?.length || 0;
+      const completionRate = (totalSubmitted / totalStarted) * 100;
 
-      let averageTimeSpentOnPage = {};
-      if (formMetadata.totalTimeSpentMetricsOnPage) {
-        for (const [key, value] of Object.entries(
-          formMetadata.totalTimeSpentMetricsOnPage || {},
-        )) {
-          averageTimeSpentOnPage = {
-            ...averageTimeSpentOnPage,
-            [key]: value / totalSubmitted,
-          };
+      console.log({ a: formMetadata.totalTimeSpentMetricsOnPage });
+
+      const dropOffRate = formMetadata.pageOrder.reduce((acc, pageId) => {
+        acc[pageId] = 0;
+        return acc;
+      }, {});
+      console.log({ f: formMetadata.pageVisitMetricsByUser });
+      for (const [userIp, pageIds] of Object.entries(
+        formMetadata.pageVisitMetricsByUser,
+      )) {
+        const lastPage = pageIds[pageIds.length - 1];
+        if (lastPage !== 'submitted') {
+          dropOffRate[lastPage] = dropOffRate[lastPage] + 1;
         }
       }
 
@@ -105,9 +98,8 @@ export class GetResponseMetricsQueryHandler
         totalStarted,
         totalSubmitted,
         completionRate,
-        totalTimeSpentMetricsOnPage: formMetadata.totalTimeSpentMetricsOnPage,
         pageVisitMetricsForAllUser: formMetadata.pageVisitMetricsForAllUser,
-        averageTimeSpentOnPage,
+        dropOffRate,
       };
     } catch (error) {
       this.logger.error(
