@@ -250,6 +250,8 @@ export class HasSatisfiedAdvancedDataConditionsQueryHandler
     const { collection, data, rootConditionGroup } = query;
     const { id, operator, conditions, conditionGroups, order } =
       rootConditionGroup;
+    if (!order || order.length === 0) return true;
+
     const properties = collection.properties;
     if (operator === 'and') {
       return order.every((oid: string) => {
