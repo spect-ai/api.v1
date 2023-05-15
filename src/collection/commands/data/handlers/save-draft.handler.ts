@@ -387,7 +387,7 @@ export class SaveAndPostSocialsCommandHandler
           ...(collection.formMetadata.drafts || {}),
           [discordId]: {
             ...(collection.formMetadata.drafts?.[discordId] || {}),
-            [nextField.name]: nextFieldVal,
+            [nextField.id]: nextFieldVal,
           },
         };
         updatedCollection = await this.collectionRepository.updateById(

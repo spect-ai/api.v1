@@ -265,7 +265,7 @@ export class GetNextFieldQueryHandler
           )
             continue;
           if (
-            draftSubmittedByUser[propertyId] &&
+            draftSubmittedByUser.hasOwnProperty(propertyId) &&
             this.rewardFieldCompleted(
               propertyId,
               draftSubmittedByUser,
@@ -345,6 +345,7 @@ export class GetNextFieldQueryHandler
       };
     }
 
+    console.log({ addr: user?.ethAddress });
     if (
       collection.formMetadata.zealyXP &&
       !collection.formMetadata?.drafts?.[discordId]?.['zealyClaimed'] &&
@@ -469,9 +470,12 @@ export class GetNextFieldQueryHandler
   ) {
     let zealyUser;
     console.log({ callerAddress, p: collection.parents[0] });
+    let circleId = collection.parents[0];
+    if ((collection.parents[0] as any).id)
+      circleId = (collection.parents[0] as any).id;
     try {
       zealyUser = await this.zealyService.getUser(
-        (collection.parents[0] as any).id,
+        circleId,
         null,
         callerAddress,
       );
@@ -481,10 +485,7 @@ export class GetNextFieldQueryHandler
 
     try {
       if (!zealyUser && callerDiscordId) {
-        zealyUser = await this.zealyService.getUser(
-          collection.parents[0],
-          callerDiscordId,
-        );
+        zealyUser = await this.zealyService.getUser(circleId, callerDiscordId);
       }
     } catch (e) {
       console.log(e);
@@ -494,7 +495,7 @@ export class GetNextFieldQueryHandler
 
     if (!zealyUser) {
       const privateCredentials = await this.circlePrivateRepository.findOne({
-        circleId: (collection.parents[0] as any).id,
+        circleId: circleId,
       });
       const zealySubdomain = privateCredentials?.zealySubdomain;
       return {
@@ -737,6 +738,7 @@ export class GetNextFieldQueryHandler
             returnedField.options = res.returnedOptions;
           }
         }
+        console.log({ returnedField });
         return returnedField;
       }
       return null;
