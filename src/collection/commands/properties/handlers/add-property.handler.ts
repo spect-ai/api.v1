@@ -136,6 +136,16 @@ export class AddPropertyCommandHandler
         delete addPropertyCommandDto.allowCustom;
         delete addPropertyCommandDto.maxSelections;
         break;
+      case 'number':
+        delete addPropertyCommandDto.options;
+        delete addPropertyCommandDto.payWallOptions;
+        delete addPropertyCommandDto.rewardOptions;
+        delete addPropertyCommandDto.milestoneFields;
+        delete addPropertyCommandDto.onUpdateNotifyUserTypes;
+        delete addPropertyCommandDto.allowCustom;
+        delete addPropertyCommandDto.maxSelections;
+        delete addPropertyCommandDto.sliderOptions;
+        break;
       default:
         break;
     }

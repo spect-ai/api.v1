@@ -305,6 +305,7 @@ export class UpdatePropertyCommandHandler
             return dataObj;
         }
       case 'number':
+      case 'slider':
         if (
           newProperty.type === 'shortText' ||
           newProperty.type === 'longText'
@@ -377,6 +378,16 @@ export class UpdatePropertyCommandHandler
         delete updatePropertyCommandDto.onUpdateNotifyUserTypes;
         delete updatePropertyCommandDto.allowCustom;
         delete updatePropertyCommandDto.maxSelections;
+        break;
+      case 'number':
+        delete updatePropertyCommandDto.options;
+        delete updatePropertyCommandDto.payWallOptions;
+        delete updatePropertyCommandDto.rewardOptions;
+        delete updatePropertyCommandDto.milestoneFields;
+        delete updatePropertyCommandDto.onUpdateNotifyUserTypes;
+        delete updatePropertyCommandDto.allowCustom;
+        delete updatePropertyCommandDto.maxSelections;
+        delete updatePropertyCommandDto.sliderOptions;
         break;
       default:
         break;
