@@ -19,6 +19,7 @@ import {
   UserType,
   Condition,
   CardRelationOptions,
+  SliderOptions,
 } from '../types/types';
 import { IsValidPaywallOptions } from '../validations/paywall-validation.service';
 import { IsValidRewardOptions } from '../validations/reward-validations.service';
@@ -50,6 +51,7 @@ export class AddPropertyDto {
     'date',
     'singleSelect',
     'multiSelect',
+    'slider',
     'ethAddress',
     'milestone',
     'singleURL',
@@ -140,6 +142,10 @@ export class AddPropertyDto {
   @IsBoolean()
   @IsOptional()
   immutable: boolean;
+
+  @IsObject()
+  @IsOptional()
+  sliderOptions: SliderOptions;
 }
 
 export class UpdatePropertyDto {
@@ -163,6 +169,7 @@ export class UpdatePropertyDto {
     'date',
     'singleSelect',
     'multiSelect',
+    'slider',
     'ethAddress',
     'milestone',
     'singleURL',
@@ -250,4 +257,8 @@ export class UpdatePropertyDto {
   @IsBoolean()
   @IsOptional()
   immutable: boolean;
+
+  @IsObject()
+  @IsOptional()
+  sliderOptions: SliderOptions;
 }

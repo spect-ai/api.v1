@@ -5,6 +5,7 @@ import { Collection } from 'src/collection/model/collection.model';
 import { GetPrivateViewCollectionQuery } from 'src/collection/queries';
 import { LoggingService } from 'src/logging/logging.service';
 import { AddPropertyCommand } from '../impl/add-property.command';
+import { AddPropertyDto } from 'src/collection/dto/update-property-request.dto';
 
 @CommandHandler(AddPropertyCommand)
 export class AddPropertyCommandHandler
@@ -22,9 +23,9 @@ export class AddPropertyCommandHandler
     try {
       console.log('AddPropertyCommandHandler');
       const { addPropertyCommandDto, collectionId, pageId } = command;
+      this.removeUnwantedKeys(addPropertyCommandDto);
       const collection = await this.collectionRepository.findById(collectionId);
       if (addPropertyCommandDto.type === 'cardRelation') {
-        console.log({ addPropertyCommandDto });
         const parentRelationpProperty =
           addPropertyCommandDto.cardRelationOptions.parentRelation;
         const childRelationProperty =
@@ -120,6 +121,23 @@ export class AddPropertyCommandHandler
         `Failed adding property to collection with error: ${error}`,
         error.message,
       );
+    }
+  }
+
+  removeUnwantedKeys(addPropertyCommandDto: AddPropertyDto) {
+    switch (addPropertyCommandDto.type) {
+      case 'slider':
+        delete addPropertyCommandDto.options;
+        delete addPropertyCommandDto.cardRelationOptions;
+        delete addPropertyCommandDto.payWallOptions;
+        delete addPropertyCommandDto.rewardOptions;
+        delete addPropertyCommandDto.milestoneFields;
+        delete addPropertyCommandDto.onUpdateNotifyUserTypes;
+        delete addPropertyCommandDto.allowCustom;
+        delete addPropertyCommandDto.maxSelections;
+        break;
+      default:
+        break;
     }
   }
 }

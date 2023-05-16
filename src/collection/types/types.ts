@@ -76,6 +76,7 @@ export type Property = {
   maxSelections?: number;
   allowCustom?: boolean;
   milestoneFields?: string[];
+  sliderOptions?: SliderOptions;
 };
 
 export type PropertyType =
@@ -88,6 +89,7 @@ export type PropertyType =
   | 'date'
   | 'singleSelect'
   | 'multiSelect'
+  | 'slider'
   | 'ethAddress'
   | 'email'
   | 'milestone'
@@ -198,4 +200,10 @@ export type SurveyTokenDistributionInfo = {
 export type SurveyTokenConditionInfo = {
   timestamp: number;
   minTotalSupply: number;
+};
+
+export type SliderOptions = {
+  min: number;
+  max: number;
+  step: number;
 };

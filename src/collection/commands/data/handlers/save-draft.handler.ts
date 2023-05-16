@@ -143,6 +143,8 @@ export class SaveDraftCommandHandler
               }
             });
             formFieldUpdates[key] = options;
+          } else if (property.type === 'slider') {
+            formFieldUpdates[key] = parseInt(val.optionId || '0');
           } else formFieldUpdates[key] = val;
         }
       }
