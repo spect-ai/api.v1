@@ -9,6 +9,7 @@ import { Property } from 'src/collection/types/types';
 import { GetPrivateViewCollectionQuery } from 'src/collection/queries';
 import { ActivityBuilder } from 'src/collection/services/activity.service';
 import { v4 as uuidV4 } from 'uuid';
+import { UpdatePropertyDto } from 'src/collection/dto/update-property-request.dto';
 
 @CommandHandler(UpdatePropertyCommand)
 export class UpdatePropertyCommandHandler
@@ -35,6 +36,8 @@ export class UpdatePropertyCommandHandler
 
       if (updatePropertyCommandDto.name === 'slug')
         throw 'Cannot add property with name slug';
+
+      this.removeUnwantedKeys(updatePropertyCommandDto);
 
       if (collection.collectionType === 0) {
         // dont allow property to be immutable after some data has been added
@@ -362,5 +365,21 @@ export class UpdatePropertyCommandHandler
       delete data[property.id];
     }
     return dataObj;
+  }
+
+  removeUnwantedKeys(updatePropertyCommandDto: UpdatePropertyDto) {
+    switch (updatePropertyCommandDto.type) {
+      case 'slider':
+        delete updatePropertyCommandDto.options;
+        delete updatePropertyCommandDto.payWallOptions;
+        delete updatePropertyCommandDto.rewardOptions;
+        delete updatePropertyCommandDto.milestoneFields;
+        delete updatePropertyCommandDto.onUpdateNotifyUserTypes;
+        delete updatePropertyCommandDto.allowCustom;
+        delete updatePropertyCommandDto.maxSelections;
+        break;
+      default:
+        break;
+    }
   }
 }

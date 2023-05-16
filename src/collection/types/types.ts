@@ -206,4 +206,6 @@ export type SliderOptions = {
   min: number;
   max: number;
   step: number;
+  minLabel: string;
+  maxLabel: string;
 };
