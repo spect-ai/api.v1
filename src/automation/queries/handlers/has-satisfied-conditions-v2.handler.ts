@@ -96,7 +96,6 @@ function satisfiesCondition(
           );
         case 'includes one of':
           // eslint-disable-next-line no-case-declarations
-          console.log({ values });
           return (
             value &&
             value?.some((v: { value: any }) => values?.includes(v.value))
