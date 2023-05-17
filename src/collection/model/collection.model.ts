@@ -14,6 +14,7 @@ import {
   Permissions,
   Condition,
   Option,
+  ConditionGroup,
 } from '../types/types';
 
 @useMongoosePlugin()
@@ -341,6 +342,26 @@ export interface FormMetadata {
   zealyXpPerField?: MappedItem<number>;
   responseDataForZealy?: MappedItem<any>;
   zealyClaimedBy?: string[];
+
+  pageVisitMetricsForUniqueUser?: {
+    [pageId: string]: number;
+  };
+
+  pageVisitMetricsForAllUser?: {
+    [pageId: string]: number;
+  };
+
+  pageVisitMetricsByUser?: {
+    [userIp: string]: string[];
+  };
+
+  totalTimeSpentMetricsOnPage?: {
+    [pageId: string]: number;
+  };
+
+  totalTimeSpentMetricsOnPageForCompletedResponses?: {
+    [pageId: string]: number;
+  };
 }
 
 export interface PaymentConfig {
@@ -371,6 +392,7 @@ export interface ProjectMetadata {
       type: 'grid' | 'kanban' | 'gantt' | 'list' | 'form';
       groupByColumn?: string;
       filters?: Condition[];
+      advancedFilters?: ConditionGroup;
       sort?: {
         property: string;
         direction: 'asc' | 'desc';

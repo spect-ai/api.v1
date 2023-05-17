@@ -7,6 +7,7 @@ import {
   IsString,
 } from 'class-validator';
 import { Action, Condition, Trigger } from '../types';
+import { ConditionGroup } from 'src/collection/types/types';
 
 export class CreateAutomationDto {
   /**
@@ -57,6 +58,13 @@ export class CreateAutomationDto {
   @IsArray()
   @IsOptional()
   conditions: Condition[];
+
+  /**
+   * Conditons of the automation
+   **/
+  @IsObject()
+  @IsOptional()
+  advancedConditions: ConditionGroup;
 }
 
 export class UpdateAutomationDto {
@@ -94,6 +102,13 @@ export class UpdateAutomationDto {
   @IsArray()
   @IsOptional()
   conditions: Condition[];
+
+  /**
+   * Conditons of the automation
+   **/
+  @IsObject()
+  @IsOptional()
+  advancedConditions: ConditionGroup;
 
   /**
    * Automation is disabled
