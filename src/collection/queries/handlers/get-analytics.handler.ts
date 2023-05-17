@@ -62,7 +62,6 @@ export class GetResponseMetricsQueryHandler
       // only send form metadata
       const { formMetadata } = collection;
       const averageTimeSpent = 0;
-
       let pageId;
       for (const p of collection.formMetadata.pageOrder) {
         if (['start', 'connect', 'connectDiscord'].includes(p)) continue;
@@ -70,7 +69,7 @@ export class GetResponseMetricsQueryHandler
         break;
       }
       const totalStarted =
-        collection.formMetadata.pageVisitMetricsForAllUser?.[pageId] || 0;
+        formMetadata.pageVisitMetricsForAllUser?.[pageId] || 0;
       const totalViews =
         formMetadata.pageVisitMetricsForAllUser?.['start'] || 0;
       const totalSubmitted = Object.keys(collection.data || {})?.length || 0;
@@ -78,19 +77,32 @@ export class GetResponseMetricsQueryHandler
 
       console.log({ a: formMetadata.totalTimeSpentMetricsOnPage });
 
-      const dropOffRate = formMetadata.pageOrder.reduce((acc, pageId) => {
-        acc[pageId] = 0;
-        return acc;
-      }, {});
-      console.log({ f: formMetadata.pageVisitMetricsByUser });
-      for (const [userIp, pageIds] of Object.entries(
-        formMetadata.pageVisitMetricsByUser,
-      )) {
-        const lastPage = pageIds[pageIds.length - 1];
-        if (lastPage !== 'submitted') {
-          dropOffRate[lastPage] = dropOffRate[lastPage] + 1;
-        }
-      }
+      const dropOffRate = formMetadata.pageOrder.reduce(
+        (acc, pageId, index) => {
+          const metrics = formMetadata.pageVisitMetricsForAllUser;
+
+          if (index === formMetadata.pageOrder.length - 1) acc[pageId] = 0;
+          else if (
+            !formMetadata.pageVisitMetricsForAllUser?.[pageId] ||
+            !formMetadata.pageVisitMetricsForAllUser?.[
+              formMetadata.pageOrder[index + 1]
+            ]
+          )
+            acc[pageId] = 0;
+          else if (formMetadata.pageOrder[index + 1] === 'submitted') {
+            acc[pageId] =
+              ((metrics?.[pageId] - totalSubmitted) / metrics?.[pageId]) * 100;
+          } else {
+            const nextPageId = formMetadata.pageOrder[index + 1];
+            acc[pageId] =
+              ((metrics?.[pageId] - metrics?.[nextPageId]) /
+                metrics?.[pageId]) *
+              100;
+          }
+          return acc;
+        },
+        {},
+      );
 
       return {
         averageTimeSpent,
