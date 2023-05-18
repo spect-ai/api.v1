@@ -74,35 +74,33 @@ export class GetResponseMetricsQueryHandler
         formMetadata.pageVisitMetricsForAllUser?.['start'] || 0;
       const totalSubmitted = Object.keys(collection.data || {})?.length || 0;
       const completionRate = (totalSubmitted / totalStarted) * 100;
-
-      console.log({ a: formMetadata.totalTimeSpentMetricsOnPage });
-
-      const dropOffRate = formMetadata.pageOrder.reduce(
-        (acc, pageId, index) => {
-          const metrics = formMetadata.pageVisitMetricsForAllUser;
-
-          if (index === formMetadata.pageOrder.length - 1) acc[pageId] = 0;
-          else if (
-            !formMetadata.pageVisitMetricsForAllUser?.[pageId] ||
-            !formMetadata.pageVisitMetricsForAllUser?.[
-              formMetadata.pageOrder[index + 1]
-            ]
-          )
-            acc[pageId] = 0;
-          else if (formMetadata.pageOrder[index + 1] === 'submitted') {
-            acc[pageId] =
-              ((metrics?.[pageId] - totalSubmitted) / metrics?.[pageId]) * 100;
-          } else {
-            const nextPageId = formMetadata.pageOrder[index + 1];
-            acc[pageId] =
-              ((metrics?.[pageId] - metrics?.[nextPageId]) /
-                metrics?.[pageId]) *
-              100;
-          }
-          return acc;
-        },
-        {},
+      const metricPages = formMetadata.pageOrder.filter(
+        (pageId) => !['connect', 'connectDiscord', 'collect'].includes(pageId),
       );
+      delete formMetadata.pageVisitMetricsForAllUser['connect'];
+      delete formMetadata.pageVisitMetricsForAllUser['connectDiscord'];
+      delete formMetadata.pageVisitMetricsForAllUser['collect'];
+
+      const dropOffRate = metricPages.reduce((acc, pageId, index) => {
+        const metrics = formMetadata.pageVisitMetricsForAllUser;
+
+        if (index === metricPages.length - 1) acc[pageId] = 0;
+        else if (
+          !formMetadata.pageVisitMetricsForAllUser?.[pageId] ||
+          !formMetadata.pageVisitMetricsForAllUser?.[metricPages[index + 1]]
+        )
+          acc[pageId] = 0;
+        else if (metricPages[index + 1] === 'submitted') {
+          acc[pageId] =
+            ((metrics?.[pageId] - totalSubmitted) / metrics?.[pageId]) * 100;
+        } else {
+          const nextPageId = metricPages[index + 1];
+          acc[pageId] =
+            ((metrics?.[pageId] - metrics?.[nextPageId]) / metrics?.[pageId]) *
+            100;
+        }
+        return acc;
+      }, {});
 
       return {
         averageTimeSpent,
