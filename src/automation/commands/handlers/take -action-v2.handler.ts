@@ -64,15 +64,20 @@ export class CommonActionService {
       throw new Error('No collection found for the given slug');
     }
 
-    const userId = collection.dataOwner[relevantIds.dataSlug];
-    const user = await this.queryBus.execute(
-      new GetProfileQuery(
-        {
-          _id: userId,
-        },
-        userId,
-      ),
-    );
+    let user;
+    try {
+      const userId = collection.dataOwner[relevantIds.dataSlug];
+      user = await this.queryBus.execute(
+        new GetProfileQuery(
+          {
+            _id: userId,
+          },
+          userId,
+        ),
+      );
+    } catch (err) {
+      console.log({ err });
+    }
 
     let discordUserId;
     const discordField = Object.values(collection.properties).find(
@@ -80,9 +85,9 @@ export class CommonActionService {
     );
     if (discordField) {
       discordUserId =
-        collection.data[relevantIds.dataSlug][discordField.name]?.['id'];
+        collection.data[relevantIds.dataSlug][discordField.id]?.['id'];
     }
-
+    console.log({ discordUserId });
     return {
       circle,
       collection,
@@ -115,7 +120,7 @@ export class SendEmailActionCommandHandler
       }
       if (!action.data.message) return;
 
-      const { circle, collection, user } =
+      const { circle, collection } =
         await this.commonActionService.getCircleCollectionUsersFromRelevantIds(
           circleId,
           relevantIds,
@@ -128,6 +133,7 @@ export class SendEmailActionCommandHandler
           collection.data[relevantIds.dataSlug][emailProperty],
         ];
       }
+      console.log({ emails });
       for (const email of emails) {
         if (!email) continue;
         console.log('Sending email to ', email);
@@ -148,6 +154,7 @@ export class SendEmailActionCommandHandler
           };
           const res = await this.emailService.send(mail);
         } catch (err) {
+          console.log({ err });
           this.logger.error(err);
         }
       }
@@ -189,6 +196,8 @@ export class GiveRoleActionCommandHandler
           circleId,
           relevantIds,
         );
+
+      if (!user) throw 'User not found in give role automation';
 
       let newMemberRoles = [];
       if (circle.memberRoles[user._id.toString()]) {
@@ -268,6 +277,7 @@ export class GiveDiscordRoleActionCommandHandler
         const discordField = Object.values(collection.properties).find(
           (property) => property.type === 'discord',
         );
+        console.log({ discordField12: discordField });
         if (discordField) {
           const val = collection.data[relevantIds.dataSlug][discordField.id];
           let discordUsername, discordDiscriminator;
@@ -279,6 +289,7 @@ export class GiveDiscordRoleActionCommandHandler
             discordUsername = val.username;
             discordDiscriminator = val.discriminator;
           }
+          console.log({ discordUsername, discordDiscriminator });
           if (discordUsername && discordDiscriminator) {
             await this.discordService.giveRolesToUser(
               circle.discordGuildId,
@@ -639,6 +650,7 @@ export class CreateDiscordThreadCommandHandler
               .map((u) => u.discordId);
         }
       }
+      console.log({ discordIdsToAdd });
       if (action.data.addResponder) {
         if (discordUserId) {
           discordIdsToAdd.push(discordUserId);
@@ -742,7 +754,7 @@ export class PostOnDiscordThreadCommandHandler
       }
       if (!action.data.message) throw 'Message is required';
 
-      const { circle, collection, user } =
+      const { circle, collection } =
         await this.commonActionService.getCircleCollectionUsersFromRelevantIds(
           circleId,
           relevantIds,
