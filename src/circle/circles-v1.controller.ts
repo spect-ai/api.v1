@@ -122,62 +122,6 @@ export class CircleV1Controller {
     private readonly circleCollectionService: CirclesCollectionService,
   ) {}
 
-  @Patch('/migrateAutomation')
-  async migrateAutomation(): Promise<boolean> {
-    const circles = await this.circleRepository.findAll();
-    console.log({ totalCircles: circles.length });
-    const output = {
-      totalCircles: circles.length,
-      successfullyMigrated: [],
-      failedCircleUpdate: [],
-      skippedMigration: [],
-    };
-    for (const circle of circles) {
-      const automations = circle.automations;
-      let update = false;
-      for (const [automationId, automation] of Object.entries(
-        automations || {},
-      )) {
-        if (
-          automation?.conditions &&
-          typeof automation.conditions === 'object' &&
-          Object.keys(automation.conditions)?.length
-        ) {
-          update = true;
-          const advancedFilters = {
-            operator: 'and',
-            conditions: {},
-            order: [],
-          } as ConditionGroup;
-          const conditions = automation.conditions;
-          for (const [conditionId, condition] of Object.entries(conditions)) {
-            const id = uuidv4();
-            advancedFilters.conditions[id] = condition;
-            advancedFilters.order.push(id);
-          }
-          automation.advancedConditions = advancedFilters;
-        }
-      }
-      if (update) {
-        try {
-          await this.circleRepository.updateById(circle.id, {
-            automations: automations,
-          });
-          output.successfullyMigrated.push(circle.id);
-          console.log(`updated circle ${circle.id}`);
-        } catch (error) {
-          console.log(`failed to update circle ${circle.id}`);
-          output.failedCircleUpdate.push(circle.id);
-        }
-      } else {
-        output.skippedMigration.push(circle.id);
-      }
-    }
-    console.log('done');
-    console.log(JSON.stringify(output));
-    return true;
-  }
-
   @UseGuards(PublicViewAuthGuard)
   @Get('/allPublicParents')
   async findAllParentCircles(): Promise<BucketizedCircleResponseDto> {
@@ -186,51 +130,6 @@ export class CircleV1Controller {
     } catch (error) {
       console.log(error);
       return {};
-    }
-  }
-
-  @UseGuards(AdminAuthGuard)
-  @Patch('/migrateRoles')
-  async migrateRoles() {
-    const circles = await this.circleRepository.findAll();
-    for (const circle of circles) {
-      console.log({ circle: circle.id });
-      const roles = circle.roles;
-      for (const [roleId, role] of Object.entries(roles)) {
-        for (const [permissionId, permission] of Object.entries(
-          role.permissions,
-        )) {
-          if (
-            [
-              'createNewCircle',
-              'manageCircleSettings',
-              'managePaymentOptions',
-              'makePayment',
-              'inviteMembers',
-              'manageRoles',
-              'manageMembers',
-              'distributeCredentials',
-              'createNewForm',
-            ].includes(permissionId)
-          ) {
-            continue;
-          } else {
-            delete role.permissions[permissionId];
-          }
-        }
-        // if (!role.permissions['createNewForm']) {
-        //   permissions['createNewForm'] = permissions['createNewProject'];
-        // }
-        // if (!role.permissions['distributeCredentials']) {
-        //   permissions['distributeCredentials'] = permissions['makePayment'];
-        // }
-        // console.log({ permissions: role.permissions });
-        roles[roleId] = role;
-      }
-
-      await this.circleRepository.updateById(circle.id, {
-        roles,
-      });
     }
   }
 
@@ -765,42 +664,4 @@ export class CircleV1Controller {
       updateCircleRequestDto,
     );
   }
-
-  // @UseGuards(AdminAuthGuard)
-  // @Patch('/:id/migrateRoles')
-  // async migrateRoles() {
-  //   const circles = await this.circleRepository.findAll();
-  //   for (const circle of circles) {
-  //     const roles = circle.roles;
-  //     for (const [roleId, role] of Object.entries(roles)) {
-  //       const permissions = {};
-  //       for (const [permissionId, permission] of Object.entries(
-  //         role.permissions,
-  //       )) {
-  //         if (
-  //           permissionId === 'manageFormSettings' ||
-  //           permissionId === 'updateFormResponsesManually'
-  //         ) {
-  //           continue;
-  //         }
-  //         permissions[permissionId] = permission;
-  //       }
-  //       if (!role.permissions['createNewForm']) {
-  //         permissions['createNewForm'] = permissions['createNewProject'];
-  //       }
-  //       if (!role.permissions['distributeCredentials']) {
-  //         permissions['distributeCredentials'] = permissions['makePayment'];
-  //       }
-
-  //       roles[roleId] = {
-  //         ...role,
-  //         permissions,
-  //       };
-  //     }
-
-  //     await this.circleRepository.updateById(circle.id, {
-  //       roles,
-  //     });
-  //   }
-  // }
 }
