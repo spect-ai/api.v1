@@ -1,14 +1,14 @@
 import { Injectable } from '@nestjs/common';
+import { QueryBus } from '@nestjs/cqrs';
+import { ethers } from 'ethers';
+import mongoose from 'mongoose';
+import { HasSatisfiedAdvancedDataConditionsQuery } from 'src/automation/queries/impl';
 import { MappedItem } from 'src/common/interfaces';
+import { isValidDateString } from 'src/common/validators/isDateString.validator';
 import { LoggingService } from 'src/logging/logging.service';
 import { CollectionRepository } from '../collection.repository';
 import { Collection } from '../model/collection.model';
 import { Property } from '../types/types';
-import { ethers } from 'ethers';
-import mongoose from 'mongoose';
-import { QueryBus } from '@nestjs/cqrs';
-import { HasSatisfiedDataConditionsQuery } from 'src/automation/queries/impl';
-import { isValidDateString } from 'src/common/validators/isDateString.validator';
 
 @Injectable()
 export class DataValidationService {
@@ -212,7 +212,6 @@ export class DataValidationService {
         }
       } else if (['discord'].includes(properties[propertyId].type)) {
         if (data) {
-          console.log({ data });
           if (typeof data === 'string') {
             if (!data.match(/#\d{4}$/))
               throw "Discord data type doesn't match, must end with # and 4 digits";
@@ -237,15 +236,14 @@ export class DataValidationService {
     )) {
       if (property.type === 'readonly' || !property.isPartOfFormView) continue;
       let satisfiedConditions = true;
-      if (property.viewConditions?.length) {
+      if (property.advancedConditions?.order?.length)
         satisfiedConditions = await this.queryBus.execute(
-          new HasSatisfiedDataConditionsQuery(
+          new HasSatisfiedAdvancedDataConditionsQuery(
             collection,
             dataObj || {},
-            property.viewConditions,
+            property.advancedConditions,
           ),
         );
-      }
       if (property.required && satisfiedConditions) {
         if (
           operation === 'update' &&
@@ -268,12 +266,12 @@ export class DataValidationService {
   ): Promise<boolean> {
     for (const [propertyId, property] of Object.entries(dataObj)) {
       let satisfiedConditions = true;
-      if (property.viewConditions)
+      if (property.advancedConditions?.order)
         satisfiedConditions = await this.queryBus.execute(
-          new HasSatisfiedDataConditionsQuery(
+          new HasSatisfiedAdvancedDataConditionsQuery(
             collection,
             dataObj || {},
-            property.viewConditions,
+            property.advancedConditions,
           ),
         );
       if (property.required && satisfiedConditions) {

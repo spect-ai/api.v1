@@ -5,23 +5,22 @@ import {
   ICommandHandler,
   QueryBus,
 } from '@nestjs/cqrs';
+import { HasSatisfiedAdvancedDataConditionsQuery } from 'src/automation/queries/impl';
 import { CollectionRepository } from 'src/collection/collection.repository';
-import { LoggingService } from 'src/logging/logging.service';
-import {
-  UpdateDataCommand,
-  UpdateDataUsingAutomationCommand,
-} from '../impl/update-data.command';
-import { DataValidationService } from 'src/collection/validations/data-validation.service';
 import { DataUpatedEvent } from 'src/collection/events';
-import { ActivityBuilder } from 'src/collection/services/activity.service';
+import { Collection } from 'src/collection/model/collection.model';
 import {
   GetPrivateViewCollectionQuery,
   GetPublicViewCollectionQuery,
 } from 'src/collection/queries';
-import { Collection } from 'src/collection/model/collection.model';
-import { HasSatisfiedDataConditionsQuery } from 'src/automation/queries/impl';
+import { ActivityBuilder } from 'src/collection/services/activity.service';
+import { DataValidationService } from 'src/collection/validations/data-validation.service';
+import { LoggingService } from 'src/logging/logging.service';
 import { GetProfileQuery } from 'src/users/queries/impl';
-import { v4 as uuidv4 } from 'uuid';
+import {
+  UpdateDataCommand,
+  UpdateDataUsingAutomationCommand,
+} from '../impl/update-data.command';
 
 @CommandHandler(UpdateDataCommand)
 export class UpdateDataCommandHandler
@@ -42,6 +41,8 @@ export class UpdateDataCommandHandler
     const { data, caller, collectionId, dataSlug, view } = command;
     try {
       const collection = await this.collectionRepository.findById(collectionId);
+      if (!collection) throw 'Collection does not exist';
+
       // remove all properties from the upadte which are same as the existing data
       for (const [key, value] of Object.entries(data)) {
         if (
@@ -56,7 +57,6 @@ export class UpdateDataCommandHandler
         return;
       }
 
-      if (!collection) throw 'Collection does not exist';
       if (collection.collectionType === 0) {
         if (collection.formMetadata.active === false)
           throw 'Collection is inactive';
@@ -168,13 +168,14 @@ export class UpdateDataCommandHandler
     for (const [propertyId, property] of Object.entries(
       collection.properties,
     )) {
-      console.log({ property });
-      if (property.viewConditions) {
-        const condition = property.viewConditions;
+      if (property.advancedConditions?.order) {
         const satisfied = await this.queryBus.execute(
-          new HasSatisfiedDataConditionsQuery(collection, data, condition),
+          new HasSatisfiedAdvancedDataConditionsQuery(
+            collection,
+            data,
+            property.advancedConditions,
+          ),
         );
-        console.log({ propertyId, satisfied });
         if (satisfied) filteredData[propertyId] = data[propertyId];
       } else {
         filteredData[propertyId] = data[propertyId];

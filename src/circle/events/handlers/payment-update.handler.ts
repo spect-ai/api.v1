@@ -29,7 +29,7 @@ export class PaymentUpdateEventHandler
           await this.commandBus.execute(
             new PerformAutomationOnPaymentCancelledCommand(
               collection,
-              {},
+              collection.data?.[dataSlug] || {},
               dataSlug,
               caller,
               circle,
@@ -39,7 +39,7 @@ export class PaymentUpdateEventHandler
           await this.commandBus.execute(
             new PerformAutomationOnPaymentCompleteCommand(
               collection,
-              {},
+              collection.data?.[dataSlug] || {},
               dataSlug,
               caller,
               circle,

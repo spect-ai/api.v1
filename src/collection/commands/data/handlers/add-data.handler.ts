@@ -6,28 +6,28 @@ import {
   ICommandHandler,
   QueryBus,
 } from '@nestjs/cqrs';
+import { HasSatisfiedAdvancedDataConditionsQuery } from 'src/automation/queries/impl';
 import { CollectionRepository } from 'src/collection/collection.repository';
+import { DataAddedEvent } from 'src/collection/events';
+import { Collection } from 'src/collection/model/collection.model';
+import {
+  GetPrivateViewCollectionQuery,
+  GetPublicViewCollectionQuery,
+} from 'src/collection/queries';
+import { AdvancedAccessService } from 'src/collection/services/advanced-access.service';
+import { ResponseCredentialService } from 'src/collection/services/response-credentialing.service';
+import { Activity } from 'src/collection/types/types';
+import { DataValidationService } from 'src/collection/validations/data-validation.service';
+import { MappedItem } from 'src/common/interfaces';
 import { LoggingService } from 'src/logging/logging.service';
+import { CheckUserTokensCommand } from 'src/users/commands/impl';
+import { GetProfileQuery } from 'src/users/queries/impl';
+import { v4 as uuidv4 } from 'uuid';
 import {
   AddDataCommand,
   AddDataUsingAutomationCommand,
   AddMultipleDataUsingAutomationCommand,
 } from '../impl/add-data.command';
-import { v4 as uuidv4 } from 'uuid';
-import { DataValidationService } from 'src/collection/validations/data-validation.service';
-import { DataAddedEvent } from 'src/collection/events';
-import { Collection } from 'src/collection/model/collection.model';
-import { MappedItem } from 'src/common/interfaces';
-import { Activity } from 'src/collection/types/types';
-import { AdvancedAccessService } from 'src/collection/services/advanced-access.service';
-import {
-  GetPrivateViewCollectionQuery,
-  GetPublicViewCollectionQuery,
-} from 'src/collection/queries';
-import { GetProfileQuery } from 'src/users/queries/impl';
-import { HasSatisfiedDataConditionsQuery } from 'src/automation/queries/impl';
-import { ResponseCredentialService } from 'src/collection/services/response-credentialing.service';
-import { CheckUserTokensCommand } from 'src/users/commands/impl';
 
 @Injectable()
 export class ActivityOnAddData {
@@ -335,10 +335,13 @@ export class AddDataCommandHandler implements ICommandHandler<AddDataCommand> {
     for (const [propertyId, property] of Object.entries(
       collection.properties,
     )) {
-      if (property.viewConditions) {
-        const condition = property.viewConditions;
+      if (property.advancedConditions?.order) {
         const satisfied = await this.queryBus.execute(
-          new HasSatisfiedDataConditionsQuery(collection, data, condition),
+          new HasSatisfiedAdvancedDataConditionsQuery(
+            collection,
+            data,
+            property.advancedConditions,
+          ),
         );
         if (satisfied) filteredData[propertyId] = data[propertyId];
       } else {

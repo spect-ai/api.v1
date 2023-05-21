@@ -71,6 +71,7 @@ export type Property = {
   payWallOptions?: PayWallOptions;
   description?: string;
   viewConditions?: Condition[];
+  advancedConditions?: ConditionGroup;
   cardRelationOptions?: CardRelationOptions;
   internal?: boolean;
   maxSelections?: number;
@@ -120,7 +121,9 @@ export type Condition = {
 export type ConditionGroup = {
   id: string;
   operator: 'and' | 'or';
-  conditions: Condition[];
+  conditions: { [id: string]: Condition };
+  conditionGroups?: { [id: string]: ConditionGroup };
+  order: string[];
 };
 
 export type ComparisonCondition = 'greaterThanOrEqualTo' | 'lessThanOrEqualTo';

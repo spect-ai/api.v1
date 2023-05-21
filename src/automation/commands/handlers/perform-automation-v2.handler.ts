@@ -7,7 +7,7 @@ import {
 } from '@nestjs/cqrs';
 import {
   GetTriggeredCollectionAutomationsQuery,
-  HasSatisfiedDataConditionsQuery,
+  HasSatisfiedAdvancedDataConditionsQuery,
 } from 'src/automation/queries/impl';
 import { AutomationUpdatesContainer } from 'src/automation/types/types';
 import { LoggingService } from 'src/logging/logging.service';
@@ -60,7 +60,27 @@ export class PerformAutomationOnCollectionDataUpdateCommandHandler
         ),
       );
 
+      const triggeredAutomationsSatisfiedConditions = [];
       for (const automationId of triggeredAutomations) {
+        const { advancedConditions } = circle.automations[automationId];
+        if (!advancedConditions || !advancedConditions?.order) {
+          triggeredAutomationsSatisfiedConditions.push(automationId);
+          continue;
+        }
+        const hasSatisfied = await this.queryBus.execute(
+          new HasSatisfiedAdvancedDataConditionsQuery(
+            collection,
+            collection.data[dataSlug],
+            advancedConditions,
+          ),
+        );
+        if (!hasSatisfied) continue;
+        triggeredAutomationsSatisfiedConditions.push(automationId);
+      }
+
+      console.log({ triggeredAutomationsSatisfiedConditions });
+
+      for (const automationId of triggeredAutomationsSatisfiedConditions) {
         const { actions } = circle.automations[automationId];
         for (const action of actions) {
           const actionCommand = actionIdToCommandMapNew[action.type];
@@ -119,17 +139,26 @@ export class PerformAutomationOnCollectionDataAddCommandHandler
             !circle.automations[automationId].disabled,
         ) || [];
 
+      console.log({ triggeredAutomations });
       const triggeredAutomationsSatisfiedConditions = [];
       for (const automationId of triggeredAutomations) {
-        const { conditions } = circle.automations[automationId];
-        if (!conditions) continue;
+        const { advancedConditions } = circle.automations[automationId];
+        if (!advancedConditions || !advancedConditions?.order) {
+          triggeredAutomationsSatisfiedConditions.push(automationId);
+          continue;
+        }
         const hasSatisfied = await this.queryBus.execute(
-          new HasSatisfiedDataConditionsQuery(collection, data, conditions),
+          new HasSatisfiedAdvancedDataConditionsQuery(
+            collection,
+            data,
+            advancedConditions,
+          ),
         );
         if (!hasSatisfied) continue;
         triggeredAutomationsSatisfiedConditions.push(automationId);
       }
 
+      console.log({ triggeredAutomationsSatisfiedConditions });
       for (const automationId of triggeredAutomationsSatisfiedConditions) {
         const { actions } = circle.automations[automationId];
         for (const action of actions) {
@@ -191,10 +220,15 @@ export class PerformAutomationOnPaymentCompleteCommandHandler
 
       const triggeredAutomationsSatisfiedConditions = [];
       for (const automationId of triggeredAutomations) {
-        const { conditions } = circle.automations[automationId];
-        if (!conditions) continue;
+        const { advancedConditions } = circle.automations[automationId];
+        if (!advancedConditions || !advancedConditions.order) continue;
+        console.log({ advancedConditions });
         const hasSatisfied = await this.queryBus.execute(
-          new HasSatisfiedDataConditionsQuery(collection, data, conditions),
+          new HasSatisfiedAdvancedDataConditionsQuery(
+            collection,
+            data,
+            advancedConditions,
+          ),
         );
         if (!hasSatisfied) continue;
         triggeredAutomationsSatisfiedConditions.push(automationId);
@@ -261,10 +295,14 @@ export class PerformAutomationOnPaymentCancelledCommandHandler
 
       const triggeredAutomationsSatisfiedConditions = [];
       for (const automationId of triggeredAutomations) {
-        const { conditions } = circle.automations[automationId];
-        if (!conditions) continue;
+        const { advancedConditions } = circle.automations[automationId];
+        if (!advancedConditions || !advancedConditions.order) continue;
         const hasSatisfied = await this.queryBus.execute(
-          new HasSatisfiedDataConditionsQuery(collection, data, conditions),
+          new HasSatisfiedAdvancedDataConditionsQuery(
+            collection,
+            data,
+            advancedConditions,
+          ),
         );
         if (!hasSatisfied) continue;
         triggeredAutomationsSatisfiedConditions.push(automationId);
@@ -274,19 +312,7 @@ export class PerformAutomationOnPaymentCancelledCommandHandler
         const { actions } = circle.automations[automationId];
         for (const action of actions) {
           const actionCommand = actionIdToCommandMapNew[action.type];
-          mixpanel.init(process.env.MIXPANEL_TOKEN || '', {
-            debug: true,
-            api_host: 'https://tracking.spect.network',
-          });
-          process.env.NODE_ENV === 'production' &&
-            mixpanel.track('Automation Triggered', {
-              automationId,
-              actionId: action.id,
-              actionType: action.type,
-              collectionSlug: collection.slug,
-              dataSlug,
-              circle: circle.slug,
-            });
+
           await this.commandBus.execute(
             new actionCommand(action, caller, dataContainer, updateContainer, {
               collectionSlug: collection.slug,

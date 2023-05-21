@@ -367,7 +367,6 @@ export class GetPrivateViewCollectionQueryHandler
           }
         }
       }
-      console.log({ filteredResponsesNonAnon });
       if (collectionToGet.dataOwner) {
         const profiles = [];
         for (const [dataSlug, owner] of Object.entries(

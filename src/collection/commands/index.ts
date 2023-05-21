@@ -16,6 +16,7 @@ export * from './comments/impl/remove-comment.command';
 export * from './impl/migrate-collection.command';
 export * from './data/impl/save-draft.command';
 export * from './data/impl/delete-draft.command';
+export * from './metrics/impl/update-metrics.command';
 
 import { AddCommentCommandHandler } from './comments/handlers/add-comment.handler';
 import { RemoveCommentCommandHandler } from './comments/handlers/remove-comment.handler';
@@ -62,6 +63,10 @@ import {
 } from './data/handlers/save-draft.handler';
 import { GetChangelogCommandHandler } from './handlers/get-changelog.handler';
 import { DeleteDraftCommandHandler } from './data/handlers/delete-draft.handler';
+import {
+  UpdatePageVisitMetricsCommandHandler,
+  UpdateTimeSpentMetricsCommandHandler,
+} from './metrics/handlers/update-metrics.handler';
 
 export const CommandHandlers = [
   CreateCollectionCommandHandler,
@@ -96,4 +101,6 @@ export const CommandHandlers = [
   SaveAndPostPaymentCommandHandler,
   GetChangelogCommandHandler,
   DeleteDraftCommandHandler,
+  UpdatePageVisitMetricsCommandHandler,
+  UpdateTimeSpentMetricsCommandHandler,
 ];

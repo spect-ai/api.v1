@@ -105,6 +105,8 @@ import {
   UpdateMultiplePaymentsDto,
   UpdatePaymentRequestDto,
 } from './dto/payment.dto';
+import { ConditionGroup } from 'src/collection/types/types';
+import { v4 as uuidv4 } from 'uuid';
 
 @Controller('circle/v1')
 @ApiTags('circle.v1')
@@ -119,6 +121,36 @@ export class CircleV1Controller {
     private readonly circleRepository: CirclesRepository,
     private readonly circleCollectionService: CirclesCollectionService,
   ) {}
+
+  @Patch('/migrateAutomation')
+  async migrateAutomation(): Promise<boolean> {
+    const circles = await this.circleRepository.findAll();
+    for (const circle of circles) {
+      const automations = circle.automations;
+      for (const [automationId, automation] of Object.entries(
+        automations || {},
+      )) {
+        if (automation?.conditions) {
+          const advancedFilters = {
+            operator: 'and',
+            conditions: {},
+            order: [],
+          } as ConditionGroup;
+          const conditions = automation.conditions;
+          for (const [conditionId, condition] of Object.entries(conditions)) {
+            const id = uuidv4();
+            advancedFilters.conditions[id] = condition;
+            advancedFilters.order.push(id);
+          }
+          automation.advancedConditions = advancedFilters;
+        }
+      }
+      await this.circleRepository.updateById(circle.id, {
+        automations: automations,
+      });
+    }
+    return true;
+  }
 
   @UseGuards(PublicViewAuthGuard)
   @Get('/allPublicParents')
