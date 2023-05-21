@@ -125,12 +125,25 @@ export class CircleV1Controller {
   @Patch('/migrateAutomation')
   async migrateAutomation(): Promise<boolean> {
     const circles = await this.circleRepository.findAll();
+    console.log({ totalCircles: circles.length });
+    const output = {
+      totalCircles: circles.length,
+      successfullyMigrated: [],
+      failedCircleUpdate: [],
+      skippedMigration: [],
+    };
     for (const circle of circles) {
       const automations = circle.automations;
+      let update = false;
       for (const [automationId, automation] of Object.entries(
         automations || {},
       )) {
-        if (automation?.conditions) {
+        if (
+          automation?.conditions &&
+          typeof automation.conditions === 'object' &&
+          Object.keys(automation.conditions)?.length
+        ) {
+          update = true;
           const advancedFilters = {
             operator: 'and',
             conditions: {},
@@ -145,10 +158,23 @@ export class CircleV1Controller {
           automation.advancedConditions = advancedFilters;
         }
       }
-      await this.circleRepository.updateById(circle.id, {
-        automations: automations,
-      });
+      if (update) {
+        try {
+          await this.circleRepository.updateById(circle.id, {
+            automations: automations,
+          });
+          output.successfullyMigrated.push(circle.id);
+          console.log(`updated circle ${circle.id}`);
+        } catch (error) {
+          console.log(`failed to update circle ${circle.id}`);
+          output.failedCircleUpdate.push(circle.id);
+        }
+      } else {
+        output.skippedMigration.push(circle.id);
+      }
     }
+    console.log('done');
+    console.log(JSON.stringify(output));
     return true;
   }
 

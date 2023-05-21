@@ -174,17 +174,25 @@ export class CollectionController {
     )) as Collection[];
 
     if (!collections) throw new NotFoundException('Collections not found');
-    console.log({ c: collections.length });
+    console.log({ numForms: collections.length });
+    const output = {
+      totalForms: collections.length,
+      successfullyMigrated: [],
+      failedFormUpdate: [],
+      skippiedMigration: [],
+    };
     for (const collection of collections) {
       if (
         !collection.properties ||
         !Object.keys(collection.properties || {})?.length
       )
         continue;
+      let update = false;
       for (const [propertyId, property] of Object.entries(
         collection.properties,
       )) {
-        if (property.viewConditions) {
+        if (property.viewConditions && property.viewConditions.length) {
+          update = true;
           const advancedFilters = {
             operator: 'and',
             conditions: {},
@@ -199,22 +207,29 @@ export class CollectionController {
         }
       }
 
-      console.log({ id: collection._id?.toString() });
-
-      try {
-        await this.commandBus.execute(
-          new UpdateCollectionCommand(
-            {
-              properties: collection.properties,
-            },
-            'caller',
-            collection._id?.toString(),
-          ),
-        );
-      } catch (e) {
-        console.log({ e });
+      if (update) {
+        try {
+          await this.commandBus.execute(
+            new UpdateCollectionCommand(
+              {
+                properties: collection.properties,
+              },
+              'caller',
+              collection._id?.toString(),
+            ),
+          );
+          output['successfullyMigrated'].push(collection._id?.toString());
+          console.log(`Successfully migrated ${collection._id?.toString()}`);
+        } catch (e) {
+          console.log({ e });
+          output['failedFormUpdate'].push(collection._id?.toString());
+        }
+      } else {
+        output['skippiedMigration'].push(collection._id?.toString());
       }
     }
+    console.log('done');
+    console.log(JSON.stringify(output));
     return true;
   }
 
@@ -223,20 +238,27 @@ export class CollectionController {
   async migrateProjectConditions(): Promise<boolean> {
     const collections = (await this.queryBus.execute(
       new GetMultipleCollectionsQuery({
-        'projectMetadata.views': { $exists: true },
+        collectionType: 1,
       }),
     )) as Collection[];
-    console.log({ l: collections.length });
+    console.log({ numProjs: collections.length });
+    const output = {
+      totalProjs: collections.length,
+      successfullyMigrated: [],
+      failedProjectUpdate: [],
+      skippiedMigration: [],
+    };
     if (!collections) throw new NotFoundException('Collections not found');
     for (const collection of collections) {
       if (!collection.projectMetadata || !collection.projectMetadata.views)
         continue;
       const updatedProjectMetadata = collection.projectMetadata;
-
+      let update = false;
       for (const [viewId, view] of Object.entries(
         collection.projectMetadata.views || {},
       )) {
-        if (view.filters) {
+        if (view.filters && view.filters.length) {
+          update = true;
           const advancedFilters = {
             operator: 'and',
             conditions: {},
@@ -251,17 +273,30 @@ export class CollectionController {
           updatedProjectMetadata.views[viewId] = view;
         }
       }
-      console.log({ updatedProjectMetadata });
-      await this.commandBus.execute(
-        new UpdateCollectionCommand(
-          {
-            projectMetadata: updatedProjectMetadata,
-          },
-          'caller',
-          collection._id?.toString(),
-        ),
-      );
+      if (update) {
+        console.log({ id: collection._id?.toString(), name: collection.name });
+        try {
+          await this.commandBus.execute(
+            new UpdateCollectionCommand(
+              {
+                projectMetadata: updatedProjectMetadata,
+              },
+              'caller',
+              collection._id?.toString(),
+            ),
+          );
+          output['successfullyMigrated'].push(collection._id?.toString());
+        } catch (err) {
+          output['failedProjectUpdate'].push(collection._id?.toString());
+          console.log({ err });
+        }
+      } else {
+        output['skippiedMigration'].push(collection._id?.toString());
+      }
     }
+    console.log('done');
+    console.log(JSON.stringify(output));
+
     return true;
   }
 
