@@ -101,7 +101,6 @@ import {
 import {
   LinkDiscordDto,
   LinkDiscordThreadToDataDto,
-  LinkDiscordToCollectionDto,
 } from './dto/link-discord.dto';
 import { RemoveDataDto } from './dto/remove.data-request.dto';
 import { SocialsDto } from './dto/socials.dto';
@@ -756,21 +755,6 @@ export class CollectionController {
   async getEmbedCharts(@Param() param: RequiredSlugDto): Promise<Collection> {
     return await this.queryBus.execute(
       new GetFormAnalyticsBySlugQuery(param.slug),
-    );
-  }
-
-  @SetMetadata('permissions', ['manageSettings'])
-  @UseGuards(CollectionAuthGuard)
-  @Patch('/:id/linkDiscordThreadToCollection')
-  async linkDiscordThreadToCollection(
-    @Param() param: ObjectIdDto,
-    @Body() body: LinkDiscordToCollectionDto,
-    @Request() req,
-  ): Promise<Collection> {
-    return await this.linkDiscordService.linkThreadToCollection(
-      param.id,
-      body,
-      req.user,
     );
   }
 
