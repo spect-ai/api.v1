@@ -67,6 +67,12 @@ export class Collection extends BaseModel {
   permissions: Permissions;
 
   /**
+   * Editor version
+   **/
+  @prop()
+  editorVersion: number;
+
+  /**
    * Parent Ids of the collection
    */
   @prop({ ref: () => Circle, type: Schema.Types.String, default: [] })
