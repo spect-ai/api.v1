@@ -64,15 +64,20 @@ export class CommonActionService {
       throw new Error('No collection found for the given slug');
     }
 
-    const userId = collection.dataOwner[relevantIds.dataSlug];
-    const user = await this.queryBus.execute(
-      new GetProfileQuery(
-        {
-          _id: userId,
-        },
-        userId,
-      ),
-    );
+    let user;
+    try {
+      const userId = collection.dataOwner[relevantIds.dataSlug];
+      user = await this.queryBus.execute(
+        new GetProfileQuery(
+          {
+            _id: userId,
+          },
+          userId,
+        ),
+      );
+    } catch (err) {
+      console.log({ err });
+    }
 
     let discordUserId;
     const discordField = Object.values(collection.properties).find(
@@ -80,8 +85,9 @@ export class CommonActionService {
     );
     if (discordField) {
       discordUserId =
-        collection.data[relevantIds.dataSlug][discordField.name]?.['id'];
+        collection.data[relevantIds.dataSlug][discordField.id]?.['id'];
     }
+    console.log({ discordUserId });
 
     return {
       circle,
@@ -189,7 +195,7 @@ export class GiveRoleActionCommandHandler
           circleId,
           relevantIds,
         );
-
+      if (!user) throw `No user found foound in GiveRoleActionCommand`;
       let newMemberRoles = [];
       if (circle.memberRoles[user._id.toString()]) {
         newMemberRoles = [
