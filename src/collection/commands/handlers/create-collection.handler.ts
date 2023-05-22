@@ -36,47 +36,6 @@ export class CreateCollectionCommandHandler
     try {
       const { createCollectionDto, caller } = command;
 
-      const formPropertyOrder = [uuidv4(), uuidv4(), uuidv4()];
-
-      const formProperties = {
-        [formPropertyOrder[0]]: {
-          id: formPropertyOrder[0],
-          name: 'What is your name?',
-          type: 'shortText',
-          default: '',
-          isPartOfFormView: true,
-          immutable: true,
-        },
-        [formPropertyOrder[1]]: {
-          id: formPropertyOrder[1],
-          name: 'Why do you want to join our team?',
-          type: 'longText',
-          default: '',
-          isPartOfFormView: true,
-        },
-        [formPropertyOrder[2]]: {
-          id: formPropertyOrder[2],
-          name: 'Status',
-          type: 'singleSelect',
-          default: {},
-          options: [
-            {
-              label: 'To Do',
-              value: uuidv4(),
-            },
-            {
-              label: 'In Progress',
-              value: uuidv4(),
-            },
-            {
-              label: 'Done',
-              value: uuidv4(),
-            },
-          ],
-          isPartOfFormView: false,
-        },
-      } as MappedItem<Property>;
-
       const projectPropertyOrder = ['Title', 'Description', uuidv4()];
 
       const projectProperties = {
@@ -154,6 +113,7 @@ export class CreateCollectionCommandHandler
           parents: [createCollectionDto.circleId],
           slug: uuidv4(),
           permissions: defaultPermissions,
+          editorVersion: 2,
           formMetadata: {
             active: true,
             logo: parentCircle.avatar,
@@ -214,6 +174,7 @@ export class CreateCollectionCommandHandler
           parents: [createCollectionDto.circleId],
           slug: uuidv4(),
           permissions: defaultPermissions,
+          editorVersion: 2,
           projectMetadata: {
             viewOrder: [defaultViewId],
             views: {
