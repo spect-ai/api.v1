@@ -80,55 +80,6 @@ export class LinkDiscordService {
     }
   }
 
-  async linkThreadToCollection(
-    collectionId: string,
-    linkDiscordDto: LinkDiscordToCollectionDto,
-    caller: User,
-  ) {
-    const { threadName, selectedChannel } = linkDiscordDto;
-    try {
-      const collection = await this.queryBus.execute(
-        new GetCollectionByIdQuery(collectionId),
-      );
-      if (!collection) {
-        throw new NotFoundException('Collection not found');
-      }
-      const circle = await this.queryBus.execute(
-        new GetCircleByIdQuery(collection.parents[0]),
-      );
-
-      const threadId = await this.discordService.createThread(
-        circle.discordGuildId,
-        threadName,
-        selectedChannel.value,
-        false,
-        [],
-        [],
-        collection.description || "Let's get started!",
-      );
-      await this.commandBus.execute(
-        new UpdateCollectionCommand(
-          {
-            collectionLevelDiscordThreadRef: {
-              threadId: threadId,
-              channelId: selectedChannel.value,
-              guildId: circle.discordGuildId,
-              private: false,
-            },
-          },
-          caller.id,
-          collection._id.toString(),
-        ),
-      );
-      return await this.queryBus.execute(
-        new GetPrivateViewCollectionQuery(collection.slug, null),
-      );
-    } catch (e) {
-      console.log(e);
-      this.logger.logError(`Failed linking discord with error ${e}`);
-    }
-  }
-
   async linkThreadToData(
     messageId: string,
     discordUserId: string,

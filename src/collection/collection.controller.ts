@@ -101,7 +101,6 @@ import {
 import {
   LinkDiscordDto,
   LinkDiscordThreadToDataDto,
-  LinkDiscordToCollectionDto,
 } from './dto/link-discord.dto';
 import { RemoveDataDto } from './dto/remove.data-request.dto';
 import { SocialsDto } from './dto/socials.dto';
@@ -164,106 +163,6 @@ export class CollectionController {
     private readonly advancedAccessService: AdvancedAccessService,
     private readonly claimEligibilityService: ClaimEligibilityService,
   ) {}
-
-  @Patch('/migrateFormConditions')
-  async migrateFormConditions(): Promise<boolean> {
-    const collections = (await this.queryBus.execute(
-      new GetMultipleCollectionsQuery({
-        collectionType: 0,
-      }),
-    )) as Collection[];
-
-    if (!collections) throw new NotFoundException('Collections not found');
-    console.log({ c: collections.length });
-    for (const collection of collections) {
-      if (
-        !collection.properties ||
-        !Object.keys(collection.properties || {})?.length
-      )
-        continue;
-      for (const [propertyId, property] of Object.entries(
-        collection.properties,
-      )) {
-        if (property.viewConditions) {
-          const advancedFilters = {
-            operator: 'and',
-            conditions: {},
-            order: [],
-          } as ConditionGroup;
-          for (const condition of property.viewConditions) {
-            const id = uuidv4();
-            advancedFilters.conditions[id] = condition;
-            advancedFilters.order.push(id);
-          }
-          property.advancedConditions = advancedFilters;
-        }
-      }
-
-      console.log({ id: collection._id?.toString() });
-
-      try {
-        await this.commandBus.execute(
-          new UpdateCollectionCommand(
-            {
-              properties: collection.properties,
-            },
-            'caller',
-            collection._id?.toString(),
-          ),
-        );
-      } catch (e) {
-        console.log({ e });
-      }
-    }
-    return true;
-  }
-
-  // @UseGuards(AdminAuthGuard)
-  @Patch('/migrateProjectConditions')
-  async migrateProjectConditions(): Promise<boolean> {
-    const collections = (await this.queryBus.execute(
-      new GetMultipleCollectionsQuery({
-        'projectMetadata.views': { $exists: true },
-      }),
-    )) as Collection[];
-    console.log({ l: collections.length });
-    if (!collections) throw new NotFoundException('Collections not found');
-    for (const collection of collections) {
-      if (!collection.projectMetadata || !collection.projectMetadata.views)
-        continue;
-      const updatedProjectMetadata = collection.projectMetadata;
-
-      for (const [viewId, view] of Object.entries(
-        collection.projectMetadata.views || {},
-      )) {
-        if (view.filters) {
-          const advancedFilters = {
-            operator: 'and',
-            conditions: {},
-            order: [],
-          } as ConditionGroup;
-          for (const filter of view.filters) {
-            const id = uuidv4();
-            advancedFilters.conditions[id] = filter;
-            advancedFilters.order.push(id);
-          }
-          view.advancedFilters = advancedFilters;
-          updatedProjectMetadata.views[viewId] = view;
-        }
-      }
-      console.log({ updatedProjectMetadata });
-      await this.commandBus.execute(
-        new UpdateCollectionCommand(
-          {
-            projectMetadata: updatedProjectMetadata,
-          },
-          'caller',
-          collection._id?.toString(),
-        ),
-      );
-    }
-    return true;
-  }
 
   @Get('/changelog')
   async getChangelog(): Promise<CreateCollectionResponseDto> {
@@ -856,21 +755,6 @@ export class CollectionController {
   async getEmbedCharts(@Param() param: RequiredSlugDto): Promise<Collection> {
     return await this.queryBus.execute(
       new GetFormAnalyticsBySlugQuery(param.slug),
-    );
-  }
-
-  @SetMetadata('permissions', ['manageSettings'])
-  @UseGuards(CollectionAuthGuard)
-  @Patch('/:id/linkDiscordThreadToCollection')
-  async linkDiscordThreadToCollection(
-    @Param() param: ObjectIdDto,
-    @Body() body: LinkDiscordToCollectionDto,
-    @Request() req,
-  ): Promise<Collection> {
-    return await this.linkDiscordService.linkThreadToCollection(
-      param.id,
-      body,
-      req.user,
     );
   }
 

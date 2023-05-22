@@ -657,11 +657,10 @@ export class CreateDiscordThreadCommandHandler
         action.data.isPrivate,
         discordIdsToAdd,
         rolesToAdd,
-        `Gm folks, this thread is linked to the following ${
+        `Gm folks, this thread is linked to a ${
           collection.collectionType === 0 ? 'response' : 'card'
-        }. https://circles.spect.network/${circle.slug}/r/${
-          collection.slug
-        }?cardSlug=${relevantIds.dataSlug}`,
+        } on ${collection.name}`,
+        `https://circles.spect.network/${circle.slug}/r/${collection.slug}?cardSlug=${relevantIds.dataSlug}`,
       );
       await this.commandBus.execute(
         new UpdateCollectionCommand(
