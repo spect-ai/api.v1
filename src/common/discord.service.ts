@@ -317,6 +317,7 @@ export class DiscordService {
     usersToAdd: string[],
     rolesToAdd: string[],
     message: string,
+    url?: string,
   ) {
     try {
       console.log({ message });
@@ -335,6 +336,7 @@ export class DiscordService {
             usersToAdd,
             rolesToAdd,
             firstMessage: message || 'card',
+            url,
           }),
         },
       );
