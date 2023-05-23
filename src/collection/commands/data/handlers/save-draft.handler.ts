@@ -1,7 +1,4 @@
-import {
-  InternalServerErrorException,
-  NotFoundException,
-} from '@nestjs/common';
+import { HttpException, HttpStatus, NotFoundException } from '@nestjs/common';
 import {
   CommandBus,
   CommandHandler,
@@ -10,32 +7,23 @@ import {
   QueryBus,
 } from '@nestjs/cqrs';
 import { CollectionRepository } from 'src/collection/collection.repository';
+import { SocialsDto } from 'src/collection/dto/socials.dto';
 import { GetNextFieldQuery } from 'src/collection/queries';
-import { AdvancedAccessService } from 'src/collection/services/advanced-access.service';
+import { ResponseCredentialService } from 'src/collection/services/response-credentialing.service';
+import { Property } from 'src/collection/types/types';
 import { DataValidationService } from 'src/collection/validations/data-validation.service';
+import { DiscordService } from 'src/common/discord.service';
 import { LoggingService } from 'src/logging/logging.service';
-import {
-  AddDataCommand,
-  AddDataUsingAutomationCommand,
-} from '../impl/add-data.command';
+import { LookupRepository } from 'src/lookup/lookup.repository';
+import { User } from 'src/users/model/users.model';
+import { GetUserByFilterQuery } from 'src/users/queries/impl';
+import { AddDataCommand } from '../impl/add-data.command';
 import {
   SaveAndPostPaymentCommand,
   SaveAndPostSocialsCommand,
   SaveDraftFromDiscordCommand,
 } from '../impl/save-draft.command';
 import { ActivityOnAddData } from './add-data.handler';
-import { v4 as uuid } from 'uuid';
-import { DataAddedEvent } from 'src/collection/events';
-import { LookupRepository } from 'src/lookup/lookup.repository';
-import { HttpException, HttpStatus } from '@nestjs/common';
-import { UpdateUserCommand } from 'src/users/commands/impl';
-import { DiscordService } from 'src/common/discord.service';
-import { SocialsDto } from 'src/collection/dto/socials.dto';
-import { User } from 'src/users/model/users.model';
-import { GetUserByFilterQuery } from 'src/users/queries/impl';
-import { isUUID } from 'class-validator';
-import { ResponseCredentialService } from 'src/collection/services/response-credentialing.service';
-import { Property } from 'src/collection/types/types';
 
 @CommandHandler(SaveDraftFromDiscordCommand)
 export class SaveDraftCommandHandler
@@ -86,12 +74,23 @@ export class SaveDraftCommandHandler
           value: number;
         };
       };
-
       // eslint-disable-next-line prefer-const
       for (let [key, val] of Object.entries(data)) {
-        if (collection.formMetadata.idLookup?.[key])
-          key = collection.formMetadata.idLookup[key];
-        const property = collection.properties[key];
+        if (
+          key !== '***' &&
+          key !== collection.formMetadata.draftNextField?.[callerDiscordId]
+        ) {
+          throw 'Invalid response, please respond to the last question';
+        }
+        let property;
+        if (collection.formMetadata.draftNextField?.[callerDiscordId]) {
+          property =
+            collection.properties[
+              collection.formMetadata.draftNextField[callerDiscordId]
+            ];
+          key = property.id;
+        } else throw 'No next field found';
+
         if (property && property.isPartOfFormView) {
           if (property.type === 'number') {
             formFieldUpdates[key] = parseFloat(val);

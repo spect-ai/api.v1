@@ -70,6 +70,8 @@ export class GetNextFieldQueryHandler
   async addOptionIdsToLookup(
     options: Option[],
     collection: Collection,
+    callerId: string,
+    property: Partial<Property>,
     idLookup?: { [key: string]: any },
   ) {
     const lookupUpdates = {};
@@ -91,6 +93,10 @@ export class GetNextFieldQueryHandler
       formMetadata: {
         ...collection.formMetadata,
         idLookup: idLookupUpdates,
+        draftNextField: {
+          ...(collection.formMetadata.draftNextField || {}),
+          [callerId]: property.id,
+        },
       },
     });
 
@@ -100,6 +106,7 @@ export class GetNextFieldQueryHandler
   async addFieldsToLookup(
     property: Partial<Property>,
     collection: Collection,
+    callerId: string,
     idLookup?: { [key: string]: any },
   ) {
     const idLookupsVals = Object.values(collection.formMetadata.idLookup || {});
@@ -119,6 +126,10 @@ export class GetNextFieldQueryHandler
       formMetadata: {
         ...collection.formMetadata,
         idLookup: updatedLookups,
+        draftNextField: {
+          ...(collection.formMetadata.draftNextField || {}),
+          [callerId]: property.id,
+        },
       },
     });
 
@@ -593,6 +604,25 @@ export class GetNextFieldQueryHandler
 
       console.log({ nextField });
       if (nextField) {
+        if (
+          ![
+            'paywall',
+            'user',
+            'user[]',
+            'singleSelect',
+            'multiSelect',
+          ].includes(collection.properties[nextField]?.type)
+        ) {
+          await this.collectionRepository.updateById(collection.id, {
+            formMetadata: {
+              ...collection.formMetadata,
+              draftNextField: {
+                ...(collection.formMetadata.draftNextField || {}),
+                [callerId]: nextField,
+              },
+            },
+          });
+        }
         if (nextField === 'readonlyAtEnd')
           return {
             readonly: true,
@@ -639,7 +669,11 @@ export class GetNextFieldQueryHandler
             name: 'paywall',
             paymentConfig: collection.formMetadata.paymentConfig,
           };
-          const res = await this.addFieldsToLookup(paywallField, collection);
+          const res = await this.addFieldsToLookup(
+            paywallField,
+            collection,
+            callerId,
+          );
           return {
             ...paywallField,
             id: res.id,
@@ -729,12 +763,13 @@ export class GetNextFieldQueryHandler
             const res = await this.addOptionIdsToLookup(
               returnedField.options,
               collection,
+              callerId,
+              returnedField,
               // lookupAdditionRes.updatedLookups,
             );
             returnedField.options = res.returnedOptions;
           }
         }
-        console.log({ returnedField });
         return returnedField;
       }
       return null;

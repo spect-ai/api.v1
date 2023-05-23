@@ -368,6 +368,10 @@ export interface FormMetadata {
   totalTimeSpentMetricsOnPageForCompletedResponses?: {
     [pageId: string]: number;
   };
+
+  draftNextField?: {
+    [userId: string]: string;
+  };
 }
 
 export interface PaymentConfig {

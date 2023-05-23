@@ -29,7 +29,8 @@ export class DeleteDraftCommandHandler
 
       if (collection.formMetadata.drafts?.[discordId])
         delete formMetadata.drafts[discordId];
-
+      if (collection.formMetadata.draftNextField?.[discordId])
+        delete formMetadata.draftNextField[discordId];
       if (collection.formMetadata.skippedFormFields?.[discordId])
         delete formMetadata.skippedFormFields[discordId];
       await this.collectionRepository.updateById(collection.id, {
