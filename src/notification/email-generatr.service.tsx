@@ -71,20 +71,6 @@ export class EmailGeneratorService {
               </MjmlSection>
             );
           })}
-          <MjmlSection>
-            <MjmlColumn>
-              <MjmlDivider border-color="#ae5fe2" border-width="2px" />
-              <MjmlButton
-                background-color="#f7f7f7"
-                color="#ae5fe2"
-                align="right"
-                text-decoration="underline"
-                href={`https://circles.spect.network/profile/${caller.username}`}
-              >
-                Unsub
-              </MjmlButton>
-            </MjmlColumn>
-          </MjmlSection>
         </MjmlBody>
       </Mjml>,
 
@@ -128,24 +114,6 @@ export class EmailGeneratorService {
                 href={`${link}`}
               >
                 Check it out
-              </MjmlButton>
-            </MjmlColumn>
-          </MjmlSection>
-          <MjmlSection>
-            <MjmlColumn>
-              <MjmlDivider border-color="#ae5fe2" border-width="2px" />
-              <MjmlButton
-                background-color="#f7f7f7"
-                color="#ae5fe2"
-                align="right"
-                text-decoration="underline"
-                href={
-                  receipient
-                    ? `https://circles.spect.network/profile/${receipient.username}`
-                    : `https://circles.spect.network/`
-                }
-              >
-                Unsub
               </MjmlButton>
             </MjmlColumn>
           </MjmlSection>
