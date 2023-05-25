@@ -20,16 +20,6 @@ import {
   RequiredEducationId,
   RequiredExperienceId,
 } from 'src/common/dtos/string.dto';
-import {
-  AddEducationCommand,
-  RemoveEducationCommand,
-  UpdateEducationCommand,
-} from './commands/education';
-import {
-  AddExperienceCommand,
-  RemoveExperienceCommand,
-  UpdateExperienceCommand,
-} from './commands/experience';
 import { GetTokenMetadataCommand, GetTokensCommand } from './commands/impl';
 import { ReadNotificationCommand } from './commands/notifications/impl';
 import { DetailedUserPubliceResponseDto } from './dto/detailed-user-response.dto';
@@ -103,80 +93,6 @@ export class UsersController {
   ): Promise<DetailedUserPubliceResponseDto> {
     return await this.commandBus.execute(
       new ReadNotificationCommand(body.notificationIds, req.user),
-    );
-  }
-
-  @UseGuards(SessionAuthGuard)
-  @Patch('/me/addExperience')
-  async addExperience(
-    @Body() addExperienceDto: AddExperienceDto,
-    @Request() req,
-  ) {
-    return await this.commandBus.execute(
-      new AddExperienceCommand(addExperienceDto, req.user),
-    );
-  }
-
-  @UseGuards(SessionAuthGuard)
-  @Patch('/me/updateExperience')
-  async updateExperience(
-    @Query() experience: RequiredExperienceId,
-    @Body() updateExperienceDto: UpdateExperienceDto,
-    @Request() req,
-  ) {
-    return await this.commandBus.execute(
-      new UpdateExperienceCommand(
-        experience.experienceId,
-        updateExperienceDto,
-        req.user,
-      ),
-    );
-  }
-
-  @UseGuards(SessionAuthGuard)
-  @Patch('/me/removeExperience')
-  async removeExperience(
-    @Query() experience: RequiredExperienceId,
-    @Request() req,
-  ) {
-    return await this.commandBus.execute(
-      new RemoveExperienceCommand(experience.experienceId, req.user),
-    );
-  }
-
-  @UseGuards(SessionAuthGuard)
-  @Patch('/me/addEducation')
-  async addEducation(@Body() addEducationDto: AddEducationDto, @Request() req) {
-    console.log(addEducationDto);
-    return await this.commandBus.execute(
-      new AddEducationCommand(addEducationDto, req.user),
-    );
-  }
-
-  @UseGuards(SessionAuthGuard)
-  @Patch('/me/updateEducation')
-  async updateEducation(
-    @Query() education: RequiredEducationId,
-    @Body() updateEducationDto: UpdateEducationDto,
-    @Request() req,
-  ) {
-    return await this.commandBus.execute(
-      new UpdateEducationCommand(
-        education.educationId,
-        updateEducationDto,
-        req.user,
-      ),
-    );
-  }
-
-  @UseGuards(SessionAuthGuard)
-  @Patch('/me/removeEducation')
-  async removeEducation(
-    @Query() education: RequiredEducationId,
-    @Request() req,
-  ) {
-    return await this.commandBus.execute(
-      new RemoveEducationCommand(education.educationId, req.user),
     );
   }
 

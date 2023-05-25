@@ -47,6 +47,8 @@ import { SurveyTokenService } from 'src/credentials/services/survey-token.servic
 import { CirclesCollectionService } from 'src/circle/services/circle-collection.service';
 import { GetCollectionService } from './services/get-collection.service';
 import { ZealyService } from 'src/credentials/services/zealy.service';
+import { forwardRef } from 'react';
+import { UsersModule } from 'src/users/users.module';
 
 @Module({
   imports: [
@@ -60,6 +62,7 @@ import { ZealyService } from 'src/credentials/services/zealy.service';
     RegistryModule,
     SecretModule,
     LookupModule,
+    UsersModule,
   ],
   controllers: [CollectionController],
   providers: [

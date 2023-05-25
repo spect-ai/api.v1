@@ -1,8 +1,11 @@
 import {
+  Body,
   Controller,
+  Delete,
   Get,
   Param,
   Patch,
+  Post,
   Query,
   Request,
   UseGuards,
@@ -134,5 +137,18 @@ export class UsersControllerV1 {
   @Get('/connectDiscord')
   connectDiscord(@Request() req, @Query('code') code: string) {
     return this.commandBus.execute(new ConnectDiscordCommand(req.user, code));
+  }
+
+  @UseGuards(SessionAuthGuard)
+  @Post('/apiKey')
+  createAPIKey() {
+    return this.usersService.createAPIKey();
+  }
+
+  @UseGuards(SessionAuthGuard)
+  @Delete('/apiKey')
+  deleteApiKey(@Body() body: { apiKey: string }) {
+    console.log({ body });
+    return this.usersService.deleteApiKey(body.apiKey);
   }
 }

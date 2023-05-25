@@ -28,10 +28,13 @@ import { EncryptionService } from 'src/common/encryption.service';
 import { SecretModule } from 'src/secretRegistry/secret.module';
 import { CirclesCollectionService } from 'src/circle/services/circle-collection.service';
 import { CirclesModule } from 'src/circle/circles.module';
+import { KeysRepository } from './keys.repository';
+import { Keys } from './model/keys.model';
 
 @Module({
   imports: [
     TypegooseModule.forFeature([User]),
+    TypegooseModule.forFeature([Keys]),
     EthAddressModule,
     CqrsModule,
     SecretModule,
@@ -58,7 +61,8 @@ import { CirclesModule } from 'src/circle/circles.module';
     EncryptionService,
     CirclesCollectionService,
     RealtimeGateway,
+    KeysRepository,
   ],
-  exports: [UsersService, UsersRepository, UsersModule],
+  exports: [UsersService, UsersRepository, UsersModule, KeysRepository],
 })
 export class UsersModule {}

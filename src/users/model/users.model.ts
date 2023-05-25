@@ -172,4 +172,7 @@ export class User extends ProfileModel {
     id: string;
     username: string;
   };
+
+  @prop()
+  apiKeys?: string[];
 }

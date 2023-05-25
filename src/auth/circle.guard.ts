@@ -10,6 +10,8 @@ import { Circle } from 'src/circle/model/circle.model';
 import { RolesService } from 'src/roles/roles.service';
 import { User } from 'src/users/model/users.model';
 import { SessionAuthGuard } from './iron-session.guard';
+import { UsersRepository } from 'src/users/users.repository';
+import { KeysRepository } from 'src/users/keys.repository';
 
 @Injectable()
 export class CircleAuthGuard implements CanActivate {
@@ -18,6 +20,8 @@ export class CircleAuthGuard implements CanActivate {
     private readonly roleService: RolesService,
     private readonly reflector: Reflector,
     private readonly sessionAuthGuard: SessionAuthGuard,
+    private readonly keysRepository: KeysRepository,
+    private readonly usersRepository: UsersRepository,
   ) {}
 
   checkPermissions(
@@ -46,12 +50,19 @@ export class CircleAuthGuard implements CanActivate {
     );
     const request = context.switchToHttp().getRequest();
     try {
-      request.user = (await this.sessionAuthGuard.validateUser(
-        request.session.siwe?.address,
-      )) as unknown as User;
-      if (!request.user) return false;
-      if (!permissions) return true;
-
+      if (request.session.siwe?.address) {
+        request.user = (await this.sessionAuthGuard.validateUser(
+          request.session.siwe?.address,
+        )) as unknown as User;
+        if (!request.user) return false;
+        if (!permissions) return true;
+      } else if (request.headers.apiKey) {
+        const keyData = await this.keysRepository.findOne({
+          key: request.headers.apiKey,
+        });
+        if (!keyData?.userId) return false;
+        request.user = await this.usersRepository.findById(keyData.userId);
+      } else return false;
       const circle = await this.circlesRepository.findById(request.params.id);
       if (!circle) {
         throw new HttpException('Circle not found', 404);
@@ -73,6 +84,8 @@ export class CircleAuthGuard implements CanActivate {
 @Injectable()
 export class CreateCircleAuthGuard implements CanActivate {
   constructor(
+    private readonly keysRepository: KeysRepository,
+    private readonly usersRepository: UsersRepository,
     private readonly circlesRepository: CirclesRepository,
     private readonly sessionAuthGuard: SessionAuthGuard,
     private readonly circleAuthGuard: CircleAuthGuard,
@@ -81,10 +94,19 @@ export class CreateCircleAuthGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
     try {
-      request.user = (await this.sessionAuthGuard.validateUser(
-        request.session.siwe?.address,
-      )) as unknown as User;
-      if (!request.user) return false;
+      if (request.session.siwe?.address) {
+        request.user = (await this.sessionAuthGuard.validateUser(
+          request.session.siwe?.address,
+        )) as unknown as User;
+        if (!request.user) return false;
+      } else if (request.headers.apiKey) {
+        const keyData = await this.keysRepository.findOne({
+          key: request.headers.apiKey,
+        });
+        if (!keyData?.userId) return false;
+        request.user = await this.usersRepository.findById(keyData.userId);
+      } else return false;
+
       if (!request.body.parent) return true;
 
       const circle = await this.circlesRepository.findById(request.body.parent);
@@ -115,23 +137,25 @@ export class ViewCircleAuthGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
     try {
-      let circle;
-      if (request.params.id)
-        circle = await this.circlesRepository.findById(request.params.id);
-      else if (request.params.slug)
-        circle = await this.circlesRepository.findOne({
-          slug: request.params.slug,
-        });
-      if (!circle) {
-        throw new HttpException('Circle not found', 404);
-      }
-      request.user = (await this.sessionAuthGuard.validateUser(
-        request.session.siwe?.address,
-      )) as unknown as User;
-      if (circle.private) {
-        if (!request.user || !circle.members.includes(request.user.id))
-          return false;
-      }
+      // let circle;
+      // if (request.params.id)
+      //   circle = await this.circlesRepository.findById(request.params.id);
+      // else if (request.params.slug)
+      //   circle = await this.circlesRepository.findOne({
+      //     slug: request.params.slug,
+      //   });
+      // if (!circle) {
+      //   throw new HttpException('Circle not found', 404);
+      // }
+      // request.user = (await this.sessionAuthGuard.validateUser(
+      //   request.session.siwe?.address,
+      // )) as unknown as User;
+      // if (circle.private) {
+      //   if (!request.user || !circle.members.includes(request.user.id))
+      //     return false;
+      // }
+      console.log({ headers: request.headers });
+      if (!request.headers['x-api-key']) return false;
 
       return true;
     } catch (error) {

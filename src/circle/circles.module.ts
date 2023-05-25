@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { TypegooseModule } from 'nestjs-typegoose';
 import { CirclesController } from './circles.controller';
 import { CirclesService } from './circles.service';
@@ -34,6 +34,8 @@ import { MintKudosService } from 'src/credentials/services/mintkudos.service';
 import { CirclesCollectionService } from './services/circle-collection.service';
 import { RealtimeGateway } from 'src/realtime/realtime.gateway';
 import { EncryptionService } from 'src/common/encryption.service';
+import { KeysRepository } from 'src/users/keys.repository';
+import { UsersModule } from 'src/users/users.module';
 
 @Module({
   imports: [
@@ -42,6 +44,7 @@ import { EncryptionService } from 'src/common/encryption.service';
     EthAddressModule,
     RegistryModule,
     CqrsModule,
+    forwardRef(() => UsersModule),
   ],
   controllers: [
     CirclesController,

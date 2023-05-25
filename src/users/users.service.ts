@@ -20,6 +20,8 @@ import { UserCreatedEvent } from './events/impl';
 import { LensService } from './external/lens.service';
 import { GetCircleByIdQuery } from 'src/circle/queries/impl';
 import { EthAddressService } from 'src/_eth-address/_eth-address.service';
+import { randomBytes } from 'crypto';
+import { KeysRepository } from './keys.repository';
 
 @Injectable()
 export class UsersService {
@@ -32,7 +34,7 @@ export class UsersService {
     private readonly commandBus: CommandBus,
     private readonly eventBus: EventBus,
     private readonly logger: LoggingService,
-    private readonly lensService: LensService,
+    private readonly keysRepository: KeysRepository,
   ) {
     logger.setContext('UsersService');
   }
@@ -265,6 +267,57 @@ export class UsersService {
       );
       throw new InternalServerErrorException(
         `Failed getting user by id`,
+        error.message,
+      );
+    }
+  }
+
+  async createAPIKey(): Promise<string[]> {
+    try {
+      const apiKey = randomBytes(32).toString('hex');
+      const user = await this.usersRepository.updateById(
+        this.requestProvider.user.id,
+        {
+          apiKeys: [...(this.requestProvider.user.apiKeys || []), apiKey],
+        },
+      );
+
+      await this.keysRepository.create({
+        type: 'api-key',
+        key: apiKey,
+        userId: user._id.toString(),
+      });
+
+      return user.apiKeys;
+    } catch (error) {
+      this.logger.logError(
+        `Failed creating api key with error: ${error.message}`,
+        this.requestProvider,
+      );
+      throw new InternalServerErrorException(
+        `Failed creating api key`,
+        error.message,
+      );
+    }
+  }
+
+  async deleteApiKey(key: string): Promise<string[]> {
+    try {
+      const user = this.requestProvider.user;
+      console.log({ apiKeys: user.apiKeys, key });
+      const apiKeys = user.apiKeys.filter((apiKey) => apiKey !== key);
+      console.log({ apiKeys });
+      const res = await this.usersRepository.updateById(user.id, { apiKeys });
+      await this.keysRepository.deleteOne({ key });
+
+      return res.apiKeys;
+    } catch (error) {
+      this.logger.logError(
+        `Failed deleting api key with error: ${error.message}`,
+        this.requestProvider,
+      );
+      throw new InternalServerErrorException(
+        `Failed deleting api key`,
         error.message,
       );
     }
