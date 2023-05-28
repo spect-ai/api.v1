@@ -156,3 +156,69 @@ export class ViewCollectionAuthGuard implements CanActivate {
     }
   }
 }
+
+@Injectable()
+export class StrongerCollectionAuthGuard implements CanActivate {
+  constructor(
+    private readonly collectionRepository: CollectionRepository,
+    private readonly sessionAuthGuard: SessionAuthGuard,
+    private readonly circleRepository: CirclesRepository,
+    private readonly reflector: Reflector,
+  ) {}
+
+  async checkPermissions(
+    permissions: string[],
+    userId: string,
+    collection: Collection,
+  ): Promise<boolean> {
+    if (permissions.length === 0) return true;
+
+    const circle = await this.circleRepository.findById(collection.parents[0]);
+    const userRoles = circle?.memberRoles[userId];
+    const permissionsSatisfied = [];
+    for (const permission of permissions) {
+      if (
+        collection.permissions[permission]?.some((role) =>
+          userRoles?.includes(role),
+        )
+      ) {
+        permissionsSatisfied.push(true);
+      } else permissionsSatisfied.push(false);
+    }
+
+    return permissionsSatisfied.every((permission) => permission === true);
+  }
+
+  async canActivate(context: ExecutionContext): Promise<boolean> {
+    const request = context.switchToHttp().getRequest();
+    const permissions = this.reflector.get<string[]>(
+      'permissions',
+      context.getHandler(),
+    );
+    try {
+      if (!(await this.sessionAuthGuard.canActivate(context))) return false;
+
+      if (request.params.id || request.projectId)
+        request.collection = await this.collectionRepository.findById(
+          request.params.id || request.projectId,
+        );
+      else if (request.params.slug)
+        request.collection = await this.collectionRepository.findOne({
+          slug: request.params.slug,
+        });
+      if (!request.collection) {
+        throw new HttpException('Collection not found', 404);
+      }
+
+      return await this.checkPermissions(
+        permissions,
+        request.user.id,
+        request.collection,
+      );
+    } catch (error) {
+      console.log(error);
+      //   request.session.destroy();
+      throw new HttpException({ message: error }, 422);
+    }
+  }
+}

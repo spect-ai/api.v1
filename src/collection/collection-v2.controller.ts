@@ -1,0 +1,54 @@
+import { Controller, Get, Param, SetMetadata, UseGuards } from '@nestjs/common';
+import { CommandBus, QueryBus } from '@nestjs/cqrs';
+import { ApiTags } from '@nestjs/swagger';
+import {
+  CollectionAuthGuard,
+  StrongerCollectionAuthGuard,
+  ViewCollectionAuthGuard,
+} from 'src/auth/collection.guard';
+import { RequiredSlugDto } from 'src/common/dtos/string.dto';
+import { CollectionDataResponseDto } from './dto/v2/collection-response.dto';
+import { GetCollectionBySlugQuery } from './queries';
+import { LoggingService } from 'src/logging/logging.service';
+
+/**
+ Built with keeping integratoors in mind, this API is meant to
+    1. Simplify responses for integrators
+    2. Reduce the payload size of large responses & group similar data together (which we will later use to optimize requests from our frontend)
+    3. Implement limit, offset and pagination for large responses
+    4. Reduce number of lines in controller code
+ **/
+
+@Controller('collection/v2')
+@ApiTags('collection.v2')
+export class CollectionV2Controller {
+  constructor(
+    private readonly commandBus: CommandBus,
+    private readonly queryBus: QueryBus,
+    private readonly logger: LoggingService,
+  ) {
+    this.logger.setContext(CollectionV2Controller.name);
+  }
+
+  @SetMetadata('permissions', ['viewResponses'])
+  @UseGuards(StrongerCollectionAuthGuard)
+  @Get('/slug/:slug/data')
+  async findBySlug(
+    @Param() param: RequiredSlugDto,
+  ): Promise<CollectionDataResponseDto> {
+    return await this.queryBus.execute(
+      new GetCollectionBySlugQuery(
+        param.slug,
+        {},
+        {
+          id: 1,
+          name: 1,
+          slug: 1,
+          description: 1,
+          properties: 1,
+          data: 1,
+        },
+      ),
+    );
+  }
+}

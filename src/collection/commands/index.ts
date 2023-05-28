@@ -17,6 +17,8 @@ export * from './impl/migrate-collection.command';
 export * from './data/impl/save-draft.command';
 export * from './data/impl/delete-draft.command';
 export * from './metrics/impl/update-metrics.command';
+export * from './data/v2/impl/add-data.command';
+export * from './data/v2/impl/update-data.command';
 
 import { AddCommentCommandHandler } from './comments/handlers/add-comment.handler';
 import { RemoveCommentCommandHandler } from './comments/handlers/remove-comment.handler';
@@ -67,6 +69,8 @@ import {
   UpdatePageVisitMetricsCommandHandler,
   UpdateTimeSpentMetricsCommandHandler,
 } from './metrics/handlers/update-metrics.handler';
+import { AddProjectDataCommandHandler } from './data/v2/handlers/add-data.handler';
+import { UpdateProjectDataCommandHandler } from './data/v2/handlers/update-data.handler';
 
 export const CommandHandlers = [
   CreateCollectionCommandHandler,
@@ -103,4 +107,6 @@ export const CommandHandlers = [
   DeleteDraftCommandHandler,
   UpdatePageVisitMetricsCommandHandler,
   UpdateTimeSpentMetricsCommandHandler,
+  AddProjectDataCommandHandler,
+  UpdateProjectDataCommandHandler,
 ];

@@ -32,3 +32,9 @@ export class SaveDraftDto {
   @IsOptional()
   readonly skip: { [key: string]: boolean };
 }
+
+export class AddProjectDataDto {
+  @IsObject()
+  @IsNotEmpty()
+  readonly data: object;
+}

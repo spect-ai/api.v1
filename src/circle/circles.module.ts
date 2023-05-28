@@ -35,6 +35,7 @@ import { EncryptionService } from 'src/common/encryption.service';
 import { KeysRepository } from 'src/users/keys.repository';
 import { UsersModule } from 'src/users/users.module';
 import { AuthModule } from 'src/auth/auth.module';
+import { CircleV2Controller } from './circles-v2.controller';
 
 @Module({
   imports: [
@@ -51,6 +52,7 @@ import { AuthModule } from 'src/auth/auth.module';
     CircleV1Controller,
     CirclePrivateController,
     CircleExternalController,
+    CircleV2Controller,
   ],
   providers: [
     CirclesService,

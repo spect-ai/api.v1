@@ -48,6 +48,9 @@ import { ZealyService } from 'src/credentials/services/zealy.service';
 import { forwardRef } from 'react';
 import { UsersModule } from 'src/users/users.module';
 import { AuthModule } from 'src/auth/auth.module';
+import { CollectionV2Controller } from './collection-v2.controller';
+import { CollectionV2ProjectController } from './collection-v2-project.controller';
+import { CollectionV2FormController } from './collection-v2-form.controller';
 
 @Module({
   imports: [
@@ -64,7 +67,12 @@ import { AuthModule } from 'src/auth/auth.module';
     UsersModule,
     AuthModule,
   ],
-  controllers: [CollectionController],
+  controllers: [
+    CollectionController,
+    CollectionV2Controller,
+    CollectionV2ProjectController,
+    CollectionV2FormController,
+  ],
   providers: [
     ...QueryHandlers,
     ...CommandHandlers,
