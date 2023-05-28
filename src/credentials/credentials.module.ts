@@ -18,6 +18,8 @@ import { GitcoinPassportService } from './services/gitcoin-passport.service';
 import { MazuryService } from './services/mazury.service';
 import { MintKudosService } from './services/mintkudos.service';
 import { PoapService } from './services/poap.service';
+import { UsersModule } from 'src/users/users.module';
+import { AuthModule } from 'src/auth/auth.module';
 
 @Module({
   imports: [
@@ -25,6 +27,8 @@ import { PoapService } from './services/poap.service';
     EthAddressModule,
     CqrsModule,
     SecretModule,
+    UsersModule,
+    AuthModule,
   ],
   controllers: [CredentialsController],
   providers: [

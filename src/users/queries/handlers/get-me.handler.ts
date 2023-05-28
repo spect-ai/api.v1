@@ -1,9 +1,8 @@
 import { InternalServerErrorException } from '@nestjs/common';
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
-import { CommonTools } from 'src/common/common.service';
+import { EncryptionService } from 'src/common/encryption.service';
 import { LoggingService } from 'src/logging/logging.service';
-import { PublicProfileResponseDto } from 'src/users/dto/profile-response.dto';
-import { LensService } from 'src/users/external/lens.service';
+import { PrivateProfileResponseDto } from 'src/users/dto/profile-response.dto';
 import { UsersRepository } from 'src/users/users.repository';
 import { GetMeQuery } from '../impl/get-me.query';
 
@@ -28,14 +27,13 @@ const hideProfileFields = {
 export class GetMeQueryHandler implements IQueryHandler<GetMeQuery> {
   constructor(
     private readonly userRepository: UsersRepository,
-    private readonly lensService: LensService,
     private readonly logger: LoggingService,
-    private readonly commonTools: CommonTools,
+    private readonly encryptionService: EncryptionService,
   ) {
     this.logger.setContext('GetMeQueryHandler');
   }
 
-  async execute(query: GetMeQuery): Promise<PublicProfileResponseDto> {
+  async execute(query: GetMeQuery): Promise<PrivateProfileResponseDto> {
     try {
       const { caller } = query;
       const user = await this.userRepository.getUserByFilter(
@@ -47,33 +45,14 @@ export class GetMeQueryHandler implements IQueryHandler<GetMeQuery> {
       if (!user) {
         throw `User with id ${caller} not found`;
       }
-      if (!user.lensHandle) {
-        return user;
-      }
-      // const lensProfile = await this.lensService.getLensProfile(
-      //   user.lensHandle,
-      // );
-      // const localAttributes = {
-      //   skills: [],
-      //   education: [],
-      //   experience: [],
-      // };
-      // for (const attribute of lensProfile.attributes) {
-      //   if (attribute.key in localAttributes) {
-      //     localAttributes[attribute.key] = JSON.parse(attribute.value);
-      //   }
-      //   if (attribute.key === 'avatar') {
-      //     console.log({ attribute });
-      //     user.avatar = attribute.value;
-      //   }
-      // }
+
+      const decryptedApiKeys = user.apiKeys
+        ? user.apiKeys.map((apiKey) => this.encryptionService.decrypt(apiKey))
+        : [];
 
       return {
         ...user,
-        // skillsV2: localAttributes.skills,
-        // education: localAttributes.education,
-        // experiences: localAttributes.experience,
-        // bio: lensProfile.bio,
+        apiKeys: decryptedApiKeys,
       };
     } catch (error) {
       this.logger.error(`Failed getting user me with error: ${error}`);

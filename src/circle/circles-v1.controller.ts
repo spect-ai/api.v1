@@ -13,7 +13,11 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { QueryBus, CommandBus } from '@nestjs/cqrs';
-import { CircleAuthGuard, CreateCircleAuthGuard } from 'src/auth/circle.guard';
+import {
+  CircleAuthGuard,
+  CreateCircleAuthGuard,
+  ViewCircleAuthGuard,
+} from 'src/auth/circle.guard';
 import {
   AdminAuthGuard,
   PublicViewAuthGuard,
@@ -133,7 +137,7 @@ export class CircleV1Controller {
     }
   }
 
-  @UseGuards(PublicViewAuthGuard)
+  @UseGuards(ViewCircleAuthGuard)
   @Get('/:id')
   async findByObjectId(
     @Param() param: ObjectIdDto,
@@ -141,7 +145,7 @@ export class CircleV1Controller {
     return await this.circleCrudService.getById(param.id);
   }
 
-  @UseGuards(PublicViewAuthGuard)
+  @UseGuards(ViewCircleAuthGuard)
   @Get('/slug/:slug')
   async findBySlug(
     @Param() param: RequiredSlugDto,

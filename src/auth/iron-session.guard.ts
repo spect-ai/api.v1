@@ -6,10 +6,20 @@ import {
 } from '@nestjs/common';
 import { ObjectId } from 'mongoose';
 import { EthAddressService } from 'src/_eth-address/_eth-address.service';
+import { KeysRepository } from 'src/users/keys.repository';
+import { UsersRepository } from 'src/users/users.repository';
+import { RateLimitCacheService } from './rate-limit-cache.service';
+import { EncryptionService } from 'src/common/encryption.service';
 
 @Injectable()
 export class SessionAuthGuard implements CanActivate {
-  constructor(private readonly ethAddressService: EthAddressService) {}
+  constructor(
+    private readonly ethAddressService: EthAddressService,
+    private readonly keysRepository: KeysRepository,
+    private readonly usersRepository: UsersRepository,
+    private readonly rateLimitCacheService: RateLimitCacheService,
+    private readonly encryptionService: EncryptionService,
+  ) {}
 
   async validateUser(address: string): Promise<ObjectId | boolean> {
     if (address) {
@@ -27,8 +37,26 @@ export class SessionAuthGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
     try {
-      request.user = await this.validateUser(request.session.siwe?.address);
-      if (!request.user) return false;
+      if (request.session.siwe?.address) {
+        request.user = await this.validateUser(request.session.siwe?.address);
+        if (!request.user) return false;
+      } else if (request.headers['x-api-key']) {
+        const keyData = await this.keysRepository.findOne({
+          key: this.encryptionService.encrypt(request.headers['x-api-key']),
+        });
+        if (!keyData?.userId) return false;
+        request.user = await this.usersRepository.findById(keyData.userId);
+      } else return false;
+
+      if (this.rateLimitCacheService.hasCrossedLimit(request.user.id)) {
+        throw new HttpException(
+          'You have exceeded the rate limit. Please try again later.',
+          429,
+        );
+      } else {
+        this.rateLimitCacheService.addOrIncrement(request.user.id);
+      }
+
       return true;
     } catch (error) {
       request.session.destroy();

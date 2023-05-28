@@ -22,8 +22,6 @@ export class CollectionAuthGuard implements CanActivate {
     private readonly sessionAuthGuard: SessionAuthGuard,
     private readonly circlesService: CirclesService,
     private readonly reflector: Reflector,
-    private readonly keysRepository: KeysRepository,
-    private readonly usersRepository: UsersRepository,
   ) {}
 
   async checkPermissions(
@@ -56,18 +54,7 @@ export class CollectionAuthGuard implements CanActivate {
       context.getHandler(),
     );
     try {
-      if (request.session.siwe?.address) {
-        request.user = (await this.sessionAuthGuard.validateUser(
-          request.session.siwe?.address,
-        )) as unknown as User;
-        if (!request.user) return false;
-      } else if (request.headers.apiKey) {
-        const keyData = await this.keysRepository.findOne({
-          key: request.headers.apiKey,
-        });
-        if (!keyData?.userId) return false;
-        request.user = await this.usersRepository.findById(keyData.userId);
-      } else return false;
+      if (!(await this.sessionAuthGuard.canActivate(context))) return false;
 
       const collection = await this.collectionRepository.findById(
         request.params.id,
@@ -97,25 +84,12 @@ export class CreateNewCollectionAuthGuard implements CanActivate {
     private readonly circlesRepository: CirclesRepository,
     private readonly sessionAuthGuard: SessionAuthGuard,
     private readonly circleAuthGuard: CircleAuthGuard,
-    private readonly keysRepository: KeysRepository,
-    private readonly usersRepository: UsersRepository,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
     try {
-      if (request.session.siwe?.address) {
-        request.user = (await this.sessionAuthGuard.validateUser(
-          request.session.siwe?.address,
-        )) as unknown as User;
-        if (!request.user) return false;
-      } else if (request.headers.apiKey) {
-        const keyData = await this.keysRepository.findOne({
-          key: request.headers.apiKey,
-        });
-        if (!keyData?.userId) return false;
-        request.user = await this.usersRepository.findById(keyData.userId);
-      } else return false;
+      if (!(await this.sessionAuthGuard.canActivate(context))) return false;
 
       const circle = await this.circlesRepository.findById(
         request.body.circleId,
@@ -172,10 +146,8 @@ export class ViewCollectionAuthGuard implements CanActivate {
         throw new HttpException('Collection not found', 404);
       }
       request.collection = collection;
-      request.user = (await this.sessionAuthGuard.validateUser(
-        request.session.siwe?.address,
-      )) as unknown as User;
-      if (!request.user) return false;
+      if (!(await this.sessionAuthGuard.canActivate(context))) return false;
+
       return await this.isMember(collection.parents, request.user.id);
     } catch (error) {
       console.log(error);

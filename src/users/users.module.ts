@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { CqrsModule } from '@nestjs/cqrs';
 import { TypegooseModule } from 'nestjs-typegoose';
 import { EventHandlers } from './events/handlers';
@@ -11,10 +11,6 @@ import { UsersRepository } from './users.repository';
 import { UsersService } from './users.service';
 import { QueryHandlers } from './queries/handlers';
 import { UserFieldResolver } from './queries/handlers/get-user.handler';
-import {
-  PublicViewAuthGuard,
-  SessionAuthGuard,
-} from 'src/auth/iron-session.guard';
 import { CommandHandlers } from './commands/handlers';
 import { LoggingService } from 'src/logging/logging.service';
 import { MailService } from 'src/mail/mail.service';
@@ -30,6 +26,7 @@ import { CirclesCollectionService } from 'src/circle/services/circle-collection.
 import { CirclesModule } from 'src/circle/circles.module';
 import { KeysRepository } from './keys.repository';
 import { Keys } from './model/keys.model';
+import { AuthModule } from 'src/auth/auth.module';
 
 @Module({
   imports: [
@@ -39,6 +36,7 @@ import { Keys } from './model/keys.model';
     CqrsModule,
     SecretModule,
     CirclesModule,
+    forwardRef(() => AuthModule),
   ],
   controllers: [UsersController, UsersControllerV1],
   providers: [
@@ -50,8 +48,6 @@ import { Keys } from './model/keys.model';
     ...QueryHandlers,
     ...CommandHandlers,
     UserFieldResolver,
-    PublicViewAuthGuard,
-    SessionAuthGuard,
     LoggingService,
     MailService,
     LensService,

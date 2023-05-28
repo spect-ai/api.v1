@@ -22,6 +22,7 @@ import { GetCircleByIdQuery } from 'src/circle/queries/impl';
 import { EthAddressService } from 'src/_eth-address/_eth-address.service';
 import { randomBytes } from 'crypto';
 import { KeysRepository } from './keys.repository';
+import { EncryptionService } from 'src/common/encryption.service';
 
 @Injectable()
 export class UsersService {
@@ -35,6 +36,7 @@ export class UsersService {
     private readonly eventBus: EventBus,
     private readonly logger: LoggingService,
     private readonly keysRepository: KeysRepository,
+    private readonly encryptionService: EncryptionService,
   ) {
     logger.setContext('UsersService');
   }
@@ -275,20 +277,27 @@ export class UsersService {
   async createAPIKey(): Promise<string[]> {
     try {
       const apiKey = randomBytes(32).toString('hex');
+      const encryptedApiKey = await this.encryptionService.encrypt(apiKey);
       const user = await this.usersRepository.updateById(
         this.requestProvider.user.id,
         {
-          apiKeys: [...(this.requestProvider.user.apiKeys || []), apiKey],
+          apiKeys: [
+            ...(this.requestProvider.user.apiKeys || []),
+            encryptedApiKey,
+          ],
         },
       );
 
       await this.keysRepository.create({
         type: 'api-key',
-        key: apiKey,
+        key: encryptedApiKey,
         userId: user._id.toString(),
       });
 
-      return user.apiKeys;
+      const decryptedApiKeys = user.apiKeys.map((apiKey) =>
+        this.encryptionService.decrypt(apiKey),
+      );
+      return decryptedApiKeys;
     } catch (error) {
       this.logger.logError(
         `Failed creating api key with error: ${error.message}`,
@@ -304,13 +313,15 @@ export class UsersService {
   async deleteApiKey(key: string): Promise<string[]> {
     try {
       const user = this.requestProvider.user;
-      console.log({ apiKeys: user.apiKeys, key });
-      const apiKeys = user.apiKeys.filter((apiKey) => apiKey !== key);
-      console.log({ apiKeys });
+      const encryptedKey = this.encryptionService.encrypt(key);
+      const apiKeys = user.apiKeys.filter((apiKey) => apiKey !== encryptedKey);
       const res = await this.usersRepository.updateById(user.id, { apiKeys });
-      await this.keysRepository.deleteOne({ key });
+      await this.keysRepository.deleteOne({ key: encryptedKey });
 
-      return res.apiKeys;
+      const decryptedApiKeys = res.apiKeys.map((apiKey) =>
+        this.encryptionService.decrypt(apiKey),
+      );
+      return decryptedApiKeys;
     } catch (error) {
       this.logger.logError(
         `Failed deleting api key with error: ${error.message}`,

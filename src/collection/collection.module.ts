@@ -1,8 +1,6 @@
 import { Module } from '@nestjs/common';
 import { CqrsModule } from '@nestjs/cqrs';
 import { TypegooseModule } from 'nestjs-typegoose';
-import { CircleAuthGuard } from 'src/auth/circle.guard';
-import { SessionAuthGuard } from 'src/auth/iron-session.guard';
 import { CirclesModule } from 'src/circle/circles.module';
 import { CommonTools } from 'src/common/common.service';
 import { DiscordService } from 'src/common/discord.service';
@@ -49,6 +47,7 @@ import { GetCollectionService } from './services/get-collection.service';
 import { ZealyService } from 'src/credentials/services/zealy.service';
 import { forwardRef } from 'react';
 import { UsersModule } from 'src/users/users.module';
+import { AuthModule } from 'src/auth/auth.module';
 
 @Module({
   imports: [
@@ -63,6 +62,7 @@ import { UsersModule } from 'src/users/users.module';
     SecretModule,
     LookupModule,
     UsersModule,
+    AuthModule,
   ],
   controllers: [CollectionController],
   providers: [
@@ -76,12 +76,10 @@ import { UsersModule } from 'src/users/users.module';
     ActivityBuilder,
     AdvancedAccessService,
     ActivityResolver,
-    SessionAuthGuard,
     RequestProvider,
     GuildxyzService,
     MintKudosService,
     ResponseCredentialingService,
-    CircleAuthGuard,
     RolesService,
     ActivityOnAddData,
     DiscordService,

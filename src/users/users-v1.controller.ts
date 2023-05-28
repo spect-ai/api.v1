@@ -148,7 +148,6 @@ export class UsersControllerV1 {
   @UseGuards(SessionAuthGuard)
   @Delete('/apiKey')
   deleteApiKey(@Body() body: { apiKey: string }) {
-    console.log({ body });
     return this.usersService.deleteApiKey(body.apiKey);
   }
 }

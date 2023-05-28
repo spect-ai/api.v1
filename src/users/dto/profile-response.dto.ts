@@ -95,4 +95,6 @@ export class PrivateProfileResponseDto {
   @IsString()
   @IsNotEmpty()
   discordId?: string;
+
+  apiKeys?: any;
 }

@@ -13,8 +13,6 @@ import { RolesService } from 'src/roles/roles.service';
 import { CommonTools } from 'src/common/common.service';
 import { CircleRegistryService } from './registry.circle.service';
 import { RegistryModule } from 'src/registry/registry.module';
-import { SessionAuthGuard } from 'src/auth/iron-session.guard';
-import { CircleAuthGuard } from 'src/auth/circle.guard';
 import { QueryHandlers } from './queries/handlers';
 import { CircleV1Controller } from './circles-v1.controller';
 import { CqrsModule } from '@nestjs/cqrs';
@@ -36,6 +34,7 @@ import { RealtimeGateway } from 'src/realtime/realtime.gateway';
 import { EncryptionService } from 'src/common/encryption.service';
 import { KeysRepository } from 'src/users/keys.repository';
 import { UsersModule } from 'src/users/users.module';
+import { AuthModule } from 'src/auth/auth.module';
 
 @Module({
   imports: [
@@ -45,6 +44,7 @@ import { UsersModule } from 'src/users/users.module';
     RegistryModule,
     CqrsModule,
     forwardRef(() => UsersModule),
+    forwardRef(() => AuthModule),
   ],
   controllers: [
     CirclesController,
@@ -63,8 +63,6 @@ import { UsersModule } from 'src/users/users.module';
     RolesService,
     CommonTools,
     CircleRegistryService,
-    SessionAuthGuard,
-    CircleAuthGuard,
     ...QueryHandlers,
     ...CommandHandlers,
     ...EventHandlers,
@@ -84,6 +82,7 @@ import { UsersModule } from 'src/users/users.module';
     CirclesRepository,
     CirclesModule,
     CirclesPrivateRepository,
+    RolesService,
   ],
 })
 export class CirclesModule {}

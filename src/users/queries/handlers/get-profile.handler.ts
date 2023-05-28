@@ -99,6 +99,7 @@ export class GetProfileQueryHandler implements IQueryHandler<GetProfileQuery> {
   ): PublicProfileResponseDto {
     delete user.email;
     delete user.discordId;
+    delete user.apiKeys;
     return user;
   }
 }
