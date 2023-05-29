@@ -46,6 +46,12 @@ export class CreateCircleCommandHandler
           await this.circlesRepository.getCircleWithUnpopulatedReferences(
             createCircleDto.parent,
           );
+
+        if (parentCircle.pricingPlan === 0) {
+          throw new InternalServerErrorException(
+            'You cannot create a workstream in the free plan, please upgrade to a paid plan.',
+          );
+        }
       }
       let createdCircle: Circle;
       const memberRoles = {};
@@ -67,6 +73,8 @@ export class CreateCircleCommandHandler
             showPayment: false,
             showDiscussion: false,
           },
+          pricingPlan: parentCircle.pricingPlan,
+          topUpMembers: parentCircle.topUpMembers,
         });
         await this.circlesRepository.updateById(parentCircle.id as string, {
           ...parentCircle,
@@ -94,6 +102,8 @@ export class CreateCircleCommandHandler
             showPayment: false,
             showDiscussion: false,
           },
+          pricingPlan: 0,
+          topUpMembers: 0,
         });
       }
 

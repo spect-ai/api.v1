@@ -36,6 +36,20 @@ export class JoinUsingInvitationCommandHandler
       const { id, joinCircleDto, caller } = command;
       const circle =
         await this.circlesRepository.getCircleWithUnpopulatedReferences(id);
+
+      if (circle.pricingPlan === 0 && circle.members.length > 2) {
+        throw new InternalServerErrorException(
+          'This space has reached the maximum number of members for the free plan. Please ask the steward to upgrade to a paid plan.',
+        );
+      }
+      if (
+        circle.pricingPlan === 1 &&
+        circle.members.length > circle.topUpMembers + 4
+      ) {
+        throw new InternalServerErrorException(
+          'This space has reached the maximum number of members for the paid plan. Please ask the steward to upgrade to a higher plan, or top up the number of members.',
+        );
+      }
       this.validationService.validateNewMember(circle, caller.id);
 
       const inviteIndex = circle.invites.findIndex(

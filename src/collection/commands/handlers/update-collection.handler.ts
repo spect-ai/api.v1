@@ -9,7 +9,10 @@ import { CollectionRepository } from 'src/collection/collection.repository';
 import { CollectionResponseDto } from 'src/collection/dto/collection-response.dto';
 import { UpdateCollectionDto } from 'src/collection/dto/update-collection-request.dto';
 import { CollectionUpdatedEvent } from 'src/collection/events';
-import { Collection } from 'src/collection/model/collection.model';
+import {
+  Collection,
+  FormMetadata,
+} from 'src/collection/model/collection.model';
 import { GetPrivateViewCollectionQuery } from 'src/collection/queries';
 import { PoapService } from 'src/credentials/services/poap.service';
 import { LoggingService } from 'src/logging/logging.service';
@@ -82,10 +85,11 @@ export class UpdateCollectionCommandHandler
         throw new InternalServerErrorException('Form metadata is invalid');
       }
 
+      const circle: Circle = await this.queryBus.execute(
+        new GetCircleByIdQuery(collection.parents[0]),
+      );
+
       if (formMetadata && formMetadata.paymentConfig) {
-        const circle: Circle = await this.queryBus.execute(
-          new GetCircleByIdQuery(collection.parents[0]),
-        );
         const whitelistedAddresses = circle.whitelistedAddresses;
         Object.values(formMetadata.paymentConfig.networks).map((network) => {
           const receiverAddress = network.receiverAddress;
@@ -97,6 +101,17 @@ export class UpdateCollectionCommandHandler
             });
           }
         });
+      }
+
+      if (circle.pricingPlan === 0) {
+        const pluginsCount = this.getPluginsCount(
+          updateCollectionDto.formMetadata,
+        );
+        if (pluginsCount > 2) {
+          throw new InternalServerErrorException({
+            message: `You can only have 2 plugins per form in the free plan, upgrade to the premium plan to add unlimited plugins`,
+          });
+        }
       }
 
       await this.updateValidationService.validateUpdateCollectionCommand(
@@ -303,6 +318,36 @@ export class UpdateCollectionCommandHandler
       this.logger.error(e);
       throw new InternalServerErrorException(e);
     }
+  }
+
+  getPluginsCount(formMetadata: FormMetadata): number {
+    let pluginsCount = 0;
+    Object.keys(formMetadata).map((prop) => {
+      if (prop === 'sybilProtectionEnabled' && formMetadata[prop]) {
+        pluginsCount++;
+      } else if (prop === 'poapEditCode' && formMetadata[prop]) {
+        pluginsCount++;
+      } else if (prop === 'mintkudosTokenId' && formMetadata[prop]) {
+        pluginsCount++;
+      } else if (prop === 'surveyTokenId' && formMetadata[prop]) {
+        pluginsCount++;
+      } else if (prop === 'formRoleGating' && formMetadata[prop]?.length) {
+        pluginsCount++;
+      } else if (prop === 'discordRoleGating' && formMetadata[prop]?.length) {
+        pluginsCount++;
+      } else if (prop === 'zealyXP' && formMetadata[prop] > 0) {
+        pluginsCount++;
+      } else if (prop === 'allowAnonymousResponses' && !formMetadata[prop]) {
+        pluginsCount++;
+      } else if (prop === 'paymentConfig' && formMetadata[prop]) {
+        pluginsCount++;
+      } else if (prop === 'discordConfig' && formMetadata[prop]) {
+        pluginsCount++;
+      } else if (prop === 'captchaEnabled' && formMetadata[prop]) {
+        pluginsCount++;
+      }
+    });
+    return pluginsCount;
   }
 }
 

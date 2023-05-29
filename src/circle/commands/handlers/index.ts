@@ -43,6 +43,8 @@ import {
 } from '../payments/handlers/update-payment.handler';
 import { GetSpaceCollectionsCommandHandler } from './get-space-collections.handler';
 import { GetRegistryCommandHandler } from './get-registry.handler';
+import { UpgradePlanCommandHandler } from './uprade-plan.handler';
+import { CancelPlanCommandHandler } from './cancel-plan.handler';
 
 export const CommandHandlers = [
   JoinUsingInvitationCommandHandler,
@@ -80,4 +82,6 @@ export const CommandHandlers = [
   UpdateMultiplePaymentsCommandHandler,
   GetSpaceCollectionsCommandHandler,
   GetRegistryCommandHandler,
+  UpgradePlanCommandHandler,
+  CancelPlanCommandHandler,
 ];

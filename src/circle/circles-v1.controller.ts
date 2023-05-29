@@ -6,7 +6,9 @@ import {
   Patch,
   Post,
   Query,
+  RawBodyRequest,
   Request,
+  Response,
   SetMetadata,
   UploadedFile,
   UseGuards,
@@ -19,7 +21,6 @@ import {
   ViewCircleAuthGuard,
 } from 'src/auth/circle.guard';
 import {
-  AdminAuthGuard,
   PublicViewAuthGuard,
   SessionAuthGuard,
 } from 'src/auth/iron-session.guard';
@@ -38,6 +39,7 @@ import {
   UpdateFolderCommand,
   UpdateFolderOrderCommand,
   UpdateFolderDetailsCommand,
+  UpgradePlanCommand,
 } from './commands/impl';
 import { WhitelistMemberAddressCommand } from './commands/roles/impl/whitelist-member-address.command';
 import { AddSafeCommand, RemoveSafeCommand } from './commands/safe/impl';
@@ -58,6 +60,7 @@ import { SafeAddress } from './dto/safe-request.dto';
 import {
   AddWhitelistedAddressRequestDto,
   UpdateCircleRequestDto,
+  UpgradePlanDto,
   WhitelistAddressRequestDto,
 } from './dto/update-circle-request.dto';
 import { UpdateMemberRolesDto } from './dto/update-member-role.dto';
@@ -111,6 +114,8 @@ import {
 } from './dto/payment.dto';
 import { ConditionGroup } from 'src/collection/types/types';
 import { v4 as uuidv4 } from 'uuid';
+import Stripe from 'stripe';
+import { CancelPlanCommand } from './commands/impl/cancel-plan.command';
 
 @Controller('circle/v1')
 @ApiTags('circle.v1')
@@ -137,7 +142,73 @@ export class CircleV1Controller {
     }
   }
 
-  @UseGuards(ViewCircleAuthGuard)
+  // @UseGuards(ViewCircleAuthGuard)
+  @Post('/stripe/webhook')
+  async stripeWebhook(
+    @Request() request: RawBodyRequest<Request>,
+    @Response() response,
+  ) {
+    const sig = request.headers['stripe-signature'];
+    let event;
+    const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
+    const stripe = new Stripe(process.env.STRIPE_PVT_KEY, {
+      apiVersion: '2022-11-15',
+    });
+    try {
+      event = stripe.webhooks.constructEvent(
+        request.rawBody,
+        sig,
+        endpointSecret,
+      );
+    } catch (err) {
+      console.log(err);
+      response.status(400).send(`Webhook Error: ${err.message}`);
+      return;
+    }
+    console.log({ event });
+    switch (event.type) {
+      case 'checkout.session.completed':
+        const session = await stripe.checkout.sessions.retrieve(
+          event.data.object.id,
+          {
+            expand: ['line_items'],
+          },
+        );
+
+        const membersTopUp = session.line_items.data[1]?.quantity;
+        console.log({ session });
+
+        await this.circleRepository.updateCircleAndReturnWithPopulatedReferences(
+          session.client_reference_id,
+          {
+            pricingPlan: 1,
+            topUpMembers: membersTopUp || 0,
+            subscriptionId: session.subscription,
+          },
+        );
+
+        break;
+      case 'customer.subscription.deleted':
+        const subscription = event.data.object;
+        console.log({ subscription });
+        const circle = await this.circleRepository.findOne({
+          subscriptionId: subscription.id,
+        });
+        console.log({ circle });
+        await this.circleRepository.updateCircleAndReturnWithPopulatedReferences(
+          circle.id,
+          {
+            pricingPlan: 0,
+            topUpMembers: 0,
+            subscriptionId: '',
+          },
+        );
+        break;
+      default:
+        console.log(`Unhandled event type ${event.type}`);
+    }
+  }
+  @UseGuards(PublicViewAuthGuard)
   @Get('/:id')
   async findByObjectId(
     @Param() param: ObjectIdDto,
@@ -666,6 +737,29 @@ export class CircleV1Controller {
     return await this.circleCrudService.update(
       param.id,
       updateCircleRequestDto,
+    );
+  }
+
+  // @SetMetadata('permissions', ['manageCircleSettings'])
+  // @UseGuards(CircleAuthGuard)
+  @Post('/:id/upgradePlan')
+  async upgradePlan(
+    @Param() param: ObjectIdDto,
+    @Body() upgradePlanDto: UpgradePlanDto,
+    @Request() request,
+  ) {
+    console.log({ upgradePlanDto });
+    return await this.commandBus.execute(
+      new UpgradePlanCommand(upgradePlanDto, param.id, request.user),
+    );
+  }
+
+  // @SetMetadata('permissions', ['manageCircleSettings'])
+  // @UseGuards(CircleAuthGuard)
+  @Post('/:id/cancelPlan')
+  async cancelPlan(@Param() param: ObjectIdDto, @Request() request) {
+    return await this.commandBus.execute(
+      new CancelPlanCommand(param.id, request.user),
     );
   }
 }

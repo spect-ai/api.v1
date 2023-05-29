@@ -28,6 +28,8 @@ import {
   AddDataUsingAutomationCommand,
   AddMultipleDataUsingAutomationCommand,
 } from '../impl/add-data.command';
+import { GetCircleByIdQuery } from 'src/circle/queries/impl';
+import { Circle } from 'src/circle/model/circle.model';
 
 @Injectable()
 export class ActivityOnAddData {
@@ -109,6 +111,20 @@ export class AddDataCommandHandler implements ICommandHandler<AddDataCommand> {
       const collection = await this.collectionRepository.findById(collectionId);
       if (!collection) throw 'Collection does not exist';
       let verificationUserUniqueId;
+
+      const circle: Circle = await this.queryBus.execute(
+        new GetCircleByIdQuery(collection.parents[0]),
+      );
+
+      if (
+        collection.collectionType === 1 &&
+        circle.pricingPlan === 0 &&
+        Object.keys(collection.data || {}).length >= 200
+      ) {
+        throw new InternalServerErrorException(
+          'You have reached the maximum number of rows for your plan. Please upgrade your plan to add more rows.',
+        );
+      }
 
       if (collection.collectionType === 0) {
         if (collection.formMetadata.active === false)
@@ -313,7 +329,7 @@ export class AddDataCommandHandler implements ICommandHandler<AddDataCommand> {
       this.logger.error(
         `Failed adding data to collection Id ${collectionId} with error ${err}`,
       );
-      throw new InternalServerErrorException(`${err}`);
+      throw new InternalServerErrorException(err);
     }
   }
 

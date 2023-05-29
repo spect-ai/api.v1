@@ -306,6 +306,15 @@ export class Circle extends ProfileModel {
 
   @prop()
   version: number;
+
+  @prop()
+  pricingPlan: number;
+
+  @prop()
+  topUpMembers: number;
+
+  @prop()
+  subscriptionId: string;
 }
 
 export class ExtendedCircle extends Circle {
