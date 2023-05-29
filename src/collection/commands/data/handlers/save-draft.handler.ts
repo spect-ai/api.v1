@@ -76,6 +76,7 @@ export class SaveDraftCommandHandler
       };
       // eslint-disable-next-line prefer-const
       for (let [key, val] of Object.entries(data)) {
+        if (data['captcha']) continue;
         if (
           key !== '***' &&
           key !== collection.formMetadata.draftNextField?.[callerDiscordId]
