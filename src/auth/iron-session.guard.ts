@@ -60,6 +60,7 @@ export class SessionAuthGuard implements CanActivate {
       return true;
     } catch (error) {
       request.session.destroy();
+      if (error instanceof HttpException) throw error;
       throw new HttpException({ message: error }, 422);
     }
   }
