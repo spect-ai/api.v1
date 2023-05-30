@@ -126,7 +126,7 @@ export class AddPropertyDto {
    */
   @IsArray()
   @IsOptional()
-  viewConditions?: Condition[];
+  advancedConditions?: ConditionGroup;
 
   @IsObject()
   @IsOptional()
