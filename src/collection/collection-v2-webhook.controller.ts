@@ -32,13 +32,13 @@ import { RemoveSubscriptionCommand, SubscribeToEventCommand } from './commands';
 
 @Controller('collection/v2/webhook')
 @ApiTags('collection.v2.webhook')
-export class CollectionV2Controller {
+export class CollectionV2WebhookController {
   constructor(
     private readonly commandBus: CommandBus,
     private readonly queryBus: QueryBus,
     private readonly logger: LoggingService,
   ) {
-    this.logger.setContext(CollectionV2Controller.name);
+    this.logger.setContext(CollectionV2WebhookController.name);
   }
 
   @SetMetadata('permissions', ['manageSettings'])
