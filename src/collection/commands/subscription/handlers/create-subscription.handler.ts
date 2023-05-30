@@ -89,7 +89,6 @@ export class SendEventToSubscribersCommandHandler
       }
     } catch (error) {
       this.logger.error(error);
-      throw error;
     }
   }
 }

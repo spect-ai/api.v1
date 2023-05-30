@@ -545,16 +545,19 @@ export class PostOnDiscordActionCommandHandler
       );
 
       const fields = action.data.fields
-        ? action.data.fields
-            .map((f) => ({
-              name: f.label,
-              value:
-                collection.properties?.[f.value]?.type === 'singleSelect'
-                  ? collection?.data?.[relevantIds.dataSlug]?.[f.value]?.label
-                  : collection?.data?.[relevantIds.dataSlug]?.[f.value],
-            }))
-            .filter((f) => f.value !== undefined)
-        : [];
+        ?.map((f) => ({
+          name: collection.properties?.[f.value]?.name,
+          value: collection?.data?.[relevantIds.dataSlug]?.[f.value],
+          type: collection.properties?.[f.value]?.type,
+        }))
+        .filter((f) => {
+          if (f.type === 'singleSelect') {
+            return f.value?.value;
+          } else if (f.type === 'multiSelect') {
+            return f.value?.some((v) => v.value);
+          }
+          return f.value !== undefined && f.value !== null && f.value !== '';
+        });
 
       await this.discordService.postData(
         action.data.channel.value,
@@ -763,13 +766,18 @@ export class PostOnDiscordThreadCommandHandler
 
       const fields = action.data.fields
         ?.map((f) => ({
-          name: f.value,
-          value:
-            collection.properties?.[f.value]?.type === 'singleSelect'
-              ? collection?.data?.[relevantIds.dataSlug]?.[f.value]?.label
-              : collection?.data?.[relevantIds.dataSlug]?.[f.value],
+          name: collection.properties?.[f.value]?.name,
+          value: collection?.data?.[relevantIds.dataSlug]?.[f.value],
+          type: collection.properties?.[f.value]?.type,
         }))
-        .filter((f) => f.value !== undefined);
+        .filter((f) => {
+          if (f.type === 'singleSelect') {
+            return f.value?.value !== undefined;
+          } else if (f.type === 'multiSelect') {
+            return f.value?.some((v) => v.value !== undefined);
+          }
+          return f.value !== undefined && f.value !== null && f.value !== '';
+        });
 
       const res = await this.discordService.postData(
         threadRef.threadId,
