@@ -48,7 +48,10 @@ export class SessionAuthGuard implements CanActivate {
         request.user = await this.usersRepository.findById(keyData.userId);
       } else return false;
 
-      if (this.rateLimitCacheService.hasCrossedLimit(request.user.id)) {
+      if (
+        request.headers['x-api-key'] &&
+        this.rateLimitCacheService.hasCrossedLimit(request.user.id)
+      ) {
         throw new HttpException(
           'You have exceeded the rate limit. Please try again later.',
           429,
