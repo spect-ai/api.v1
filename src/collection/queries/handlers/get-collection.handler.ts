@@ -324,7 +324,10 @@ export class GetPrivateViewCollectionQueryHandler
       }
 
       // add __payment__ to properties if payment config is set
-      if (collectionToGet.formMetadata?.paymentConfig) {
+      if (
+        collectionToGet.formMetadata?.paymentConfig &&
+        collectionToGet.properties
+      ) {
         collectionToGet.properties.__payment__ = {
           name: 'Payment',
           id: '__payment__',
