@@ -20,9 +20,11 @@ export class RemoveSubscriptionCommandHandler
     [eventName: string]: Subscription[];
   }> {
     try {
-      const { collectionId, eventName, subscriptionId } = command;
-      const collection = await this.collectionRepository.findById(collectionId);
-      if (!collection) throw `Collection with id ${collectionId} not found`;
+      const { collectionSlug, eventName, subscriptionId } = command;
+      const collection = await this.collectionRepository.findOne({
+        slug: collectionSlug,
+      });
+      if (!collection) throw `Collection with id ${collectionSlug} not found`;
 
       const subscriptions = {
         ...(collection.subscriptions || {}),
@@ -33,9 +35,14 @@ export class RemoveSubscriptionCommandHandler
         ],
       };
 
-      await this.collectionRepository.updateById(collectionId, {
-        subscriptions,
-      });
+      await this.collectionRepository.updateByFilter(
+        {
+          slug: collectionSlug,
+        },
+        {
+          subscriptions,
+        },
+      );
 
       return subscriptions;
     } catch (error) {

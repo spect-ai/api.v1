@@ -2,7 +2,7 @@ import { CreateSubscriptionToEventDto } from 'src/collection/dto/v2/subcription.
 
 export class SubscribeToEventCommand {
   constructor(
-    public readonly collectionId: string,
+    public readonly collectionSlug: string,
     public readonly createSubscriptionDto: CreateSubscriptionToEventDto,
   ) {}
 }

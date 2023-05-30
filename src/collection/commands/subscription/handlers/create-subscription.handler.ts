@@ -7,6 +7,7 @@ import {
   SendEventToSubscribersCommand,
   SubscribeToEventCommand,
 } from '../impl/create-subscription.command';
+import fetch from 'node-fetch';
 
 @CommandHandler(SubscribeToEventCommand)
 export class SubscribeToEventCommandHandler
@@ -23,9 +24,11 @@ export class SubscribeToEventCommandHandler
     [eventName: string]: Subscription[];
   }> {
     try {
-      const { collectionId, createSubscriptionDto } = command;
-      const collection = await this.collectionRepository.findById(collectionId);
-      if (!collection) throw `Collection with id ${collectionId} not found`;
+      const { collectionSlug, createSubscriptionDto } = command;
+      const collection = await this.collectionRepository.findOne({
+        slug: collectionSlug,
+      });
+      if (!collection) throw `Collection with id ${collectionSlug} not found`;
 
       const { eventName, url, method, headers, body, params, query } =
         createSubscriptionDto;
@@ -45,9 +48,14 @@ export class SubscribeToEventCommandHandler
           },
         ],
       };
-      await this.collectionRepository.updateById(collectionId, {
-        subscriptions,
-      });
+      await this.collectionRepository.updateByFilter(
+        {
+          slug: collectionSlug,
+        },
+        {
+          subscriptions,
+        },
+      );
 
       return subscriptions;
     } catch (error) {
@@ -81,10 +89,22 @@ export class SendEventToSubscribersCommandHandler
         if (sub.url) {
           const options = {};
           if (sub.headers) options['headers'] = sub.headers;
-          if (sub.body) options['body'] = sub.body;
+          if (sub.body)
+            options['body'] = {
+              data,
+              properties: collection.properties,
+              name: collection.name,
+              slug: collection.slug,
+            };
           if (sub.params) options['params'] = sub.params;
           if (sub.query) options['query'] = sub.query;
-          await fetch(sub.url, options);
+          try {
+            await fetch(sub.url, options);
+          } catch (error) {
+            this.logger.error(
+              `Error sending event to ${sub.url}: ${error?.message || error}`,
+            );
+          }
         }
       }
     } catch (error) {
