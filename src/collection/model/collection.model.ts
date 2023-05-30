@@ -178,6 +178,28 @@ export class Collection extends BaseModel {
 
   @prop()
   version: number;
+
+  @prop()
+  subscriptions: {
+    [eventName: string]: Subscription[];
+  };
+}
+
+export interface Subscription {
+  id: string;
+  eventName: string;
+  url: string;
+  headers?: {
+    [key: string]: string;
+  };
+  method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
+  body?: BodyInit;
+  params?: {
+    [key: string]: string;
+  };
+  query?: {
+    [key: string]: string;
+  };
 }
 
 export interface FormMetadata {

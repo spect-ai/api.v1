@@ -15,6 +15,7 @@ import { DataAddedEvent } from '../impl/data-added.event';
 import { AddItemsCommand as AddItemsToUserCommand } from 'src/users/commands/impl';
 import { PerformAutomationOnCollectionDataAddCommand } from 'src/automation/commands/impl';
 import { UpdateMultipleCirclesCommand } from 'src/circle/commands/impl/update-circle.command';
+import { SendEventToSubscribersCommand } from 'src/collection/commands/subscription/impl/create-subscription.command';
 
 @EventsHandler(DataAddedEvent)
 export class DataAddedEventHandler implements IEventHandler<DataAddedEvent> {
@@ -121,6 +122,10 @@ export class DataAddedEventHandler implements IEventHandler<DataAddedEvent> {
           null,
           caller.id,
         ),
+      );
+
+      this.commandBus.execute(
+        new SendEventToSubscribersCommand(collection.id, 'dataAdded', data),
       );
 
       // console.log('event', `${collection.slug}:dataAdded`);
