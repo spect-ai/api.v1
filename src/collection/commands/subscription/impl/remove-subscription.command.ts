@@ -2,6 +2,6 @@ export class RemoveSubscriptionCommand {
   constructor(
     public readonly collectionSlug: string,
     public readonly eventName: string,
-    public readonly subscriptionId: string,
+    public readonly subscribedUrl: string,
   ) {}
 }

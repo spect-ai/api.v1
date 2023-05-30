@@ -179,6 +179,7 @@ export class AdvancedAccessService {
     delete collection.formMetadata?.idLookup;
     delete collection.formMetadata?.drafts;
     delete collection.formMetadata?.verificationTokens;
+    delete collection.subscriptions;
     return collection;
   }
 }

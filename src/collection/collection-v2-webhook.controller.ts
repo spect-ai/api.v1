@@ -59,10 +59,10 @@ export class CollectionV2WebhookController {
   async unsubscribe(
     @Param() param: RequiredSlugDto,
     @Query('eventName') eventName: string,
-    @Query('id') id: string,
+    @Body('subscribedUrl') subscribedUrl: string,
   ): Promise<CollectionDataResponseDto> {
-    return await this.queryBus.execute(
-      new RemoveSubscriptionCommand(param.slug, eventName, id),
+    return await this.commandBus.execute(
+      new RemoveSubscriptionCommand(param.slug, eventName, subscribedUrl),
     );
   }
 }

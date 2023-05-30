@@ -85,22 +85,30 @@ export class SendEventToSubscribersCommandHandler
       const subscriptions = collection.subscriptions || {};
       const subscription = subscriptions[eventName];
       if (!subscription) throw `No subscription for event ${eventName}`;
+      const dataItems = {};
+      for (const [key, value] of Object.entries(data)) {
+        dataItems[key] = {
+          value,
+          property: collection.properties[key],
+        };
+      }
       for (const sub of subscription) {
         if (sub.url) {
           const options = {};
-          if (sub.headers) options['headers'] = sub.headers;
-          if (sub.body)
-            options['body'] = {
-              data,
-              properties: collection.properties,
-              name: collection.name,
-              slug: collection.slug,
-            };
+          options['body'] = dataItems;
+          options['headers'] = {
+            ...(sub.headers || {}),
+            'Content-Type': 'application/json',
+          };
+
           if (sub.params) options['params'] = sub.params;
           if (sub.query) options['query'] = sub.query;
+          options['method'] = sub.method || 'POST';
           try {
-            await fetch(sub.url, options);
+            const res = await fetch(sub.url, options);
+            console.log({ res });
           } catch (error) {
+            console.log({ error });
             this.logger.error(
               `Error sending event to ${sub.url}: ${error?.message || error}`,
             );

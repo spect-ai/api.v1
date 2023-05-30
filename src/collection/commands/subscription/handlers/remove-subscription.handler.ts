@@ -17,10 +17,12 @@ export class RemoveSubscriptionCommandHandler
   }
 
   async execute(command: RemoveSubscriptionCommand): Promise<{
-    [eventName: string]: Subscription[];
+    [key: string]: {
+      [eventName: string]: string;
+    };
   }> {
     try {
-      const { collectionSlug, eventName, subscriptionId } = command;
+      const { collectionSlug, eventName, subscribedUrl } = command;
       const collection = await this.collectionRepository.findOne({
         slug: collectionSlug,
       });
@@ -30,7 +32,7 @@ export class RemoveSubscriptionCommandHandler
         ...(collection.subscriptions || {}),
         [eventName]: [
           ...(collection.subscriptions?.[eventName] || []).filter(
-            (subscription) => subscription.id !== subscriptionId,
+            (subscription) => subscription.url !== subscribedUrl,
           ),
         ],
       };
@@ -44,7 +46,11 @@ export class RemoveSubscriptionCommandHandler
         },
       );
 
-      return subscriptions;
+      return {
+        removed: {
+          [eventName]: subscribedUrl,
+        },
+      };
     } catch (error) {
       this.logger.error(error);
       throw error;
