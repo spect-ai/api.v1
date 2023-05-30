@@ -156,6 +156,7 @@ export class UpdateCollectionCommandHandler
         formMetadata.allowAnonymousResponses
       ) {
         const { formMetadata } = updatedCollection;
+        delete formMetadata.pages['connect'];
         updatedCollection = await this.collectionRepository.updateById(
           collectionId,
           {
@@ -163,7 +164,6 @@ export class UpdateCollectionCommandHandler
               ...formMetadata,
               pages: {
                 ...formMetadata.pages,
-                ['connect']: undefined,
               },
               pageOrder: formMetadata.pageOrder.filter(
                 (page) => page !== 'connect',
