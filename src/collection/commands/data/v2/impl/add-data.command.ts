@@ -6,5 +6,6 @@ export class AddProjectDataCommand {
     public readonly caller: User,
     public readonly collectionSlug: string,
     public readonly validateData = true,
+    public readonly atomic = true,
   ) {}
 }

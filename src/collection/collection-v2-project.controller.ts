@@ -44,24 +44,32 @@ export class CollectionV2ProjectController {
 
   @SetMetadata('permissions', ['updateResponsesManually'])
   @UseGuards(CollectionAuthGuard)
-  @Patch('slug/:slug/addDataGuarded')
+  @Patch('/slug/:slug/addDataGuarded')
   async addDataGuarded(
     @Param() param: RequiredSlugDto,
     @Body() addDataDto: AddProjectDataDto,
+    @Query('atomic') atomic: string, // if true, then the update will be atomic, ie, if validation fails for one field it wont write the data. If false, data will be written for fields where validation passed
     @Request() req,
   ): Promise<Collection> {
     return await this.commandBus.execute(
-      new AddProjectDataCommand(addDataDto.data, req.user, param.slug, false),
+      new AddProjectDataCommand(
+        addDataDto.data,
+        req.user,
+        param.slug,
+        true,
+        atomic === 'false' ? false : true,
+      ),
     );
   }
 
   @SetMetadata('permissions', ['updateResponsesManually'])
   @UseGuards(CollectionAuthGuard)
-  @Patch('slug/:slug/updateDataGuarded')
+  @Patch('/slug/:slug/updateDataGuarded')
   async updateDataGuarded(
     @Param() param: RequiredSlugDto,
     @Query() dataSlugParam: RequiredUUIDDto,
     @Body() updateDataDto: UpdateDataDto,
+    @Query('atomic') atomic: string, // if true, then the update will be atomic, ie, if validation fails for one field it wont write the data. If false, data will be written for fields where validation passed
     @Request() req,
   ): Promise<Collection> {
     return await this.commandBus.execute(
@@ -70,6 +78,7 @@ export class CollectionV2ProjectController {
         req.user,
         param.slug,
         dataSlugParam.dataId,
+        atomic === 'false' ? false : true,
       ),
     );
   }

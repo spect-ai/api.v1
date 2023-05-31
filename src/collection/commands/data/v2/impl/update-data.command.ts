@@ -6,5 +6,6 @@ export class UpdateProjectDataCommand {
     public readonly caller: User,
     public readonly collectionSlug: string,
     public readonly dataSlug: string,
+    public readonly atomic = true,
   ) {}
 }

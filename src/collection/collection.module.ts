@@ -52,6 +52,7 @@ import { CollectionV2Controller } from './collection-v2.controller';
 import { CollectionV2ProjectController } from './collection-v2-project.controller';
 import { CollectionV2FormController } from './collection-v2-form.controller';
 import { CollectionV2WebhookController } from './collection-v2-webhook.controller';
+import { ProjectDataValidationV2Service } from './services/v2/data-validation-v2.service';
 
 @Module({
   imports: [
@@ -109,6 +110,7 @@ import { CollectionV2WebhookController } from './collection-v2-webhook.controlle
     SurveyTokenService,
     GetCollectionService,
     ZealyService,
+    ProjectDataValidationV2Service,
   ],
   exports: [CollectionModule, CollectionRepository],
 })
