@@ -21,6 +21,7 @@ import {
 import { Collection } from './model/collection.model';
 import { UpdateProjectDataCommand } from './commands';
 import { RequiredUUIDDto } from 'src/common/dtos/string.dto';
+import { RequiredSlugDto } from 'src/common/dtos/string.dto';
 
 /**
  Built with keeping integratoors in mind, this API is meant to
@@ -43,22 +44,22 @@ export class CollectionV2ProjectController {
 
   @SetMetadata('permissions', ['updateResponsesManually'])
   @UseGuards(CollectionAuthGuard)
-  @Patch('/:id/addDataGuarded')
+  @Patch('slug/:slug/addDataGuarded')
   async addDataGuarded(
-    @Param() param: ObjectIdDto,
+    @Param() param: RequiredSlugDto,
     @Body() addDataDto: AddProjectDataDto,
     @Request() req,
   ): Promise<Collection> {
     return await this.commandBus.execute(
-      new AddProjectDataCommand(addDataDto.data, req.user, param.id, false),
+      new AddProjectDataCommand(addDataDto.data, req.user, param.slug, false),
     );
   }
 
   @SetMetadata('permissions', ['updateResponsesManually'])
   @UseGuards(CollectionAuthGuard)
-  @Patch('/:id/updateDataGuarded')
+  @Patch('slug/:slug/updateDataGuarded')
   async updateDataGuarded(
-    @Param() param: ObjectIdDto,
+    @Param() param: RequiredSlugDto,
     @Query() dataSlugParam: RequiredUUIDDto,
     @Body() updateDataDto: UpdateDataDto,
     @Request() req,
@@ -67,7 +68,7 @@ export class CollectionV2ProjectController {
       new UpdateProjectDataCommand(
         updateDataDto.data,
         req.user,
-        param.id,
+        param.slug,
         dataSlugParam.dataId,
       ),
     );

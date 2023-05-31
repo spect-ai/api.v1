@@ -4,7 +4,7 @@ export class UpdateProjectDataCommand {
   constructor(
     public readonly data: object,
     public readonly caller: User,
-    public readonly collectionId: string,
+    public readonly collectionSlug: string,
     public readonly dataSlug: string,
   ) {}
 }

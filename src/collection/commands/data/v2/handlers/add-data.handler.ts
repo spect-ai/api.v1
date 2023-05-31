@@ -30,9 +30,11 @@ export class AddProjectDataCommandHandler
   }
 
   async execute(command: AddProjectDataCommand) {
-    const { data, caller, collectionId, validateData } = command;
+    const { data, caller, collectionSlug, validateData } = command;
     try {
-      const collection = await this.collectionRepository.findById(collectionId);
+      const collection = await this.collectionRepository.findOne({
+        slug: collectionSlug,
+      });
       if (!collection) throw 'Collection does not exist';
       if (collection.collectionType !== 1) throw 'Collection is not a project';
 
@@ -94,7 +96,7 @@ export class AddProjectDataCommandHandler
       }
 
       const updatedCollection = await this.collectionRepository.updateById(
-        collectionId,
+        collection.id,
         {
           data: {
             ...collection.data,
@@ -123,7 +125,7 @@ export class AddProjectDataCommandHandler
     } catch (err) {
       console.log({ err });
       this.logger.error(
-        `Failed adding data to collection Id ${collectionId} with error ${err}`,
+        `Failed adding data to collection Id ${collectionSlug} with error ${err}`,
       );
       throw new InternalServerErrorException(`${err}`);
     }

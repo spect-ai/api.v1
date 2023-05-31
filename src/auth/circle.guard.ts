@@ -64,6 +64,7 @@ export class CircleAuthGuard implements CanActivate {
     } catch (error) {
       console.log(error);
       // request.session.destroy();
+      if (error instanceof HttpException) throw error;
       throw new HttpException({ message: error }, 422);
     }
   }
@@ -97,6 +98,7 @@ export class CreateCircleAuthGuard implements CanActivate {
     } catch (error) {
       console.log(error);
       // request.session.destroy();
+      if (error instanceof HttpException) throw error;
       throw new HttpException({ message: error }, 422);
     }
   }
@@ -135,6 +137,7 @@ export class ViewCircleAuthGuard implements CanActivate {
     } catch (error) {
       console.log(error);
       // request.session.destroy();
+      if (error instanceof HttpException) throw error;
       throw new HttpException({ message: error }, 422);
     }
   }
