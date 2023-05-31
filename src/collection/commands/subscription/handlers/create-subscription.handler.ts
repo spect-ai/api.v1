@@ -8,6 +8,7 @@ import {
   SubscribeToEventCommand,
 } from '../impl/create-subscription.command';
 import fetch from 'node-fetch';
+import { CommonTools } from 'src/common/common.service';
 
 @CommandHandler(SubscribeToEventCommand)
 export class SubscribeToEventCommandHandler
@@ -72,8 +73,52 @@ export class SendEventToSubscribersCommandHandler
   constructor(
     private readonly collectionRepository: CollectionRepository,
     private readonly logger: LoggingService,
+    private readonly commonTools: CommonTools,
   ) {
     this.logger.setContext('SendEventToSubscribersCommandHandler');
+  }
+
+  getHumanFriendlyValue(value: any, property: any) {
+    switch (property.type) {
+      case 'shortText':
+      case 'email':
+      case 'ethAddress':
+      case 'url':
+      case 'number':
+      case 'date':
+      case 'slider':
+        return value;
+      case 'singleSelect':
+      case 'user':
+        return value?.label;
+      case 'multiSelect':
+      case 'user[]':
+        return value?.map((v) => v.label).join(', ');
+      case 'discord':
+        return {
+          id: value?.id,
+          username: `${value?.username}#${value?.discriminator}`,
+        };
+      case 'telegram':
+        return {
+          id: value?.id,
+          username: value?.username,
+        };
+
+      case 'github':
+        return {
+          id: value?.id,
+          username: value?.login,
+        };
+      case 'longText':
+        return this.commonTools.enrich(value);
+      case 'reward':
+        return `${value?.value} ${value?.token?.label} on ${value?.chain?.label}`;
+      case 'readonly':
+        return null;
+      default:
+        return value;
+    }
   }
 
   async execute(command: SendEventToSubscribersCommand): Promise<void> {
@@ -87,15 +132,29 @@ export class SendEventToSubscribersCommandHandler
       if (!subscription) throw `No subscription for event ${eventName}`;
       const dataItems = {};
       for (const [key, value] of Object.entries(data)) {
-        dataItems[key] = {
+        if (
+          !collection.properties[key] ||
+          !collection.properties[key].isPartOfFormView
+        )
+          continue;
+        const humanFriendlyValue = this.getHumanFriendlyValue(
           value,
-          property: collection.properties[key],
-        };
+          collection.properties[key],
+        );
+        if (humanFriendlyValue)
+          dataItems[collection.properties[key].name] = humanFriendlyValue;
       }
+      if (Object.keys(dataItems).length === 0) return;
+      const dataSlug = data['slug'];
+      dataItems['Response Id'] = dataSlug;
+      dataItems['Response Created At'] =
+        collection.dataActivities?.[dataSlug]?.[
+          collection.dataActivityOrder?.[dataSlug]?.[0]
+        ]?.timestamp || '';
       for (const sub of subscription) {
         if (sub.url) {
           const options = {};
-          options['body'] = dataItems;
+          options['body'] = JSON.stringify(dataItems);
           options['headers'] = {
             ...(sub.headers || {}),
             'Content-Type': 'application/json',

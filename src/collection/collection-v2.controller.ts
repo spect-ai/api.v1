@@ -31,9 +31,38 @@ export class CollectionV2Controller {
   }
 
   @SetMetadata('permissions', ['viewResponses'])
+  @UseGuards(ViewCollectionAuthGuard)
+  @Get('/slug/:slug')
+  async getCollectionBySlug(
+    @Param() param: RequiredSlugDto,
+  ): Promise<CollectionDataResponseDto> {
+    const res = await this.queryBus.execute(
+      new GetCollectionBySlugQuery(
+        param.slug,
+        {},
+        {
+          id: 1,
+          name: 1,
+          slug: 1,
+          description: 1,
+          collectionType: 1,
+          properties: 1,
+          propertyOrder: 1,
+          'formMetadata.pages': 1,
+          'formMetadata.pageOrder': 1,
+        },
+      ),
+    );
+
+    if (res.collectionType === 0) delete res.propertyOrder;
+    else delete res.formMetadata;
+    return res;
+  }
+
+  @SetMetadata('permissions', ['viewResponses'])
   @UseGuards(StrongerCollectionAuthGuard)
   @Get('/slug/:slug/data')
-  async findBySlug(
+  async getDataByCollectionSlug(
     @Param() param: RequiredSlugDto,
   ): Promise<CollectionDataResponseDto> {
     return await this.queryBus.execute(

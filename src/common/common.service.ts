@@ -3,6 +3,7 @@ import { detailedDiff as objectDiff } from 'deep-object-diff';
 import { diff as arrayDiff } from 'fast-array-diff';
 import { PropertyType } from 'src/collection/types/types';
 import { MappedItem } from './interfaces';
+import TurndownService from 'turndown';
 
 @Injectable()
 export class CommonTools {
@@ -149,5 +150,65 @@ export class CommonTools {
           elem1.token.address !== elem2.token.address
         );
     }
+  }
+
+  isHtml(str: string) {
+    const regex = /(<([^>]+)>)/gi;
+    return regex.test(str);
+  }
+
+  removeBackslashFromEmptyLines(text: string) {
+    if (!text) return text;
+    const lines = text.split('\n');
+    const modifiedLines = lines.map((line, index) => {
+      if (line.trim() === '\\') {
+        return '';
+      } else {
+        return line;
+      }
+    });
+    return modifiedLines.join('\n');
+  }
+
+  enrichHeadings(text: string) {
+    if (!text) return text;
+    const lines = text.split('\n');
+    const convertedLines = lines.map((line) => {
+      const trimmedLine = line.trim();
+      if (trimmedLine.startsWith('# ')) {
+        const heading = trimmedLine.substring(2);
+        return `__**${heading}**__`;
+      } else if (trimmedLine.startsWith('## ')) {
+        const heading = trimmedLine.substring(3);
+        return `__${heading}__`;
+      } else if (trimmedLine.startsWith('### ')) {
+        const heading = trimmedLine.substring(4);
+        return `**${heading}**`;
+      }
+      return line;
+    });
+    return convertedLines.join('\n');
+  }
+
+  enrich(text: string) {
+    let md;
+    if (this.isHtml(text)) {
+      const turndownService = new TurndownService({
+        blankReplacement(content, node) {
+          const src = node.getAttribute('src');
+          if (src) {
+            return ` ${src} `;
+          }
+          return content;
+        },
+      });
+
+      md = turndownService.turndown(text);
+    } else md = text;
+
+    let enrichedText = this.removeBackslashFromEmptyLines(md || '');
+    enrichedText = this.enrichHeadings(enrichedText || '');
+
+    return enrichedText;
   }
 }

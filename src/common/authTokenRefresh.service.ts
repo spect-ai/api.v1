@@ -66,8 +66,12 @@ export class AuthTokenRefreshService {
   fetchForm() {
     fetch(
       'https://circles.spect.network/r/3c3cab39-4ecf-4230-83cb-157954d5283d',
-    ).then((res) => {
-      console.log({ fetched: res.status });
-    });
+    )
+      .then((res) => {
+        console.log({ fetched: res.status });
+      })
+      .catch((err) => {
+        console.log({ err });
+      });
   }
 }
