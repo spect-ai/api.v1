@@ -3,7 +3,7 @@ import { detailedDiff as objectDiff } from 'deep-object-diff';
 import { diff as arrayDiff } from 'fast-array-diff';
 import { PropertyType } from 'src/collection/types/types';
 import { MappedItem } from './interfaces';
-import TurndownService from 'turndown';
+import TurndownService = require('turndown');
 
 @Injectable()
 export class CommonTools {
@@ -195,7 +195,7 @@ export class CommonTools {
     if (this.isHtml(text)) {
       const turndownService = new TurndownService({
         blankReplacement(content, node) {
-          const src = node.getAttribute('src');
+          const src = (node as any).getAttribute('src');
           if (src) {
             return ` ${src} `;
           }

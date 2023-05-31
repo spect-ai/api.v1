@@ -44,6 +44,7 @@ import { StartVotingPeriodCommand } from 'src/collection/commands/data/impl/vote
 import { JoinedCircleEvent } from 'src/circle/events/impl';
 import { AddPaymentsCommand } from 'src/circle/commands/payments/impl';
 import { Collection } from 'src/collection/model/collection.model';
+import { CommonTools } from 'src/common/common.service';
 
 @Injectable()
 export class CommonActionService {
@@ -409,6 +410,7 @@ export class CreateCardActionCommandHandler
     private readonly logger: LoggingService,
     private readonly commandBus: CommandBus,
     private readonly queryBus: QueryBus,
+    private readonly commonTools: CommonTools,
   ) {
     this.logger.setContext(CreateCardActionCommandHandler.name);
   }
@@ -449,6 +451,16 @@ export class CreateCardActionCommandHandler
               value.mapping.from.data?.subFieldName,
               value.mapping.to.value,
             ]);
+          } else if (
+            fromCollection.properties[value.mapping.from?.value]?.type ===
+              'longText' &&
+            value.mapping.to.data?.type !== 'longText'
+          ) {
+            data[value.mapping.to.value] = this.commonTools.enrich(
+              fromCollection.data[relevantIds.dataSlug][
+                value.mapping.from.value
+              ],
+            );
           } else
             data[value.mapping.to.value] =
               fromCollection.data[relevantIds.dataSlug][

@@ -514,10 +514,14 @@ export class AddMultipleDataUsingAutomationCommandHandler
         const obj = {};
         for (const i of Object.keys(d)) {
           if (d[i] !== undefined) obj[i] = d[i];
+          if (
+            typeof d[i] === 'number' &&
+            collection.properties[i].type === 'shortText'
+          )
+            obj[i] = d[i].toString();
         }
         return obj;
       });
-
       for (const d of filteredData) {
         const validData = await this.validationService.validate(
           d,
