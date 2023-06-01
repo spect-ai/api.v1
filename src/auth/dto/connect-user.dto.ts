@@ -1,9 +1,6 @@
 import { IsNotEmpty, IsObject, IsString } from 'class-validator';
 import { Activity } from 'src/common/types/activity.type';
-import {
-  NotificationV2,
-  UserSubmittedApplication,
-} from 'src/users/types/types';
+import { NotificationV2 } from 'src/users/types/types';
 
 export class ConnectUserDto {
   /**
@@ -46,12 +43,6 @@ export class ConnectUserResponseDto {
   bio: string;
 
   /**
-   * The skills of the profile
-   * @example ["React", "NodeJS", "Solidity"]
-   */
-  skills: string[];
-
-  /**
    * Ethereum address
    * @example "0x6304CE63F2EBf8C0Cc76b60d34Cc52a84aBB6057"
    */
@@ -68,12 +59,6 @@ export class ConnectUserResponseDto {
    * @example []
    */
   accounts: string[];
-
-  /**
-   * Discord Integration user id
-   * @example "123456789"
-   */
-  // discordId: string;
 
   /**
    * Email of user
@@ -106,30 +91,6 @@ export class ConnectUserResponseDto {
   collectionsSubmittedTo: string[];
 
   /**
-   * List of cards a user is currently assigned to
-   * @example ['62f7395628ef93d8f2a686cb', '62ff23f5c2412e3e2a73dd60', '62ff559cc2412e3e2a73e2b5']
-   */
-  assignedCards: string[];
-
-  /**
-   * List of cards a user is currently reviewing
-   * @example ['62f7395628ef93d8f2a686cb', '62ff23f5c2412e3e2a73dd60', '62ff559cc2412e3e2a73e2b5']
-   */
-  reviewingCards: string[];
-
-  /**
-   * List of cards a user was assigned to that have been closed
-   * @example ['62f7395628ef93d8f2a686cb', '62ff23f5c2412e3e2a73dd60', '62ff559cc2412e3e2a73e2b5']
-   */
-  assignedClosedCards: string[];
-
-  /**
-   * List of cards a user was reviewing that have been closed
-   * @example ['62f7395628ef93d8f2a686cb', '62ff23f5c2412e3e2a73dd60', '62ff559cc2412e3e2a73e2b5']
-   */
-  reviewingClosedCards: string[];
-
-  /**
    * Activities taken by the user
    * @example [{actionType:"create", content:"has added a card",id:"17c1106f-206b-4251-ad07-6c89d3d8c815", linkPath:[],ref:{},stakeholders:[],timestamp:"2022-11-09T09:40:57.409Z"}]
    */
@@ -137,67 +98,7 @@ export class ConnectUserResponseDto {
 
   /**
    * Notifications for the user
-   * @example []
-   */
-  notifications: Notification[];
-
-  /**
-   * Notifications for the user
    * @example [{content:"Your response on Alchemix Grants Program was received", ref:null}]
    */
   notificationsV2: NotificationV2[];
-
-  /**
-   * Applications submitted by the user
-   * @example []
-   */
-  activeApplications: UserSubmittedApplication[];
-
-  /**
-   * Applications submitted by the user that have been picked
-   * @example []
-   */
-  pickedApplications: UserSubmittedApplication[];
-
-  /**
-   * Applications submitted by the user that have been rejected
-   * @example []
-   */
-  rejectedApplications: UserSubmittedApplication[];
-
-  /**
-   * Card bookmarks for the user
-   * @example ['62f7395628ef93d8f2a686cb', '62ff23f5c2412e3e2a73dd60', '62ff559cc2412e3e2a73e2b5']
-   */
-  bookmarks: string[];
-
-  /**
-   * Circles followed by the user
-   * @example ['62f7395628ef93d8f2a686cb', '62ff23f5c2412e3e2a73dd60', '62ff559cc2412e3e2a73e2b5']
-   */
-  followedCircles: string[];
-
-  /**
-   * Users followed by the user
-   * @example ['62f7395628ef93d8f2a686cb', '62ff23f5c2412e3e2a73dd60', '62ff559cc2412e3e2a73e2b5']
-   */
-  followedUsers: string[];
-
-  /**
-   * Users following the user
-   * @example ['62f7395628ef93d8f2a686cb', '62ff23f5c2412e3e2a73dd60', '62ff559cc2412e3e2a73e2b5']
-   */
-  followedByUsers: string[];
-
-  /**
-   * Users following the user
-   * @example ['62f7395628ef93d8f2a686cb', '62ff23f5c2412e3e2a73dd60', '62ff559cc2412e3e2a73e2b5']
-   */
-  retro: string[];
-
-  /**
-   * The skills of the profile
-   * @example "avp"
-   */
-  lensHandle?: string;
 }

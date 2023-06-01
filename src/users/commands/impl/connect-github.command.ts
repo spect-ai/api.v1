@@ -1,9 +1,9 @@
 import { User } from 'src/users/model/users.model';
 
-export class ConnectDiscordCommand {
+export class ConnectGithubCommand {
   constructor(public readonly user: User, public readonly code: string) {}
 }
 
-export class DisconnectDiscordCommand {
+export class DisconnectGithubCommand {
   constructor(public readonly user: User) {}
 }

@@ -1,11 +1,4 @@
-import {
-  IsArray,
-  IsNotEmpty,
-  IsObject,
-  IsOptional,
-  IsString,
-} from 'class-validator';
-import { LensEducation, LensExperience, LensSkills } from '../types/types';
+import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 export class PublicProfileResponseDto {
   id: string;
@@ -19,33 +12,9 @@ export class PublicProfileResponseDto {
   @IsOptional()
   bio?: string;
 
-  @IsArray()
-  @IsOptional()
-  skillsV2?: LensSkills[];
-
-  @IsObject()
-  @IsOptional()
-  experiences?: LensExperience[];
-
-  //   @IsArray()
-  //   @IsOptional()
-  //   experienceOrder?: string[];
-
-  @IsObject()
-  @IsOptional()
-  education?: LensEducation[];
-
-  //   @IsArray()
-  //   @IsOptional()
-  //   educationOrder?: string[];
-
   @IsString()
   @IsNotEmpty()
   ethAddress: string;
-
-  @IsString()
-  @IsNotEmpty()
-  lensHandle?: string;
 
   @IsString()
   @IsOptional()
@@ -64,18 +33,6 @@ export class PrivateProfileResponseDto {
   @IsOptional()
   bio?: string;
 
-  @IsArray()
-  @IsOptional()
-  skillsV2?: LensSkills[];
-
-  @IsObject()
-  @IsOptional()
-  experiences?: LensExperience[];
-
-  @IsObject()
-  @IsOptional()
-  education?: LensEducation[];
-
   @IsString()
   @IsNotEmpty()
   ethAddress: string;
@@ -87,10 +44,6 @@ export class PrivateProfileResponseDto {
   @IsString()
   @IsNotEmpty()
   email?: string;
-
-  @IsString()
-  @IsNotEmpty()
-  lensHandle?: string;
 
   @IsString()
   @IsNotEmpty()

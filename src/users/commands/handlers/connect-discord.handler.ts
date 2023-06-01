@@ -1,11 +1,12 @@
-import { CommandBus, CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { User } from 'src/users/model/users.model';
-import { UsersRepository } from 'src/users/users.repository';
-import { LoggingService } from 'src/logging/logging.service';
-import { ConnectDiscordCommand } from '../impl/connect-discord.command';
-import { CirclesRepository } from 'src/circle/circles.repository';
 import { InternalServerErrorException } from '@nestjs/common';
+import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import fetch from 'node-fetch';
+import { LoggingService } from 'src/logging/logging.service';
+import { UsersRepository } from 'src/users/users.repository';
+import {
+  ConnectDiscordCommand,
+  DisconnectDiscordCommand,
+} from '../impl/connect-discord.command';
 
 @CommandHandler(ConnectDiscordCommand)
 export class ConnectDiscordCommandHandler
@@ -13,8 +14,6 @@ export class ConnectDiscordCommandHandler
 {
   constructor(
     private readonly userRepository: UsersRepository,
-    private readonly circlesRepository: CirclesRepository,
-    private readonly commandBus: CommandBus,
     private readonly logger: LoggingService,
   ) {
     this.logger.setContext('ConnectDiscordCommandHandler');
@@ -24,7 +23,6 @@ export class ConnectDiscordCommandHandler
     try {
       console.log('ConnectDiscordCommandHandler');
       const { user, code } = command;
-      console.log({ user, code });
 
       const oauthResult = await fetch('https://discord.com/api/oauth2/token', {
         method: 'POST',
@@ -42,7 +40,6 @@ export class ConnectDiscordCommandHandler
       });
 
       const oauthData: any = await oauthResult.json();
-      console.log({ oauthData });
       const userResult = await fetch('https://discord.com/api/users/@me', {
         headers: {
           authorization: `${oauthData.token_type} ${oauthData.access_token}`,
@@ -57,7 +54,6 @@ export class ConnectDiscordCommandHandler
           },
         },
       );
-      const guildData = await userGuilds.json();
       const userData = await userResult.json();
 
       let userToUpdate = user;
@@ -66,40 +62,10 @@ export class ConnectDiscordCommandHandler
         userToUpdate = await this.userRepository.findById(user.id);
       if (!userToUpdate) throw new Error('User not found');
 
-      // try {
-      //   const guildIds = guildData.map((guild) => guild.id);
-      //   console.log({ guildIds });
-      //   if (guildIds?.length == 0) return;
-      //   const guildCircles = await this.circlesRepository.findAll({
-      //     $and: [
-      //       {
-      //         discordGuildId: { $in: guildIds },
-      //         discordToCircleRoles: { $exists: true },
-      //         private: false,
-      //       },
-      //     ],
-      //   });
-      //   console.log({ guildCircles });
-      //   if (guildCircles?.length == 0) return;
-      //   for await (const circle of guildCircles) {
-      //     if (
-      //       !circle?.members?.includes(user.id) &&
-      //       circle?.status.archived == false
-      //     ) {
-      //       const id = circle?.id;
-      //       console.log({ id });
-      //       await this.commandBus.execute(
-      //         new JoinUsingDiscordCommand(id, user),
-      //       );
-      //     }
-      //   }
-      // } catch (error) {
-      //   console.log(error);
-      // }
-
       const profile = await this.userRepository.updateById(user.id, {
         discordId: userData.id,
         discordUsername: userData.username + '#' + userData.discriminator,
+        discordAvatar: userData.avatar,
       });
       return {
         profile,
@@ -110,6 +76,47 @@ export class ConnectDiscordCommandHandler
       this.logger.error(`Failed connecting discord: ${error}`, command);
       throw new InternalServerErrorException(
         'Failed connecting discord',
+        error,
+      );
+    }
+  }
+}
+
+@CommandHandler(DisconnectDiscordCommand)
+export class DisconnectDiscordCommandHandler
+  implements ICommandHandler<DisconnectDiscordCommand>
+{
+  constructor(
+    private readonly userRepository: UsersRepository,
+    private readonly logger: LoggingService,
+  ) {
+    this.logger.setContext('DisconnectDiscordCommandHandler');
+  }
+
+  async execute(command: DisconnectDiscordCommand) {
+    try {
+      console.log('DisconnectDiscordCommandHandler');
+      const { user } = command;
+
+      let userToUpdate = user;
+
+      if (!userToUpdate)
+        userToUpdate = await this.userRepository.findById(user.id);
+      if (!userToUpdate) throw new Error('User not found');
+
+      const profile = await this.userRepository.updateById(user.id, {
+        discordId: null,
+        discordUsername: null,
+        discordAvatar: null,
+      });
+      return {
+        profile,
+      };
+    } catch (error) {
+      console.error(error);
+      this.logger.error(`Failed disconnecting discord: ${error}`, command);
+      throw new InternalServerErrorException(
+        'Failed disconnecting discord',
         error,
       );
     }

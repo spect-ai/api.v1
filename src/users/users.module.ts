@@ -14,7 +14,6 @@ import { UserFieldResolver } from './queries/handlers/get-user.handler';
 import { CommandHandlers } from './commands/handlers';
 import { LoggingService } from 'src/logging/logging.service';
 import { MailService } from 'src/mail/mail.service';
-import { LensService } from './external/lens.service';
 import { UsersControllerV1 } from './users-v1.controller';
 import { RealtimeGateway } from 'src/realtime/realtime.gateway';
 import { PoapService } from 'src/credentials/services/poap.service';
@@ -50,7 +49,6 @@ import { AuthModule } from 'src/auth/auth.module';
     UserFieldResolver,
     LoggingService,
     MailService,
-    LensService,
     PoapService,
     MintKudosService,
     AuthTokenRefreshService,

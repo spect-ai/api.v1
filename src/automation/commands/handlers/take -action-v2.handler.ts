@@ -518,7 +518,6 @@ export class CreateCardActionCommandHandler
         }
       }
 
-      console.log({ allData });
       if (allData.length === 0) allData.push(data);
       await this.commandBus.execute(
         new AddMultipleDataUsingAutomationCommand(

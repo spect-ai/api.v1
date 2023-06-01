@@ -9,7 +9,6 @@ import {
   DetailedUserPubliceResponseDto,
 } from 'src/users/dto/detailed-user-response.dto';
 import { User } from 'src/users/model/users.model';
-import { Activity, Notification } from 'src/users/types/types';
 import { UsersRepository } from '../../users.repository';
 import {
   GetMultipleUsersByFilterQuery,
@@ -26,32 +25,8 @@ export class UserFieldResolver {
     private readonly commonTools: CommonTools,
   ) {}
 
-  getContentReferences(
-    contentField: Activity[] | Notification[],
-    key: 'cards' | 'users' | 'circles' | 'projects' | 'retro',
-  ): string[] {
-    const ids = [];
-    for (const contentObject of contentField) {
-      const references = contentObject.ref?.[key];
-      if (references) {
-        for (const key in references) {
-          ids.push(references[key]);
-        }
-      }
-    }
-
-    return ids;
-  }
-
   async getObjectifiedUserDetails(user: User): Promise<MappedItem<User>> {
     let activityUserIds, notifUserIds: string[];
-    if (user.activities) {
-      activityUserIds = this.getContentReferences(user.activities, 'users');
-    }
-
-    if (user.notifications) {
-      notifUserIds = this.getContentReferences(user.notifications, 'users');
-    }
 
     const userIds = [...(activityUserIds || []), ...(notifUserIds || [])];
     const users = await this.queryBus.execute(
@@ -71,13 +46,6 @@ export class UserFieldResolver {
 
   async getObjectifiedCircleDetails(user: User): Promise<MappedItem<Circle>> {
     let activityCircleIds, notifCircleIds: string[];
-    if (user.activities) {
-      activityCircleIds = this.getContentReferences(user.activities, 'circles');
-    }
-
-    if (user.notifications) {
-      notifCircleIds = this.getContentReferences(user.notifications, 'circles');
-    }
 
     const circleIds = [
       ...(user.circles || []),
@@ -109,29 +77,14 @@ export class UserFieldResolver {
     return this.commonTools.objectify(circles, 'id');
   }
 
-  populateActor(user: DetailedUserPrivateResponseDto): any {
-    if (!user.notifications) return user;
-    const updatedNotifs = [];
-    for (const notification of user.notifications) {
-      notification.content = notification.content?.replace(
-        '[actor]',
-        user.userDetails[notification.actor]?.username,
-      );
-      updatedNotifs.push(notification);
-    }
-    user.notifications = updatedNotifs;
-    return user;
-  }
-
   async resolve(
     user: User,
     caller: string,
   ): Promise<DetailedUserPubliceResponseDto | DetailedUserPrivateResponseDto> {
     if (caller === user?.id) {
-      const enrichedUser = (await this.resolvePrivateFields(
+      return (await this.resolvePrivateFields(
         user,
       )) as DetailedUserPrivateResponseDto;
-      return this.populateActor(enrichedUser);
     } else
       return (await this.resolvePublicFields(
         user,

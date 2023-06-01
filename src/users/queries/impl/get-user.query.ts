@@ -1,7 +1,9 @@
 import { FilterQuery } from 'mongoose';
 import { User } from 'src/users/model/users.model';
-import { PopulatedUserFields } from 'src/users/types/types';
 
+type PopulatedUserFields = {
+  [key: string]: Record<string, unknown>;
+};
 export class GetUserByIdQuery {
   constructor(
     public readonly id: string,

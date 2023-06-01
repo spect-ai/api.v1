@@ -5,7 +5,6 @@ import {
   Param,
   Patch,
   Post,
-  Query,
   Request,
   UseGuards,
 } from '@nestjs/common';
@@ -15,17 +14,8 @@ import {
   PublicViewAuthGuard,
   SessionAuthGuard,
 } from 'src/auth/iron-session.guard';
-import {
-  RequiredCardIdDto,
-  RequiredEducationId,
-  RequiredExperienceId,
-} from 'src/common/dtos/string.dto';
 import { GetTokenMetadataCommand, GetTokensCommand } from './commands/impl';
-import { ReadNotificationCommand } from './commands/notifications/impl';
-import { DetailedUserPubliceResponseDto } from './dto/detailed-user-response.dto';
-import { AddEducationDto, UpdateEducationDto } from './dto/education.dto';
-import { AddExperienceDto, UpdateExperienceDto } from './dto/experience.dto';
-import { ReadNotificationDto, UpdateUserDto } from './dto/update-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
 import { UsersRepository } from './users.repository';
 import { UsersService } from './users.service';
 
@@ -67,55 +57,6 @@ export class UsersController {
   @Patch('/me')
   update(@Body() updateUserDto: UpdateUserDto) {
     return this.usersService.update(updateUserDto);
-  }
-
-  @UseGuards(SessionAuthGuard)
-  @Patch('/addBookmark/:cardId')
-  async addBookmark(
-    @Param() param: RequiredCardIdDto,
-  ): Promise<DetailedUserPubliceResponseDto> {
-    return await this.usersService.addItem('bookmarks', param.cardId);
-  }
-
-  @UseGuards(SessionAuthGuard)
-  @Patch('/removeBookmark/:cardId')
-  async removeBookmark(
-    @Param() param: RequiredCardIdDto,
-  ): Promise<DetailedUserPubliceResponseDto> {
-    return await this.usersService.removeItem('bookmarks', param.cardId);
-  }
-
-  @UseGuards(SessionAuthGuard)
-  @Patch('/readNotifications')
-  async readNotifications(
-    @Body() body: ReadNotificationDto,
-    @Request() req,
-  ): Promise<DetailedUserPubliceResponseDto> {
-    return await this.commandBus.execute(
-      new ReadNotificationCommand(body.notificationIds, req.user),
-    );
-  }
-
-  @Patch('/migrateSkills')
-  async migrateSkills() {
-    const users = await this.userRepository.findAll();
-    let i = 0;
-    for (const user of users) {
-      if (user.skills) {
-        const skills = user.skills.map((skill) => {
-          return {
-            title: skill,
-            icon: '',
-            linkedCredentials: [],
-            nfts: [],
-            poaps: [],
-          };
-        });
-        await this.userRepository.updateById(user.id, { skillsV2: skills });
-        i++;
-      }
-    }
-    return i;
   }
 
   @UseGuards(SessionAuthGuard)

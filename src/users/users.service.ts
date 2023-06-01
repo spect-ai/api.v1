@@ -17,7 +17,6 @@ import {
 import { LoggingService } from 'src/logging/logging.service';
 import { AddItemsCommand, RemoveItemsCommand } from './commands/impl';
 import { UserCreatedEvent } from './events/impl';
-import { LensService } from './external/lens.service';
 import { GetCircleByIdQuery } from 'src/circle/queries/impl';
 import { EthAddressService } from 'src/_eth-address/_eth-address.service';
 import { randomBytes } from 'crypto';
@@ -121,19 +120,9 @@ export class UsersService {
   async create(ethAddress: string) {
     try {
       const numUsers = await this.usersRepository.count();
-      let lensProfile;
-      // try {
-      //   lensProfile = await this.lensService.getLensDefaultProfile(ethAddress);
-      // } catch (error) {
-      //   this.logger.logError(
-      //     `Failed to get lens profile with error: ${error.message}`,
-      //     this.requestProvider,
-      //   );
-      // }
       const user = await this.usersRepository.create({
         username: `fren${numUsers + 200}`,
         ethAddress: ethAddress,
-        lensHandle: lensProfile?.handle,
       });
       await this.ethAddressRepository.create({
         ethAddress: ethAddress,
@@ -176,69 +165,6 @@ export class UsersService {
       );
       throw new InternalServerErrorException(
         'Failed user update',
-        error.message,
-      );
-    }
-  }
-
-  async addItem(
-    itemType: 'bookmarks' | 'followingCircles' | 'followingUsers' | 'followers',
-    itemId: string,
-    userId?: string,
-  ): Promise<DetailedUserPubliceResponseDto> {
-    try {
-      if (!userId) userId = this.requestProvider.user?.id;
-      if (!userId) throw new Error('User id cannot be null');
-
-      return await this.commandBus.execute(
-        new AddItemsCommand(
-          [
-            {
-              fieldName: itemType,
-              itemIds: [itemId],
-            },
-          ],
-          null,
-          userId,
-        ),
-      );
-    } catch (error) {
-      this.logger.logError(
-        `Failed adding ${itemType} to user with error: ${error.message}`,
-        this.requestProvider,
-      );
-      throw new InternalServerErrorException(
-        `Failed adding ${itemType} to user`,
-        error.message,
-      );
-    }
-  }
-
-  async removeItem(
-    itemType: 'bookmarks' | 'followingCircles' | 'followingUsers' | 'followers',
-    itemId: string,
-    userId?: string,
-  ): Promise<DetailedUserPubliceResponseDto> {
-    try {
-      return await this.commandBus.execute(
-        new RemoveItemsCommand(
-          [
-            {
-              fieldName: itemType,
-              itemIds: [itemId],
-            },
-          ],
-          null,
-          userId,
-        ),
-      );
-    } catch (error) {
-      this.logger.logError(
-        `Failed removing ${itemType} to user with error: ${error.message}`,
-        this.requestProvider,
-      );
-      throw new InternalServerErrorException(
-        `Failed removing ${itemType} to user`,
         error.message,
       );
     }

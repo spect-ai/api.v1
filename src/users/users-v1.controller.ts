@@ -26,7 +26,6 @@ import {
   PrivateProfileResponseDto,
   PublicProfileResponseDto,
 } from './dto/profile-response.dto';
-import { LensService } from './external/lens.service';
 import {
   GetMeQuery,
   GetNotificationsQuery,
@@ -34,7 +33,14 @@ import {
   GetUnreadNotificationsQuery,
 } from './queries/impl';
 import { UsersService } from './users.service';
-import { ConnectDiscordCommand } from './commands/impl';
+import {
+  ConnectDiscordCommand,
+  DisconnectDiscordCommand,
+} from './commands/impl';
+import {
+  ConnectGithubCommand,
+  DisconnectGithubCommand,
+} from './commands/impl/connect-github.command';
 
 @Controller('user/v1')
 @ApiTags('user.v1')
@@ -43,7 +49,6 @@ export class UsersControllerV1 {
     private readonly usersService: UsersService,
     private readonly queryBus: QueryBus,
     private readonly commandBus: CommandBus,
-    private readonly lensService: LensService,
   ) {}
 
   @UseGuards(SessionAuthGuard)
@@ -82,14 +87,6 @@ export class UsersControllerV1 {
         req.user?.id,
       ),
     );
-  }
-
-  @UseGuards(SessionAuthGuard)
-  @Get('/lensHandles')
-  getLensHandles(
-    @Request() req,
-  ): Promise<PublicProfileResponseDto | PrivateProfileResponseDto> {
-    return this.lensService.getLensProfilesByAddress(req.user.ethAddress);
   }
 
   @UseGuards(PublicViewAuthGuard)
@@ -140,6 +137,12 @@ export class UsersControllerV1 {
   }
 
   @UseGuards(SessionAuthGuard)
+  @Patch('/disconnectDiscord')
+  disconnectDiscord(@Request() req) {
+    return this.commandBus.execute(new DisconnectDiscordCommand(req.user));
+  }
+
+  @UseGuards(SessionAuthGuard)
   @Post('/apiKey')
   createAPIKey() {
     return this.usersService.createAPIKey();
@@ -149,5 +152,17 @@ export class UsersControllerV1 {
   @Delete('/apiKey')
   deleteApiKey(@Body() body: { apiKey: string }) {
     return this.usersService.deleteApiKey(body.apiKey);
+  }
+
+  @UseGuards(SessionAuthGuard)
+  @Get('/connectGithub')
+  connectGithub(@Request() req, @Query('code') code: string) {
+    return this.commandBus.execute(new ConnectGithubCommand(req.user, code));
+  }
+
+  @UseGuards(SessionAuthGuard)
+  @Patch('/disconnectGithub')
+  disconnectGithub(@Request() req) {
+    return this.commandBus.execute(new DisconnectGithubCommand(req.user));
   }
 }
