@@ -255,7 +255,6 @@ export class SaveDraftCommandHandler
                 discordId: callerDiscordId,
               },
               '',
-              true,
             ),
           );
         } catch (err) {
@@ -437,7 +436,6 @@ export class SaveAndPostSocialsCommandHandler
                 discordId: discordId,
               },
               '',
-              true,
             ),
           );
         } catch (err) {
@@ -572,7 +570,6 @@ export class SaveAndPostPaymentCommandHandler
                 discordId: discordUserId,
               },
               '',
-              true,
             ),
           );
         } catch (err) {

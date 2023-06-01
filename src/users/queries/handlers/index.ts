@@ -1,7 +1,5 @@
 import { GetProfileQueryHandler } from './get-profile.handler';
 import {
-  GetUserByIdQueryHandler,
-  GetUserByUsernameQueryHandler,
   GetMultipleUsersByIdsQueryHandler,
   GetUserByFilterQueryHandler,
   GetMultipleUsersByFilterQueryHandler,
@@ -14,8 +12,6 @@ import {
 } from './get-notifications.handler';
 
 export const QueryHandlers = [
-  GetUserByIdQueryHandler,
-  GetUserByUsernameQueryHandler,
   GetMultipleUsersByIdsQueryHandler,
   GetUserByFilterQueryHandler,
   GetProfileQueryHandler,

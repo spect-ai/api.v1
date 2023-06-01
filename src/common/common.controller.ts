@@ -4,14 +4,39 @@ import { GasPredictionService } from './gas-prediction.service';
 import fetch from 'node-fetch';
 import { RequiredUrlDto } from './dtos/string.dto';
 import { parse } from 'parse5';
+import { GetTokenMetadataCommand } from 'src/users/commands/impl';
+import { CommandBus } from '@nestjs/cqrs';
 @Controller('common')
 @ApiTags('common')
 export class CommonController {
-  constructor(private readonly gasPredictionService: GasPredictionService) {}
+  constructor(
+    private readonly gasPredictionService: GasPredictionService,
+    private readonly commandBus: CommandBus,
+  ) {}
 
   @Get('/gasPrediction')
   async gasPrediction(@Query() param: any) {
     return await this.gasPredictionService.predictGas(param.chainId);
+  }
+
+  @Post('/getTokenMetadata')
+  async getTokenMetadata(
+    @Body()
+    body: {
+      chainId: string;
+      tokenType: string;
+      tokenAddress: string;
+      tokenId?: string;
+    },
+  ) {
+    return await this.commandBus.execute(
+      new GetTokenMetadataCommand(
+        body.chainId,
+        body.tokenType,
+        body.tokenAddress,
+        body.tokenId,
+      ),
+    );
   }
 
   @Post('/url')

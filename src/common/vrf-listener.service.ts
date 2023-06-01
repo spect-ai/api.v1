@@ -2,15 +2,12 @@ import { Injectable } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { Alchemy, Network } from 'alchemy-sdk';
 import { ethers, utils } from 'ethers';
-import { AbiCoder } from 'ethers/lib/utils';
-import { UpdateCollectionCommand } from 'src/collection/commands';
-import { Collection } from 'src/collection/model/collection.model';
 import { GetCollectionByFilterQuery } from 'src/collection/queries';
 import { LoggingService } from 'src/logging/logging.service';
 import { MailService } from 'src/mail/mail.service';
 import { EmailGeneratorService } from 'src/notification/email-generatr.service';
 import { RegistryService } from 'src/registry/registry.service';
-import { GetProfileQuery, GetUserByFilterQuery } from 'src/users/queries/impl';
+import { GetProfileQuery } from 'src/users/queries/impl';
 import { surveyHubAbi } from './abis/surveyHub';
 import { vrfConsumerAbi } from './abis/vrfConsumer';
 

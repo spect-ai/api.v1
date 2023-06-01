@@ -11,9 +11,10 @@ import { EncryptionService } from './encryption.service';
 import { SecretModule } from 'src/secretRegistry/secret.module';
 import { CommonController } from './common.controller';
 import { GasPredictionService } from './gas-prediction.service';
+import { CqrsModule } from '@nestjs/cqrs';
 
 @Module({
-  imports: [ScheduleModule.forRoot(), SecretModule],
+  imports: [ScheduleModule.forRoot(), SecretModule, CqrsModule],
   controllers: [CommonController],
   providers: [
     SlugService,

@@ -6,11 +6,21 @@ import {
   ICommandHandler,
   QueryBus,
 } from '@nestjs/cqrs';
+import { AddPaymentsCommand } from 'src/circle/commands/payments/impl';
+import { JoinedCircleEvent } from 'src/circle/events/impl';
 import { GetCircleByIdQuery } from 'src/circle/queries/impl';
+import {
+  AddMultipleDataUsingAutomationCommand,
+  UpdateCollectionCommand,
+  UpdateDataUsingAutomationCommand,
+} from 'src/collection/commands';
+import { StartVotingPeriodCommand } from 'src/collection/commands/data/impl/vote-data.command';
+import { Collection } from 'src/collection/model/collection.model';
 import {
   GetCollectionByFilterQuery,
   GetCollectionBySlugQuery,
 } from 'src/collection/queries';
+import { CommonTools } from 'src/common/common.service';
 import { DiscordService } from 'src/common/discord.service';
 import { MappedItem } from 'src/common/interfaces';
 import { LoggingService } from 'src/logging/logging.service';
@@ -19,32 +29,20 @@ import { EmailGeneratorService } from 'src/notification/email-generatr.service';
 import {
   GetMultipleUsersByIdsQuery,
   GetProfileQuery,
-  GetUserByFilterQuery,
 } from 'src/users/queries/impl';
 import {
+  CloseCardActionCommand,
   CreateCardActionCommand,
   CreateDiscordChannelActionCommand,
+  CreateDiscordThreadCommand,
   GiveDiscordRoleActionCommand,
   GiveRoleActionCommand,
+  InitiatePendingPaymentActionCommand,
   PostOnDiscordActionCommand,
+  PostOnDiscordThreadCommand,
   SendEmailActionCommand,
   StartVotingPeriodActionCommand,
-  CloseCardActionCommand,
-  InitiatePendingPaymentActionCommand,
-  CreateDiscordThreadCommand,
-  PostOnDiscordThreadCommand,
 } from '../impl/take-action-v2.command';
-import {
-  AddDataUsingAutomationCommand,
-  AddMultipleDataUsingAutomationCommand,
-  UpdateCollectionCommand,
-  UpdateDataUsingAutomationCommand,
-} from 'src/collection/commands';
-import { StartVotingPeriodCommand } from 'src/collection/commands/data/impl/vote-data.command';
-import { JoinedCircleEvent } from 'src/circle/events/impl';
-import { AddPaymentsCommand } from 'src/circle/commands/payments/impl';
-import { Collection } from 'src/collection/model/collection.model';
-import { CommonTools } from 'src/common/common.service';
 
 @Injectable()
 export class CommonActionService {

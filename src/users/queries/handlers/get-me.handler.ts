@@ -7,19 +7,12 @@ import { UsersRepository } from 'src/users/users.repository';
 import { GetMeQuery } from '../impl/get-me.query';
 
 const hideProfileFields = {
-  assignedCards: 0,
-  reviewingCards: 0,
-  reviewingClosedCards: 0,
-  assignedClosedCards: 0,
-  activities: 0,
-  notifications: 0,
   notificationsV2: 0,
   collections: 0,
   collectionsSubmittedTo: 0,
   experiences: 0,
   accounts: 0,
   __v: 0,
-  retro: 0,
   circles: 0,
 };
 

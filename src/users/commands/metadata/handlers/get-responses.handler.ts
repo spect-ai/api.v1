@@ -17,7 +17,7 @@ export class GetResponsesCommandHandler
     private readonly logger: LoggingService,
     private readonly queryBus: QueryBus,
   ) {
-    this.logger.setContext('AddEducationCommandHandler');
+    this.logger.setContext('GetResponsesCommandHandler');
   }
 
   async execute(command: GetCirclesCommand) {

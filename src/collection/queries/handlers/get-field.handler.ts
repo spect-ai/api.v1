@@ -167,7 +167,6 @@ export class GetNextFieldQueryHandler
               discordId,
             },
             '',
-            true,
           ),
         );
         if (!user || !user?.ethAddress) {

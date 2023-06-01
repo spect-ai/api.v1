@@ -49,7 +49,6 @@ export class AdvancedAccessService {
           discordId: callerDiscordId,
         },
         '',
-        true,
       ),
     );
 
