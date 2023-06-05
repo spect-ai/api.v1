@@ -10,52 +10,63 @@ import { PoapService } from 'src/credentials/services/poap.service';
 import { MintKudosService } from 'src/credentials/services/mintkudos.service';
 import { User } from 'src/users/model/users.model';
 import { GetRegistryCommand } from 'src/circle/commands/impl';
+import { AnkrProvider } from '@ankr.com/ankr.js';
 
 @CommandHandler(GetTokensCommand)
 export class GetTokensCommandHandler
   implements ICommandHandler<GetTokensCommand>
 {
+  provider: AnkrProvider;
   constructor(
     private readonly poapService: PoapService,
     private readonly kudosService: MintKudosService,
     private readonly logger: LoggingService,
     private readonly commandBus: CommandBus,
   ) {
+    this.provider = new AnkrProvider(process.env.ANKR_ENDPOINT);
+
     this.logger.setContext('GetTokensCommandHandler');
   }
 
   async execute(command: GetTokensCommand) {
     try {
-      const { user, chainId, tokenType, circleId } = command;
+      const { user, tokenType, circleId } = command;
 
       if (tokenType === 'erc20') {
-        const userTokens = await getUserTokens(chainId, user);
-        const registry = await this.commandBus.execute(
-          new GetRegistryCommand(circleId),
-        );
-        console.log({ userTokens });
-        const tokenDetails = registry[chainId].tokenDetails;
-        for (const [tokenAddress, token] of Object.entries(tokenDetails)) {
-          if (
-            tokenAddress !== '0x0' &&
-            !userTokens.find(
-              (t) =>
-                t.contractAddress.toLowerCase() === tokenAddress.toLowerCase(),
-            )
-          ) {
-            const tokenMetadata = await this.commandBus.execute(
-              new GetTokenMetadataCommand(chainId, 'erc20', tokenAddress),
-            );
-            userTokens.push({
-              ...tokenMetadata,
-              balance: 0,
-              contractAddress: tokenAddress,
-            });
-          }
-        }
-        return userTokens;
+        return await this.provider.getAccountBalance({
+          blockchain: [
+            'bsc',
+            'eth',
+            'polygon',
+            'avalanche',
+            'arbitrum',
+            'optimism',
+          ],
+          walletAddress: user.ethAddress,
+          onlyWhitelisted: true,
+        });
       } else if (tokenType === 'nft') {
-        return getUserNFTs(chainId, user);
+        const res = await this.provider.getNFTsByOwner({
+          blockchain: [
+            'bsc',
+            'eth',
+            'polygon',
+            'avalanche',
+            'arbitrum',
+            'optimism',
+          ],
+          walletAddress: user.ethAddress,
+          pageSize: 20,
+        });
+
+        const returnedNfts = [];
+        res.assets.forEach((nft) => {
+          if (nft.name) {
+            returnedNfts.push(nft);
+          }
+        });
+
+        return returnedNfts;
       } else if (tokenType === 'kudos') {
         const credentials = await this.kudosService.getKudosByAddress(
           user.ethAddress,
@@ -86,138 +97,8 @@ export class GetTokensCommandHandler
         `Failed adding item to user with error: ${error.message}`,
         command,
       );
+      throw error;
     }
-  }
-}
-
-async function getUserTokens(chainId: string, user: User) {
-  switch (chainId) {
-    case '1':
-      console.log('ETH');
-      const config = {
-        apiKey: process.env.ALCHEMY_API_KEY_MAINNET,
-        network: Network.ETH_MAINNET,
-      };
-      const alchemy = new Alchemy(config);
-      return await getTokens(alchemy, user.ethAddress);
-    case '137':
-      console.log('MATIC');
-      const configMatic = {
-        apiKey: process.env.ALCHEMY_API_KEY_POLYGON,
-        network: Network.MATIC_MAINNET,
-      };
-      const alchemyMatic = new Alchemy(configMatic);
-      return await getTokens(alchemyMatic, user.ethAddress);
-    case '80001':
-      console.log('MUMBAI');
-      const configMumbai = {
-        apiKey: process.env.ALCHEMY_API_KEY_MUMBAI,
-        network: Network.MATIC_MUMBAI,
-      };
-      const alchemyMumbai = new Alchemy(configMumbai);
-      return await getTokens(alchemyMumbai, user.ethAddress);
-    case '10':
-      console.log('OPTIMISM');
-      const configOptimism = {
-        apiKey: process.env.ALCHEMY_API_KEY_OPTIMISM,
-        network: Network.OPT_MAINNET,
-      };
-      const alchemyOptimism = new Alchemy(configOptimism);
-      return await getTokens(alchemyOptimism, user.ethAddress);
-    case '42161':
-      console.log('ARBITRUM');
-      const configArbitrum = {
-        apiKey: process.env.ALCHEMY_API_KEY_ARBITRUM,
-        network: Network.ARB_MAINNET,
-      };
-      const alchemyArbitrum = new Alchemy(configArbitrum);
-      return await getTokens(alchemyArbitrum, user.ethAddress);
-    default:
-      break;
-  }
-}
-
-async function getTokens(alchemy: Alchemy, ethAddress: string) {
-  const balances = await alchemy.core.getTokenBalances(ethAddress);
-  const nonZeroBalances = balances.tokenBalances.filter((token) => {
-    return Number(token.tokenBalance) !== 0;
-  });
-  const tokenBalances = [];
-  for await (const token of nonZeroBalances) {
-    let balance = Number(token.tokenBalance);
-    const metadata = await alchemy.core.getTokenMetadata(token.contractAddress);
-
-    // Compute token balance in human-readable format
-    balance = balance / Math.pow(10, metadata.decimals);
-    balance = Number(balance.toFixed(2));
-    tokenBalances.push({
-      logo: metadata.logo,
-      name: metadata.name,
-      symbol: metadata.symbol,
-      balance,
-      contractAddress: token.contractAddress,
-    });
-  }
-  return tokenBalances;
-}
-
-async function getUserNFTs(chainId: string, user: User) {
-  switch (chainId) {
-    case '1':
-      console.log('ETH');
-      const config = {
-        apiKey: process.env.ALCHEMY_API_KEY_MAINNET,
-        network: Network.ETH_MAINNET,
-      };
-      const alchemy = new Alchemy(config);
-      return await getNFTs(alchemy, user.ethAddress);
-    case '137':
-      console.log('MATIC');
-      const configMatic = {
-        apiKey: process.env.ALCHEMY_API_KEY_POLYGON,
-        network: Network.MATIC_MAINNET,
-      };
-      const alchemyMatic = new Alchemy(configMatic);
-      return await getNFTs(alchemyMatic, user.ethAddress);
-    case '80001':
-      console.log('MUMBAI');
-      const configMumbai = {
-        apiKey: process.env.ALCHEMY_API_KEY_MUMBAI,
-        network: Network.MATIC_MUMBAI,
-      };
-      const alchemyMumbai = new Alchemy(configMumbai);
-      return await getNFTs(alchemyMumbai, user.ethAddress);
-    case '10':
-      console.log('OPTIMISM');
-      const configOptimism = {
-        apiKey: process.env.ALCHEMY_API_KEY_OPTIMISM,
-        network: Network.OPT_MAINNET,
-      };
-      const alchemyOptimism = new Alchemy(configOptimism);
-      return await getNFTs(alchemyOptimism, user.ethAddress);
-    case '42161':
-      console.log('ARBITRUM');
-      const configArbitrum = {
-        apiKey: process.env.ALCHEMY_API_KEY_ARBITRUM,
-        network: Network.ARB_MAINNET,
-      };
-      const alchemyArbitrum = new Alchemy(configArbitrum);
-      return await getNFTs(alchemyArbitrum, user.ethAddress);
-
-    default:
-      break;
-  }
-}
-
-async function getNFTs(alchemy: Alchemy, ethAddress: string) {
-  try {
-    const nfts = await alchemy.nft.getNftsForOwner(ethAddress, {
-      excludeFilters: [NftExcludeFilters.SPAM, NftExcludeFilters.AIRDROPS],
-    });
-    return nfts.ownedNfts || [];
-  } catch (err) {
-    const nfts = await alchemy.nft.getNftsForOwner(ethAddress);
-    return nfts.ownedNfts || [];
   }
 }
 

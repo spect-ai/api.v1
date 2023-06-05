@@ -131,12 +131,23 @@ export class UsersControllerV1 {
   @Get('/getTokenBalances/:chainId/:tokenType/:circleId')
   async getTokenBalances(
     @Request() req,
-    @Param('chainId') chainId: string,
     @Param('tokenType') tokenType: string,
     @Param('circleId') circleId: string,
   ) {
     return await this.commandBus.execute(
-      new GetTokensCommand(req.user, chainId, tokenType, circleId),
+      new GetTokensCommand(req.user, tokenType, circleId),
+    );
+  }
+
+  @UseGuards(SessionAuthGuard)
+  @Get('/tokenBalances')
+  async getTokenBalancesV2(
+    @Request() req,
+    @Query('tokenType') tokenType: 'erc20' | 'nft',
+    @Query('circleId') circleId: string,
+  ) {
+    return await this.commandBus.execute(
+      new GetTokensCommand(req.user, tokenType, circleId),
     );
   }
 }

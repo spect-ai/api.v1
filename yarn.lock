@@ -68,6 +68,14 @@
     ora "5.4.1"
     rxjs "6.6.7"
 
+"@ankr.com/ankr.js@^0.4.0":
+  version "0.4.0"
+  resolved "https://registry.yarnpkg.com/@ankr.com/ankr.js/-/ankr.js-0.4.0.tgz#24241b18c1a47097ef0e66eccdd485578270f2f7"
+  integrity sha512-7yA/NM/XSzx7vXartN6PDGN6toS/dueFt7Yp/+LiRDa6dB7FfGa380YHNWipf81CqSkwQEeHVWvS+fts+TWXeg==
+  dependencies:
+    axios "^0.26.1"
+    typescript "^4.6.2"
+
 "@aws-crypto/ie11-detection@^2.0.0":
   version "2.0.2"
   resolved "https://registry.yarnpkg.com/@aws-crypto/ie11-detection/-/ie11-detection-2.0.2.tgz#9c39f4a5558196636031a933ec1b4792de959d6a"
@@ -9096,6 +9104,11 @@ typescript@^4.3.5:
   version "4.9.3"
   resolved "https://registry.yarnpkg.com/typescript/-/typescript-4.9.3.tgz#3aea307c1746b8c384435d8ac36b8a2e580d85db"
   integrity sha512-CIfGzTelbKNEnLpLdGFgdyKhG23CKdKgQPOBc+OUNrkJ2vr+KSzsSV5kq5iWhEQbok+quxgGzrAtGWCyU7tHnA==
+
+typescript@^4.6.2:
+  version "4.9.5"
+  resolved "https://registry.yarnpkg.com/typescript/-/typescript-4.9.5.tgz#095979f9bcc0d09da324d58d03ce8f8374cbe65a"
+  integrity sha512-1FXk9E2Hm+QzZQ7z+McJiHL4NW1F2EzMu9Nq9i3zAaGqibafqYwCVU6WyWAuyQRRzOlxou8xZSyXLEN8oKj24g==
 
 uc.micro@^1.0.1:
   version "1.0.6"

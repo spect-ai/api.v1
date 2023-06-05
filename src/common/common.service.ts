@@ -4,6 +4,7 @@ import { diff as arrayDiff } from 'fast-array-diff';
 import { PropertyType } from 'src/collection/types/types';
 import { MappedItem } from './interfaces';
 import TurndownService = require('turndown');
+import { Alchemy, Network } from 'alchemy-sdk';
 
 @Injectable()
 export class CommonTools {
@@ -210,5 +211,52 @@ export class CommonTools {
     enrichedText = this.enrichHeadings(enrichedText || '');
 
     return enrichedText;
+  }
+}
+
+export function alchemyInstance(chainId) {
+  switch (chainId) {
+    case '1':
+      console.log('ETH');
+      const config = {
+        apiKey: process.env.ALCHEMY_API_KEY_MAINNET,
+        network: Network.ETH_MAINNET,
+      };
+      return new Alchemy(config);
+
+    case '137':
+      console.log('MATIC');
+      const configMatic = {
+        apiKey: process.env.ALCHEMY_API_KEY_POLYGON,
+        network: Network.MATIC_MAINNET,
+      };
+      return new Alchemy(configMatic);
+
+    case '80001':
+      console.log('MUMBAI');
+      const configMumbai = {
+        apiKey: process.env.ALCHEMY_API_KEY_MUMBAI,
+        network: Network.MATIC_MUMBAI,
+      };
+      return new Alchemy(configMumbai);
+
+    case '10':
+      console.log('OPTIMISM');
+      const configOptimism = {
+        apiKey: process.env.ALCHEMY_API_KEY_OPTIMISM,
+        network: Network.OPT_MAINNET,
+      };
+      return new Alchemy(configOptimism);
+
+    case '42161':
+      console.log('ARBITRUM');
+      const configArbitrum = {
+        apiKey: process.env.ALCHEMY_API_KEY_ARBITRUM,
+        network: Network.ARB_MAINNET,
+      };
+      return new Alchemy(configArbitrum);
+
+    default:
+      throw 'Invalid chainId';
   }
 }

@@ -3,7 +3,6 @@ import { User } from 'src/users/model/users.model';
 export class GetTokensCommand {
   constructor(
     public readonly user: User,
-    public readonly chainId: string,
     public readonly tokenType: string,
     public readonly circleId: string,
   ) {}

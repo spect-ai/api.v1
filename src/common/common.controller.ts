@@ -4,14 +4,15 @@ import { GasPredictionService } from './gas-prediction.service';
 import fetch from 'node-fetch';
 import { RequiredUrlDto } from './dtos/string.dto';
 import { parse } from 'parse5';
-import { GetTokenMetadataCommand } from 'src/users/commands/impl';
-import { CommandBus } from '@nestjs/cqrs';
+import { CommandBus, QueryBus } from '@nestjs/cqrs';
+import { GetTokenMetadataQuery } from './queries/impl';
+import { Blockchain } from '@ankr.com/ankr.js';
 @Controller('common')
 @ApiTags('common')
 export class CommonController {
   constructor(
     private readonly gasPredictionService: GasPredictionService,
-    private readonly commandBus: CommandBus,
+    private readonly queryBus: QueryBus,
   ) {}
 
   @Get('/gasPrediction')
@@ -19,23 +20,14 @@ export class CommonController {
     return await this.gasPredictionService.predictGas(param.chainId);
   }
 
-  @Post('/getTokenMetadata')
-  async getTokenMetadata(
-    @Body()
-    body: {
-      chainId: string;
-      tokenType: string;
-      tokenAddress: string;
-      tokenId?: string;
-    },
+  @Get('/tokenMetadata')
+  async getTokenMetadataV2(
+    @Query('chainId') chainId: Blockchain,
+    @Query('contractAddress') contractAddress: string,
+    @Query('tokenId') tokenId?: string,
   ) {
-    return await this.commandBus.execute(
-      new GetTokenMetadataCommand(
-        body.chainId,
-        body.tokenType,
-        body.tokenAddress,
-        body.tokenId,
-      ),
+    return await this.queryBus.execute(
+      new GetTokenMetadataQuery(chainId, contractAddress, tokenId),
     );
   }
 

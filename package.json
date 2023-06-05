@@ -21,6 +21,7 @@
     "test:e2e": "jest --config ./test/jest-e2e.json"
   },
   "dependencies": {
+    "@ankr.com/ankr.js": "^0.4.0",
     "@gitcoinco/passport-sdk-reader": "^0.1.4",
     "@gitcoinco/passport-sdk-scorer": "git+https://github.com/spect-ai/scorer.git",
     "@gitcoinco/passport-sdk-verifier": "git+https://github.com/spect-ai/passport-sdk-verifier.git",
