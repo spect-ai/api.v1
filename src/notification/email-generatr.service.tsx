@@ -123,4 +123,38 @@ export class EmailGeneratorService {
 
     return html;
   }
+
+  generateNotificationEmail(header: string, message: string, link: string) {
+    const { html, errors } = render(
+      <Mjml>
+        <MjmlHead>{header}</MjmlHead>
+
+        <MjmlBody background-color="#f7f7f7">
+          <MjmlSection>
+            <MjmlColumn>
+              <MjmlText font-size="20px" color="#ae5fe2">
+                {message}
+              </MjmlText>
+            </MjmlColumn>
+          </MjmlSection>
+          <MjmlSection>
+            <MjmlColumn>
+              <MjmlButton
+                background-color="#ecdef3"
+                align="right"
+                border="1px solid #d9d9d9"
+                color="#ae5fe2"
+                font-weight="bold"
+                border-radius="6px"
+                href={`${link}`}
+              >
+                Check it out
+              </MjmlButton>
+            </MjmlColumn>
+          </MjmlSection>
+        </MjmlBody>
+      </Mjml>,
+    );
+    return html;
+  }
 }

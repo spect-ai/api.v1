@@ -12,6 +12,7 @@ import { LoggingService } from 'src/logging/logging.service';
 import { v4 as uuidv4 } from 'uuid';
 import { MailService } from 'src/mail/mail.service';
 import { RealtimeGateway } from 'src/realtime/realtime.gateway';
+import { EmailGeneratorService } from 'src/notification/email-generatr.service';
 
 @EventsHandler(NotificationEventV2)
 export class NotificationEventV2Handler
@@ -106,6 +107,7 @@ export class SingleEmailNotificationEventHandler
     private readonly userRepository: UsersRepository,
     private readonly logger: LoggingService,
     private readonly mailService: MailService,
+    private readonly emailGeneratorService: EmailGeneratorService,
   ) {
     this.logger.setContext('SingleEmailNotificationEventHandler');
   }
@@ -113,25 +115,35 @@ export class SingleEmailNotificationEventHandler
   async handle(event: SingleEmailNotificationEvent) {
     try {
       console.log('NotificationEventHandler');
-      const { recipient, content, subject, redirectUrl } = event;
-      const recipientEntity = await this.userRepository.findById(recipient);
-      if (recipientEntity.email) {
-        const mail = {
-          to: `${recipientEntity.email}`,
-          from: {
-            name: 'Spect Notifications',
-            email: process.env.NOTIFICATION_EMAIL,
-          }, // Fill it with your validated email on SendGrid account
-          html: '<h1>Hello</h1>',
-          template_id: 'd-29167d84858a4bbebd669512def5ee29',
-          dynamic_template_data: {
-            title: content,
-            link: redirectUrl,
-            subject: subject,
-          },
-        };
-
-        return await this.mailService.send(mail);
+      const { recipients, content, subject, redirectUrl } = event;
+      const recipientEntities = await this.userRepository.findAll({
+        _id: { $in: recipients },
+      });
+      console.log({ recipientEntities });
+      const emails = recipientEntities.map((user) => user.email);
+      console.log({ emails });
+      for (const email of emails) {
+        if (!email) continue;
+        console.log('Sending email to ', email);
+        try {
+          const html = this.emailGeneratorService.generateNotificationEmail(
+            subject,
+            content,
+            redirectUrl,
+          );
+          const mail = {
+            to: `${email}`,
+            from: {
+              name: `Spect Notifications`,
+              email: process.env.NOTIFICATION_EMAIL,
+            }, // Fill it with your validated email on SendGrid account
+            html,
+            subject,
+          };
+          const res = await this.mailService.send(mail);
+        } catch (err) {
+          this.logger.error(err);
+        }
       }
     } catch (error) {
       // Make sure to not send a large object to the logger

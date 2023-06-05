@@ -24,6 +24,7 @@ import { CirclesModule } from 'src/circle/circles.module';
 import { KeysRepository } from './keys.repository';
 import { Keys } from './model/keys.model';
 import { AuthModule } from 'src/auth/auth.module';
+import { EmailGeneratorService } from 'src/notification/email-generatr.service';
 
 @Module({
   imports: [
@@ -53,6 +54,7 @@ import { AuthModule } from 'src/auth/auth.module';
     CirclesCollectionService,
     RealtimeGateway,
     KeysRepository,
+    EmailGeneratorService,
   ],
   exports: [UsersService, UsersRepository, UsersModule, KeysRepository],
 })

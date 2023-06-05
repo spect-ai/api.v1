@@ -10,7 +10,10 @@ import { GetCircleByIdQuery } from 'src/circle/queries/impl';
 import { GetPrivateViewCollectionQuery } from 'src/collection/queries';
 import { LoggingService } from 'src/logging/logging.service';
 import { RealtimeGateway } from 'src/realtime/realtime.gateway';
-import { SingleNotificationEvent } from 'src/users/events/impl';
+import {
+  SingleEmailNotificationEvent,
+  SingleNotificationEvent,
+} from 'src/users/events/impl';
 import { DataAddedEvent } from '../impl/data-added.event';
 import { AddItemsCommand as AddItemsToUserCommand } from 'src/users/commands/impl';
 import { PerformAutomationOnCollectionDataAddCommand } from 'src/automation/commands/impl';
@@ -127,6 +130,31 @@ export class DataAddedEventHandler implements IEventHandler<DataAddedEvent> {
       this.commandBus.execute(
         new SendEventToSubscribersCommand(collection.id, 'dataAdded', data),
       );
+
+      try {
+        const rolesToNotify = collection.circleRolesToNotifyUponNewResponse;
+        const membersToNotify = Object.entries(circle.memberRoles)
+          .filter(([memberId, roles]) =>
+            roles.some((role) => rolesToNotify.includes(role)),
+          )
+          .map(([memberId]) => memberId);
+
+        console.log({ rolesToNotify, membersToNotify });
+        const uniqueMembersToNotify = [...new Set(membersToNotify)];
+        console.log({ uniqueMembersToNotify });
+        this.eventBus.publish(
+          new SingleEmailNotificationEvent(
+            `A new response was received on ${collection.name}`,
+            `New response on ${collection.name}`,
+            redirectUrl,
+            uniqueMembersToNotify,
+          ),
+        );
+      } catch (error) {
+        this.logger.error(
+          `Failed sending email notification to user with error: ${error.message}`,
+        );
+      }
 
       // console.log('event', `${collection.slug}:dataAdded`);
       this.realtime.server.emit(
