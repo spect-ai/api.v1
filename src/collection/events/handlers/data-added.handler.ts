@@ -15,10 +15,15 @@ import {
   SingleNotificationEvent,
 } from 'src/users/events/impl';
 import { DataAddedEvent } from '../impl/data-added.event';
-import { AddItemsCommand as AddItemsToUserCommand } from 'src/users/commands/impl';
+import {
+  AddItemsCommand as AddItemsToUserCommand,
+  GetTokensOfMultipleTokenTypesOfUserQuery,
+} from 'src/users/commands/impl';
 import { PerformAutomationOnCollectionDataAddCommand } from 'src/automation/commands/impl';
 import { UpdateMultipleCirclesCommand } from 'src/circle/commands/impl/update-circle.command';
 import { SendEventToSubscribersCommand } from 'src/collection/commands/subscription/impl/create-subscription.command';
+import { GuildxyzService } from 'src/common/guildxyz.service';
+import { CollectionRepository } from 'src/collection/collection.repository';
 
 @EventsHandler(DataAddedEvent)
 export class DataAddedEventHandler implements IEventHandler<DataAddedEvent> {
@@ -28,6 +33,8 @@ export class DataAddedEventHandler implements IEventHandler<DataAddedEvent> {
     private readonly commandBus: CommandBus,
     private readonly logger: LoggingService,
     private readonly realtime: RealtimeGateway,
+    private readonly guildxyzService: GuildxyzService,
+    private readonly collectionRepository: CollectionRepository,
   ) {
     this.logger.setContext('DataAddedEventHandler');
   }
@@ -77,18 +84,24 @@ export class DataAddedEventHandler implements IEventHandler<DataAddedEvent> {
         );
       }
 
-      const res = await this.commandBus.execute(
-        new PerformAutomationOnCollectionDataAddCommand(
-          collection,
-          data,
-          data['slug'],
-          caller.id,
-          circle,
-        ),
-      );
-      if (Object.keys(res.circle).length > 0) {
-        await this.commandBus.execute(
-          new UpdateMultipleCirclesCommand(res.circle),
+      try {
+        const res = await this.commandBus.execute(
+          new PerformAutomationOnCollectionDataAddCommand(
+            collection,
+            data,
+            data['slug'],
+            caller.id,
+            circle,
+          ),
+        );
+        if (Object.keys(res.circle).length > 0) {
+          await this.commandBus.execute(
+            new UpdateMultipleCirclesCommand(res.circle),
+          );
+        }
+      } catch (error) {
+        this.logger.error(
+          `Failed to perform automation on collection data add with error: ${error.message}`,
         );
       }
 
@@ -153,6 +166,43 @@ export class DataAddedEventHandler implements IEventHandler<DataAddedEvent> {
       } catch (error) {
         this.logger.error(
           `Failed sending email notification to user with error: ${error.message}`,
+        );
+      }
+
+      try {
+        const filteredData = { ...data };
+        if (collection.formMetadata?.lookup?.tokens?.length) {
+          const res = await this.queryBus.execute(
+            new GetTokensOfMultipleTokenTypesOfUserQuery(
+              caller,
+              collection.formMetadata.lookup.tokens,
+            ),
+          );
+          filteredData['__lookup__'] = res;
+        }
+        if (collection.formMetadata?.lookup?.communities) {
+          const communitiesOfUser =
+            await this.guildxyzService.getDetailedGuildMembershipsWithRoles(
+              caller.ethAddress,
+            );
+          console.log({ communitiesOfUser });
+
+          filteredData['__lookupCommunities__'] = communitiesOfUser;
+        }
+        if (
+          filteredData['__lookup__'] ||
+          filteredData['__lookupCommunities__']
+        ) {
+          await this.collectionRepository.updateById(collection.id, {
+            data: {
+              ...collection.data,
+              [data['slug']]: filteredData,
+            },
+          });
+        }
+      } catch (error) {
+        this.logger.error(
+          `Failed adding lookup data to user with error: ${error.message}`,
         );
       }
 

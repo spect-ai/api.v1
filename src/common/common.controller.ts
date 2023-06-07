@@ -5,7 +5,10 @@ import fetch from 'node-fetch';
 import { RequiredUrlDto } from './dtos/string.dto';
 import { parse } from 'parse5';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
-import { GetTokenMetadataQuery } from './queries/impl';
+import {
+  GetContractMetadataQuery,
+  GetTokenMetadataQuery,
+} from './queries/impl';
 import { Blockchain } from '@ankr.com/ankr.js';
 @Controller('common')
 @ApiTags('common')
@@ -20,14 +23,24 @@ export class CommonController {
     return await this.gasPredictionService.predictGas(param.chainId);
   }
 
-  @Get('/tokenMetadata')
-  async getTokenMetadataV2(
+  @Get('/nft/metadata')
+  async getNftMetadata(
     @Query('chainId') chainId: Blockchain,
     @Query('contractAddress') contractAddress: string,
-    @Query('tokenId') tokenId?: string,
+    @Query('tokenId') tokenId: string,
   ) {
     return await this.queryBus.execute(
       new GetTokenMetadataQuery(chainId, contractAddress, tokenId),
+    );
+  }
+
+  @Get('/nft/contractMetadata')
+  async getNftContractMetadata(
+    @Query('chainId') chainId: Blockchain,
+    @Query('contractAddress') contractAddress: string,
+  ) {
+    return await this.queryBus.execute(
+      new GetContractMetadataQuery(chainId, contractAddress),
     );
   }
 

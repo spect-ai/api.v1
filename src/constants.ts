@@ -229,3 +229,21 @@ export const roleWithNoPermission = (roleName: string) => {
     } as CirclePermission,
   };
 };
+
+export const blockchainToChainIdMap = {
+  bsc: 56,
+  eth: 1,
+  polygon: 137,
+  avalanche: 43114,
+  arbitrum: 42161,
+  optimism: 10,
+} as const;
+
+export const chainIdToBlockchainMap = {
+  56: 'bsc',
+  1: 'eth',
+  137: 'polygon',
+  43114: 'avalanche',
+  42161: 'arbitrum',
+  10: 'optimism',
+} as const;

@@ -25,6 +25,8 @@ import { KeysRepository } from './keys.repository';
 import { Keys } from './model/keys.model';
 import { AuthModule } from 'src/auth/auth.module';
 import { EmailGeneratorService } from 'src/notification/email-generatr.service';
+import { ERC721Service } from 'src/credentials/services/erc721.service';
+import { ERC20Service } from 'src/credentials/services/erc20.service';
 
 @Module({
   imports: [
@@ -55,6 +57,8 @@ import { EmailGeneratorService } from 'src/notification/email-generatr.service';
     RealtimeGateway,
     KeysRepository,
     EmailGeneratorService,
+    ERC20Service,
+    ERC721Service,
   ],
   exports: [UsersService, UsersRepository, UsersModule, KeysRepository],
 })

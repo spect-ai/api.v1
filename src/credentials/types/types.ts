@@ -52,3 +52,15 @@ export type ZealyUserType = {
   createdAt: Date;
   updatedAt: Date;
 };
+
+export type NFTFromAnkr = {
+  contractAddress: string;
+  blockchain: string;
+  collectionName: string;
+  symbol: string;
+  tokenId: string;
+  contractType: string;
+  tokenUrl: string;
+  name: string;
+  imageUrl: string;
+};

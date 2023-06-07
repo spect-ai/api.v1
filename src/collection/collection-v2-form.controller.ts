@@ -1,5 +1,6 @@
 import {
   Controller,
+  Get,
   Param,
   Patch,
   SetMetadata,
@@ -10,6 +11,7 @@ import { ApiTags } from '@nestjs/swagger';
 import { StrongerCollectionAuthGuard } from 'src/auth/collection.guard';
 import { RequiredSlugDto } from 'src/common/dtos/string.dto';
 import { LoggingService } from 'src/logging/logging.service';
+import { GetCollectionBySlugQuery } from './queries';
 
 /**
  Built with keeping integratoors in mind, this API is meant to
@@ -28,5 +30,22 @@ export class CollectionV2FormController {
     private readonly logger: LoggingService,
   ) {
     this.logger.setContext(CollectionV2FormController.name);
+  }
+
+  @SetMetadata('permissions', ['manageSettings'])
+  @UseGuards(StrongerCollectionAuthGuard)
+  @Get('/slug/:slug/responderProfilePlugin')
+  async getResponderProfilePlugin(
+    @Param() param: RequiredSlugDto,
+  ): Promise<any> {
+    return await this.queryBus.execute(
+      new GetCollectionBySlugQuery(
+        param.slug,
+        {},
+        {
+          'formMetadata.lookup': 1,
+        },
+      ),
+    );
   }
 }

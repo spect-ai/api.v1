@@ -5,11 +5,7 @@ import { GetCirclesCommandHandler } from '../metadata/handlers/get-circles.handl
 import { GetResponsesCommandHandler } from '../metadata/handlers/get-responses.handler';
 import { SetUnreadNotificationsCommandHandler } from '../notifications/handlers/set-unread-notifications.handler';
 import { UpdateUserCommandHandler } from './update-user.handler';
-import {
-  CheckUserTokensCommandHandler,
-  GetTokenMetadataCommandHandler,
-  GetTokensCommandHandler,
-} from './get-tokens.handler';
+
 import {
   ConnectDiscordCommandHandler,
   DisconnectDiscordCommandHandler,
@@ -27,9 +23,6 @@ export const CommandHandlers = [
   GetResponsesCommandHandler,
   SetUnreadNotificationsCommandHandler,
   UpdateUserCommandHandler,
-  GetTokensCommandHandler,
-  CheckUserTokensCommandHandler,
-  GetTokenMetadataCommandHandler,
   ConnectDiscordCommandHandler,
   DisconnectDiscordCommandHandler,
   ConnectGithubCommandHandler,

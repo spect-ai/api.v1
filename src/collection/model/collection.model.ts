@@ -16,6 +16,7 @@ import {
   Option,
   ConditionGroup,
 } from '../types/types';
+import { Blockchain } from '@ankr.com/ankr.js';
 
 @useMongoosePlugin()
 export class Collection extends BaseModel {
@@ -337,7 +338,10 @@ export interface FormMetadata {
       };
       tokenId?: number;
       chainId: number;
+      chainName?: Blockchain;
     }[];
+    communities: boolean;
+    verifiedAddress: boolean;
     snapshot: number;
   };
 

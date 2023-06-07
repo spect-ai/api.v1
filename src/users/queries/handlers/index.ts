@@ -10,6 +10,10 @@ import {
   GetNotificationsQueryHandler,
   GetUnreadNotificationsQueryHandler,
 } from './get-notifications.handler';
+import {
+  GetTokensOfMultipleTokenTypesOfUserQueryHandler,
+  GetTokensOfUserQueryHandler,
+} from './get-tokens.handler';
 
 export const QueryHandlers = [
   GetMultipleUsersByIdsQueryHandler,
@@ -19,4 +23,6 @@ export const QueryHandlers = [
   GetNotificationsQueryHandler,
   GetUnreadNotificationsQueryHandler,
   GetMultipleUsersByFilterQueryHandler,
+  GetTokensOfUserQueryHandler,
+  GetTokensOfMultipleTokenTypesOfUserQueryHandler,
 ];

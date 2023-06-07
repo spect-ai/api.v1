@@ -3,7 +3,6 @@ import {
   Controller,
   Delete,
   Get,
-  Param,
   Patch,
   Post,
   Query,
@@ -16,7 +15,7 @@ import { SessionAuthGuard } from 'src/auth/iron-session.guard';
 import {
   ConnectDiscordCommand,
   DisconnectDiscordCommand,
-  GetTokensCommand,
+  GetTokensOfUserQuery,
 } from './commands/impl';
 import {
   ConnectGithubCommand,
@@ -128,26 +127,14 @@ export class UsersControllerV1 {
   }
 
   @UseGuards(SessionAuthGuard)
-  @Get('/getTokenBalances/:chainId/:tokenType/:circleId')
-  async getTokenBalances(
-    @Request() req,
-    @Param('tokenType') tokenType: string,
-    @Param('circleId') circleId: string,
-  ) {
-    return await this.commandBus.execute(
-      new GetTokensCommand(req.user, tokenType, circleId),
-    );
-  }
-
-  @UseGuards(SessionAuthGuard)
   @Get('/tokenBalances')
   async getTokenBalancesV2(
     @Request() req,
     @Query('tokenType') tokenType: 'erc20' | 'nft',
     @Query('circleId') circleId: string,
   ) {
-    return await this.commandBus.execute(
-      new GetTokensCommand(req.user, tokenType, circleId),
+    return await this.queryBus.execute(
+      new GetTokensOfUserQuery(req.user, tokenType, circleId),
     );
   }
 }
