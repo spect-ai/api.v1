@@ -8,6 +8,7 @@ export class UpdatePageVisitMetricsCommand {
     public readonly collectionId: string,
     public readonly updatePageVisitMetricsDto: UpdatePageVisitMetricsDto,
     public readonly callerIp: string,
+    public readonly userId?: string,
   ) {}
 }
 

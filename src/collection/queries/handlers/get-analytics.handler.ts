@@ -62,32 +62,41 @@ export class GetResponseMetricsQueryHandler
       // only send form metadata
       const { formMetadata } = collection;
       const averageTimeSpent = 0;
-      let pageId;
-      for (const p of collection.formMetadata.pageOrder) {
-        if (['start', 'connect', 'connectDiscord'].includes(p)) continue;
-        pageId = p;
-        break;
+      let totalStarted = 0;
+      for (const [userIp, pages] of Object.entries(
+        formMetadata.pageVisitMetricsByUser,
+      )) {
+        const p = pages.filter((page) =>
+          [
+            'submitted',
+            'start',
+            'connect',
+            'collect',
+            'connectDiscord',
+          ].includes(page),
+        );
+        if (p.length > 0) totalStarted += 1;
       }
-      const totalStarted =
-        formMetadata.pageVisitMetricsForAllUser?.[pageId] || 0;
+
       const totalViews =
-        formMetadata.pageVisitMetricsForAllUser?.['start'] || 0;
+        formMetadata.pageVisitMetricsForUniqueUser?.['start'] || 0;
       const totalSubmitted = Object.keys(collection.data || {})?.length || 0;
       const completionRate = (totalSubmitted / totalStarted) * 100;
       const metricPages = formMetadata.pageOrder.filter(
         (pageId) => !['connect', 'connectDiscord', 'collect'].includes(pageId),
       );
-      delete formMetadata.pageVisitMetricsForAllUser['connect'];
-      delete formMetadata.pageVisitMetricsForAllUser['connectDiscord'];
-      delete formMetadata.pageVisitMetricsForAllUser['collect'];
+      delete formMetadata.pageVisitMetricsForUniqueUser['connect'];
+      delete formMetadata.pageVisitMetricsForUniqueUser['connectDiscord'];
+      delete formMetadata.pageVisitMetricsForUniqueUser['collect'];
 
       const dropOffRate = metricPages.reduce((acc, pageId, index) => {
-        const metrics = formMetadata.pageVisitMetricsForAllUser;
+        const metrics = formMetadata.pageVisitMetricsForUniqueUser;
 
+        // last page
         if (index === metricPages.length - 1) acc[pageId] = 0;
         else if (
-          !formMetadata.pageVisitMetricsForAllUser?.[pageId] ||
-          !formMetadata.pageVisitMetricsForAllUser?.[metricPages[index + 1]]
+          !formMetadata.pageVisitMetricsForUniqueUser?.[pageId] ||
+          !formMetadata.pageVisitMetricsForUniqueUser?.[metricPages[index + 1]]
         )
           acc[pageId] = 0;
         else if (metricPages[index + 1] === 'submitted') {
@@ -108,7 +117,7 @@ export class GetResponseMetricsQueryHandler
         totalStarted,
         totalSubmitted,
         completionRate,
-        pageVisitMetricsForAllUser: formMetadata.pageVisitMetricsForAllUser,
+        pageVisitMetricsForAllUser: formMetadata.pageVisitMetricsForUniqueUser,
         dropOffRate,
       };
     } catch (error) {

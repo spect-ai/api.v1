@@ -19,7 +19,8 @@ export class UpdatePageVisitMetricsCommandHandler
 
   async execute(command: UpdatePageVisitMetricsCommand): Promise<any> {
     try {
-      const { collectionId, updatePageVisitMetricsDto, callerIp } = command;
+      const { collectionId, updatePageVisitMetricsDto, callerIp, userId } =
+        command;
       const collection = await this.collectionRepository.findById(collectionId);
       if (!collection) throw `Collection with id ${collectionId} not found`;
       const formMetadata = collection.formMetadata;
