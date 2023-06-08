@@ -53,9 +53,6 @@ import {
 import { AddPropertyCommandHandler } from './properties/handlers/add-property.handler';
 import { RemovePropertyCommandHandler } from './properties/handlers/remove-property.handler';
 import { UpdatePropertyCommandHandler } from './properties/handlers/update-property.handler';
-import { CreateGrantWorkflowCommandHandler } from './template/handlers/grant-workflow.handler';
-import { OnboardingWorkflowCommandHandler } from './template/handlers/onboarding-workflow.handler';
-import { KanbanProjectCommandHandler } from './template/handlers/kanban-project.handler';
 import { OnboardToSpectProjectCommandHandler } from './default/handlers/onboard-to-spect.handler';
 
 import { ImportCommandHandler } from './handlers/import.handler';
@@ -99,9 +96,6 @@ export const CommandHandlers = [
   EndVotingPeriodCommandHandler,
   DeleteCollectionCommandHandler,
   AddMultipleDataUsingAutomationCommandHandler,
-  CreateGrantWorkflowCommandHandler,
-  OnboardingWorkflowCommandHandler,
-  KanbanProjectCommandHandler,
   OnboardToSpectProjectCommandHandler,
   RecordSnapshotProposalCommandHandler,
   ImportCommandHandler,
