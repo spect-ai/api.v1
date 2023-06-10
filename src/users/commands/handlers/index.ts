@@ -4,7 +4,6 @@ import { MoveItemCommandHandler } from './move-item.handler';
 import { GetCirclesCommandHandler } from '../metadata/handlers/get-circles.handler';
 import { GetResponsesCommandHandler } from '../metadata/handlers/get-responses.handler';
 import { SetUnreadNotificationsCommandHandler } from '../notifications/handlers/set-unread-notifications.handler';
-import { UpdateUserCommandHandler } from './update-user.handler';
 
 import {
   ConnectDiscordCommandHandler,
@@ -22,7 +21,6 @@ export const CommandHandlers = [
   GetCirclesCommandHandler,
   GetResponsesCommandHandler,
   SetUnreadNotificationsCommandHandler,
-  UpdateUserCommandHandler,
   ConnectDiscordCommandHandler,
   DisconnectDiscordCommandHandler,
   ConnectGithubCommandHandler,

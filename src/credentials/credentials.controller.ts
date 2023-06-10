@@ -32,6 +32,7 @@ import { Credentials } from './model/credentials.model';
 import { GitcoinPassportService } from './services/gitcoin-passport.service';
 import { MazuryService } from './services/mazury.service';
 import { PoapService } from './services/poap.service';
+import { ENSService } from './services/ens.service';
 
 @Controller('credentials/v1')
 @ApiTags('credentials.v1')
@@ -42,6 +43,7 @@ export class CredentialsController {
     private readonly passportService: GitcoinPassportService,
     private readonly poapService: PoapService,
     private readonly gitcoinPassportService: GitcoinPassportService,
+    private readonly ensService: ENSService,
   ) {}
 
   @Get('/')
@@ -101,6 +103,18 @@ export class CredentialsController {
       body.editCode,
       body.ethAddress,
     );
+  }
+
+  @UseGuards(AdminAuthGuard)
+  @Get('/ensName')
+  async getEnsName(@Query('address') address) {
+    return await this.ensService.resolveENSName(address);
+  }
+
+  @UseGuards(AdminAuthGuard)
+  @Get('/addressFromEns')
+  async getAddressFromEns(@Query('ens') ens) {
+    return await this.ensService.resolveAddress(ens);
   }
 
   @Get('/:id')

@@ -124,4 +124,17 @@ export class User extends ProfileModel {
 
   @prop()
   apiKeys?: string[];
+
+  @prop()
+  guilds?: {
+    guildId: number;
+    guildName: string;
+    guildImage: string;
+    guildUrl: string;
+    roles: {
+      name: string;
+      id: number;
+      description: string;
+    }[];
+  }[];
 }

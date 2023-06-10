@@ -20,6 +20,7 @@ import { MintKudosService } from './services/mintkudos.service';
 import { PoapService } from './services/poap.service';
 import { UsersModule } from 'src/users/users.module';
 import { AuthModule } from 'src/auth/auth.module';
+import { ENSService } from './services/ens.service';
 
 @Module({
   imports: [
@@ -45,7 +46,13 @@ import { AuthModule } from 'src/auth/auth.module';
     CirclesCollectionService,
     RequestProvider,
     EncryptionService,
+    ENSService,
   ],
-  exports: [CredentialsService, CredentialsModule, GitcoinPassportService],
+  exports: [
+    CredentialsService,
+    CredentialsModule,
+    GitcoinPassportService,
+    ENSService,
+  ],
 })
 export class CredentialsModule {}
