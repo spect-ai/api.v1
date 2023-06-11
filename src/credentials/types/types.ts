@@ -64,3 +64,64 @@ export type NFTFromAnkr = {
   name: string;
   imageUrl: string;
 };
+
+export type GitcoinPassport = {
+  next: string | null;
+  prev: string | null;
+  items: GitcoinPassportCredentials;
+};
+
+export type GitcoinPassportCredentials = {
+  version: string;
+  credential: GitcoinPassportCredential;
+}[];
+
+export type GitcoinPassportCredential = {
+  type: string[];
+  proof: {
+    type: string;
+    created: string;
+    proofPurpose: string;
+    verificationMethod: string;
+    jws: string;
+  };
+  credentialSubject: {
+    id: string;
+    hash: string;
+    provider: string;
+    '@context': object;
+  };
+  expirationDate: string;
+  issuanceDate: string;
+  issuer: string;
+};
+
+export type GitcoinPassportMinimalStamp = {
+  id: string;
+  provider: string;
+  providerName:
+    | 'Gitcoin'
+    | 'Discord'
+    | 'Twitter'
+    | 'Github'
+    | 'Linkedin'
+    | 'Lens'
+    | 'Google'
+    | 'Facebook'
+    | 'Poh'
+    | 'Brightid'
+    | 'POAP'
+    | 'ETH'
+    | 'NFT'
+    | 'GnosisSafe'
+    | 'Snapshot';
+  providerUrl: string;
+  providerImage: string;
+  issuer: string;
+  issuerName: string;
+  defaultScore: number;
+  stampName: string;
+  stampDescription: string;
+  score?: number;
+  verified?: boolean;
+};
