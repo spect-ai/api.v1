@@ -414,11 +414,13 @@ export class GetNextFieldQueryHandler
   }
 
   async sybilScores(collection: Collection, callerAddress: string) {
-    const stamps =
-      await this.gitcoinPassportService.getDetailedPassportStampsWithTotalScore(
-        callerAddress,
-        collection.formMetadata.sybilProtectionScores,
-      );
+    const stamps = await this.gitcoinPassportService.getScoreByEthAddress(
+      callerAddress,
+      collection.formMetadata.sybilProtectionScores,
+      true,
+      true,
+      true,
+    );
     return stamps;
   }
 

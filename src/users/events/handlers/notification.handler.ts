@@ -119,9 +119,7 @@ export class SingleEmailNotificationEventHandler
       const recipientEntities = await this.userRepository.findAll({
         _id: { $in: recipients },
       });
-      console.log({ recipientEntities });
       const emails = recipientEntities.map((user) => user.email);
-      console.log({ emails });
       for (const email of emails) {
         if (!email) continue;
         console.log('Sending email to ', email);
