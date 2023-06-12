@@ -47,6 +47,7 @@ export class UsersService {
       const user = await this.usersRepository.create({
         username: username,
         ethAddress: ethAddress,
+        firstLogin: username.endsWith('.eth') ? false : true, // if username is an ENS name, then person doesnt need to set username
       });
       await this.ethAddressRepository.create({
         ethAddress: ethAddress,
@@ -91,7 +92,10 @@ export class UsersService {
       }
       return await this.usersRepository.updateById(
         this.requestProvider.user.id,
-        updateUserDto,
+        {
+          ...updateUserDto,
+          firstLogin: false,
+        },
       );
     } catch (error) {
       this.logger.logError(

@@ -137,4 +137,7 @@ export class User extends ProfileModel {
       description: string;
     }[];
   }[];
+
+  @prop()
+  firstLogin?: boolean;
 }
