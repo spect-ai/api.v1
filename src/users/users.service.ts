@@ -41,7 +41,7 @@ export class UsersService {
       }
       if (!username) {
         const numUsers = await this.usersRepository.count();
-        username = `user${numUsers + 1}`;
+        username = `fren${numUsers + 200}`;
       }
 
       const user = await this.usersRepository.create({
