@@ -139,7 +139,7 @@ export class SendEmailActionCommandHandler
         try {
           const html = this.emailGeneratorService.generateEmailWithMessage(
             action.data.message,
-            `https://circles.spect.network`,
+            undefined,
             circle,
           );
           const mail = {
