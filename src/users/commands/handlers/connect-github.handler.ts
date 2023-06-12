@@ -46,7 +46,8 @@ export class ConnectGithubCommandHandler
         },
       });
       const userData = await userResult.json();
-      console.log({ userData });
+      if (!userData?.id || !userData?.login)
+        throw new Error('Couldnt find Github Id or Username while connecting');
       let userToUpdate = user;
 
       if (!userToUpdate)
@@ -55,7 +56,7 @@ export class ConnectGithubCommandHandler
 
       const profile = await this.userRepository.updateById(user.id, {
         githubId: userData.id,
-        githubUsername: userData.username + '#' + userData.discriminator,
+        githubUsername: userData.login,
         githubAvatar: userData.avatar,
       });
       return {

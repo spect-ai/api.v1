@@ -55,6 +55,8 @@ export class ConnectDiscordCommandHandler
         },
       );
       const userData = await userResult.json();
+      if (!userData?.id || !userData?.username)
+        throw new Error('Couldnt find Discord Id or Username while connecting');
 
       let userToUpdate = user;
 

@@ -48,7 +48,7 @@ export class DataAddedEventHandler implements IEventHandler<DataAddedEvent> {
       )) as Circle;
 
       const notifContent = `A new response was received on ${collection.name}`;
-      const redirectUrl = `/${circle.slug}/r/${collection.slug}?responses`;
+      const redirectUrl = `/${circle.slug}/r/${collection.slug}?cardSlug=${data['slug']}`;
 
       if (
         collection.circleRolesToNotifyUponNewResponse &&
@@ -159,7 +159,7 @@ export class DataAddedEventHandler implements IEventHandler<DataAddedEvent> {
           new SingleEmailNotificationEvent(
             `A new response was received on ${collection.name}`,
             `New response on ${collection.name}`,
-            redirectUrl,
+            `http://localhost:3000${redirectUrl}`,
             uniqueMembersToNotify,
           ),
         );
@@ -185,8 +185,6 @@ export class DataAddedEventHandler implements IEventHandler<DataAddedEvent> {
             await this.guildxyzService.getDetailedGuildMembershipsWithRoles(
               caller.ethAddress,
             );
-          console.log({ communitiesOfUser });
-
           filteredData['__lookupCommunities__'] = communitiesOfUser;
         }
         if (
