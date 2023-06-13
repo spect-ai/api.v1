@@ -98,9 +98,17 @@ export class SaveDraftCommandHandler
         if (property && property.isPartOfFormView) {
           if (['github', 'telegram'].includes(property.type)) {
             throw 'Please connect your account to verify it';
-          } else if (property.type === 'number') {
+          } else if (['number'].includes(property.type)) {
             formFieldUpdates[key] = parseFloat(val);
             if (isNaN(formFieldUpdates[key])) throw 'Invalid number';
+          } else if (property.type === 'slider') {
+            formFieldUpdates[key] = parseInt(val.optionId || '0');
+            if (isNaN(formFieldUpdates[key])) throw 'Invalid choice';
+            if (
+              formFieldUpdates[key] < property.sliderOptions.min ||
+              formFieldUpdates[key] > property.sliderOptions.max
+            )
+              throw 'Invalid value';
           } else if (property.type === 'reward') {
             if (val['chain']) {
               const chain = collection.formMetadata.idLookup?.[val['chain']];
@@ -150,8 +158,6 @@ export class SaveDraftCommandHandler
               }
             });
             formFieldUpdates[key] = options;
-          } else if (property.type === 'slider') {
-            formFieldUpdates[key] = parseInt(val.optionId || '0');
           } else formFieldUpdates[key] = val;
         }
       }
