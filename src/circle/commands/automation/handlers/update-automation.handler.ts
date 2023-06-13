@@ -38,11 +38,6 @@ export class UpdateAutomationCommandHandler
         },
       };
 
-      await this.updateCollectionRequireDiscordConnection(
-        circle.automations[automationId].triggerCollectionSlug,
-        updateAutomationDto,
-      );
-
       const updatedCircle =
         await this.circlesRepository.updateCircleAndReturnWithPopulatedReferences(
           circleId,
@@ -53,58 +48,6 @@ export class UpdateAutomationCommandHandler
       );
     } catch (error) {
       throw new InternalServerErrorException(error);
-    }
-  }
-
-  private async updateCollectionRequireDiscordConnection(
-    collectionSlug: string,
-    updateAutomationDto: UpdateAutomationDto,
-  ): Promise<void> {
-    const collection = await this.queryBus.execute(
-      new GetCollectionBySlugQuery(collectionSlug),
-    );
-    let requireDiscordConnection = false;
-    for (const action of updateAutomationDto.actions) {
-      if (action.type === 'giveDiscordRole') {
-        requireDiscordConnection = true;
-      }
-      if (
-        action.type === 'createDiscordChannel' &&
-        action.data?.isPrivate &&
-        action.data?.addResponder
-      ) {
-        requireDiscordConnection = true;
-      }
-    }
-    if (collection.requiredDiscordConnection && !requireDiscordConnection) {
-      await this.commandBus.execute(
-        new UpdateCollectionCommand(
-          {
-            formMetadata: {
-              ...collection.formMetadata,
-              discordConnectionRequired: false,
-            },
-          },
-          null,
-          collection._id.toString(),
-        ),
-      );
-    } else if (
-      !collection.requiredDiscordConnection &&
-      requireDiscordConnection
-    ) {
-      await this.commandBus.execute(
-        new UpdateCollectionCommand(
-          {
-            formMetadata: {
-              ...collection.formMetadata,
-              discordConnectionRequired: true,
-            },
-          },
-          null,
-          collection._id.toString(),
-        ),
-      );
     }
   }
 }

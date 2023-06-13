@@ -196,11 +196,6 @@ export class GetPublicViewCollectionQueryHandler
         collectionToGet.formMetadata.mintkudosTokenId > 0 &&
         !caller;
 
-      const canFillForm =
-        hasRole &&
-        !formHasCredentialsButUserIsntConnected &&
-        hasPassedSybilCheck;
-
       const previousResponses = [];
       if (collectionToGet.dataOwner)
         for (const [dataSlug, owner] of Object.entries(
@@ -261,7 +256,6 @@ export class GetPublicViewCollectionQueryHandler
         ...res,
         formMetadata: {
           ...res.formMetadata,
-          canFillForm,
           hasRole,
           canClaimKudos: canClaimResForKudos.canClaim,
           hasPassedSybilCheck,

@@ -3,14 +3,19 @@ import {
   Controller,
   Param,
   Patch,
+  Post,
   Query,
+  Req,
   Request,
   SetMetadata,
   UseGuards,
 } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { ApiTags } from '@nestjs/swagger';
-import { CollectionAuthGuard } from 'src/auth/collection.guard';
+import {
+  CollectionAuthGuard,
+  StrongerCollectionAuthGuard,
+} from 'src/auth/collection.guard';
 import { ObjectIdDto } from 'src/common/dtos/object-id.dto';
 import { LoggingService } from 'src/logging/logging.service';
 import { AddProjectDataCommand } from './commands/data/v2/impl/add-data.command';
@@ -19,7 +24,7 @@ import {
   UpdateDataDto,
 } from './dto/update-data-request.dto';
 import { Collection } from './model/collection.model';
-import { UpdateProjectDataCommand } from './commands';
+import { DuplicateProjectCommand, UpdateProjectDataCommand } from './commands';
 import { RequiredUUIDDto } from 'src/common/dtos/string.dto';
 import { RequiredSlugDto } from 'src/common/dtos/string.dto';
 
@@ -80,6 +85,18 @@ export class CollectionV2ProjectController {
         dataSlugParam.dataId,
         atomic === 'false' ? false : true,
       ),
+    );
+  }
+
+  @SetMetadata('permissions', ['manageSettings'])
+  @UseGuards(StrongerCollectionAuthGuard)
+  @Post('/slug/:slug/duplicate')
+  async duplicateForm(
+    @Param() param: RequiredSlugDto,
+    @Req() req: any,
+  ): Promise<any> {
+    return await this.commandBus.execute(
+      new DuplicateProjectCommand(param.slug, req.user),
     );
   }
 }

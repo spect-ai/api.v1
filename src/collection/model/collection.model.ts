@@ -206,10 +206,6 @@ export interface Subscription {
 export interface FormMetadata {
   ceramicEnabled?: boolean;
   captchaEnabled?: boolean;
-  /**
-   * Is collection private?
-   */
-  privateResponses?: boolean;
 
   /**
    * The guild.xyz roles that a person needs to hold to fill up form
@@ -220,11 +216,6 @@ export interface FormMetadata {
    * Responses are anonymous?
    */
   allowAnonymousResponses?: boolean;
-
-  /**
-   * Responses are anonymous?
-   */
-  walletConnectionRequired?: boolean;
 
   /**
    * The mintkudos token id to distribute when a person fills the form
@@ -252,11 +243,6 @@ export interface FormMetadata {
   updatingResponseAllowed?: boolean;
 
   /**
-   * Send confirmation email upon submission?
-   */
-  sendConfirmationEmail?: boolean;
-
-  /**
    * The message to show when the form is submitted
    */
   logo?: string;
@@ -274,13 +260,7 @@ export interface FormMetadata {
 
   credentialCurationEnabled?: boolean;
 
-  isAnOpportunity?: boolean;
-
-  opportunityInfo?: OpportunityInfo;
-
   active?: boolean;
-
-  discordConnectionRequired?: boolean;
 
   paymentConfig?: PaymentConfig;
 
@@ -291,8 +271,6 @@ export interface FormMetadata {
   surveyToken?: Option;
   surveyTotalValue?: number;
   surveyLotteryWinner?: number;
-  claimCodes?: string[];
-  claimCode?: string;
   poapEventId?: string;
   poapEditCode?: string;
   transactionHashes?: {
@@ -319,9 +297,6 @@ export interface FormMetadata {
     [userId: string]: {
       [key: string]: any;
     };
-  };
-  currentField?: {
-    [userId: string]: string;
   };
   skippedFormFields?: {
     [userId: string]: {

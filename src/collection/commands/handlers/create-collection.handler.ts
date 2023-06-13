@@ -121,7 +121,7 @@ export class CreateCollectionCommandHandler
             multipleResponsesAllowed: false,
             updatingResponseAllowed: false,
             allowAnonymousResponses: true,
-            walletConnectionRequired: false,
+
             version: 1,
             pages: {
               start: {

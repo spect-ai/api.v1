@@ -68,7 +68,7 @@ export const getGrantApplicationFormDetails = (
       multipleResponsesAllowed: false,
       updatingResponseAllowed: true,
       allowAnonymousResponses: false,
-      walletConnectionRequired: true,
+
       pages: {
         ['start']: {
           id: 'start',
@@ -239,7 +239,7 @@ export const getOnboardingFormDetails = (circle: Circle) => {
       multipleResponsesAllowed: false,
       updatingResponseAllowed: false,
       allowAnonymousResponses: false,
-      walletConnectionRequired: true,
+
       pages: {
         ['start']: {
           id: 'start',

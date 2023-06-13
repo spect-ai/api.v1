@@ -3,6 +3,7 @@ import {
   Get,
   Param,
   Patch,
+  Post,
   Req,
   SetMetadata,
   UseGuards,
@@ -17,6 +18,7 @@ import { PublicViewAuthGuard } from 'src/auth/iron-session.guard';
 import { GitcoinPassportService } from 'src/credentials/services/gitcoin-passport.service';
 import { GitcoinPassportMinimalStamp } from 'src/credentials/types/types';
 import { CollectionRepository } from './collection.repository';
+import { DuplicateFormCommand } from './commands/v2/impl/duplicate-collection.command';
 
 /**
  Built with keeping integratoors in mind, this API is meant to
@@ -82,5 +84,17 @@ export class CollectionV2FormController {
       );
       throw e;
     }
+  }
+
+  @SetMetadata('permissions', ['createNewForm'])
+  @UseGuards(StrongerCollectionAuthGuard)
+  @Post('/slug/:slug/duplicate')
+  async duplicateForm(
+    @Param() param: RequiredSlugDto,
+    @Req() req: any,
+  ): Promise<any> {
+    return await this.commandBus.execute(
+      new DuplicateFormCommand(param.slug, req.user),
+    );
   }
 }

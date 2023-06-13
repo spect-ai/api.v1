@@ -59,6 +59,7 @@ export type Folder = {
   name: string;
   avatar: string;
   contentIds?: string[];
+  id: string;
 };
 
 export type Action = {
