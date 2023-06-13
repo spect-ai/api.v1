@@ -176,8 +176,7 @@ export class ProjectDataValidationV2Service {
             }
             continue;
           case 'discord':
-            if (!data.match(/#\d{4}$/))
-              throw "Discord data type doesn't match, must end with # and 4 digits";
+            if (!data.match(/#\d{4}$/)) throw "Discord data type doesn't match";
             continue;
         }
       } catch (e) {

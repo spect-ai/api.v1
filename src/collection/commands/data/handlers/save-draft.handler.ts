@@ -77,23 +77,28 @@ export class SaveDraftCommandHandler
       // eslint-disable-next-line prefer-const
       for (let [key, val] of Object.entries(data)) {
         if (data['captcha']) continue;
+
+        // Prevent button clicks in previous questions
         if (
           key !== '***' &&
           key !== collection.formMetadata.draftNextField?.[callerDiscordId]
         ) {
           throw 'Invalid response, please respond to the last question';
         }
-        let property;
-        if (collection.formMetadata.draftNextField?.[callerDiscordId]) {
-          property =
-            collection.properties[
-              collection.formMetadata.draftNextField[callerDiscordId]
-            ];
-          key = property.id;
-        } else throw 'No next field found';
+        if (!collection.formMetadata.draftNextField?.[callerDiscordId])
+          throw 'No next field found';
+        const property =
+          collection.properties[
+            collection.formMetadata.draftNextField[callerDiscordId]
+          ];
+        if (!property?.id)
+          throw 'Input you provided is not supported, please click on the relevant button';
+        key = property.id;
 
         if (property && property.isPartOfFormView) {
-          if (property.type === 'number') {
+          if (['github', 'telegram'].includes(property.type)) {
+            throw 'Please connect your account to verify it';
+          } else if (property.type === 'number') {
             formFieldUpdates[key] = parseFloat(val);
             if (isNaN(formFieldUpdates[key])) throw 'Invalid number';
           } else if (property.type === 'reward') {
@@ -113,6 +118,7 @@ export class SaveDraftCommandHandler
             if (!option) throw 'Invalid optionId';
             formFieldUpdates[key] = option;
           } else if (['user[]'].includes(property.type)) {
+            if (!Array.isArray(val)) throw 'Invalid value';
             const options = val.map((opt: any) => {
               const option = collection.formMetadata.idLookup?.[opt.optionId];
               if (!option) throw 'Invalid optionId';
@@ -130,6 +136,7 @@ export class SaveDraftCommandHandler
             if (!option) throw 'Invalid optionId';
             formFieldUpdates[key] = option;
           } else if (['multiSelect'].includes(property.type)) {
+            if (!Array.isArray(val)) throw 'Invalid value';
             const options = val.map((option: any) => {
               if (option.custom) {
                 return {
