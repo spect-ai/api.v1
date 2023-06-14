@@ -21,6 +21,7 @@ export * from './data/v2/impl/add-data.command';
 export * from './data/v2/impl/update-data.command';
 export * from './subscription/impl/create-subscription.command';
 export * from './subscription/impl/remove-subscription.command';
+export * from './v2/impl/duplicate-collection.command';
 
 import { AddCommentCommandHandler } from './comments/handlers/add-comment.handler';
 import { RemoveCommentCommandHandler } from './comments/handlers/remove-comment.handler';
@@ -75,6 +76,10 @@ import {
   SubscribeToEventCommandHandler,
 } from './subscription/handlers/create-subscription.handler';
 import { RemoveSubscriptionCommandHandler } from './subscription/handlers/remove-subscription.handler';
+import {
+  DuplicateFormCommandHandler,
+  DuplicateProjectCommandHandler,
+} from './v2/handlers/duplicate-collection.handler';
 
 export const CommandHandlers = [
   CreateCollectionCommandHandler,
@@ -113,4 +118,6 @@ export const CommandHandlers = [
   SendEventToSubscribersCommandHandler,
   SubscribeToEventCommandHandler,
   RemoveSubscriptionCommandHandler,
+  DuplicateFormCommandHandler,
+  DuplicateProjectCommandHandler,
 ];

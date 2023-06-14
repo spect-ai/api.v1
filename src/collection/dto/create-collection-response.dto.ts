@@ -24,12 +24,6 @@ export class CreateCollectionResponseDto {
   slug: string;
 
   /**
-   * Is collection private?
-   * @example true
-   */
-  privateResponses: boolean;
-
-  /**
    * The description of the collection
    * @example "This collection is created to track the progress of the project"
    */
@@ -164,12 +158,6 @@ export class CreateCollectionResponseDto {
   updatingResponseAllowed: boolean;
 
   /**
-   * Send confirmation email upon submission?
-   * @example true
-   */
-  sendConfirmationEmail: boolean;
-
-  /**
    * Send email to circle members upon new response
    * @example true
    */
@@ -208,10 +196,6 @@ export class CreateCollectionResponseDto {
    * @example true
    */
   credentialCurationEnabled: boolean;
-
-  isAnOpportunity: boolean;
-
-  opportunityInfo: OpportunityInfo;
 
   permissions: Permissions;
 

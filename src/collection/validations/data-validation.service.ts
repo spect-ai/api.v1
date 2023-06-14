@@ -105,7 +105,7 @@ export class DataValidationService {
           if (!elem['value'] || !elem['label'])
             throw "Multi select data type doesn't match";
         }
-      } else if (['number'].includes(properties[propertyId].type)) {
+      } else if (['number', 'slider'].includes(properties[propertyId].type)) {
         if (typeof data !== 'number') throw "Data type should be 'number'";
       } else if (['reward'].includes(properties[propertyId].type)) {
         if (data && data['value']) {
@@ -213,8 +213,7 @@ export class DataValidationService {
       } else if (['discord'].includes(properties[propertyId].type)) {
         if (data) {
           if (typeof data === 'string') {
-            if (!data.match(/#\d{4}$/))
-              throw "Discord data type doesn't match, must end with # and 4 digits";
+            if (!data.match(/#\d{4}$/)) throw "Discord data type doesn't match";
           } else if (typeof data === 'object') {
             if (!data.id || !data.username || !data.discriminator)
               throw "Discord data type doesn't match, must contain id, username and discriminator";

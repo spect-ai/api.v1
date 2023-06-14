@@ -19,12 +19,6 @@ export class UpdateCollectionDto {
   @IsString()
   @IsOptional()
   name?: string;
-  /**
-   * Private collection
-   */
-  @IsBoolean()
-  @IsOptional()
-  privateResponses: boolean;
 
   /**
    * The description of creating this collection

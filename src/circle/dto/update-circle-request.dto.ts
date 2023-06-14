@@ -13,8 +13,9 @@ import {
   DiscordToCircleRoles,
   GuildxyzToCircleRoles,
 } from '../model/circle.model';
-import { Addresses, DiscordChannel, SidebarConfig } from '../types';
+import { Addresses, DiscordChannel, Folder, SidebarConfig } from '../types';
 import { CreateCircleRequestDto } from './create-circle-request.dto';
+import { MappedItem } from 'src/common/interfaces';
 
 export class UpdateCircleRequestDto extends OmitType(CreateCircleRequestDto, [
   'name',
@@ -176,6 +177,10 @@ export class UpdateCircleRequestDto extends OmitType(CreateCircleRequestDto, [
   @IsObject()
   @IsOptional()
   sidebarConfig?: SidebarConfig;
+
+  @IsObject()
+  @IsOptional()
+  folderDetails?: MappedItem<Folder>;
 }
 
 export class UpdateCircleGithubRepoRequestDto {

@@ -152,17 +152,3 @@ export class KudosResponseDto {
   @IsNotEmpty()
   imageUrl: string;
 }
-
-export class PoapClaimDto {
-  @IsString()
-  @IsNotEmpty()
-  claimCode: string;
-
-  @IsString()
-  @IsNotEmpty()
-  editCode: string;
-
-  @IsString()
-  @IsNotEmpty()
-  ethAddress: string;
-}

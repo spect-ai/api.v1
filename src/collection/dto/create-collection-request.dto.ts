@@ -24,13 +24,6 @@ export class CreateCollectionDto {
   @IsObjectId()
   @IsNotEmpty()
   circleId?: string;
-  /**
-   * Private collection
-   * @example true
-   */
-  @IsBoolean()
-  @IsOptional()
-  privateResponses: boolean;
 
   /**
    * The description of creating this collection
