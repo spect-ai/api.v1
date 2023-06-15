@@ -101,7 +101,9 @@ export class MoveCollectionCommandHandler
       // Remove from current circle
       const currentCollectionIdFolder = Object.values(
         currParentCircle.folderDetails,
-      ).find((f: Folder) => f.contentIds.includes(collection.id)) as Folder;
+      ).find((f: Folder) =>
+        f.contentIds.includes(movedCollection.id),
+      ) as Folder;
 
       const folderIdOfCurrentCollectionInParentCircle =
         currentCollectionIdFolder.id;
@@ -111,7 +113,7 @@ export class MoveCollectionCommandHandler
           currParentCircleId,
           {
             collections: currParentCircle.collections.filter(
-              (collectionId) => collectionId !== collection.id,
+              (collectionId) => collectionId !== movedCollection.id,
             ),
             folderDetails: {
               ...currParentCircle.folderDetails,
@@ -121,7 +123,9 @@ export class MoveCollectionCommandHandler
                 ],
                 contentIds: currParentCircle.folderDetails[
                   folderIdOfCurrentCollectionInParentCircle
-                ].contentIds.filter((contentId) => contentId !== collection.id),
+                ].contentIds.filter(
+                  (contentId) => contentId !== movedCollection.id,
+                ),
               },
             },
           },

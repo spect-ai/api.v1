@@ -87,16 +87,4 @@ export class CollectionV2ProjectController {
       ),
     );
   }
-
-  @SetMetadata('permissions', ['manageSettings'])
-  @UseGuards(StrongerCollectionAuthGuard)
-  @Post('/slug/:slug/duplicate')
-  async duplicateForm(
-    @Param() param: RequiredSlugDto,
-    @Req() req: any,
-  ): Promise<any> {
-    return await this.commandBus.execute(
-      new DuplicateProjectCommand(param.slug, req.user),
-    );
-  }
 }
