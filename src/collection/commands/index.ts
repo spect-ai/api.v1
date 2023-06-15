@@ -22,6 +22,7 @@ export * from './data/v2/impl/update-data.command';
 export * from './subscription/impl/create-subscription.command';
 export * from './subscription/impl/remove-subscription.command';
 export * from './v2/impl/duplicate-collection.command';
+export * from './v2/impl/move-collection.command';
 
 import { AddCommentCommandHandler } from './comments/handlers/add-comment.handler';
 import { RemoveCommentCommandHandler } from './comments/handlers/remove-comment.handler';
@@ -83,6 +84,7 @@ import {
   DuplicateFormCommandHandler,
   DuplicateProjectCommandHandler,
 } from './v2/handlers/duplicate-collection.handler';
+import { MoveCollectionCommandHandler } from './v2/handlers/move-collection.handler';
 
 export const CommandHandlers = [
   CreateCollectionCommandHandler,
@@ -126,4 +128,5 @@ export const CommandHandlers = [
   RemoveSubscriptionCommandHandler,
   DuplicateFormCommandHandler,
   DuplicateProjectCommandHandler,
+  MoveCollectionCommandHandler,
 ];
