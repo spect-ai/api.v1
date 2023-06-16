@@ -133,14 +133,20 @@ class Summarizer_Output implements INode {
         // return '';
 
         const combinePromptTemplate = `
-        Please generate 4 questions that test the understanding of a person that reads the following text. Also provide 3 options for each question.
+        I would like to create multiple choice questions for my students based on the following text. Can you help me generate 4 such questions. Here is my desired format for each multiple choice question:
+
+        1. [QUESTION]
+        A: [OPTION 1]
+        B: [OPTION 2]
+        C: [OPTION 3]
+
 
         Text: {text}
-        
+
         `;
 
         const combineMapTemplate = `
-        Write a summary of the following in about 250 words or less. Make it very engaging and fun. Use emojis, like twitter threads. Don't use phrases like "in this post", "in this article" etc. You can divide it into paragraphs or bullet points. Give output in markdown.
+        Write a summary of the following in about 200 words or less. Make it very engaging and fun using emojis. Don't use phrases like "in this post", "in this article" etc. You can divide it into paragraphs or bullet points. Give the output in markdown.
 
         Text: {text}
         `;
@@ -243,6 +249,7 @@ class Summarizer_Output implements INode {
         intermediateSteps: string[];
       } = data;
       const rawQuestions = output.text.split('\n');
+      console.log({ rawQuestions, text: output.text });
       const questions = rawQuestions
         .slice(rawQuestions.findIndex((line) => line.startsWith('1.')))
         .filter((line) => line);
