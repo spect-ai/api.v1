@@ -45,9 +45,9 @@ export class WorkflowService {
       (node) => node.type === 'summarizer',
     );
     const updates: FlowData[string][] = [];
-    if (flow.runs.length > 40) {
+    if (flow.runs.length > 9) {
       throw new InternalServerErrorException(
-        'During beta you can only run a flow 5 times',
+        'During beta you can only run a flow 10 times',
       );
     }
 
@@ -106,7 +106,6 @@ export class WorkflowService {
     }
 
     // update run
-    console.log({ runs: flow.runs });
     await this.workflowRepository.updateById(flowId, {
       runs: flow.runs?.map((run) =>
         run.runId === runId

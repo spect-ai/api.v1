@@ -49,7 +49,17 @@ class Mirror_Source implements INode {
           .find('a')
           .map((i, el) => {
             const href = $(el).attr('href');
-            if (href && $(el).siblings().length > 1) hrefs.push(href);
+            if (
+              this.node.type === 'mirror' &&
+              href?.includes(this.node.data.url)
+            ) {
+              const blogPostId = href?.split('/').pop();
+              if (blogPostId.length === 43) {
+                console.log('Found blog post', href);
+                hrefs.push(href);
+              }
+              // if (href && $(el).siblings().length > 1) hrefs.push(href);
+            }
           });
 
         const latestPost = hrefs[0];

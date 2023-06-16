@@ -109,12 +109,23 @@ class Summarizer_Output implements INode {
 
         const inputText = (await Promise.all(promises)).join('\n');
 
+        console.log({ inputText: inputText.length });
+
+        // const { chunkSize, chunkOverlap } = this.getChunkSize(inputText.length);
+
+        const chunkSize = 6000;
+        const chunkOverlap = 600;
+
+        console.log({ chunkSize, chunkOverlap });
+
         const splitter = new RecursiveCharacterTextSplitter({
-          chunkSize: 6000,
-          chunkOverlap: 600,
+          chunkSize,
+          chunkOverlap,
         });
         const chunks = await splitter.createDocuments([inputText]);
         console.log({ chunks: chunks.length });
+
+        // return '';
 
         const template = `
         Please generate 4 questions that test the understanding of a person that reads the following text. Also provide 3 options for each question.
@@ -283,6 +294,35 @@ class Summarizer_Output implements INode {
       console.log('updated folder');
 
       return form.slug;
+    }
+  }
+
+  getChunkSize(inputTextLength: number) {
+    if (inputTextLength < 4500) {
+      return {
+        chunkSize: 1000,
+        chunkOverlap: 100,
+      };
+    } else if (inputTextLength >= 4500 && inputTextLength < 7500) {
+      return {
+        chunkSize: 2000,
+        chunkOverlap: 200,
+      };
+    } else if (inputTextLength >= 7500 && inputTextLength < 10000) {
+      return {
+        chunkSize: 1000,
+        chunkOverlap: 100,
+      };
+    } else if (inputTextLength >= 10000 && inputTextLength < 20000) {
+      return {
+        chunkSize: 4000,
+        chunkOverlap: 400,
+      };
+    } else {
+      return {
+        chunkSize: 6000,
+        chunkOverlap: 600,
+      };
     }
   }
 }
