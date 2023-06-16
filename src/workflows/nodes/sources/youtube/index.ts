@@ -85,6 +85,7 @@ class Youtube_Source implements INode {
             data: res,
             cacheKey: latestVideoId,
           });
+          console.log('youtube finished');
         }
       } catch (e) {
         console.log(e);

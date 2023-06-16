@@ -76,6 +76,7 @@ class Reddit_Source implements INode {
           data: res,
           cacheKey: latestPost,
         });
+        console.log('Reddit finished');
       } catch (e) {
         console.log({ e });
         this.updateFlowData({

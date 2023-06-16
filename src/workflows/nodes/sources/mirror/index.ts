@@ -77,6 +77,7 @@ class Mirror_Source implements INode {
           data: res,
           cacheKey: latestPost,
         });
+        console.log('Mirror finished');
       } catch (e) {
         console.log(e);
         this.updateFlowData({

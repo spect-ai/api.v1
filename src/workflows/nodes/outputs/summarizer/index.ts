@@ -114,6 +114,7 @@ class Summarizer_Output implements INode {
           chunkOverlap: 600,
         });
         const chunks = await splitter.createDocuments([inputText]);
+        console.log({ chunks: chunks.length });
 
         const template = `
         Please generate 4 questions that test the understanding of a person that reads the following text. Also provide 3 options for each question.
@@ -137,6 +138,7 @@ class Summarizer_Output implements INode {
           type: 'map_reduce',
           returnIntermediateSteps: true,
           combinePrompt: mapReducePrompt,
+          verbose: true,
         });
 
         // const text = fs.readFileSync("summarizer_openai.txt", "utf8");
