@@ -36,7 +36,14 @@ class Youtube_Source implements INode {
     let res = '';
     if (this.node.type === 'youtube') {
       try {
-        const channelId = this.node.data.channelId;
+        const channelRes = await (
+          await fetch(
+            `https://www.googleapis.com/youtube/v3/search?part=id,snippet&maxResults=1&type=channel&q=${this.node.data.channelId}&key=${process.env.YOUTUBE_API_KEY}`,
+          )
+        ).json();
+        const channelId = channelRes.items[0].id.channelId;
+        console.log({ channelId });
+
         const query = this.node.data.filter.replace(' ', '%20');
 
         const videos = await (
