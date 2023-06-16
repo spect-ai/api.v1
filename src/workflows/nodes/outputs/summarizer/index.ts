@@ -200,7 +200,6 @@ class Summarizer_Output implements INode {
         new CreateCollectionCommand(
           {
             name: this.node.data.formName,
-            privateResponses: false,
             description: '',
             collectionType: 0,
             circleId: this.flow.circle,
