@@ -2,7 +2,11 @@ import { OpenAI } from 'langchain/llms/openai';
 import Mirror_Source from '../../sources/mirror';
 import Youtube_Source from '../../sources/youtube';
 import { RecursiveCharacterTextSplitter } from 'langchain/text_splitter';
-import { loadSummarizationChain } from 'langchain/chains';
+import {
+  LLMChain,
+  MapReduceDocumentsChain,
+  StuffDocumentsChain,
+} from 'langchain/chains';
 import { PromptTemplate } from 'langchain/prompts';
 import Reddit_Source from '../../sources/reddit';
 import { v4 as uuid } from 'uuid';
@@ -17,6 +21,7 @@ import { GetProfileQuery } from 'src/users/queries/impl';
 import { GetCircleByIdQuery } from 'src/circle/queries/impl';
 import { Circle } from 'src/circle/model/circle.model';
 import { UpdateFolderCommand } from 'src/circle/commands/impl';
+import { Converter } from 'showdown';
 
 class Summarizer_Output implements INode {
   flow: Flow;
@@ -111,10 +116,10 @@ class Summarizer_Output implements INode {
 
         console.log({ inputText: inputText.length });
 
-        // const { chunkSize, chunkOverlap } = this.getChunkSize(inputText.length);
+        const { chunkSize, chunkOverlap } = this.getChunkSize(inputText.length);
 
-        const chunkSize = 6000;
-        const chunkOverlap = 600;
+        // const chunkSize = 2000;
+        // const chunkOverlap = 500;
 
         console.log({ chunkSize, chunkOverlap });
 
@@ -127,11 +132,17 @@ class Summarizer_Output implements INode {
 
         // return '';
 
-        const template = `
+        const combinePromptTemplate = `
         Please generate 4 questions that test the understanding of a person that reads the following text. Also provide 3 options for each question.
 
         Text: {text}
         
+        `;
+
+        const combineMapTemplate = `
+        Write a summary of the following in about 250 words or less. Make it very engaging and fun. Use emojis, like twitter threads. Don't use phrases like "in this post", "in this article" etc. You can divide it into paragraphs or bullet points. Give output in markdown.
+
+        Text: {text}
         `;
 
         if (chunks.length > 9) {
@@ -140,17 +151,21 @@ class Summarizer_Output implements INode {
           );
         }
 
-        const mapReducePrompt = new PromptTemplate({
-          template,
-          inputVariables: ['text'],
-        });
-        const openai_model = new OpenAI({ temperature: 0 });
-        const chain = loadSummarizationChain(openai_model, {
-          type: 'map_reduce',
-          returnIntermediateSteps: true,
-          combinePrompt: mapReducePrompt,
-          verbose: true,
-        });
+        const llm = new OpenAI({ temperature: 0 });
+        // const chain = loadSummarizationChain(openai_model, {
+        //   type: 'map_reduce',
+        //   returnIntermediateSteps: true,
+        // combinePrompt: new PromptTemplate({
+        //   template: combinePromptTemplate,
+        //   inputVariables: ['text'],
+        // }),
+        // combineMapPrompt: new PromptTemplate({
+        //   template: combineMapTemplate,
+        //   inputVariables: ['text'],
+        // }),
+        //   verbose: true,
+        //   ensureMapStep: true,
+        // } as any);
 
         // const text = fs.readFileSync("summarizer_openai.txt", "utf8");
         // const res = await openai_model.call(`
@@ -162,6 +177,34 @@ class Summarizer_Output implements INode {
         // console.log({ res });
         // return res;
 
+        const llmChain = new LLMChain({
+          prompt: new PromptTemplate({
+            template: combineMapTemplate,
+            inputVariables: ['text'],
+          }),
+          llm,
+        });
+        const combineLLMChain = new LLMChain({
+          prompt: new PromptTemplate({
+            template: combinePromptTemplate,
+            inputVariables: ['text'],
+          }),
+          llm,
+        });
+        const combineDocumentChain = new StuffDocumentsChain({
+          llmChain: combineLLMChain,
+          documentVariableName: 'text',
+          verbose: true,
+        });
+        const chain = new MapReduceDocumentsChain({
+          llmChain,
+          combineDocumentChain,
+          documentVariableName: 'text',
+          ensureMapStep: true,
+          verbose: true,
+          returnIntermediateSteps: true,
+        });
+
         const res = await chain.call({
           input_documents: chunks,
         });
@@ -169,6 +212,8 @@ class Summarizer_Output implements INode {
         // for await (const step of res.intermediateSteps) {
         //   summary += step + '\n';
         // }
+        console.log({ res });
+
         this.updateFlowData({
           nodeId: this.node.id,
           status: 'success',
@@ -223,14 +268,17 @@ class Summarizer_Output implements INode {
 
       let lineCount = 1;
       for await (const line of output.intermediateSteps) {
-        const htmlLine = '<p>' + line + '</p>';
+        // const htmlLine = '<p>' + line + '</p>';
+        const converter = new Converter();
+        const html = converter.makeHtml(line);
+        console.log({ html });
         await this.commandBus.execute(
           new AddPropertyCommand(
             {
               name: `${lineCount}.`,
               id: uuid(),
               type: 'readonly',
-              description: htmlLine,
+              description: html,
             },
             botUser.id,
             form.id,
@@ -300,23 +348,23 @@ class Summarizer_Output implements INode {
   getChunkSize(inputTextLength: number) {
     if (inputTextLength < 4500) {
       return {
-        chunkSize: 1000,
-        chunkOverlap: 100,
+        chunkSize: 1200,
+        chunkOverlap: 200,
       };
     } else if (inputTextLength >= 4500 && inputTextLength < 7500) {
       return {
-        chunkSize: 2000,
-        chunkOverlap: 200,
+        chunkSize: 1700,
+        chunkOverlap: 300,
       };
     } else if (inputTextLength >= 7500 && inputTextLength < 10000) {
       return {
-        chunkSize: 1000,
-        chunkOverlap: 100,
+        chunkSize: 2000,
+        chunkOverlap: 400,
       };
     } else if (inputTextLength >= 10000 && inputTextLength < 20000) {
       return {
         chunkSize: 4000,
-        chunkOverlap: 400,
+        chunkOverlap: 500,
       };
     } else {
       return {
