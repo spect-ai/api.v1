@@ -100,6 +100,7 @@ export class AIWhitelistAuthGuard implements CanActivate {
       '0x55b23ed53fe13060183b92979c737a8ef9a73b73',
       '0x6304ce63f2ebf8c0cc76b60d34cc52a84abb6057',
       '0x43717E907A963bBd9D381461a6964FBDB96407F7'.toLowerCase(),
+      '0xB2Ebc9b3a788aFB1E942eD65B59E9E49A1eE500D'.toLowerCase(),
     ].includes(address);
   }
 
