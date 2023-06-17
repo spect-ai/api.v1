@@ -746,15 +746,6 @@ export class GetNextFieldQueryHandler
             });
           }
         }
-        if (['singleSelect'].includes(returnedField.type)) {
-          if (returnedField.allowCustom) {
-            returnedField.options.push({
-              label: 'Other',
-              value: 'other',
-            });
-          }
-        }
-
         if (
           ['reward', 'user', 'user[]', 'singleSelect', 'multiSelect'].includes(
             returnedField.type,
