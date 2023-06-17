@@ -10,6 +10,9 @@ import { KeysRepository } from 'src/users/keys.repository';
 import { UsersRepository } from 'src/users/users.repository';
 import { RateLimitCacheService } from './rate-limit-cache.service';
 import { EncryptionService } from 'src/common/encryption.service';
+import { QueryBus } from '@nestjs/cqrs';
+import { Collection } from 'src/collection/model/collection.model';
+import { GetCollectionBySlugQuery } from 'src/collection/queries';
 
 @Injectable()
 export class SessionAuthGuard implements CanActivate {
@@ -95,13 +98,29 @@ export class AdminAuthGuard implements CanActivate {
 
 @Injectable()
 export class AIWhitelistAuthGuard implements CanActivate {
+  constructor(private readonly queryBus: QueryBus) {}
+
   async validateUser(address: string): Promise<ObjectId | boolean> {
-    return [
-      '0x55b23ed53fe13060183b92979c737a8ef9a73b73',
-      '0x6304ce63f2ebf8c0cc76b60d34cc52a84abb6057',
-      '0x43717E907A963bBd9D381461a6964FBDB96407F7'.toLowerCase(),
-      '0xB2Ebc9b3a788aFB1E942eD65B59E9E49A1eE500D'.toLowerCase(),
-    ].includes(address);
+    const whitelistSlug = 'c6270b30-a25f-4b46-a563-a3d674913604';
+    const whitelistedForField = '1dccb71a-3f85-43d8-b14b-de6951c41f6b';
+    const ethAddressField = '2f2aba52-2784-48ed-a558-00076d270ea6';
+
+    const changelog_collection: Collection = await this.queryBus.execute(
+      new GetCollectionBySlugQuery(whitelistSlug),
+    );
+    const rows = Object.values(changelog_collection?.data);
+
+    const whitelistedRows = rows.filter(
+      (row) =>
+        row[whitelistedForField] &&
+        row[whitelistedForField].includes('AI Workflows'),
+    );
+
+    const whitelistedAddresses = whitelistedRows.map((row) =>
+      row[ethAddressField].toLowerCase(),
+    );
+
+    return whitelistedAddresses.includes(address);
   }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -113,6 +132,7 @@ export class AIWhitelistAuthGuard implements CanActivate {
       if (!request.user) return false;
       return true;
     } catch (error) {
+      console.log(error);
       request.session.destroy();
       throw new HttpException({ message: error }, 422);
     }
