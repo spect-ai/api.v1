@@ -24,6 +24,7 @@ import {
   SaveDraftFromDiscordCommand,
 } from '../impl/save-draft.command';
 import { ActivityOnAddData } from './add-data.handler';
+import { isAddress } from 'ethers/lib/utils';
 
 @CommandHandler(SaveDraftFromDiscordCommand)
 export class SaveDraftCommandHandler
@@ -77,6 +78,7 @@ export class SaveDraftCommandHandler
       // eslint-disable-next-line prefer-const
       for (let [key, val] of Object.entries(data)) {
         if (data['captcha']) continue;
+        if (data['connectWallet']) continue;
 
         // Prevent button clicks in previous questions
         if (
@@ -174,10 +176,10 @@ export class SaveDraftCommandHandler
           skippedFormFields[key] = val;
         }
       }
-
       if (
         Object.entries(formFieldUpdates).length === 0 &&
         !data['captcha'] &&
+        !data['connectWallet'] &&
         Object.keys(skippedFormFields).length === 0 &&
         Object.keys(rewardFields).length === 0
       )
@@ -218,6 +220,9 @@ export class SaveDraftCommandHandler
 
       if (data['captcha']) {
         formFieldUpdates['captcha'] = data['captcha'];
+      }
+      if (data['connectWallet']) {
+        formFieldUpdates['connectWallet'] = data['connectWallet'];
       }
 
       const updatedCollection = await this.collectionRepository.updateById(
@@ -262,13 +267,26 @@ export class SaveDraftCommandHandler
       ) {
         let user;
         try {
+          const query = {
+            discordId: callerDiscordId,
+          };
+          if (
+            collection.formMetadata.drafts?.[callerDiscordId]?.[
+              'connectWallet'
+            ] &&
+            isAddress(
+              collection.formMetadata.drafts?.[callerDiscordId]?.[
+                'connectWallet'
+              ],
+            )
+          ) {
+            query['ethAddress'] =
+              collection.formMetadata.drafts?.[callerDiscordId]?.[
+                'connectWallet'
+              ];
+          }
           user = await this.queryBus.execute(
-            new GetUserByFilterQuery(
-              {
-                discordId: callerDiscordId,
-              },
-              '',
-            ),
+            new GetUserByFilterQuery(query, ''),
           );
         } catch (err) {
           console.log({ warning: err });
@@ -396,14 +414,29 @@ export class SaveAndPostSocialsCommandHandler
 
       const nextFieldVal = this.getVal(nextField.type, socialsDto, caller);
       let updatedCollection;
-      if (['github', 'discord', 'telegram'].includes(nextField.type)) {
+      if (
+        ['github', 'discord', 'telegram', 'connectWallet'].includes(
+          nextField.type,
+        )
+      ) {
+        const updatedField =
+          nextField.type === 'connectWallet'
+            ? {
+                ['connectWallet']: nextFieldVal.ethAddress,
+              }
+            : {
+                [nextField.id]: nextFieldVal,
+              };
+
+        console.log({ updatedField });
         const updatedDraft = {
           ...(collection.formMetadata.drafts || {}),
           [discordId]: {
             ...(collection.formMetadata.drafts?.[discordId] || {}),
-            [nextField.id]: nextFieldVal,
+            ...updatedField,
           },
         };
+
         updatedCollection = await this.collectionRepository.updateById(
           collection.id,
           {
@@ -443,13 +476,20 @@ export class SaveAndPostSocialsCommandHandler
       ) {
         let user;
         try {
+          const query = {
+            discordId,
+          };
+          if (
+            collection.formMetadata.drafts?.[discordId]?.['connectWallet'] &&
+            isAddress(
+              collection.formMetadata.drafts?.[discordId]?.['connectWallet'],
+            )
+          ) {
+            query['ethAddress'] =
+              collection.formMetadata.drafts?.[discordId]?.['connectWallet'];
+          }
           user = await this.queryBus.execute(
-            new GetUserByFilterQuery(
-              {
-                discordId: discordId,
-              },
-              '',
-            ),
+            new GetUserByFilterQuery(query, ''),
           );
         } catch (err) {
           console.log({ warning: err });
@@ -577,13 +617,26 @@ export class SaveAndPostPaymentCommandHandler
       ) {
         let user;
         try {
+          const query = {
+            discordId: discordUserId,
+          };
+          if (
+            collection.formMetadata.drafts?.[discordUserId]?.[
+              'connectWallet'
+            ] &&
+            isAddress(
+              collection.formMetadata.drafts?.[discordUserId]?.[
+                'connectWallet'
+              ],
+            )
+          ) {
+            query['ethAddress'] =
+              collection.formMetadata.drafts?.[discordUserId]?.[
+                'connectWallet'
+              ];
+          }
           user = await this.queryBus.execute(
-            new GetUserByFilterQuery(
-              {
-                discordId: discordUserId,
-              },
-              '',
-            ),
+            new GetUserByFilterQuery(query, ''),
           );
         } catch (err) {
           console.log({ warning: err });

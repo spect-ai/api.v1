@@ -312,8 +312,6 @@ export class DiscordService {
         }),
       });
 
-      console.log({ res });
-
       const json = await res.json();
       if (res.status !== 200) {
         throw new HttpException(json.message, res.status);
