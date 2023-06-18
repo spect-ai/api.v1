@@ -52,6 +52,7 @@ import { SurveyTokenService } from './credentials/services/survey-token.service'
 import * as dotenv from 'dotenv';
 import { GetCollectionService } from './collection/services/get-collection.service';
 import { ZealyService } from './credentials/services/zealy.service';
+import { WorkflowsModule } from './workflows/workflows.module';
 dotenv.config();
 
 const databaseUrl = process.env.MONGO_URL
@@ -80,6 +81,7 @@ const databaseUrl = process.env.MONGO_URL
     SecretModule,
     AutomationModule,
     LookupModule,
+    WorkflowsModule,
   ],
   controllers: [AppController, RegistryController, CollectionController],
   providers: [
