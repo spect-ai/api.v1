@@ -16,7 +16,7 @@ import { LoggingService } from 'src/logging/logging.service';
 import { GetCollectionBySlugQuery } from './queries';
 import { PublicViewAuthGuard } from 'src/auth/iron-session.guard';
 import { GitcoinPassportService } from 'src/credentials/services/gitcoin-passport.service';
-import { GitcoinPassportMinimalStamp } from 'src/credentials/types/types';
+import { GitcoinPassportMinimalStampOnSpect } from 'src/credentials/types/types';
 import { CollectionRepository } from './collection.repository';
 import { DuplicateFormCommand } from './commands/v2/impl/duplicate-collection.command';
 import { CircleAuthGuard } from 'src/auth/circle.guard';
@@ -66,7 +66,7 @@ export class CollectionV2FormController {
     @Req() req: any,
   ): Promise<{
     score: number;
-    stamps: GitcoinPassportMinimalStamp[];
+    stamps: GitcoinPassportMinimalStampOnSpect[];
   }> {
     try {
       const form = await this.collectionRepository.findOne({
