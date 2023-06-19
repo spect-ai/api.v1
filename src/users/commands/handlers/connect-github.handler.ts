@@ -57,7 +57,7 @@ export class ConnectGithubCommandHandler
       const profile = await this.userRepository.updateById(user.id, {
         githubId: userData.id,
         githubUsername: userData.login,
-        githubAvatar: userData.avatar,
+        githubAvatar: userData.avatar_url,
       });
       return {
         profile,
