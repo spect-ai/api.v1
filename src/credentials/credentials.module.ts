@@ -15,7 +15,6 @@ import { CredentialsRepository } from './credentials.repository';
 import { CredentialsService } from './credentials.service';
 import { Credentials } from './model/credentials.model';
 import { GitcoinPassportService } from './services/gitcoin-passport.service';
-import { MazuryService } from './services/mazury.service';
 import { MintKudosService } from './services/mintkudos.service';
 import { PoapService } from './services/poap.service';
 import { UsersModule } from 'src/users/users.module';
@@ -35,7 +34,6 @@ import { ENSService } from './services/ens.service';
   providers: [
     CredentialsService,
     CredentialsRepository,
-    MazuryService,
     LoggingService,
     GitcoinPassportService,
     CommonTools,

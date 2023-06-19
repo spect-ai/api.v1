@@ -53,6 +53,7 @@ import * as dotenv from 'dotenv';
 import { GetCollectionService } from './collection/services/get-collection.service';
 import { ZealyService } from './credentials/services/zealy.service';
 import { TemplateModule } from './template/template.module';
+import { WorkflowsModule } from './workflows/workflows.module';
 dotenv.config();
 
 const databaseUrl = process.env.MONGO_URL
@@ -82,6 +83,7 @@ const databaseUrl = process.env.MONGO_URL
     AutomationModule,
     LookupModule,
     TemplateModule,
+    WorkflowsModule,
   ],
   controllers: [AppController, RegistryController, CollectionController],
   providers: [

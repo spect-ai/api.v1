@@ -1,32 +1,3 @@
-export type MazuryCredentialType = {
-  id: string;
-  badge_type: {
-    created_at: string;
-    description: string;
-    external_image_url: string;
-    id: string;
-    image: string;
-    issuer: {
-      name: string;
-    };
-    slug: string;
-    title: string;
-    updated_at: string;
-    total_supply: number;
-    video?: string;
-  };
-  created_at: string;
-  external_links: { [key: string]: string };
-  hidden: boolean;
-  token_id: string;
-  owner: {
-    eth_address: string;
-    ens_name: string;
-    avatar: string;
-    username: string;
-  };
-};
-
 export type KudosType = {
   kudosTokenId: number;
   headline: string;
@@ -65,18 +36,18 @@ export type NFTFromAnkr = {
   imageUrl: string;
 };
 
-export type GitcoinPassport = {
+export type GitcoinPassportWithVerifiedCredentials = {
   next: string | null;
   prev: string | null;
-  items: GitcoinPassportCredentials;
+  items: GitcoinPassportVerifiedCredentials;
 };
 
-export type GitcoinPassportCredentials = {
+export type GitcoinPassportVerifiedCredentials = {
   version: string;
-  credential: GitcoinPassportCredential;
+  credential: GitcoinPassportVerifiedCredential;
 }[];
 
-export type GitcoinPassportCredential = {
+export type GitcoinPassportVerifiedCredential = {
   type: string[];
   proof: {
     type: string;
@@ -96,25 +67,10 @@ export type GitcoinPassportCredential = {
   issuer: string;
 };
 
-export type GitcoinPassportMinimalStamp = {
+export type GitcoinPassportMinimalStampOnSpect = {
   id: string;
   provider: string;
-  providerName:
-    | 'Gitcoin'
-    | 'Discord'
-    | 'Twitter'
-    | 'Github'
-    | 'Linkedin'
-    | 'Lens'
-    | 'Google'
-    | 'Facebook'
-    | 'Poh'
-    | 'Brightid'
-    | 'POAP'
-    | 'ETH'
-    | 'NFT'
-    | 'GnosisSafe'
-    | 'Snapshot';
+  providerName: string;
   providerUrl: string;
   providerImage: string;
   issuer: string;
@@ -124,4 +80,24 @@ export type GitcoinPassportMinimalStamp = {
   stampDescription: string;
   score?: number;
   verified?: boolean;
+};
+
+export type GitcoinPassportIndividualStamp = {
+  name: string;
+  description: string;
+  hash: string;
+};
+
+export type GitcoinPassportStampGroup = {
+  name: string;
+  stamps: GitcoinPassportIndividualStamp[];
+};
+
+export type GitcoinPassportStampsOfAProviderPlatform = {
+  id: string;
+  icon: string;
+  name: string;
+  description: string;
+  connectMessage: string;
+  groups: GitcoinPassportStampGroup[];
 };

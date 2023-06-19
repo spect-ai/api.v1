@@ -22,6 +22,7 @@ import { GetUserByFilterQuery } from 'src/users/queries/impl';
 import { v4 as uuidv4 } from 'uuid';
 import { GetCollectionBySlugQuery } from '../impl/get-collection.query';
 import { GetNextFieldQuery } from '../impl/get-field.query';
+import { isAddress } from 'ethers/lib/utils';
 
 @QueryHandler(GetNextFieldQuery)
 export class GetNextFieldQueryHandler
@@ -148,7 +149,6 @@ export class GetNextFieldQueryHandler
   }> {
     const { properties, propertyOrder } = collection;
     const updates = {} as { [key: string]: any };
-
     if (
       collection.formMetadata.captchaEnabled &&
       !draftSubmittedByUser.captcha
@@ -161,21 +161,32 @@ export class GetNextFieldQueryHandler
     let user;
     if (collection.formMetadata.pageOrder.includes('connect')) {
       try {
-        user = await this.queryBus.execute(
-          new GetUserByFilterQuery(
-            {
-              discordId,
-            },
-            '',
-          ),
-        );
-        if (!user || !user?.ethAddress) {
+        const query = {
+          discordId,
+        };
+        if (
+          collection.formMetadata.drafts?.[discordId]?.['connectWallet'] &&
+          isAddress(
+            collection.formMetadata.drafts?.[discordId]?.['connectWallet'],
+          )
+        ) {
+          query['ethAddress'] =
+            collection.formMetadata.drafts?.[discordId]?.['connectWallet'];
+        }
+        user = await this.queryBus.execute(new GetUserByFilterQuery(query, ''));
+        console.log({ e: user?.ethAddress });
+        if (!user?.ethAddress) {
           return {
             field: 'connectWallet',
             ethAddress: null,
           };
-        }
-        updates['connectWallet'] = user.ethAddress;
+        } else if (
+          !collection.formMetadata.drafts?.[discordId]?.['connectWallet']
+        )
+          return {
+            field: 'connectWallet',
+            ethAddress: user.ethAddress,
+          };
       } catch (e) {
         return {
           field: 'connectWallet',
@@ -638,13 +649,17 @@ export class GetNextFieldQueryHandler
         else if (nextField === 'connectWallet') {
           return {
             type: 'connectWallet',
-            name: 'Please connect wallet to continue',
+            name: callerAddress
+              ? `You have previously connected your account with ethereum address ${callerAddress}`
+              : 'Please connect wallet to continue',
+            ethAddress: callerAddress,
           };
         } else if (nextField === 'sybilProtection') {
           return {
             type: 'sybilProtection',
             name: 'Please complete the sybil protection to continue',
             detailedScores: await this.sybilScores(collection, callerAddress),
+            ethAddress: callerAddress,
           };
         } else if (nextField === 'roleGating') {
           return {
@@ -652,6 +667,7 @@ export class GetNextFieldQueryHandler
             name: 'Please complete the role gating to continue',
             guildRoles: collection.formMetadata.formRoleGating,
             guildUrl: await this.guildUrl(collection),
+            ethAddress: callerAddress,
           };
         } else if (nextField === 'discordRoleGating') {
           return {
@@ -746,15 +762,6 @@ export class GetNextFieldQueryHandler
             });
           }
         }
-        if (['singleSelect'].includes(returnedField.type)) {
-          if (returnedField.allowCustom) {
-            returnedField.options.push({
-              label: 'Other',
-              value: 'other',
-            });
-          }
-        }
-
         if (
           ['reward', 'user', 'user[]', 'singleSelect', 'multiSelect'].includes(
             returnedField.type,

@@ -66,7 +66,10 @@ export class ConnectDiscordCommandHandler
 
       const profile = await this.userRepository.updateById(user.id, {
         discordId: userData.id,
-        discordUsername: userData.username + '#' + userData.discriminator,
+        discordUsername:
+          userData.discriminator === '0'
+            ? userData.username
+            : userData.username + '#' + userData.discriminator,
         discordAvatar: userData.avatar,
       });
       return {

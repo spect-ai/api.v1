@@ -19,6 +19,7 @@ export class ActionCommand {
 export class SendEmailActionCommand extends ActionCommand {}
 export class GiveRoleActionCommand extends ActionCommand {}
 export class GiveDiscordRoleActionCommand extends ActionCommand {}
+export class RemoveDiscordRoleActionCommand extends ActionCommand {}
 export class CreateDiscordChannelActionCommand extends ActionCommand {}
 export class CreateCardActionCommand extends ActionCommand {}
 export class StartVotingPeriodActionCommand extends ActionCommand {}
@@ -40,4 +41,5 @@ export const actionIdToCommandMapNew = {
   postOnDiscord: PostOnDiscordActionCommand,
   closeCard: CloseCardActionCommand,
   initiatePendingPayment: InitiatePendingPaymentActionCommand,
+  removeDiscordRole: RemoveDiscordRoleActionCommand,
 };

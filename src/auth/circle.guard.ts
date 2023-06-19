@@ -51,7 +51,14 @@ export class CircleAuthGuard implements CanActivate {
       if (!permissions) return true;
 
       if (!(await this.sessionAuthGuard.canActivate(context))) return false;
-      const circle = await this.circlesRepository.findById(request.params.id);
+      let circle;
+      if (request.params.id)
+        circle = await this.circlesRepository.findById(request.params.id);
+      else if (request.params.slug)
+        circle = await this.circlesRepository.findOne({
+          slug: request.params.slug,
+        });
+
       if (!circle) {
         throw new HttpException('Circle not found', 404);
       }

@@ -97,7 +97,11 @@ export class SendEventToSubscribersCommandHandler
       case 'discord':
         return {
           id: value?.id,
-          username: `${value?.username}#${value?.discriminator}`,
+          username: `${
+            value?.discriminator === '0'
+              ? value?.username
+              : `${value?.username}#${value?.discriminator}`
+          } `,
         };
       case 'telegram':
         return {

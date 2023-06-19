@@ -71,13 +71,36 @@ export class SessionAuthGuard implements CanActivate {
 
 @Injectable()
 export class AdminAuthGuard implements CanActivate {
-  constructor(private readonly ethAddressService: EthAddressService) {}
-
   async validateUser(address: string): Promise<ObjectId | boolean> {
     return [
       '0x55b23ed53fe13060183b92979c737a8ef9a73b73',
       '0x6304ce63f2ebf8c0cc76b60d34cc52a84abb6057',
     ].includes(address.toLowerCase());
+  }
+
+  async canActivate(context: ExecutionContext): Promise<boolean> {
+    const request = context.switchToHttp().getRequest();
+    try {
+      request.user = await this.validateUser(
+        request.session.siwe?.address?.toLowerCase(),
+      );
+      if (!request.user) return false;
+      return true;
+    } catch (error) {
+      request.session.destroy();
+      throw new HttpException({ message: error }, 422);
+    }
+  }
+}
+
+@Injectable()
+export class AIWhitelistAuthGuard implements CanActivate {
+  async validateUser(address: string): Promise<ObjectId | boolean> {
+    return [
+      '0x55b23ed53fe13060183b92979c737a8ef9a73b73',
+      '0x6304ce63f2ebf8c0cc76b60d34cc52a84abb6057',
+      '0x43717E907A963bBd9D381461a6964FBDB96407F7'.toLowerCase(),
+    ].includes(address);
   }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {

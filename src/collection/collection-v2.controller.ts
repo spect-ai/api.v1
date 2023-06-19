@@ -1,4 +1,13 @@
-import { Controller, Get, Param, SetMetadata, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Param,
+  Patch,
+  Query,
+  Req,
+  SetMetadata,
+  UseGuards,
+} from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { ApiTags } from '@nestjs/swagger';
 import {
@@ -10,6 +19,7 @@ import { RequiredSlugDto } from 'src/common/dtos/string.dto';
 import { CollectionDataResponseDto } from './dto/v2/collection-response.dto';
 import { GetCollectionBySlugQuery } from './queries';
 import { LoggingService } from 'src/logging/logging.service';
+import { MoveCollectionCommand } from './commands';
 
 /**
  Built with keeping integratoors in mind, this API is meant to
@@ -79,5 +89,20 @@ export class CollectionV2Controller {
         },
       ),
     );
+  }
+
+  @SetMetadata('permissions', ['manageSettings'])
+  @UseGuards(StrongerCollectionAuthGuard)
+  @Patch('/slug/:slug/move')
+  async moveCollection(
+    @Param() param: RequiredSlugDto,
+    @Query('circleId') circleId: string,
+    @Req() req: any,
+  ): Promise<CollectionDataResponseDto> {
+    const res = await this.commandBus.execute(
+      new MoveCollectionCommand(param.slug, circleId, req.user),
+    );
+
+    return res;
   }
 }
