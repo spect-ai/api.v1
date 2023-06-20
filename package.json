@@ -93,7 +93,7 @@
     "yt-get": "^1.1.2"
   },
   "devDependencies": {
-    "@avp1598/spect-shared-types": "^0.2.1",
+    "@avp1598/spect-shared-types": "^0.2.3",
     "@nestjs/cli": "^8.0.0",
     "@nestjs/schematics": "^8.0.0",
     "@nestjs/testing": "^8.0.0",

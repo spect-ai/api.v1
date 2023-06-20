@@ -22,6 +22,7 @@ import { GetCircleByIdQuery } from 'src/circle/queries/impl';
 import { Circle } from 'src/circle/model/circle.model';
 import { UpdateFolderCommand } from 'src/circle/commands/impl';
 import { Converter } from 'showdown';
+import Discourse_Source from '../../sources/discourse';
 
 class Summarizer_Output implements INode {
   flow: Flow;
@@ -81,8 +82,6 @@ class Summarizer_Output implements INode {
                 this.flowData,
                 this.updateFlowData,
               );
-              // const mirrorNodeRes = await mirrorNode.run();
-              // inputText += mirrorNodeRes;
               promises.push(mirrorNode.run());
               break;
             case 'reddit':
@@ -92,8 +91,6 @@ class Summarizer_Output implements INode {
                 this.flowData,
                 this.updateFlowData,
               );
-              // const redditNodeRes = await redditNode.run();
-              // inputText += redditNodeRes;
               promises.push(redditNode.run());
               break;
             case 'youtube':
@@ -103,10 +100,16 @@ class Summarizer_Output implements INode {
                 this.flowData,
                 this.updateFlowData,
               );
-              // const youtubeNodeRes = await youtubeNode.run();
-              // inputText += youtubeNodeRes;
               promises.push(youtubeNode.run());
               break;
+            case 'discourse':
+              const discourseNode = new Discourse_Source(
+                this.flow,
+                inputNode,
+                this.flowData,
+                this.updateFlowData,
+              );
+              promises.push(discourseNode.run());
             default:
               break;
           }
@@ -312,9 +315,6 @@ class Summarizer_Output implements INode {
           ],
         }),
       );
-
-      console.log('updated folder');
-
       return form.slug;
     }
   }
