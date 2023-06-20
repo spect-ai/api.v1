@@ -213,10 +213,9 @@ export class DataValidationService {
       } else if (['discord'].includes(properties[propertyId].type)) {
         if (data) {
           if (typeof data === 'string') {
-            if (!data.match(/#\d{4}$/)) throw "Discord data type doesn't match";
           } else if (typeof data === 'object') {
-            if (!data.id || !data.username || !data.discriminator)
-              throw "Discord data type doesn't match, must contain id, username and discriminator";
+            if (!data.id || !data.username)
+              throw "Discord data type doesn't match, must contain id or username";
           } else
             throw "Internal error: Discord data type doesn't match, must be object or string";
         }

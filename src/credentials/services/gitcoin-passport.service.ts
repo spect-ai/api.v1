@@ -3,8 +3,8 @@ import fetch from 'node-fetch';
 import { CredentialsRepository } from '../credentials.repository';
 import { Credentials } from '../model/credentials.model';
 import {
-  GitcoinPassportCredentials,
-  GitcoinPassportMinimalStamp,
+  GitcoinPassportVerifiedCredentials,
+  GitcoinPassportMinimalStampOnSpect,
 } from '../types/types';
 
 @Injectable()
@@ -25,7 +25,7 @@ export class GitcoinPassportService {
 
   async getStampsByEthAddress(
     ethAddress: string,
-  ): Promise<GitcoinPassportCredentials> {
+  ): Promise<GitcoinPassportVerifiedCredentials> {
     const res = await fetch(
       `https://api.scorer.gitcoin.co/registry/stamps/${ethAddress}?include_metadata=true`,
       {
@@ -54,7 +54,7 @@ export class GitcoinPassportService {
     sortStampsByScore = false,
   ): Promise<{
     score: number;
-    stamps: GitcoinPassportMinimalStamp[];
+    stamps: GitcoinPassportMinimalStampOnSpect[];
   }> {
     const stampsOfUser = await this.getStampsByEthAddress(ethAddress);
     const providersOfUserStamps = stampsOfUser?.map(

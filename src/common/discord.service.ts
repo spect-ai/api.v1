@@ -122,8 +122,56 @@ export class DiscordService {
       let url;
       if (discordUserId)
         url = `${process.env.DISCORD_URI}/api/guilds/${guildId}/roles/give?userId=${discordUserId}`;
-      else if (discordUsername && discordDiscriminator)
+      else if (
+        discordUsername &&
+        discordDiscriminator &&
+        discordDiscriminator !== '0'
+      )
         url = `${process.env.DISCORD_URI}/api/guilds/${guildId}/roles/give?username=${discordUsername}&discriminator=${discordDiscriminator}`;
+      else if (discordUsername)
+        url = `${process.env.DISCORD_URI}/api/guilds/${guildId}/roles/give?username=${discordUsername}`;
+      const res = await fetch(url, {
+        headers: {
+          'Content-Type': 'application/json',
+          secret: this.encryptionService.encrypt(process.env.API_SECRET),
+        },
+        method: 'POST',
+        body: JSON.stringify({
+          roleIds,
+        }),
+      });
+
+      const json = await res.json();
+      if (res.status !== 200) {
+        throw new HttpException(json.message, res.status);
+      }
+      return json;
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
+    }
+  }
+
+  async removeRolesFromUser(
+    guildId: string,
+    roleIds: string[],
+    discordUserId?: string,
+    discordUsername?: string,
+    discordDiscriminator?: string,
+  ) {
+    try {
+      let url;
+      if (discordUserId)
+        url = `${process.env.DISCORD_URI}/api/guilds/${guildId}/roles/remove?userId=${discordUserId}`;
+      else if (
+        discordUsername &&
+        discordDiscriminator &&
+        discordDiscriminator !== '0'
+      )
+        url = `${process.env.DISCORD_URI}/api/guilds/${guildId}/roles/remove?username=${discordUsername}&discriminator=${discordDiscriminator}`;
+      else if (discordUsername)
+        url = `${process.env.DISCORD_URI}/api/guilds/${guildId}/roles/remove?username=${discordUsername}`;
+
       const res = await fetch(url, {
         headers: {
           'Content-Type': 'application/json',
@@ -263,8 +311,6 @@ export class DiscordService {
           discordUserId,
         }),
       });
-
-      console.log({ res });
 
       const json = await res.json();
       if (res.status !== 200) {

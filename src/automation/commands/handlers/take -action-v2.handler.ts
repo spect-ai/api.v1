@@ -40,6 +40,7 @@ import {
   InitiatePendingPaymentActionCommand,
   PostOnDiscordActionCommand,
   PostOnDiscordThreadCommand,
+  RemoveDiscordRoleActionCommand,
   SendEmailActionCommand,
   StartVotingPeriodActionCommand,
 } from '../impl/take-action-v2.command';
@@ -86,7 +87,6 @@ export class CommonActionService {
       discordUserId =
         collection.data[relevantIds.dataSlug][discordField.id]?.['id'];
     }
-    console.log({ discordUserId });
 
     return {
       circle,
@@ -284,8 +284,80 @@ export class GiveDiscordRoleActionCommandHandler
             discordUsername = val.username;
             discordDiscriminator = val.discriminator;
           }
-          if (discordUsername && discordDiscriminator) {
+          if (discordUsername) {
             await this.discordService.giveRolesToUser(
+              circle.discordGuildId,
+              roles,
+              null,
+              discordUsername,
+              discordDiscriminator,
+            );
+          }
+        }
+      }
+    } catch (err) {
+      this.logger.error(err);
+    }
+    return updatesContainer;
+  }
+}
+
+@CommandHandler(RemoveDiscordRoleActionCommand)
+export class RemoveDiscordRoleActionCommandHandler
+  implements ICommandHandler<RemoveDiscordRoleActionCommand>
+{
+  constructor(
+    private readonly logger: LoggingService,
+    private readonly discordService: DiscordService,
+    private readonly commonActionService: CommonActionService,
+  ) {
+    this.logger.setContext(GiveDiscordRoleActionCommandHandler.name);
+  }
+
+  async execute(command: RemoveDiscordRoleActionCommand): Promise<any> {
+    const { action, updatesContainer, relevantIds } = command;
+    try {
+      console.log('RemoveDiscordRoleActionCommandHandler');
+      const circleId = action.data.circleId;
+      if (!circleId) {
+        throw new Error('No circleId provided in automation data');
+      }
+      if (!action.data.roles || typeof action.data.roles !== 'object') return;
+      const roles = [];
+      for (const [role, give] of Object.entries(action.data.roles)) {
+        if (give) roles.push(role);
+      }
+      if (!roles || roles.length === 0) return;
+      const { circle, collection, discordUserId } =
+        await this.commonActionService.getCircleCollectionUsersFromRelevantIds(
+          circleId,
+          relevantIds,
+        );
+
+      if (discordUserId) {
+        await this.discordService.removeRolesFromUser(
+          circle.discordGuildId,
+          roles,
+          discordUserId,
+        );
+      } else {
+        const discordField = Object.values(collection.properties).find(
+          (property) => property.type === 'discord',
+        );
+        if (discordField) {
+          const val = collection.data[relevantIds.dataSlug][discordField.id];
+          let discordUsername, discordDiscriminator;
+          if (typeof val === 'string') {
+            const split = val.split('#');
+            discordUsername = split[0];
+            discordDiscriminator = split[1];
+          } else if (typeof val === 'object') {
+            discordUsername = val.username;
+            discordDiscriminator = val.discriminator;
+          }
+
+          if (discordUsername) {
+            await this.discordService.removeRolesFromUser(
               circle.discordGuildId,
               roles,
               null,
