@@ -23,6 +23,15 @@ import { Circle } from 'src/circle/model/circle.model';
 import { UpdateFolderCommand } from 'src/circle/commands/impl';
 import { Converter } from 'showdown';
 import Discourse_Source from '../../sources/discourse';
+import Snapshot_Source from '../../sources/snapshot';
+
+const nodeTypeToSourceClassMap: Record<string, any> = {
+  mirror: Mirror_Source,
+  reddit: Reddit_Source,
+  youtube: Youtube_Source,
+  discourse: Discourse_Source,
+  snapshot: Snapshot_Source,
+};
 
 class Summarizer_Output implements INode {
   flow: Flow;
@@ -73,45 +82,16 @@ class Summarizer_Output implements INode {
           const inputNode = this.flow.flowConfig.nodes.find(
             (node) => node.id === input,
           );
+          const sourceClass = nodeTypeToSourceClassMap[inputNode?.type];
 
-          switch (inputNode?.type) {
-            case 'mirror':
-              const mirrorNode = new Mirror_Source(
-                this.flow,
-                inputNode,
-                this.flowData,
-                this.updateFlowData,
-              );
-              promises.push(mirrorNode.run());
-              break;
-            case 'reddit':
-              const redditNode = new Reddit_Source(
-                this.flow,
-                inputNode,
-                this.flowData,
-                this.updateFlowData,
-              );
-              promises.push(redditNode.run());
-              break;
-            case 'youtube':
-              const youtubeNode = new Youtube_Source(
-                this.flow,
-                inputNode,
-                this.flowData,
-                this.updateFlowData,
-              );
-              promises.push(youtubeNode.run());
-              break;
-            case 'discourse':
-              const discourseNode = new Discourse_Source(
-                this.flow,
-                inputNode,
-                this.flowData,
-                this.updateFlowData,
-              );
-              promises.push(discourseNode.run());
-            default:
-              break;
+          if (sourceClass) {
+            const sourceNode = new sourceClass(
+              this.flow,
+              inputNode,
+              this.flowData,
+              this.updateFlowData,
+            );
+            promises.push(sourceNode.run());
           }
         }
 
