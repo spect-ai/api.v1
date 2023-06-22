@@ -235,12 +235,6 @@ export class Circle extends ProfileModel {
   @prop({ default: [] })
   labels: string[];
 
-  /**
-   * Payment address of the circle
-   */
-  @prop()
-  paymentAddress: string;
-
   @prop()
   questbookWorkspaceUrl?: string;
 

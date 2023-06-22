@@ -11,13 +11,9 @@ import { RemoveFromCircleCommandHandler } from '../membership/handlers/remove-fr
 import { AddRoleCommandHandler } from '../roles/handlers/add-role.handler';
 import { RemoveRoleCommandHandler } from '../roles/handlers/remove-role.handler';
 import { UpdateRoleCommandHandler } from '../roles/handlers/update-role.handler';
-import {
-  CreateCircleCommandHandler,
-  CreateClaimableCircleCommandHandler,
-} from './create-circle.handler';
+import { CreateCircleCommandHandler } from './create-circle.handler';
 import { AddSafeCommandHandler } from '../safe/handlers/add-safe.handler';
 import { RemoveSafeCommandHandler } from '../safe/handlers/remove-safe.handler';
-import { ClaimCircleCommandHandler } from '../claim/handlers/claim-circle.handler';
 import {
   UpdateCircleCommandHandler,
   UpdateMultipleCircleCommandHandler,
@@ -43,6 +39,7 @@ import {
 } from '../payments/handlers/update-payment.handler';
 import { GetSpaceCollectionsCommandHandler } from './get-space-collections.handler';
 import { GetRegistryCommandHandler } from './get-registry.handler';
+import { DuplicateCircleCommandHandler } from '../v2/handlers/duplicate-circle.handler';
 
 export const CommandHandlers = [
   JoinUsingInvitationCommandHandler,
@@ -51,14 +48,12 @@ export const CommandHandlers = [
   InviteToCircleCommandHandler,
   RemoveFromCircleCommandHandler,
   CreateCircleCommandHandler,
-  CreateClaimableCircleCommandHandler,
   AddRoleCommandHandler,
   RemoveRoleCommandHandler,
   UpdateRoleCommandHandler,
   UpdateMemberRolesCommandHandler,
   AddSafeCommandHandler,
   RemoveSafeCommandHandler,
-  ClaimCircleCommandHandler,
   UpdateCircleCommandHandler,
   ArchiveCircleByIdCommandHandler,
   WhitelistMemberAddressCommandHandler,
@@ -80,4 +75,5 @@ export const CommandHandlers = [
   UpdateMultiplePaymentsCommandHandler,
   GetSpaceCollectionsCommandHandler,
   GetRegistryCommandHandler,
+  DuplicateCircleCommandHandler,
 ];

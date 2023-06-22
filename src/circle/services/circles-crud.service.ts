@@ -56,7 +56,6 @@ const getCirclePopulatedFields = {
     description: 1,
     id: 1,
     avatar: 1,
-    paymentAddress: 1,
   },
 };
 

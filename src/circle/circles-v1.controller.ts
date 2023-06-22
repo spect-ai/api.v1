@@ -32,7 +32,6 @@ import {
 } from 'src/common/dtos/string.dto';
 import {
   ArchiveCircleByIdCommand,
-  ClaimCircleCommand,
   CreateFolderCommand,
   DeleteFolderCommand,
   UpdateFolderCommand,
@@ -428,17 +427,6 @@ export class CircleV1Controller {
   ): Promise<DetailedCircleResponseDto> {
     return await this.commandBus.execute(
       new ArchiveCircleByIdCommand(param.id),
-    );
-  }
-
-  @UseGuards(SessionAuthGuard)
-  @Patch('/:id/claimCircle')
-  async claimCircle(
-    @Param() param: ObjectIdDto,
-    @Request() request,
-  ): Promise<CircleResponseDto> {
-    return await this.commandBus.execute(
-      new ClaimCircleCommand(param.id, request.user),
     );
   }
 
