@@ -80,12 +80,7 @@ export class EmailGeneratorService {
     return html;
   }
 
-  generateEmailWithMessage(
-    message: string,
-    link: string,
-    circle?: Circle,
-    receipient?: User,
-  ) {
+  generateEmailWithMessage(message: string, link?: string, circle?: Circle) {
     const { html, errors } = render(
       <Mjml>
         <MjmlHead>
@@ -93,6 +88,43 @@ export class EmailGeneratorService {
             circle ? `from ${circle.name}!` : '!'
           }`}
         </MjmlHead>
+
+        <MjmlBody background-color="#f7f7f7">
+          <MjmlSection>
+            <MjmlColumn>
+              <MjmlText font-size="20px" color="#ae5fe2">
+                {message}
+              </MjmlText>
+            </MjmlColumn>
+          </MjmlSection>
+          {link && (
+            <MjmlSection>
+              <MjmlColumn>
+                <MjmlButton
+                  background-color="#ecdef3"
+                  align="right"
+                  border="1px solid #d9d9d9"
+                  color="#ae5fe2"
+                  font-weight="bold"
+                  border-radius="6px"
+                  href={`${link}`}
+                >
+                  Check it out
+                </MjmlButton>
+              </MjmlColumn>
+            </MjmlSection>
+          )}
+        </MjmlBody>
+      </Mjml>,
+    );
+
+    return html;
+  }
+
+  generateNotificationEmail(header: string, message: string, link: string) {
+    const { html, errors } = render(
+      <Mjml>
+        <MjmlHead>{header}</MjmlHead>
 
         <MjmlBody background-color="#f7f7f7">
           <MjmlSection>
@@ -120,7 +152,6 @@ export class EmailGeneratorService {
         </MjmlBody>
       </Mjml>,
     );
-
     return html;
   }
 }

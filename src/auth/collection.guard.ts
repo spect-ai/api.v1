@@ -56,23 +56,29 @@ export class CollectionAuthGuard implements CanActivate {
     try {
       if (!(await this.sessionAuthGuard.canActivate(context))) return false;
 
-      const collection = await this.collectionRepository.findById(
-        request.params.id,
-      );
-      if (!collection) {
+      if (request.params.id || request.projectId)
+        request.collection = await this.collectionRepository.findById(
+          request.params.id || request.projectId,
+        );
+      else if (request.params.slug)
+        request.collection = await this.collectionRepository.findOne({
+          slug: request.params.slug,
+        });
+
+      if (!request.collection) {
         throw new HttpException('Collection not found', 404);
       }
-      request.collection = collection;
 
       return await this.checkPermissions(
         permissions,
         request.user.id,
-        collection,
-        collection.parents,
+        request.collection,
+        request.collection.parents,
       );
     } catch (error) {
       console.log(error);
       //   request.session.destroy();
+      if (error instanceof HttpException) throw error;
       throw new HttpException({ message: error }, 422);
     }
   }
@@ -107,6 +113,7 @@ export class CreateNewCollectionAuthGuard implements CanActivate {
     } catch (error) {
       console.log(error);
       //   request.session.destroy();
+      if (error instanceof HttpException) throw error;
       throw new HttpException({ message: error }, 422);
     }
   }
@@ -152,6 +159,7 @@ export class ViewCollectionAuthGuard implements CanActivate {
     } catch (error) {
       console.log(error);
       // request.session.destroy();
+      if (error instanceof HttpException) throw error;
       throw new HttpException({ message: error }, 422);
     }
   }
@@ -217,6 +225,7 @@ export class StrongerCollectionAuthGuard implements CanActivate {
       );
     } catch (error) {
       console.log(error);
+      if (error instanceof HttpException) throw error;
       //   request.session.destroy();
       throw new HttpException({ message: error }, 422);
     }

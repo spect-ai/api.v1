@@ -1,18 +1,15 @@
 import { Injectable } from '@nestjs/common';
-import { CommandBus, QueryBus } from '@nestjs/cqrs';
+import { QueryBus } from '@nestjs/cqrs';
 import { GetCircleByIdQuery } from 'src/circle/queries/impl';
-import { CommonTools } from 'src/common/common.service';
+import { DiscordService } from 'src/common/discord.service';
 import { GuildxyzService } from 'src/common/guildxyz.service';
-import { CredentialsService } from 'src/credentials/credentials.service';
 import { GitcoinPassportService } from 'src/credentials/services/gitcoin-passport.service';
 import { User } from 'src/users/model/users.model';
 import { GetUserByFilterQuery } from 'src/users/queries/impl';
+import { v4 as uuidv4 } from 'uuid';
+import { CollectionRepository } from '../collection.repository';
 import { Collection } from '../model/collection.model';
 import { GetCollectionByIdQuery } from '../queries';
-import { DiscordService } from 'src/common/discord.service';
-import { v4 as uuidv4 } from 'uuid';
-import { UpdateCollectionCommand } from '../commands';
-import { CollectionRepository } from '../collection.repository';
 
 @Injectable()
 export class AdvancedAccessService {
@@ -23,19 +20,6 @@ export class AdvancedAccessService {
     private readonly discordService: DiscordService,
     private readonly collectionRepository: CollectionRepository,
   ) {}
-
-  async requiresWalletConnect(collection: Collection): Promise<boolean> {
-    if (
-      collection.formMetadata.mintkudosTokenId ||
-      collection.formMetadata.poapEventId ||
-      collection.formMetadata.formRoleGating ||
-      collection.formMetadata.sybilProtectionEnabled ||
-      !collection.formMetadata.allowAnonymousResponses
-    ) {
-      return true;
-    }
-    return false;
-  }
 
   async hasLinkedWalletToDiscord(
     collection: Collection,
@@ -49,7 +33,6 @@ export class AdvancedAccessService {
           discordId: callerDiscordId,
         },
         '',
-        true,
       ),
     );
 
@@ -179,6 +162,7 @@ export class AdvancedAccessService {
     delete collection.formMetadata?.idLookup;
     delete collection.formMetadata?.drafts;
     delete collection.formMetadata?.verificationTokens;
+    delete collection.subscriptions;
     return collection;
   }
 }

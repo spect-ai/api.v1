@@ -267,7 +267,7 @@ export class PoapService {
     }
   }
 
-  async getPoapsByAddress(address: string) {
+  async getPoapsByAddress(address: string, eventIds?: string[]): Promise<any> {
     try {
       const options = {
         method: 'GET',
@@ -277,9 +277,16 @@ export class PoapService {
         },
       };
 
-      return await (
+      const allPoaps = await (
         await fetch(`https://api.poap.tech/actions/scan/${address}`, options)
       ).json();
+      if (!eventIds) {
+        return allPoaps;
+      } else {
+        return allPoaps.filter((poap) =>
+          eventIds.includes(poap.event.id.toString()),
+        );
+      }
     } catch (e) {
       this.logger.error(e);
       throw new InternalServerErrorException(

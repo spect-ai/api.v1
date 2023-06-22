@@ -24,10 +24,10 @@ export class RateLimitCacheService {
     if (!this.cache[userId]) {
       return false;
     }
-    return this.cache[userId] > 30;
+    return this.cache[userId] > 50;
   }
 
-  @Cron(CronExpression.EVERY_MINUTE)
+  @Cron(CronExpression.EVERY_10_SECONDS)
   handleCron() {
     this.refreshCache();
   }

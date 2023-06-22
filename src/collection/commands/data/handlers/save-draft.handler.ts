@@ -24,6 +24,7 @@ import {
   SaveDraftFromDiscordCommand,
 } from '../impl/save-draft.command';
 import { ActivityOnAddData } from './add-data.handler';
+import { isAddress } from 'ethers/lib/utils';
 
 @CommandHandler(SaveDraftFromDiscordCommand)
 export class SaveDraftCommandHandler
@@ -76,25 +77,40 @@ export class SaveDraftCommandHandler
       };
       // eslint-disable-next-line prefer-const
       for (let [key, val] of Object.entries(data)) {
+        if (data['captcha']) continue;
+        if (data['connectWallet']) continue;
+
+        // Prevent button clicks in previous questions
         if (
           key !== '***' &&
           key !== collection.formMetadata.draftNextField?.[callerDiscordId]
         ) {
           throw 'Invalid response, please respond to the last question';
         }
-        let property;
-        if (collection.formMetadata.draftNextField?.[callerDiscordId]) {
-          property =
-            collection.properties[
-              collection.formMetadata.draftNextField[callerDiscordId]
-            ];
-          key = property.id;
-        } else throw 'No next field found';
+        if (!collection.formMetadata.draftNextField?.[callerDiscordId])
+          throw 'No next field found';
+        const property =
+          collection.properties[
+            collection.formMetadata.draftNextField[callerDiscordId]
+          ];
+        if (!property?.id)
+          throw 'Input you provided is not supported, please click on the relevant button';
+        key = property.id;
 
         if (property && property.isPartOfFormView) {
-          if (property.type === 'number') {
+          if (['github', 'telegram'].includes(property.type)) {
+            throw 'Please connect your account to verify it';
+          } else if (['number'].includes(property.type)) {
             formFieldUpdates[key] = parseFloat(val);
             if (isNaN(formFieldUpdates[key])) throw 'Invalid number';
+          } else if (property.type === 'slider') {
+            formFieldUpdates[key] = parseInt(val.optionId || '0');
+            if (isNaN(formFieldUpdates[key])) throw 'Invalid choice';
+            if (
+              formFieldUpdates[key] < property.sliderOptions.min ||
+              formFieldUpdates[key] > property.sliderOptions.max
+            )
+              throw 'Invalid value';
           } else if (property.type === 'reward') {
             if (val['chain']) {
               const chain = collection.formMetadata.idLookup?.[val['chain']];
@@ -112,6 +128,7 @@ export class SaveDraftCommandHandler
             if (!option) throw 'Invalid optionId';
             formFieldUpdates[key] = option;
           } else if (['user[]'].includes(property.type)) {
+            if (!Array.isArray(val)) throw 'Invalid value';
             const options = val.map((opt: any) => {
               const option = collection.formMetadata.idLookup?.[opt.optionId];
               if (!option) throw 'Invalid optionId';
@@ -129,6 +146,7 @@ export class SaveDraftCommandHandler
             if (!option) throw 'Invalid optionId';
             formFieldUpdates[key] = option;
           } else if (['multiSelect'].includes(property.type)) {
+            if (!Array.isArray(val)) throw 'Invalid value';
             const options = val.map((option: any) => {
               if (option.custom) {
                 return {
@@ -142,8 +160,6 @@ export class SaveDraftCommandHandler
               }
             });
             formFieldUpdates[key] = options;
-          } else if (property.type === 'slider') {
-            formFieldUpdates[key] = parseInt(val.optionId || '0');
           } else formFieldUpdates[key] = val;
         }
       }
@@ -160,10 +176,10 @@ export class SaveDraftCommandHandler
           skippedFormFields[key] = val;
         }
       }
-
       if (
         Object.entries(formFieldUpdates).length === 0 &&
         !data['captcha'] &&
+        !data['connectWallet'] &&
         Object.keys(skippedFormFields).length === 0 &&
         Object.keys(rewardFields).length === 0
       )
@@ -204,6 +220,9 @@ export class SaveDraftCommandHandler
 
       if (data['captcha']) {
         formFieldUpdates['captcha'] = data['captcha'];
+      }
+      if (data['connectWallet']) {
+        formFieldUpdates['connectWallet'] = data['connectWallet'];
       }
 
       const updatedCollection = await this.collectionRepository.updateById(
@@ -248,14 +267,26 @@ export class SaveDraftCommandHandler
       ) {
         let user;
         try {
+          const query = {
+            discordId: callerDiscordId,
+          };
+          if (
+            collection.formMetadata.drafts?.[callerDiscordId]?.[
+              'connectWallet'
+            ] &&
+            isAddress(
+              collection.formMetadata.drafts?.[callerDiscordId]?.[
+                'connectWallet'
+              ],
+            )
+          ) {
+            query['ethAddress'] =
+              collection.formMetadata.drafts?.[callerDiscordId]?.[
+                'connectWallet'
+              ];
+          }
           user = await this.queryBus.execute(
-            new GetUserByFilterQuery(
-              {
-                discordId: callerDiscordId,
-              },
-              '',
-              true,
-            ),
+            new GetUserByFilterQuery(query, ''),
           );
         } catch (err) {
           console.log({ warning: err });
@@ -383,14 +414,29 @@ export class SaveAndPostSocialsCommandHandler
 
       const nextFieldVal = this.getVal(nextField.type, socialsDto, caller);
       let updatedCollection;
-      if (['github', 'discord', 'telegram'].includes(nextField.type)) {
+      if (
+        ['github', 'discord', 'telegram', 'connectWallet'].includes(
+          nextField.type,
+        )
+      ) {
+        const updatedField =
+          nextField.type === 'connectWallet'
+            ? {
+                ['connectWallet']: nextFieldVal.ethAddress,
+              }
+            : {
+                [nextField.id]: nextFieldVal,
+              };
+
+        console.log({ updatedField });
         const updatedDraft = {
           ...(collection.formMetadata.drafts || {}),
           [discordId]: {
             ...(collection.formMetadata.drafts?.[discordId] || {}),
-            [nextField.id]: nextFieldVal,
+            ...updatedField,
           },
         };
+
         updatedCollection = await this.collectionRepository.updateById(
           collection.id,
           {
@@ -430,14 +476,20 @@ export class SaveAndPostSocialsCommandHandler
       ) {
         let user;
         try {
+          const query = {
+            discordId,
+          };
+          if (
+            collection.formMetadata.drafts?.[discordId]?.['connectWallet'] &&
+            isAddress(
+              collection.formMetadata.drafts?.[discordId]?.['connectWallet'],
+            )
+          ) {
+            query['ethAddress'] =
+              collection.formMetadata.drafts?.[discordId]?.['connectWallet'];
+          }
           user = await this.queryBus.execute(
-            new GetUserByFilterQuery(
-              {
-                discordId: discordId,
-              },
-              '',
-              true,
-            ),
+            new GetUserByFilterQuery(query, ''),
           );
         } catch (err) {
           console.log({ warning: err });
@@ -565,14 +617,26 @@ export class SaveAndPostPaymentCommandHandler
       ) {
         let user;
         try {
+          const query = {
+            discordId: discordUserId,
+          };
+          if (
+            collection.formMetadata.drafts?.[discordUserId]?.[
+              'connectWallet'
+            ] &&
+            isAddress(
+              collection.formMetadata.drafts?.[discordUserId]?.[
+                'connectWallet'
+              ],
+            )
+          ) {
+            query['ethAddress'] =
+              collection.formMetadata.drafts?.[discordUserId]?.[
+                'connectWallet'
+              ];
+          }
           user = await this.queryBus.execute(
-            new GetUserByFilterQuery(
-              {
-                discordId: discordUserId,
-              },
-              '',
-              true,
-            ),
+            new GetUserByFilterQuery(query, ''),
           );
         } catch (err) {
           console.log({ warning: err });

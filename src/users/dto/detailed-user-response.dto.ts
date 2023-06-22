@@ -8,7 +8,7 @@ import {
 import { Circle } from 'src/circle/model/circle.model';
 import { MappedPartialItem } from 'src/common/interfaces';
 import { User } from '../model/users.model';
-import { Activity, Notification } from '../types/types';
+import { Activity } from '../types/types';
 
 export class DetailedUserPubliceResponseDto {
   /**
@@ -25,13 +25,6 @@ export class DetailedUserPubliceResponseDto {
   @IsString()
   @IsOptional()
   bio?: string;
-
-  /**
-   * Skills of the user
-   */
-  @IsArray()
-  @IsOptional()
-  skills?: string[];
 
   /**
    * The ethereum address of the user
@@ -60,20 +53,6 @@ export class DetailedUserPubliceResponseDto {
   @IsArray()
   @IsOptional()
   activities: Activity[];
-
-  /**
-   * Users followed by the user
-   */
-  @IsArray()
-  @IsOptional()
-  followedUsers: string[];
-
-  /**
-   * Users following the user
-   */
-  @IsArray()
-  @IsOptional()
-  followedByUsers: string[];
 
   /**
    * Associated user details

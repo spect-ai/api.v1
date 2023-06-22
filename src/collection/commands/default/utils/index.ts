@@ -131,7 +131,7 @@ export const getOnboardToSpectFormDetails = (
       multipleResponsesAllowed: false,
       updatingResponseAllowed: false,
       allowAnonymousResponses: true,
-      walletConnectionRequired: false,
+
       pages: {
         start: {
           id: 'start',

@@ -2,7 +2,6 @@ import { InternalServerErrorException } from '@nestjs/common';
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { CommonTools } from 'src/common/common.service';
 import { LoggingService } from 'src/logging/logging.service';
-import { LensService } from 'src/users/external/lens.service';
 import { NotificationV2 } from 'src/users/types/types';
 import { UsersRepository } from 'src/users/users.repository';
 import { GetNotificationsQuery, GetUnreadNotificationsQuery } from '../impl';
@@ -11,12 +10,7 @@ import { GetNotificationsQuery, GetUnreadNotificationsQuery } from '../impl';
 export class GetNotificationsQueryHandler
   implements IQueryHandler<GetNotificationsQuery>
 {
-  constructor(
-    private readonly userRepository: UsersRepository,
-    private readonly lensService: LensService,
-    private readonly logger: LoggingService,
-    private readonly commonTools: CommonTools,
-  ) {
+  constructor(private readonly logger: LoggingService) {
     this.logger.setContext('GetNotifsHandler');
   }
 

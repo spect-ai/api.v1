@@ -16,6 +16,7 @@ import {
   CloseCardActionCommandHandler,
   CreateDiscordThreadCommandHandler,
   PostOnDiscordThreadCommandHandler,
+  RemoveDiscordRoleActionCommandHandler,
 } from './take -action-v2.handler';
 
 export const CommandHandlers = [
@@ -34,4 +35,5 @@ export const CommandHandlers = [
   InitiatePendingPaymentActionCommandHandler,
   CreateDiscordThreadCommandHandler,
   PostOnDiscordThreadCommandHandler,
+  RemoveDiscordRoleActionCommandHandler,
 ];

@@ -11,6 +11,7 @@ import { GetPrivateViewCollectionQuery } from 'src/collection/queries';
 import { LoggingService } from 'src/logging/logging.service';
 import { RealtimeGateway } from 'src/realtime/realtime.gateway';
 import { DataUpatedEvent } from '../impl/data-updated.event';
+import { SendEventToSubscribersCommand } from 'src/collection/commands/subscription/impl/create-subscription.command';
 
 @EventsHandler(DataUpatedEvent)
 export class DataUpatedEventHandler implements IEventHandler<DataUpatedEvent> {
@@ -41,15 +42,23 @@ export class DataUpatedEventHandler implements IEventHandler<DataUpatedEvent> {
           circle,
         ),
       );
-      console.log({ res });
       if (Object.keys(res.circle).length > 0) {
         await this.commandBus.execute(
           new UpdateMultipleCirclesCommand(res.circle),
         );
       }
+
       const pvtCollection = await this.queryBus.execute(
         new GetPrivateViewCollectionQuery(collection.slug),
       );
+      this.commandBus.execute(
+        new SendEventToSubscribersCommand(
+          collection.id,
+          'dataAdded',
+          pvtCollection.data[dataSlug],
+        ),
+      );
+
       this.realtime.server.emit(`${collection.slug}:newActivityPrivate`, {
         data: pvtCollection,
         user: caller.id,

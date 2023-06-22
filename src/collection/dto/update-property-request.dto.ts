@@ -70,83 +70,83 @@ export class AddPropertyDto {
 
   @IsString()
   @IsOptional()
-  description: string;
+  description?: string;
 
   @IsOptional()
-  default: any;
+  default?: any;
 
   @IsOptional()
   @IsArray()
   @ValidateNested()
   @Type(() => OptionModel)
-  options: any;
+  options?: any;
 
   @IsOptional()
   @IsValidRewardOptions()
-  rewardOptions: Map<string, NetworkModel>;
+  rewardOptions?: Map<string, NetworkModel>;
 
   @IsOptional()
   @IsValidPaywallOptions()
-  payWallOptions: PayWallOptions;
+  payWallOptions?: PayWallOptions;
 
   @IsBoolean()
   @IsOptional()
-  isPartOfFormView: boolean;
+  isPartOfFormView?: boolean;
 
   /**
    * User type of user fields
    */
   @IsString()
   @IsOptional()
-  userType: UserType;
+  userType?: UserType;
 
   /**
    * User types to notify upon update
    */
   @IsArray()
   @IsOptional()
-  onUpdateNotifyUserTypes: UserType[];
+  onUpdateNotifyUserTypes?: UserType[];
 
   /**
    * Is this a required field
    */
   @IsBoolean()
   @IsOptional()
-  required: boolean;
+  required?: boolean;
 
   /**
    * Fields in milestone
    */
   @IsArray()
   @IsOptional()
-  milestoneFields: string[];
+  milestoneFields?: string[];
 
   /**
    * Conditions to show this field
    */
-  @IsArray()
+  @IsObject()
   @IsOptional()
-  viewConditions?: Condition[];
+  advancedConditions?: ConditionGroup;
 
   @IsObject()
   @IsOptional()
-  cardRelationOptions: CardRelationOptions;
+  cardRelationOptions?: CardRelationOptions;
 
   @IsBoolean()
   @IsOptional()
-  allowCustom: boolean;
+  allowCustom?: boolean;
 
   @IsNumber()
   @IsOptional()
-  maxSelections: number;
+  maxSelections?: number;
 
   @IsBoolean()
   @IsOptional()
-  immutable: boolean;
+  immutable?: boolean;
 
   @IsObject()
   @IsOptional()
-  sliderOptions: SliderOptions;
+  sliderOptions?: SliderOptions;
 }
 
 export class UpdatePropertyDto {

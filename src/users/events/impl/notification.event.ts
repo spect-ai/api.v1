@@ -30,6 +30,6 @@ export class SingleEmailNotificationEvent {
     public readonly content: string,
     public readonly subject: string,
     public readonly redirectUrl: string,
-    public readonly recipient: string,
+    public readonly recipients: string[],
   ) {}
 }

@@ -6,15 +6,12 @@ import { CommonTools } from 'src/common/common.service';
 import { EthAddressModule } from 'src/_eth-address/_eth-address.module';
 import { User } from './model/users.model';
 import { RequestProvider } from './user.provider';
-import { UsersController } from './users.controller';
 import { UsersRepository } from './users.repository';
 import { UsersService } from './users.service';
 import { QueryHandlers } from './queries/handlers';
-import { UserFieldResolver } from './queries/handlers/get-user.handler';
 import { CommandHandlers } from './commands/handlers';
 import { LoggingService } from 'src/logging/logging.service';
 import { MailService } from 'src/mail/mail.service';
-import { LensService } from './external/lens.service';
 import { UsersControllerV1 } from './users-v1.controller';
 import { RealtimeGateway } from 'src/realtime/realtime.gateway';
 import { PoapService } from 'src/credentials/services/poap.service';
@@ -27,6 +24,9 @@ import { CirclesModule } from 'src/circle/circles.module';
 import { KeysRepository } from './keys.repository';
 import { Keys } from './model/keys.model';
 import { AuthModule } from 'src/auth/auth.module';
+import { EmailGeneratorService } from 'src/notification/email-generatr.service';
+import { ERC721Service } from 'src/credentials/services/erc721.service';
+import { ERC20Service } from 'src/credentials/services/erc20.service';
 
 @Module({
   imports: [
@@ -38,7 +38,7 @@ import { AuthModule } from 'src/auth/auth.module';
     CirclesModule,
     forwardRef(() => AuthModule),
   ],
-  controllers: [UsersController, UsersControllerV1],
+  controllers: [UsersControllerV1],
   providers: [
     UsersService,
     UsersRepository,
@@ -47,10 +47,8 @@ import { AuthModule } from 'src/auth/auth.module';
     ...EventHandlers,
     ...QueryHandlers,
     ...CommandHandlers,
-    UserFieldResolver,
     LoggingService,
     MailService,
-    LensService,
     PoapService,
     MintKudosService,
     AuthTokenRefreshService,
@@ -58,6 +56,9 @@ import { AuthModule } from 'src/auth/auth.module';
     CirclesCollectionService,
     RealtimeGateway,
     KeysRepository,
+    EmailGeneratorService,
+    ERC20Service,
+    ERC721Service,
   ],
   exports: [UsersService, UsersRepository, UsersModule, KeysRepository],
 })

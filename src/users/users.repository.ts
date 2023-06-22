@@ -2,12 +2,12 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from 'nestjs-typegoose';
 import { BaseRepository } from 'src/base/base.repository';
 import { User } from './model/users.model';
-import { MappedUser, PopulatedUserFields } from './types/types';
+import { MappedUser } from './types/types';
 import mongodb from 'mongodb';
 import { DetailedUserPubliceResponseDto } from './dto/detailed-user-response.dto';
 import { FilterQuery, UpdateQuery } from 'mongoose';
 
-const defaultPopulate: PopulatedUserFields = {};
+const defaultPopulate = {};
 
 @Injectable()
 export class UsersRepository extends BaseRepository<User> {
@@ -57,7 +57,9 @@ export class UsersRepository extends BaseRepository<User> {
 
   async getMultipleUsersByIds(
     ids: string[],
-    customPopulate?: PopulatedUserFields,
+    customPopulate?: {
+      [key: string]: Record<string, unknown>;
+    },
     selectedFields?: Record<string, unknown>,
   ): Promise<User[]> {
     const query = this.findAll(
@@ -84,7 +86,9 @@ export class UsersRepository extends BaseRepository<User> {
 
   async getUserByFilter(
     filterQuery: FilterQuery<User>,
-    customPopulate?: PopulatedUserFields,
+    customPopulate?: {
+      [key: string]: Record<string, unknown>;
+    },
     selectedFields?: Record<string, unknown>,
   ): Promise<User> {
     const query = this.findOne(filterQuery, {
@@ -106,7 +110,9 @@ export class UsersRepository extends BaseRepository<User> {
 
   async getMultipleUsersByFilter(
     filterQuery: FilterQuery<User>,
-    customPopulate?: PopulatedUserFields,
+    customPopulate?: {
+      [key: string]: Record<string, unknown>;
+    },
     selectedFields?: Record<string, unknown>,
   ): Promise<User[]> {
     const query = this.findAll(filterQuery, {

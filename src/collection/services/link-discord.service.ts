@@ -133,7 +133,6 @@ export class LinkDiscordService {
         collection.name,
         collection.description,
       );
-      console.log({ res });
       await this.commandBus.execute(
         new UpdateCollectionCommand(
           {

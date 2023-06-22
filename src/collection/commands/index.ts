@@ -19,6 +19,10 @@ export * from './data/impl/delete-draft.command';
 export * from './metrics/impl/update-metrics.command';
 export * from './data/v2/impl/add-data.command';
 export * from './data/v2/impl/update-data.command';
+export * from './subscription/impl/create-subscription.command';
+export * from './subscription/impl/remove-subscription.command';
+export * from './v2/impl/duplicate-collection.command';
+export * from './v2/impl/move-collection.command';
 
 import { AddCommentCommandHandler } from './comments/handlers/add-comment.handler';
 import { RemoveCommentCommandHandler } from './comments/handlers/remove-comment.handler';
@@ -71,6 +75,16 @@ import {
 } from './metrics/handlers/update-metrics.handler';
 import { AddProjectDataCommandHandler } from './data/v2/handlers/add-data.handler';
 import { UpdateProjectDataCommandHandler } from './data/v2/handlers/update-data.handler';
+import {
+  SendEventToSubscribersCommandHandler,
+  SubscribeToEventCommandHandler,
+} from './subscription/handlers/create-subscription.handler';
+import { RemoveSubscriptionCommandHandler } from './subscription/handlers/remove-subscription.handler';
+import {
+  DuplicateFormCommandHandler,
+  DuplicateProjectCommandHandler,
+} from './v2/handlers/duplicate-collection.handler';
+import { MoveCollectionCommandHandler } from './v2/handlers/move-collection.handler';
 
 export const CommandHandlers = [
   CreateCollectionCommandHandler,
@@ -109,4 +123,10 @@ export const CommandHandlers = [
   UpdateTimeSpentMetricsCommandHandler,
   AddProjectDataCommandHandler,
   UpdateProjectDataCommandHandler,
+  SendEventToSubscribersCommandHandler,
+  SubscribeToEventCommandHandler,
+  RemoveSubscriptionCommandHandler,
+  DuplicateFormCommandHandler,
+  DuplicateProjectCommandHandler,
+  MoveCollectionCommandHandler,
 ];

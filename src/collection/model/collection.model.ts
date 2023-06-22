@@ -16,6 +16,7 @@ import {
   Option,
   ConditionGroup,
 } from '../types/types';
+import { Blockchain } from '@ankr.com/ankr.js';
 
 @useMongoosePlugin()
 export class Collection extends BaseModel {
@@ -178,15 +179,33 @@ export class Collection extends BaseModel {
 
   @prop()
   version: number;
+
+  @prop()
+  subscriptions: {
+    [eventName: string]: Subscription[];
+  };
+}
+
+export interface Subscription {
+  id: string;
+  eventName: string;
+  url: string;
+  headers?: {
+    [key: string]: string;
+  };
+  method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
+  body?: BodyInit;
+  params?: {
+    [key: string]: string;
+  };
+  query?: {
+    [key: string]: string;
+  };
 }
 
 export interface FormMetadata {
   ceramicEnabled?: boolean;
   captchaEnabled?: boolean;
-  /**
-   * Is collection private?
-   */
-  privateResponses?: boolean;
 
   /**
    * The guild.xyz roles that a person needs to hold to fill up form
@@ -197,11 +216,6 @@ export interface FormMetadata {
    * Responses are anonymous?
    */
   allowAnonymousResponses?: boolean;
-
-  /**
-   * Responses are anonymous?
-   */
-  walletConnectionRequired?: boolean;
 
   /**
    * The mintkudos token id to distribute when a person fills the form
@@ -229,11 +243,6 @@ export interface FormMetadata {
   updatingResponseAllowed?: boolean;
 
   /**
-   * Send confirmation email upon submission?
-   */
-  sendConfirmationEmail?: boolean;
-
-  /**
    * The message to show when the form is submitted
    */
   logo?: string;
@@ -251,13 +260,7 @@ export interface FormMetadata {
 
   credentialCurationEnabled?: boolean;
 
-  isAnOpportunity?: boolean;
-
-  opportunityInfo?: OpportunityInfo;
-
   active?: boolean;
-
-  discordConnectionRequired?: boolean;
 
   paymentConfig?: PaymentConfig;
 
@@ -268,8 +271,6 @@ export interface FormMetadata {
   surveyToken?: Option;
   surveyTotalValue?: number;
   surveyLotteryWinner?: number;
-  claimCodes?: string[];
-  claimCode?: string;
   poapEventId?: string;
   poapEditCode?: string;
   transactionHashes?: {
@@ -297,9 +298,6 @@ export interface FormMetadata {
       [key: string]: any;
     };
   };
-  currentField?: {
-    [userId: string]: string;
-  };
   skippedFormFields?: {
     [userId: string]: {
       field: boolean;
@@ -315,7 +313,10 @@ export interface FormMetadata {
       };
       tokenId?: number;
       chainId: number;
+      chainName?: Blockchain;
     }[];
+    communities: boolean;
+    verifiedAddress: boolean;
     snapshot: number;
   };
 

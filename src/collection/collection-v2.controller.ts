@@ -1,4 +1,13 @@
-import { Controller, Get, Param, SetMetadata, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Param,
+  Patch,
+  Query,
+  Req,
+  SetMetadata,
+  UseGuards,
+} from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { ApiTags } from '@nestjs/swagger';
 import {
@@ -10,6 +19,7 @@ import { RequiredSlugDto } from 'src/common/dtos/string.dto';
 import { CollectionDataResponseDto } from './dto/v2/collection-response.dto';
 import { GetCollectionBySlugQuery } from './queries';
 import { LoggingService } from 'src/logging/logging.service';
+import { MoveCollectionCommand } from './commands';
 
 /**
  Built with keeping integratoors in mind, this API is meant to
@@ -31,9 +41,38 @@ export class CollectionV2Controller {
   }
 
   @SetMetadata('permissions', ['viewResponses'])
+  @UseGuards(ViewCollectionAuthGuard)
+  @Get('/slug/:slug')
+  async getCollectionBySlug(
+    @Param() param: RequiredSlugDto,
+  ): Promise<CollectionDataResponseDto> {
+    const res = await this.queryBus.execute(
+      new GetCollectionBySlugQuery(
+        param.slug,
+        {},
+        {
+          id: 1,
+          name: 1,
+          slug: 1,
+          description: 1,
+          collectionType: 1,
+          properties: 1,
+          propertyOrder: 1,
+          'formMetadata.pages': 1,
+          'formMetadata.pageOrder': 1,
+        },
+      ),
+    );
+
+    if (res.collectionType === 0) delete res.propertyOrder;
+    else delete res.formMetadata;
+    return res;
+  }
+
+  @SetMetadata('permissions', ['viewResponses'])
   @UseGuards(StrongerCollectionAuthGuard)
   @Get('/slug/:slug/data')
-  async findBySlug(
+  async getDataByCollectionSlug(
     @Param() param: RequiredSlugDto,
   ): Promise<CollectionDataResponseDto> {
     return await this.queryBus.execute(
@@ -50,5 +89,20 @@ export class CollectionV2Controller {
         },
       ),
     );
+  }
+
+  @SetMetadata('permissions', ['manageSettings'])
+  @UseGuards(StrongerCollectionAuthGuard)
+  @Patch('/slug/:slug/move')
+  async moveCollection(
+    @Param() param: RequiredSlugDto,
+    @Query('circleId') circleId: string,
+    @Req() req: any,
+  ): Promise<CollectionDataResponseDto> {
+    const res = await this.commandBus.execute(
+      new MoveCollectionCommand(param.slug, circleId, req.user),
+    );
+
+    return res;
   }
 }

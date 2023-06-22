@@ -20,7 +20,6 @@ import { Activity } from 'src/collection/types/types';
 import { DataValidationService } from 'src/collection/validations/data-validation.service';
 import { MappedItem } from 'src/common/interfaces';
 import { LoggingService } from 'src/logging/logging.service';
-import { CheckUserTokensCommand } from 'src/users/commands/impl';
 import { GetProfileQuery } from 'src/users/queries/impl';
 import { v4 as uuidv4 } from 'uuid';
 import {
@@ -201,16 +200,6 @@ export class AddDataCommandHandler implements ICommandHandler<AddDataCommand> {
 
       filteredData['slug'] = uuidv4();
 
-      if (collection.formMetadata?.lookup?.tokens?.length) {
-        const res = await this.commandBus.execute(
-          new CheckUserTokensCommand(
-            caller,
-            collection.formMetadata.lookup.tokens,
-          ),
-        );
-        filteredData['__lookup__'] = res;
-      }
-
       /** Disabling activity for forms as it doesnt quite make sense yet */
       const { dataActivities, dataActivityOrder } =
         this.activityOnAddData.getActivity(
@@ -268,12 +257,13 @@ export class AddDataCommandHandler implements ICommandHandler<AddDataCommand> {
           },
         };
       }
+      filteredData['anonymous'] = anon;
       const updatedCollection = await this.collectionRepository.updateById(
         collectionId,
         {
           data: {
             ...collection.data,
-            [filteredData['slug']]: { ...filteredData, ['anonymous']: anon },
+            [filteredData['slug']]: filteredData,
           },
           dataActivities,
           dataActivityOrder,
@@ -530,10 +520,14 @@ export class AddMultipleDataUsingAutomationCommandHandler
         const obj = {};
         for (const i of Object.keys(d)) {
           if (d[i] !== undefined) obj[i] = d[i];
+          if (
+            typeof d[i] === 'number' &&
+            collection.properties[i].type === 'shortText'
+          )
+            obj[i] = d[i].toString();
         }
         return obj;
       });
-
       for (const d of filteredData) {
         const validData = await this.validationService.validate(
           d,

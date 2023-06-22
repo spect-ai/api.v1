@@ -133,7 +133,10 @@ export class UpdateCollectionCommandHandler
           formMetadata.surveyTokenId ||
           formMetadata.formRoleGating ||
           formMetadata.zealyXP > 0 ||
-          !formMetadata.allowAnonymousResponses)
+          !formMetadata.allowAnonymousResponses ||
+          formMetadata.lookup?.tokens?.length ||
+          formMetadata.lookup?.communities ||
+          formMetadata.lookup?.verifiedAddress)
       ) {
         const { formMetadata } = updatedCollection;
         updatedCollection = await this.collectionRepository.updateById(
@@ -168,9 +171,13 @@ export class UpdateCollectionCommandHandler
         !formMetadata.surveyTokenId &&
         !formMetadata.formRoleGating?.length &&
         !formMetadata.zealyXP &&
-        formMetadata.allowAnonymousResponses
+        formMetadata.allowAnonymousResponses &&
+        !formMetadata.lookup?.tokens?.length &&
+        !formMetadata.lookup?.communities &&
+        !formMetadata.lookup?.verifiedAddress
       ) {
         const { formMetadata } = updatedCollection;
+        delete formMetadata.pages['connect'];
         updatedCollection = await this.collectionRepository.updateById(
           collectionId,
           {
@@ -178,7 +185,6 @@ export class UpdateCollectionCommandHandler
               ...formMetadata,
               pages: {
                 ...formMetadata.pages,
-                ['connect']: undefined,
               },
               pageOrder: formMetadata.pageOrder.filter(
                 (page) => page !== 'connect',
@@ -257,7 +263,7 @@ export class UpdateCollectionCommandHandler
         collection.collectionType === 0 &&
         formMetadata &&
         !formMetadata.pages['connectDiscord'] &&
-        formMetadata.discordRoleGating
+        formMetadata.discordRoleGating?.length
       ) {
         const { formMetadata } = updatedCollection;
         updatedCollection = await this.collectionRepository.updateById(

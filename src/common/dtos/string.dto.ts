@@ -180,12 +180,6 @@ export class RequiredPoapIdDto {
   poapId: string;
 }
 
-export class RequiredClaimCodeDto {
-  @IsString()
-  @IsNotEmpty()
-  claimCode: string;
-}
-
 export class RequiredDiscordMessageIdDto {
   @IsString()
   @IsNotEmpty()

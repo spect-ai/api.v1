@@ -1,4 +1,13 @@
-import { Controller, Get, Param, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Param,
+  Post,
+  Query,
+  Req,
+  SetMetadata,
+  UseGuards,
+} from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { ApiTags } from '@nestjs/swagger';
 import { CircleAuthGuard, ViewCircleAuthGuard } from 'src/auth/circle.guard';
@@ -6,6 +15,12 @@ import { PublicViewAuthGuard } from 'src/auth/iron-session.guard';
 import { RequiredSlugDto } from 'src/common/dtos/string.dto';
 import { EntitiesInCircleResponseDto } from './dto/v2/circle-response.dto';
 import { GetCircleBySlugQuery } from './queries/impl';
+import { Collection } from 'src/collection/model/collection.model';
+import { Circle } from './model/circle.model';
+import {
+  DuplicateFormCommand,
+  DuplicateProjectCommand,
+} from 'src/collection/commands';
 
 /**
  Built with keeping integratoors in mind, this API is meant to
@@ -43,10 +58,11 @@ export class CircleV2Controller {
 
   @UseGuards(ViewCircleAuthGuard)
   @Get('/slug/:slug/entities')
-  async findBySlug(
+  async findEntitiesInCircle(
     @Param() param: RequiredSlugDto,
-  ): Promise<EntitiesInCircleResponseDto> {
-    return await this.queryBus.execute(
+    @Query('entityType') entityType: 'workstream' | 'form' | 'project',
+  ): Promise<Partial<Collection>[] | Partial<Circle[]>> {
+    const circle = await this.queryBus.execute(
       new GetCircleBySlugQuery(
         param.slug,
         {
@@ -65,6 +81,45 @@ export class CircleV2Controller {
           createdAt: 1,
         },
       ),
+    );
+
+    if (['form', 'project'].includes(entityType)) {
+      const collectionType = entityType === 'form' ? 0 : 1;
+      const returnedCollections = [];
+      for (const collection of circle.collections) {
+        if (collection.collectionType === collectionType) {
+          returnedCollections.push(collection);
+        }
+      }
+      return returnedCollections;
+    } else if (entityType === 'workstream') {
+      return circle.children;
+    } else return circle;
+  }
+
+  @SetMetadata('permissions', ['createNewForm'])
+  @UseGuards(CircleAuthGuard)
+  @Post('/slug/:slug/duplicateForm')
+  async duplicateForm(
+    @Param() param: RequiredSlugDto,
+    @Query('collectionSlug') collectionSlug: string,
+    @Req() req: any,
+  ): Promise<any> {
+    return await this.commandBus.execute(
+      new DuplicateFormCommand(collectionSlug, req.user),
+    );
+  }
+
+  @SetMetadata('permissions', ['createNewForm'])
+  @UseGuards(CircleAuthGuard)
+  @Post('/slug/:slug/duplicateProject')
+  async duplicateProject(
+    @Param() param: RequiredSlugDto,
+    @Query('collectionSlug') collectionSlug: string,
+    @Req() req: any,
+  ): Promise<any> {
+    return await this.commandBus.execute(
+      new DuplicateProjectCommand(collectionSlug, req.user),
     );
   }
 }

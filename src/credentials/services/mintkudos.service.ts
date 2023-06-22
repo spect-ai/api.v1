@@ -265,6 +265,7 @@ export class MintKudosService {
     address: string,
     offset?: number,
     limit?: number,
+    tokenIds?: string[],
   ): Promise<KudosType[]> {
     let offsetLimit = '';
     if (offset) {
@@ -283,7 +284,14 @@ export class MintKudosService {
       },
     );
     const data = await res.json();
-    return data.data;
+    let filteredData = data.data;
+    if (tokenIds) {
+      filteredData = filteredData.filter((kudos) =>
+        tokenIds.includes(kudos.kudosTokenId.toString()),
+      );
+    }
+
+    return filteredData;
   }
 
   async getSpaceKudos(spaceId: string) {

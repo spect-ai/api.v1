@@ -6,11 +6,21 @@ import {
   ICommandHandler,
   QueryBus,
 } from '@nestjs/cqrs';
+import { AddPaymentsCommand } from 'src/circle/commands/payments/impl';
+import { JoinedCircleEvent } from 'src/circle/events/impl';
 import { GetCircleByIdQuery } from 'src/circle/queries/impl';
+import {
+  AddMultipleDataUsingAutomationCommand,
+  UpdateCollectionCommand,
+  UpdateDataUsingAutomationCommand,
+} from 'src/collection/commands';
+import { StartVotingPeriodCommand } from 'src/collection/commands/data/impl/vote-data.command';
+import { Collection } from 'src/collection/model/collection.model';
 import {
   GetCollectionByFilterQuery,
   GetCollectionBySlugQuery,
 } from 'src/collection/queries';
+import { CommonTools } from 'src/common/common.service';
 import { DiscordService } from 'src/common/discord.service';
 import { MappedItem } from 'src/common/interfaces';
 import { LoggingService } from 'src/logging/logging.service';
@@ -19,31 +29,21 @@ import { EmailGeneratorService } from 'src/notification/email-generatr.service';
 import {
   GetMultipleUsersByIdsQuery,
   GetProfileQuery,
-  GetUserByFilterQuery,
 } from 'src/users/queries/impl';
 import {
+  CloseCardActionCommand,
   CreateCardActionCommand,
   CreateDiscordChannelActionCommand,
+  CreateDiscordThreadCommand,
   GiveDiscordRoleActionCommand,
   GiveRoleActionCommand,
+  InitiatePendingPaymentActionCommand,
   PostOnDiscordActionCommand,
+  PostOnDiscordThreadCommand,
+  RemoveDiscordRoleActionCommand,
   SendEmailActionCommand,
   StartVotingPeriodActionCommand,
-  CloseCardActionCommand,
-  InitiatePendingPaymentActionCommand,
-  CreateDiscordThreadCommand,
-  PostOnDiscordThreadCommand,
 } from '../impl/take-action-v2.command';
-import {
-  AddDataUsingAutomationCommand,
-  AddMultipleDataUsingAutomationCommand,
-  UpdateCollectionCommand,
-  UpdateDataUsingAutomationCommand,
-} from 'src/collection/commands';
-import { StartVotingPeriodCommand } from 'src/collection/commands/data/impl/vote-data.command';
-import { JoinedCircleEvent } from 'src/circle/events/impl';
-import { AddPaymentsCommand } from 'src/circle/commands/payments/impl';
-import { Collection } from 'src/collection/model/collection.model';
 
 @Injectable()
 export class CommonActionService {
@@ -87,7 +87,6 @@ export class CommonActionService {
       discordUserId =
         collection.data[relevantIds.dataSlug][discordField.id]?.['id'];
     }
-    console.log({ discordUserId });
 
     return {
       circle,
@@ -140,7 +139,7 @@ export class SendEmailActionCommandHandler
         try {
           const html = this.emailGeneratorService.generateEmailWithMessage(
             action.data.message,
-            `https://circles.spect.network`,
+            undefined,
             circle,
           );
           const mail = {
@@ -285,8 +284,80 @@ export class GiveDiscordRoleActionCommandHandler
             discordUsername = val.username;
             discordDiscriminator = val.discriminator;
           }
-          if (discordUsername && discordDiscriminator) {
+          if (discordUsername) {
             await this.discordService.giveRolesToUser(
+              circle.discordGuildId,
+              roles,
+              null,
+              discordUsername,
+              discordDiscriminator,
+            );
+          }
+        }
+      }
+    } catch (err) {
+      this.logger.error(err);
+    }
+    return updatesContainer;
+  }
+}
+
+@CommandHandler(RemoveDiscordRoleActionCommand)
+export class RemoveDiscordRoleActionCommandHandler
+  implements ICommandHandler<RemoveDiscordRoleActionCommand>
+{
+  constructor(
+    private readonly logger: LoggingService,
+    private readonly discordService: DiscordService,
+    private readonly commonActionService: CommonActionService,
+  ) {
+    this.logger.setContext(GiveDiscordRoleActionCommandHandler.name);
+  }
+
+  async execute(command: RemoveDiscordRoleActionCommand): Promise<any> {
+    const { action, updatesContainer, relevantIds } = command;
+    try {
+      console.log('RemoveDiscordRoleActionCommandHandler');
+      const circleId = action.data.circleId;
+      if (!circleId) {
+        throw new Error('No circleId provided in automation data');
+      }
+      if (!action.data.roles || typeof action.data.roles !== 'object') return;
+      const roles = [];
+      for (const [role, give] of Object.entries(action.data.roles)) {
+        if (give) roles.push(role);
+      }
+      if (!roles || roles.length === 0) return;
+      const { circle, collection, discordUserId } =
+        await this.commonActionService.getCircleCollectionUsersFromRelevantIds(
+          circleId,
+          relevantIds,
+        );
+
+      if (discordUserId) {
+        await this.discordService.removeRolesFromUser(
+          circle.discordGuildId,
+          roles,
+          discordUserId,
+        );
+      } else {
+        const discordField = Object.values(collection.properties).find(
+          (property) => property.type === 'discord',
+        );
+        if (discordField) {
+          const val = collection.data[relevantIds.dataSlug][discordField.id];
+          let discordUsername, discordDiscriminator;
+          if (typeof val === 'string') {
+            const split = val.split('#');
+            discordUsername = split[0];
+            discordDiscriminator = split[1];
+          } else if (typeof val === 'object') {
+            discordUsername = val.username;
+            discordDiscriminator = val.discriminator;
+          }
+
+          if (discordUsername) {
+            await this.discordService.removeRolesFromUser(
               circle.discordGuildId,
               roles,
               null,
@@ -409,6 +480,7 @@ export class CreateCardActionCommandHandler
     private readonly logger: LoggingService,
     private readonly commandBus: CommandBus,
     private readonly queryBus: QueryBus,
+    private readonly commonTools: CommonTools,
   ) {
     this.logger.setContext(CreateCardActionCommandHandler.name);
   }
@@ -449,6 +521,16 @@ export class CreateCardActionCommandHandler
               value.mapping.from.data?.subFieldName,
               value.mapping.to.value,
             ]);
+          } else if (
+            fromCollection.properties[value.mapping.from?.value]?.type ===
+              'longText' &&
+            value.mapping.to.data?.type !== 'longText'
+          ) {
+            data[value.mapping.to.value] = this.commonTools.enrich(
+              fromCollection.data[relevantIds.dataSlug][
+                value.mapping.from.value
+              ],
+            );
           } else
             data[value.mapping.to.value] =
               fromCollection.data[relevantIds.dataSlug][
@@ -506,7 +588,6 @@ export class CreateCardActionCommandHandler
         }
       }
 
-      console.log({ allData });
       if (allData.length === 0) allData.push(data);
       await this.commandBus.execute(
         new AddMultipleDataUsingAutomationCommand(
@@ -545,16 +626,19 @@ export class PostOnDiscordActionCommandHandler
       );
 
       const fields = action.data.fields
-        ? action.data.fields
-            .map((f) => ({
-              name: f.label,
-              value:
-                collection.properties?.[f.value]?.type === 'singleSelect'
-                  ? collection?.data?.[relevantIds.dataSlug]?.[f.value]?.label
-                  : collection?.data?.[relevantIds.dataSlug]?.[f.value],
-            }))
-            .filter((f) => f.value !== undefined)
-        : [];
+        ?.map((f) => ({
+          name: collection.properties?.[f.value]?.name,
+          value: collection?.data?.[relevantIds.dataSlug]?.[f.value],
+          type: collection.properties?.[f.value]?.type,
+        }))
+        .filter((f) => {
+          if (f.type === 'singleSelect') {
+            return f.value?.value;
+          } else if (f.type === 'multiSelect') {
+            return f.value?.some((v) => v.value);
+          }
+          return f.value !== undefined && f.value !== null && f.value !== '';
+        });
 
       await this.discordService.postData(
         action.data.channel.value,
@@ -763,13 +847,18 @@ export class PostOnDiscordThreadCommandHandler
 
       const fields = action.data.fields
         ?.map((f) => ({
-          name: f.value,
-          value:
-            collection.properties?.[f.value]?.type === 'singleSelect'
-              ? collection?.data?.[relevantIds.dataSlug]?.[f.value]?.label
-              : collection?.data?.[relevantIds.dataSlug]?.[f.value],
+          name: collection.properties?.[f.value]?.name,
+          value: collection?.data?.[relevantIds.dataSlug]?.[f.value],
+          type: collection.properties?.[f.value]?.type,
         }))
-        .filter((f) => f.value !== undefined);
+        .filter((f) => {
+          if (f.type === 'singleSelect') {
+            return f.value?.value !== undefined;
+          } else if (f.type === 'multiSelect') {
+            return f.value?.some((v) => v.value !== undefined);
+          }
+          return f.value !== undefined && f.value !== null && f.value !== '';
+        });
 
       const res = await this.discordService.postData(
         threadRef.threadId,

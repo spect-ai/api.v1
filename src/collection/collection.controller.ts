@@ -1004,7 +1004,7 @@ export class CollectionController {
     @Request() req,
   ): Promise<void> {
     return await this.commandBus.execute(
-      new UpdatePageVisitMetricsCommand(param.id, body, req.ip),
+      new UpdatePageVisitMetricsCommand(param.id, body, req.ip, req.user?.id),
     );
   }
 

@@ -33,9 +33,11 @@ export class UpdateProjectDataCommandHandler
   }
 
   async execute(command: UpdateProjectDataCommand) {
-    const { data, caller, collectionId, dataSlug } = command;
+    const { data, caller, collectionSlug, dataSlug } = command;
     try {
-      const collection = await this.collectionRepository.findById(collectionId);
+      const collection = await this.collectionRepository.findOne({
+        slug: collectionSlug,
+      });
       if (!collection) throw 'Collection does not exist';
       if (collection.collectionType !== 1) throw 'Collection is not a project';
 
@@ -68,7 +70,7 @@ export class UpdateProjectDataCommandHandler
         caller?.id,
       );
       const updatedCollection = await this.collectionRepository.updateById(
-        collectionId,
+        collection.id,
         {
           data: {
             ...collection.data,
@@ -94,7 +96,7 @@ export class UpdateProjectDataCommandHandler
       };
     } catch (err) {
       this.logger.error(
-        `Failed updating data in project with id ${collectionId} with error ${err}`,
+        `Failed updating data in project with id ${collectionSlug} with error ${err}`,
       );
       throw new InternalServerErrorException(`${err}`);
     }

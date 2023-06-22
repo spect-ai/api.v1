@@ -3,14 +3,19 @@ import {
   Controller,
   Param,
   Patch,
+  Post,
   Query,
+  Req,
   Request,
   SetMetadata,
   UseGuards,
 } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { ApiTags } from '@nestjs/swagger';
-import { CollectionAuthGuard } from 'src/auth/collection.guard';
+import {
+  CollectionAuthGuard,
+  StrongerCollectionAuthGuard,
+} from 'src/auth/collection.guard';
 import { ObjectIdDto } from 'src/common/dtos/object-id.dto';
 import { LoggingService } from 'src/logging/logging.service';
 import { AddProjectDataCommand } from './commands/data/v2/impl/add-data.command';
@@ -19,8 +24,9 @@ import {
   UpdateDataDto,
 } from './dto/update-data-request.dto';
 import { Collection } from './model/collection.model';
-import { UpdateProjectDataCommand } from './commands';
+import { DuplicateProjectCommand, UpdateProjectDataCommand } from './commands';
 import { RequiredUUIDDto } from 'src/common/dtos/string.dto';
+import { RequiredSlugDto } from 'src/common/dtos/string.dto';
 
 /**
  Built with keeping integratoors in mind, this API is meant to
@@ -43,32 +49,41 @@ export class CollectionV2ProjectController {
 
   @SetMetadata('permissions', ['updateResponsesManually'])
   @UseGuards(CollectionAuthGuard)
-  @Patch('/:id/addDataGuarded')
+  @Patch('/slug/:slug/addDataGuarded')
   async addDataGuarded(
-    @Param() param: ObjectIdDto,
+    @Param() param: RequiredSlugDto,
     @Body() addDataDto: AddProjectDataDto,
+    @Query('atomic') atomic: string, // if true, then the update will be atomic, ie, if validation fails for one field it wont write the data. If false, data will be written for fields where validation passed
     @Request() req,
   ): Promise<Collection> {
     return await this.commandBus.execute(
-      new AddProjectDataCommand(addDataDto.data, req.user, param.id, false),
+      new AddProjectDataCommand(
+        addDataDto.data,
+        req.user,
+        param.slug,
+        true,
+        atomic === 'false' ? false : true,
+      ),
     );
   }
 
   @SetMetadata('permissions', ['updateResponsesManually'])
   @UseGuards(CollectionAuthGuard)
-  @Patch('/:id/updateDataGuarded')
+  @Patch('/slug/:slug/updateDataGuarded')
   async updateDataGuarded(
-    @Param() param: ObjectIdDto,
+    @Param() param: RequiredSlugDto,
     @Query() dataSlugParam: RequiredUUIDDto,
     @Body() updateDataDto: UpdateDataDto,
+    @Query('atomic') atomic: string, // if true, then the update will be atomic, ie, if validation fails for one field it wont write the data. If false, data will be written for fields where validation passed
     @Request() req,
   ): Promise<Collection> {
     return await this.commandBus.execute(
       new UpdateProjectDataCommand(
         updateDataDto.data,
         req.user,
-        param.id,
+        param.slug,
         dataSlugParam.dataId,
+        atomic === 'false' ? false : true,
       ),
     );
   }

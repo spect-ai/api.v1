@@ -1,7 +1,10 @@
 import {
   Controller,
+  Get,
   Param,
   Patch,
+  Post,
+  Req,
   SetMetadata,
   UseGuards,
 } from '@nestjs/common';
@@ -10,6 +13,13 @@ import { ApiTags } from '@nestjs/swagger';
 import { StrongerCollectionAuthGuard } from 'src/auth/collection.guard';
 import { RequiredSlugDto } from 'src/common/dtos/string.dto';
 import { LoggingService } from 'src/logging/logging.service';
+import { GetCollectionBySlugQuery } from './queries';
+import { PublicViewAuthGuard } from 'src/auth/iron-session.guard';
+import { GitcoinPassportService } from 'src/credentials/services/gitcoin-passport.service';
+import { GitcoinPassportMinimalStampOnSpect } from 'src/credentials/types/types';
+import { CollectionRepository } from './collection.repository';
+import { DuplicateFormCommand } from './commands/v2/impl/duplicate-collection.command';
+import { CircleAuthGuard } from 'src/auth/circle.guard';
 
 /**
  Built with keeping integratoors in mind, this API is meant to
@@ -26,7 +36,54 @@ export class CollectionV2FormController {
     private readonly commandBus: CommandBus,
     private readonly queryBus: QueryBus,
     private readonly logger: LoggingService,
+    private readonly gitcoinPassportService: GitcoinPassportService,
+    private readonly collectionRepository: CollectionRepository,
   ) {
     this.logger.setContext(CollectionV2FormController.name);
+  }
+
+  @SetMetadata('permissions', ['manageSettings'])
+  @UseGuards(StrongerCollectionAuthGuard)
+  @Get('/slug/:slug/responderProfilePlugin')
+  async getResponderProfilePlugin(
+    @Param() param: RequiredSlugDto,
+  ): Promise<any> {
+    return await this.queryBus.execute(
+      new GetCollectionBySlugQuery(
+        param.slug,
+        {},
+        {
+          'formMetadata.lookup': 1,
+        },
+      ),
+    );
+  }
+
+  @UseGuards(PublicViewAuthGuard)
+  @Get('/slug/:slug/gitcoinPassportScoreAndStamps')
+  async getGitcoinPassportScoreByEthAddress(
+    @Param() param: RequiredSlugDto,
+    @Req() req: any,
+  ): Promise<{
+    score: number;
+    stamps: GitcoinPassportMinimalStampOnSpect[];
+  }> {
+    try {
+      const form = await this.collectionRepository.findOne({
+        slug: param.slug,
+      });
+      return await this.gitcoinPassportService.getScoreByEthAddress(
+        req.user?.ethAddress,
+        form.formMetadata.sybilProtectionScores,
+        true,
+      );
+    } catch (e) {
+      this.logger.error(
+        `Error getting gitcoin passport score and stamps for ${
+          req.user?.ethAddress
+        } for ${param.slug} with error ${e?.message || e}`,
+      );
+      throw e;
+    }
   }
 }

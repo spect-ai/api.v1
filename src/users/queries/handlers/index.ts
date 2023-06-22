@@ -1,7 +1,5 @@
 import { GetProfileQueryHandler } from './get-profile.handler';
 import {
-  GetUserByIdQueryHandler,
-  GetUserByUsernameQueryHandler,
   GetMultipleUsersByIdsQueryHandler,
   GetUserByFilterQueryHandler,
   GetMultipleUsersByFilterQueryHandler,
@@ -12,10 +10,12 @@ import {
   GetNotificationsQueryHandler,
   GetUnreadNotificationsQueryHandler,
 } from './get-notifications.handler';
+import {
+  GetTokensOfMultipleTokenTypesOfUserQueryHandler,
+  GetTokensOfUserQueryHandler,
+} from './get-tokens.handler';
 
 export const QueryHandlers = [
-  GetUserByIdQueryHandler,
-  GetUserByUsernameQueryHandler,
   GetMultipleUsersByIdsQueryHandler,
   GetUserByFilterQueryHandler,
   GetProfileQueryHandler,
@@ -23,4 +23,6 @@ export const QueryHandlers = [
   GetNotificationsQueryHandler,
   GetUnreadNotificationsQueryHandler,
   GetMultipleUsersByFilterQueryHandler,
+  GetTokensOfUserQueryHandler,
+  GetTokensOfMultipleTokenTypesOfUserQueryHandler,
 ];

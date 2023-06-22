@@ -739,7 +739,6 @@ export class ResponseCredentialingService {
             discordId,
           },
           '',
-          true,
         ),
       );
 
@@ -835,7 +834,6 @@ export class ResponseCredentialingService {
             discordId,
           },
           '',
-          true,
         ),
       );
       if (!user || !user.ethAddress) {
@@ -891,7 +889,6 @@ export class ResponseCredentialingService {
             discordId,
           },
           '',
-          true,
         ),
       );
       if (!user || !user.ethAddress) {
@@ -950,7 +947,6 @@ export class ResponseCredentialingService {
             discordId,
           },
           '',
-          true,
         ),
       );
       if (!user || !user.ethAddress) {
