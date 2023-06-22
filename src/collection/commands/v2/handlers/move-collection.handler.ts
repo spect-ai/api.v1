@@ -1,4 +1,7 @@
-import { InternalServerErrorException } from '@nestjs/common';
+import {
+  InternalServerErrorException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import {
   CommandBus,
   CommandHandler,
@@ -13,6 +16,7 @@ import { Permissions } from 'src/collection/types/types';
 import { LoggingService } from 'src/logging/logging.service';
 import { MoveCollectionCommand } from '../impl/move-collection.command';
 import { Folder } from 'src/circle/types';
+import { CircleAuthGuard } from 'src/auth/circle.guard';
 
 @CommandHandler(MoveCollectionCommand)
 export class MoveCollectionCommandHandler
@@ -24,6 +28,7 @@ export class MoveCollectionCommandHandler
     private readonly eventBus: EventBus,
     private readonly commandBus: CommandBus,
     private readonly queryBus: QueryBus,
+    private readonly circleAuthGuard: CircleAuthGuard,
   ) {
     this.logger.setContext('MoveCollectionCommandHandler');
   }
@@ -43,6 +48,18 @@ export class MoveCollectionCommandHandler
       const newParentCircle = await this.queryBus.execute(
         new GetCircleByIdQuery(newParentCircleId),
       );
+      if (
+        !this.circleAuthGuard.checkPermissions(
+          ['createNewForm'],
+          newParentCircle.memberRoles?.[caller.id] || [],
+          newParentCircle,
+        )
+      )
+        throw new UnauthorizedException(
+          `You do not have permission to move this ${
+            collection.collectionType === 0 ? 'form' : 'project'
+          } to this circle`,
+        );
       const currParentCircle = await this.queryBus.execute(
         new GetCircleByIdQuery(currParentCircleId),
       );
@@ -137,7 +154,7 @@ export class MoveCollectionCommandHandler
       this.logger.error(
         `Failed moving form with slug ${collectionSlug} with error ${err}`,
       );
-      throw new InternalServerErrorException(`${err?.message || err}`);
+      throw err;
     }
   }
 }

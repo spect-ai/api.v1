@@ -1,9 +1,23 @@
-import { Controller, Get } from '@nestjs/common';
-import { QueryBus } from '@nestjs/cqrs';
+import {
+  Controller,
+  Get,
+  Param,
+  Post,
+  Query,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
+import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import {
   GetCollectionByIdQuery,
   GetCollectionBySlugQuery,
 } from 'src/collection/queries';
+import { Template } from './types';
+import { Collection } from 'src/collection/model/collection.model';
+import { SessionAuthGuard } from 'src/auth/iron-session.guard';
+import { RequiredSlugDto } from 'src/common/dtos/string.dto';
+import { DuplicateCircleCommand } from 'src/circle/commands/impl';
+import { Circle } from 'src/circle/model/circle.model';
 
 const groups = [
   'Popular',
@@ -27,18 +41,42 @@ const shortDescriptionId = 'de88db03-6884-4ecb-a5d5-9e19968ea1d8';
 
 @Controller('templates/v1')
 export class TemplateController {
-  constructor(private readonly queryBus: QueryBus) {}
+  constructor(
+    private readonly queryBus: QueryBus,
+    private readonly commandBus: CommandBus,
+  ) {}
 
   @Get('/')
   async getAllTemplates() {
-    const templates = await this.queryBus.execute(
-      new GetCollectionBySlugQuery('342d80ac-524d-489e-bc75-eebc6170e19e'),
-    );
-    const templatesByGroup = {};
+    if (!process.env.TEMPLATE_COLLECTION_SLUG) return [];
+    const templates = (await this.queryBus.execute(
+      new GetCollectionBySlugQuery(process.env.TEMPLATE_COLLECTION_SLUG),
+    )) as Collection;
+    const mappedPropertyIds = {
+      [statusId]: null,
+      [imageId]: null,
+      [urlId]: null,
+      [tagsId]: null,
+      [shortDescriptionId]: null,
+    };
+    for (const [propertyId, property] of Object.entries(templates.properties)) {
+      if (property.name === 'Status') mappedPropertyIds[statusId] = property.id;
+      else if (property.name === 'Image')
+        mappedPropertyIds[imageId] = property.id;
+      else if (property.name === 'Url') mappedPropertyIds[urlId] = property.id;
+      else if (property.name === 'Tags')
+        mappedPropertyIds[tagsId] = property.id;
+      else if (property.name === 'Short Description')
+        mappedPropertyIds[shortDescriptionId] = property.id;
+    }
+    console.log({
+      mappedPropertyIds,
+    });
+    const templatesByGroup = {} as { [key: string]: string[] };
     for (const group of groups) {
       templatesByGroup[group] = [];
     }
-    const templateData = [];
+    const templateData = [] as Template[];
     for (const td of Object.values(templates.data)) {
       const tags = td[tagsId] ? td[tagsId].map((tag: any) => tag.label) : [];
       for (const tag of tags) {
@@ -56,10 +94,54 @@ export class TemplateController {
         tags: tags,
       });
     }
+    console.log({ templateData });
+    for (const group of groups) {
+      if (templatesByGroup[group]?.length === 0) delete templatesByGroup[group];
+    }
 
     return {
       templateData,
       templatesByGroup,
     };
+  }
+
+  @UseGuards(SessionAuthGuard)
+  @Post('/:slug/use')
+  async duplicate(
+    @Param() param: RequiredSlugDto,
+    @Req() req: any,
+    @Query('destinationCircleId') destinationCircleId?: string,
+  ): Promise<Circle> {
+    console.log('duplicate');
+    if (!process.env.TEMPLATE_COLLECTION_SLUG)
+      throw 'Template database not found';
+    const templates = (await this.queryBus.execute(
+      new GetCollectionBySlugQuery(process.env.TEMPLATE_COLLECTION_SLUG),
+    )) as Collection;
+    const template = Object.values(templates.data).find(
+      (t) => t['slug'] === param.slug,
+    );
+    if (!template) throw 'Template not found';
+
+    let templateUrl = '';
+    for (const [propertyId, property] of Object.entries(templates.properties)) {
+      if (property.name === 'Url') {
+        templateUrl = property.id;
+        break;
+      }
+    }
+    if (!templateUrl) throw 'Template Url not found';
+
+    const circleIdBeingDuplicated = template[templateUrl].split('/').pop();
+    return await this.commandBus.execute(
+      new DuplicateCircleCommand(
+        circleIdBeingDuplicated,
+        req.user,
+        true,
+        true,
+        false,
+        destinationCircleId,
+      ),
+    );
   }
 }
