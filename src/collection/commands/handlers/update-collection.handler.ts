@@ -179,12 +179,13 @@ export class UpdateCollectionCommandHandler
         );
       }
 
+      console.log({ updateCollectionDto });
       if (
         updateCollectionDto.formMetadata &&
         (updateCollectionDto.formMetadata.poapEventId ||
           updateCollectionDto.formMetadata.surveyTokenId ||
           updateCollectionDto.formMetadata.mintkudosTokenId ||
-          formMetadata.zealyXP > 0) &&
+          updateCollectionDto.formMetadata.zealyXP > 0) &&
         !updatedCollection.formMetadata.pages['collect']
       ) {
         const { formMetadata } = updatedCollection;
@@ -216,7 +217,7 @@ export class UpdateCollectionCommandHandler
         updateCollectionDto.formMetadata &&
         (updateCollectionDto.formMetadata.mintkudosTokenId === null ||
           updateCollectionDto.formMetadata.poapEventId === '' ||
-          !formMetadata.zealyXP) &&
+          !updateCollectionDto.formMetadata.zealyXP) &&
         updatedCollection.formMetadata.pages['collect']
       ) {
         const { formMetadata } = updatedCollection;
