@@ -207,31 +207,31 @@ export class MintKudosService {
     circleId: string,
     asset: Express.Multer.File,
   ): Promise<AddedNFTTypeResponse> {
-    let communityId, encodedString;
-    const privateProps = await this.getPrivateProps(circleId);
-    if (privateProps) {
-      communityId = privateProps.mintkudosCommunityId;
-      encodedString = Buffer.from(
-        communityId + ':' + privateProps.mintkudosApiKey,
-      ).toString('base64');
-    } else {
-      communityId = process.env.MINTKUDOS_DEFAULT_COMMUNITY_ID;
-      encodedString = Buffer.from(
-        communityId + ':' + process.env.MINTKUDOS_DEFAULT_API_KEY,
-      ).toString('base64');
-    }
+    try {
+      let communityId, encodedString;
+      const privateProps = await this.getPrivateProps(circleId);
+      if (privateProps) {
+        communityId = privateProps.mintkudosCommunityId;
+        encodedString = Buffer.from(
+          communityId + ':' + privateProps.mintkudosApiKey,
+        ).toString('base64');
+      } else {
+        communityId = process.env.MINTKUDOS_DEFAULT_COMMUNITY_ID;
+        encodedString = Buffer.from(
+          communityId + ':' + process.env.MINTKUDOS_DEFAULT_API_KEY,
+        ).toString('base64');
+      }
 
-    const nftTypeId = uuidv4();
-    const ext = asset.originalname.split('.').pop();
-    const formData = new FormData();
-    formData.append('assetFile', Readable.from(asset.buffer), {
-      filename: asset.originalname,
-    });
-    formData.append('name', `${uuidv4()}.${ext}`);
-    formData.append('alias', `${asset.originalname}`);
-    formData.append('nftTypeId', nftTypeId);
-    const res = await (
-      await fetch(
+      const nftTypeId = uuidv4();
+      const ext = asset.originalname.split('.').pop();
+      const formData = new FormData();
+      formData.append('assetFile', Readable.from(asset.buffer), {
+        filename: asset.originalname,
+      });
+      formData.append('name', `${uuidv4()}.${ext}`);
+      formData.append('alias', `${asset.originalname}`);
+      formData.append('nftTypeId', nftTypeId);
+      const res = await await fetch(
         `${process.env.MINTKUDOS_URL}/v1/communities/${communityId}/nftTypes`,
         {
           method: 'POST',
@@ -240,25 +240,37 @@ export class MintKudosService {
           },
           body: formData,
         },
-      )
-    ).json();
-
-    if (!privateProps) {
-      const circle = await this.queryBus.execute(
-        new GetCircleByIdQuery(circleId),
       );
+      if (!res.ok) {
+        const error = await res.json();
+        console.log({ error });
+        throw error;
+      }
+      const data = await res.json();
 
-      const res = await this.commandBus.execute(
-        new UpdateCircleCommand(
-          circleId,
-          {
-            nftTypeIds: [...(circle.nftTypeIds || []), nftTypeId],
-          },
-          '',
-        ),
+      if (!privateProps) {
+        const circle = await this.queryBus.execute(
+          new GetCircleByIdQuery(circleId),
+        );
+
+        await this.commandBus.execute(
+          new UpdateCircleCommand(
+            circleId,
+            {
+              nftTypeIds: [...(circle.nftTypeIds || []), nftTypeId],
+            },
+            '',
+          ),
+        );
+      }
+      return { ...data, nftTypeId, name: asset.originalname };
+    } catch (e) {
+      this.logger.error(
+        `Failed adding new community design with error ${e.message}`,
       );
+      console.log({ e });
+      return e;
     }
-    return { ...res, nftTypeId, name: asset.originalname };
   }
 
   async getKudosByAddress(
