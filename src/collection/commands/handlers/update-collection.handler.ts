@@ -179,14 +179,16 @@ export class UpdateCollectionCommandHandler
         );
       }
 
+      console.log({ updateCollectionDto });
       if (
         updateCollectionDto.formMetadata &&
         (updateCollectionDto.formMetadata.poapEventId ||
           updateCollectionDto.formMetadata.surveyTokenId ||
           updateCollectionDto.formMetadata.mintkudosTokenId ||
-          formMetadata.zealyXP > 0) &&
+          updateCollectionDto.formMetadata.zealyXP > 0) &&
         !updatedCollection.formMetadata.pages['collect']
       ) {
+        console.log('adding collect page');
         const { formMetadata } = updatedCollection;
         updatedCollection = await this.collectionRepository.updateById(
           collectionId,
@@ -216,15 +218,20 @@ export class UpdateCollectionCommandHandler
         updateCollectionDto.formMetadata &&
         (updateCollectionDto.formMetadata.mintkudosTokenId === null ||
           updateCollectionDto.formMetadata.poapEventId === '' ||
-          !formMetadata.zealyXP) &&
+          !updateCollectionDto.formMetadata.surveyTokenId ||
+          !updateCollectionDto.formMetadata.zealyXP) &&
         updatedCollection.formMetadata.pages['collect']
       ) {
+        console.log('maybe removing collect page');
         const { formMetadata } = updatedCollection;
         if (
-          !collection.formMetadata.mintkudosTokenId &&
-          !collection.formMetadata.poapEventId &&
-          !collection.formMetadata.surveyTokenId
+          !formMetadata.mintkudosTokenId &&
+          !formMetadata.poapEventId &&
+          !formMetadata.surveyTokenId &&
+          !formMetadata.zealyXP &&
+          !formMetadata.surveyTokenId
         ) {
+          console.log('removing collect page');
           updatedCollection = await this.collectionRepository.updateById(
             collectionId,
             {

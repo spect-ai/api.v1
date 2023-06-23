@@ -22,6 +22,16 @@ import { GetCircleByIdQuery } from 'src/circle/queries/impl';
 import { Circle } from 'src/circle/model/circle.model';
 import { UpdateFolderCommand } from 'src/circle/commands/impl';
 import { Converter } from 'showdown';
+import Discourse_Source from '../../sources/discourse';
+import Snapshot_Source from '../../sources/snapshot';
+
+const nodeTypeToSourceClassMap: Record<string, any> = {
+  mirror: Mirror_Source,
+  reddit: Reddit_Source,
+  youtube: Youtube_Source,
+  discourse: Discourse_Source,
+  snapshot: Snapshot_Source,
+};
 
 class Summarizer_Output implements INode {
   flow: Flow;
@@ -72,43 +82,16 @@ class Summarizer_Output implements INode {
           const inputNode = this.flow.flowConfig.nodes.find(
             (node) => node.id === input,
           );
+          const sourceClass = nodeTypeToSourceClassMap[inputNode?.type];
 
-          switch (inputNode?.type) {
-            case 'mirror':
-              const mirrorNode = new Mirror_Source(
-                this.flow,
-                inputNode,
-                this.flowData,
-                this.updateFlowData,
-              );
-              // const mirrorNodeRes = await mirrorNode.run();
-              // inputText += mirrorNodeRes;
-              promises.push(mirrorNode.run());
-              break;
-            case 'reddit':
-              const redditNode = new Reddit_Source(
-                this.flow,
-                inputNode,
-                this.flowData,
-                this.updateFlowData,
-              );
-              // const redditNodeRes = await redditNode.run();
-              // inputText += redditNodeRes;
-              promises.push(redditNode.run());
-              break;
-            case 'youtube':
-              const youtubeNode = new Youtube_Source(
-                this.flow,
-                inputNode,
-                this.flowData,
-                this.updateFlowData,
-              );
-              // const youtubeNodeRes = await youtubeNode.run();
-              // inputText += youtubeNodeRes;
-              promises.push(youtubeNode.run());
-              break;
-            default:
-              break;
+          if (sourceClass) {
+            const sourceNode = new sourceClass(
+              this.flow,
+              inputNode,
+              this.flowData,
+              this.updateFlowData,
+            );
+            promises.push(sourceNode.run());
           }
         }
 
@@ -130,10 +113,10 @@ class Summarizer_Output implements INode {
         const chunks = await splitter.createDocuments([inputText]);
         console.log({ chunks: chunks.length });
 
-        // return '';
-
         const combinePromptTemplate = `
-        I would like to create multiple choice questions for my students based on the following text. Can you help me generate 4 such questions. Here is my desired format for each multiple choice question:
+        I would like to create multiple choice questions for my students based on the following text. I also need a short engaging summary of the text which makes people click on it. Can you help me generate 4 such questions. Here is my desired format for each multiple choice question:
+
+        [SUMMARY]
 
         1. [QUESTION]
         A: [OPTION 1]
@@ -158,31 +141,6 @@ class Summarizer_Output implements INode {
         }
 
         const llm = new OpenAI({ temperature: 0 });
-        // const chain = loadSummarizationChain(openai_model, {
-        //   type: 'map_reduce',
-        //   returnIntermediateSteps: true,
-        // combinePrompt: new PromptTemplate({
-        //   template: combinePromptTemplate,
-        //   inputVariables: ['text'],
-        // }),
-        // combineMapPrompt: new PromptTemplate({
-        //   template: combineMapTemplate,
-        //   inputVariables: ['text'],
-        // }),
-        //   verbose: true,
-        //   ensureMapStep: true,
-        // } as any);
-
-        // const text = fs.readFileSync("summarizer_openai.txt", "utf8");
-        // const res = await openai_model.call(`
-        // Please generate 4 questions that test the understanding of a person that reads the following text. Also provide 3 options for each question.
-
-        // Text: ${text}
-
-        // `);
-        // console.log({ res });
-        // return res;
-
         const llmChain = new LLMChain({
           prompt: new PromptTemplate({
             template: combineMapTemplate,
@@ -214,12 +172,6 @@ class Summarizer_Output implements INode {
         const res = await chain.call({
           input_documents: chunks,
         });
-        // let summary = '';
-        // for await (const step of res.intermediateSteps) {
-        //   summary += step + '\n';
-        // }
-        console.log({ res });
-
         this.updateFlowData({
           nodeId: this.node.id,
           status: 'success',
@@ -243,6 +195,7 @@ class Summarizer_Output implements INode {
 
   async createForm(data: any = {}): Promise<string> {
     if (this.node.type === 'summarizer') {
+      const converter = new Converter();
       // parse questions
       const output: {
         text: string;
@@ -265,7 +218,7 @@ class Summarizer_Output implements INode {
         new CreateCollectionCommand(
           {
             name: this.node.data.formName,
-            description: '',
+            description: converter.makeHtml(rawQuestions[1].trim().slice(10)),
             collectionType: 0,
             circleId: this.flow.circle,
           },
@@ -275,10 +228,7 @@ class Summarizer_Output implements INode {
 
       let lineCount = 1;
       for await (const line of output.intermediateSteps) {
-        // const htmlLine = '<p>' + line + '</p>';
-        const converter = new Converter();
         const html = converter.makeHtml(line);
-        console.log({ html });
         await this.commandBus.execute(
           new AddPropertyCommand(
             {
@@ -345,9 +295,6 @@ class Summarizer_Output implements INode {
           ],
         }),
       );
-
-      console.log('updated folder');
-
       return form.slug;
     }
   }

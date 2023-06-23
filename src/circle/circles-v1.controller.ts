@@ -136,6 +136,25 @@ export class CircleV1Controller {
     }
   }
 
+  @UseGuards(AdminAuthGuard)
+  @Get('/totalKudosDesigns')
+  async totalKudosDesigns(): Promise<number> {
+    const res = await this.kudosService.getAllDesigns();
+    return res.length;
+  }
+
+  @UseGuards(AdminAuthGuard)
+  @Get('/allKudosDesigns')
+  async allKudosDesigns(): Promise<nftTypes[]> {
+    return await this.kudosService.getAllDesigns();
+  }
+
+  @UseGuards(AdminAuthGuard)
+  @Get('removeFirstUserAddedKudosDesign')
+  async removeKudosDesigns(): Promise<nftTypes> {
+    return await this.kudosService.removeFirstUserAddedKudosDesign();
+  }
+
   @UseGuards(ViewCircleAuthGuard)
   @Get('/:id')
   async findByObjectId(
@@ -446,7 +465,7 @@ export class CircleV1Controller {
     );
   }
 
-  @SetMetadata('permissions', ['distributeCredentials'])
+  @SetMetadata('permissions', ['manageCircleSettings'])
   @UseGuards(CircleAuthGuard)
   @Patch('/:id/mintKudos')
   async mintKudos(
@@ -473,7 +492,7 @@ export class CircleV1Controller {
     return await this.kudosService.getCommunityKudosDesigns(param.id);
   }
 
-  @SetMetadata('permissions', ['distributeCredentials'])
+  @SetMetadata('permissions', ['manageCircleSettings'])
   @UseGuards(CircleAuthGuard)
   @Patch('/:id/addKudosDesign')
   @UseInterceptors(FileInterceptor('file'))
