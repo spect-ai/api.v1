@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import fetch from 'node-fetch';
 import {
@@ -83,12 +83,18 @@ export class MintKudosService {
         body: JSON.stringify(kudos),
       });
       const data = await res.json();
+      if (!res.ok) {
+        throw data;
+      }
       const operationId = res.headers.get('Location');
       return operationId;
     } catch (e) {
-      this.logger.error(`Failed minting kudos with error ${e.message}`);
       console.log({ e });
-      return e;
+      this.logger.error(`Failed creating kudos with error ${e.error}`);
+      throw new InternalServerErrorException({
+        message: e.error,
+        name: e.name,
+      });
     }
   }
 
