@@ -137,6 +137,18 @@ export class CircleV1Controller {
     }
   }
 
+  @UseGuards(AdminAuthGuard)
+  @Get('/allKudosDesigns')
+  async allKudosDesigns(): Promise<nftTypes[]> {
+    return await this.kudosService.getAllDesigns();
+  }
+
+  @UseGuards(AdminAuthGuard)
+  @Get('removeFirstUserAddedKudosDesign')
+  async removeKudosDesigns(): Promise<nftTypes> {
+    return await this.kudosService.removeFirstUserAddedKudosDesign();
+  }
+
   @UseGuards(ViewCircleAuthGuard)
   @Get('/:id')
   async findByObjectId(
