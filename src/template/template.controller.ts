@@ -18,20 +18,7 @@ import { SessionAuthGuard } from 'src/auth/iron-session.guard';
 import { RequiredSlugDto } from 'src/common/dtos/string.dto';
 import { DuplicateCircleCommand } from 'src/circle/commands/impl';
 import { Circle } from 'src/circle/model/circle.model';
-
-const groups = [
-  'Popular',
-  'New',
-  'Onboarding',
-  'Education',
-  'Community Management',
-  'Governance',
-  'Project Management',
-  'Grant Program',
-  'Event Management',
-  'Social',
-  'Marketing',
-];
+import { TemplateService } from './template.service';
 
 const statusId = '431af81f-75ab-4a34-8656-e885b47b4e0c';
 const imageId = 'ff681f83-f903-49bc-87e6-c4c375cfff31';
@@ -42,67 +29,19 @@ const shortDescriptionId = 'de88db03-6884-4ecb-a5d5-9e19968ea1d8';
 @Controller('templates/v1')
 export class TemplateController {
   constructor(
+    private readonly templateService: TemplateService,
     private readonly queryBus: QueryBus,
     private readonly commandBus: CommandBus,
   ) {}
 
   @Get('/')
   async getAllTemplates() {
-    if (!process.env.TEMPLATE_COLLECTION_SLUG) return [];
-    const templates = (await this.queryBus.execute(
-      new GetCollectionBySlugQuery(process.env.TEMPLATE_COLLECTION_SLUG),
-    )) as Collection;
-    const mappedPropertyIds = {
-      [statusId]: null,
-      [imageId]: null,
-      [urlId]: null,
-      [tagsId]: null,
-      [shortDescriptionId]: null,
-    };
-    for (const [propertyId, property] of Object.entries(templates.properties)) {
-      if (property.name === 'Status') mappedPropertyIds[statusId] = property.id;
-      else if (property.name === 'Image')
-        mappedPropertyIds[imageId] = property.id;
-      else if (property.name === 'Url') mappedPropertyIds[urlId] = property.id;
-      else if (property.name === 'Tags')
-        mappedPropertyIds[tagsId] = property.id;
-      else if (property.name === 'Short Description')
-        mappedPropertyIds[shortDescriptionId] = property.id;
-    }
-    console.log({
-      mappedPropertyIds,
-    });
-    const templatesByGroup = {} as { [key: string]: string[] };
-    for (const group of groups) {
-      templatesByGroup[group] = [];
-    }
-    const templateData = [] as Template[];
-    for (const td of Object.values(templates.data)) {
-      const tags = td[tagsId] ? td[tagsId].map((tag: any) => tag.label) : [];
-      for (const tag of tags) {
-        if (templatesByGroup[tag]) templatesByGroup[tag].push(td['slug']);
-      }
+    return await this.templateService.getAllTemplates();
+  }
 
-      if (td[statusId].label === 'Draft') continue;
-      templateData.push({
-        id: td['slug'],
-        name: td['Title'],
-        shortDescription: td[shortDescriptionId],
-        description: td['Description'],
-        image: td[imageId],
-        url: td[urlId],
-        tags: tags,
-      });
-    }
-    console.log({ templateData });
-    for (const group of groups) {
-      if (templatesByGroup[group]?.length === 0) delete templatesByGroup[group];
-    }
-
-    return {
-      templateData,
-      templatesByGroup,
-    };
+  @Get('/:slug')
+  async getTemplate(@Param() param: RequiredSlugDto): Promise<Template> {
+    return await this.templateService.getTemplate(param.slug);
   }
 
   @UseGuards(SessionAuthGuard)
