@@ -311,7 +311,7 @@ export class MintKudosService {
           process.env.MINTKUDOS_DEFAULT_API_KEY,
       ).toString('base64');
       const nftTypes = await this.getAllDesigns();
-      const nftType = nftTypes.find((nftType) => nftType.isUserAdded);
+      const nftType = nftTypes.reverse().find((nftType) => nftType.isUserAdded);
       if (!nftType) {
         throw new Error('No user added kudos design found');
       }

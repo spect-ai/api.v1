@@ -138,6 +138,13 @@ export class CircleV1Controller {
   }
 
   @UseGuards(AdminAuthGuard)
+  @Get('/totalKudosDesigns')
+  async totalKudosDesigns(): Promise<number> {
+    const res = await this.kudosService.getAllDesigns();
+    return res.length;
+  }
+
+  @UseGuards(AdminAuthGuard)
   @Get('/allKudosDesigns')
   async allKudosDesigns(): Promise<nftTypes[]> {
     return await this.kudosService.getAllDesigns();
