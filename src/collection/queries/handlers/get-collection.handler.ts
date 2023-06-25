@@ -283,16 +283,15 @@ export class GetPublicViewCollectionQueryHandler
             avatar: 1,
             ethAddress: 1,
             bio: 1,
-            skillsV2: 1,
             id: 1,
-            website: 1,
-            twitter: 1,
-            github: 1,
-            behance: 1,
           }),
         );
       }
     }
+    collectionToGet =
+      this.advancedAccessService.removePrivateFieldsFromProject(
+        collectionToGet,
+      );
     return {
       ...collectionToGet,
       profiles: profileInfo?.length
@@ -308,9 +307,19 @@ export class GetPublicViewCollectionQueryHandler
 
     try {
       let collectionToGet = collection;
-      if (!collectionToGet) {
+      if (!collectionToGet && this.commonTools.isUUID(slug)) {
         collectionToGet = await this.queryBus.execute(
           new GetCollectionBySlugQuery(slug),
+        );
+        // For projects, public link should be seperate from slug (to preserve privacy)
+        if (collectionToGet?.collectionType === 1) {
+          throw new Error('Collection not found');
+        }
+      } else if (!collectionToGet && slug) {
+        collectionToGet = await this.queryBus.execute(
+          new GetCollectionByFilterQuery({
+            'shareSlugs.readonly': slug,
+          }),
         );
       }
       if (!collectionToGet) {
@@ -422,12 +431,7 @@ export class GetPrivateViewCollectionQueryHandler
               avatar: 1,
               ethAddress: 1,
               bio: 1,
-              skillsV2: 1,
               id: 1,
-              website: 1,
-              twitter: 1,
-              github: 1,
-              behance: 1,
             }),
           );
         }

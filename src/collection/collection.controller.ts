@@ -374,7 +374,6 @@ export class CollectionController {
     @Body() updateDataDto: UpdateDataDto,
     @Request() req,
   ): Promise<Collection> {
-    console.log({ updateDataDto });
     return await this.commandBus.execute(
       new UpdateDataCommand(
         updateDataDto.data,

@@ -53,6 +53,7 @@ import { CollectionV2ProjectController } from './collection-v2-project.controlle
 import { CollectionV2FormController } from './collection-v2-form.controller';
 import { CollectionV2WebhookController } from './collection-v2-webhook.controller';
 import { ProjectDataValidationV2Service } from './services/v2/data-validation-v2.service';
+import { StrongerCollectionAuthGuard } from 'src/auth/collection.guard';
 
 @Module({
   imports: [
@@ -111,6 +112,7 @@ import { ProjectDataValidationV2Service } from './services/v2/data-validation-v2
     GetCollectionService,
     ZealyService,
     ProjectDataValidationV2Service,
+    StrongerCollectionAuthGuard,
   ],
   exports: [CollectionModule, CollectionRepository],
 })

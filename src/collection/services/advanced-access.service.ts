@@ -165,4 +165,11 @@ export class AdvancedAccessService {
     delete collection.subscriptions;
     return collection;
   }
+
+  removePrivateFieldsFromProject(collection: Collection): any {
+    delete collection.subscriptions;
+    delete collection.shareSlugs?.readComment;
+    delete collection.shareSlugs?.readWriteComment;
+    return collection;
+  }
 }
