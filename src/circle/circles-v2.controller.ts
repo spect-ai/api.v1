@@ -11,16 +11,18 @@ import {
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { ApiTags } from '@nestjs/swagger';
 import { CircleAuthGuard, ViewCircleAuthGuard } from 'src/auth/circle.guard';
-import { PublicViewAuthGuard } from 'src/auth/iron-session.guard';
-import { RequiredSlugDto } from 'src/common/dtos/string.dto';
-import { EntitiesInCircleResponseDto } from './dto/v2/circle-response.dto';
-import { GetCircleBySlugQuery } from './queries/impl';
-import { Collection } from 'src/collection/model/collection.model';
-import { Circle } from './model/circle.model';
 import {
   DuplicateFormCommand,
   DuplicateProjectCommand,
+  MoveCollectionCommand,
 } from 'src/collection/commands';
+import { CollectionDataResponseDto } from 'src/collection/dto/v2/collection-response.dto';
+import { Collection } from 'src/collection/model/collection.model';
+import { RequiredSlugDto } from 'src/common/dtos/string.dto';
+import { DuplicateCircleCommand } from './commands/impl';
+import { MoveCircleCommand } from './commands/v2/impl/move-circle.command';
+import { Circle } from './model/circle.model';
+import { GetCircleBySlugQuery } from './queries/impl';
 
 /**
  Built with keeping integratoors in mind, this API is meant to
@@ -95,6 +97,62 @@ export class CircleV2Controller {
     } else if (entityType === 'workstream') {
       return circle.children;
     } else return circle;
+  }
+
+  @SetMetadata('permissions', ['manageCircleSettings'])
+  @UseGuards(CircleAuthGuard)
+  @Post('/slug/:slug/move')
+  async move(
+    @Param() param: RequiredSlugDto,
+    @Query('destinationCircleId') destinationCircleId: string,
+    @Req() req: any,
+  ): Promise<CollectionDataResponseDto> {
+    const res = await this.commandBus.execute(
+      new MoveCircleCommand(param.slug, destinationCircleId, req.user),
+    );
+
+    return res;
+  }
+
+  @SetMetadata('permissions', ['manageCircleSettings'])
+  @UseGuards(CircleAuthGuard)
+  @Post('/slug/:slug/duplicate')
+  async duplicate(
+    @Param() param: RequiredSlugDto,
+    @Query('circleIdBeingDuplicated') circleIdBeingDuplicated: string,
+    @Req() req: any,
+    @Query('duplicateAutomations') duplicateAutomations?: boolean,
+    @Query('duplicateCollections') duplicateCollections?: boolean,
+    @Query('duplicateMembership') duplicateMembership?: boolean,
+    @Query('destinationCircleId') destinationCircleId?: string,
+  ): Promise<any> {
+    console.log('duplicate');
+    return await this.commandBus.execute(
+      new DuplicateCircleCommand(
+        circleIdBeingDuplicated,
+        req.user,
+        duplicateAutomations,
+        duplicateCollections,
+        duplicateMembership,
+        destinationCircleId,
+      ),
+    );
+  }
+
+  @SetMetadata('permissions', ['manageCircleSettings'])
+  @UseGuards(CircleAuthGuard)
+  @Post('/slug/:slug/moveCollection')
+  async moveCollection(
+    @Param() param: RequiredSlugDto,
+    @Query('collectionSlug') collectionSlug: string,
+    @Query('destinationCircleId') destinationCircleId: string,
+    @Req() req: any,
+  ): Promise<CollectionDataResponseDto> {
+    const res = await this.commandBus.execute(
+      new MoveCollectionCommand(collectionSlug, destinationCircleId, req.user),
+    );
+
+    return res;
   }
 
   @SetMetadata('permissions', ['createNewForm'])

@@ -32,7 +32,6 @@ import {
 } from 'src/common/dtos/string.dto';
 import {
   ArchiveCircleByIdCommand,
-  ClaimCircleCommand,
   CreateFolderCommand,
   DeleteFolderCommand,
   UpdateFolderCommand,
@@ -135,6 +134,25 @@ export class CircleV1Controller {
       console.log(error);
       return {};
     }
+  }
+
+  @UseGuards(AdminAuthGuard)
+  @Get('/totalKudosDesigns')
+  async totalKudosDesigns(): Promise<number> {
+    const res = await this.kudosService.getAllDesigns();
+    return res.length;
+  }
+
+  @UseGuards(AdminAuthGuard)
+  @Get('/allKudosDesigns')
+  async allKudosDesigns(): Promise<nftTypes[]> {
+    return await this.kudosService.getAllDesigns();
+  }
+
+  @UseGuards(AdminAuthGuard)
+  @Get('removeFirstUserAddedKudosDesign')
+  async removeKudosDesigns(): Promise<nftTypes> {
+    return await this.kudosService.removeFirstUserAddedKudosDesign();
   }
 
   @UseGuards(ViewCircleAuthGuard)
@@ -431,17 +449,6 @@ export class CircleV1Controller {
     );
   }
 
-  @UseGuards(SessionAuthGuard)
-  @Patch('/:id/claimCircle')
-  async claimCircle(
-    @Param() param: ObjectIdDto,
-    @Request() request,
-  ): Promise<CircleResponseDto> {
-    return await this.commandBus.execute(
-      new ClaimCircleCommand(param.id, request.user),
-    );
-  }
-
   @Get('/:id/circleNav')
   async circleNav(
     @Param() param: ObjectIdDto,
@@ -458,7 +465,7 @@ export class CircleV1Controller {
     );
   }
 
-  @SetMetadata('permissions', ['distributeCredentials'])
+  @SetMetadata('permissions', ['manageCircleSettings'])
   @UseGuards(CircleAuthGuard)
   @Patch('/:id/mintKudos')
   async mintKudos(
@@ -485,7 +492,7 @@ export class CircleV1Controller {
     return await this.kudosService.getCommunityKudosDesigns(param.id);
   }
 
-  @SetMetadata('permissions', ['distributeCredentials'])
+  @SetMetadata('permissions', ['manageCircleSettings'])
   @UseGuards(CircleAuthGuard)
   @Patch('/:id/addKudosDesign')
   @UseInterceptors(FileInterceptor('file'))

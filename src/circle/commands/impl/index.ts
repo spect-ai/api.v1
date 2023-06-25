@@ -4,6 +4,6 @@ export * from './create-circle.command';
 export * from './get-space-collections.command';
 export * from './get-registry.command';
 export * from '../roles/impl';
-export * from '../claim/impl';
 export * from '../archive/impl';
 export * from '../folders/impl';
+export * from '../v2/impl/duplicate-circle.command';

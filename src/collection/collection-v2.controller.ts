@@ -90,19 +90,4 @@ export class CollectionV2Controller {
       ),
     );
   }
-
-  @SetMetadata('permissions', ['manageSettings'])
-  @UseGuards(StrongerCollectionAuthGuard)
-  @Patch('/slug/:slug/move')
-  async moveCollection(
-    @Param() param: RequiredSlugDto,
-    @Query('circleId') circleId: string,
-    @Req() req: any,
-  ): Promise<CollectionDataResponseDto> {
-    const res = await this.commandBus.execute(
-      new MoveCollectionCommand(param.slug, circleId, req.user),
-    );
-
-    return res;
-  }
 }

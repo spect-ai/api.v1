@@ -34,16 +34,24 @@ export class DuplicateFormCommandHandler
   }
 
   async execute(command: DuplicateFormCommand) {
-    const { caller, collectionSlug } = command;
+    const { caller, collectionSlug, destinationCircleId } = command;
     try {
       const collection = await this.collectionRepository.findOne({
         slug: collectionSlug,
       });
       if (!collection) throw 'Collection does not exist';
-      const parentCircleId = collection.parents[0];
-      const parentCircle = await this.queryBus.execute(
-        new GetCircleByIdQuery(parentCircleId),
+      const currParentCircleId = collection.parents[0];
+      const currParentCircle = await this.queryBus.execute(
+        new GetCircleByIdQuery(currParentCircleId),
       );
+      let newParentCircleId = currParentCircleId;
+      let newParentCircle = currParentCircle;
+      if (destinationCircleId) {
+        newParentCircleId = destinationCircleId;
+        newParentCircle = await this.queryBus.execute(
+          new GetCircleByIdQuery(newParentCircleId),
+        );
+      }
       // Remove incentives to prevent security issues if its not the creator
       let updatesIfNotCreator = {};
       if (collection.creator !== caller.id) {
@@ -70,7 +78,10 @@ export class DuplicateFormCommandHandler
       delete collection.id;
       const createdCollection = await this.collectionRepository.create({
         ...collection,
-        name: `${collection.name} (Copy)`,
+        name:
+          newParentCircleId !== currParentCircleId
+            ? `${collection.name}`
+            : `${collection.name} (Copy)`,
         slug: uuidv4(),
         parents: collection.parents,
         permissions: collection.permissions,
@@ -104,9 +115,8 @@ export class DuplicateFormCommandHandler
         subscriptions: {},
       });
 
-      console.log({ id: collectionId });
       const currentCollectionIdFolder = Object.values(
-        parentCircle.folderDetails,
+        newParentCircle.folderDetails,
       ).find((f: Folder) => f.contentIds.includes(collectionId)) as Folder;
 
       const folderIdOfCurrentCollectionInParentCircle =
@@ -114,17 +124,16 @@ export class DuplicateFormCommandHandler
       const indexOfCurrentCollection =
         currentCollectionIdFolder.contentIds.indexOf(collectionId);
 
-      console.log({ cId: createdCollection.id });
       await this.commandBus.execute(
         new UpdateCircleCommand(
-          parentCircleId,
+          newParentCircleId,
           {
             collections: [
-              ...(parentCircle.collections || []),
+              ...(newParentCircle.collections || []),
               createdCollection.id,
             ],
             folderDetails: {
-              ...parentCircle.folderDetails,
+              ...newParentCircle.folderDetails,
               [folderIdOfCurrentCollectionInParentCircle]: {
                 ...currentCollectionIdFolder,
                 contentIds: [
@@ -173,23 +182,34 @@ export class DuplicateProjectCommandHandler
   }
 
   async execute(command: DuplicateProjectCommand) {
-    const { caller, collectionSlug } = command;
+    const { caller, collectionSlug, destinationCircleId } = command;
     try {
       const collection = await this.collectionRepository.findOne({
         slug: collectionSlug,
       });
       if (!collection) throw 'Collection does not exist';
-      const parentCircleId = collection.parents[0];
-      const parentCircle = await this.queryBus.execute(
-        new GetCircleByIdQuery(parentCircleId),
+      const currParentCircleId = collection.parents[0];
+      const currParentCircle = await this.queryBus.execute(
+        new GetCircleByIdQuery(currParentCircleId),
       );
+      let newParentCircleId = currParentCircleId;
+      let newParentCircle = currParentCircle;
+      if (destinationCircleId) {
+        newParentCircleId = destinationCircleId;
+        newParentCircle = await this.queryBus.execute(
+          new GetCircleByIdQuery(newParentCircleId),
+        );
+      }
 
       const collectionId = collection.id;
       delete collection._id;
       delete collection.id;
       const createdCollection = await this.collectionRepository.create({
         ...collection,
-        name: `${collection.name} (Copy)`,
+        name:
+          newParentCircleId !== currParentCircleId
+            ? `${collection.name}`
+            : `${collection.name} (Copy)`,
         slug: uuidv4(),
         parents: collection.parents,
         permissions: collection.permissions,
@@ -200,7 +220,7 @@ export class DuplicateProjectCommandHandler
       });
 
       const currentCollectionIdFolder = Object.values(
-        parentCircle.folderDetails,
+        newParentCircle.folderDetails,
       ).find((f: Folder) => f.contentIds.includes(collectionId)) as Folder;
 
       const folderIdOfCurrentCollectionInParentCircle =
@@ -210,14 +230,14 @@ export class DuplicateProjectCommandHandler
 
       await this.commandBus.execute(
         new UpdateCircleCommand(
-          parentCircleId,
+          newParentCircleId,
           {
             collections: [
-              ...(parentCircle.collections || []),
+              ...(newParentCircle.collections || []),
               createdCollection.id,
             ],
             folderDetails: {
-              ...parentCircle.folderDetails,
+              ...newParentCircle.folderDetails,
               [folderIdOfCurrentCollectionInParentCircle]: {
                 ...currentCollectionIdFolder,
                 contentIds: [

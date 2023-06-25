@@ -14,7 +14,7 @@ export class CircleValidationService {
       !circle.memberRoles[newMember].includes('__removed__')
     ) {
       throw new HttpException(
-        'You are already a member of this circle',
+        'You are already a member of this space',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }

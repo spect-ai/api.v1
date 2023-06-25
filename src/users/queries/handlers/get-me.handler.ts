@@ -6,16 +6,6 @@ import { PrivateProfileResponseDto } from 'src/users/dto/profile-response.dto';
 import { UsersRepository } from 'src/users/users.repository';
 import { GetMeQuery } from '../impl/get-me.query';
 
-const hideProfileFields = {
-  notificationsV2: 0,
-  collections: 0,
-  collectionsSubmittedTo: 0,
-  experiences: 0,
-  accounts: 0,
-  __v: 0,
-  circles: 0,
-};
-
 @QueryHandler(GetMeQuery)
 export class GetMeQueryHandler implements IQueryHandler<GetMeQuery> {
   constructor(
@@ -32,7 +22,7 @@ export class GetMeQueryHandler implements IQueryHandler<GetMeQuery> {
       const user = await this.userRepository.getUserByFilter(
         { _id: caller },
         null,
-        hideProfileFields,
+        {},
       );
 
       if (!user) {

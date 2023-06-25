@@ -69,11 +69,11 @@ export class GitcoinPassportService {
     for (const stampLocal of stampsLocal) {
       const stamp = {
         ...stampLocal,
-        score: scoresOfStamps[stampLocal.id],
+        score: scoresOfStamps?.[stampLocal.id] || 0,
         verified: providersOfUserStampsSet.has(stampLocal.provider),
       };
       stamps.push(stamp);
-      if (providersOfUserStampsSet.has(stamp.provider))
+      if (providersOfUserStampsSet.has(stamp.provider) && stamp.score > 0)
         totalScore += scoresOfStamps[stamp.id];
     }
 
