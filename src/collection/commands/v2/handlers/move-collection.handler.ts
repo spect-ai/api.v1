@@ -17,6 +17,7 @@ import { LoggingService } from 'src/logging/logging.service';
 import { MoveCollectionCommand } from '../impl/move-collection.command';
 import { Folder } from 'src/circle/types';
 import { CircleAuthGuard } from 'src/auth/circle.guard';
+import { Collection } from 'src/collection/model/collection.model';
 
 @CommandHandler(MoveCollectionCommand)
 export class MoveCollectionCommandHandler
@@ -31,6 +32,15 @@ export class MoveCollectionCommandHandler
     private readonly circleAuthGuard: CircleAuthGuard,
   ) {
     this.logger.setContext('MoveCollectionCommandHandler');
+  }
+
+  removeCollectionFieldsThatRequireCircleLevelInfo(collection: Collection) {
+    delete collection.formMetadata?.paymentConfig;
+    delete collection.formMetadata?.zealyXP;
+    delete collection.formMetadata?.zealyXpPerField;
+    delete collection.formMetadata?.responseDataForZealy;
+    delete collection.formMetadata?.formRoleGating;
+    delete collection.formMetadata?.discordRoleGating;
   }
 
   async execute(command: MoveCollectionCommand) {
@@ -79,10 +89,12 @@ export class MoveCollectionCommandHandler
         }
       });
 
+      this.removeCollectionFieldsThatRequireCircleLevelInfo(collection);
       // Add to new circle
       const movedCollection = await this.collectionRepository.updateById(
         collection.id,
         {
+          ...collection,
           parents: [circleId],
           permissions: defaultPermissions,
         },

@@ -235,7 +235,8 @@ export class DuplicateCircleCommandHandler
         folderOrder: circle.folderOrder,
         discordGuildId: addDiscordGuildFromParent
           ? parentCircle.discordGuildId
-          : undefined,
+          : circle.discordGuildId,
+        localRegistry: circle.localRegistry,
       });
 
       // Update the parent circle with the new circle
