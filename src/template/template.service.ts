@@ -125,19 +125,17 @@ export class TemplateService {
         if (['giveDiscordRole', 'removeDiscordRole'].includes(action.type)) {
           requirementsSet.add('discordRole');
         } else if (
-          [
-            'createDiscordThread',
-            'postOnDiscordThread',
-            'postOnDiscord',
-            'createDiscordChannel',
-          ].includes(action.type)
+          ['createDiscordThread', 'postOnDiscord'].includes(action.type)
         )
           requirementsSet.add('discordChannel');
-
+        else if (['createDiscordChannel'].includes(action.type))
+          requirementsSet.add('discordCategory');
+        else if (['postOnDiscord', 'createDiscordThread'].includes(action.type))
+          requirementsSet.add('discordCategory');
         if (
           ['createDiscordThread', 'createDiscordChannel'].includes(action.type)
         ) {
-          if (action.data?.rolesToAdd?.length) {
+          if (Object.keys(action.data?.rolesToAdd || {}).length > 0) {
             requirementsSet.add('discordRole');
           }
         }
@@ -154,7 +152,7 @@ export class TemplateService {
       ? template[mappedPropertyIds['tagsId']].map((tag: any) => tag.label)
       : [];
     return {
-      id: template[mappedPropertyIds['slug']],
+      id: templateId,
       name: template['Title'],
       description: template['Description'],
       shortDescription: template[mappedPropertyIds['shortDescriptionId']],

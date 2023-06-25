@@ -55,6 +55,7 @@ export class GetCirclesCommandHandler
           gradient: circle.gradient || circle.parents[0]?.gradient,
           collections: circle.collections,
           memberRoles: circle.memberRoles,
+          discordGuildId: circle.discordGuildId,
         };
       });
     } catch (err) {

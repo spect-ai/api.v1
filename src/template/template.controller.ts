@@ -1,4 +1,5 @@
 import {
+  Body,
   Controller,
   Get,
   Param,
@@ -8,23 +9,15 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
-import {
-  GetCollectionByIdQuery,
-  GetCollectionBySlugQuery,
-} from 'src/collection/queries';
-import { Template } from './types';
-import { Collection } from 'src/collection/model/collection.model';
 import { SessionAuthGuard } from 'src/auth/iron-session.guard';
-import { RequiredSlugDto } from 'src/common/dtos/string.dto';
 import { DuplicateCircleCommand } from 'src/circle/commands/impl';
 import { Circle } from 'src/circle/model/circle.model';
+import { Collection } from 'src/collection/model/collection.model';
+import { GetCollectionBySlugQuery } from 'src/collection/queries';
+import { RequiredSlugDto } from 'src/common/dtos/string.dto';
+import { UseTemplateCircleSpecificInfoDtos } from './dto/useTemplateCircleSpecificInfoDto.dto';
 import { TemplateService } from './template.service';
-
-const statusId = '431af81f-75ab-4a34-8656-e885b47b4e0c';
-const imageId = 'ff681f83-f903-49bc-87e6-c4c375cfff31';
-const urlId = 'b05d3001-fd4e-440b-9f68-cb896b24bd98';
-const tagsId = 'c2204f25-a77b-44a5-beaf-4760909f66bb';
-const shortDescriptionId = 'de88db03-6884-4ecb-a5d5-9e19968ea1d8';
+import { Template } from './types';
 
 @Controller('templates/v1')
 export class TemplateController {
@@ -50,6 +43,8 @@ export class TemplateController {
     @Param() param: RequiredSlugDto,
     @Req() req: any,
     @Query('destinationCircleId') destinationCircleId?: string,
+    @Body()
+    useTemplateDto?: UseTemplateCircleSpecificInfoDtos,
   ): Promise<Circle> {
     console.log('duplicate');
     if (!process.env.TEMPLATE_COLLECTION_SLUG)
@@ -78,8 +73,10 @@ export class TemplateController {
         req.user,
         true,
         true,
-        false,
+        true,
         destinationCircleId,
+        useTemplateDto.useTemplateCircleSpecificInfoDtos,
+        true,
       ),
     );
   }

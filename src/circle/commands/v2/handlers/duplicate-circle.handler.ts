@@ -9,24 +9,23 @@ import {
   ICommandHandler,
   QueryBus,
 } from '@nestjs/cqrs';
+import { Schema } from 'mongoose';
+import { CircleAuthGuard } from 'src/auth/circle.guard';
 import { CirclesRepository } from 'src/circle/circles.repository';
-import { LoggingService } from 'src/logging/logging.service';
-import { v4 as uuidv4 } from 'uuid';
-import { DuplicateCircleCommand } from '../impl/duplicate-circle.command';
-import { SlugService } from 'src/common/slug.service';
 import { CreatedCircleEvent } from 'src/circle/events/impl';
-import { GetCircleByIdQuery } from 'src/circle/queries/impl';
+import { Circle } from 'src/circle/model/circle.model';
+import { Automation, Folder } from 'src/circle/types';
 import {
   DuplicateFormCommand,
   DuplicateProjectCommand,
 } from 'src/collection/commands';
-import { GetMultipleCollectionsQuery } from 'src/collection/queries';
-import { defaultCircleCreatorRoles, defaultCircleRoles } from 'src/constants';
-import { Automation, Folder } from 'src/circle/types';
 import { Collection } from 'src/collection/model/collection.model';
-import { Schema, Types } from 'mongoose';
-import { CircleAuthGuard } from 'src/auth/circle.guard';
-import { Circle } from 'src/circle/model/circle.model';
+import { GetMultipleCollectionsQuery } from 'src/collection/queries';
+import { SlugService } from 'src/common/slug.service';
+import { defaultCircleCreatorRoles, defaultCircleRoles } from 'src/constants';
+import { LoggingService } from 'src/logging/logging.service';
+import { UseTemplateCircleSpecificInfoDto } from 'src/template/dto/useTemplateCircleSpecificInfoDto.dto';
+import { DuplicateCircleCommand } from '../impl/duplicate-circle.command';
 
 @CommandHandler(DuplicateCircleCommand)
 export class DuplicateCircleCommandHandler
@@ -65,15 +64,14 @@ export class DuplicateCircleCommandHandler
   }
 
   getAutomationForNewCircle(
+    circleId: string,
     automationInOldCircle: Automation,
     oldCollectionToNewCollectionMap: {
       [key: string]: Collection;
     },
-    automationInNewCircle?: Automation,
+    circleSpecificAutomationInfo?: UseTemplateCircleSpecificInfoDto,
   ) {
-    const newAutomation = automationInNewCircle
-      ? { ...automationInNewCircle }
-      : { ...automationInOldCircle };
+    const newAutomation = { ...automationInOldCircle };
     if (newAutomation.triggerCollectionSlug) {
       newAutomation.triggerCollectionSlug =
         oldCollectionToNewCollectionMap[
@@ -81,16 +79,72 @@ export class DuplicateCircleCommandHandler
         ].slug;
     }
     const actions = [];
+    console.log({ circleSpecificAutomationInfo });
     for (const action of newAutomation.actions) {
       if (action.type === 'createCard') {
         action.data.selectedCollection.value =
           oldCollectionToNewCollectionMap[
             automationInOldCircle.triggerCollectionSlug
           ].id;
+      } else if (
+        [
+          'createDiscordChannel',
+          'giveDiscordRole',
+          'removeDiscordRole',
+          'postOnDiscord',
+        ].includes(action.type) &&
+        circleSpecificAutomationInfo?.skip
+      ) {
+        console.log('skipping');
+        continue;
+      } else if (
+        ['giveDiscordRole', 'removeDiscordRole'].includes(action.type)
+      ) {
+        let roles = {};
+        if (circleSpecificAutomationInfo?.info?.roleIds) {
+          roles = circleSpecificAutomationInfo.info.roleIds.reduce(
+            (acc, curr) => {
+              acc[curr] = true;
+              return acc;
+            },
+            {},
+          );
+        }
+        action.data.roles = roles;
+        action.data.circleId = circleId;
+      } else if (['createDiscordChannel'].includes(action.type)) {
+        action.data.channelCategory =
+          circleSpecificAutomationInfo.info.category;
+        let roles = {};
+        if (circleSpecificAutomationInfo?.info?.roleIds) {
+          roles = circleSpecificAutomationInfo.info.roleIds.reduce(
+            (acc, curr) => {
+              acc[curr] = true;
+              return acc;
+            },
+            {},
+          );
+        }
+        action.data.rolesToAdd = roles;
+      } else if (['postOnDiscord'].includes(action.type)) {
+        action.data.channel = circleSpecificAutomationInfo.info.channel;
+      } else if (['createDiscordThread'].includes(action.type)) {
+        action.data.channel = circleSpecificAutomationInfo.info.channel;
+        let roles = {};
+        if (circleSpecificAutomationInfo?.info?.roleIds) {
+          roles = circleSpecificAutomationInfo.info.roleIds.reduce(
+            (acc, curr) => {
+              acc[curr] = true;
+              return acc;
+            },
+            {},
+          );
+        }
+        action.data.rolesToAdd = roles;
       }
-
       actions.push(action);
     }
+    console.log({ actions });
     newAutomation.actions = actions;
     return newAutomation;
   }
@@ -103,6 +157,8 @@ export class DuplicateCircleCommandHandler
       duplicateCollections,
       duplicateMembership,
       destinationCircleId,
+      useTemplateCircleSpecificInfoDto,
+      addDiscordGuildFromParent,
     } = command;
     console.log('duplicateCircleCommand');
     try {
@@ -131,13 +187,13 @@ export class DuplicateCircleCommandHandler
       // Check if the caller has permission to duplicate the circle to the destination circle / parent circle
       if (
         !this.circleAuthGuard.checkPermissions(
-          ['manageSettings'],
+          ['manageCircleSettings'],
           parentCircle.memberRoles?.[caller.id] || [],
           parentCircle,
         )
       )
         throw new UnauthorizedException(
-          `You do not have permission to move duplicate this space`,
+          `You do not have permission to duplicate this space`,
         );
 
       const slug = await this.slugService.generateUniqueSlug(
@@ -166,7 +222,7 @@ export class DuplicateCircleCommandHandler
 
       // Create the new circle
       const createdCircle = await this.circleRepository.create({
-        name: `${circle.name} (copy)`,
+        name: destinationCircleId ? `${circle.name}` : `${circle.name} (Copy)`,
         slug,
         description: circle.description,
         avatar: circle.avatar,
@@ -177,6 +233,9 @@ export class DuplicateCircleCommandHandler
         collections: [],
         folderDetails: circle.folderDetails,
         folderOrder: circle.folderOrder,
+        discordGuildId: addDiscordGuildFromParent
+          ? parentCircle.discordGuildId
+          : undefined,
       });
 
       // Update the parent circle with the new circle
@@ -259,19 +318,23 @@ export class DuplicateCircleCommandHandler
           oldCollectionToNewCollectionMap[collection.slug] = newCollection;
         }
       }
-      console.log(
-        `createdCollections: ${Object.values(
-          oldCollectionToNewCollectionMap,
-        ).join(', ')}`,
-      );
 
       let finalCircle = createdCircle;
       let automationCount = 0;
       // Duplicate the automations in the circle
+      console.log({
+        au: circle.automationsIndexedByCollection,
+        duplicateAutomations,
+      });
       if (duplicateAutomations) {
         const currAutomations = circle.automations;
         const newAutomationsIndexedByCollection = {};
         const newAutomations = {};
+        const automationIdToCircleSpecificInfoMap =
+          useTemplateCircleSpecificInfoDto?.reduce((acc, curr) => {
+            acc[curr.id] = curr;
+            return acc;
+          }, {});
         for (const [collectionSlug, automationOrder] of Object.entries(
           circle.automationsIndexedByCollection,
         )) {
@@ -285,10 +348,13 @@ export class DuplicateCircleCommandHandler
             newAutomationsIndexedByCollection[newCollectionSlug] =
               automationOrder;
             automationCount += automationOrder.length;
+            console.log({ automationOrder });
             for (const automationId of automationOrder) {
               const newAutomation = this.getAutomationForNewCircle(
+                createdCircle.id,
                 currAutomations[automationId],
                 oldCollectionToNewCollectionMap,
+                automationIdToCircleSpecificInfoMap?.[automationId],
               );
               console.log({ newAutomation });
               newAutomations[automationId] = newAutomation;

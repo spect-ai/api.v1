@@ -1,4 +1,7 @@
-export type TemplateRequirement = 'discordRole' | 'discordChannel';
+export type TemplateRequirement =
+  | 'discordRole'
+  | 'discordChannel'
+  | 'discordCategory';
 
 export type TemplateAutomation = {
   id: string;

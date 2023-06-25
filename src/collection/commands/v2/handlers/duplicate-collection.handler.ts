@@ -115,7 +115,6 @@ export class DuplicateFormCommandHandler
         subscriptions: {},
       });
 
-      console.log({ id: collectionId });
       const currentCollectionIdFolder = Object.values(
         newParentCircle.folderDetails,
       ).find((f: Folder) => f.contentIds.includes(collectionId)) as Folder;
@@ -125,7 +124,6 @@ export class DuplicateFormCommandHandler
       const indexOfCurrentCollection =
         currentCollectionIdFolder.contentIds.indexOf(collectionId);
 
-      console.log({ cId: createdCollection.id });
       await this.commandBus.execute(
         new UpdateCircleCommand(
           newParentCircleId,
@@ -221,7 +219,6 @@ export class DuplicateProjectCommandHandler
         subscriptions: {},
       });
 
-      console.log({ id: createdCollection.id });
       const currentCollectionIdFolder = Object.values(
         newParentCircle.folderDetails,
       ).find((f: Folder) => f.contentIds.includes(collectionId)) as Folder;
