@@ -15,13 +15,7 @@ export class CircleSpecificInfo {
   category?: Option;
 }
 
-export class UseTemplateCircleSpecificInfoDto {
-  @IsString()
-  type: string;
-
-  @IsString()
-  id: string;
-
+export class ActionInfo {
   @IsOptional()
   @IsBoolean()
   skip?: boolean;
@@ -30,6 +24,17 @@ export class UseTemplateCircleSpecificInfoDto {
   @ValidateNested()
   @Type(() => CircleSpecificInfo)
   info?: CircleSpecificInfo;
+}
+
+export class UseTemplateCircleSpecificInfoDto {
+  @IsString()
+  type: string;
+
+  @IsString()
+  id: string;
+
+  @IsArray()
+  actions: ActionInfo[];
 }
 
 export class UseTemplateCircleSpecificInfoDtos {

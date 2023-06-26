@@ -5,6 +5,7 @@ import { GetCollectionBySlugQuery } from 'src/collection/queries';
 import { Property } from 'src/collection/types/types';
 import {
   Template,
+  TemplateAction,
   TemplateAutomation,
   TemplateMinimal,
   TemplateRequirement,
@@ -86,7 +87,6 @@ export class TemplateService {
         tags: tags,
       });
     }
-    console.log({ templateData });
     for (const group of groups) {
       if (templatesByGroup[group]?.length === 0) delete templatesByGroup[group];
     }
@@ -113,7 +113,6 @@ export class TemplateService {
     );
     const automations = [] as TemplateAutomation[];
     const circleId = template[mappedPropertyIds['urlId']].split('/').pop();
-    console.log({ circleId });
     const templateCircle = (await this.queryBus.execute(
       new GetCircleBySlugQuery(circleId),
     )) as Circle;
@@ -121,16 +120,14 @@ export class TemplateService {
       templateCircle?.automations || {},
     )) {
       const requirementsSet = new Set() as Set<TemplateRequirement>;
+      const templateActions = [] as TemplateAction[];
       for (const action of automation.actions) {
         if (['giveDiscordRole', 'removeDiscordRole'].includes(action.type)) {
           requirementsSet.add('discordRole');
-        } else if (
-          ['createDiscordThread', 'postOnDiscord'].includes(action.type)
-        )
+        }
+        if (['createDiscordThread', 'postOnDiscord'].includes(action.type))
           requirementsSet.add('discordChannel');
-        else if (['createDiscordChannel'].includes(action.type))
-          requirementsSet.add('discordCategory');
-        else if (['postOnDiscord', 'createDiscordThread'].includes(action.type))
+        if (['createDiscordChannel'].includes(action.type))
           requirementsSet.add('discordCategory');
         if (
           ['createDiscordThread', 'createDiscordChannel'].includes(action.type)
@@ -139,12 +136,17 @@ export class TemplateService {
             requirementsSet.add('discordRole');
           }
         }
+        templateActions.push({
+          name: action.name,
+          requirements: Array.from(requirementsSet),
+        });
       }
+
       automations.push({
         id: automationId,
         name: automation.name,
         description: automation.description,
-        requirements: [...requirementsSet],
+        actions: templateActions,
       });
     }
 

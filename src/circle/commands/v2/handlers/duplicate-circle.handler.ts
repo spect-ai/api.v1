@@ -79,8 +79,8 @@ export class DuplicateCircleCommandHandler
         ].slug;
     }
     const actions = [];
-    console.log({ circleSpecificAutomationInfo });
-    for (const action of newAutomation.actions) {
+    for (let i = 0; i < automationInOldCircle.actions.length; i++) {
+      const action = automationInOldCircle.actions[i];
       if (action.type === 'createCard') {
         action.data.selectedCollection.value =
           oldCollectionToNewCollectionMap[
@@ -93,7 +93,7 @@ export class DuplicateCircleCommandHandler
           'removeDiscordRole',
           'postOnDiscord',
         ].includes(action.type) &&
-        circleSpecificAutomationInfo?.skip
+        circleSpecificAutomationInfo?.actions?.[i]?.skip
       ) {
         console.log('skipping');
         continue;
@@ -101,50 +101,48 @@ export class DuplicateCircleCommandHandler
         ['giveDiscordRole', 'removeDiscordRole'].includes(action.type)
       ) {
         let roles = {};
-        if (circleSpecificAutomationInfo?.info?.roleIds) {
-          roles = circleSpecificAutomationInfo.info.roleIds.reduce(
-            (acc, curr) => {
-              acc[curr] = true;
-              return acc;
-            },
-            {},
-          );
+        if (circleSpecificAutomationInfo?.actions?.[i].info?.roleIds) {
+          roles = circleSpecificAutomationInfo?.actions?.[
+            i
+          ].info.roleIds.reduce((acc, curr) => {
+            acc[curr] = true;
+            return acc;
+          }, {});
         }
         action.data.roles = roles;
         action.data.circleId = circleId;
       } else if (['createDiscordChannel'].includes(action.type)) {
         action.data.channelCategory =
-          circleSpecificAutomationInfo.info.category;
+          circleSpecificAutomationInfo?.actions?.[i].info.category;
         let roles = {};
-        if (circleSpecificAutomationInfo?.info?.roleIds) {
-          roles = circleSpecificAutomationInfo.info.roleIds.reduce(
-            (acc, curr) => {
-              acc[curr] = true;
-              return acc;
-            },
-            {},
-          );
+        if (circleSpecificAutomationInfo?.actions?.[i].info?.roleIds) {
+          roles = circleSpecificAutomationInfo?.actions?.[
+            i
+          ].info.roleIds.reduce((acc, curr) => {
+            acc[curr] = true;
+            return acc;
+          }, {});
         }
         action.data.rolesToAdd = roles;
       } else if (['postOnDiscord'].includes(action.type)) {
-        action.data.channel = circleSpecificAutomationInfo.info.channel;
+        action.data.channel =
+          circleSpecificAutomationInfo?.actions?.[i].info.channel;
       } else if (['createDiscordThread'].includes(action.type)) {
-        action.data.channel = circleSpecificAutomationInfo.info.channel;
+        action.data.channel =
+          circleSpecificAutomationInfo?.actions?.[i].info.channel;
         let roles = {};
-        if (circleSpecificAutomationInfo?.info?.roleIds) {
-          roles = circleSpecificAutomationInfo.info.roleIds.reduce(
-            (acc, curr) => {
-              acc[curr] = true;
-              return acc;
-            },
-            {},
-          );
+        if (circleSpecificAutomationInfo?.actions?.[i].info?.roleIds) {
+          roles = circleSpecificAutomationInfo?.actions?.[
+            i
+          ].info.roleIds.reduce((acc, curr) => {
+            acc[curr] = true;
+            return acc;
+          }, {});
         }
         action.data.rolesToAdd = roles;
       }
       actions.push(action);
     }
-    console.log({ actions });
     newAutomation.actions = actions;
     return newAutomation;
   }
@@ -162,8 +160,6 @@ export class DuplicateCircleCommandHandler
     } = command;
     console.log('duplicateCircleCommand');
     try {
-      console.log({ circleSlug });
-
       // Get the circle to be duplicated
       const circle = await this.circleRepository.findOne({
         slug: circleSlug,
@@ -173,7 +169,6 @@ export class DuplicateCircleCommandHandler
       let parentCircle;
       if (circle?.parents?.length > 0 || destinationCircleId) {
         let parentCircleId = circle.parents[0];
-        console.log({ destinationCircleId, parentCircleId });
 
         if (destinationCircleId) {
           parentCircleId =
@@ -284,8 +279,6 @@ export class DuplicateCircleCommandHandler
         });
       }
 
-      console.log(`createdCircle: ${createdCircle.id}`);
-
       // Duplicate the collections in the cirle
       // also, maintain a mapping so that the automations can be updated with the new collection ids
       const oldCollectionToNewCollectionMap = {} as {
@@ -323,10 +316,7 @@ export class DuplicateCircleCommandHandler
       let finalCircle = createdCircle;
       let automationCount = 0;
       // Duplicate the automations in the circle
-      console.log({
-        au: circle.automationsIndexedByCollection,
-        duplicateAutomations,
-      });
+
       if (duplicateAutomations) {
         const currAutomations = circle.automations;
         const newAutomationsIndexedByCollection = {};
@@ -341,7 +331,6 @@ export class DuplicateCircleCommandHandler
         )) {
           const newCollectionSlug =
             oldCollectionToNewCollectionMap?.[collectionSlug]?.slug;
-          console.log({ newCollectionSlug, collectionSlug });
           if (newCollectionSlug) {
             if (!newAutomationsIndexedByCollection[newCollectionSlug]) {
               newAutomationsIndexedByCollection[newCollectionSlug] = [];
@@ -349,7 +338,6 @@ export class DuplicateCircleCommandHandler
             newAutomationsIndexedByCollection[newCollectionSlug] =
               automationOrder;
             automationCount += automationOrder.length;
-            console.log({ automationOrder });
             for (const automationId of automationOrder) {
               const newAutomation = this.getAutomationForNewCircle(
                 createdCircle.id,
@@ -357,7 +345,6 @@ export class DuplicateCircleCommandHandler
                 oldCollectionToNewCollectionMap,
                 automationIdToCircleSpecificInfoMap?.[automationId],
               );
-              console.log({ newAutomation });
               newAutomations[automationId] = newAutomation;
             }
           }
@@ -369,11 +356,7 @@ export class DuplicateCircleCommandHandler
           automationCount,
         });
       }
-      console.log(
-        `createdAutomations: ${JSON.stringify(
-          finalCircle.automationsIndexedByCollection,
-        )}`,
-      );
+
       this.eventBus.publish(new CreatedCircleEvent(createdCircle, null));
 
       return createdCircle;
