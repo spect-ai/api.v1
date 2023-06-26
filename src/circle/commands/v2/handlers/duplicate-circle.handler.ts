@@ -26,6 +26,7 @@ import { defaultCircleCreatorRoles, defaultCircleRoles } from 'src/constants';
 import { LoggingService } from 'src/logging/logging.service';
 import { UseTemplateCircleSpecificInfoDto } from 'src/template/dto/useTemplateCircleSpecificInfoDto.dto';
 import { DuplicateCircleCommand } from '../impl/duplicate-circle.command';
+import { CommonTools } from 'src/common/common.service';
 
 @CommandHandler(DuplicateCircleCommand)
 export class DuplicateCircleCommandHandler
@@ -39,25 +40,33 @@ export class DuplicateCircleCommandHandler
     private readonly commandBus: CommandBus,
     private readonly queryBus: QueryBus,
     private readonly circleAuthGuard: CircleAuthGuard,
+    private readonly commonTools: CommonTools,
   ) {
     this.logger.setContext('DuplicateCircleCommandHandler');
   }
 
+  isDiscordAutomation(actionType: string) {
+    return [
+      'createDiscordChannel',
+      'giveDiscordRole',
+      'removeDiscordRole',
+      'postOnDiscord',
+      'createDiscordThread',
+      'postOnDiscordThread',
+    ].includes(actionType);
+  }
+
+  hasDiscordAutomationAction(automation: Automation) {
+    for (const action of automation.actions) {
+      return this.isDiscordAutomation(action.type);
+    }
+    return false;
+  }
+
   hasDiscordAutomation(circle: Circle) {
     for (const automation of Object.values(circle.automations)) {
-      for (const action of automation.actions) {
-        if (
-          [
-            'createDiscordChannel',
-            'giveDiscordRole',
-            'postOnDiscord',
-            'postOnDiscordThread',
-            'createDiscordThread',
-            'removeDiscordRole',
-          ].includes(action.type)
-        ) {
-          return true;
-        }
+      if (this.hasDiscordAutomationAction(automation)) {
+        return true;
       }
     }
     return false;
@@ -70,7 +79,7 @@ export class DuplicateCircleCommandHandler
       [key: string]: Collection;
     },
     circleSpecificAutomationInfo?: UseTemplateCircleSpecificInfoDto,
-  ) {
+  ): Automation {
     const newAutomation = { ...automationInOldCircle };
     if (newAutomation.triggerCollectionSlug) {
       newAutomation.triggerCollectionSlug =
@@ -87,13 +96,8 @@ export class DuplicateCircleCommandHandler
             automationInOldCircle.triggerCollectionSlug
           ].id;
       } else if (
-        [
-          'createDiscordChannel',
-          'giveDiscordRole',
-          'removeDiscordRole',
-          'postOnDiscord',
-        ].includes(action.type) &&
-        circleSpecificAutomationInfo?.actions?.[i]?.skip
+        this.isDiscordAutomation(action.type) &&
+        !circleSpecificAutomationInfo?.actions?.length
       ) {
         console.log('skipping');
         continue;
@@ -141,6 +145,7 @@ export class DuplicateCircleCommandHandler
         }
         action.data.rolesToAdd = roles;
       }
+
       actions.push(action);
     }
     newAutomation.actions = actions;
@@ -215,9 +220,20 @@ export class DuplicateCircleCommandHandler
         };
       }
 
+      const folderOrder = circle.folderOrder;
+      const folderDetails = {};
+      for (const folderId of folderOrder) {
+        folderDetails[folderId] = {
+          ...circle.folderDetails[folderId],
+          contentIds: [],
+        };
+      }
       // Create the new circle
       const createdCircle = await this.circleRepository.create({
-        name: destinationCircleId ? `${circle.name}` : `${circle.name} (Copy)`,
+        name:
+          parentCircle.id !== circle.parents[0]
+            ? `${circle.name}`
+            : `${circle.name} (Copy)`,
         slug,
         description: circle.description,
         avatar: circle.avatar,
@@ -226,8 +242,8 @@ export class DuplicateCircleCommandHandler
         sidebarConfig: circle.sidebarConfig,
         children: [],
         collections: [],
-        folderDetails: circle.folderDetails,
-        folderOrder: circle.folderOrder,
+        folderDetails,
+        folderOrder,
         discordGuildId: addDiscordGuildFromParent
           ? parentCircle.discordGuildId
           : circle.discordGuildId,
@@ -284,32 +300,44 @@ export class DuplicateCircleCommandHandler
       const oldCollectionToNewCollectionMap = {} as {
         [key: string]: Collection;
       };
+
       if (circle.collections?.length && duplicateCollections) {
         const collections = await this.queryBus.execute(
           new GetMultipleCollectionsQuery({
             _id: circle.collections,
           }),
         );
-        for (const collection of collections) {
-          let newCollection;
-          if (collection.collectionType === 0) {
-            newCollection = await this.commandBus.execute(
-              new DuplicateFormCommand(
-                collection.slug,
-                caller,
-                createdCircle.id,
-              ),
-            );
-          } else if (collection.collectionType === 1) {
-            newCollection = await this.commandBus.execute(
-              new DuplicateProjectCommand(
-                collection.slug,
-                caller,
-                createdCircle.id,
-              ),
-            );
+        const collectionIdToOldCollectionMap = this.commonTools.objectify(
+          collections,
+          'id',
+        );
+        for (const folderId of circle.folderOrder) {
+          const contentIds = circle.folderDetails[folderId].contentIds;
+          for (const contentId of contentIds) {
+            const collection = collectionIdToOldCollectionMap[contentId];
+            if (!collection || collection.archived) continue;
+            let newCollection;
+            if (collection.collectionType === 0) {
+              newCollection = await this.commandBus.execute(
+                new DuplicateFormCommand(
+                  collection.slug,
+                  caller,
+                  createdCircle.id,
+                  folderId,
+                ),
+              );
+            } else if (collection.collectionType === 1) {
+              newCollection = await this.commandBus.execute(
+                new DuplicateProjectCommand(
+                  collection.slug,
+                  caller,
+                  createdCircle.id,
+                  folderId,
+                ),
+              );
+            }
+            oldCollectionToNewCollectionMap[collection.slug] = newCollection;
           }
-          oldCollectionToNewCollectionMap[collection.slug] = newCollection;
         }
       }
 
@@ -335,8 +363,7 @@ export class DuplicateCircleCommandHandler
             if (!newAutomationsIndexedByCollection[newCollectionSlug]) {
               newAutomationsIndexedByCollection[newCollectionSlug] = [];
             }
-            newAutomationsIndexedByCollection[newCollectionSlug] =
-              automationOrder;
+            newAutomationsIndexedByCollection[newCollectionSlug] = [];
             automationCount += automationOrder.length;
             for (const automationId of automationOrder) {
               const newAutomation = this.getAutomationForNewCircle(
@@ -345,7 +372,12 @@ export class DuplicateCircleCommandHandler
                 oldCollectionToNewCollectionMap,
                 automationIdToCircleSpecificInfoMap?.[automationId],
               );
-              newAutomations[automationId] = newAutomation;
+              if (newAutomation?.actions?.length) {
+                newAutomations[automationId] = newAutomation;
+                newAutomationsIndexedByCollection[newCollectionSlug].push(
+                  automationId,
+                );
+              }
             }
           }
         }

@@ -5,6 +5,7 @@ export class DuplicateFormCommand {
     public readonly collectionSlug: string,
     public readonly caller: User,
     public readonly destinationCircleId?: string,
+    public readonly folderId?: string,
   ) {}
 }
 
@@ -13,5 +14,6 @@ export class DuplicateProjectCommand {
     public readonly collectionSlug: string,
     public readonly caller: User,
     public readonly destinationCircleId?: string,
+    public readonly folderId?: string,
   ) {}
 }

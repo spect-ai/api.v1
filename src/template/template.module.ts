@@ -8,6 +8,7 @@ import { TypegooseModule } from 'nestjs-typegoose';
 import { UsersModule } from 'src/users/users.module';
 import { EncryptionService } from 'src/common/encryption.service';
 import { TemplateService } from './template.service';
+import { CommonTools } from 'src/common/common.service';
 
 @Module({
   imports: [
@@ -18,6 +19,6 @@ import { TemplateService } from './template.service';
     UsersModule,
   ],
   controllers: [TemplateController],
-  providers: [EncryptionService, TemplateService],
+  providers: [EncryptionService, TemplateService, CommonTools],
 })
 export class TemplateModule {}
