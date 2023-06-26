@@ -43,7 +43,7 @@ import {
 } from '../payments/handlers/update-payment.handler';
 import { GetSpaceCollectionsCommandHandler } from './get-space-collections.handler';
 import { GetRegistryCommandHandler } from './get-registry.handler';
-import { UpgradePlanCommandHandler } from './uprade-plan.handler';
+import { UpgradePlanCommandHandler } from './upgrade-plan.handler';
 import { CancelPlanCommandHandler } from './cancel-plan.handler';
 
 export const CommandHandlers = [

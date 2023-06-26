@@ -14,6 +14,7 @@ import {
   GetTokensOfMultipleTokenTypesOfUserQueryHandler,
   GetTokensOfUserQueryHandler,
 } from './get-tokens.handler';
+import { GetReferralsQueryHandler } from './get-referrals.handler';
 
 export const QueryHandlers = [
   GetMultipleUsersByIdsQueryHandler,
@@ -25,4 +26,5 @@ export const QueryHandlers = [
   GetMultipleUsersByFilterQueryHandler,
   GetTokensOfUserQueryHandler,
   GetTokensOfMultipleTokenTypesOfUserQueryHandler,
+  GetReferralsQueryHandler,
 ];

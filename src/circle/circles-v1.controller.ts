@@ -166,18 +166,18 @@ export class CircleV1Controller {
       return;
     }
     console.log({ event });
+    let subscription;
+    let circle;
     switch (event.type) {
       case 'checkout.session.completed':
+        console.log('CHECKOUT SESSION COMPLETED');
         const session = await stripe.checkout.sessions.retrieve(
           event.data.object.id,
           {
             expand: ['line_items'],
           },
         );
-
         const membersTopUp = session.line_items.data[1]?.quantity;
-        console.log({ session });
-
         await this.circleRepository.updateCircleAndReturnWithPopulatedReferences(
           session.client_reference_id,
           {
@@ -189,12 +189,11 @@ export class CircleV1Controller {
 
         break;
       case 'customer.subscription.deleted':
-        const subscription = event.data.object;
-        console.log({ subscription });
-        const circle = await this.circleRepository.findOne({
+        console.log('CUSTOMER SUBSCRIPTION DELETED');
+        subscription = event.data.object;
+        circle = await this.circleRepository.findOne({
           subscriptionId: subscription.id,
         });
-        console.log({ circle });
         await this.circleRepository.updateCircleAndReturnWithPopulatedReferences(
           circle.id,
           {
@@ -203,6 +202,22 @@ export class CircleV1Controller {
             subscriptionId: '',
           },
         );
+        break;
+      case 'invoice.paid':
+        console.log('INVOICE PAID');
+        const invoice = event.data.object;
+        subscription = invoice.subscription;
+        circle = await this.circleRepository.findOne({
+          subscriptionId: subscription,
+        });
+        await this.circleRepository.updateCircleAndReturnWithPopulatedReferences(
+          circle.id,
+          {
+            pendingBonus:
+              (circle.pendingBonus || 0) + invoice.amount_paid * 0.01 * 0.2,
+          },
+        );
+
         break;
       default:
         console.log(`Unhandled event type ${event.type}`);

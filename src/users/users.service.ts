@@ -25,12 +25,13 @@ export class UsersService {
     logger.setContext('UsersService');
   }
 
-  async create(ethAddress: string) {
+  async create(ethAddress: string, refCode?: string) {
     try {
       const numUsers = await this.usersRepository.count();
       const user = await this.usersRepository.create({
         username: `fren${numUsers + 200}`,
         ethAddress: ethAddress,
+        referredBy: refCode,
       });
       await this.ethAddressRepository.create({
         ethAddress: ethAddress,

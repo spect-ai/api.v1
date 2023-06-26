@@ -19,6 +19,7 @@ export class AuthService {
   async connect(
     { message, signature }: ConnectUserDto,
     req: any,
+    refCode?: string,
   ): Promise<any> {
     const siweMessage = new SiweMessage(message);
     const fields = await siweMessage.validate(signature);
@@ -32,8 +33,10 @@ export class AuthService {
       req.session.siwe.address.toLowerCase(),
     );
     if (!_ethAddress) {
+      console.log({ refCode });
       const user = await this.userService.create(
         req.session.siwe.address.toLowerCase(),
+        refCode,
       );
       return user;
     }

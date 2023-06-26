@@ -124,4 +124,10 @@ export class User extends ProfileModel {
 
   @prop()
   apiKeys?: string[];
+
+  @prop()
+  referralCode?: string;
+
+  @prop()
+  referredBy?: string;
 }

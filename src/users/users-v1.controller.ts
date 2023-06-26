@@ -15,7 +15,9 @@ import { SessionAuthGuard } from 'src/auth/iron-session.guard';
 import {
   ConnectDiscordCommand,
   DisconnectDiscordCommand,
+  GetReferralCodeCommand,
   GetTokensOfUserQuery,
+  WithdrawBonusCommand,
 } from './commands/impl';
 import {
   ConnectGithubCommand,
@@ -29,6 +31,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import {
   GetMeQuery,
   GetNotificationsQuery,
+  GetReferralsQuery,
   GetUnreadNotificationsQuery,
 } from './queries/impl';
 import { UsersService } from './users.service';
@@ -136,5 +139,23 @@ export class UsersControllerV1 {
     return await this.queryBus.execute(
       new GetTokensOfUserQuery(req.user, tokenType, circleId),
     );
+  }
+
+  @UseGuards(SessionAuthGuard)
+  @Get('/referralCode')
+  async getReferralCode(@Request() req) {
+    return await this.commandBus.execute(new GetReferralCodeCommand(req.user));
+  }
+
+  @UseGuards(SessionAuthGuard)
+  @Get('/referrals')
+  async getReferrals(@Request() req) {
+    return await this.queryBus.execute(new GetReferralsQuery(req.user));
+  }
+
+  @UseGuards(SessionAuthGuard)
+  @Get('/withdrawBonus')
+  async withdrawBonus(@Request() req) {
+    return await this.commandBus.execute(new WithdrawBonusCommand(req.user));
   }
 }

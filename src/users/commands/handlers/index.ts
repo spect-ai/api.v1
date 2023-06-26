@@ -14,6 +14,8 @@ import {
   ConnectGithubCommandHandler,
   DisconnectGithubCommandHandler,
 } from './connect-github.handler';
+import { GetReferralCodeCommandHandler } from './get-referralCode.handler';
+import { WithdrawBonusCommandHandler } from './withdraw-bonus.handler';
 
 export const CommandHandlers = [
   AddItemCommandHandler,
@@ -27,4 +29,6 @@ export const CommandHandlers = [
   DisconnectDiscordCommandHandler,
   ConnectGithubCommandHandler,
   DisconnectGithubCommandHandler,
+  GetReferralCodeCommandHandler,
+  WithdrawBonusCommandHandler,
 ];

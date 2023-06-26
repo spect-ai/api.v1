@@ -315,6 +315,12 @@ export class Circle extends ProfileModel {
 
   @prop()
   subscriptionId: string;
+
+  @prop()
+  referredBy: string;
+
+  @prop()
+  pendingBonus: number;
 }
 
 export class ExtendedCircle extends Circle {
