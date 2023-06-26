@@ -23,6 +23,7 @@ export * from './subscription/impl/create-subscription.command';
 export * from './subscription/impl/remove-subscription.command';
 export * from './v2/impl/duplicate-collection.command';
 export * from './v2/impl/move-collection.command';
+export * from './v2/impl/share-collection.command';
 
 import { AddCommentCommandHandler } from './comments/handlers/add-comment.handler';
 import { RemoveCommentCommandHandler } from './comments/handlers/remove-comment.handler';
@@ -55,9 +56,6 @@ import {
 import { AddPropertyCommandHandler } from './properties/handlers/add-property.handler';
 import { RemovePropertyCommandHandler } from './properties/handlers/remove-property.handler';
 import { UpdatePropertyCommandHandler } from './properties/handlers/update-property.handler';
-import { CreateGrantWorkflowCommandHandler } from './template/handlers/grant-workflow.handler';
-import { OnboardingWorkflowCommandHandler } from './template/handlers/onboarding-workflow.handler';
-import { KanbanProjectCommandHandler } from './template/handlers/kanban-project.handler';
 import { OnboardToSpectProjectCommandHandler } from './default/handlers/onboard-to-spect.handler';
 
 import { ImportCommandHandler } from './handlers/import.handler';
@@ -85,6 +83,7 @@ import {
   DuplicateProjectCommandHandler,
 } from './v2/handlers/duplicate-collection.handler';
 import { MoveCollectionCommandHandler } from './v2/handlers/move-collection.handler';
+import { ShareCollectionCommandHandler } from './v2/handlers/share-collection.handler';
 
 export const CommandHandlers = [
   CreateCollectionCommandHandler,
@@ -106,9 +105,6 @@ export const CommandHandlers = [
   EndVotingPeriodCommandHandler,
   DeleteCollectionCommandHandler,
   AddMultipleDataUsingAutomationCommandHandler,
-  CreateGrantWorkflowCommandHandler,
-  OnboardingWorkflowCommandHandler,
-  KanbanProjectCommandHandler,
   OnboardToSpectProjectCommandHandler,
   RecordSnapshotProposalCommandHandler,
   ImportCommandHandler,
@@ -129,4 +125,5 @@ export const CommandHandlers = [
   DuplicateFormCommandHandler,
   DuplicateProjectCommandHandler,
   MoveCollectionCommandHandler,
+  ShareCollectionCommandHandler,
 ];

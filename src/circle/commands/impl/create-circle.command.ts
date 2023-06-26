@@ -10,9 +10,3 @@ export class CreateCircleCommand {
     public readonly caller: User,
   ) {}
 }
-
-export class CreateClaimableCircleCommand {
-  constructor(
-    public readonly createCircleDto: CreateClaimableCircleRequestDto,
-  ) {}
-}

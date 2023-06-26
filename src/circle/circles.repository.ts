@@ -19,7 +19,6 @@ const defaultPopulate: PopulatedCircleFields = {
     description: 1,
     slug: 1,
     avatar: 1,
-    paymentAddress: 1,
   },
   collections: {
     id: 1,

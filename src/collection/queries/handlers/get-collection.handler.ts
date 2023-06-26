@@ -18,6 +18,7 @@ import {
   GetPublicViewCollectionQuery,
 } from '../impl/get-collection.query';
 import { CirclesPrivateRepository } from 'src/circle/circles-private.repository';
+import { User } from 'src/users/model/users.model';
 
 @QueryHandler(GetCollectionByIdQuery)
 export class GetCollectionByIdQueryHandler
@@ -153,6 +154,7 @@ export class GetPublicViewCollectionQueryHandler
     private readonly logger: LoggingService,
     private readonly circlePrivateRepository: CirclesPrivateRepository,
     private readonly claimEligibilityService: ClaimEligibilityService,
+    private readonly commonTools: CommonTools,
   ) {
     logger.setContext('GetPublicViewCollectionQueryHandler');
   }
@@ -167,6 +169,137 @@ export class GetPublicViewCollectionQueryHandler
     return;
   }
 
+  async getForm(collectionToGet: Collection, caller?: User) {
+    const hasRole = await this.advancedAccessService.hasRoleToAccessForm(
+      collectionToGet,
+      caller,
+    );
+    const hasPassedSybilCheck =
+      await this.advancedAccessService.hasPassedSybilProtection(
+        collectionToGet,
+        caller,
+      );
+    const formHasCredentialsButUserIsntConnected =
+      collectionToGet.formMetadata.mintkudosTokenId &&
+      collectionToGet.formMetadata.mintkudosTokenId > 0 &&
+      !caller;
+
+    const previousResponses = [];
+    if (collectionToGet.dataOwner)
+      for (const [dataSlug, owner] of Object.entries(
+        collectionToGet.dataOwner,
+      )) {
+        if (owner === caller?.id) {
+          previousResponses.push({
+            slug: dataSlug,
+            ...collectionToGet.data[dataSlug],
+          });
+        }
+      }
+    const canClaimResForKudos = this.claimEligibilityService.canClaimKudos(
+      collectionToGet,
+      caller?.id,
+    );
+
+    const canClaimSurveyToken = false;
+
+    const canClaimResForPoap = this.claimEligibilityService.canClaimPoap(
+      collectionToGet,
+      caller?.id,
+    );
+
+    const canClaimResForZealy = this.claimEligibilityService.canClaimZealyXp(
+      collectionToGet,
+      caller?.id,
+      'just checking, not claiming',
+    );
+    let zealySubdomain;
+    if (canClaimResForZealy?.canClaimXp) {
+      try {
+        const privateCredentials = await this.circlePrivateRepository.findOne({
+          circleId: (collectionToGet.parents[0] as any).id,
+        });
+        zealySubdomain = privateCredentials?.zealySubdomain;
+      } catch (e) {
+        console.log(e);
+      }
+    }
+
+    let activityOrder, activity;
+    if (previousResponses.length > 0) {
+      const prevSlug = previousResponses[previousResponses.length - 1].slug;
+      activityOrder = collectionToGet.dataActivityOrder[prevSlug];
+      activity = collectionToGet.dataActivities[prevSlug];
+    }
+
+    const transactionHashesOfUser =
+      collectionToGet.formMetadata.transactionHashes?.[caller?.ethAddress];
+
+    const res = this.advancedAccessService.removePrivateFields(collectionToGet);
+
+    return {
+      ...res,
+      formMetadata: {
+        ...res.formMetadata,
+        hasRole,
+        canClaimKudos: canClaimResForKudos.canClaim,
+        hasPassedSybilCheck,
+        previousResponses,
+        canClaimSurveyToken,
+        transactionHashesOfUser,
+        canClaimPoap: canClaimResForPoap.canClaim,
+        hasClaimedKudos: canClaimResForKudos.hasClaimed,
+        matchCountForPoap: canClaimResForPoap.matchCount,
+        matchCountForKudos: canClaimResForKudos.matchCount,
+        canClaimZealy: canClaimResForZealy.canClaimXp,
+        hasClaimedZealy: canClaimResForZealy.hasClaimedXp,
+        zealySubdomain,
+        currentPage:
+          canClaimResForKudos.canClaim ||
+          canClaimResForZealy.canClaimXp ||
+          canClaimResForPoap.canClaim
+            ? 'collect'
+            : undefined,
+      },
+      activity,
+      activityOrder,
+    };
+  }
+
+  async getProject(collectionToGet: Collection, caller?: User) {
+    let profileInfo = [];
+
+    if (collectionToGet.dataOwner) {
+      const profiles = [];
+      for (const [dataSlug, owner] of Object.entries(
+        collectionToGet.dataOwner,
+      )) {
+        profiles.push(owner);
+      }
+      if (profiles.length > 0) {
+        profileInfo = await this.queryBus.execute(
+          new GetMultipleUsersByIdsQuery(profiles, null, {
+            username: 1,
+            avatar: 1,
+            ethAddress: 1,
+            bio: 1,
+            id: 1,
+          }),
+        );
+      }
+    }
+    collectionToGet =
+      this.advancedAccessService.removePrivateFieldsFromProject(
+        collectionToGet,
+      );
+    return {
+      ...collectionToGet,
+      profiles: profileInfo?.length
+        ? this.commonTools.objectify(profileInfo, 'id')
+        : {},
+    };
+  }
+
   async execute(
     query: GetPublicViewCollectionQuery,
   ): Promise<CollectionPublicResponseDto> {
@@ -174,111 +307,29 @@ export class GetPublicViewCollectionQueryHandler
 
     try {
       let collectionToGet = collection;
-      if (!collectionToGet) {
+      if (!collectionToGet && this.commonTools.isUUID(slug)) {
         collectionToGet = await this.queryBus.execute(
           new GetCollectionBySlugQuery(slug),
+        );
+        // For projects, public link should be seperate from slug (to preserve privacy)
+        if (collectionToGet?.collectionType === 1) {
+          throw new Error('Collection not found');
+        }
+      } else if (!collectionToGet && slug) {
+        collectionToGet = await this.queryBus.execute(
+          new GetCollectionByFilterQuery({
+            'shareSlugs.readonly': slug,
+          }),
         );
       }
       if (!collectionToGet) {
         throw new Error('Collection not found');
       }
-      const hasRole = await this.advancedAccessService.hasRoleToAccessForm(
-        collectionToGet,
-        caller,
-      );
-      const hasPassedSybilCheck =
-        await this.advancedAccessService.hasPassedSybilProtection(
-          collectionToGet,
-          caller,
-        );
-      const formHasCredentialsButUserIsntConnected =
-        collectionToGet.formMetadata.mintkudosTokenId &&
-        collectionToGet.formMetadata.mintkudosTokenId > 0 &&
-        !caller;
-
-      const previousResponses = [];
-      if (collectionToGet.dataOwner)
-        for (const [dataSlug, owner] of Object.entries(
-          collectionToGet.dataOwner,
-        )) {
-          if (owner === caller?.id) {
-            previousResponses.push({
-              slug: dataSlug,
-              ...collectionToGet.data[dataSlug],
-            });
-          }
-        }
-      const canClaimResForKudos = this.claimEligibilityService.canClaimKudos(
-        collectionToGet,
-        caller?.id,
-      );
-
-      const canClaimSurveyToken = false;
-
-      const canClaimResForPoap = this.claimEligibilityService.canClaimPoap(
-        collectionToGet,
-        caller?.id,
-      );
-
-      const canClaimResForZealy = this.claimEligibilityService.canClaimZealyXp(
-        collectionToGet,
-        caller?.id,
-        'just checking, not claiming',
-      );
-      let zealySubdomain;
-      if (canClaimResForZealy?.canClaimXp) {
-        try {
-          const privateCredentials = await this.circlePrivateRepository.findOne(
-            {
-              circleId: (collectionToGet.parents[0] as any).id,
-            },
-          );
-          zealySubdomain = privateCredentials?.zealySubdomain;
-        } catch (e) {
-          console.log(e);
-        }
+      if (collectionToGet.collectionType === 0) {
+        return await this.getForm(collectionToGet, caller);
+      } else if (collectionToGet.collectionType === 1) {
+        return await this.getProject(collectionToGet, caller);
       }
-
-      let activityOrder, activity;
-      if (previousResponses.length > 0) {
-        const prevSlug = previousResponses[previousResponses.length - 1].slug;
-        activityOrder = collectionToGet.dataActivityOrder[prevSlug];
-        activity = collectionToGet.dataActivities[prevSlug];
-      }
-
-      const transactionHashesOfUser =
-        collectionToGet.formMetadata.transactionHashes?.[caller?.ethAddress];
-
-      const res =
-        this.advancedAccessService.removePrivateFields(collectionToGet);
-
-      return {
-        ...res,
-        formMetadata: {
-          ...res.formMetadata,
-          hasRole,
-          canClaimKudos: canClaimResForKudos.canClaim,
-          hasPassedSybilCheck,
-          previousResponses,
-          canClaimSurveyToken,
-          transactionHashesOfUser,
-          canClaimPoap: canClaimResForPoap.canClaim,
-          hasClaimedKudos: canClaimResForKudos.hasClaimed,
-          matchCountForPoap: canClaimResForPoap.matchCount,
-          matchCountForKudos: canClaimResForKudos.matchCount,
-          canClaimZealy: canClaimResForZealy.canClaimXp,
-          hasClaimedZealy: canClaimResForZealy.hasClaimedXp,
-          zealySubdomain,
-          currentPage:
-            canClaimResForKudos.canClaim ||
-            canClaimResForZealy.canClaimXp ||
-            canClaimResForPoap.canClaim
-              ? 'collect'
-              : undefined,
-        },
-        activity,
-        activityOrder,
-      };
     } catch (error) {
       this.logger.logError(
         `Failed while getting public collection with id ${collection?.id} with error: ${error.message}`,
@@ -380,12 +431,7 @@ export class GetPrivateViewCollectionQueryHandler
               avatar: 1,
               ethAddress: 1,
               bio: 1,
-              skillsV2: 1,
               id: 1,
-              website: 1,
-              twitter: 1,
-              github: 1,
-              behance: 1,
             }),
           );
         }

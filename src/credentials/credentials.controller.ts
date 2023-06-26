@@ -1,9 +1,8 @@
 import {
-  Body,
   Controller,
   Get,
   Param,
-  Post,
+  Query,
   Request,
   UseGuards,
 } from '@nestjs/common';
@@ -15,8 +14,8 @@ import {
 import { ObjectIdDto } from 'src/common/dtos/object-id.dto';
 import { RequiredPoapIdDto } from 'src/common/dtos/string.dto';
 import { CredentialsService } from './credentials.service';
-import { CreateCredentialRequestDto } from './dto/create-credential.dto';
 import { Credentials } from './model/credentials.model';
+import { ENSService } from './services/ens.service';
 import { PoapService } from './services/poap.service';
 
 @Controller('credentials/v1')
@@ -25,6 +24,7 @@ export class CredentialsController {
   constructor(
     private readonly credentialService: CredentialsService,
     private readonly poapService: PoapService,
+    private readonly ensService: ENSService,
   ) {}
 
   @Get('/')
@@ -47,5 +47,17 @@ export class CredentialsController {
   @Get('/:id')
   async getById(@Param() param: ObjectIdDto): Promise<Credentials> {
     return await this.credentialService.getById(param.id);
+  }
+
+  @UseGuards(AdminAuthGuard)
+  @Get('/ensName')
+  async getEnsName(@Query('address') address) {
+    return await this.ensService.resolveENSName(address);
+  }
+
+  @UseGuards(AdminAuthGuard)
+  @Get('/addressFromEns')
+  async getAddressFromEns(@Query('ens') ens) {
+    return await this.ensService.resolveAddress(ens);
   }
 }

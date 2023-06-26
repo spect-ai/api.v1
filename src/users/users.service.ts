@@ -10,6 +10,7 @@ import { KeysRepository } from './keys.repository';
 import { User } from './model/users.model';
 import { RequestProvider } from './user.provider';
 import { UsersRepository } from './users.repository';
+import { ENSService } from 'src/credentials/services/ens.service';
 
 @Injectable()
 export class UsersService {
@@ -21,17 +22,33 @@ export class UsersService {
     private readonly logger: LoggingService,
     private readonly keysRepository: KeysRepository,
     private readonly encryptionService: EncryptionService,
+    private readonly ensService: ENSService,
   ) {
     logger.setContext('UsersService');
   }
 
   async create(ethAddress: string, refCode?: string) {
     try {
-      const numUsers = await this.usersRepository.count();
+      let username;
+      try {
+        const ensName = await this.ensService.resolveENSName(ethAddress);
+        if (ensName) username = ensName;
+      } catch (error) {
+        this.logger.logError(
+          `Failed resolving ens name with error: ${error.message}`,
+          this.requestProvider,
+        );
+      }
+      if (!username) {
+        const numUsers = await this.usersRepository.count();
+        username = `fren${numUsers + 200}`;
+      }
+
       const user = await this.usersRepository.create({
-        username: `fren${numUsers + 200}`,
+        username: username,
         ethAddress: ethAddress,
         referredBy: refCode,
+        firstLogin: username.endsWith('.eth') ? false : true, // if username is an ENS name, then person doesnt need to set username
       });
       await this.ethAddressRepository.create({
         ethAddress: ethAddress,
@@ -62,20 +79,31 @@ export class UsersService {
           username: updateUserDto.username,
         });
         if (usernameTaken) throw new Error('Username taken');
+        if (updateUserDto.username.endsWith('.eth')) {
+          const address = await this.ensService.resolveAddress(
+            updateUserDto.username,
+          );
+          if (!address) throw new Error('Invalid ENS name');
+          if (
+            address?.toLowerCase() !==
+            this.requestProvider.user.ethAddress?.toLowerCase()
+          )
+            throw new Error('ENS name does not match address');
+        }
       }
       return await this.usersRepository.updateById(
         this.requestProvider.user.id,
-        updateUserDto,
+        {
+          ...updateUserDto,
+          firstLogin: false,
+        },
       );
     } catch (error) {
       this.logger.logError(
         `Failed user update with error: ${error.message}`,
         this.requestProvider,
       );
-      throw new InternalServerErrorException(
-        'Failed user update',
-        error.message,
-      );
+      throw new InternalServerErrorException(error?.message);
     }
   }
 

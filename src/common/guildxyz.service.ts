@@ -73,7 +73,19 @@ export class GuildxyzService {
     }
   }
 
-  async getDetailedGuildMembershipsWithRoles(ethAddress: string) {
+  async getDetailedGuildMembershipsWithRoles(ethAddress: string): Promise<
+    {
+      guildId: number;
+      guildName: string;
+      guildImage: string;
+      guildUrl: string;
+      roles: {
+        name: string;
+        id: number;
+        description: string;
+      }[];
+    }[]
+  > {
     try {
       const memberships = await this.getGuildMemberships(ethAddress);
 

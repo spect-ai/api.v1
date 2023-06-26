@@ -28,6 +28,8 @@ import { EmailGeneratorService } from 'src/notification/email-generatr.service';
 import { ERC721Service } from 'src/credentials/services/erc721.service';
 import { ERC20Service } from 'src/credentials/services/erc20.service';
 import { RegistryModule } from 'src/registry/registry.module';
+import { ENSService } from 'src/credentials/services/ens.service';
+import { GuildxyzService } from 'src/common/guildxyz.service';
 
 @Module({
   imports: [
@@ -61,6 +63,8 @@ import { RegistryModule } from 'src/registry/registry.module';
     EmailGeneratorService,
     ERC20Service,
     ERC721Service,
+    ENSService,
+    GuildxyzService,
   ],
   exports: [UsersService, UsersRepository, UsersModule, KeysRepository],
 })

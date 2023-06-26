@@ -126,13 +126,6 @@ export class UpdateCircleRequestDto extends OmitType(CreateCircleRequestDto, [
   grantApplicantProject?: string;
 
   /**
-   * Payment address of the circle
-   */
-  // @IsString()
-  // @IsOptional()
-  // paymentAddress?: string;
-
-  /**
    * Discord Channel to get notifications on when grant is approved
    */
   @IsObject()

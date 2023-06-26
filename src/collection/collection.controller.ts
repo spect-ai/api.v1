@@ -42,7 +42,6 @@ import {
 } from 'src/common/dtos/string.dto';
 import { MappedItem } from 'src/common/interfaces';
 import { CreatePOAPDto } from 'src/credentials/dto/create-credential.dto';
-import { v4 as uuidv4 } from 'uuid';
 import {
   AddCommentCommand,
   AddPropertyCommand,
@@ -80,11 +79,6 @@ import {
 } from './commands/data/impl/vote-data.command';
 import { OnboardToSpectProjectCommand } from './commands/default/impl';
 import {
-  CreateGrantWorkflowCommand,
-  KanbanProjectCommand,
-  OnboardingWorkflowCommand,
-} from './commands/template/impl';
-import {
   CollectionPublicResponseDto,
   CollectionResponseDto,
 } from './dto/collection-response.dto';
@@ -94,10 +88,6 @@ import {
 } from './dto/create-collection-request.dto';
 import { CreateCollectionResponseDto } from './dto/create-collection-response.dto';
 import { FormPaymentDto } from './dto/form-payment.dto';
-import {
-  TemplateIdDto,
-  UseTemplateDto,
-} from './dto/grant-workflow-template.dto';
 import {
   LinkDiscordDto,
   LinkDiscordThreadToDataDto,
@@ -136,7 +126,6 @@ import {
 import {
   GetCollectionByFilterQuery,
   GetCollectionByIdQuery,
-  GetMultipleCollectionsQuery,
   GetPrivateViewCollectionQuery,
   GetPublicViewCollectionQuery,
 } from './queries/impl/get-collection.query';
@@ -148,7 +137,7 @@ import {
   ResponseCredentialingService,
 } from './services/response-credentialing.service';
 import { WhitelistService } from './services/whitelist.service';
-import { ConditionGroup, Property } from './types/types';
+import { Property } from './types/types';
 
 @Controller('collection/v1')
 @ApiTags('collection.v1')
@@ -385,7 +374,6 @@ export class CollectionController {
     @Body() updateDataDto: UpdateDataDto,
     @Request() req,
   ): Promise<Collection> {
-    console.log({ updateDataDto });
     return await this.commandBus.execute(
       new UpdateDataCommand(
         updateDataDto.data,
@@ -625,30 +613,6 @@ export class CollectionController {
         voteDataDto.vote,
       ),
     );
-  }
-
-  @SetMetadata('permissions', ['manageCircleSettings'])
-  @UseGuards(SessionAuthGuard)
-  @Patch('/:id/useTemplate')
-  async useTemplate(
-    @Param() param: ObjectIdDto,
-    @Body() template: UseTemplateDto,
-    @Query() query: TemplateIdDto,
-    @Request() req,
-  ): Promise<Circle> {
-    if (query.templateId === '1') {
-      return await this.commandBus.execute(
-        new CreateGrantWorkflowCommand(template, param.id, req.user?.id),
-      );
-    } else if (query.templateId === '2') {
-      return await this.commandBus.execute(
-        new OnboardingWorkflowCommand(template, param.id, req.user?.id),
-      );
-    } else if (query.templateId === '3') {
-      return await this.commandBus.execute(
-        new KanbanProjectCommand(template, param.id, req.user?.id),
-      );
-    }
   }
 
   @SetMetadata('permissions', ['manageCircleSettings'])

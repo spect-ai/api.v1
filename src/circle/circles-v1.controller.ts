@@ -21,6 +21,7 @@ import {
   ViewCircleAuthGuard,
 } from 'src/auth/circle.guard';
 import {
+  AdminAuthGuard,
   PublicViewAuthGuard,
   SessionAuthGuard,
 } from 'src/auth/iron-session.guard';
@@ -33,7 +34,6 @@ import {
 } from 'src/common/dtos/string.dto';
 import {
   ArchiveCircleByIdCommand,
-  ClaimCircleCommand,
   CreateFolderCommand,
   DeleteFolderCommand,
   UpdateFolderCommand,
@@ -112,8 +112,6 @@ import {
   UpdateMultiplePaymentsDto,
   UpdatePaymentRequestDto,
 } from './dto/payment.dto';
-import { ConditionGroup } from 'src/collection/types/types';
-import { v4 as uuidv4 } from 'uuid';
 import Stripe from 'stripe';
 import { CancelPlanCommand } from './commands/impl/cancel-plan.command';
 
@@ -223,7 +221,28 @@ export class CircleV1Controller {
         console.log(`Unhandled event type ${event.type}`);
     }
   }
+
   @UseGuards(PublicViewAuthGuard)
+  @UseGuards(AdminAuthGuard)
+  @Get('/totalKudosDesigns')
+  async totalKudosDesigns(): Promise<number> {
+    const res = await this.kudosService.getAllDesigns();
+    return res.length;
+  }
+
+  @UseGuards(AdminAuthGuard)
+  @Get('/allKudosDesigns')
+  async allKudosDesigns(): Promise<nftTypes[]> {
+    return await this.kudosService.getAllDesigns();
+  }
+
+  @UseGuards(AdminAuthGuard)
+  @Get('removeFirstUserAddedKudosDesign')
+  async removeKudosDesigns(): Promise<nftTypes> {
+    return await this.kudosService.removeFirstUserAddedKudosDesign();
+  }
+
+  @UseGuards(ViewCircleAuthGuard)
   @Get('/:id')
   async findByObjectId(
     @Param() param: ObjectIdDto,
@@ -517,17 +536,6 @@ export class CircleV1Controller {
     );
   }
 
-  @UseGuards(SessionAuthGuard)
-  @Patch('/:id/claimCircle')
-  async claimCircle(
-    @Param() param: ObjectIdDto,
-    @Request() request,
-  ): Promise<CircleResponseDto> {
-    return await this.commandBus.execute(
-      new ClaimCircleCommand(param.id, request.user),
-    );
-  }
-
   @Get('/:id/circleNav')
   async circleNav(
     @Param() param: ObjectIdDto,
@@ -544,7 +552,7 @@ export class CircleV1Controller {
     );
   }
 
-  @SetMetadata('permissions', ['distributeCredentials'])
+  @SetMetadata('permissions', ['manageCircleSettings'])
   @UseGuards(CircleAuthGuard)
   @Patch('/:id/mintKudos')
   async mintKudos(
@@ -571,7 +579,7 @@ export class CircleV1Controller {
     return await this.kudosService.getCommunityKudosDesigns(param.id);
   }
 
-  @SetMetadata('permissions', ['distributeCredentials'])
+  @SetMetadata('permissions', ['manageCircleSettings'])
   @UseGuards(CircleAuthGuard)
   @Patch('/:id/addKudosDesign')
   @UseInterceptors(FileInterceptor('file'))

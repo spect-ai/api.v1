@@ -40,7 +40,7 @@ export class CirclesService {
     const members = circle.members.map((m) => m.toString());
     if (members.includes(newMember)) {
       throw new HttpException(
-        'You are already a member of this circle',
+        'You are already a member of this space',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }

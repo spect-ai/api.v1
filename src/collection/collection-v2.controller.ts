@@ -20,6 +20,7 @@ import { CollectionDataResponseDto } from './dto/v2/collection-response.dto';
 import { GetCollectionBySlugQuery } from './queries';
 import { LoggingService } from 'src/logging/logging.service';
 import { MoveCollectionCommand } from './commands';
+import { ShareCollectionCommand } from './commands/v2/impl/share-collection.command';
 
 /**
  Built with keeping integratoors in mind, this API is meant to
@@ -38,6 +39,19 @@ export class CollectionV2Controller {
     private readonly logger: LoggingService,
   ) {
     this.logger.setContext(CollectionV2Controller.name);
+  }
+
+  @SetMetadata('permissions', ['viewResponses'])
+  @UseGuards(ViewCollectionAuthGuard)
+  @Patch('/slug/:slug/share')
+  async shareCollection(
+    @Param() param: RequiredSlugDto,
+    @Req() req,
+  ): Promise<string> {
+    const res = await this.commandBus.execute(
+      new ShareCollectionCommand(param.slug, req.user),
+    );
+    return res;
   }
 
   @SetMetadata('permissions', ['viewResponses'])
@@ -89,20 +103,5 @@ export class CollectionV2Controller {
         },
       ),
     );
-  }
-
-  @SetMetadata('permissions', ['manageSettings'])
-  @UseGuards(StrongerCollectionAuthGuard)
-  @Patch('/slug/:slug/move')
-  async moveCollection(
-    @Param() param: RequiredSlugDto,
-    @Query('circleId') circleId: string,
-    @Req() req: any,
-  ): Promise<CollectionDataResponseDto> {
-    const res = await this.commandBus.execute(
-      new MoveCollectionCommand(param.slug, circleId, req.user),
-    );
-
-    return res;
   }
 }

@@ -184,6 +184,13 @@ export class Collection extends BaseModel {
   subscriptions: {
     [eventName: string]: Subscription[];
   };
+
+  @prop()
+  shareSlugs?: {
+    readonly?: string;
+    readComment?: string;
+    readWriteComment?: string;
+  };
 }
 
 export interface Subscription {

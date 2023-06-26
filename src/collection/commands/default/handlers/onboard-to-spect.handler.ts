@@ -45,6 +45,7 @@ export class OnboardToSpectProjectCommandHandler
         creator: caller,
         parents: [id],
         slug: uuidv4(),
+        editorVersion: 2,
         ...onboardingFormDto,
       } as any);
 

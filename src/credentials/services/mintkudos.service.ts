@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import fetch from 'node-fetch';
 import {
@@ -83,12 +83,18 @@ export class MintKudosService {
         body: JSON.stringify(kudos),
       });
       const data = await res.json();
+      if (!res.ok) {
+        throw data;
+      }
       const operationId = res.headers.get('Location');
       return operationId;
     } catch (e) {
-      this.logger.error(`Failed minting kudos with error ${e.message}`);
       console.log({ e });
-      return e;
+      this.logger.error(`Failed creating kudos with error ${e.error}`);
+      throw new InternalServerErrorException({
+        message: e.error,
+        name: e.name,
+      });
     }
   }
 
@@ -152,6 +158,31 @@ export class MintKudosService {
     }
   }
 
+  async getAllDesigns(): Promise<nftTypes[]> {
+    const encodedString = Buffer.from(
+      process.env.MINTKUDOS_DEFAULT_COMMUNITY_ID +
+        ':' +
+        process.env.MINTKUDOS_DEFAULT_API_KEY,
+    ).toString('base64');
+    const res = await fetch(
+      `${process.env.MINTKUDOS_URL}/v1/communities/${process.env.MINTKUDOS_DEFAULT_COMMUNITY_ID}/nftTypes`,
+      {
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+          Authorization: `Basic ${encodedString}`,
+        },
+      },
+    );
+    if (!res.ok) {
+      const error = await res.json();
+      console.log({ error });
+      throw error;
+    }
+    const nftTypes = await res.json();
+    return nftTypes?.data;
+  }
+
   async getCommunityKudosDesigns(id: string): Promise<nftTypes> {
     const privateProps = await this.getPrivateProps(id);
     if (privateProps) {
@@ -207,31 +238,36 @@ export class MintKudosService {
     circleId: string,
     asset: Express.Multer.File,
   ): Promise<AddedNFTTypeResponse> {
-    let communityId, encodedString;
-    const privateProps = await this.getPrivateProps(circleId);
-    if (privateProps) {
-      communityId = privateProps.mintkudosCommunityId;
-      encodedString = Buffer.from(
-        communityId + ':' + privateProps.mintkudosApiKey,
-      ).toString('base64');
-    } else {
-      communityId = process.env.MINTKUDOS_DEFAULT_COMMUNITY_ID;
-      encodedString = Buffer.from(
-        communityId + ':' + process.env.MINTKUDOS_DEFAULT_API_KEY,
-      ).toString('base64');
-    }
+    try {
+      const existinKudosDesigns = await this.getAllDesigns();
+      if (existinKudosDesigns.length >= 45) {
+        await this.removeFirstUserAddedKudosDesign();
+      }
 
-    const nftTypeId = uuidv4();
-    const ext = asset.originalname.split('.').pop();
-    const formData = new FormData();
-    formData.append('assetFile', Readable.from(asset.buffer), {
-      filename: asset.originalname,
-    });
-    formData.append('name', `${uuidv4()}.${ext}`);
-    formData.append('alias', `${asset.originalname}`);
-    formData.append('nftTypeId', nftTypeId);
-    const res = await (
-      await fetch(
+      let communityId, encodedString;
+      const privateProps = await this.getPrivateProps(circleId);
+      if (privateProps) {
+        communityId = privateProps.mintkudosCommunityId;
+        encodedString = Buffer.from(
+          communityId + ':' + privateProps.mintkudosApiKey,
+        ).toString('base64');
+      } else {
+        communityId = process.env.MINTKUDOS_DEFAULT_COMMUNITY_ID;
+        encodedString = Buffer.from(
+          communityId + ':' + process.env.MINTKUDOS_DEFAULT_API_KEY,
+        ).toString('base64');
+      }
+
+      const nftTypeId = uuidv4();
+      const ext = asset.originalname.split('.').pop();
+      const formData = new FormData();
+      formData.append('assetFile', Readable.from(asset.buffer), {
+        filename: asset.originalname,
+      });
+      formData.append('name', `${uuidv4()}.${ext}`);
+      formData.append('alias', `${asset.originalname}`);
+      formData.append('nftTypeId', nftTypeId);
+      const res = await await fetch(
         `${process.env.MINTKUDOS_URL}/v1/communities/${communityId}/nftTypes`,
         {
           method: 'POST',
@@ -240,25 +276,76 @@ export class MintKudosService {
           },
           body: formData,
         },
-      )
-    ).json();
-
-    if (!privateProps) {
-      const circle = await this.queryBus.execute(
-        new GetCircleByIdQuery(circleId),
       );
+      if (!res.ok) {
+        const error = await res.json();
+        console.log({ error });
+        throw error;
+      }
+      const data = await res.json();
 
-      const res = await this.commandBus.execute(
-        new UpdateCircleCommand(
-          circleId,
-          {
-            nftTypeIds: [...(circle.nftTypeIds || []), nftTypeId],
-          },
-          '',
-        ),
+      if (!privateProps) {
+        const circle = await this.queryBus.execute(
+          new GetCircleByIdQuery(circleId),
+        );
+
+        await this.commandBus.execute(
+          new UpdateCircleCommand(
+            circleId,
+            {
+              nftTypeIds: [...(circle.nftTypeIds || []), nftTypeId],
+            },
+            '',
+          ),
+        );
+      }
+      return { ...data, nftTypeId, name: asset.originalname };
+    } catch (e) {
+      this.logger.error(
+        `Failed adding new community design with error ${e.message}`,
       );
+      console.log({ e });
+      return e;
     }
-    return { ...res, nftTypeId, name: asset.originalname };
+  }
+
+  async removeFirstUserAddedKudosDesign(): Promise<nftTypes> {
+    try {
+      const encodedString = Buffer.from(
+        process.env.MINTKUDOS_DEFAULT_COMMUNITY_ID +
+          ':' +
+          process.env.MINTKUDOS_DEFAULT_API_KEY,
+      ).toString('base64');
+      const nftTypes = await this.getAllDesigns();
+      const nftType = nftTypes.reverse().find((nftType) => nftType.isUserAdded);
+      if (!nftType) {
+        throw new Error('No user added kudos design found');
+      }
+      const res2 = await fetch(
+        `${process.env.MINTKUDOS_URL}/v1/communities/${process.env.MINTKUDOS_DEFAULT_COMMUNITY_ID}/nftTypes/${nftType.nftTypeId}`,
+        {
+          headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+            Authorization: `Basic ${encodedString}`,
+          },
+          method: 'DELETE',
+        },
+      );
+      if (!res2.ok) {
+        const error = await res2.json();
+        console.log({ error });
+        throw error;
+      }
+
+      return nftType;
+    } catch (e) {
+      this.logger.error(
+        `Failed removing first community design with error ${e.message}`,
+      );
+      console.log({ e });
+      return e;
+    }
   }
 
   async getKudosByAddress(
