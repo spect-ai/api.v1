@@ -109,7 +109,7 @@ export class TemplateController {
           idBeingDuplicated,
           req.user,
           true,
-          true,
+          false,
           true,
           destinationCircleId,
           useTemplateDto.useTemplateCircleSpecificInfoDtos,
