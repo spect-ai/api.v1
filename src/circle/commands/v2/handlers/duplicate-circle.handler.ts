@@ -1,6 +1,7 @@
 import {
   InternalServerErrorException,
   UnauthorizedException,
+  NotFoundException,
 } from '@nestjs/common';
 import {
   CommandBus,
@@ -169,6 +170,13 @@ export class DuplicateCircleCommandHandler
       const circle = await this.circleRepository.findOne({
         slug: circleSlug,
       });
+      if (!circle)
+        throw new NotFoundException(`Circle with slug ${circleSlug} not found`);
+
+      if (!circle?.parents?.length)
+        throw new UnauthorizedException(
+          `You do not have permission to duplicate a parent space`,
+        );
 
       // Get the parent circle or destination circle
       let parentCircle;
