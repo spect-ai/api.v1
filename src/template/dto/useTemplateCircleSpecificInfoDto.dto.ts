@@ -41,4 +41,8 @@ export class UseTemplateCircleSpecificInfoDtos {
   @IsOptional()
   @IsArray()
   useTemplateCircleSpecificInfoDtos?: UseTemplateCircleSpecificInfoDto[];
+
+  @IsOptional()
+  @IsString()
+  discordGuildId: string;
 }

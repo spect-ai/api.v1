@@ -130,10 +130,10 @@ export class DuplicateCircleCommandHandler
         }
         action.data.rolesToAdd = roles;
       } else if (['postOnDiscord'].includes(action.type)) {
-        action.data.channel =
+        action.data.selectedChannel =
           circleSpecificAutomationInfo?.actions?.[i].info.channel;
       } else if (['createDiscordThread'].includes(action.type)) {
-        action.data.channel =
+        action.data.selectedChannel =
           circleSpecificAutomationInfo?.actions?.[i].info.channel;
         let roles = {};
         if (circleSpecificAutomationInfo?.actions?.[i].info?.roleIds) {
@@ -162,7 +162,7 @@ export class DuplicateCircleCommandHandler
       duplicateMembership,
       destinationCircleId,
       useTemplateCircleSpecificInfoDto,
-      addDiscordGuildFromParent,
+      discordGuildId,
     } = command;
     console.log('duplicateCircleCommand');
     try {
@@ -252,9 +252,12 @@ export class DuplicateCircleCommandHandler
         collections: [],
         folderDetails,
         folderOrder,
-        discordGuildId: addDiscordGuildFromParent
-          ? parentCircle.discordGuildId
-          : circle.discordGuildId,
+        discordGuildId:
+          discordGuildId === 'fromParent'
+            ? parentCircle.discordGuildId
+            : discordGuildId
+            ? discordGuildId
+            : circle.discordGuildId,
         localRegistry: circle.localRegistry,
       });
 

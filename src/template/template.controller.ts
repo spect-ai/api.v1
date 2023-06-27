@@ -113,7 +113,7 @@ export class TemplateController {
           true,
           destinationCircleId,
           useTemplateDto.useTemplateCircleSpecificInfoDtos,
-          true,
+          useTemplateDto.discordGuildId,
         ),
       );
       return {
