@@ -28,12 +28,9 @@ export class AdvancedAccessService {
     if (collection.formMetadata.drafts?.[callerDiscordId]?.['connectedWallet'])
       return true;
     const user = await this.queryBus.execute(
-      new GetUserByFilterQuery(
-        {
-          discordId: callerDiscordId,
-        },
-        '',
-      ),
+      new GetUserByFilterQuery({
+        discordId: callerDiscordId,
+      }),
     );
 
     if (user?.ethAddress) {

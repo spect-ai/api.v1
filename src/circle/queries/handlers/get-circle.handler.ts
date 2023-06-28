@@ -8,6 +8,7 @@ import {
   GetCircleByFilterQuery,
   GetCircleWithChildrenQuery,
   GetCircleWithAllRelationsQuery,
+  GetCirclesByFilterQuery,
 } from '../impl/get-circle.query';
 import { LoggingService } from 'src/logging/logging.service';
 import { InternalServerErrorException } from '@nestjs/common';
@@ -134,6 +135,33 @@ export class GetCircleByFilterQueryHandler
     } catch (error) {
       this.logger.logError(
         `Failed while getting circle using filter with error: ${error.message}`,
+        query,
+      );
+      throw new InternalServerErrorException(
+        'Failed while getting circle using filter',
+        error.message,
+      );
+    }
+  }
+}
+
+@QueryHandler(GetCirclesByFilterQuery)
+export class GetCirclesByFilterQueryHandler
+  implements IQueryHandler<GetCirclesByFilterQuery>
+{
+  constructor(
+    private readonly circleRepository: CirclesRepository,
+    private readonly logger: LoggingService,
+  ) {
+    logger.setContext('GetCirclesByFilterQueryHandler');
+  }
+
+  async execute(query: GetCircleByFilterQuery) {
+    try {
+      return await this.circleRepository.getCircles(query.filterQuery);
+    } catch (error) {
+      this.logger.logError(
+        `Failed while getting circles using filter with error: ${error.message}`,
         query,
       );
       throw new InternalServerErrorException(

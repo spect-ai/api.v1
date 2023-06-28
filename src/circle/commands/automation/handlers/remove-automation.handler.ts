@@ -40,6 +40,7 @@ export class RemoveAutomationCommandHandler
 
       delete circle.automations[automationId];
       updates['automations'] = circle.automations;
+      updates['automationCount'] = circle.automationCount - 1;
       const updatedCircle =
         await this.circlesRepository.updateCircleAndReturnWithPopulatedReferences(
           circleId,

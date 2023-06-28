@@ -13,6 +13,11 @@ export class UpdateRoleCommandHandler
   async execute(command: UpdateRoleCommand): Promise<Circle> {
     try {
       const { circle, id, roleId, roleDto } = command;
+      if (circle.pricingPlan === 0) {
+        throw new InternalServerErrorException(
+          'You cannot update roles on the free plan. For Custom roles and granular access management please upgrade your plan.',
+        );
+      }
       let circleToUpdate = circle;
       if (!circleToUpdate) {
         circleToUpdate = await this.circlesRepository.findById(id);
@@ -46,7 +51,7 @@ export class UpdateRoleCommandHandler
         );
       return updatedCircle;
     } catch (error) {
-      throw new InternalServerErrorException(error.message);
+      throw new InternalServerErrorException(error);
     }
   }
 }

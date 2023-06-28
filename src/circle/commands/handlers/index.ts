@@ -39,6 +39,8 @@ import {
 } from '../payments/handlers/update-payment.handler';
 import { GetSpaceCollectionsCommandHandler } from './get-space-collections.handler';
 import { GetRegistryCommandHandler } from './get-registry.handler';
+import { UpgradePlanCommandHandler } from './upgrade-plan.handler';
+import { CancelPlanCommandHandler } from './cancel-plan.handler';
 import { DuplicateCircleCommandHandler } from '../v2/handlers/duplicate-circle.handler';
 
 export const CommandHandlers = [
@@ -75,5 +77,7 @@ export const CommandHandlers = [
   UpdateMultiplePaymentsCommandHandler,
   GetSpaceCollectionsCommandHandler,
   GetRegistryCommandHandler,
+  UpgradePlanCommandHandler,
+  CancelPlanCommandHandler,
   DuplicateCircleCommandHandler,
 ];

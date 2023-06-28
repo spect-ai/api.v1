@@ -27,7 +27,7 @@ export class UsersService {
     logger.setContext('UsersService');
   }
 
-  async create(ethAddress: string) {
+  async create(ethAddress: string, refCode?: string) {
     try {
       let username;
       try {
@@ -47,6 +47,7 @@ export class UsersService {
       const user = await this.usersRepository.create({
         username: username,
         ethAddress: ethAddress,
+        referredBy: refCode,
         firstLogin: username.endsWith('.eth') ? false : true, // if username is an ENS name, then person doesnt need to set username
       });
       await this.ethAddressRepository.create({

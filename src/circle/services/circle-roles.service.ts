@@ -34,10 +34,7 @@ export class CirclesRolesService {
         `Failed adding circle role with error: ${error.message}`,
         this.requestProvider,
       );
-      throw new InternalServerErrorException(
-        'Failed adding circle role',
-        error.message,
-      );
+      throw new InternalServerErrorException(error);
     }
   }
 
@@ -56,10 +53,7 @@ export class CirclesRolesService {
         `Failed updating circle role with error: ${error.message}`,
         this.requestProvider,
       );
-      throw new InternalServerErrorException(
-        'Failed updating circle role',
-        error.message,
-      );
+      throw new InternalServerErrorException(error);
     }
   }
 

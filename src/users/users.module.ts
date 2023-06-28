@@ -27,6 +27,7 @@ import { AuthModule } from 'src/auth/auth.module';
 import { EmailGeneratorService } from 'src/notification/email-generatr.service';
 import { ERC721Service } from 'src/credentials/services/erc721.service';
 import { ERC20Service } from 'src/credentials/services/erc20.service';
+import { RegistryModule } from 'src/registry/registry.module';
 import { ENSService } from 'src/credentials/services/ens.service';
 import { GuildxyzService } from 'src/common/guildxyz.service';
 
@@ -39,6 +40,7 @@ import { GuildxyzService } from 'src/common/guildxyz.service';
     SecretModule,
     CirclesModule,
     forwardRef(() => AuthModule),
+    RegistryModule,
   ],
   controllers: [UsersControllerV1],
   providers: [

@@ -7,7 +7,9 @@ import * as bodyParser from 'body-parser';
 const ironSession = require('iron-session/express').ironSession;
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, {
+    rawBody: true,
+  });
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
@@ -48,7 +50,7 @@ async function bootstrap() {
       },
     }),
   );
-  app.use(bodyParser.json({ limit: '50mb' }));
+  // app.use(bodyParser.json({ limit: '50mb' }));
   app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
   await app.listen(process.env.PORT || 8080, '0.0.0.0');
 }

@@ -234,10 +234,7 @@ export class CirclesCrudService {
         `Failed circle creation with error: ${error.message}`,
         this.requestProvider,
       );
-      throw new InternalServerErrorException(
-        'Failed circle creation',
-        error.message,
-      );
+      throw new InternalServerErrorException(error);
     }
   }
 

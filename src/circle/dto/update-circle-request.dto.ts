@@ -202,3 +202,13 @@ export class WhitelistAddressRequestDto {
   @IsOptional()
   whitelistedAddresses?: Addresses;
 }
+
+export class UpgradePlanDto {
+  @IsNumber()
+  @IsOptional()
+  memberTopUp?: number;
+
+  @IsString()
+  @IsOptional()
+  refCode?: string;
+}

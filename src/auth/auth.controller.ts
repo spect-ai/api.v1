@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Req, Res } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query, Req, Res } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { Request, Response } from 'express';
 import { AuthService } from './auth.service';
@@ -23,10 +23,10 @@ export class AuthController {
   @Post('/connect')
   async connect(
     @Body() body: ConnectUserDto,
-    @Res({ passthrough: true }) response: Response,
+    @Query('ref') ref: string,
     @Req() request: Request,
   ): Promise<ConnectUserResponseDto> {
-    const user = await this.authService.connect(body, request);
+    const user = await this.authService.connect(body, request, ref);
     return user;
   }
 

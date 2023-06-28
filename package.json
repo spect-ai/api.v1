@@ -6,7 +6,7 @@
   "private": true,
   "license": "UNLICENSED",
   "engines": {
-    "node": "18"
+    "node": ">=18.0.0"
   },
   "scripts": {
     "prebuild": "rimraf dist",
@@ -87,6 +87,7 @@
     "rxjs": "^7.2.0",
     "showdown": "^2.1.0",
     "siwe": "^1.1.6",
+    "stripe": "^12.6.0",
     "turndown": "^7.1.2",
     "url-slug": "^3.0.4",
     "uuid": "^9.0.0",

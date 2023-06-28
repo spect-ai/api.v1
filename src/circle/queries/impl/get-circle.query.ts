@@ -38,6 +38,15 @@ export class GetCircleByFilterQuery {
   ) {}
 }
 
+export class GetCirclesByFilterQuery {
+  constructor(
+    public readonly filterQuery: FilterQuery<Circle>,
+    public readonly customPopulate?: PopulatedCircleFields,
+    public readonly selectedFields?: Record<string, unknown>,
+    public readonly ignorePrivateCircles = true,
+  ) {}
+}
+
 export class GetCircleWithChildrenQuery {
   constructor(public readonly id: string, public readonly maxDepth?: number) {}
 }

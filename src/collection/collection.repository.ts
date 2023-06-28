@@ -10,6 +10,7 @@ const defaultPopulate: PopulatedCollectionFields = {
     id: 1,
     name: 1,
     slug: 1,
+    pricingPlan: 1,
   },
 };
 
@@ -74,6 +75,8 @@ export class CollectionRepository extends BaseRepository<Collection> {
     );
     let populatedFields = defaultPopulate;
     if (customPopulate) populatedFields = customPopulate;
+
+    console.log(populatedFields);
 
     Object.keys(populatedFields).forEach((key) => {
       query.populate(key, populatedFields[key]);

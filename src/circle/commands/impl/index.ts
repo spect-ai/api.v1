@@ -6,4 +6,6 @@ export * from './get-registry.command';
 export * from '../roles/impl';
 export * from '../archive/impl';
 export * from '../folders/impl';
+export * from './upgrade-plan.command';
+export * from './cancel-plan.command';
 export * from '../v2/impl/duplicate-circle.command';

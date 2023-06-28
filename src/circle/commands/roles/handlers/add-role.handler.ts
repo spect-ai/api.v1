@@ -11,6 +11,11 @@ export class AddRoleCommandHandler implements ICommandHandler<AddRoleCommand> {
   async execute(command: AddRoleCommand): Promise<Circle> {
     try {
       const { circle, id, roleDto } = command;
+      if (circle.pricingPlan === 0) {
+        throw new InternalServerErrorException(
+          'You cannot add roles on the free plan. Please upgrade to a paid plan to add roles.',
+        );
+      }
       const role = roleDto.name.toLowerCase().replace(/\s/g, '');
       let circleToUpdate = circle;
       if (!circleToUpdate) {
@@ -40,7 +45,7 @@ export class AddRoleCommandHandler implements ICommandHandler<AddRoleCommand> {
         );
       return updatedCircle;
     } catch (error) {
-      throw new InternalServerErrorException(error.message);
+      throw new InternalServerErrorException(error);
     }
   }
 }

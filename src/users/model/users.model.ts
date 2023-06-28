@@ -126,6 +126,12 @@ export class User extends ProfileModel {
   apiKeys?: string[];
 
   @prop()
+  referralCode?: string;
+
+  @prop()
+  referredBy?: string;
+
+  @prop()
   guilds?: {
     guildId: number;
     guildName: string;

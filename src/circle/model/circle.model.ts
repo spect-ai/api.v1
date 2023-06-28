@@ -300,6 +300,24 @@ export class Circle extends ProfileModel {
 
   @prop()
   version: number;
+
+  @prop()
+  pricingPlan: number;
+
+  @prop()
+  topUpMembers: number;
+
+  @prop()
+  subscriptionId: string;
+
+  @prop()
+  referredBy: string;
+
+  @prop()
+  pendingBonus: number;
+
+  @prop()
+  monthsOfSubscription: number;
 }
 
 export class ExtendedCircle extends Circle {
