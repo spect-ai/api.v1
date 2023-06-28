@@ -734,12 +734,9 @@ export class ResponseCredentialingService {
       );
 
       const user = await this.queryBus.execute(
-        new GetUserByFilterQuery(
-          {
-            discordId,
-          },
-          '',
-        ),
+        new GetUserByFilterQuery({
+          discordId,
+        }),
       );
 
       if (!user) throw new Error('User not linked to discord');
@@ -829,12 +826,9 @@ export class ResponseCredentialingService {
       );
 
       const user = await this.queryBus.execute(
-        new GetUserByFilterQuery(
-          {
-            discordId,
-          },
-          '',
-        ),
+        new GetUserByFilterQuery({
+          discordId,
+        }),
       );
       if (!user || !user.ethAddress) {
         throw new NotFoundException('EthAddress of user not found');
@@ -884,12 +878,9 @@ export class ResponseCredentialingService {
         throw 'No mintkudos token id found';
 
       const user = await this.queryBus.execute(
-        new GetUserByFilterQuery(
-          {
-            discordId,
-          },
-          '',
-        ),
+        new GetUserByFilterQuery({
+          discordId,
+        }),
       );
       if (!user || !user.ethAddress) {
         throw new NotFoundException('EthAddress of user not found');
@@ -942,12 +933,9 @@ export class ResponseCredentialingService {
       );
 
       const user = await this.queryBus.execute(
-        new GetUserByFilterQuery(
-          {
-            discordId,
-          },
-          '',
-        ),
+        new GetUserByFilterQuery({
+          discordId,
+        }),
       );
       if (!user || !user.ethAddress) {
         throw new NotFoundException('EthAddress of user not found');

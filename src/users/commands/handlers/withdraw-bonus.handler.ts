@@ -52,6 +52,17 @@ export class WithdrawBonusCommandHandler
           ),
         );
       }
+      fetch(`${process.env.DISCORD_URI}/api/notifyBonusWithdrawal`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          username: user.username,
+          amount: circles.reduce((acc, circle) => acc + circle.pendingBonus, 0),
+        }),
+      });
+
       return txHash;
     } catch (error) {
       console.log({ error });

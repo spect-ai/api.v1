@@ -315,6 +315,9 @@ export class Circle extends ProfileModel {
 
   @prop()
   pendingBonus: number;
+
+  @prop()
+  monthsOfSubscription: number;
 }
 
 export class ExtendedCircle extends Circle {

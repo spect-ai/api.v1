@@ -72,6 +72,7 @@ export class CreateCircleCommandHandler
           pricingPlan: parentCircle.pricingPlan,
           topUpMembers: parentCircle.topUpMembers,
           referredBy: caller.referredBy,
+          monthsOfSubscription: parentCircle.monthsOfSubscription,
         });
         await this.circlesRepository.updateById(parentCircle.id as string, {
           ...parentCircle,
@@ -102,6 +103,7 @@ export class CreateCircleCommandHandler
           pricingPlan: 0,
           topUpMembers: 0,
           referredBy: caller.referredBy,
+          monthsOfSubscription: 0,
         });
       }
 

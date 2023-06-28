@@ -35,6 +35,7 @@ import {
   GetUnreadNotificationsQuery,
 } from './queries/impl';
 import { UsersService } from './users.service';
+import { IsWhitelistedQuery } from './queries/impl/is-whitelisted.query';
 
 @Controller('user/v1')
 @ApiTags('user.v1')
@@ -139,6 +140,12 @@ export class UsersControllerV1 {
     return await this.queryBus.execute(
       new GetTokensOfUserQuery(req.user, tokenType, circleId),
     );
+  }
+
+  @UseGuards(SessionAuthGuard)
+  @Get('/isWhitelisted')
+  async isWhitelisted(@Request() req) {
+    return await this.queryBus.execute(new IsWhitelistedQuery(req.user));
   }
 
   @UseGuards(SessionAuthGuard)

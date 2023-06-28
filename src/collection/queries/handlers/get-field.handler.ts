@@ -173,7 +173,7 @@ export class GetNextFieldQueryHandler
           query['ethAddress'] =
             collection.formMetadata.drafts?.[discordId]?.['connectWallet'];
         }
-        user = await this.queryBus.execute(new GetUserByFilterQuery(query, ''));
+        user = await this.queryBus.execute(new GetUserByFilterQuery(query));
         console.log({ e: user?.ethAddress });
         if (!user?.ethAddress) {
           return {

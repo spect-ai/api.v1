@@ -207,4 +207,8 @@ export class UpgradePlanDto {
   @IsNumber()
   @IsOptional()
   memberTopUp?: number;
+
+  @IsString()
+  @IsOptional()
+  refCode?: string;
 }

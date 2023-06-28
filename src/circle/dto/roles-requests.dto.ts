@@ -37,9 +37,6 @@ export class Permissions {
   manageMembers: boolean;
 
   @IsBoolean()
-  distributeCredentials: boolean;
-
-  @IsBoolean()
   createNewForm: boolean;
 }
 

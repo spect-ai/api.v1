@@ -3,6 +3,7 @@ import { CommandBus, CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { CirclesRepository } from 'src/circle/circles.repository';
 import { UpgradePlanCommand } from '../impl/upgrade-plan.command';
 import Stripe from 'stripe';
+import { UsersRepository } from 'src/users/users.repository';
 
 @CommandHandler(UpgradePlanCommand)
 export class UpgradePlanCommandHandler
@@ -10,12 +11,39 @@ export class UpgradePlanCommandHandler
 {
   constructor(
     private readonly circlesRepository: CirclesRepository,
+    private readonly usersRepository: UsersRepository,
     private readonly commandBus: CommandBus,
   ) {}
 
   async execute(command: UpgradePlanCommand) {
     try {
-      const { id, upgradePlanDto } = command;
+      const {
+        caller,
+        id,
+        upgradePlanDto: { memberTopUp, refCode },
+      } = command;
+
+      if (refCode === caller.referralCode) {
+        throw new InternalServerErrorException(
+          'You cannot use your own referral code',
+        );
+      }
+
+      if (refCode) {
+        const referredUser = await this.usersRepository.findOne({
+          referralCode: refCode,
+        });
+        if (!referredUser)
+          throw new InternalServerErrorException('Invalid referral code');
+
+        await this.circlesRepository.updateCircleAndReturnWithPopulatedReferences(
+          id,
+          {
+            referredBy: refCode,
+          },
+        );
+      }
+
       const circle = await this.circlesRepository.findById(id);
       const stripe = new Stripe(process.env.STRIPE_PVT_KEY, {
         apiVersion: '2022-11-15',
@@ -45,10 +73,10 @@ export class UpgradePlanCommandHandler
               interval: 'day',
             },
           },
-          quantity: upgradePlanDto.memberTopUp,
+          quantity: memberTopUp,
         },
       ];
-      if (!upgradePlanDto.memberTopUp) {
+      if (!memberTopUp) {
         line_items.pop();
       }
 
@@ -59,14 +87,21 @@ export class UpgradePlanCommandHandler
         mode: 'subscription',
         success_url: `${process.env.CLIENT_URL}/${circle.slug}`,
         cancel_url: `${process.env.CLIENT_URL}/${circle.slug}`,
+        discounts: refCode
+          ? [
+              {
+                coupon: 'bM7u2uS8',
+              },
+            ]
+          : [],
       });
-      console.log({ session });
+
       return {
         url: session.url,
       };
     } catch (error) {
       console.log({ error });
-      throw new InternalServerErrorException(error);
+      throw error;
     }
   }
 }

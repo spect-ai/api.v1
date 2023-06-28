@@ -114,6 +114,7 @@ import {
 } from './dto/payment.dto';
 import Stripe from 'stripe';
 import { CancelPlanCommand } from './commands/impl/cancel-plan.command';
+import { GetUserByFilterQuery } from 'src/users/queries/impl';
 
 @Controller('circle/v1')
 @ApiTags('circle.v1')
@@ -146,6 +147,7 @@ export class CircleV1Controller {
     @Request() request: RawBodyRequest<Request>,
     @Response() response,
   ) {
+    console.log('STRIPE WEBHOOK');
     const sig = request.headers['stripe-signature'];
     let event;
     const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
@@ -165,7 +167,7 @@ export class CircleV1Controller {
     }
     console.log({ event });
     let subscription;
-    let circle;
+    let circle: Circle;
     switch (event.type) {
       case 'checkout.session.completed':
         console.log('CHECKOUT SESSION COMPLETED');
@@ -175,15 +177,41 @@ export class CircleV1Controller {
             expand: ['line_items'],
           },
         );
+        console.log({ session: session.client_reference_id });
         const membersTopUp = session.line_items.data[1]?.quantity;
-        await this.circleRepository.updateCircleAndReturnWithPopulatedReferences(
-          session.client_reference_id,
-          {
-            pricingPlan: 1,
-            topUpMembers: membersTopUp || 0,
-            subscriptionId: session.subscription,
+        circle =
+          await this.circleRepository.updateCircleAndReturnWithPopulatedReferences(
+            session.client_reference_id,
+            {
+              pricingPlan: 1,
+              topUpMembers: membersTopUp || 0,
+              subscriptionId: session.subscription,
+            },
+          );
+        console.log({ circle: circle.name, referrer: circle.referredBy });
+
+        let referrer = '';
+        if (circle.referredBy) {
+          const referrerUser = await this.queryBus.execute(
+            new GetUserByFilterQuery({
+              referralCode: circle.referredBy,
+            }),
+          );
+          console.log({ referrerUser });
+          referrer = referrerUser?.username;
+        }
+
+        fetch(`${process.env.DISCORD_URI}/api/notifySubscription`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
           },
-        );
+          body: JSON.stringify({
+            circleName: circle.name,
+            members: membersTopUp || 0,
+            referredBy: referrer,
+          }),
+        });
 
         break;
       case 'customer.subscription.deleted':
@@ -200,6 +228,17 @@ export class CircleV1Controller {
             subscriptionId: '',
           },
         );
+
+        fetch(`${process.env.DISCORD_URI}/api/notifySubscriptionDeleted`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            circleName: circle.name,
+          }),
+        });
+
         break;
       case 'invoice.paid':
         console.log('INVOICE PAID');
@@ -208,18 +247,57 @@ export class CircleV1Controller {
         circle = await this.circleRepository.findOne({
           subscriptionId: subscription,
         });
+        console.log({
+          circle: circle.pendingBonus,
+          invoice: invoice.amount_paid,
+          added: invoice.amount_paid * 0.01 * 0.2,
+        });
         await this.circleRepository.updateCircleAndReturnWithPopulatedReferences(
           circle.id,
           {
             pendingBonus:
               (circle.pendingBonus || 0) + invoice.amount_paid * 0.01 * 0.2,
+            monthsOfSubscription: (circle.monthsOfSubscription || 0) + 1,
           },
         );
 
+        fetch(`${process.env.DISCORD_URI}/api/notifyInvoice`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            circleName: circle.name,
+            amount: invoice.amount_paid * 0.01,
+            failure: false,
+          }),
+        });
+
+        break;
+      case 'invoice.payment_failed':
+        console.log('INVOICE PAYMENT FAILED');
+        const invoicePaymentFailed = event.data.object;
+        subscription = invoicePaymentFailed.subscription;
+        circle = await this.circleRepository.findOne({
+          subscriptionId: subscription,
+        });
+        fetch(`${process.env.DISCORD_URI}/api/notifyInvoice`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            circleName: circle.name,
+            amount: invoice.amount_paid * 0.01,
+            failure: true,
+          }),
+        });
         break;
       default:
         console.log(`Unhandled event type ${event.type}`);
     }
+
+    return { received: true };
   }
 
   @UseGuards(PublicViewAuthGuard)
@@ -763,22 +841,21 @@ export class CircleV1Controller {
     );
   }
 
-  // @SetMetadata('permissions', ['manageCircleSettings'])
-  // @UseGuards(CircleAuthGuard)
+  @SetMetadata('permissions', ['manageCircleSettings'])
+  @UseGuards(CircleAuthGuard)
   @Post('/:id/upgradePlan')
   async upgradePlan(
     @Param() param: ObjectIdDto,
     @Body() upgradePlanDto: UpgradePlanDto,
     @Request() request,
   ) {
-    console.log({ upgradePlanDto });
     return await this.commandBus.execute(
       new UpgradePlanCommand(upgradePlanDto, param.id, request.user),
     );
   }
 
-  // @SetMetadata('permissions', ['manageCircleSettings'])
-  // @UseGuards(CircleAuthGuard)
+  @SetMetadata('permissions', ['manageCircleSettings'])
+  @UseGuards(CircleAuthGuard)
   @Post('/:id/cancelPlan')
   async cancelPlan(@Param() param: ObjectIdDto, @Request() request) {
     return await this.commandBus.execute(

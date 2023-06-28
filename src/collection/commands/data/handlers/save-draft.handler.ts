@@ -285,9 +285,7 @@ export class SaveDraftCommandHandler
                 'connectWallet'
               ];
           }
-          user = await this.queryBus.execute(
-            new GetUserByFilterQuery(query, ''),
-          );
+          user = await this.queryBus.execute(new GetUserByFilterQuery(query));
         } catch (err) {
           console.log({ warning: err });
         }
@@ -488,9 +486,7 @@ export class SaveAndPostSocialsCommandHandler
             query['ethAddress'] =
               collection.formMetadata.drafts?.[discordId]?.['connectWallet'];
           }
-          user = await this.queryBus.execute(
-            new GetUserByFilterQuery(query, ''),
-          );
+          user = await this.queryBus.execute(new GetUserByFilterQuery(query));
         } catch (err) {
           console.log({ warning: err });
         }
@@ -635,9 +631,7 @@ export class SaveAndPostPaymentCommandHandler
                 'connectWallet'
               ];
           }
-          user = await this.queryBus.execute(
-            new GetUserByFilterQuery(query, ''),
-          );
+          user = await this.queryBus.execute(new GetUserByFilterQuery(query));
         } catch (err) {
           console.log({ warning: err });
         }

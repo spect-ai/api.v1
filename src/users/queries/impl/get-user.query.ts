@@ -16,7 +16,6 @@ export class GetMultipleUsersByIdsQuery {
 export class GetUserByFilterQuery {
   constructor(
     public readonly filter: FilterQuery<User>,
-    public readonly caller: string,
     public readonly customPopulate?: PopulatedUserFields,
     public readonly selectedFields?: Record<string, unknown>,
   ) {}
