@@ -18,6 +18,12 @@ import { RequiredSlugDto } from 'src/common/dtos/string.dto';
 import { UseTemplateCircleSpecificInfoDtos } from './dto/useTemplateCircleSpecificInfoDto.dto';
 import { TemplateService } from './template.service';
 import { Template } from './types';
+import { CommonTools } from 'src/common/common.service';
+import {
+  DuplicateFormCommand,
+  DuplicateProjectCommand,
+} from 'src/collection/commands';
+import { GetCircleByIdQuery } from 'src/circle/queries/impl';
 
 @Controller('templates/v1')
 export class TemplateController {
@@ -25,6 +31,7 @@ export class TemplateController {
     private readonly templateService: TemplateService,
     private readonly queryBus: QueryBus,
     private readonly commandBus: CommandBus,
+    private readonly commonTools: CommonTools,
   ) {}
 
   @Get('/')
@@ -45,8 +52,9 @@ export class TemplateController {
     @Query('destinationCircleId') destinationCircleId?: string,
     @Body()
     useTemplateDto?: UseTemplateCircleSpecificInfoDtos,
-  ): Promise<Circle> {
-    console.log('duplicate');
+  ): Promise<{
+    redirectUrl: string;
+  }> {
     if (!process.env.TEMPLATE_COLLECTION_SLUG)
       throw 'Template database not found';
     const templates = (await this.queryBus.execute(
@@ -66,18 +74,51 @@ export class TemplateController {
     }
     if (!templateUrl) throw 'Template Url not found';
 
-    const circleIdBeingDuplicated = template[templateUrl].split('/').pop();
-    return await this.commandBus.execute(
-      new DuplicateCircleCommand(
-        circleIdBeingDuplicated,
-        req.user,
-        true,
-        true,
-        true,
-        destinationCircleId,
-        useTemplateDto.useTemplateCircleSpecificInfoDtos,
-        true,
-      ),
-    );
+    const idBeingDuplicated = template[templateUrl].split('/').pop();
+    if (this.commonTools.isUUID(idBeingDuplicated)) {
+      const collection = (await this.queryBus.execute(
+        new GetCollectionBySlugQuery(idBeingDuplicated),
+      )) as Collection;
+      let res;
+      if (collection.collectionType === 0)
+        res = await this.commandBus.execute(
+          new DuplicateFormCommand(
+            idBeingDuplicated,
+            req.user,
+            destinationCircleId,
+          ),
+        );
+      else
+        res = await this.commandBus.execute(
+          new DuplicateProjectCommand(
+            idBeingDuplicated,
+            req.user,
+            destinationCircleId,
+          ),
+        );
+
+      const circle = (await this.queryBus.execute(
+        new GetCircleByIdQuery(res.circleId),
+      )) as Circle;
+      return {
+        redirectUrl: `${circle.slug}/r/${res.slug}`,
+      };
+    } else {
+      const res = await this.commandBus.execute(
+        new DuplicateCircleCommand(
+          idBeingDuplicated,
+          req.user,
+          true,
+          false,
+          true,
+          destinationCircleId,
+          useTemplateDto.useTemplateCircleSpecificInfoDtos,
+          useTemplateDto.discordGuildId,
+        ),
+      );
+      return {
+        redirectUrl: `/${res.slug}`,
+      };
+    }
   }
 }

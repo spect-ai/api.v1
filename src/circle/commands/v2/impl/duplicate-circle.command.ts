@@ -11,6 +11,6 @@ export class DuplicateCircleCommand {
     public readonly duplicateAutomations: boolean = true,
     public readonly destinationCircleId?: string,
     public readonly useTemplateCircleSpecificInfoDto?: UseTemplateCircleSpecificInfoDto[],
-    public readonly addDiscordGuildFromParent?: boolean,
+    public readonly discordGuildId?: string,
   ) {}
 }

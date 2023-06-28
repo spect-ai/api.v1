@@ -159,7 +159,7 @@ export class DataAddedEventHandler implements IEventHandler<DataAddedEvent> {
           new SingleEmailNotificationEvent(
             `A new response was received on ${collection.name}`,
             `New response on ${collection.name}`,
-            `http://localhost:3000${redirectUrl}`,
+            `https://circles.spect.network${redirectUrl}`,
             uniqueMembersToNotify,
           ),
         );
