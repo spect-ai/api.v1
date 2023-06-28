@@ -91,11 +91,12 @@ export class DuplicateCircleCommandHandler
     const actions = [];
     for (let i = 0; i < automationInOldCircle.actions.length; i++) {
       const action = automationInOldCircle.actions[i];
+
       if (action.type === 'createCard') {
         action.data.selectedCollection.value =
           oldCollectionToNewCollectionMap[
-            automationInOldCircle.triggerCollectionSlug
-          ].id;
+            action.data.selectedCollection?.data?.slug
+          ]?.id;
       } else if (
         this.isDiscordAutomation(action.type) &&
         !circleSpecificAutomationInfo?.actions?.length
@@ -115,7 +116,6 @@ export class DuplicateCircleCommandHandler
           }, {});
         }
         action.data.roles = roles;
-        action.data.circleId = circleId;
       } else if (['createDiscordChannel'].includes(action.type)) {
         action.data.channelCategory =
           circleSpecificAutomationInfo?.actions?.[i].info.category;
@@ -130,7 +130,7 @@ export class DuplicateCircleCommandHandler
         }
         action.data.rolesToAdd = roles;
       } else if (['postOnDiscord'].includes(action.type)) {
-        action.data.selectedChannel =
+        action.data.channel =
           circleSpecificAutomationInfo?.actions?.[i].info.channel;
       } else if (['createDiscordThread'].includes(action.type)) {
         action.data.selectedChannel =
@@ -146,6 +146,7 @@ export class DuplicateCircleCommandHandler
         }
         action.data.rolesToAdd = roles;
       }
+      action.data.circleId = circleId;
 
       actions.push(action);
     }

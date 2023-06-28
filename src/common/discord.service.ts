@@ -205,7 +205,7 @@ export class DiscordService {
     try {
       console.log({ rolesToAdd, usersToAdd });
       const res = await fetch(
-        `${process.env.DISCORD_URI}/api/channels?guildId=${guildId}`,
+        `${process.env.DISCORD_URI}/api/channels?guildId=${guildId}&parentId=${parentId}`,
         {
           headers: {
             'Content-Type': 'application/json',
@@ -217,8 +217,8 @@ export class DiscordService {
             type: 'textChannel',
             parentId,
             isPrivate,
-            rolesToAdd: [],
-            usersToAdd: [],
+            rolesToAdd: rolesToAdd || [],
+            usersToAdd: usersToAdd || [],
           }),
         },
       );

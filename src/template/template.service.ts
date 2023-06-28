@@ -122,6 +122,16 @@ export class TemplateService {
       const requirementsSet = new Set() as Set<TemplateRequirement>;
       const templateActions = [] as TemplateAction[];
       for (const action of automation.actions) {
+        if (
+          ![
+            'createDiscordChannel',
+            'createDiscordThread',
+            'postOnDiscord',
+            'giveDiscordRole',
+            'removeDiscordRole',
+          ].includes(action.type)
+        )
+          continue;
         if (['giveDiscordRole', 'removeDiscordRole'].includes(action.type)) {
           requirementsSet.add('discordRole');
         }
@@ -141,6 +151,8 @@ export class TemplateService {
           requirements: Array.from(requirementsSet),
         });
       }
+
+      if (templateActions.length === 0) continue;
 
       automations.push({
         id: automationId,
