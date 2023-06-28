@@ -166,6 +166,7 @@ export class CircleV1Controller {
       return;
     }
     console.log({ event });
+    response.status(200).send('OK');
     let subscription;
     let circle: Circle;
     switch (event.type) {
