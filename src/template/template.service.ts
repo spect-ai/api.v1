@@ -24,6 +24,7 @@ const groups = [
   'Grant Program',
   'Event Management',
   'Social',
+  'Support',
   'Marketing',
 ];
 

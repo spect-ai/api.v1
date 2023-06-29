@@ -98,10 +98,10 @@ export class TemplateController {
         );
 
       const circle = (await this.queryBus.execute(
-        new GetCircleByIdQuery(res.circleId),
+        new GetCircleByIdQuery(res.parents[0]),
       )) as Circle;
       return {
-        redirectUrl: `${circle.slug}/r/${res.slug}`,
+        redirectUrl: `/${circle.slug}/r/${res.slug}`,
       };
     } else {
       const res = await this.commandBus.execute(
