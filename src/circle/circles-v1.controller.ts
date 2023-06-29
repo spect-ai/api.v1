@@ -116,6 +116,8 @@ import Stripe from 'stripe';
 import { CancelPlanCommand } from './commands/impl/cancel-plan.command';
 import { GetUserByFilterQuery } from 'src/users/queries/impl';
 
+const idempotencyKeys = new Map<string, boolean>();
+
 @Controller('circle/v1')
 @ApiTags('circle.v1')
 export class CircleV1Controller {
@@ -242,12 +244,24 @@ export class CircleV1Controller {
 
         break;
       case 'invoice.paid':
+        const idempotencyKey = event.request.idempotency_key;
+        console.log({ idempotencyKey });
+
+        // ensure that the invoice is not paid twice
+        if (idempotencyKeys.has(idempotencyKey)) {
+          console.log('IDEMPOTENT INVOICE PAID');
+          return;
+        }
+
+        idempotencyKeys.set(idempotencyKey, true);
+
         console.log('INVOICE PAID');
         const invoice = event.data.object;
         subscription = invoice.subscription;
         circle = await this.circleRepository.findOne({
           subscriptionId: subscription,
         });
+
         console.log({
           circle: circle.pendingBonus,
           invoice: invoice.amount_paid,
