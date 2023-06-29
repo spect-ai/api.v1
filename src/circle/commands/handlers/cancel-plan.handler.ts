@@ -17,6 +17,11 @@ export class CancelPlanCommandHandler
     try {
       const { id } = command;
       const circle = await this.circlesRepository.findById(id);
+      if (circle.parents.length > 0) {
+        throw new InternalServerErrorException(
+          'You can only cancel plan from the parent circle',
+        );
+      }
       const stripe = new Stripe(process.env.STRIPE_PVT_KEY, {
         apiVersion: '2022-11-15',
       });
