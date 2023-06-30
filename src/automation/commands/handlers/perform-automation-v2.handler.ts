@@ -19,8 +19,6 @@ import {
 } from '../impl';
 import { actionIdToCommandMapNew } from '../impl/take-action-v2.command';
 
-import mixpanel from 'mixpanel';
-
 @CommandHandler(PerformAutomationOnCollectionDataUpdateCommand)
 export class PerformAutomationOnCollectionDataUpdateCommandHandler
   implements ICommandHandler<PerformAutomationOnCollectionDataUpdateCommand>

@@ -1,10 +1,5 @@
 import { InternalServerErrorException } from '@nestjs/common';
-import {
-  CommandBus,
-  CommandHandler,
-  ICommandHandler,
-  QueryBus,
-} from '@nestjs/cqrs';
+import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { CirclesRepository } from 'src/circle/circles.repository';
 import { CircleResponseDto } from 'src/circle/dto/detailed-circle-response.dto';
 import { LoggingService } from 'src/logging/logging.service';
@@ -25,11 +20,11 @@ export class AddAutomationCommandHandler
     try {
       const { circleId, createAutomationDto } = command;
       const circle = await this.circlesRepository.findById(circleId);
-      if (circle.pricingPlan === 0 && circle.automationCount > 9) {
-        throw new InternalServerErrorException(
-          'You have reached the maximum number of automations for your plan. Please upgrade your plan to add more automations.',
-        );
-      }
+      // if (circle.pricingPlan === 0 && circle.automationCount > 5) {
+      //   throw new InternalServerErrorException(
+      //     'You have reached the maximum number of automations for your plan. Please upgrade your plan to add more automations.',
+      //   );
+      // }
 
       const newAutomationId = uuidv4();
       const updates = {};
