@@ -38,14 +38,19 @@ export class JoinUsingInvitationCommandHandler
       const circle =
         await this.circlesRepository.getCircleWithUnpopulatedReferences(id);
 
-      const parentCircle = await this.getParentCircle(circle);
+      const parentCircle: Circle = await this.getParentCircle(circle);
 
-      if (parentCircle.pricingPlan === 0 && parentCircle.members.length > 2) {
+      if (
+        !parentCircle.members.includes(caller.id) &&
+        parentCircle.pricingPlan === 0 &&
+        parentCircle.members.length > 2
+      ) {
         throw new InternalServerErrorException(
           'This space has reached the maximum number of members for the free plan. Please ask the steward to upgrade to a paid plan.',
         );
       }
       if (
+        !parentCircle.members.includes(caller.id) &&
         parentCircle.pricingPlan === 1 &&
         parentCircle.members.length > parentCircle.topUpMembers + 4
       ) {
