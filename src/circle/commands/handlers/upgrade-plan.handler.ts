@@ -45,6 +45,9 @@ export class UpgradePlanCommandHandler
       }
 
       const circle = await this.circlesRepository.findById(id);
+
+      const circleRefCode = circle.referredBy;
+
       const stripe = new Stripe(process.env.STRIPE_PVT_KEY, {
         apiVersion: '2022-11-15',
       });
@@ -87,13 +90,14 @@ export class UpgradePlanCommandHandler
         mode: 'subscription',
         success_url: `${process.env.CLIENT_URL}/${circle.slug}`,
         cancel_url: `${process.env.CLIENT_URL}/${circle.slug}`,
-        discounts: refCode
-          ? [
-              {
-                coupon: 'bM7u2uS8',
-              },
-            ]
-          : [],
+        discounts:
+          refCode || circleRefCode
+            ? [
+                {
+                  coupon: 'bM7u2uS8',
+                },
+              ]
+            : [],
       });
 
       return {
