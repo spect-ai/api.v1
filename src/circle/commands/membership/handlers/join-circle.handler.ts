@@ -42,8 +42,8 @@ export class JoinUsingInvitationCommandHandler
 
       const activeMembers = parentCircle.members.filter((member) => {
         if (
-          circle.memberRoles[member]?.includes('__removed__') ||
-          circle.memberRoles[member]?.includes('__left__')
+          parentCircle.memberRoles[member]?.includes('__removed__') ||
+          parentCircle.memberRoles[member]?.includes('__left__')
         ) {
           return false;
         }
