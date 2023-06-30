@@ -20,7 +20,7 @@ export class IsWhitelistedQueryHandler
     try {
       const { caller } = query;
       const spectCircle: Circle = await this.queryBus.execute(
-        new GetCircleBySlugQuery('dada'),
+        new GetCircleBySlugQuery('dsad-3'),
       );
       if (spectCircle.memberRoles[caller.id].includes('referrers')) {
         return 'true';
