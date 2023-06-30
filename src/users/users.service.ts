@@ -47,7 +47,7 @@ export class UsersService {
       const user = await this.usersRepository.create({
         username: username,
         ethAddress: ethAddress,
-        referredBy: refCode,
+        referredBy: refCode === 'undefined' ? undefined : refCode,
         firstLogin: username.endsWith('.eth') ? false : true, // if username is an ENS name, then person doesnt need to set username
       });
       await this.ethAddressRepository.create({
