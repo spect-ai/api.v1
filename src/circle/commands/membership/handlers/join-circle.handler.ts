@@ -40,10 +40,22 @@ export class JoinUsingInvitationCommandHandler
 
       const parentCircle: Circle = await this.getParentCircle(circle);
 
+      const activeMembers = parentCircle.members.filter((member) => {
+        if (
+          circle.memberRoles[member]?.includes('__removed__') ||
+          circle.memberRoles[member]?.includes('__left__')
+        ) {
+          return false;
+        }
+        return true;
+      }).length;
+
+      console.log({ activeMembers });
+
       if (
         !parentCircle.members.includes(caller.id) &&
         parentCircle.pricingPlan === 0 &&
-        parentCircle.members.length > 2
+        activeMembers > 2
       ) {
         throw new InternalServerErrorException(
           'This space has reached the maximum number of members for the free plan. Please ask the steward to upgrade to a paid plan.',
@@ -52,7 +64,7 @@ export class JoinUsingInvitationCommandHandler
       if (
         !parentCircle.members.includes(caller.id) &&
         parentCircle.pricingPlan === 1 &&
-        parentCircle.members.length > parentCircle.topUpMembers + 4
+        activeMembers > parentCircle.topUpMembers + 4
       ) {
         throw new InternalServerErrorException(
           'This space has reached the maximum number of members for the paid plan. Please ask the steward to upgrade to a higher plan, or top up the number of members.',
