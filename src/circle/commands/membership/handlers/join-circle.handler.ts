@@ -16,6 +16,7 @@ import {
 } from 'src/circle/commands/impl';
 import { DetailedCircleResponseDto } from 'src/circle/dto/detailed-circle-response.dto';
 import { JoinedCircleEvent } from 'src/circle/events/impl';
+import { Circle } from 'src/circle/model/circle.model';
 import { LoggingService } from 'src/logging/logging.service';
 import { RolesService } from 'src/roles/roles.service';
 
@@ -37,14 +38,16 @@ export class JoinUsingInvitationCommandHandler
       const circle =
         await this.circlesRepository.getCircleWithUnpopulatedReferences(id);
 
-      if (circle.pricingPlan === 0 && circle.members.length > 2) {
+      const parentCircle = await this.getParentCircle(circle);
+
+      if (parentCircle.pricingPlan === 0 && parentCircle.members.length > 2) {
         throw new InternalServerErrorException(
           'This space has reached the maximum number of members for the free plan. Please ask the steward to upgrade to a paid plan.',
         );
       }
       if (
-        circle.pricingPlan === 1 &&
-        circle.members.length > circle.topUpMembers + 4
+        parentCircle.pricingPlan === 1 &&
+        parentCircle.members.length > parentCircle.topUpMembers + 4
       ) {
         throw new InternalServerErrorException(
           'This space has reached the maximum number of members for the paid plan. Please ask the steward to upgrade to a higher plan, or top up the number of members.',
@@ -84,6 +87,18 @@ export class JoinUsingInvitationCommandHandler
           },
         );
 
+      if (parentCircle.id !== circle.id) {
+        const updatedParentCircle =
+          await this.circlesRepository.updateCircleAndReturnWithPopulatedReferences(
+            parentCircle.id,
+            {
+              members: parentCircle.members?.includes(caller.id)
+                ? parentCircle.members
+                : [...parentCircle.members, caller.id],
+            },
+          );
+      }
+
       this.eventBus.publish(
         new JoinedCircleEvent(caller.id, id, updatedCircle),
       );
@@ -91,6 +106,18 @@ export class JoinUsingInvitationCommandHandler
     } catch (error) {
       throw new InternalServerErrorException(error);
     }
+  }
+
+  async getParentCircle(circle: Circle) {
+    if (circle.parents.length > 0) {
+      const parentCircle =
+        await this.circlesRepository.getCircleWithUnpopulatedReferences(
+          circle.parents[0].toString(),
+        );
+      return this.getParentCircle(parentCircle);
+    }
+    console.log({ parent: circle.id });
+    return circle;
   }
 }
 
