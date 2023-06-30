@@ -541,7 +541,7 @@ export class CircleV1Controller {
     );
   }
 
-  @SetMetadata('permissions', ['manageCircleSettings'])
+  @SetMetadata('permissions', ['createNewForm'])
   @UseGuards(CircleAuthGuard)
   @Patch('/:id/folder/:folderId/update')
   async updateFolder(
