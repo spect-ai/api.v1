@@ -162,12 +162,21 @@ export class CircleV1Controller {
         sig,
         endpointSecret,
       );
+      const idempotencyKey = event.request.idempotency_key;
+      console.log({ idempotencyKey });
+
+      // ensure that the invoice is not paid twice
+      if (idempotencyKey && idempotencyKeys.has(idempotencyKey)) {
+        console.log('IDEMPOTENT INVOICE PAID');
+        response.status(200).send('OK');
+      }
+
+      idempotencyKeys.set(idempotencyKey, true);
     } catch (err) {
       console.log(err);
       response.status(400).send(`Webhook Error: ${err.message}`);
       return;
     }
-    console.log({ event });
     response.status(200).send('OK');
     let subscription;
     let circle: Circle;
@@ -244,17 +253,6 @@ export class CircleV1Controller {
 
         break;
       case 'invoice.paid':
-        const idempotencyKey = event.request.idempotency_key;
-        console.log({ idempotencyKey });
-
-        // ensure that the invoice is not paid twice
-        if (idempotencyKeys.has(idempotencyKey)) {
-          console.log('IDEMPOTENT INVOICE PAID');
-          return;
-        }
-
-        idempotencyKeys.set(idempotencyKey, true);
-
         console.log('INVOICE PAID');
         const invoice = event.data.object;
         subscription = invoice.subscription;
@@ -311,8 +309,6 @@ export class CircleV1Controller {
       default:
         console.log(`Unhandled event type ${event.type}`);
     }
-
-    return { received: true };
   }
 
   @UseGuards(PublicViewAuthGuard)
