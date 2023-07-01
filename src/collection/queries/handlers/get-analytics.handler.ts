@@ -1,4 +1,4 @@
-import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
+import { IQueryHandler, QueryBus, QueryHandler } from '@nestjs/cqrs';
 import {
   GetFormAnalyticsBySlugQuery,
   GetResponseMetricsQuery,
@@ -6,6 +6,8 @@ import {
 import { CollectionRepository } from 'src/collection/collection.repository';
 import { LoggingService } from 'src/logging/logging.service';
 import { InternalServerErrorException } from '@nestjs/common';
+import { GetCircleByIdQuery } from 'src/circle/queries/impl';
+import { Circle } from 'src/circle/model/circle.model';
 
 @QueryHandler(GetFormAnalyticsBySlugQuery)
 export class GetFormAnalyticsBySlugQueryHandler
@@ -51,6 +53,7 @@ export class GetResponseMetricsQueryHandler
 {
   constructor(
     private readonly collectionRepository: CollectionRepository,
+    private readonly queryBus: QueryBus,
     private readonly logger: LoggingService,
   ) {
     logger.setContext('GetResponseMetricsQueryHandler');
@@ -59,6 +62,23 @@ export class GetResponseMetricsQueryHandler
   async execute(query: GetResponseMetricsQuery) {
     try {
       const collection = await this.collectionRepository.findById(query.id);
+
+      const circle: Circle = await this.queryBus.execute(
+        new GetCircleByIdQuery(collection.parents[0]),
+      );
+
+      if (circle.pricingPlan === 0) {
+        return {
+          averageTimeSpent: 0,
+          totalViews: 0,
+          totalStarted: 0,
+          totalSubmitted: 0,
+          completionRate: 0,
+          pageVisitMetricsForAllUser: {},
+          dropOffRate: {},
+        };
+      }
+
       // only send form metadata
       const { formMetadata } = collection;
       const averageTimeSpent = 0;

@@ -988,10 +988,7 @@ export class CollectionController {
   @SetMetadata('permissions', ['manageSettings'])
   @UseGuards(CollectionAuthGuard)
   @Get('/:id/responseMetrics')
-  async responseMetrics(
-    @Param() param: ObjectIdDto,
-    @Request() req,
-  ): Promise<void> {
+  async responseMetrics(@Param() param: ObjectIdDto): Promise<void> {
     return await this.queryBus.execute(new GetResponseMetricsQuery(param.id));
   }
 }
