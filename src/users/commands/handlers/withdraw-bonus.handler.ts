@@ -11,7 +11,7 @@ import { Circle } from 'src/circle/model/circle.model';
 import { UpdateCircleCommand } from 'src/circle/commands/impl/update-circle.command';
 import { ethers } from 'ethers';
 import { RegistryService } from 'src/registry/registry.service';
-import { USDTAbi } from 'src/common/abis/usdt';
+import { USDCAbi } from 'src/common/abis/usdc';
 import { InternalServerErrorException } from '@nestjs/common';
 
 @CommandHandler(WithdrawBonusCommand)
@@ -77,30 +77,30 @@ export class WithdrawBonusCommandHandler
     console.log({ address, amount });
     const registry = await this.registryService.getRegistry();
     const provider = new ethers.providers.JsonRpcProvider(
-      registry['80001'].provider,
+      registry['137'].provider,
     );
     const signer = new ethers.Wallet(process.env.PRIVATE_KEY, provider);
 
-    const USDTContract = new ethers.Contract(
-      '0x9c3C9283D3e44854697Cd22D3Faa240Cfb032889',
-      USDTAbi,
+    const USDCContract = new ethers.Contract(
+      '0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174',
+      USDCAbi,
       signer,
     );
 
     const amountInWei = ethers.utils.parseUnits(
-      (amount / 100).toString(),
-      await USDTContract.decimals(),
+      amount.toString(),
+      await USDCContract.decimals(),
     );
 
     console.log({ amountInWei });
 
-    const tx = await USDTContract.transfer(address, amountInWei);
+    const tx = await USDCContract.transfer(address, amountInWei);
     await tx.wait();
     // TODO: Withdraw bonus
     console.log({ tx });
     return {
       txHash: tx.hash,
-      txUrl: `${registry['80001'].blockExplorer}/tx/${tx.hash}`,
+      txUrl: `${registry['137'].blockExplorer}/tx/${tx.hash}`,
     };
   }
 }

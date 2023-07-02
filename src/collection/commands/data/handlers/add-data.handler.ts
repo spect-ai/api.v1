@@ -118,7 +118,7 @@ export class AddDataCommandHandler implements ICommandHandler<AddDataCommand> {
       if (
         collection.collectionType === 1 &&
         circle.pricingPlan === 0 &&
-        Object.keys(collection.data || {}).length >= 5
+        Object.keys(collection.data || {}).length >= 100
       ) {
         throw new InternalServerErrorException(
           'You have reached the maximum number of rows in a project. Please upgrade your plan to add more rows.',

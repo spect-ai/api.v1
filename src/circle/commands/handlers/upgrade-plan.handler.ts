@@ -60,7 +60,7 @@ export class UpgradePlanCommandHandler
             },
             unit_amount: 3000,
             recurring: {
-              interval: 'day',
+              interval: 'month',
             },
           },
           quantity: 1,
@@ -73,7 +73,7 @@ export class UpgradePlanCommandHandler
             },
             unit_amount: 1000,
             recurring: {
-              interval: 'day',
+              interval: 'month',
             },
           },
           quantity: memberTopUp,
@@ -94,7 +94,7 @@ export class UpgradePlanCommandHandler
           refCode || circleRefCode
             ? [
                 {
-                  coupon: 'bM7u2uS8',
+                  coupon: process.env.STRIPE_DISCOUNT_CODE,
                 },
               ]
             : [],
