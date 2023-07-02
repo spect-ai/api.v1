@@ -246,10 +246,13 @@ export class DataValidationService {
         if (
           operation === 'update' &&
           propertyId in dataObj &&
-          !dataObj[propertyId]
+          (dataObj[propertyId] === undefined || dataObj[propertyId] === '')
         ) {
           return false;
-        } else if (operation === 'add' && !dataObj[propertyId]) {
+        } else if (
+          operation === 'add' &&
+          (dataObj[propertyId] === undefined || dataObj[propertyId] === '')
+        ) {
           return false;
         }
       }
