@@ -58,7 +58,7 @@ export class UpgradePlanCommandHandler
             product_data: {
               name: 'Spect premium plan',
             },
-            unit_amount: 3000,
+            unit_amount: 2900,
             recurring: {
               interval: 'month',
             },
