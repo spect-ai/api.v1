@@ -1,5 +1,6 @@
 {
   "name": "spect-api",
+  "packageManager": "yarn@3.6.1",
   "version": "0.0.1",
   "description": "",
   "author": "",
@@ -24,6 +25,7 @@
     "test:e2e": "jest --config ./test/jest-e2e.json"
   },
   "dependencies": {
+    "@avp1598/vibes": "file:/Users/avp/Desktop/Coding/@avp1598/vibes",
     "@ankr.com/ankr.js": "^0.4.0",
     "@deepgram/sdk": "^2.1.1",
     "@gitcoinco/passport-sdk-reader": "^0.1.4",
@@ -139,5 +141,8 @@
     ],
     "coverageDirectory": "../coverage",
     "testEnvironment": "node"
+  },
+  "resolutions": {
+    "@avp1598/vibes": "portal:/Users/avp/Desktop/Coding/@avp1598/vibes"
   }
 }

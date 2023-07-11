@@ -17,6 +17,7 @@ import { LoggingService } from 'src/logging/logging.service';
 import { InternalServerErrorException } from '@nestjs/common';
 import { CollectionCreatedEvent } from 'src/collection/events';
 import { Circle } from 'src/circle/model/circle.model';
+import { SpectProps } from '@avp1598/vibes';
 
 @CommandHandler(CreateCollectionCommand)
 export class CreateCollectionCommandHandler
@@ -121,7 +122,6 @@ export class CreateCollectionCommandHandler
             multipleResponsesAllowed: false,
             updatingResponseAllowed: false,
             allowAnonymousResponses: true,
-
             version: 1,
             pages: {
               start: {
@@ -146,6 +146,7 @@ export class CreateCollectionCommandHandler
               },
             },
             pageOrder: ['start', 'page-1', 'submitted'],
+            theme: SpectProps,
           },
           projectMetadata: {
             viewOrder: [defaultViewId],

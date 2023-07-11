@@ -10,13 +10,13 @@ import {
   DefaultViewType,
   Property,
   Voting,
-  OpportunityInfo,
   Permissions,
   Condition,
   Option,
   ConditionGroup,
 } from '../types/types';
 import { Blockchain } from '@ankr.com/ankr.js';
+import { FormContextProps } from '@avp1598/vibes';
 
 @useMongoosePlugin()
 export class Collection extends BaseModel {
@@ -380,6 +380,8 @@ export interface FormMetadata {
   draftNextField?: {
     [userId: string]: string;
   };
+
+  theme?: FormContextProps;
 }
 
 export interface PaymentConfig {
