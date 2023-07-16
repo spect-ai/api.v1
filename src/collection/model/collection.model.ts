@@ -382,6 +382,8 @@ export interface FormMetadata {
   };
 
   theme?: FormContextProps;
+
+  selectedTheme?: string;
 }
 
 export interface PaymentConfig {

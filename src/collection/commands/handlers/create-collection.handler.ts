@@ -147,6 +147,7 @@ export class CreateCollectionCommandHandler
             },
             pageOrder: ['start', 'page-1', 'submitted'],
             theme: SpectProps,
+            selectedTheme: 'spect',
           },
           projectMetadata: {
             viewOrder: [defaultViewId],

@@ -95,7 +95,9 @@ export class DataValidationService {
         if (typeof data !== 'string') {
           throw "Data type should be 'string'";
         }
-      } else if (['singleSelect'].includes(properties[propertyId].type)) {
+      } else if (
+        ['singleSelect', 'slider'].includes(properties[propertyId].type)
+      ) {
         if (typeof data !== 'object') return false;
         if (Object.keys(data)?.length && (!data['value'] || !data['label']))
           throw "Single select data type doesn't match";
@@ -105,7 +107,7 @@ export class DataValidationService {
           if (!elem['value'] || !elem['label'])
             throw "Multi select data type doesn't match";
         }
-      } else if (['number', 'slider'].includes(properties[propertyId].type)) {
+      } else if (['number'].includes(properties[propertyId].type)) {
         if (typeof data !== 'number') throw "Data type should be 'number'";
       } else if (['reward'].includes(properties[propertyId].type)) {
         if (data && data['value']) {
