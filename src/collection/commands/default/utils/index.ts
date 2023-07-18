@@ -88,6 +88,7 @@ export const getOnboardToSpectProjectDetails = (
 export const getOnboardToSpectFormDetails = (
   caller: string,
 ): Partial<Collection> => {
+  const defaultPageId = uuidv4();
   return {
     name: 'Your First Form on Spect',
     properties: getProperties() as any,
@@ -138,8 +139,8 @@ export const getOnboardToSpectFormDetails = (
           name: 'Welcome Page',
           properties: [],
         },
-        'page-1': {
-          id: 'page-1',
+        [defaultPageId]: {
+          id: defaultPageId,
           name: 'Page 1',
           properties: propertyOrder,
           movable: true,
@@ -150,7 +151,7 @@ export const getOnboardToSpectFormDetails = (
           properties: [],
         },
       },
-      pageOrder: ['start', 'page-1', 'submitted'],
+      pageOrder: ['start', defaultPageId, 'submitted'],
     },
     archived: false,
   };

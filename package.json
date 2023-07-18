@@ -1,5 +1,6 @@
 {
   "name": "spect-api",
+  "packageManager": "yarn@3.6.1",
   "version": "0.0.1",
   "description": "",
   "author": "",
@@ -25,6 +26,7 @@
   },
   "dependencies": {
     "@ankr.com/ankr.js": "^0.4.0",
+    "@avp1598/vibes": "^0.1.1",
     "@deepgram/sdk": "^2.1.1",
     "@gitcoinco/passport-sdk-reader": "^0.1.4",
     "@gitcoinco/passport-sdk-scorer": "git+https://github.com/spect-ai/scorer.git",

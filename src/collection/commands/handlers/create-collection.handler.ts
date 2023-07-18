@@ -17,6 +17,7 @@ import { LoggingService } from 'src/logging/logging.service';
 import { InternalServerErrorException } from '@nestjs/common';
 import { CollectionCreatedEvent } from 'src/collection/events';
 import { Circle } from 'src/circle/model/circle.model';
+import { SpectProps } from '@avp1598/vibes';
 
 @CommandHandler(CreateCollectionCommand)
 export class CreateCollectionCommandHandler
@@ -104,6 +105,7 @@ export class CreateCollectionCommandHandler
       });
 
       if (createCollectionDto.collectionType === 0) {
+        const defaultPageId = uuidv4();
         const defaultViewId = '0x0';
         createdCollection = await this.collectionRepository.create({
           ...createCollectionDto,
@@ -121,7 +123,6 @@ export class CreateCollectionCommandHandler
             multipleResponsesAllowed: false,
             updatingResponseAllowed: false,
             allowAnonymousResponses: true,
-
             version: 1,
             pages: {
               start: {
@@ -129,9 +130,9 @@ export class CreateCollectionCommandHandler
                 name: 'Welcome Page',
                 properties: [],
               },
-              'page-1': {
-                id: 'page-1',
-                name: 'Page 1',
+              [defaultPageId]: {
+                id: defaultPageId,
+                name: 'Fields Page',
                 properties: [
                   // 'What is your name?',
                   // 'Why do you want to join our team?',
@@ -145,7 +146,9 @@ export class CreateCollectionCommandHandler
                 properties: [],
               },
             },
-            pageOrder: ['start', 'page-1', 'submitted'],
+            pageOrder: ['start', defaultPageId, 'submitted'],
+            theme: SpectProps,
+            selectedTheme: 'spect',
           },
           projectMetadata: {
             viewOrder: [defaultViewId],

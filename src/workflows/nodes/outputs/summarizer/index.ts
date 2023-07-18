@@ -239,7 +239,7 @@ class Summarizer_Output implements INode {
             },
             botUser.id,
             form.id,
-            'page-1',
+            form.formMetadata.pageOrder[1],
           ),
         );
         lineCount++;
@@ -255,7 +255,7 @@ class Summarizer_Output implements INode {
           },
           botUser.id,
           form.id,
-          'page-1',
+          form.formMetadata.pageOrder[1],
         ),
       );
 
@@ -277,7 +277,7 @@ class Summarizer_Output implements INode {
             },
             botUser.id,
             form.id,
-            'page-1',
+            form.formMetadata.pageOrder[1],
           ),
         );
       }

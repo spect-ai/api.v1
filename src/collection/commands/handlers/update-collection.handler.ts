@@ -335,7 +335,7 @@ export class UpdateCollectionCommandHandler
 
   getPluginsCount(formMetadata: FormMetadata): number {
     let pluginsCount = 0;
-    Object.keys(formMetadata).map((prop) => {
+    Object.keys(formMetadata || {}).map((prop) => {
       if (prop === 'sybilProtectionEnabled' && formMetadata[prop]) {
         pluginsCount++;
       } else if (prop === 'poapEditCode' && formMetadata[prop]) {

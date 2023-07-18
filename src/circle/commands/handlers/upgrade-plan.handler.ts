@@ -58,7 +58,7 @@ export class UpgradePlanCommandHandler
             product_data: {
               name: 'Spect premium plan',
             },
-            unit_amount: 3000,
+            unit_amount: 2900,
             recurring: {
               interval: 'month',
             },
@@ -84,7 +84,7 @@ export class UpgradePlanCommandHandler
       }
 
       const session = await stripe.checkout.sessions.create({
-        payment_method_types: ['card', 'paypal', 'us_bank_account'],
+        payment_method_types: ['card'],
         line_items,
         client_reference_id: id,
         mode: 'subscription',
