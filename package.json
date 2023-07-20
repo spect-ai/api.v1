@@ -25,7 +25,7 @@
   },
   "dependencies": {
     "@ankr.com/ankr.js": "^0.4.0",
-    "@avp1598/vibes": "^0.1.1",
+    "@avp1598/vibes": "^0.2.2",
     "@deepgram/sdk": "^2.1.1",
     "@gitcoinco/passport-sdk-reader": "^0.1.4",
     "@gitcoinco/passport-sdk-scorer": "git+https://github.com/spect-ai/scorer.git",

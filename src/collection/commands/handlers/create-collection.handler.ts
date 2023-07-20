@@ -17,7 +17,7 @@ import { LoggingService } from 'src/logging/logging.service';
 import { InternalServerErrorException } from '@nestjs/common';
 import { CollectionCreatedEvent } from 'src/collection/events';
 import { Circle } from 'src/circle/model/circle.model';
-import { SpectProps } from '@avp1598/vibes';
+import { SpectBase } from '@avp1598/vibes';
 
 @CommandHandler(CreateCollectionCommand)
 export class CreateCollectionCommandHandler
@@ -147,8 +147,11 @@ export class CreateCollectionCommandHandler
               },
             },
             pageOrder: ['start', defaultPageId, 'submitted'],
-            theme: SpectProps,
-            selectedTheme: 'spect',
+            theme: {
+              layout: SpectBase,
+              selectedLayout: 'spect',
+              selectedTheme: 'dark',
+            },
           },
           projectMetadata: {
             viewOrder: [defaultViewId],

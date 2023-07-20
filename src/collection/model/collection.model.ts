@@ -381,7 +381,11 @@ export interface FormMetadata {
     [userId: string]: string;
   };
 
-  theme?: FormContextProps;
+  theme?: {
+    layout: FormContextProps;
+    selectedLayout: string;
+    selectedTheme: string;
+  };
 
   selectedTheme?: string;
 }
