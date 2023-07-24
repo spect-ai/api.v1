@@ -23,6 +23,7 @@ export class MigrateAllCollectionsCommandHandler
     const allCollections = await this.collectionRepository.findAll();
 
     for await (const collection of allCollections) {
+      if (!collection.formMetadata) continue;
       collection.formMetadata.theme = {
         layout: {
           ...SpectBase,
