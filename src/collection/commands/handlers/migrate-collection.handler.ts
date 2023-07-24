@@ -7,6 +7,7 @@ import { Circle } from 'src/circle/model/circle.model';
 import { GetCollectionBySlugQuery } from 'src/collection/queries';
 import { Collection } from 'src/collection/model/collection.model';
 import { CirclesRepository } from 'src/circle/circles.repository';
+import { SpectBase, SpectThemes } from '@avp1598/vibes';
 
 @CommandHandler(MigrateAllCollectionsCommand)
 export class MigrateAllCollectionsCommandHandler
@@ -19,14 +20,32 @@ export class MigrateAllCollectionsCommandHandler
   ) {}
 
   async execute(command: MigrateAllCollectionsCommand) {
-    const allCircles = await this.circleRepository.findAll();
-    for await (const circle of allCircles) {
-      console.log('------------Migrating circle----------: ', circle.name);
-      await this.circleRepository.updateById(circle.id, {
-        pricingPlan: 0,
-        topUpMembers: 0,
-      });
+    const allCollections = await this.collectionRepository.findAll();
+
+    for await (const collection of allCollections) {
+      collection.formMetadata.theme = {
+        layout: {
+          ...SpectBase,
+          colorPalette: SpectThemes.dark,
+        },
+        selectedLayout: 'spect',
+        selectedTheme: 'dark',
+      };
+      console.log(
+        '------------Migrating collection----------: ',
+        collection.name,
+      );
+      await this.collectionRepository.updateById(collection.id, collection);
     }
+
+    // const allCircles = await this.circleRepository.findAll();
+    // for await (const circle of allCircles) {
+    //   console.log('------------Migrating circle----------: ', circle.name);
+    //   await this.circleRepository.updateById(circle.id, {
+    //     pricingPlan: 0,
+    //     topUpMembers: 0,
+    //   });
+    // }
     // for await (const circle of allCircles) {
     //   if (circle.version === 2) continue;
     //   console.log('------------Migrating circle----------: ', circle.name);
